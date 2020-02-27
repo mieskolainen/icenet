@@ -20,6 +20,15 @@ conda info --envs
 conda list --name icenet
 ```
 
+## Folder structure
+
+```
+-checkpoint   Saved models
+-configs      Input configuration
+-electronid   Electron ID input reader
+-icenet       Deep learning, classifiers, plotting, IO
+-figs         Output figures
+```
 
 ## Training
 ```
