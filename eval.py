@@ -128,25 +128,27 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
     ###
     if args['flr_param']['active']:
 
-        print('\nEvaluate FLR classifier ...')
+        label = args['flr_param']['label']
+        print('\nEvaluate {} classifier ...'.format(label))
+
         b_pdfs, s_pdfs, bin_edges = pickle.load(open(modeldir + '/flr_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
         def func_predict(X):
             return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
         # Evaluate (pt,eta) binned AUC
-        label = 'FLR'
         saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
         
     ###
     if args['xgb_param']['active']:
 
-        print('\nEvaluate xgboost classifier ...')
+        label = args['xgb_param']['label']
+        print('\nEvaluate {} classifier ...'.format(label))
+
         xgb_model = pickle.load(open(modeldir + '/xgb_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
         def func_predict(X):
             return xgb_model.predict(xgboost.DMatrix(data = X))
 
         # Evaluate (pt,eta) binned AUC
-        label = 'XGB'
         saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
 
 
@@ -158,6 +160,8 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
     ###
     if args['xtx_param']['active']:
 
+        label = args['xtx_param']['label']
+
         y_tot      = np.array([])
         y_pred_tot = np.array([])
 
@@ -168,16 +172,16 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
 
                 pt_range  = [ pt_edges[i],  pt_edges[i+1]]
                 eta_range = [eta_edges[j], eta_edges[j+1]]
-
+                
                 # Indices
                 tst_ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index('trk_pt')],   pt_range),
                                          aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
 
-                print('\nEvaluate XTX classifier ...')
+                print('\nEvaluate {} classifier ...'.format(label))
                 print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(
                     pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
-                xtx_model = aux.load_checkpoint('{}/XTX_checkpoint_bin_{}_{}.pth'.format(modeldir, i, j))
-
+                xtx_model = aux.load_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j))
+                
                 signalclass = 1
                 y_pred = xtx_model.softpredict(X_ptr)[tst_ind, signalclass].detach().numpy()
                 
@@ -193,44 +197,48 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         # Evaluate total performance
         met = aux.Metric(y_true = y_tot, y_pred = y_pred_tot)
         roc_mstats.append(met)
-        roc_labels.append('XTX')
+        roc_labels.append(label)
 
         fig,ax = iceplots.plot_auc_matrix(AUC, pt_edges, eta_edges)
-        ax.set_title('XTX: Integrated AUC = {:.3f}'.format(met.auc))
+        ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
         
         targetdir = './figs/{}/eval/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-        plt.savefig(targetdir + '/XTX_AUC.pdf')
+        plt.savefig('{}/{}_AUC.pdf'.format(targetdir, label))
 
     ###
     if args['lgr_param']['active']:
 
-        print('\nEvaluate LGR classifier ...')
+        label = args['lgr_param']['label']
+        print('\nEvaluate {} classifier ...'.format(label))
+
         lgr_model = aux.load_checkpoint(modeldir + '/LGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         def func_predict(X):
             signalclass = 1
             return lgr_model.softpredict(X)[:, signalclass].detach().numpy()
 
         # Evaluate (pt,eta) binned AUC
-        label = 'LGR'
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
 
     ###
     if args['dmlp_param']['active']:
 
-        print('\nEvaluate DMLP classifier ...')
+        label = args['dmlp_param']['label']
+        print('\nEvaluate {} classifier ...'.format(label))
+
         dmlp_model = aux.load_checkpoint(modeldir + '/DMLP_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         def func_predict(X):
             signalclass = 1
             return dmlp_model.softpredict(X)[:, signalclass].detach().numpy()
 
         # Evaluate (pt,eta) binned AUC
-        label = 'DMLP'
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
         
     ###
     if args['dbnf_param']['active']:
 
-        print('\nEvaluate DBNF classifier ...')
+        label = args['dbnf_param']['label']
+        print('\nEvaluate {} classifier ...'.format(label))
+
         dbnf_param = args['dbnf_param']
         dbnf_param['n_dims'] = X.shape[1]
         def func_predict(X):
@@ -239,7 +247,6 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
                            'class_1_rw_' + args['reweight_param']['mode']], modeldir)
 
         # Evaluate (pt,eta) binned AUC
-        label = 'DBNF'
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
 
 

@@ -7,6 +7,6 @@
 CONFIG="tune0"
 DATAPATH="/home/user/imperial_trees"
 
-python train.py --config $CONFIG --datapath $DATAPATH --datasets 0,1,2
-python eval.py  --config $CONFIG --datapath $DATAPATH --datasets 0,1,2
+python train.py --config $CONFIG --datapath $DATAPATH --datasets 0,1,
+python eval.py  --config $CONFIG --datapath $DATAPATH --datasets 0,1
 

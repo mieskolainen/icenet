@@ -111,9 +111,9 @@ xtx_param:
 dmlp_param:
   active: true
   device: 'cpu:0' # alternative 'cuda:0'
-  label:  'MAXOUT-MLP'
-
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  label:  'DMLP'
+  
+  lossfunc: 'focal_entropy' # cross_entropy, focal_entropy
   gamma: 2 # focal_entropy exponent parameter
   
   num_units: 6
