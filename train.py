@@ -64,12 +64,12 @@ def main() :
 
     ### Plot variables
     if args['plot_param']['basic_on']:
-        targetdir = './figs/{}/train/1D_active/'.format(args['config'])
+        targetdir = './figs/{}/train/1D_all/'.format(args['config'])
         os.makedirs(targetdir, exist_ok = True)
         iceplots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS, weights = trn_weights, 
             targetdir = targetdir, title = 'training reweight reference: {}'.format(args['reweight_param']['mode']))
     
-
+    
     ### Pick kinematic variables out
     newind, newvars = io.pick_vars(data, KINEMATIC_ID)
 
