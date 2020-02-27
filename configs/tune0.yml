@@ -12,7 +12,7 @@ varnorm: 'zscore'            # variable normalization: 'zscore', 'none'
 ## Pure plotting setup
 plot_param:
   basic_on:    true
-  contours_on: true
+  contours_on: false
 
   # (eta,pt)-binned plots
   pt_edges:  [0, 0.75, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
