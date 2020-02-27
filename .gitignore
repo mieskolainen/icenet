@@ -1,0 +1,8 @@
+*.pdf
+*.pth
+*.dat
+tensorboard/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
