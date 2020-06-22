@@ -1,7 +1,8 @@
-# Common input & data reading routine for train.py and eval.py
+# B/RK analyzer common input & data reading routine
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
+
 
 import math
 import numpy as np
@@ -15,26 +16,37 @@ import pickle
 import sys
 import yaml
 
-from icenet.tools import io
-
-from electronid import ereader
+import uproot
 
 
-def common():
+def init():
+    """ Initialization function.
 
+    Args:
+        None
+
+    Returns:
+        paths :
+        args  :
+        cli   :
+        iodir :
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--config",   type = str, default='default')
     parser.add_argument("--datapath", type = str, default=".")
     parser.add_argument("--datasets", type = str, default="0")
+    parser.add_argument("--tag",      type = str, default='tag0')
 
     cli = parser.parse_args()
 
+    
     # Input is [0,1,2,..]
     cli.datasets = cli.datasets.split(',')
 
     ## Read configuration
     config_yaml_file = cli.config + '.yml'
-    with open('./configs/' + config_yaml_file, 'r') as stream:
+    with open('./configs/brk/' + config_yaml_file, 'r') as stream:
         try:
             args = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -43,15 +55,13 @@ def common():
     args['config'] = cli.config
     print(args)
     print(torch.__version__)
-    args['device'] = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
     
     ### Load data
     paths = []
     for i in cli.datasets:
-        paths.append(cli.datapath + '/output_' + str(i) + '.root')
+        paths.append(cli.datapath + '/BParkNANO_mc_relaxed_Kee_' + str(i) + '.root')
+    
+    ### Input-Output directory
+    iodir = f'./output/brk/{cli.tag}/'; os.makedirs(iodir, exist_ok = True)
 
-    # background (0) and signal (1)
-    class_id = [0,1]
-    data  = io.DATASET(func_loader = ereader.load_root_file, files = paths, class_id = class_id, frac = args['frac'], rngseed = args['rngseed'])
-
-    return data, args
+    return paths,args,cli,iodir

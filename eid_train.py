@@ -1,8 +1,7 @@
-# Main file for training classifiers
+# Electron ID [TRAINING] code
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
-
 
 import math
 import numpy as np
@@ -18,7 +17,6 @@ import yaml
 import copy
 import graphviz
 
-
 # xgboost
 import xgboost
 
@@ -30,22 +28,30 @@ from sklearn         import metrics
 from sklearn.metrics import accuracy_score
 
 # icenet
+import sys
+sys.path.append(".")
+import _icepaths_
+
 from icenet.tools import io
 from icenet.tools import aux
-from icenet.tools import iceplots
+from icenet.tools import plots
+from icenet.tools import prints
 
 from icenet.algo  import flr
 from icenet.deep  import bnaf
-from icenet.deep  import dpyt
+from icenet.deep  import dopt
 from icenet.deep  import dbnf
+from icenet.deep  import mlgr
+from icenet.deep  import maxo
+
 
 from icenet.optim import adam
 from icenet.optim import adamax
 from icenet.optim import scheduler
 
-from electronid import *
-from configs.eidvars import *
-from common import *
+# iceid
+from configs.eid.mvavars import *
+from iceid import common
 
 
 # Main function
@@ -53,23 +59,23 @@ from common import *
 def main() :
 
     ### Get input
-    data, args = common()
-
+    data, args = common.init()
+    
     ### Print ranges
-    aux.print_variables(data.trn.x, data.VARS)
+    prints.print_variables(data.trn.x, data.VARS)
 
     ### Compute reweighting weights
-    trn_weights     = ereader.compute_reweights(data, args)
-
-
+    trn_weights = common.compute_reweights(data, args)
+    
+    
     ### Plot variables
     if args['plot_param']['basic_on']:
-        targetdir = './figs/{}/train/1D_all/'.format(args['config'])
+        targetdir = f'./figs/eid/{args["config"]}/train/1D_all/'
         os.makedirs(targetdir, exist_ok = True)
-        iceplots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS, weights = trn_weights, 
-            targetdir = targetdir, title = 'training reweight reference: {}'.format(args['reweight_param']['mode']))
-    
-    
+        plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS, weights = trn_weights, 
+            targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
+
+
     ### Pick kinematic variables out
     newind, newvars = io.pick_vars(data, KINEMATIC_ID)
 
@@ -79,7 +85,6 @@ def main() :
     data_kin.tst.x  = data.tst.x[:, newind]
     data_kin.VARS   = newvars
 
-
     ### Choose active variables
     newind, newvars = io.pick_vars(data, globals()[args['inputvar']])
 
@@ -88,21 +93,16 @@ def main() :
     data.tst.x = data.tst.x[:, newind]    
     data.VARS  = newvars
 
-
     ### Print variables
-    fig,ax = iceplots.plot_correlations(data.trn.x, data.VARS)
-    targetdir = './figs/{}/train/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
+    fig,ax = plots.plot_correlations(data.trn.x, data.VARS)
+    targetdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(fname = targetdir + 'correlations.pdf', pad_inches = 0.2, bbox_inches='tight')
 
-
     print(__name__ + ': Active variables:')
-    aux.print_variables(data.trn.x, data.VARS)
-
+    prints.print_variables(data.trn.x, data.VARS)
 
     ### Execute
     train(data = data, data_kin = data_kin, trn_weights = trn_weights, args = args)
-
-
     print(__name__ + ' [done]')
 
 
@@ -110,10 +110,9 @@ def main() :
 #
 def train(data, data_kin, trn_weights, args) :
 
-    print(__name__ + ": Input with {} events and {} dimensions ".format(data.trn.x.shape[0], data.trn.x.shape[1]))
+    print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
     
-    modeldir = './checkpoint/{}/'.format(args['config']); os.makedirs(modeldir, exist_ok = True)
-    
+    modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
     # Truncate outliers (component by component) from the training set
     if args['outlier_param']['algo'] == 'truncate' :
@@ -128,17 +127,25 @@ def train(data, data_kin, trn_weights, args) :
     # Variable normalization
     if args['varnorm'] == 'zscore' :
 
-        print('\nz-score normalizing variables ...')
-
+        print('\nZ-score normalizing variables ...')
         X_mu, X_std = io.calc_zscore(data.trn.x)
         data.trn.x  = io.apply_zscore(data.trn.x, X_mu, X_std)
         data.val.x  = io.apply_zscore(data.val.x, X_mu, X_std)
 
-        aux.print_variables(data.trn.x, data.VARS)
-
         # Save it for the evaluation
         pickle.dump([X_mu, X_std], open(modeldir + '/zscore.dat', 'wb'))
+
+    elif args['varnorm'] == 'madscore' :
+
+        print('\nMAD-score normalizing variables ...')
+        X_m, X_mad  = io.calc_madscore(data.trn.x)
+        data.trn.x  = io.apply_madscore(data.trn.x, X_m, X_mad)
+        data.val.x  = io.apply_madscore(data.val.x, X_m, X_mad)
+
+        # Save it for the evaluation
+        pickle.dump([X_m, X_mad], open(modeldir + '/madscore.dat', 'wb'))
     
+    prints.print_variables(data.trn.x, data.VARS)
 
     ### Pick training data into PyTorch format
     X_trn = torch.from_numpy(data.trn.x).type(torch.FloatTensor)
@@ -148,31 +155,31 @@ def train(data, data_kin, trn_weights, args) :
     Y_val = torch.from_numpy(data.val.y).type(torch.LongTensor)
 
 
-    ###
+    ### CLASSIFIER
     if args['flr_param']['active']:
 
         label = args['flr_param']['label']
 
-        print('\nTraining {} classifier ...'.format(label))
+        print(f'\nTraining {label} classifier ...')
         b_pdfs, s_pdfs, bin_edges = flr.train(X = data.trn.x, y = data.trn.y, weights = trn_weights, param = args['flr_param'])
         pickle.dump([b_pdfs, s_pdfs, bin_edges],
-            open(modeldir + '/flr_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
+            open(modeldir + '/FLR_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
 
         def func_predict(X):
             return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
         ### Plot contours
         if args['plot_param']['contours_on']:
-            targetdir = './figs/{}/train/2D_contours/flr/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-            iceplots.plot_decision_contour(lambda x : func_predict(x),
+            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/flr/'; os.makedirs(targetdir, exist_ok = True)
+            plots.plot_decision_contour(lambda x : func_predict(x),
                 X = data.trn.x, y = data.trn.y, labels = data.VARS, targetdir = targetdir, matrix = 'numpy')
 
-    ###
+    ### CLASSIFIER
     if args['xgb_param']['active']:
 
         label = args['xgb_param']['label']
 
-        print('\nTraining {} classifier ...'.format(label))
+        print(f'\nTraining {label} classifier ...')
         dtrain = xgboost.DMatrix(data = data.trn.x, label = data.trn.y, weight = trn_weights)
         dtest  = xgboost.DMatrix(data = data.val.x, label = data.val.y)
 
@@ -182,16 +189,16 @@ def train(data, data_kin, trn_weights, args) :
             num_boost_round = args['xgb_param']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
 
         ## Save
-        pickle.dump(xgb_model, open(modeldir + '/xgb_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
+        pickle.dump(xgb_model, open(modeldir + '/XGB_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
 
         losses   = results['train']['logloss']
         trn_aucs = results['train']['auc']
         val_aucs = results['eval']['auc']
 
         # Plot evolution
-        plotdir  = './figs/{}/train/'.format(args['config']); os.makedirs(plotdir, exist_ok = True)
-        fig,ax = iceplots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig('{}/{}_evolution.pdf'.format(plotdir, label)); plt.close()
+        plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+        fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Plot feature importance (xgb does Not return it for all of them)
         fscores = xgb_model.get_score(importance_type='gain')
@@ -211,46 +218,45 @@ def train(data, data_kin, trn_weights, args) :
         bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.VARS)
         plt.xlabel('f-score')
 
-        targetdir = './figs/{}/train'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-        plt.savefig('{}/xgb_importance.pdf'.format(targetdir)); plt.close()
+        targetdir = f'./figs/eid/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+        plt.savefig(f'{targetdir}/xgb_importance.pdf', bbox_inches='tight'); plt.close()
 
         ## Plot decision tree
         #xgboost.plot_tree(xgb_model, num_trees=2)
-        #plt.savefig('{}/xgb_tree.pdf'.format(targetdir)); plt.close()        
+        #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
         
         ### Plot contours
         if args['plot_param']['contours_on']:
-            targetdir = './figs/{}/train/2D_contours/xgb/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-            iceplots.plot_decision_contour(lambda x : xgb_model.predict(x),
+            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/xgb/'; os.makedirs(targetdir, exist_ok = True)
+            plots.plot_decision_contour(lambda x : xgb_model.predict(x),
                 X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
 
+    ### CLASSIFIER
+    if args['mlgr_param']['active']:
 
-    ###
-    if args['lgr_param']['active']:
-
-        label = args['lgr_param']['label']
-
-        print('\nTraining {} classifier ...'.format(label))
-        lgr_model = dpyt.LGR(D = X_trn.shape[1], C = 2, param = args['lgr_param'])
-        lgr_model, losses, trn_aucs, val_aucs = dpyt.train(model = lgr_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, param = args['lgr_param'])
+        label = args['mlgr_param']['label']
+        
+        print(f'\nTraining {label} classifier ...')
+        mlgr_model = mlgr.MLGR(D = X_trn.shape[1], C = 2)
+        mlgr_model, losses, trn_aucs, val_aucs = dopt.train(model = mlgr_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+            trn_weights = trn_weights, param = args['mlgr_param'])
         
         # Plot evolution
-        plotdir  = './figs/{}/train/'.format(args['config']); os.makedirs(plotdir, exist_ok = True)
-        fig,ax = iceplots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig('{}/{}_evolution.pdf'.format(plotdir, label)); plt.close()
+        plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+        fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Save
-        checkpoint = {'model': dpyt.LGR(D = X_trn.shape[1], C = 2, param = args['lgr_param']), 'state_dict': lgr_model.state_dict()}
-        torch.save(checkpoint, modeldir + '/LGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        checkpoint = {'model': mlgr.MLGR(D = X_trn.shape[1], C = 2), 'state_dict': mlgr_model.state_dict()}
+        torch.save(checkpoint, modeldir + '/MLGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
         ### Plot contours
         if args['plot_param']['contours_on']:
-            targetdir = './figs/{}/train/2D_contours/lgr/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-            iceplots.plot_decision_contour(lambda x : lgr_model.softpredict(x),
+            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/mlgr/'; os.makedirs(targetdir, exist_ok = True)
+            plots.plot_decision_contour(lambda x : mlgr_model.softpredict(x),
                 X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
-    ###
+    ### CLASSIFIER
     if args['xtx_param']['active']:
 
         label = args['xtx_param']['label']
@@ -290,42 +296,42 @@ def train(data, data_kin, trn_weights, args) :
                 print('weightsum = {}'.format(np.sum(weights[yy == 0])))
 
                 # Train
-                xtx_model = dpyt.LGR(D = X_trn.shape[1], C = 2, param = args['xtx_param'])
-                xtx_model, losses, trn_aucs, val_aucs = dpyt.train(model = xtx_model,
+                xtx_model = mlgr.MLGR(D = X_trn.shape[1], C = 2)
+                xtx_model, losses, trn_aucs, val_aucs = dopt.train(model = xtx_model,
                     X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
                     X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], trn_weights = weights, param = args['xtx_param'])
 
                 # Save
-                checkpoint = {'model': dpyt.LGR(D = X_trn.shape[1], C = 2, param = args['xtx_param']), 'state_dict': xtx_model.state_dict()}
-                torch.save(checkpoint, '{}/XTX_checkpoint_bin_{}_{}.pth'.format(modeldir, i, j))
+                checkpoint = {'model': mlgr.MLGR(D = X_trn.shape[1], C = 2), 'state_dict': xtx_model.state_dict()}
+                torch.save(checkpoint, f'{modeldir}/XTX_checkpoint_bin_{i}_{j}.pth')
 
-    ###
-    if args['dmlp_param']['active']:
+    ### CLASSIFIER
+    if args['dmax_param']['active']:
 
-        label = args['dmlp_param']['label']
-
-        print('\nTraining {} classifier ...'.format(label))
-        dmlp_model = dpyt.MAXOUT_MLP(D = X_trn.shape[1], C = 2, param = args['dmlp_param'])
-        dmlp_model, losses, trn_aucs, val_aucs = dpyt.train(model = dmlp_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, param = args['dmlp_param'])
+        label = args['dmax_param']['label']
+        
+        print(f'\nTraining {label} classifier ...')
+        dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = 2, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout'])
+        dmax_model, losses, trn_aucs, val_aucs = dopt.train(model = dmax_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+            trn_weights = trn_weights, param = args['dmax_param'])
 
         # Plot evolution
-        plotdir  = './figs/{}/train/'.format(args['config']); os.makedirs(plotdir, exist_ok = True)
-        fig,ax = iceplots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig('{}/{}_evolution.pdf'.format(targetdir, label)); plt.close()
+        plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+        fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{targetdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Save
-        checkpoint = {'model': dpyt.MAXOUT_MLP(D = X_trn.shape[1], C = 2, param = args['dmlp_param']), 'state_dict': dmlp_model.state_dict()}
-        targetdir = './checkpoint/{}/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-        torch.save(checkpoint, modeldir + '/DMLP_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
-
+        checkpoint = {'model': maxo.MAXOUT(D = X_trn.shape[1], C = 2, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout']), 'state_dict': dmax_model.state_dict()}
+        targetdir = f'./checkpoint/{args["config"]}/'; os.makedirs(targetdir, exist_ok = True)
+        torch.save(checkpoint, modeldir + '/DMAX_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+            
         ### Plot contours
         if args['plot_param']['contours_on']:
-            targetdir = './figs/{}/train/2D_contours/dmlp/'.format(args['config']); os.makedirs(targetdir, exist_ok = True)
-            iceplots.plot_decision_contour(lambda x : dmlp_model.softpredict(x),
+            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/dmax/'; os.makedirs(targetdir, exist_ok = True)
+            plots.plot_decision_contour(lambda x : dmax_model.softpredict(x),
                 X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
-    ###
+    ### CLASSIFIER
     if args['dbnf_param']['active']:
 
         label = args['dbnf_param']['label']
@@ -333,7 +339,7 @@ def train(data, data_kin, trn_weights, args) :
         dbnf_param = args['dbnf_param']
         dbnf_param['n_dims'] = data.trn.x.shape[1]
 
-        print('\nTraining {} classifier ...'.format(label))
+        print(f'\nTraining {label} classifier ...')
 
         for classid in [0,1] :
             dbnf_param['model'] = 'class_' + str(classid) + '_rw_' + args['reweight_param']['mode']
@@ -358,10 +364,11 @@ def train(data, data_kin, trn_weights, args) :
                                           early_stopping = dbnf_param['early_stopping'],
                                           threshold_mode = 'abs')
 
-            print('Training density for class = {} ...'.format(classid))
+            print(f'Training density for class = {classid} ...')
             dbnf.train(dbnf_model, optimizer, sched, trn.x, val.x, weights, dbnf_param, modeldir)
 
 
 if __name__ == '__main__' :
 
    main()
+

@@ -1,8 +1,19 @@
 *.pdf
 *.pth
 *.dat
+*.profile
+*.hd5
+*.pkl
 tensorboard/
+data/
+trash/
+dev/
+.ipynb_checkpoints
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+
+todo
+test.py
+

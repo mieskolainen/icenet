@@ -7,13 +7,24 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from ..tools import aux
+
+from .. tools import aux
 
 
-# X is input data  [# vectors x # dimensions]
-# y is target data [# vectors]
-# 
 def train(X, y, weights, param):
+    """ Factorized likelihood classifier training.
+    
+    Args:
+        X:         input data [# vectors x # dimensions]
+        y:         target data
+        weights:   weighted events
+        param:     dictionary for the parameters
+
+    Returns:
+        b_pdfs:    background pdfs
+        s_pdfs:    signal pdfs
+        bin_edges: histogram bin edges
+    """
 
     bin_edges = []
     b_pdfs    = []
@@ -39,10 +50,18 @@ def train(X, y, weights, param):
     return b_pdfs, s_pdfs, bin_edges
 
 
-# Evaluate the likelihood ratio
-#
-#
 def predict(X, b_pdfs, s_pdfs, bin_edges):
+    """ Evaluate the likelihood ratio.
+    
+    Args:
+        X:         input data [# vectors x # dimensions]
+        b_pdfs:    background pdfs
+        s_pdfs:    signal pdfs
+        bin_edges: bin edges
+    
+    Returns:
+        LR:        likelihood ratio
+    """
 
     EPS = 1e-12
 

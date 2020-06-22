@@ -12,19 +12,23 @@ import os
 import json
 import pprint
 import datetime
+
 import torch
 import numpy as np
-
-from .bnaf import *
-
 from tqdm import tqdm
 from torch.utils import data
-from ..tools import aux
+
+from . bnaf import *
+from .. tools import aux
 
 
-# Log-likelihood
-#
 def compute_log_p_x(model, x_mb):
+    """ Log-likelihood.
+    
+    Args:
+    Returns:
+
+    """
 
     y_mb, log_diag_j_mb = model(x_mb)
     log_p_y_mb = torch.distributions.Normal(torch.zeros_like(y_mb),
@@ -32,20 +36,31 @@ def compute_log_p_x(model, x_mb):
     return log_p_y_mb + log_diag_j_mb
 
 
-# Evaluate likelihood at point x
-#
-# Example:
-# x = torch.tensor([[1.0, 2.0]])
-# l = get_pdf(model,x)
-#
 def get_pdf(model, x) :
+    """ Evaluate likelihood at the point x.
+    
+    Args:
+        model: object for the model
+        x:     vector
+
+    Returns:
+        likelihood
+
+    Examples:
+        > x = torch.tensor([[1.0, 2.0]])
+        > l = get_pdf(model,x)
+    """
 
     return torch.exp(compute_log_p_x(model, x)).item()
 
 
-# Train the model density
-#
 def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldir):
+    """ Train the model density.
+
+    Args:
+    Returns:
+
+    """
 
     # Pytorch loaders
     dataset_valid     = torch.utils.data.TensorDataset(torch.from_numpy(val_x).float().to(param['device']))
@@ -120,10 +135,13 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     print('Validation loss: {:4.3f}'.format(validation_loss.item()))
 
 
-# Construct the model
-#
-#
 def create_model(param, verbose=False):
+    """ Construct the model.
+
+    Args:
+    Returns:
+
+    """
 
     flows = []
     for f in range(param['flows']):
@@ -155,11 +173,14 @@ def create_model(param, verbose=False):
     return model
 
 
-# Input X is [# vectors x # dimensions]
-#
-# 2-class likelihood ratio predictions
-#
 def predict(param, X, paths, modeldir) :
+    """ Input X is [# vectors x # dimensions]
+    2-class likelihood ratio predictions
+    
+    Args:
+    Returns:
+    
+    """
 
     EPS = 1e-12
 
@@ -191,4 +212,3 @@ def predict(param, X, paths, modeldir) :
             LLR[i] = sgn_likelihood / bgk_likelihood
     
     return LLR
-

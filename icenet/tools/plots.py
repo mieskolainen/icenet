@@ -10,11 +10,20 @@ import xgboost
 
 from . import aux
 
-
-# Training evolution
 def plot_train_evolution(losses, trn_aucs, val_aucs, label):
+    """ Training evolution plots.
 
-    fig,ax = plt.subplots(1, 2, figsize = (8,6))
+    Args:
+        losses:   loss values
+        trn_aucs: training matrices
+        val_aucs: validation metrics
+    
+    Returns:
+        fig: figure handle
+        ax:  figure axis
+    """
+
+    fig,ax = plt.subplots(1,2,figsize=(8,6))
     
     ax[0].plot(losses)
     ax[0].set_xlabel('k (epoch)')
@@ -38,9 +47,9 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-# Evaluate AUC per bin
-#
 def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
+    """ Evaluate AUC per bin
+    """
 
     y_tot      = np.array([])
     y_pred_tot = np.array([])
@@ -58,7 +67,7 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
                                  aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
 
             print('\nEvaluate classifier ...')
-            print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
+            print(f'*** PT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], ETA = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
             y_pred = func_predict(X[ind, :])
             
             # Evaluate metric
@@ -78,9 +87,10 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
 
     return fig,ax,met
 
-# Add text annotations to a matrix heatmap plot
-#
+
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
+    """ Add text annotations to a matrix heatmap plot
+    """
 
     ax.set_xticks(np.arange(0, len(xlabels), 1));
     ax.set_yticks(np.arange(0, len(ylabels), 1));
@@ -98,14 +108,21 @@ def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 
                 text = ax.text(j, i, '{:.1f}'.format(X[i,j]), ha="center", va="center", color=color)
             if (decimals == 2):
                 text = ax.text(j, i, '{:.2f}'.format(X[i,j]), ha="center", va="center", color=color)
-
     return ax
 
 
-# Plot AUC matrix
-#
-#
 def plot_auc_matrix(AUC, pt_edges, eta_edges):
+    """ Plot AUC matrix.
+
+    Args:
+        AUC:       auc matrix
+        pt_edges:  transverse momentum histogram edges
+        eta_edges: pseudorapidity histogram edges
+    
+    Returns:
+        fig:       figure handle
+        ax:        figure axis
+    """
 
     fig, ax = plt.subplots()
 
@@ -127,67 +144,59 @@ def plot_auc_matrix(AUC, pt_edges, eta_edges):
     return fig, ax
 
 
-# Plot all variables
-#
-#
 def plotvars(X, y, VARS, weights, NBINS = 70, title = '', targetdir = '.'):
-
+    """ Plot all variables.
+    """
     for i in range(X.shape[1]):
         x = X[:,i]
         var = VARS[i]
         plotvar(x, y, var, weights, NBINS, title, targetdir)
 
 
-# Plot single variable
-#
-#
 def plotvar(x, y, var, weights, NBINS = 70, title = '', targetdir = '.'):
-
+    """ Plot a single variable.
+    """
     bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), NBINS)
     plot_reweight_result(x, y, bins, weights, title = title, xlabel = var)
-    plt.savefig('{}/{}.pdf'.format(targetdir, var)); plt.close()
+    plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight'); plt.close()
 
 
-# N.B. Here plot with pure event counts
-# so we see that also integrated class fractions are equalized (or not)!
-#
-def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x') :
 
-  # Plot re-weighting results
-  fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
+def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
+    """ Here plot pure event counts
+        so we see that also integrated class fractions are equalized (or not)!
+    """
+    # Plot re-weighting results
+    fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
 
-  for i in range(2):
+    for i in range(2):
+        ax = ax1 if i == 0 else ax2
 
-    if i == 0:
-      ax = ax1
-    if i == 1:
-      ax = ax2
+        # Loop over classes
+        for c in range(2) :
+            w = trn_weights[y == c]
+            ax.hist(X[y == c], bins, density = False,
+                histtype = 'step', fill = False, linewidth = 1.5)
 
-    # Loop over classes
-    for c in range(2) :
-        w = trn_weights[y == c]
-        ax.hist(X[y == c], bins, density = False,
-          histtype = 'step', fill = False, linewidth = 1.5)
+        # Loop over classes
+        for c in range(2) :
+            w = trn_weights[y == c]
+            ax.hist(X[y == c], bins, weights = w, density = False,
+                histtype = 'step', fill = False, linestyle = '-', linewidth = 1.5)
 
-    # Loop over classes
-    for c in range(2) :
-        w = trn_weights[y == c]
-        ax.hist(X[y == c], bins, weights = w, density = False,
-          histtype = 'step', fill = False, linestyle = '-', linewidth = 1.5)
+        ax.set_ylabel('weighted counts')
+        ax.set_xlabel(xlabel)
 
-    ax.set_ylabel('weighted counts')
-    ax.set_xlabel(xlabel)
-
-  ax1.set_title(title)
-  ax1.legend(['background','signal', 'background (w)','signal (w)'])
-  ax2.set_yscale('log')
-  plt.tight_layout()
+    ax1.set_title(title)
+    ax1.legend(['background','signal', 'background (w)','signal (w)'])
+    ax2.set_yscale('log')
+    plt.tight_layout()
 
 
-# Plot cross-correlations
-# Data in format (# samples x # dimensions)
-#
 def plot_correlations(X, netvars, colorbar = False):
+    """ Plot cross-correlations
+    Data in format (# samples x # dimensions)
+    """
 
     import pandas as pd
     from sklearn import neighbors
@@ -202,17 +211,17 @@ def plot_correlations(X, netvars, colorbar = False):
     ax.imshow(C)
     ax = annotate_heatmap(X = C, ax = ax, xlabels = netvars,
         ylabels = netvars, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
-    ax.set_title('linear correlation $\in$ [-100,100]')
+    ax.set_title('linear correlation $\\in$ [-100,100]')
     
     if colorbar:
         cb = plt.colorbar()
 
     return fig,ax
 
-# 'Receiver Operating Characteristics'
-#  False positive (x) vs True positive (y)
-#
+
 def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
+    """ Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
+    """
 
     fig,ax = plt.subplots()
     xx = np.logspace(-5, 0, 100)
@@ -228,22 +237,21 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
     ax.set_title(title)
     ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
 
-
     plt.ylim(0.0, 1.0)
     plt.xlim(0.0, 1.0)
-    plt.savefig(filename + '.pdf')
+    plt.savefig(filename + '.pdf', bbox_inches='tight')
 
     plt.gca().set_xscale('log')
     plt.ylim(0.0, 1.0)
     plt.xlim(1e-4, 1.0)
-    plt.savefig(filename + '_log.pdf')
+    plt.savefig(filename + '_log.pdf', bbox_inches='tight')
 
     plt.close()
 
 
-# Histogram observables 1D
-#
 def plothist1d(X, y, labels) :
+    """ Histogram observables in 1D
+    """
 
     # Number of classes
     C = int(np.max(y) - np.min(y) + 1)
@@ -275,11 +283,11 @@ def plothist1d(X, y, labels) :
         plt.gca().set_yscale('log')
 
 
-### Decision contour pairwise for each dimension,
-# other dimensions evaluated at zero=(0,0,...0)
-# 
 def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'numpy'):
-
+    """ Decision contour pairwise for each dimension,
+    other dimensions evaluated at zero=(0,0,...0)
+    """
+    
     print(__name__ + '.plot_decision_contour')
     
     NPOINTS = 3000
@@ -332,5 +340,5 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
             plt.ylabel('X[%d]' % dim2 + ' (%s)' % labels[dim2])
             plt.colorbar(cs, ticks = np.linspace(0.0, 1.0, 11))
             
-            plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf")
+            plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf", bbox_inches='tight')
             plt.close()

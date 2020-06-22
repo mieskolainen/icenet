@@ -1,0 +1,207 @@
+# ------------------------------------------------------------------------
+# Possible cuts:
+# 
+# === Low-level cuts per triplet===
+# 
+# Vtx_prob     > 0.1
+# lxy/sigma    > 6
+# 
+ 
+# === Fiducial cuts per event ===
+# 
+# number of SV = 2 (perhaps ?)
+# 
+
+# === Fiducial cuts per triplet ===
+# 
+# cos(α_2D)    >  0.99 [0.999]
+# pT(triplet)  >  3 GeV
+# pt(1,2,3)    >  0.5 GeV
+# eta(1,2,3)   <  2.4
+#
+
+# === A GOOD FIDUCIAL DEFINITION ===
+# 
+# Number 1 rule: Do not look inside the decay tree!
+# Number 2 rule: Do not use some MC information you cannot measure!
+# 
+# Define here [ ... ]
+# 
+# ------------------------------------------------------------------------
+
+
+'''
+ 1) BToKEE_fit_l1_normpt: pT(l1)/m(B)
+ 2) BToKEE_fit_l2_normpt: pT(l2)/m(B)
+ 3) BToKEE_fit_k_normpt:  pT(k)/m(B)
+ 4) BToKEE_fit_normpt:    pT(B)/m(B)
+ 5) BToKEE_l1_iso04_rel:  relative track isolation ([sum pT(track) ] / pT(l1)) around l1 cone dR < 0.04
+ 6) BToKEE_l2_iso04_rel:  relative track isolation ([sum pT(track) ] / pT(l2)) around l2 cone dR < 0.04
+ 7) BToKEE_k_iso04_rel:   relative track isolation ([sum pT(track) ] / pT(k)) around k cone dR < 0.04
+ 8) BToKEE_b_iso04_rel:   relative track isolation ([sum pT(track) ] / pT(B)) around B cone dR < 0.04
+ 9) BToKEE_l1_dxy_sig:    l1 transverse impact parameter significance w.r.t. first PV
+10) BToKEE_l2_dxy_sig:    l2 transverse impact parameter significance w.r.t. first PV
+11) BToKEE_k_DCASig:      k transverse impact parameter significance w.r.t. beamspot
+12) BToKEE_dz:            SV delta z w.r.t. first PV
+13) BToKEE_minDR:         minimum dR among 3 tracks
+14) BToKEE_maxDR:         maximum dR among 3 tracks
+15) BToKEE_svprob:        SV vertex fit confidence level
+16) BToKEE_lxy_sig:       SV transverse displacement significance
+17) BToKEE_fit_cos2D:     cosine angle in the transverse plane between the B momentum and the separation between the B vertex and the beamspot.
+18) BToKEE_ptImbalance:   |p(ee) x r| / |p(k) x r|, where x is the cross product, r is the vector connecting PV and SV. This is the ratio of the transverse momentum w.r.t. to B trajectory of the dielectron momentum and that of the kaon momentum
+19) BToKEE_l1_pfmvaId_LowPt, HighPt: The retrained PF electron mva ID of the leading or subleading electron. I retrained the electron mva ID in 2 pT bins: pT < 5 GeV and pT > 5 GeV (Since pT < 5 GeV electrons have fewer available variables for training). If the electron doesn't belong to that group, it is set to be 20
+'''
+
+
+#    ('BToKEE_l_xy_sig',      'BToKEE_l_xy',      'BToKEE_l_xy_unc'),
+
+
+# add additional branches
+#self._branches['BToKEE_l_xy_sig']       = self._branches['BToKEE_l_xy'] / self._branches['BToKEE_l_xy_unc']
+#self._branches['BToKEE_l1_dxy_sig']     = self._branches['BToKEE_l1_dxy'] / self._branches['BToKEE_l1_dxyErr']
+#self._branches['BToKEE_l2_dxy_sig']     = self._branches['BToKEE_l2_dxy'] / self._branches['BToKEE_l2_dxyErr']
+#self._branches['BToKEE_fit_l1_normpt']  = self._branches['BToKEE_fit_l1_pt'] / self._branches['BToKEE_fit_mass']
+#self._branches['BToKEE_fit_l2_normpt']  = self._branches['BToKEE_fit_l2_pt'] / self._branches['BToKEE_fit_mass']
+#self._branches['BToKEE_fit_k_normpt']   = self._branches['BToKEE_fit_k_pt'] / self._branches['BToKEE_fit_mass']
+#self._branches['BToKEE_fit_normpt']     = self._branches['BToKEE_fit_pt'] / self._branches['BToKEE_fit_mass']
+#self._branches['BToKEE_q2']             = self._branches['BToKEE_mll_fullfit'] * self._branches['BToKEE_mll_fullfit']
+#self._branches['BToKEE_b_iso04_rel']    = self._branches['BToKEE_b_iso04'] / self._branches['BToKEE_fit_pt']
+#self._branches['BToKEE_l1_iso04_rel']   = self._branches['BToKEE_l1_iso04'] / self._branches['BToKEE_fit_l1_pt']
+#self._branches['BToKEE_l2_iso04_rel']   = self._branches['BToKEE_l2_iso04'] / self._branches['BToKEE_fit_l2_pt']
+#self._branches['BToKEE_k_iso04_rel']    = self._branches['BToKEE_k_iso04'] / self._branches['BToKEE_fit_k_pt']
+#self._branches['BToKEE_eleEtaCats']     = map(self.EleEtaCats, self._branches['BToKEE_fit_l1_eta'], self._branches['BToKEE_fit_l2_eta'])
+#self._branches['BToKEE_fit_dphi']       = map(self.DeltaPhi, self._branches['BToKEE_fit_phi'], self._branches['BToKEE_trg_phi'])
+#self._branches['BToKEE_dz']             = self._branches['BToKEE_vtx_z'] - self._branches['BToKEE_trg_vz']
+'''
+
+
+
+inputbranches_BToKEE = ['nBToKEE',
+                        'BToKEE_mll_fullfit',
+                        'BToKEE_fit_mass',
+                        'BToKEE_fit_massErr',
+                        'BToKEE_l1Idx',
+                        'BToKEE_l2Idx',
+                        'BToKEE_kIdx',
+                        'BToKEE_l_xy',
+                        'BToKEE_l_xy_unc',
+                        'BToKEE_fit_pt',
+                        'BToKEE_fit_eta',
+                        'BToKEE_fit_phi',
+                        'BToKEE_fit_l1_pt',
+                        'BToKEE_fit_l1_eta',
+                        'BToKEE_fit_l1_phi',
+                        'BToKEE_fit_l2_pt',
+                        'BToKEE_fit_l2_eta',
+                        'BToKEE_fit_l2_phi',
+                        'BToKEE_fit_k_pt',
+                        'BToKEE_fit_k_eta',
+                        'BToKEE_fit_k_phi',
+                        'BToKEE_svprob',
+                        'BToKEE_fit_cos2D',
+                        'BToKEE_maxDR',
+                        'BToKEE_minDR',
+                        'BToKEE_k_iso04',
+                        'BToKEE_l1_iso04',
+                        'BToKEE_l2_iso04',
+                        'BToKEE_b_iso04',
+                        'BToKEE_vtx_x',
+                        'BToKEE_vtx_y',
+                        'BToKEE_vtx_z',
+                        'Electron_pt',
+                        'Electron_charge',
+                        'Electron_dxy',
+                        'Electron_dxyErr',
+                        'Electron_convVeto',
+                        'Electron_isLowPt',
+                        'Electron_isPF',
+                        'Electron_isPFoverlap',
+                        'Electron_mvaId',
+                        'Electron_pfmvaId',
+                        'ProbeTracks_charge',
+                        'ProbeTracks_pt',
+                        'ProbeTracks_DCASig',
+                        'ProbeTracks_eta',
+                        'ProbeTracks_phi',
+                        'ProbeTracks_nValidHits',
+                        #'HLT_Mu9_IP6_*',
+                        'TriggerMuon_vz',
+                        'PV_x',
+                        'PV_y',
+                        'PV_z',
+                        'event',
+                        'PV_npvsGood',
+                        ]
+
+inputbranches_BToKEE_MC = ['GenPart_pdgId',
+                           'GenPart_genPartIdxMother',
+                           'Electron_genPartIdx',
+                           'ProbeTracks_genPartIdx',
+                           ]
+  
+outputbranches_BToKEE = {'BToKEE_mll_fullfit': {'nbins': 30, 'xmin': 2.6, 'xmax': 3.6},
+                         'BToKEE_q2': {'nbins': 50, 'xmin': 0.0, 'xmax': 20.0},
+                         'BToKEE_fit_mass': {'nbins': 30, 'xmin': 4.7, 'xmax': 6.0},
+                         'BToKEE_fit_massErr': {'nbins': 30, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_fit_l1_pt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_fit_l2_pt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_fit_l1_normpt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_fit_l2_normpt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_fit_l1_eta': {'nbins': 50, 'xmin': -3.0, 'xmax': 3.0},
+                         'BToKEE_fit_l2_eta': {'nbins': 50, 'xmin': -3.0, 'xmax': 3.0},
+                         'BToKEE_fit_l1_phi': {'nbins': 50, 'xmin': -4.0, 'xmax': 4.0},
+                         'BToKEE_fit_l2_phi': {'nbins': 50, 'xmin': -4.0, 'xmax': 4.0},
+                         'BToKEE_l1_dxy_sig': {'nbins': 50, 'xmin': -30.0, 'xmax': 30.0},
+                         'BToKEE_l2_dxy_sig': {'nbins': 50, 'xmin': -30.0, 'xmax': 30.0},
+                         'BToKEE_l1_mvaId': {'nbins': 50, 'xmin': -2.0, 'xmax': 10.0},
+                         'BToKEE_l2_mvaId': {'nbins': 50, 'xmin': -2.0, 'xmax': 10.0},
+                         'BToKEE_l1_pfmvaId': {'nbins': 50, 'xmin': -2.0, 'xmax': 10.0},
+                         'BToKEE_l2_pfmvaId': {'nbins': 50, 'xmin': -2.0, 'xmax': 10.0},
+                         'BToKEE_l1_pfmvaCats': {'nbins': 2, 'xmin': 0.0, 'xmax': 2.0},
+                         'BToKEE_l2_pfmvaCats': {'nbins': 2, 'xmin': 0.0, 'xmax': 2.0},
+                         'BToKEE_l1_isPF': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_l2_isPF': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_l1_isLowPt': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_l2_isLowPt': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_l1_isPFoverlap': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_l2_isPFoverlap': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_fit_k_pt': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_fit_k_normpt': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_fit_k_eta': {'nbins': 50, 'xmin': -3.0, 'xmax': 3.0},
+                         'BToKEE_fit_k_phi': {'nbins': 50, 'xmin': -4.0, 'xmax': 4.0},
+                         'BToKEE_k_DCASig': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_k_nValidHits': {'nbins': 30, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_k_isKaon': {'nbins': 2, 'xmin': 0, 'xmax': 2},
+                         'BToKEE_fit_pt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_fit_eta': {'nbins': 50, 'xmin': -3.0, 'xmax': 3.0},
+                         'BToKEE_fit_phi': {'nbins': 50, 'xmin': -4.0, 'xmax': 4.0},
+                         'BToKEE_fit_normpt': {'nbins': 50, 'xmin': 0.0, 'xmax': 30.0},
+                         'BToKEE_svprob': {'nbins': 50, 'xmin': 0.0, 'xmax': 1.0},
+                         'BToKEE_fit_cos2D': {'nbins': 50, 'xmin': 0.999, 'xmax': 1.0},
+                         'BToKEE_l_xy_sig': {'nbins': 50, 'xmin': 0.0, 'xmax': 50.0},
+                         'BToKEE_dz': {'nbins': 50, 'xmin': -1.0, 'xmax': 1.0},
+                         'BToKEE_ptImbalance': {'nbins': 50, 'xmin': 0.0, 'xmax': 50.0},
+                         'BToKEE_Dmass': {'nbins': 50, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_Dmass_flip': {'nbins': 50, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_maxDR': {'nbins': 50, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_minDR': {'nbins': 50, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_k_iso04_rel': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_l1_iso04_rel': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_l2_iso04_rel': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_b_iso04_rel': {'nbins': 50, 'xmin': 0.0, 'xmax': 10.0},
+                         'BToKEE_eleEtaCats': {'nbins': 3, 'xmin': 0.0, 'xmax': 3.0},
+                         'BToKEE_event': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                         #'BToKEE_decay': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                         #'BToKEE_PV_npvsGood': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                         }
+
+outputbranches_BToKEE_mc = {'BToKEE_l1_isGen': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            'BToKEE_l2_isGen': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            'BToKEE_k_isGen': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            'BToKEE_l1_genPdgId': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            'BToKEE_l2_genPdgId': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            'BToKEE_k_genPdgId': {'nbins': 10, 'xmin': 0, 'xmax': 10},
+                            }
+
+outputbranches_BToKEE_mva = {'BToKEE_xgb': {'nbins': 100, 'xmin': -20.0, 'xmax': 20.0},
+                             }
