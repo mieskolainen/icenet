@@ -33,16 +33,17 @@ conda list --name icenet
 -icenet       Deep learning classes & functions
 -iceplot      Plotting tools
 -tests        Test functions
+-output       HDF5, pickle outputs
 -dev          Development code
 ```
 
-## Electron ID training / evaluation
+## Electron ID classifier
 ```
 python eid_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
 python eid_eval.py  --config tune0 --datapath <some path> --datasets <0,1,2,...>
 ```
 
-## B/R(K) training / calculation / print / fit
+## B/R(K) analyzer
 ```
 python brk_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
 python brk_calc.py  --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
