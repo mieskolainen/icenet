@@ -22,23 +22,24 @@ class MAXOUT(nn.Module):
             C: Output dimension
         """
         super(MAXOUT,self).__init__()
-
-        # Input and output dimension
         self.D = D
         self.C = C
         
         # Network modules
-        self.fc1_list = nn.ModuleList()
-        self.fc2_list = nn.ModuleList()
+        self.fc1_list  = nn.ModuleList()
+        self.fc2_list  = nn.ModuleList()
 
         self.num_units = num_units
         self.dropout   = nn.Dropout(p = dropout)
         
         for _ in range(self.num_units):
             self.fc1_list.append(nn.Linear(self.D, neurons))
-            self.fc2_list.append(nn.Linear(neurons, self.C))
+            nn.init.xavier_normal_(self.fc1_list[-1].weight) # xavier init
             
-    def forward(self,x):
+            self.fc2_list.append(nn.Linear(neurons, self.C))
+            nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
+            
+    def forward(self, x):
         
         x = self.maxout(x, self.fc1_list)
         x = self.dropout(x)
@@ -46,20 +47,20 @@ class MAXOUT(nn.Module):
 
         return x
     
-    def maxout(self,x, layer_list):
+    def maxout(self, x, layer_list):
         """ MAXOUT layer
         """
         max_output = layer_list[0](x)
         for _, layer in enumerate(layer_list, start=1):
-            max_output= torch.max(layer(x), max_output)
+            max_output = torch.max(layer(x), max_output)
         return max_output
 
-    def softpredict(self,x) :
+    def softpredict(self, x) :
         """ Softmax probability
         """
         return F.softmax(self.forward(x), dim = 1)
         
-    def binarypredict(self,x) :
+    def binarypredict(self, x) :
         """ Return max probability class.
         """        
         prob = list(self.softpredict(x).detach().numpy())

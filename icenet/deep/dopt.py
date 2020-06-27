@@ -22,6 +22,52 @@ import torch.nn.functional as F
 from icenet.tools import aux
 
 
+
+init_funcs = {
+    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.), # can be bias
+    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),  # can be weight
+    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # can be conv1D filter
+    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # can be conv2D filter
+    "default": lambda x: torch.nn.init.constant(x, 1.),     # everything else
+}
+
+def weights_init_all(model, init_funcs):
+    """
+    Examples:
+        model = MyNet()
+        weights_init_all(model, init_funcs)
+    """
+    for p in model.parameters():
+        init_func = init_funcs.get(len(p.shape), init_funcs["default"])
+        init_func(p)
+
+
+def weights_init_uniform_rule(m):
+    """ Initializes module weights from uniform [-a,a]
+    """
+    classname = m.__class__.__name__
+
+    # Liner layers
+    if classname.find('Linear') != -1:
+        n = m.in_features
+        y = 1.0/np.sqrt(n)
+        m.weight.data.uniform_(-y, y)
+        m.bias.data.fill_(0)
+
+
+def weights_init_normal(m):
+    """ Initializes module weights from normal distribution
+    with ad-hoc rule sigma ~ 1/sqrt(n)
+    """
+    classname = m.__class__.__name__
+    
+    # Linear layers
+    if classname.find('Linear') != -1:
+        y = m.in_features
+        m.weight.data.normal_(0.0, 1/np.sqrt(y))
+        m.bias.data.fill_(0)
+
+
 def multiclass_cross_entropy(p_hat, y, N_classes, weights, EPS = 1e-15) :
     """ Per instance weighted cross entropy loss
     (negative log-likelihood)
@@ -90,7 +136,19 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
     # Prints the weights and biases
     print(model)
+        
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(__name__ + f'.train: Number of free parameters = {params}')
     
+    # --------------------------------------------------------------------
+    ### Weight initialization
+    print(__name__ + f'.train: Weight initialization')
+    #model.apply(weights_init_normal_rule)
+    # --------------------------------------------------------------------
+
+    print('')
+
     # Class fractions
     YY = Y_trn.numpy()
     frac = []
@@ -173,7 +231,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
             optimizer.step()
 
             ### Save metrics
-            sumloss += loss.item()
+            sumloss += loss.item() # item() important for performance
             nbatch  += 1
 
         avgloss = sumloss / nbatch

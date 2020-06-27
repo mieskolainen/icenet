@@ -619,7 +619,7 @@ class Metric:
             valrange: range of probabilities / soft scores
         """
         ok = np.isfinite(y_true) & np.isfinite(y_soft)
-
+        
         lhs = len(y_true) 
         rhs = (ok == True).sum()
         if (lhs != rhs) :

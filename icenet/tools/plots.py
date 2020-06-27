@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import xgboost
+from tqdm import tqdm
 
 from . import aux
 
@@ -147,7 +148,7 @@ def plot_auc_matrix(AUC, pt_edges, eta_edges):
 def plotvars(X, y, VARS, weights, NBINS = 70, title = '', targetdir = '.'):
     """ Plot all variables.
     """
-    for i in range(X.shape[1]):
+    for i in tqdm(range(X.shape[1])):
         x = X[:,i]
         var = VARS[i]
         plotvar(x, y, var, weights, NBINS, title, targetdir)
@@ -283,37 +284,30 @@ def plothist1d(X, y, labels) :
         plt.gca().set_yscale('log')
 
 
-def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'numpy'):
+def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'numpy', reso=50, npoints=400):
     """ Decision contour pairwise for each dimension,
     other dimensions evaluated at zero=(0,0,...0)
     """
     
-    print(__name__ + '.plot_decision_contour')
-    
-    NPOINTS = 3000
-    MAXP = min(NPOINTS, X.shape[0])
-
+    print(__name__ + '.plot_decision_contour ...')
+    MAXP = min(npoints, X.shape[0])
     D = X.shape[1]
+    pad = 0.5
 
-    N = 100 # resolution
-
-    for dim1 in range(D) :
+    for dim1 in tqdm(range(D)) :
+        x_min, x_max = X[:, dim1].min() - pad, X[:, dim1].max() + pad
         for dim2 in range(D) :
-
             if dim2 <= dim1 :
                 continue
 
             # (x,y)-plane limits
-            pad = 0.5
-            x_min, x_max = X[:, dim1].min() - pad, X[:, dim1].max() + pad
             y_min, y_max = X[:, dim2].min() - pad, X[:, dim2].max() + pad
 
             # Grid points
-            PX,PY = np.meshgrid(np.linspace(x_min, x_max, N),
-                                np.linspace(y_min, y_max, N))
+            PX,PY = np.meshgrid(np.linspace(x_min, x_max, reso), np.linspace(y_min, y_max, reso))
             
             # Function values through 'pred_func' lambda            
-            Z = np.zeros((N*N, D))
+            Z = np.zeros((reso*reso, D))
             Z[:, dim1] = PX.ravel()
             Z[:, dim2] = PY.ravel()
 
@@ -327,7 +321,6 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
                 Z = pred_func(xgboost.DMatrix(data = Z))
 
             Z = Z.reshape(PX.shape)
-
             fig, axs = plt.subplots()
 
             # Contour

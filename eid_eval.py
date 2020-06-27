@@ -96,8 +96,9 @@ roc_labels = []
 
 
 def saveit(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
+
     fig, ax, met = plots.binned_AUC(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-    
+        
     global roc_mstats
     global roc_labels
     roc_mstats.append(met)
@@ -139,22 +140,22 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         print(f'\nEvaluate {label} classifier ...')
 
         b_pdfs, s_pdfs, bin_edges = pickle.load(open(modeldir + '/FLR_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
-        def func_predict(X):
-            return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
+        def func_predict(x):
+            return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
 
         # Evaluate (pt,eta) binned AUC
         saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
         
     ###
     if args['xgb_param']['active']:
-
+        
         label = args['xgb_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
         xgb_model = pickle.load(open(modeldir + '/XGB_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
         
-        def func_predict(X):
-            return xgb_model.predict(xgboost.DMatrix(data = X))
+        def func_predict(x):
+            return xgb_model.predict(xgboost.DMatrix(data = x))
 
         # Evaluate (pt,eta) binned AUC
         saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
@@ -222,9 +223,9 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         mlgr_model = aux.load_checkpoint(modeldir + '/MLGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         mlgr_model.eval() # Turn on eval mode!
         
-        def func_predict(X):
+        def func_predict(x):
             signalclass = 1
-            return mlgr_model.softpredict(X)[:, signalclass].detach().numpy()
+            return mlgr_model.softpredict(x)[:, signalclass].detach().numpy()
 
         # Evaluate (pt,eta) binned AUC
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
@@ -238,9 +239,9 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         dmax_model = aux.load_checkpoint(modeldir + '/DMAX_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         dmax_model.eval() # Turn on eval mode!
 
-        def func_predict(X):
+        def func_predict(x):
             signalclass = 1
-            return dmax_model.softpredict(X)[:, signalclass].detach().numpy()
+            return dmax_model.softpredict(x)[:, signalclass].detach().numpy()
 
         # Evaluate (pt,eta) binned AUC
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
@@ -253,11 +254,13 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
 
         dbnf_param = args['dbnf_param']
         dbnf_param['n_dims'] = X.shape[1]
-        def func_predict(X):
-            y_pred_dbnf = dbnf.predict(dbnf_param, X_ptr.numpy(),
-                          ['class_0_rw_' + args['reweight_param']['mode'],
-                           'class_1_rw_' + args['reweight_param']['mode']], modeldir)
 
+        # Load models
+        dbnf_models = dbnf.load_models(dbnf_param, ['class_0_rw_' + args['reweight_param']['mode'], 'class_1_rw_' + args['reweight_param']['mode']], modeldir)
+
+        def func_predict(x):
+            return dbnf.predict(x, dbnf_models)
+        
         # Evaluate (pt,eta) binned AUC
         saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
 

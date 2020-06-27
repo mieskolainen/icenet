@@ -27,7 +27,6 @@ from configs.eid.cuts import *
 
 def init():
     """ Initialize data input.
-    
     Args:
     Returns:
     """
@@ -38,10 +37,10 @@ def init():
     parser.add_argument("--datasets", type = str, default="0")
 
     cli = parser.parse_args()
-    
+
     # Input is [0,1,2,..]
     cli.datasets = cli.datasets.split(',')
-    
+
     ## Read configuration
     config_yaml_file = cli.config + '.yml'
     with open('./configs/eid/' + config_yaml_file, 'r') as stream:
@@ -49,18 +48,18 @@ def init():
             args = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-    
+
     args['config'] = cli.config
     print(args)
     print(torch.__version__)
 
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
-    global CUTFUNC, TARFUNC
-    CUTFUNC = globals()[args['cutfunc']]
-    TARFUNC = globals()[args['targetfunc']]
+    global CUTFUNC, TARFUNC, MAXEVENTS, INPUTVAR
+    CUTFUNC   = globals()[args['cutfunc']]
+    TARFUNC   = globals()[args['targetfunc']]
+    MAXEVENTS = args['MAXEVENTS']
 
-    
     print(__name__ + f'.init: inputvar:   <{args["inputvar"]}>')
     print(__name__ + f'.init: cutfunc:    <{args["cutfunc"]}>')
     print(__name__ + f'.init: targetfunc: <{args["targetfunc"]}>')
@@ -129,7 +128,7 @@ def compute_reweights(data, args):
     print(__name__ + f".compute_reweights: Re-weighting coefficients with mode <{args['reweight_param']['mode']}> chosen")
     trn_weights = aux.reweightcoeff2D(PT, ETA, data.trn.y, pt_binedges, eta_binedges,
         shape_reference = args['reweight_param']['mode'], max_reg = args['reweight_param']['max_reg'])
-    
+
     ### Plot some kinematic variables
     targetdir = f'./figs/eid/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)
@@ -170,13 +169,17 @@ def load_root_file(root_path, class_id = []):
 
     ### First load all data
     VARS   = [x.decode() for x in events.keys()]
+
+    ### Load only non-jagged data (EXTEND THIS!)
+    VARS   = [x.decode() for x in events.keys() if b'image_' not in x]
+
     X_dict = events.arrays(VARS, namedecode = "utf-8")
 
     # -----------------------------------------------------------------
     # @@ MC target definition here @@
     Y   = TARFUNC(events)
     # -----------------------------------------------------------------
-
+    '''
     # Print out some statistics
     labels1 = ['is_e', 'is_egamma', 'is_e_not_matched', 'is_other']
     labels2 = ['has_trk','has_seed','has_gsf','has_ele']
@@ -185,12 +188,12 @@ def load_root_file(root_path, class_id = []):
     aux.count_targets(events=events, names=labels1)
     aux.count_targets(events=events, names=labels2)
     aux.count_targets(events=events, names=labels3)
-
+    '''
     # -----------------------------------------------------------------
     ### Convert input to matrix
     X = np.array([X_dict[j] for j in VARS])
     X = np.transpose(X)
-    
+
     # -----------------------------------------------------------------
     # @@ Cut selections done here @@
     ind = CUTFUNC(X, VARS)
@@ -206,5 +209,8 @@ def load_root_file(root_path, class_id = []):
     N_after = X.shape[0]
     print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after/N_before:.3f})")
 
-
+    # PROCESS only MAXEVENTS
+    X = X[0:np.min([X.shape[0],MAXEVENTS]),:]
+    Y = Y[0:np.min([Y.shape[0],MAXEVENTS])]
+    
     return X, Y, VARS

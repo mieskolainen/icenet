@@ -1,5 +1,7 @@
 # Electron ID tune0.yml
 
+MAXEVENTS: 30000000
+
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
 targetfunc: 'target_standard'  # Training target, implemented under targets.py
@@ -10,12 +12,12 @@ varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', '
 
 # Imputation
 imputation_param:
-  active: false               # True / False
-  var: 'CMSSW_MVA_ID_ORIG'    # Array of variables to be imputated
-  algorithm: 'iterative'      # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: 0               # For constant imputation
-  knn_k: 8                    # Number of nearest neighbours considered
-  values: [-999, -666, -10]   # Special values which indicate the need for imputation
+  active: true                 # True / False
+  var: 'CMSSW_MVA_ID_ORIG'     # Array of variables to be imputated
+  algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+  fill_value: -1               # For constant imputation
+  knn_k: 8                     # Number of nearest neighbours considered
+  values: [-999, -666, -10]    # Special values which indicate the need for imputation
 
 
 ## Outlier protection in the training phase
@@ -67,7 +69,7 @@ xgb_param:
   
   # general parameters
   booster: 'gbtree'
-  num_boost_round: 100 # Number of epochs
+  num_boost_round: 50 # Number of epochs
   n_gpus: 0
   
   # booster parameters
@@ -86,7 +88,7 @@ xgb_param:
   scale_pos_weight: 1
     
   # learning task parameters
-  objective: 'binary:logistic'     # 'binary:logistic', 'binary:logistic'
+  objective: 'binary:logistic'     #
   eval_metric: ['auc', 'logloss']  # for evaluation
 
 
@@ -96,13 +98,13 @@ mlgr_param:
   label:  'MLGR'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2 # focal_entropy exponent
+  gamma: 2                  # focal_entropy exponent
   optimizer: 'Adam'
 
   epochs: 30
   batch_size: 512
   learning_rate: 0.003
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
 
 # XTX classifier
@@ -111,13 +113,13 @@ xtx_param:
   label:  'XTX'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 3 # focal loss exponent
+  gamma: 3                  # focal loss exponent
   optimizer: 'Adam'
   
   epochs: 50
   batch_size: 512
   learning_rate: 0.003
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
 
 # Deep MAXOUT network
@@ -129,11 +131,11 @@ dmax_param:
   gamma: 2 # focal_entropy exponent parameter
   optimizer: 'Adam'
   
-  num_units: 6
-  neurons:  24
+  num_units: 8
+  neurons:  30
   dropout:  0.5
   
-  epochs:  75
+  epochs:  200
   batch_size:  512
   learning_rate: 0.003
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
@@ -144,7 +146,7 @@ dbnf_param:
   active: false
   label:  'DBNF'
   
-  epochs: 3
+  epochs: 150
   batch_size: 512
   learning_rate: 0.01
   clip_norm: 0.1
@@ -152,17 +154,18 @@ dbnf_param:
   patience: 20
   cooldown: 10
   early_stopping: 100
-  decay: 0.5
+  decay:  0.5
   min_lr: 5e-4
   polyak: 0.998
 
   flows: 5
   layers: 0
-  hidden_dim: 8
-  residual: 'gated' # choises None, normal, gated
-
+  hidden_dim: 30
+  residual: 'normal'  # choises 'none', 'normal', 'gated'
+  perm: 'flip'        # flow permutation: choises 'none', 'flip', 'rand'
+  
   modelname: 'null'
   start_epoch: 0
   tensorboard: 'tensorboard'
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
 

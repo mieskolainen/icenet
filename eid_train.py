@@ -69,11 +69,11 @@ def main() :
     
     
     ### Plot variables
-    if args['plot_param']['basic_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/1D_all/'
-        os.makedirs(targetdir, exist_ok = True)
-        plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS, weights = trn_weights, 
-            targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
+    if args['plot_param']['basic_on'] == True:
+        print(__name__ + f': plotting basic histograms ...')
+        targetdir = f'./figs/eid/{args["config"]}/train/1D_all/'; os.makedirs(targetdir, exist_ok = True)
+        plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS,
+            weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
 
 
     ### Pick kinematic variables out
@@ -168,12 +168,14 @@ def train(data, data_kin, trn_weights, args) :
         def func_predict(X):
             return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
-        ### Plot contours
+        ### Plot contours (TOO SLOW!)
+        """
         if args['plot_param']['contours_on']:
             targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/flr/'; os.makedirs(targetdir, exist_ok = True)
             plots.plot_decision_contour(lambda x : func_predict(x),
                 X = data.trn.x, y = data.trn.y, labels = data.VARS, targetdir = targetdir, matrix = 'numpy')
-
+        """
+    
     ### CLASSIFIER
     if args['xgb_param']['active']:
 
