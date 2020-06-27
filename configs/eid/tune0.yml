@@ -15,7 +15,7 @@ imputation_param:
   active: true                 # True / False
   var: 'CMSSW_MVA_ID_ORIG'     # Array of variables to be imputated
   algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: -1               # For constant imputation
+  fill_value: 0                # For constant imputation
   knn_k: 8                     # Number of nearest neighbours considered
   values: [-999, -666, -10]    # Special values which indicate the need for imputation
 
@@ -143,7 +143,7 @@ dmax_param:
 
 # Deep Normalizing Flow
 dbnf_param:
-  active: false
+  active: true
   label:  'DBNF'
   
   epochs: 150
