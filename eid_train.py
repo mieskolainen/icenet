@@ -357,9 +357,11 @@ def train(data, data_kin, trn_weights, args) :
             dbnf_model = dbnf.create_model(dbnf_param, verbose = True)
 
             # Create optimizer & scheduler
-            optimizer = adam.Adam(dbnf_model.parameters(), lr = dbnf_param['learning_rate'],
-                amsgrad = True, polyak = dbnf_param['polyak'])
-
+            if   dbnf_param['optimizer'] == 'Adam':
+                optimizer = adam.Adam(dbnf_model.parameters(), lr = dbnf_param['learning_rate'], polyak = dbnf_param['polyak'])
+            elif dbnf_param['optimizer'] == 'AdamW':
+                optimizer = torch.optim.AdamW(dbnf_model.parameters(), lr = dbnf_param['learning_rate'])
+            
             sched = scheduler.ReduceLROnPlateau(optimizer, factor = dbnf_param['decay'],
                                           patience = dbnf_param['patience'], cooldown = dbnf_param['cooldown'],
                                           min_lr = dbnf_param['min_lr'], verbose = True,

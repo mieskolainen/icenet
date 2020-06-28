@@ -163,12 +163,14 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
     print(__name__ + f'.train: Found {len(np.unique(Y_trn))} / {model.C} classes in the training sample')
     
     # Define the optimizer
-    if   param['optimizer'] == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr = param['learning_rate'], amsgrad = True)
+    if   param['optimizer'] == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr = param['learning_rate'])
+    elif param['optimizer'] == 'Adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr = param['learning_rate'])
     elif param['optimizer'] == 'SGD':
-        optimizer = torch.optim.SGD(model.parameters(), lr = param['learning_rate'])
+        optimizer = torch.optim.SGD(model.parameters(),  lr = param['learning_rate'])
     else:
-        raise Exception(__name__ + f'.train: Unknown optimizer {param["optimizer"]} (use "Adam" or "SGD")')
+        raise Exception(__name__ + f'.train: Unknown optimizer {param["optimizer"]} (use "Adam", "AdamW" or "SGD")')
 
     # List to store losses
     losses   = []

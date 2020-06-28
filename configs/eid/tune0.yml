@@ -105,10 +105,10 @@ mlgr_param:
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent
-  optimizer: 'Adam'
+  optimizer: 'AdamW'
 
   epochs: 30
-  batch_size: 256
+  batch_size: 196
   learning_rate: 0.003
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
@@ -120,10 +120,10 @@ xtx_param:
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 3                  # focal loss exponent
-  optimizer: 'Adam'
+  optimizer: 'AdamW'
   
   epochs: 50
-  batch_size: 256
+  batch_size: 196
   learning_rate: 0.003
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
@@ -134,17 +134,17 @@ dmax_param:
   label:  'DMAX'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2 # focal_entropy exponent parameter
-  optimizer: 'Adam'
+  gamma: 2                  # focal_entropy exponent parameter
+  optimizer: 'AdamW'        # Adam, AdamW
   
   num_units: 8
   neurons:  30
   dropout:  0.5
   
   epochs:  200
-  batch_size:  128
+  batch_size:  196
   learning_rate: 0.005
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
 
 
 # Deep Normalizing Flow
@@ -152,11 +152,12 @@ dbnf_param:
   active: true
   label:  'DBNF'
   
-  epochs: 150
-  batch_size: 128
+  epochs: 300
+  batch_size: 196
   learning_rate: 0.01
   clip_norm: 0.1
   
+  optimizer: 'Adam'
   patience: 20
   cooldown: 10
   early_stopping: 100
@@ -167,8 +168,8 @@ dbnf_param:
   flows: 5
   layers: 0
   hidden_dim: 30
-  residual: 'normal'  # choises 'none', 'normal', 'gated'
-  perm: 'flip'        # flow permutation: choises 'none', 'flip', 'rand'
+  residual: 'normal'          # choises 'none', 'normal', 'gated'
+  perm: 'flip'                # flow permutation: choises 'none', 'flip', 'rand'
   
   modelname: 'null'
   start_epoch: 0
