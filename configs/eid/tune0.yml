@@ -1,4 +1,10 @@
 # Electron ID tune0.yml
+#
+# General comments:
+#
+# - Keep the minibatch size small enough, otherwise weak convergence to optima
+# - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
+#
 
 MAXEVENTS: 99999999
 
@@ -102,7 +108,7 @@ mlgr_param:
   optimizer: 'Adam'
 
   epochs: 30
-  batch_size: 512
+  batch_size: 256
   learning_rate: 0.003
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
@@ -117,7 +123,7 @@ xtx_param:
   optimizer: 'Adam'
   
   epochs: 50
-  batch_size: 512
+  batch_size: 256
   learning_rate: 0.003
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
 
@@ -136,8 +142,8 @@ dmax_param:
   dropout:  0.5
   
   epochs:  200
-  batch_size:  512
-  learning_rate: 0.003
+  batch_size:  128
+  learning_rate: 0.005
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
 
 
@@ -147,7 +153,7 @@ dbnf_param:
   label:  'DBNF'
   
   epochs: 150
-  batch_size: 512
+  batch_size: 128
   learning_rate: 0.01
   clip_norm: 0.1
   
