@@ -19,8 +19,11 @@ import uproot
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
+from icenet.tools import prints
 
-from configs.eid.targets import *
+from configs.eid.mctargets import *
+from configs.eid.mcfilter  import *
+
 from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
@@ -55,10 +58,12 @@ def init():
 
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
-    global CUTFUNC, TARFUNC, MAXEVENTS, INPUTVAR
-    CUTFUNC   = globals()[args['cutfunc']]
-    TARFUNC   = globals()[args['targetfunc']]
-    MAXEVENTS = args['MAXEVENTS']
+    global CUTFUNC, TARFUNC, FILTERFUNC, MAXEVENTS, INPUTVAR
+    CUTFUNC     = globals()[args['cutfunc']]
+    TARFUNC     = globals()[args['targetfunc']]
+    FILTERFUNC  = globals()[args['filterfunc']]
+
+    MAXEVENTS   = args['MAXEVENTS']
 
     print(__name__ + f'.init: inputvar:   <{args["inputvar"]}>')
     print(__name__ + f'.init: cutfunc:    <{args["cutfunc"]}>')
@@ -175,27 +180,43 @@ def load_root_file(root_path, class_id = []):
 
     X_dict = events.arrays(VARS, namedecode = "utf-8")
 
-    # -----------------------------------------------------------------
-    # @@ MC target definition here @@
-    Y   = TARFUNC(events)
-    # -----------------------------------------------------------------
-    '''
+        
     # Print out some statistics
-    labels1 = ['is_e', 'is_egamma', 'is_e_not_matched', 'is_other']
-    labels2 = ['has_trk','has_seed','has_gsf','has_ele']
-    labels3 = ['seed_trk_driven','seed_ecal_driven']
+    labels1 = ['is_e', 'is_egamma']
+    #labels2 = ['has_trk','has_seed','has_gsf','has_ele']
+    #labels3 = ['seed_trk_driven','seed_ecal_driven']
 
     aux.count_targets(events=events, names=labels1)
-    aux.count_targets(events=events, names=labels2)
-    aux.count_targets(events=events, names=labels3)
-    '''
+    #aux.count_targets(events=events, names=labels2)
+    #aux.count_targets(events=events, names=labels3)
+    
     # -----------------------------------------------------------------
     ### Convert input to matrix
     X = np.array([X_dict[j] for j in VARS])
     X = np.transpose(X)
 
+
+    # =================================================================
+    # *** MC ONLY ***
+
+    # @@ MC target definition here @@
+    print(__name__ + f'.load_root_file: MC target computed')
+    Y = TARFUNC(events)
+    prints.printbar()
+
+    # @@ MC filtering done here @@
+    print(__name__ + f'.load_root_file: MC filter applied')
+    indmc = FILTERFUNC(X, VARS)
+    prints.printbar()
+    
+    Y = Y[indmc]
+    X = X[indmc,:]
+    # =================================================================
+
+
     # -----------------------------------------------------------------
-    # @@ Cut selections done here @@
+    # @@ Observable cut selections done here @@
+    print(__name__ + f'.load_root_file: Observable cuts')
     ind = CUTFUNC(X, VARS)
     # -----------------------------------------------------------------
 

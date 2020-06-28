@@ -1,4 +1,4 @@
-# Supervised training signal class target definitions (only available in MC)
+# MC only. Supervised training signal class target definitions.
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk

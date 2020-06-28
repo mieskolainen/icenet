@@ -19,8 +19,14 @@ import numba
 
 
 def apply_cutflow(cut, names):
-    """ Apply cutflow """
-    prints.printbar('-')
+    """ Apply cutflow
+
+    Args:
+        cut   : list of pre-calculated cuts, each is a boolean array
+        names : list of names (description of each cut, for printout only)
+    Returns:
+        ind   : list of indices, 1 = pass, 0 = fail
+    """
     print(__name__ + '.apply_cutflow: \n')
 
     # Print out "serial flow"
@@ -31,7 +37,7 @@ def apply_cutflow(cut, names):
         print(f'cut[{i}] ({names[i]:>20}): pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
     
     # Print out "parallel flow"
-    vec   = np.zeros((len(cut[0]), len(cut)))
+    vec = np.zeros((len(cut[0]), len(cut)))
     for j in range(vec.shape[1]):
         vec[:,j] = np.array(cut[j])
 
@@ -40,14 +46,19 @@ def apply_cutflow(cut, names):
     print(f'\nBoolean combinations for {names}: \n')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
-
-    prints.printbar('-')
-
+    
     return ind
 
 
 def count_targets(events, names):
-    """ Targets statistics printout """
+    """ Targets statistics printout
+
+    Args:
+        events :  uproot object
+        names  :  list of branch names
+    Returns:
+        Printout on stdout
+    """
 
     K     = len(names)
     vec   = np.zeros((len(events), K))
@@ -67,15 +78,15 @@ def longvec2matrix(X, M, D, order='F'):
     """ A matrix representation / dimension converter function.
     
     Args:
-        X : Input matrix
-        M : Number of set elements
-        D : Feature dimension
+        X:     Input matrix
+        M:     Number of set elements
+        D:     Feature dimension
+        order: Reshape direction
 
     Returns:
-        Y : Output matrix
+        Y:     Output matrix
 
     Examples:
-
         X = [# number of samples N ] x [# M x D long feature vectors]
         -->
         Y = [# number of samples N ] x [# number of set elements M] x [# vector dimension D]
@@ -99,7 +110,12 @@ def number_of_set_bits(i):
 
 @numba.njit
 def binvec_are_equal(a,b):
-    """ Compare two binary vectors.
+    """ Compare equality of two binary vectors a and b.
+
+    Args:
+        a,b : binary vectors
+    Returns
+        true or false
     """
     if (np.sum(np.abs(a - b)) == 0):
         return True
@@ -109,8 +125,14 @@ def binvec_are_equal(a,b):
 
 @numba.njit
 def binvec2powersetindex(X, B):
-    """ X is matrix of binary vectors [# number of vectors x dimension]
-        B is the powerset matrix
+    """ 
+    Binary vector to powerset index.
+
+    Args:
+        X : matrix of binary vectors [# number of vectors x dimension]
+        B : the powerset matrix
+    Returns:
+        y : array of powerset indices
     """
     y = np.zeros(X.shape[0])
 
@@ -130,9 +152,9 @@ def to_graph(l):
     """
     G = networkx.Graph()
     for part in l:
-        # each sublist is a bunch of nodes
+        # Each sublist is a set of nodes
         G.add_nodes_from(part)
-        # it also imlies a number of edges:
+        # It also gives the number of edges
         G.add_edges_from(to_edges(part))
     return G
 
@@ -282,9 +304,8 @@ def bin2int(b):
 
 
 def binom_coeff_all(N, MAX = None):
-    """ Sum all all binomial coefficients.
+    """ Sum all all binomial coefficients up to MAX.
     """
-
     B = generatebinary(N, MAX)
     s = np.sum(B, axis=1)
     c = np.zeros(N+1, dtype=np.int64)
@@ -312,8 +333,14 @@ def binaryvec2int(X):
 
 def int2onehot(Y, N_classes):
     """ Integer class vector to class "one-hot encoding"
-    """
 
+    Args:
+        Y:         Class indices (# samples)
+        N_classes: Number of classes
+
+    Returns:
+        onehot:    Onehot representation
+    """
     onehot = np.zeros(shape=(len(Y), N_classes), dtype=int)
     for i in range(onehot.shape[0]):
         onehot[i, int(Y[i])] = 1
@@ -322,18 +349,19 @@ def int2onehot(Y, N_classes):
 
 @numba.njit
 def deltaphi(phi1, phi2):
+    """ Deltaphi measure. """
     return np.mod(phi1 - phi2 + np.pi, 2*np.pi) - np.pi
 
 
 @numba.njit
 def deltar(eta1,eta2, phi1,phi2):
+    """ DeltaR measure. """
     return np.sqrt((eta1 - eta2)**2 + deltaphi(phi1,phi2)**2)
 
 
-def load_checkpoint(filepath) :
+def load_torch_checkpoint(filepath) :
     """ Load pytorch checkpoint
     """
-
     checkpoint = torch.load(filepath)
     model = checkpoint['model']
     model.load_state_dict(checkpoint['state_dict'])
@@ -346,7 +374,6 @@ def load_checkpoint(filepath) :
 def save_torch_model(model, optimizer, epoch, path):
     """ PyTorch model saver
     """
-
     def f():
         print('Saving model..')
         torch.save({
@@ -361,7 +388,6 @@ def save_torch_model(model, optimizer, epoch, path):
 def load_torch_model(model, optimizer, param, path, load_start_epoch = False):
     """ PyTorch model loader
     """
-
     def f():
         print('Loading model..')
         checkpoint = torch.load(path)
@@ -374,13 +400,15 @@ def load_torch_model(model, optimizer, param, path, load_start_epoch = False):
     return f
 
 
-def reweight_aux(X, y, binedges, shape_reference = 'signal', max_reg = 1e3, EPS=1E-12) :
-    """ Compute reweighting coefficients.
-    
+def reweight_aux(X, y, binedges, shape_reference = 'signal', max_reg = 1E3, EPS=1E-12) :
+    """ Compute reweighting coefficients for 2-classes.
     Args:
-    
+        X  :              Input data (# samples)
+        y  :              Class target data (# samples)
+        binedges :        One dimensional histogram edges
+        shape_reference : Target class of re-weighting
     Returns:
-
+        weights_doublet:  Re-weight coefficients for two classes (# vectors x 2)
     """
 
     # Re-weighting weights
@@ -463,7 +491,7 @@ def reweightcoeff2DFP(X_A, X_B, y, binedges_A, binedges_B, shape_reference = 'si
         shape_reference : 'signal' or 'background' or 'none'
 
     Returns:
-
+        w   :  array of weights
     """
 
     weights_doublet_A = reweight_aux(X_A, y, binedges_A, shape_reference, max_reg)
@@ -493,7 +521,7 @@ def reweightcoeff2D(X_A, X_B, y, binedges_A, binedges_B, shape_reference = 'sign
         shape_reference : 'signal' or 'background' or 'none'
 
     Returns:
-
+        w   :  array of weights
     """
     
     # Re-weighting weights
@@ -544,6 +572,12 @@ def reweightcoeff2D(X_A, X_B, y, binedges_A, binedges_B, shape_reference = 'sign
 
 def pick_ind(x, minmax):
     """ Return indices between minmax[0] and minmax[1].
+
+    Args:
+        x :      Input vector
+        minmax : Minimum and maximum values
+    Returns:
+        indices
     """
     return (x >= minmax[0]) & (x <= minmax[1])
 
@@ -575,9 +609,9 @@ def hardclass(y_soft, valrange = [0,1]):
     """ Soft decision to hard decision at point (valrange[1] - valrange[0]) / 2
     
     Args:
-        y_soft: probabilities for two classes
+        y_soft : probabilities for two classes
     Returns:
-        y_out:  classification results
+        y_out  : classification results
     """
 
     y_out = copy.deepcopy(y_soft)
@@ -592,11 +626,11 @@ def multiclass_roc_auc_score(y_true, y_soft, average="macro"):
     """ Multiclass AUC (area under the curve).
 
     Args:
-        y_true:  True classifications
-        y_soft:  Soft probabilities
+        y_true : True classifications
+        y_soft : Soft probabilities
         average: Averaging strategy
     Returns:
-        auc:    Area under the curve via averaging
+        auc    : Area under the curve via averaging
     """
 
     lb = sklearn.preprocessing.LabelBinarizer()
@@ -614,9 +648,9 @@ class Metric:
     def __init__(self, y_true, y_soft, valrange = [0,1]) :
         """
         Args:
-            y_true:   true classifications
-            y_soft:   probabilities for two classes
-            valrange: range of probabilities / soft scores
+            y_true   : true classifications
+            y_soft   : probabilities for two classes
+            valrange : range of probabilities / soft scores
         """
         ok = np.isfinite(y_true) & np.isfinite(y_soft)
         

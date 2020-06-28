@@ -188,7 +188,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
                 print('\nEvaluate {} classifier ...'.format(label))
                 print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(
                     pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
-                xtx_model = aux.load_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j))
+                xtx_model = aux.load_torch_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j))
                 xtx_model.eval() # Turn on eval mode!
                 
                 signalclass = 1
@@ -220,7 +220,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         label = args['mlgr_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
-        mlgr_model = aux.load_checkpoint(modeldir + '/MLGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        mlgr_model = aux.load_torch_checkpoint(modeldir + '/MLGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         mlgr_model.eval() # Turn on eval mode!
         
         def func_predict(x):
@@ -236,7 +236,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         label = args['dmax_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
-        dmax_model = aux.load_checkpoint(modeldir + '/DMAX_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        dmax_model = aux.load_torch_checkpoint(modeldir + '/DMAX_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         dmax_model.eval() # Turn on eval mode!
 
         def func_predict(x):

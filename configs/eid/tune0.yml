@@ -10,8 +10,10 @@ MAXEVENTS: 99999999
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
-targetfunc: 'target_standard'  # Training target, implemented under targets.py
-cutfunc: 'cut_standard'        # Basic cuts,      implemented under cuts.py
+targetfunc: 'target_standard'  # Training target (MC),    implemented under mctargets.py
+filterfunc: 'filter_standard'  # Training filtering (MC), implemented under mcfilter.py
+
+cutfunc: 'cut_standard'        # Basic cuts,              implemented under cuts.py
 frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
 
@@ -152,9 +154,9 @@ dbnf_param:
   active: true
   label:  'DBNF'
   
-  epochs: 300
+  epochs: 200
   batch_size: 196
-  learning_rate: 0.01
+  learning_rate: 0.005
   clip_norm: 0.1
   
   optimizer: 'Adam'
@@ -175,4 +177,5 @@ dbnf_param:
   start_epoch: 0
   tensorboard: 'tensorboard'
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+
 
