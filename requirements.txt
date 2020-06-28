@@ -12,3 +12,5 @@ tensorboardX>=2.0
 pyyaml>=5.3
 python-graphviz>=0.13.2
 termcolor
+tqdm
+
