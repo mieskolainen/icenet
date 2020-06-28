@@ -121,15 +121,15 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         # Minibatch loop
         for i in range(0, trn_x.shape[0], param['batch_size']):
 
-            # Get batch
+            # Get batch vectors
             indices = permutation[i:i + param['batch_size']]
-            x_mb    = torch.tensor(trn_x[indices], dtype=torch.float32) # needs to be float32!
+            X = torch.tensor(trn_x[indices], dtype=torch.float32) # needs to be float32!
             
             # Per sample weights
             log_weights = np.log(trn_weights[indices] + EPS)
             
             # Weighted negative log-likelihood loss
-            lossvec = compute_log_p_x(model, x_mb)
+            lossvec = compute_log_p_x(model, X)
             loss    = - (lossvec + torch.tensor(log_weights)).sum()
 
             # Zero gradients, calculate loss, calculate gradients and update parameters
@@ -138,8 +138,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=param['clip_norm'])
             optimizer.step()
 
-            train_loss.append(loss.item()) # item() for performance
-            
+            train_loss.append(loss)
+
         train_loss = torch.stack(train_loss).mean()
         optimizer.swap()
         validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()

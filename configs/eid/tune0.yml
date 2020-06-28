@@ -1,6 +1,6 @@
 # Electron ID tune0.yml
 
-MAXEVENTS: 30000000
+MAXEVENTS: 3000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
