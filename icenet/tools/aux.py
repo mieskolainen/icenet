@@ -31,7 +31,7 @@ def apply_cutflow(cut, names):
 
     # Print out "serial flow"
     N   = len(cut[0])
-    ind = np.ones(N)
+    ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
         ind = np.logical_and(ind, cut[i])
         print(f'cut[{i}] ({names[i]:>20}): pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
@@ -216,7 +216,7 @@ def los2lol(listOsets):
 def bin_array(num, N):
     """ Convert a positive integer num into an N-bit bit vector.
     """
-    return np.array(list(np.binary_repr(num).zfill(N))).astype(np.int8)
+    return np.array(list(np.binary_repr(num).zfill(N))).astype(dtype=np.uint8)
 
 
 def binomial(n,k):
@@ -232,7 +232,7 @@ def generatebinary_fixed(n,k):
     # Initialize
     c = [0] * (n - k) + [1] * k
 
-    X = np.zeros(shape=(binomial(n,k), n))
+    X = np.zeros(shape=(binomial(n,k), n), dtype=np.uint8)
     X[0,:] = c
 
     z = 1
@@ -276,7 +276,7 @@ def generatebinary(N, M=None, verbose=False):
     if verbose:
         print(__name__ + f'.generatebinary: Binary matrix dimension {K} x {N}')
 
-    X = np.zeros((K, N), dtype = np.int8)
+    X = np.zeros((K, N), dtype=np.uint8)
     ivals = np.zeros(K, dtype = np.double)
 
     # Generate up to each m separately here, then sort
@@ -341,7 +341,7 @@ def int2onehot(Y, N_classes):
     Returns:
         onehot:    Onehot representation
     """
-    onehot = np.zeros(shape=(len(Y), N_classes), dtype=int)
+    onehot = np.zeros(shape=(len(Y), N_classes), dtype=np.bool_)
     for i in range(onehot.shape[0]):
         onehot[i, int(Y[i])] = 1
     return onehot

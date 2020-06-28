@@ -11,7 +11,12 @@ import numba
 import icenet.tools.aux as aux
 
 
-def filter_standard(X, VARS):
+def filter_nofilter(X, VARS):
+    """ All pass """
+    return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
+
+
+def filter_no_egamma(X, VARS):
     """ Function implements MC filtering.
     Args:
     	X    : # Number of vectors x # Number of variables

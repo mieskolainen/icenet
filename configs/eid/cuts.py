@@ -8,6 +8,10 @@ import numba
 
 import icenet.tools.aux as aux
 
+def cut_nocut(X,VARS):
+    """ No cuts """
+    return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
+
 
 def cut_standard(X, VARS):
     """ Function implements basic selections (cuts).
