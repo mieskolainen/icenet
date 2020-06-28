@@ -66,8 +66,8 @@ def main() :
 
     ### Compute reweighting weights
     trn_weights = common.compute_reweights(data, args)
-    
-    
+
+
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
         print(__name__ + f': plotting basic histograms ...')
@@ -114,7 +114,7 @@ def train(data, data_kin, trn_weights, args) :
     
     modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
-    # Truncate outliers (component by component) from the training set
+    # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
         for j in range(data.trn.x.shape[1]):
 
@@ -124,7 +124,7 @@ def train(data, data_kin, trn_weights, args) :
             data.trn.x[data.trn.x[:,j] < minval, j] = minval
             data.trn.x[data.trn.x[:,j] > maxval, j] = maxval
 
-    # Variable normalization
+    # @@ Variable normalization @@
     if args['varnorm'] == 'zscore' :
 
         print('\nZ-score normalizing variables ...')

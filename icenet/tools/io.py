@@ -210,16 +210,17 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     return trn, val, tst
 
 
-def impute_data(X, dim=[], values=[-1], labels=[], algorithm='iterative', fill_value=0, knn_k=6):
+def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iterative', fill_value=0, knn_k=6):
     """ Data imputation (treatment of missing values, Nan and Inf).
     
     Args:
-        X       : Input data matrix [# vectors x # dimensions]
-        dim     : Array of active dimensions to impute
-        values  : List of special integer values indicating the need for imputation
-        labels  : List containing textual description of input variables
-        algorith: 'mean','median', 'knn_k'
-        knn_k   : knn k-nearest neighbour parameter
+        X         : Input data matrix [# vectors x # dimensions]
+        imputer   : Pre-trained imputator, default None
+        dim       : Array of active dimensions to impute
+        values    : List of special integer values indicating the need for imputation
+        labels    : List containing textual description of input variables
+        algorithm : 'constant', mean', 'median', 'iterative', knn_k'
+        knn_k     : knn k-nearest neighbour parameter
         
     Returns:
         X       : Imputed output data
@@ -268,26 +269,29 @@ def impute_data(X, dim=[], values=[-1], labels=[], algorithm='iterative', fill_v
         if np.sum(inf_ind) > 0:
             print(__name__ + f'.impute_data: Column {j} Number of {np.sum(inf_ind)} Inf found [{labels[j]}]')
     
-    # Fill missing values
-    if   algorithm == 'constant':
-        imputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=fill_value)
-    elif algorithm == 'mean':
-        imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-    elif algorithm == 'median':
-        imputer = SimpleImputer(missing_values=np.nan, strategy='median')
-    elif algorithm == 'iterative':
-        imputer = IterativeImputer(missing_values=np.nan)    
-    elif algorithm == 'knn':
-        imputer = KNNImputer(n_neighbors=knn_k)
-    else:
-        raise Exception(__name__ + '.impute_data: Unknown algorithm chosen')
+    
+    if imputer == None:
+
+        # Fill missing values
+        if   algorithm == 'constant':
+            imputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=fill_value)
+        elif algorithm == 'mean':
+            imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+        elif algorithm == 'median':
+            imputer = SimpleImputer(missing_values=np.nan, strategy='median')
+        elif algorithm == 'iterative':
+            imputer = IterativeImputer(missing_values=np.nan)
+        elif algorithm == 'knn':
+            imputer = KNNImputer(missing_values=np.nan, n_neighbors=knn_k)
+        else:
+            raise Exception(__name__ + '.impute_data: Unknown algorithm chosen')
 
     # Fit and transform
     imputer.fit(X[:,dim])
     X[:,dim] = imputer.transform(X[:,dim])
 
     print(__name__ + '.impute_data: [done] \n')
-    return X
+    return X, imputer
 
 
 def calc_madscore(X : np.array):

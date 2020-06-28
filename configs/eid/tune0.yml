@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 5000
+MAXEVENTS: 10000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -151,7 +151,7 @@ dmax_param:
 
 # Deep Normalizing Flow
 dbnf_param:
-  active: true
+  active: false
   label:  'DBNF'
   
   epochs: 200
