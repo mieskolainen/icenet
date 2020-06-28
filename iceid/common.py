@@ -196,6 +196,7 @@ def load_root_file(root_path, class_id = []):
     X = np.transpose(X)
 
 
+    prints.printbar()
     # =================================================================
     # *** MC ONLY ***
 
