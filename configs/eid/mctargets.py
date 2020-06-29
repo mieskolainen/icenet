@@ -7,15 +7,9 @@ import numpy as np
 import numba
 
 
-def target_standard(events):
-    """ Classification signal target definition"""
-    return events.array("is_e") & np.logical_not(events.array("is_egamma"))
-
-
 def target_e(events):
     """ Classification signal target definition"""
     return events.array("is_e")
-
 
 def target_egamma(events):
     """ Classification signal target definition"""

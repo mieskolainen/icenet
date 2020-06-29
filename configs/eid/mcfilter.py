@@ -16,8 +16,22 @@ def filter_nofilter(X, VARS):
     return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
 
 
+def filter_charged(X, VARS):
+    """ Only generator level charged """
+
+    # Construct passing filter
+    cut = []
+    cut.append( np.abs(X[:, VARS.index('gen_charge')]) == 1 )
+
+    # Apply filters
+    names = ['|gen_charge| == 1']
+    ind = aux.apply_cutflow(cut=cut, names=names)
+
+    return ind
+
+
 def filter_no_egamma(X, VARS):
-    """ Function implements MC filtering.
+    """ No particle flow reconstructed electrons.
     Args:
     	X    : # Number of vectors x # Number of variables
     	VARS : Variable name array

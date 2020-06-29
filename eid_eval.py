@@ -58,12 +58,27 @@ def main() :
 
     #########################################################
     print('\nEvaluate ele_mva_value classifier ...')
-    met_elemva = aux.Metric(y_true = data.tst.y, y_soft = data.tst.x[:, data.VARS.index('ele_mva_value_depth15')])
-    
-    roc_mstats.append(met_elemva)
-    roc_labels.append('elemva')
+    try:
+        ind = data.VARS.index('ele_mva_value')
+        met_elemva = aux.Metric(y_true = data.tst.y, y_soft = data.tst.x[:,ind])
+        roc_mstats.append(met_elemva)
+        roc_labels.append('elemva')
+    except:
+        print(__name__ + 'Variable not found')
     #########################################################
     
+    #########################################################
+    print('\nEvaluate ele_mva_value_depth15 classifier ...')
+    try:
+        ind = data.VARS.index('ele_mva_value_depth15')    
+        met_elemva = aux.Metric(y_true = data.tst.y, y_soft = data.tst.x[:,ind])
+        roc_mstats.append(met_elemva)
+        roc_labels.append('elemva15')
+    except:
+        print(__name__ + 'Variable not found.')
+    #########################################################
+
+
     ### Pick kinematic variables out
     newind, newvars = io.pick_vars(data, KINEMATIC_ID)
     
