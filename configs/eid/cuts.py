@@ -28,12 +28,12 @@ def cut_standard(X, VARS):
 
     # Construct cuts
     cut = []
-    cut.append( X[:, VARS.index('gsf_pt')]  > 0      )
-    cut.append( X[:, VARS.index('trk_pt')]  > MINPT  )
+    cut.append( X[:, VARS.index('has_gsf')] == True )
+    cut.append( X[:, VARS.index('gsf_pt')]  > MINPT )
     cut.append( np.abs(X[:, VARS.index('trk_eta')]) < MAXETA )
 
     # Apply cutflow
-    names = ['gsf_pt > 0', f'trk_pt > {MINPT:0.2f}', f'|trk_eta| < {MAXETA:0.2f}']
+    names = ['has_gsf == True', f'gsf_pt > {MINPT:0.2f}', f'|gsf_eta| < {MAXETA:0.2f}']
     ind = aux.apply_cutflow(cut=cut, names=names)
 
     return ind
