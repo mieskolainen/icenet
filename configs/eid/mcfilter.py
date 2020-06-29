@@ -31,7 +31,7 @@ def filter_charged(X, VARS):
 
 
 def filter_no_egamma(X, VARS):
-    """ Function implements MC filtering.
+    """ No particle flow reconstructed electrons.
     Args:
     	X    : # Number of vectors x # Number of variables
     	VARS : Variable name array

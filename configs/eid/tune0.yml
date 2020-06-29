@@ -8,14 +8,14 @@
 
 MAXEVENTS: 10000000
 
-rngseed: 123456                # Fixed seed for training data mixing
-inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
-targetfunc: 'target_standard'  # Training target (MC),    implemented under mctargets.py
-filterfunc: 'filter_charged'   # Training filtering (MC), implemented under mcfilter.py
+rngseed: 123456                 # Fixed seed for training data mixing
+inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
+targetfunc: 'target_e'          # Training target (MC),    implemented under mctargets.py
+filterfunc: 'filter_no_egamma'  # Training filtering (MC), implemented under mcfilter.py
 
-cutfunc: 'cut_standard'        # Basic cuts,              implemented under cuts.py
-frac: 0.9                      # Train/validate/test split fraction
-varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
+cutfunc: 'cut_standard'         # Basic cuts,              implemented under cuts.py
+frac: 0.9                       # Train/validate/test split fraction
+varnorm: 'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
 
 
 # Imputation
