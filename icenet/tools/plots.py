@@ -183,7 +183,7 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
         for c in range(2) :
             w = trn_weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
-                histtype = 'step', fill = False, linestyle = '-', linewidth = 1.5)
+                histtype = 'step', fill = False, linestyle = '--', linewidth = 1.5)
 
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
