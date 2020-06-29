@@ -25,12 +25,18 @@ def filter_no_egamma(X, VARS):
     	ind  : Passing indices
     """
 
+    # Fiducial cuts for the tag-side muon trigger object
+    MINPT  = 5.0
+    MAXETA = 2.5
+
     # Construct passing filter
     cut = []
     cut.append( X[:, VARS.index('is_egamma')] == False )
+    cut.append( X[:, VARS.index('tag_pt')] > MINPT )
+    cut.append( np.abs(X[:, VARS.index('tag_eta')]) < MAXETA )
 
     # Apply filters
-    names = ['is_egamma == False']
+    names = ['is_egamma == False', f'tag_pt > {MINPT:0.2f}', f'|tag_eta| < {MAXETA:0.2f}']
     ind = aux.apply_cutflow(cut=cut, names=names)
 
     return ind
