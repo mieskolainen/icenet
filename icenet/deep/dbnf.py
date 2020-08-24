@@ -15,9 +15,14 @@ import pprint
 import datetime
 
 import torch
+import torch.nn.functional as F
+
 import numpy as np
 from tqdm import tqdm
 from torch.utils import data
+
+
+from icenet.deep  import dopt
 
 from . bnaf import *
 from .. tools import aux
@@ -25,6 +30,8 @@ from .. tools import aux
 
 def compute_log_p_x(model, x):
     """ Model log-likelihood: log [ prod_{j=1}^N pdf(x_j)], where x ~ (iid) pdf(x)
+    
+    log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|
     
     Args:
         model : model object
@@ -60,7 +67,7 @@ def get_pdf(model, x) :
 
 def predict(X, models, EPS=1E-12) :
     """
-    2-class likelihood ratio pdf(x,S) / pdf(x,B) for each vector x.
+    2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.
     
     Args:
         param    : input parameters
@@ -70,15 +77,32 @@ def predict(X, models, EPS=1E-12) :
         LLR      : log-likelihood ratio
     """
 
-    print(__name__ + f': Calculating likelihood ratio pdf(x,S)/pdf(x,B) for N = {X.shape[0]} events ...')
+    print(__name__ + f': Likelihood (density) ratio pdf(x,S)/pdf(x,B) for N = {X.shape[0]} events ...')
 
     sgn_likelihood = get_pdf(models[1], X)
     bgk_likelihood = get_pdf(models[0], X)
     
     LLR = sgn_likelihood / (bgk_likelihood + EPS)
     LLR[~np.isfinite(LLR)] = 0
-
+    
     return LLR
+
+
+class Dataset(torch.utils.data.Dataset):
+
+    def __init__(self, X, W):
+        """ Initialization """
+        self.X = X
+        self.W = W
+
+    def __len__(self):
+        """ Return the total number of samples """
+        return self.X.shape[0]
+
+    def __getitem__(self, index):
+        """ Generates one sample of data """
+        # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
+        return self.X[index,...], self.W[index]
 
 
 def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldir, EPS=1e-12):
@@ -94,17 +118,9 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         param       : parameters
         modeldir    : directory to save the model
     """
-
-    if param['device'] == 'auto':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
-    else:
-        device = param['device']
-    print(__name__ + f'.train: computing device <{device}> chosen')    
-
-    # Pytorch loaders
-    dataset_valid     = torch.utils.data.TensorDataset(torch.from_numpy(val_x).float().to(device))
-    data_loader_valid = torch.utils.data.DataLoader(dataset_valid, batch_size=param['batch_size'], shuffle=False)
     
+    model, device = dopt.model_to_cuda(model, param['device'])
+
     # TensorboardX
     if param['tensorboard']:
         from tensorboardX import SummaryWriter
@@ -112,26 +128,43 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     
     epoch = param['start_epoch']
 
+    params = {'batch_size': param['batch_size'],
+            'shuffle': True,
+            'num_workers': param['num_workers'],
+            'pin_memory': True}
+
+    # Training generator
+    training_set         = Dataset(trn_x, trn_weights)
+    training_generator   = torch.utils.data.DataLoader(training_set, **params)
+    
+    # Validation generator
+    validation_set       = torch.utils.data.TensorDataset(torch.from_numpy(val_x).float().to(device))
+    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=param['batch_size'], shuffle=False)
+    
     # Training loop
     for epoch in tqdm(range(param['start_epoch'], param['start_epoch'] + param['epochs']), ncols = 88):
 
-        train_loss = []
+        train_loss  = []
         permutation = torch.randperm((trn_x.shape[0]))
 
-        # Minibatch loop
-        for i in range(0, trn_x.shape[0], param['batch_size']):
+        for batch_x, batch_weights in training_generator:
 
-            # Get batch vectors
-            indices = permutation[i:i + param['batch_size']]
-            X = torch.tensor(trn_x[indices], dtype=torch.float32) # needs to be float32!
+            # Transfer to GPU
+            batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
+            batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+            
+            # Noise regularization
+            if param['noise_reg'] > 0:
+                noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
+                batch_x = batch_x + noise
             
             # Per sample weights
-            log_weights = np.log(trn_weights[indices] + EPS)
+            log_weights = torch.log(batch_weights + EPS)
             
             # Weighted negative log-likelihood loss
-            lossvec = compute_log_p_x(model, X)
-            loss    = - (lossvec + torch.tensor(log_weights)).sum()
-
+            lossvec = compute_log_p_x(model, batch_x)
+            loss    = - (lossvec + log_weights).sum()
+            
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
             loss.backward()
@@ -142,10 +175,13 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
 
         train_loss = torch.stack(train_loss).mean()
         optimizer.swap()
-        validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
-                                         for x_mb, in data_loader_valid], -1).mean()
+
+        # Compute validation loss (without weighting)
+        validation_loss = -torch.stack([compute_log_p_x(model, batch_x).mean().detach()
+                                        for batch_x, in validation_generator], -1).mean()
         optimizer.swap()
         
+
         print('Epoch {:3}/{:3} -- train_loss: {:4.3f} -- validation_loss: {:4.3f}'.format(
             epoch + 1, param['start_epoch'] + param['epochs'], train_loss.item(), validation_loss.item()))
 
@@ -168,7 +204,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
 
     optimizer.swap()
     validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
-                                     for x_mb, in data_loader_valid], -1).mean()
+                                     for x_mb, in validation_generator], -1).mean()
 
     print('###### Stop training after {} epochs!'.format(epoch + 1))
     print('Validation loss: {:4.3f}'.format(validation_loss.item()))
@@ -182,22 +218,21 @@ def create_model(param, verbose=False, rngseed=0):
     Returns:
         model : model object
     """
-    if param['device'] == 'auto':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
-    else:
-        device = param['device']
-    print(__name__ + f'.create_model: computing device <{device}> chosen')    
 
-    # for random permutations
+    # For random permutations
     np.random.seed(rngseed)
+    
     flows = []
     for f in range(param['flows']):
+
+        # Layers of the flow block
         layers = []
-        for _ in range(param['layers'] - 1):
+        for _ in range(param['layers']):
             layers.append(MaskedWeight(param['n_dims'] * param['hidden_dim'],
                                        param['n_dims'] * param['hidden_dim'], dim=param['n_dims']))
             layers.append(Tanh())
-            
+        
+        # Add this flow block
         flows.append(
             BNAF(*([MaskedWeight(param['n_dims'], param['n_dims'] * param['hidden_dim'], dim=param['n_dims']), Tanh()] + \
                    layers + \
@@ -210,7 +245,9 @@ def create_model(param, verbose=False, rngseed=0):
         if f < param['flows'] - 1:
             flows.append(Permutation(param['n_dims'], param['perm']))
 
-    model  = Sequential(*flows).to(device)
+    # Create the model
+    model  = Sequential(*flows)
+    
     params = sum((p != 0).sum() if len(p.shape) > 1 else torch.tensor(p.shape).item()
                  for p in model.parameters()).item()
 
@@ -233,6 +270,7 @@ def load_models(param, paths, modeldir):
         
         checkpoint = torch.load(modeldir + '/dbnf_' + paths[i] + '.pth')
         model.load_state_dict(checkpoint['model'])
+        
         model.eval() # Turn on eval mode!
         models.append(model)
 

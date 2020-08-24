@@ -55,7 +55,7 @@ def main() :
     # ====================================================================
     
     # DEEPSETS
-    DEPS_model = aux.load_checkpoint(modeldir + '/DEPS_checkpoint.pth')
+    DEPS_model = aux.load_torch_checkpoint(modeldir + '/DEPS_checkpoint.pth')
     DEPS_model.eval() # Turn on eval mode!
 
     def func_predict_A(X):
@@ -70,11 +70,11 @@ def main() :
         X_ptr = torch.from_numpy(X_).type(torch.FloatTensor)
         y = DEPS_model.softpredict(X_ptr).detach().numpy()
         return io.checkinfnan(y)
-
+        
     # MAXOUT
-    DMAX_model = aux.load_checkpoint(modeldir + '/DMAX_checkpoint.pth')
+    DMAX_model = aux.load_torch_checkpoint(modeldir + '/DMAX_checkpoint.pth')
     DMAX_model.eval() # Turn on eval mode!
-
+    
     def func_predict_B(X):
         X_ptr = torch.from_numpy(standardize(X)).type(torch.FloatTensor)
         y = DMAX_model.softpredict(X_ptr).detach().numpy()

@@ -73,7 +73,7 @@ class BNAF(torch.nn.Sequential):
         
         assert inputs.shape[-1] == outputs.shape[-1]
         
-        if self.res == 'normal':
+        if   self.res == 'normal':
             return inputs + outputs, torch.nn.functional.softplus(grad.squeeze()).sum(-1)
         elif self.res == 'gated':
             return self.gate.sigmoid() * outputs + (1 - self.gate.sigmoid()) * inputs, \
@@ -121,7 +121,7 @@ class Permutation(torch.nn.Module):
     
     def __repr__(self):
         return 'Permutation(in_features={}, p={})'.format(self.in_features, self.p)
-    
+
     
 class MaskedWeight(torch.nn.Module):
     """
@@ -137,7 +137,7 @@ class MaskedWeight(torch.nn.Module):
             dim          : ``int``, required. The number of dimensions of the input of the flow.
             bias         : ``bool``, optional. Whether to add a parametrizable bias.
         """
-
+        
         super(MaskedWeight, self).__init__()
         self.in_features, self.out_features, self.dim = in_features, out_features, dim
 
@@ -146,7 +146,7 @@ class MaskedWeight(torch.nn.Module):
             weight[i * out_features // dim:(i + 1) * out_features // dim,
                    0:(i + 1) * in_features // dim] = torch.nn.init.xavier_uniform_(
                 torch.Tensor(out_features // dim, (i + 1) * in_features // dim))
-            
+        
         self._weight = torch.nn.Parameter(weight)
         self._diag_weight = torch.nn.Parameter(torch.nn.init.uniform_(torch.Tensor(out_features, 1)).log())
         
@@ -211,7 +211,7 @@ class Tanh(torch.nn.Tanh):
     Class that extends ``torch.nn.Tanh`` additionally computing the log diagonal
     blocks of the Jacobian.
     """
-
+    
     def forward(self, inputs, grad : torch.Tensor = None):
         """
         Args:
@@ -224,4 +224,3 @@ class Tanh(torch.nn.Tanh):
         """
         g = - 2 * (inputs - math.log(2) + torch.nn.functional.softplus(- 2 * inputs))
         return torch.tanh(inputs), (g.view(grad.shape) + grad) if grad is not None else g
-    

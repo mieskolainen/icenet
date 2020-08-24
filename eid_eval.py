@@ -203,23 +203,30 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
                 print('\nEvaluate {} classifier ...'.format(label))
                 print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(
                     pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
-                xtx_model = aux.load_torch_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j))
-                xtx_model.eval() # Turn on eval mode!
-                
-                signalclass = 1
-                y_pred = xtx_model.softpredict(X_ptr)[tst_ind, signalclass].detach().numpy()
-                
-                met_xtx = aux.Metric(y_true = y[tst_ind], y_pred = y_pred)
-                print('AUC = {:.5f}'.format(met_xtx.auc))
 
-                # Accumulate
-                y_tot      = np.concatenate((y_tot, y[tst_ind]))
-                y_pred_tot = np.concatenate((y_pred_tot, y_pred))
+                try:
+                    
+                    xtx_model = aux.load_torch_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j))
+                    xtx_model.eval() # Turn on eval mode!
+                    
+                    signalclass = 1
+                    y_pred = xtx_model.softpredict(X_ptr)[tst_ind, signalclass].detach().numpy()
+                    
+                    met_xtx = aux.Metric(y_true = y[tst_ind], y_soft = y_pred)
+                    print('AUC = {:.5f}'.format(met_xtx.auc))
+
+                    # Accumulate
+                    y_tot      = np.concatenate((y_tot, y[tst_ind]))
+                    y_pred_tot = np.concatenate((y_pred_tot, y_pred))
+
+                except:
+
+                    print('Error loading and evaluating the classifier.')
 
                 AUC[i,j]   = met_xtx.auc
 
         # Evaluate total performance
-        met = aux.Metric(y_true = y_tot, y_pred = y_pred_tot)
+        met = aux.Metric(y_true = y_tot, y_soft = y_pred_tot)
         roc_mstats.append(met)
         roc_labels.append(label)
 
@@ -228,14 +235,37 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         
         targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
         plt.savefig('{}/{}_AUC.pdf'.format(targetdir, label), bbox_inches='tight')
+
+    ###
+    if args['cnn_param']['active']:
+
+        # -------------------------------------------------------------------------------
+        # Reshape into matrix format -> (#vectors, #channels, #rows, #cols)
+        XXX = torch.zeros(X_ptr.shape[0], 10*10)
+        XXX[:, 0:X_ptr.shape[1]] = X_ptr
+        X_ptr_2D = XXX.view((X_ptr.shape[0], 1, 10, 10))
+        # -------------------------------------------------------------------------------
+
+        label = args['cnn_param']['label']
+        print(f'\nEvaluate {label} classifier ...')
+
+        cnn_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        cnn_model.eval() # Turn on eval mode!
         
+        def func_predict(x):
+            signalclass = 1
+            return cnn_model.softpredict(x)[:, signalclass].detach().numpy()
+
+        # Evaluate (pt,eta) binned AUC
+        saveit(func_predict = func_predict, X = X_ptr_2D, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
+    
     ###
     if args['mlgr_param']['active']:
 
         label = args['mlgr_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
-        mlgr_model = aux.load_torch_checkpoint(modeldir + '/MLGR_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        mlgr_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         mlgr_model.eval() # Turn on eval mode!
         
         def func_predict(x):
@@ -251,7 +281,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
         label = args['dmax_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
-        dmax_model = aux.load_torch_checkpoint(modeldir + '/DMAX_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        dmax_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         dmax_model.eval() # Turn on eval mode!
 
         def func_predict(x):

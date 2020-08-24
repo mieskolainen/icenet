@@ -59,6 +59,7 @@ class Adamax(torch.optim.Optimizer):
 
                 # Update biased first moment estimate.
                 exp_avg.mul_(beta1).add_(1 - beta1, grad)
+                
                 # Update the exponentially weighted infinity norm.
                 norm_buf = torch.cat([
                     exp_inf.mul_(beta2).unsqueeze(0),

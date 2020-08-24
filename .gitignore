@@ -9,6 +9,7 @@ data/
 trash/
 dev/
 .ipynb_checkpoints
+style_output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

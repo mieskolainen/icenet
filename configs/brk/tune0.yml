@@ -4,7 +4,7 @@
 # General
 
 VERBOSE: false
-MAXEVENTS: 1500
+MAXEVENTS: 1500000
 
 
 # -----------------------------------------------------------------------------
@@ -90,27 +90,30 @@ WNORM: 'event'
 xgb_param:
   active: true
   label: 'XGB'
-
+  
   # general parameters
-  booster: 'gbtree'
-  num_boost_round: 30 # Number of epochs
-  n_gpus: 0
+  booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
+  num_boost_round: 300   # Number of epochs
+  tree_method: 'auto' # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
   
   # booster parameters
+  learning_rate: 0.15
+  
   max_depth: 15
-  #n_estimators: 2000
-  #learning_rate: 0.1
-  #gamma: 0.0
-  #min_child_weight: 1.0
-  #max_delta_step: 0
-  #subsample: 1.0
-  #colsample_bytree:  1
-  #colsample_bylevel: 1
-  #colsample_bynode:  1
-  #reg_lambda: 2.0 # L2 regularization
-  #reg_alpha: 0  # L1 regularization
-  #scale_pos_weight: 1
+  min_child_weight: 1.0
+  gamma: 0.0
+  max_delta_step: 0
+  subsample: 1.0
 
+  colsample_bytree:  1
+  colsample_bylevel: 1
+  colsample_bynode:  1
+  
+  reg_lambda: 2.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
+  scale_pos_weight: 1
+  
   # learning task parameters
   objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
   eval_metric: ['mlogloss']   # 'mlogloss' is multiclass log-loss
@@ -121,33 +124,38 @@ dmax_param:
   active: true
   label:  'DMAX'
 
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
   gamma: 2 # focal_entropy exponent parameter
   optimizer: 'AdamW'
-  
+  noise_reg: 0.0                # Noise regularization
+
   num_units: 12
   neurons:  36
   dropout:  0.5
-
+  
   epochs:  200
   batch_size:  256
   learning_rate: 0.005
+  weight_decay: 0.01            # L2-regularization
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-
+  num_workers: 1
 
 # Permutation Equivariant Network
 deps_param:
   active: true
   label:  'DEPS'
 
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
   gamma: 2 # focal_entropy exponent parameter
   optimizer: 'AdamW'
-  
+  noise_reg: 0.0                # Noise regularization
+
   z_dim: 64 # Latent dimension
 
   epochs:  200
   batch_size:  256
   learning_rate: 0.005
+  weight_decay: 0.01            # L2-regularization
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
 

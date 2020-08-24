@@ -38,15 +38,14 @@ class MAXOUT(nn.Module):
             
             self.fc2_list.append(nn.Linear(neurons, self.C))
             nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
-            
+    
     def forward(self, x):
         
         x = self.maxout(x, self.fc1_list)
         x = self.dropout(x)
         x = self.maxout(x, self.fc2_list)
-
         return x
-    
+        
     def maxout(self, x, layer_list):
         """ MAXOUT layer
         """

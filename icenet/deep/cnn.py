@@ -1,51 +1,67 @@
-# Classic convolutional (LeNet) neural nets
+# Convolutional Neural Nets
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
-import numpy as np
 
+import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
-class LeNet3C(nn.Module):
-    """ 3-channel convolution network.
-    """
-    def __init__(self, D, C):
+class CNN(nn.Module):
+    def __init__(self, C, dropout_cnn=0.25, dropout_mlp=0.5):
+        super(CNN, self).__init__()
 
-        super(CONV2, self).__init__()
+        self.C           = C
+        self.dropout_cnn = dropout_cnn
+        self.dropout_mlp = dropout_mlp
 
-        self.D = D # Input dimensions (NOT ACTIVE)
-        self.C = C # Number of output classes
-        
         # Convolution pipeline
         self.block1 = nn.Sequential(
 
-            # 3 input image channels -> 10 output channels/filters
-            nn.Conv2d(3, 10, kernel_size=5),
-            nn.MaxPool2d(2), # 2x2 window
+            nn.Conv2d(in_channels=1,  out_channels=32, kernel_size=3, padding=1),
+            #nn.MaxPool2d(2), # 2x2 window
             nn.ReLU(),
 
-            # 10 output channels/filters -> 20 output channels/filters
-            nn.Conv2d(10, 20, kernel_size=5),
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            #nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn),
+
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            #nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn),
+
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
             nn.MaxPool2d(2), # 2x2 window
-            nn.Dropout2d(p = 0.5),
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn)
         )
+        self.Z = 5*5*64
         
         # Classifier pipeline
         self.block2 = nn.Sequential(
-            nn.Linear(320, 50),
+            nn.Linear(self.Z, 128),
             nn.ReLU(),
-            nn.Dropout(p = 0.5),
-            nn.Linear(50, C),
+            nn.Dropout(p = self.dropout_mlp),
+            nn.Linear(128, self.C),
         )
 
     def forward(self, x):
-        features = self.block1(x)
-        features = features.view(x.shape[0], -1)
-        logits   = self.block2(features)
-        return logits
+        # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
+        x = self.block1(x)
+        #print(f'\nINPUT: {x.shape}')
+
+        #print(f'\nBEFORE VIEW: {x.shape}')
+        x = x.view(-1, self.Z)
+        #print(f'\nAFTER VIEW: {x.shape}')
+
+        x = self.block2(x)
+        #print(f'\nOUTPUT: {x.shape}')
+        return x
 
     # Returns softmax probability
     def softpredict(self,x) :

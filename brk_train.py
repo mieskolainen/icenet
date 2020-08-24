@@ -135,6 +135,9 @@ def main() :
 
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y_i, test_size=0.1, random_state=42)
 
+        if args['xgb_param']['tree_method'] == 'auto':
+            args['xgb_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+        
         # Update parameters
         args['xgb_param'].update({'num_class': C})
         

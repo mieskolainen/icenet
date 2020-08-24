@@ -107,27 +107,55 @@ def log_sum_exp(x):
     return y
 
 
+class Dataset(torch.utils.data.Dataset):
+
+    def __init__(self, X, Y, W):
+        """ Initialization """
+        self.X = X
+        self.Y = Y
+        self.W = W
+
+    def __len__(self):
+        """ Return the total number of samples """
+        return self.X.shape[0]
+
+    def __getitem__(self, index):
+        """ Generates one sample of data """
+
+        # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
+        return self.X[index,...], self.Y[index], self.W[index,:]
+
+
+def model_to_cuda(model, device_type='auto'):
+    """ Wrapper function to handle CPU/GPU setup
+    """
+    if device_type == 'auto':
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
+    else:
+        device = param['device']
+
+    model = model.to(device, non_blocking=True)
+    if torch.cuda.device_count() > 1:
+        print(__name__ + f'.model_to_cuda: Multi-GPU {torch.cuda.device_count()}')
+        model = nn.DataParallel(model)
+
+    print(__name__ + f'.model_to_cuda: computing device <{device}> chosen')
+    
+    return model, device
+
+
 def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
     """
     Main training loop
     """
     
-    if param['device'] == 'auto':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
-    else:
-        device = param['device']
-    print(__name__ + f'.train: computing device <{device}> chosen')    
-
-    model  = model.to(device)
-    X_trn, X_val = X_trn.to(device), X_val.to(device)
-    Y_trn, Y_val = Y_trn.to(device), Y_val.to(device)
-    
+    model, device = model_to_cuda(model, param['device'])
     
     # Input checks
     # more than 1 class sample required, will crash otherwise
-    if len(np.unique(Y_trn.detach().numpy())) <= 1:
+    if len(np.unique(Y_trn.detach().cpu().numpy())) <= 1:
         raise Exception(__name__ + '.train: Number of classes in ''Y_trn'' <= 1')
-    if len(np.unique(Y_val.detach().numpy())) <= 1:
+    if len(np.unique(Y_val.detach().cpu().numpy())) <= 1:
         raise Exception(__name__ + '.train: Number of classes in ''Y_val'' <= 1')
 
     # --------------------------------------------------------------------
@@ -136,7 +164,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
     # Prints the weights and biases
     print(model)
-        
+    
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
     print(__name__ + f'.train: Number of free parameters = {params}')
@@ -148,9 +176,9 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
     # --------------------------------------------------------------------
 
     print('')
-
+    
     # Class fractions
-    YY = Y_trn.numpy()
+    YY = Y_trn.cpu().numpy()
     frac = []
     for i in range(model.C):
         frac.append( sum(YY == i) / YY.size )
@@ -160,18 +188,18 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
     ## Classes
     for i in range(len(frac)):
         print(f' {i:4d} : {frac[i]:5.6f} ({sum(YY == i)} counts)')
-    print(__name__ + f'.train: Found {len(np.unique(Y_trn))} / {model.C} classes in the training sample')
+    print(__name__ + f'.train: Found {len(np.unique(YY))} / {model.C} classes in the training sample')
     
     # Define the optimizer
     if   param['optimizer'] == 'AdamW':
-        optimizer = torch.optim.AdamW(model.parameters(), lr = param['learning_rate'])
+        optimizer = torch.optim.AdamW(model.parameters(), lr=param['learning_rate'], weight_decay=param['weight_decay'])
     elif param['optimizer'] == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr = param['learning_rate'])
+        optimizer = torch.optim.Adam(model.parameters(),  lr=param['learning_rate'], weight_decay=param['weight_decay'])
     elif param['optimizer'] == 'SGD':
-        optimizer = torch.optim.SGD(model.parameters(),  lr = param['learning_rate'])
+        optimizer = torch.optim.SGD(model.parameters(),   lr=param['learning_rate'], weight_decay=param['weight_decay'])
     else:
         raise Exception(__name__ + f'.train: Unknown optimizer {param["optimizer"]} (use "Adam", "AdamW" or "SGD")')
-
+    
     # List to store losses
     losses   = []
     trn_aucs = []
@@ -180,47 +208,48 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
     print(__name__ + '.train: Training loop ...')
 
     # Change the shape
-    one_hot_weights = np.zeros((len(trn_weights), model.C))
+    trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
     for i in range(model.C):
-        one_hot_weights[Y_trn == i, i] = trn_weights[Y_trn == i]
-    one_hot_weights = torch.tensor(one_hot_weights, dtype=torch.float32)
+        trn_one_hot_weights[YY == i, i] = trn_weights[YY == i]
 
+    params = {'batch_size': param['batch_size'],
+            'shuffle': True,
+            'num_workers': param['num_workers'],
+            'pin_memory': True}
+
+    training_set       = Dataset(X_trn, Y_trn, trn_one_hot_weights)
+    training_generator = torch.utils.data.DataLoader(training_set, **params)
+    
+    
     # Epoch loop
     for epoch in tqdm(range(param['epochs']), ncols = 60):
-
-        # X is a torch Variable
-        permutation = torch.randperm(X_trn.size()[0])
 
         # Minibatch loop
         sumloss = 0
         nbatch  = 0
-        for i in range(0, X_trn.size()[0], param['batch_size']):
-            
-            indices = permutation[i:i + param['batch_size']]
-            
-            # Vectors
-            if (len(X_trn.shape) == 2):
-                batch_x, batch_y = X_trn[indices,:], Y_trn[indices]
-            
-            # Matrices / Sets of vectors
-            if (len(X_trn.shape) == 3):
-                batch_x, batch_y = X_trn[indices,:,:], Y_trn[indices]                
-            
-            # Tensors / Sets of matrices
-            if (len(X_trn.shape) == 4):
-                batch_x, batch_y = X_trn[indices,:,:,:], Y_trn[indices]
 
+        for batch_x, batch_y, batch_weights in training_generator:
+            
+            # Transfer to (GPU) device memory
+            batch_x, batch_y, batch_weights = \
+                batch_x.to(device, non_blocking=True), batch_y.to(device, non_blocking=True), batch_weights.to(device, non_blocking=True)
+            
+            # Noise regularization
+            if param['noise_reg'] > 0:
+                noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
+                batch_x = batch_x + noise
+            
             # Predict probabilities
             phat = model.softpredict(batch_x)
 
             # Evaluate loss
             loss = 0
             if   param['lossfunc'] == 'cross_entropy':
-                loss = multiclass_cross_entropy(phat, batch_y, model.C, one_hot_weights[indices])
+                loss = multiclass_cross_entropy(phat, batch_y, model.C, batch_weights)
             elif param['lossfunc'] == 'focal_entropy':
-                loss = multiclass_focal_entropy(phat, batch_y, model.C, one_hot_weights[indices], param['gamma'])
+                loss = multiclass_focal_entropy(phat, batch_y, model.C, batch_weights, param['gamma'])
             elif param['lossfunc'] == 'inverse_focal':
-                loss = multiclass_inverse_focal(phat, batch_y, model.C, one_hot_weights[indices], param['gamma'])
+                loss = multiclass_inverse_focal(phat, batch_y, model.C, batch_weights, param['gamma'])
             else:
                 print(__name__ + '.train: Error with unknown lossfunc ')
 
@@ -247,11 +276,11 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
                 SIGNAL_ID = 1
 
-                trn_metric = aux.Metric(y_true = Y_trn.detach().numpy(),
-                    y_soft = model.softpredict(X_trn).detach().numpy()[:, SIGNAL_ID], valrange=[0,1])
+                trn_metric = aux.Metric(y_true = Y_trn.detach().cpu().numpy(),
+                    y_soft = model.softpredict(X_trn.to(device)).detach().cpu().numpy()[:, SIGNAL_ID], valrange=[0,1])
 
-                val_metric = aux.Metric(y_true = Y_val.detach().numpy(),
-                    y_soft = model.softpredict(X_val).detach().numpy()[:, SIGNAL_ID], valrange=[0,1])
+                val_metric = aux.Metric(y_true = Y_val.detach().cpu().numpy(),
+                    y_soft = model.softpredict(X_val.to(device)).detach().cpu().numpy()[:, SIGNAL_ID], valrange=[0,1])
 
                 trn_aucs.append(trn_metric.auc)
                 val_aucs.append(val_metric.auc)
@@ -261,19 +290,19 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
                 class_labels = np.arange(model.C)
                 
                 trn_metric_auc = sklearn.metrics.roc_auc_score(y_true = Y_trn.detach().numpy(),
-                    y_score = model.softpredict(X_trn).detach().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
+                    y_score = model.softpredict(X_trn.to(device)).detach().cpu().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
                 trn_aucs.append(trn_metric_auc)
 
                 # -----------------------------------------------------------------
 
                 val_metric_auc = sklearn.metrics.roc_auc_score(y_true = Y_val.detach().numpy(),
-                    y_score = model.softpredict(X_val).detach().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
+                    y_score = model.softpredict(X_val.to(device)).detach().cpu().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
                 val_aucs.append(val_metric_auc)
                 
-                print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))
-            
-            # Just print the loss
-            else:
-                print('Epoch = {} : train loss = {:.3f}'. format(epoch, avgloss)) 
+            print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))
+                            
+        # Just print the loss
+        else:
+            print('Epoch = {} : train loss = {:.3f}'. format(epoch, avgloss)) 
 
     return model, losses, trn_aucs, val_aucs

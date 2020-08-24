@@ -6,12 +6,12 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 10000000
+MAXEVENTS: 5000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
-targetfunc: 'target_e'         # Training target (MC),    implemented under mctargets.py
-filterfunc: 'filter_no_egamma' # Training filtering (MC), implemented under mcfilter.py
+targetfunc: 'target_e'         # Training target,    implemented under mctargets.py
+filterfunc: 'filter_no_egamma' # Training filtering, implemented under mcfilter.py
 
 cutfunc: 'cut_standard'        # Basic cuts,              implemented under cuts.py
 frac: 0.9                      # Train/validate/test split fraction
@@ -51,8 +51,7 @@ plot_param:
   
   # (eta,pt)-binned plots
   pt_edges:  [0, 0.75, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
-  eta_edges: [-10, -2.5, -1.5, -0.75, 0.0, 0.75, 1.5, 2.5, 10]
-
+  eta_edges: [-2.5, -1.5, -0.75, 0.0, 0.75, 1.5, 2.5]
 
 
 # ========================================================================
@@ -76,106 +75,144 @@ xgb_param:
   label: 'XGB'
   
   # general parameters
-  booster: 'gbtree'
-  num_boost_round: 50 # Number of epochs
-  n_gpus: 0
-  
+  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+  num_boost_round: 300    # Number of epochs
+  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
   # booster parameters
-  n_estimators: 2000
-  learning_rate: 0.1
-  gamma: 0.0
+  learning_rate: 0.15
+  
   max_depth: 15
   min_child_weight: 1.0
+  gamma: 0.0
   max_delta_step: 0
   subsample: 1.0
+
   colsample_bytree:  1
   colsample_bylevel: 1
   colsample_bynode:  1
-  reg_lambda: 2.0 # L2 regularization
-  reg_alpha: 0    # L1 regularization
+  
+  reg_lambda: 2.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
   scale_pos_weight: 1
-    
+
   # learning task parameters
   objective: 'binary:logistic'     #
   eval_metric: ['auc', 'logloss']  # for evaluation
-
 
 # Logistic Regression (convex algorithm = global optimum guarantee)
 mlgr_param:
   active: true
   label:  'MLGR'
-
+  
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent
   optimizer: 'AdamW'
+  noise_reg: 0.0            # Noise regularization
 
   epochs: 30
   batch_size: 196
   learning_rate: 0.003
+  weight_decay: 0.01        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
 
+# Convolutional Neural Net [DUMMY TEMPLATE]
+cnn_param:
+  active: false
+  label:  'CNN'
 
-# XTX classifier
+  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  gamma: 2                  # focal_entropy exponent
+  optimizer: 'AdamW'
+  noise_reg: 0.0            # Noise regularization
+
+  dropout_cnn: 0.1
+  dropout_mlp: 0.5
+  
+  epochs: 150
+  batch_size: 196
+  learning_rate: 0.003
+  weight_decay: 0.01        # L2-regularization
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+# XTX (hyperbinned) classifier
 xtx_param:
   active: false
   label:  'XTX'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 3                  # focal loss exponent
-  optimizer: 'AdamW'
-  
-  epochs: 50
-  batch_size: 196
-  learning_rate: 0.003
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  gamma: 2                  # focal_entropy exponent parameter
+  optimizer: 'AdamW'        # Adam, AdamW
+  noise_reg: 0.0            # Noise regularization
 
+  num_units: 2
+  neurons:  20
+  dropout:  0.5
+  
+  epochs:  100
+  batch_size:  196
+  learning_rate: 0.005
+  weight_decay: 0.01        # L2-regularization
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
 
 # Deep MAXOUT network
 dmax_param:
   active: true
   label:  'DMAX'
-
+  
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent parameter
   optimizer: 'AdamW'        # Adam, AdamW
-  
-  num_units: 8
-  neurons:  30
-  dropout:  0.5
+  noise_reg: 0.0            # Noise regularization
+
+  num_units: 15
+  neurons:  50
+  dropout:  0.1
   
   epochs:  200
-  batch_size:  196
-  learning_rate: 0.005
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-
+  batch_size: 256
+  learning_rate: 0.01
+  weight_decay: 0.01        # L2-regularization
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
 
 # Deep Normalizing Flow
 dbnf_param:
-  active: false
+  active: true
   label:  'DBNF'
   
-  epochs: 200
-  batch_size: 196
-  learning_rate: 0.01
+  # Gradient descent
+  epochs: 1000
+  batch_size: 512
+  optimizer: 'Adam'
+  learning_rate: 0.05
+  weight_decay: 0.0         # L2-regularization
+  noise_reg: 0.001          # Noise regularization
+  polyak: 0.998
   clip_norm: 0.1
   
-  optimizer: 'Adam'
+  # Learning rate reduction on plateau
+  factor:  0.1
   patience: 20
   cooldown: 10
-  early_stopping: 100
-  decay:  0.5
   min_lr: 0.0005
-  polyak: 0.998
-  
-  flows: 5
-  layers: 0
-  hidden_dim: 30
-  residual: 'normal'          # choises 'none', 'normal', 'gated'
-  perm: 'flip'                # flow permutation: choises 'none', 'flip', 'rand'
+  early_stopping: 100
+
+  # Model structure
+  flows: 10                 # number of flow blocks
+  layers: 0                 # intermediate layers in a flow block
+  hidden_dim: 10            # 
+  residual: 'gated'         # choises 'none', 'normal', 'gated'
+  perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
   
   modelname: 'null'
   start_epoch: 0
   tensorboard: 'tensorboard'
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
 
 

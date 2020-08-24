@@ -151,6 +151,100 @@ def compute_reweights(data, args):
     return trn_weights
 
 
+def load_root_file_new(root_path, class_id = []):
+    """ Loads the root file.
+    
+    Args:
+        root_path : paths to root files
+        cutfunc   : basic cutfunction handle
+        class_id  : class ids
+    Returns:
+        X,Y       : input, output matrices
+        VARS      : variable names
+    """
+
+    # SET GLOBALS
+
+    ### From root trees
+    print('\n')
+    print( __name__ + '.load_root_file: Loading from file ' + root_path)
+    file = uproot.open(root_path)
+    events = file["ntuplizer"]["tree"]
+
+    print(events.name)
+    print(events.title)
+    print(__name__ + f'.load_root_file: events.numentries = {events.numentries}')
+
+    ### First load all data
+    VARS   = [x.decode() for x in events.keys()]
+
+    ### Load only non-jagged data (EXTEND THIS!)
+    VARS   = [x.decode() for x in events.keys() if b'image_' not in x]
+
+    X_dict = events.arrays(VARS, namedecode = "utf-8")
+
+        
+    # Print out some statistics
+    labels1 = ['is_e', 'is_egamma']
+    #labels2 = ['has_trk','has_seed','has_gsf','has_ele']
+    #labels3 = ['seed_trk_driven','seed_ecal_driven']
+
+    aux.count_targets(events=events, names=labels1)
+    #aux.count_targets(events=events, names=labels2)
+    #aux.count_targets(events=events, names=labels3)
+    
+    # -----------------------------------------------------------------
+    ### Convert input to matrix
+    X = np.array([X_dict[j] for j in VARS])
+    X = np.transpose(X)
+
+
+    prints.printbar()
+    # =================================================================
+    # *** MC ONLY ***
+
+    # @@ MC target definition here @@
+    print(__name__ + f'.load_root_file: MC target computed')
+    Y = TARFUNC(events)
+    prints.printbar()
+
+
+    # @@ MC filtering done here @@
+    print(__name__ + f'.load_root_file: MC filter applied')
+    indmc = FILTERFUNC(X, VARS)
+    prints.printbar()
+    
+    Y = Y[indmc]
+    X = X[indmc,:]
+    # =================================================================
+
+
+    # -----------------------------------------------------------------
+    # @@ Observable cut selections done here @@
+    print(__name__ + f'.load_root_file: Observable cuts')
+    ind = CUTFUNC(X, VARS)
+    # -----------------------------------------------------------------
+
+    N_before = X.shape[0]
+    print(__name__ + f".load_root_file: Prior cut selections: {N_before} events ")
+
+    ### Select events
+    X  = X[ind,:]
+    Y  = Y[ind]
+
+    N_after = X.shape[0]
+    print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after/N_before:.3f})")
+
+    # PROCESS only MAXEVENTS
+    X = X[0:np.min([X.shape[0],MAXEVENTS]),:]
+    Y = Y[0:np.min([Y.shape[0],MAXEVENTS])]
+    
+    return X, Y, VARS
+
+
+
+
+
 def load_root_file(root_path, class_id = []):
     """ Loads the root file.
 
