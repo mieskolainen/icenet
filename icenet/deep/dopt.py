@@ -24,11 +24,11 @@ from icenet.tools import aux
 
 
 init_funcs = {
-    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.), # can be bias
-    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),  # can be weight
-    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # can be conv1D filter
-    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # can be conv2D filter
-    "default": lambda x: torch.nn.init.constant(x, 1.),     # everything else
+    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.), # Bias terms
+    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),  # Weight terms
+    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # conv1D filter
+    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), # conv2D filter
+    "default": lambda x: torch.nn.init.constant(x, 1.),     # others
 }
 
 def weights_init_all(model, init_funcs):
@@ -47,7 +47,7 @@ def weights_init_uniform_rule(m):
     """
     classname = m.__class__.__name__
 
-    # Liner layers
+    # Linear layers
     if classname.find('Linear') != -1:
         n = m.in_features
         y = 1.0/np.sqrt(n)
@@ -57,7 +57,7 @@ def weights_init_uniform_rule(m):
 
 def weights_init_normal(m):
     """ Initializes module weights from normal distribution
-    with ad-hoc rule sigma ~ 1/sqrt(n)
+    with a rule sigma ~ 1/sqrt(n)
     """
     classname = m.__class__.__name__
     
