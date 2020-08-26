@@ -65,21 +65,30 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, VARS):
+def print_variables(X : np.array, VARS, active_dim = []):
     """ Print in a format (# samples x # dimensions)
     """
     print('\n')
-    print('[i] variable_name : [min, med, max]   mean +- std   [[isinf, isnan]]')
-    for j in range(X.shape[1]):
-        
-        minval = np.min(X[:,j])
-        maxval = np.max(X[:,j])
-        mean   = np.mean(X[:,j])
-        med    = np.median(X[:,j])
-        std    = np.std(X[:,j])
+    print(__name__ + f'.print_variables:')
 
-        isinf  = np.any(np.isinf(X[:,j]))
-        isnan  = np.any(np.isnan(X[:,j]))
+    if active_dim == []:
+        active_dim = np.arange(0,len(VARS))
+
+    print(f'active_dim: {active_dim} \n')
+
+    print('[i] variable_name : [min, med, max]   mean +- std   [[isinf, isnan]]')
+    for j in active_dim:
+        
+        x = np.array(X[:,j], dtype=np.float)
+
+        minval = np.min(x)
+        maxval = np.max(x)
+        mean   = np.mean(x)
+        med    = np.median(x)
+        std    = np.std(x)
+
+        isinf  = np.any(np.isinf(x))
+        isnan  = np.any(np.isnan(x))
 
         print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] \t {: >10.2E} +- {: >10.2E}   [[{}, {}]]'
             .format(j, VARS[j], minval, med, maxval, mean, std, isinf, isnan))

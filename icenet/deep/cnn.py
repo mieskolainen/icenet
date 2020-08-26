@@ -9,29 +9,36 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class CNN_DMAX(nn.Module):
+    """
+    Dual (simultaneous) input network [image tensors x vectors]
+    """
+    
+    # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-class CNN(nn.Module):
-    def __init__(self, C, dropout_cnn=0.25, dropout_mlp=0.5):
-        super(CNN, self).__init__()
+    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.4, neurons=50, num_units=6, dropout=0.1):
+        super(CNN_DMAX, self).__init__()
+        
+        # -------------------------------------------
+        # CNN BLOCK
 
         self.C           = C
         self.dropout_cnn = dropout_cnn
-        self.dropout_mlp = dropout_mlp
 
-        # Convolution pipeline
+        # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
 
-            nn.Conv2d(in_channels=1,  out_channels=32, kernel_size=3, padding=1),
-            #nn.MaxPool2d(2), # 2x2 window
+            nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
+            nn.MaxPool2d(2), # 2x2 window
             nn.ReLU(),
 
             nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
-            #nn.MaxPool2d(2), # 2x2 window
+            nn.MaxPool2d(2), # 2x2 window
             nn.ReLU(),
             nn.Dropout2d(p = self.dropout_cnn),
 
             nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
-            #nn.MaxPool2d(2), # 2x2 window
+            nn.MaxPool2d(2), # 2x2 window
             nn.ReLU(),
             nn.Dropout2d(p = self.dropout_cnn),
 
@@ -40,27 +47,123 @@ class CNN(nn.Module):
             nn.ReLU(),
             nn.Dropout2d(p = self.dropout_cnn)
         )
-        self.Z = 5*5*64
+
+        # Determine the intermediate dimension Z with a test input
+        x = torch.tensor(np.ones((1, nchannels, nrows, ncols)), dtype=torch.float)
+        dim = self.block1(x).shape
+        self.Z = dim[1]*dim[2]*dim[3]
+
+        # -------------------------------------------
+        # MAXOUT BLOCK
+
+        self.D         = D
+        self.neurons   = neurons
+        self.num_units = num_units
+        self.dropout   = nn.Dropout(p = dropout)
+
+        # Network modules
+        self.fc1_list  = nn.ModuleList()
+        self.fc2_list  = nn.ModuleList()
+
+        
+        for _ in range(self.num_units):
+            self.fc1_list.append(nn.Linear(self.D + self.Z, neurons))
+            nn.init.xavier_normal_(self.fc1_list[-1].weight) # xavier init
+            
+            self.fc2_list.append(nn.Linear(neurons, self.C))
+            nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
+
+        # -------------------------------------------
+
+    def maxout(self, x, layer_list):
+        """ MAXOUT layer
+        """
+        max_output = layer_list[0](x)
+        for _, layer in enumerate(layer_list, start=1):
+            max_output = torch.max(layer(x), max_output)
+        return max_output
+
+
+    def forward(self, x1, x2):
+
+        # print(f'\nINPUT: {x.shape}')
+        x1 = self.block1(x1)
+        # print(f'\nAFTER BLOCK 1: {x.shape}')
+        x1 = x1.view(-1, self.Z)
+
+        # ***
+        x = torch.cat((x1, x2), 1)
+        # ***
+
+        x = self.maxout(x, self.fc1_list)
+        x = self.dropout(x)
+        x = self.maxout(x, self.fc2_list)
+
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x1,x2) :
+        return F.softmax(self.forward(x1,x2), dim=1)
+
+
+class CNN(nn.Module):
+    # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
+
+    def __init__(self, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.25, dropout_mlp=0.5, mlp_dim=128):
+        super(CNN, self).__init__()
+
+        self.C           = C
+        self.dropout_cnn = dropout_cnn
+        self.dropout_mlp = dropout_mlp
+        self.mlp_dim     = mlp_dim
+
+        # Convolution (feature block) pipeline
+        self.block1 = nn.Sequential(
+
+            nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn),
+
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn),
+
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.ReLU(),
+            nn.Dropout2d(p = self.dropout_cnn)
+        )
+
+        # Determine the intermediate dimension Z with a test input
+        x = torch.tensor(np.ones((1, nchannels, nrows, ncols)), dtype=torch.float)
+        dim = self.block1(x).shape
+        self.Z = dim[1]*dim[2]*dim[3]
         
         # Classifier pipeline
         self.block2 = nn.Sequential(
-            nn.Linear(self.Z, 128),
+            nn.Linear(self.Z, self.mlp_dim),
             nn.ReLU(),
             nn.Dropout(p = self.dropout_mlp),
-            nn.Linear(128, self.C),
+            nn.Linear(self.mlp_dim, self.C),
         )
 
     def forward(self, x):
-        # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
-        x = self.block1(x)
         #print(f'\nINPUT: {x.shape}')
 
-        #print(f'\nBEFORE VIEW: {x.shape}')
+        x = self.block1(x)
+        #print(f'\nAFTER BLOCK 1: {x.shape}')
+
         x = x.view(-1, self.Z)
         #print(f'\nAFTER VIEW: {x.shape}')
 
         x = self.block2(x)
-        #print(f'\nOUTPUT: {x.shape}')
+        #print(f'\nAFTER BLOCK 2: {x.shape}')
         return x
 
     # Returns softmax probability

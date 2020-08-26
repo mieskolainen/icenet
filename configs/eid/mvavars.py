@@ -34,6 +34,44 @@ CMSSW_MVA_ID = [
 ]
 
 
+CMSSW_MVA_ID_IMAGE = [
+ 'image_gsf_ref_eta',
+ 'image_gsf_ref_phi',
+ 'image_gsf_ref_R',
+ 'image_gsf_ref_p',
+ 'image_gsf_ref_pt',
+ 'image_gen_inner_eta',
+ 'image_gen_inner_phi',
+ 'image_gen_inner_R',
+ 'image_gen_inner_p',
+ 'image_gen_inner_pt',
+ 'image_gsf_inner_eta',
+ 'image_gsf_inner_phi',
+ 'image_gsf_inner_R',
+ 'image_gsf_inner_p',
+ 'image_gsf_inner_pt',
+ 'image_gsf_charge',
+ 'image_gsf_proj_eta',
+ 'image_gsf_proj_phi',
+ 'image_gsf_proj_R',
+ 'image_gsf_proj_p',
+ 'image_gsf_atcalo_eta',
+ 'image_gsf_atcalo_phi',
+ 'image_gsf_atcalo_R',
+ 'image_gsf_atcalo_p',
+ 'image_clu_n',
+ 'image_clu_eta',
+ 'image_clu_phi',
+ 'image_clu_e',
+ 'image_pf_n',
+ 'image_pf_eta',
+ 'image_pf_phi',
+ 'image_pf_p',
+ 'image_pf_pdgid',
+ 'image_pf_matched',
+ 'image_pf_lost'
+]
+
 
 CMSSW_MVA_ID_ORIG = [
   'gsf_bdtout1',

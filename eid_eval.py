@@ -57,50 +57,29 @@ def main() :
     data, args = common.init()
 
     #########################################################
-    print('\nEvaluate ele_mva_value classifier ...')
+    varname = 'ele_mva_value_depth15'
+
+    print(f'\nEvaluate {varname} classifier ...')
     try:
-        ind = data.VARS.index('ele_mva_value')
-        met_elemva = aux.Metric(y_true = data.tst.y, y_soft = data.tst.x[:,ind])
-        roc_mstats.append(met_elemva)
-        roc_labels.append('elemva')
-    except:
-        print(__name__ + 'Variable not found')
-    #########################################################
-    
-    #########################################################
-    print('\nEvaluate ele_mva_value_depth15 classifier ...')
-    try:
-        ind = data.VARS.index('ele_mva_value_depth15')    
-        met_elemva = aux.Metric(y_true = data.tst.y, y_soft = data.tst.x[:,ind])
+        ind  = data.VARS.index(varname)
+        y    = np.array(data.tst.y, dtype=np.float)
+        yhat = np.array(data.tst.x[:,ind], dtype=np.float)
+
+        met_elemva = aux.Metric(y_true = y, y_soft = yhat)
         roc_mstats.append(met_elemva)
         roc_labels.append('elemva15')
     except:
-        print(__name__ + 'Variable not found.')
+        print(__name__ + 'Variable not found')
     #########################################################
 
-
-    ### Pick kinematic variables out
-    newind, newvars = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin       = copy.deepcopy(data)
-    data_kin.trn.x = data.trn.x[:, newind]
-    data_kin.val.x = data.val.x[:, newind]
-    data_kin.tst.x = data.tst.x[:, newind]
-    data_kin.VARS  = newvars
-
-    ### Choose active variables
-    newind, newvars = io.pick_vars(data, globals()[args['inputvar']])
-
-    data.trn.x = data.trn.x[:, newind]
-    data.val.x = data.val.x[:, newind]
-    data.tst.x = data.tst.x[:, newind]    
-    data.VARS  = newvars
+    ### Split and factor data
+    data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
 
     ### Execute
     global targetdir
     targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
 
-    evaluate(X = data.tst.x, y = data.tst.y, X_kin = data_kin.tst.x, VARS_kin = data_kin.VARS, args = args)
+    evaluate(data=data, data_tensor=data_tensor, data_kin=data_kin, args=args)
 
     print(__name__ + ' [Done]')
 
@@ -126,11 +105,21 @@ def saveit(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
 
 # Test the classifiers
 #
-def evaluate(X, y, X_kin, VARS_kin, args) :
+def evaluate(data, data_tensor, data_kin, args):
+
+    # --------------------------------------------------------------------
+    ### Collect data
+    X     = data.tst.x
+    y     = data.tst.y
+    X_kin = data_kin.tst.x
+    X_2D  = data_tensor['tst']
+
+    VARS_kin = data_kin.VARS
+    # --------------------------------------------------------------------
 
     print(__name__ + ": Input with {} events and {} dimensions ".format(X.shape[0], X.shape[1]))
 
-    modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
+    modeldir  = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
     pt_edges  = args['plot_param']['pt_edges']
     eta_edges = args['plot_param']['eta_edges'] 
@@ -178,7 +167,8 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
 
     # --------------------------------------------------------------------
     # For pytorch based
-    X_ptr = torch.from_numpy(X).type(torch.FloatTensor)
+    X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
+    X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
 
     ###
@@ -238,14 +228,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
 
     ###
     if args['cnn_param']['active']:
-
-        # -------------------------------------------------------------------------------
-        # Reshape into matrix format -> (#vectors, #channels, #rows, #cols)
-        XXX = torch.zeros(X_ptr.shape[0], 10*10)
-        XXX[:, 0:X_ptr.shape[1]] = X_ptr
-        X_ptr_2D = XXX.view((X_ptr.shape[0], 1, 10, 10))
-        # -------------------------------------------------------------------------------
-
+        
         label = args['cnn_param']['label']
         print(f'\nEvaluate {label} classifier ...')
 
@@ -257,7 +240,7 @@ def evaluate(X, y, X_kin, VARS_kin, args) :
             return cnn_model.softpredict(x)[:, signalclass].detach().numpy()
 
         # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_ptr_2D, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
+        saveit(func_predict = func_predict, X = X_2D_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
     
     ###
     if args['mlgr_param']['active']:

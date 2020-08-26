@@ -581,6 +581,60 @@ def pick_ind(x, minmax):
     """
     return (x >= minmax[0]) & (x <= minmax[1])
 
+def jagged2tensor(X, VARS, xyz, x_binedges, y_binedges):
+    """
+    Args:
+        
+        X          : input data (samples x dimensions) with jagged structure
+        VARS       : all variable names
+        xyz        : array of (x,y,z) channel triplet strings such as [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+        x_binedges
+        y_binedges : arrays of bin edges
+    
+    Returns:
+        T : tensor of size (samples x channels x rows x columns)
+    """
+
+    # Samples x Channels x Rows x Columns
+    T = np.zeros((X.shape[0], len(xyz), len(x_binedges)-1, len(y_binedges)-1), dtype=np.float)
+
+    # Choose targets
+    for c in range(len(xyz)):
+        ind = [VARS.index(x) for x in xyz[c]]
+
+        # Loop over all events
+        for i in range(X.shape[0]):
+            T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
+                x_binedges=x_binedges, y_binedges=y_binedges)
+
+    print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
+
+    return T
+
+def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
+    """
+    Array representation summed to matrix.
+    
+    Args:
+        x_arr :      array of [x values]
+        y_arr :      array of [y values]
+        z_arr :      array of [z values]
+        x_binedges : array of binedges
+        y_binedges : array of binedges
+        
+    Returns:
+        Matrix output
+    """
+
+    x_ind = x2ind(x=x_arr, binedges=x_binedges)
+    y_ind = x2ind(x=y_arr, binedges=y_binedges)
+
+    # Loop and sum
+    A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=np.float)
+    for i in range(len(x_ind)):
+        A[x_ind[i], y_ind[i]] += z_arr[i]
+
+    return A
 
 def x2ind(x, binedges) :
     """ Return histogram bin indices for data in x, which needs to be an array [].
@@ -662,7 +716,7 @@ class Metric:
 
         # invalid input
         if (np.sum(y_true == 0) == 0) | (np.sum(y_true == 1) == 0):
-            print('Metric: only one class present in y_true, cannot evaluate metrics')
+            print('Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)')
             self.fpr = -1
             self.tpr = -1
             self.thresholds = -1

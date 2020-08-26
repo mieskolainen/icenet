@@ -51,8 +51,8 @@ from icenet.optim import adamax
 from icenet.optim import scheduler
 
 # iceid
-from configs.eid.mvavars import *
 from iceid import common
+
 
 
 # Main function
@@ -63,12 +63,12 @@ def main() :
     data, args = common.init()
     
     ### Print ranges
-    prints.print_variables(data.trn.x, data.VARS)
+    #prints.print_variables(X=data.trn.x, VARS=data.VARS)
 
     ### Compute reweighting weights
-    trn_weights = common.compute_reweights(data, args)
-
-
+    trn_weights = common.compute_reweights(data=data, args=args)
+    
+    
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
         print(__name__ + f': plotting basic histograms ...')
@@ -76,43 +76,30 @@ def main() :
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
 
+    
+    ### Split and factor data
+    data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
 
-    ### Pick kinematic variables out
-    newind, newvars = io.pick_vars(data, KINEMATIC_ID)
 
-    data_kin        = copy.deepcopy(data)
-    data_kin.trn.x  = data.trn.x[:, newind]
-    data_kin.val.x  = data.val.x[:, newind]
-    data_kin.tst.x  = data.tst.x[:, newind]
-    data_kin.VARS   = newvars
-
-    ### Choose active variables
-    newind, newvars = io.pick_vars(data, globals()[args['inputvar']])
-
-    data.trn.x = data.trn.x[:, newind]
-    data.val.x = data.val.x[:, newind]
-    data.tst.x = data.tst.x[:, newind]    
-    data.VARS  = newvars
-
-    ### Print variables
+    ### Print scalar variables
     fig,ax = plots.plot_correlations(data.trn.x, data.VARS)
     targetdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(fname = targetdir + 'correlations.pdf', pad_inches = 0.2, bbox_inches='tight')
 
     print(__name__ + ': Active variables:')
-    prints.print_variables(data.trn.x, data.VARS)
+    prints.print_variables(X=data.trn.x, VARS=data.VARS)
+
 
     ### Execute
-    train(data = data, data_kin = data_kin, trn_weights = trn_weights, args = args)
+    train(data = data, data_tensor = data_tensor, data_kin = data_kin, trn_weights = trn_weights, args = args)
     print(__name__ + ' [done]')
 
 
 # Main training function
 #
-def train(data, data_kin, trn_weights, args) :
+def train(data, data_tensor, data_kin, trn_weights, args) :
 
     print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
-    
     modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
     # @@ Truncate outliers (component by component) from the training set @@
@@ -155,6 +142,13 @@ def train(data, data_kin, trn_weights, args) :
     X_val = torch.from_numpy(data.val.x).type(torch.FloatTensor)
     Y_val = torch.from_numpy(data.val.y).type(torch.LongTensor)
 
+    # -------------------------------------------------------------------------------
+    # Into torch format
+
+    X_trn_2D = torch.tensor(data_tensor['trn'], dtype=torch.float)
+    X_val_2D = torch.tensor(data_tensor['val'], dtype=torch.float)
+    DIM = X_trn_2D.shape
+    # -------------------------------------------------------------------------------
 
     ### CLASSIFIER
     if args['flr_param']['active']:
@@ -177,6 +171,65 @@ def train(data, data_kin, trn_weights, args) :
                 X = data.trn.x, y = data.trn.y, labels = data.VARS, targetdir = targetdir, matrix = 'numpy')
         """
     
+    ### CLASSIFIER
+    if args['cnn_param']['active']:
+
+        label = args['cnn_param']['label']
+
+        print(f'\nTraining {label} classifier ...')
+        cnn_model = cnn.CNN(C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+            dropout_cnn=args['cnn_param']['dropout_cnn'], dropout_mlp=args['cnn_param']['dropout_mlp'], mlp_dim=args['cnn_param']['mlp_dim'])
+        cnn_model, losses, trn_aucs, val_aucs = \
+            dopt.train(model = cnn_model, X_trn = X_trn_2D, Y_trn = Y_trn, X_val = X_val_2D, Y_val = Y_val,
+                        trn_weights = trn_weights, param = args['cnn_param'])
+        
+        # Plot evolution
+        plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+        fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+        
+        ## Save
+        checkpoint = {'model': cnn.CNN(C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+            dropout_cnn=args['cnn_param']['dropout_cnn'], dropout_mlp=args['cnn_param']['dropout_mlp'], mlp_dim=args['cnn_param']['mlp_dim']), 'state_dict': cnn_model.state_dict()}
+        torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+
+        ### Plot contours
+        if args['plot_param']['contours_on']:
+            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/cnn/'; os.makedirs(targetdir, exist_ok=True)
+            plots.plot_decision_contour(lambda x : cnn_model.softpredict(x),
+                X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+
+    ### CLASSIFIER
+    if args['cdmx_param']['active']:
+
+        label = args['cdmx_param']['label']
+
+        print(f'\nTraining {label} classifier ...')
+        cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+            dropout_cnn = args['cdmx_param']['dropout_cnn'], neurons = args['cdmx_param']['neurons'], \
+            num_units = args['cdmx_param']['num_units'], dropout = args['cdmx_param']['dropout'])
+
+        cmdx_model, losses, trn_aucs, val_aucs = dopt.dualtrain(model = cmdx_model, X1_trn = X_trn_2D, X2_trn = X_trn, \
+            Y_trn = Y_trn, X1_val = X_val_2D, X2_val = X_val, Y_val = Y_val, trn_weights = trn_weights, param = args['cdmx_param'])
+        
+        # Plot evolution
+        plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+        fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+
+        ## Save
+        checkpoint = {'model': cnn.CNN_DMAX(D = X_trn.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+            dropout_cnn = args['cdmx_param']['dropout_cnn'], neurons = args['cdmx_param']['neurons'], \
+            num_units = args['cdmx_param']['num_units'], dropout = args['cdmx_param']['dropout']), 'state_dict': cmdx_model.state_dict()}
+        torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+
+        ### Plot contours
+        #if args['plot_param']['contours_on']:
+        #    targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+        #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
+        #        X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+
+
     ### CLASSIFIER
     if args['xgb_param']['active']:
 
@@ -222,7 +275,7 @@ def train(data, data_kin, trn_weights, args) :
 
         fig = plt.figure(figsize=(12,8))
         bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.VARS)
-        plt.xlabel('f-score')
+        plt.xlabel('f-score (gain)')
 
         targetdir = f'./figs/eid/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
         plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
@@ -260,49 +313,6 @@ def train(data, data_kin, trn_weights, args) :
         if args['plot_param']['contours_on']:
             targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
             plots.plot_decision_contour(lambda x : mlgr_model.softpredict(x),
-                X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
-
-    ### CLASSIFIER
-    if args['cnn_param']['active']:
-
-        label = args['cnn_param']['label']
-
-        # -------------------------------------------------------------------------------
-        # Reshape into matrix format -> (#vectors, #channels, #rows, #cols)
-
-        # ! DUMMY TEMPLATE INPUT !
-        
-        XXX = torch.zeros(X_trn.shape[0], 10*10)
-        XXX[:, 0:X_trn.shape[1]] = X_trn
-        X_trn_2D = XXX.view((X_trn.shape[0], 1, 10,10))
-
-        XXX = torch.zeros(X_val.shape[0], 10*10)
-        XXX[:, 0:X_val.shape[1]] = X_val
-        X_val_2D = XXX.view((X_val.shape[0], 1, 10,10))
-
-        print(X_trn_2D.shape)
-        print(X_val_2D.shape)
-        # -------------------------------------------------------------------------------
-
-        print(f'\nTraining {label} classifier ...')
-        cnn_model = cnn.CNN(C=2, dropout_cnn=args['cnn_param']['dropout_cnn'], dropout_mlp=args['cnn_param']['dropout_mlp'])
-        cnn_model, losses, trn_aucs, val_aucs = \
-            dopt.train(model = cnn_model, X_trn = X_trn_2D, Y_trn = Y_trn, X_val = X_val_2D, Y_val = Y_val,
-                        trn_weights = trn_weights, param = args['cnn_param'])
-        
-        # Plot evolution
-        plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
-        fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-        
-        ## Save
-        checkpoint = {'model': cnn.CNN(C=2, dropout_cnn=args['cnn_param']['dropout_cnn'], dropout_mlp=args['cnn_param']['dropout_mlp']), 'state_dict': cnn_model.state_dict()}
-        torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
-
-        ### Plot contours
-        if args['plot_param']['contours_on']:
-            targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/cnn/'; os.makedirs(targetdir, exist_ok=True)
-            plots.plot_decision_contour(lambda x : cnn_model.softpredict(x),
                 X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
     ### CLASSIFIER

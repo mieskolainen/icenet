@@ -133,7 +133,7 @@ class Data:
     # filter operator
     def classfilter(self, classid):
 
-        x = self.x[self.y == classid, :]
+        x = self.x[self.y == classid]
         y = self.y[self.y == classid]
         
         return Data(x, y)
@@ -146,7 +146,7 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     ### Permute events to have random mixing between classes (a must!)
     np.random.seed(int(rngseed)) # seed it!
     randi = np.random.permutation(X.shape[0])
-    X = X[randi, :]
+    X = X[randi]
     Y = Y[randi]
     
     N     = X.shape[0]
@@ -158,15 +158,15 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     N_tst = N_B
 
     # A. Train
-    X_trn = X[0:N_trn, :]
+    X_trn = X[0:N_trn]
     Y_trn = Y[0:N_trn]
 
     # A. Validation
-    X_val = X[N_trn:N_trn + N_val, :]
+    X_val = X[N_trn:N_trn + N_val]
     Y_val = Y[N_trn:N_trn + N_val]
 
     # B. Test
-    X_tst = X[N-N_tst:N, :]
+    X_tst = X[N-N_tst:N]
     Y_tst = Y[N-N_tst:N]
 
     trn = Data()
@@ -185,18 +185,18 @@ def split_data(X, Y, frac, rngseed, class_id = []):
 
         for c in class_id : 
             ind  = (Y_trn == c)
-            trn += Data(x = X_trn[ind, :], y = np.ones(ind.sum())*c)
+            trn += Data(x = X_trn[ind], y = np.ones(ind.sum())*c)
 
             ind  = (Y_val == c)
-            val += Data(x = X_val[ind, :], y = np.ones(ind.sum())*c)
+            val += Data(x = X_val[ind], y = np.ones(ind.sum())*c)
 
             ind  = (Y_tst == c)
-            tst += Data(x = X_tst[ind, :], y = np.ones(ind.sum())*c)
+            tst += Data(x = X_tst[ind], y = np.ones(ind.sum())*c)
 
     ### Permute events once again to have random mixing between classes
     def mix(data):
         randi  = np.random.permutation(data.x.shape[0])
-        data.x = data.x[randi,:]
+        data.x = data.x[randi]
         data.y = data.y[randi]
         return data
     
@@ -236,8 +236,7 @@ def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iter
 
     # Count NaN
     for j in dim:
-
-        nan_ind = np.isnan(X[:,j])
+        nan_ind = np.isnan(np.array(X[:,j], dtype=np.float))
         if np.sum(nan_ind) > 0:
             print(__name__ + f'.impute_data: Column {j} Number of {nan_ind} NaN found [{labels[j]}]')
 
@@ -248,9 +247,9 @@ def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iter
         M_tot = 0
         for z in values:
             
-            ind = np.isclose(X[:,j],z)
+            ind = np.isclose(np.array(X[:,j], dtype=np.float), z)
             X[ind, j] = np.nan
-
+            
             M = np.sum(ind)
             M_tot += M
 
@@ -264,7 +263,7 @@ def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iter
     # Treat infinities (inf)
     for j in dim:
 
-        inf_ind = np.isinf(X[:,j])
+        inf_ind = np.isinf(np.array(X[:,j], dtype=np.float))
         X[inf_ind, j] = np.nan
         if np.sum(inf_ind) > 0:
             print(__name__ + f'.impute_data: Column {j} Number of {np.sum(inf_ind)} Inf found [{labels[j]}]')

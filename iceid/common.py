@@ -3,6 +3,7 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
+import copy
 import math
 import argparse
 import pprint
@@ -26,6 +27,65 @@ from configs.eid.mcfilter  import *
 
 from configs.eid.mvavars import *
 from configs.eid.cuts import *
+
+
+def splitfactor(data, args):
+    """
+    Split electron ID data into:
+        scalar data
+        jagged arrays ("images")
+        kinematic data
+    """
+
+    ### Pick kinematic variables out
+    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
+    
+    data_kin         = copy.deepcopy(data)
+    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
+    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
+    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
+    data_kin.VARS    = k_vars
+    
+    
+    ### Pick active jagged array / "image" variables out
+    j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
+    
+    data_image       = copy.deepcopy(data)
+    data_image.trn.x = data.trn.x[:, j_ind]
+    data_image.val.x = data.val.x[:, j_ind]
+    data_image.tst.x = data.tst.x[:, j_ind]
+    data_image.VARS  = j_vars 
+
+
+    # Pick tensor data out
+    data_tensor = {
+        'trn' : [],
+        'val' : [],
+        'tst' : []
+    }
+
+    eta_binedges = np.linspace(-3, 3, 21)
+    phi_binedges = np.linspace(-np.pi, np.pi, 21)
+    xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
+            ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
+
+    #xyz   = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+
+    data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+
+
+    ### Pick active scalar variables out
+    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    
+    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
+    data.val.x    = data.val.x[:, s_ind].astype(np.float)
+    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
+    data.VARS     = s_vars
+
+
+    return data, data_tensor, data_kin
 
 
 def init():
@@ -77,7 +137,7 @@ def init():
 
     # Background (0) and signal (1)
     class_id = [0,1]
-    data     = io.DATASET(func_loader=load_root_file, files=paths, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+    data     = io.DATASET(func_loader=load_root_file_new, files=paths, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
 
     # @@ Imputation @@
     if args['imputation_param']['active']:
@@ -87,7 +147,7 @@ def init():
 
         # Choose active dimensions
         INPUTVAR = globals()[args['imputation_param']['var']]
-        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in INPUTVAR])
+        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in INPUTVAR], dtype=int)
 
         # Parameters
         param = {
@@ -98,11 +158,11 @@ def init():
             "fill_value": args['imputation_param']['fill_value'],
             "knn_k":      args['imputation_param']['knn_k']
         }
-        
+
         data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
         data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
         data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
-    
+        
     else:
         # No imputation, but fix spurious NaN / Inf
         data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
@@ -175,15 +235,15 @@ def load_root_file_new(root_path, class_id = []):
     print(events.title)
     print(__name__ + f'.load_root_file: events.numentries = {events.numentries}')
 
-    ### First load all data
-    VARS   = [x.decode() for x in events.keys()]
+    ### All variables
+    VARS    = [x.decode() for x in events.keys()]
+    VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
 
-    ### Load only non-jagged data (EXTEND THIS!)
-    VARS   = [x.decode() for x in events.keys() if b'image_' not in x]
-
-    X_dict = events.arrays(VARS, namedecode = "utf-8")
-
-        
+    # Turn into dictionaries
+    X_dict  = events.arrays(VARS,   namedecode = "utf-8")
+    #X_dict_j = events.arrays(VARS_j, namedecode = "utf-8")
+    
+    
     # Print out some statistics
     labels1 = ['is_e', 'is_egamma']
     #labels2 = ['has_trk','has_seed','has_gsf','has_ele']
@@ -195,27 +255,27 @@ def load_root_file_new(root_path, class_id = []):
     
     # -----------------------------------------------------------------
     ### Convert input to matrix
-    X = np.array([X_dict[j] for j in VARS])
-    X = np.transpose(X)
-
+    X   = np.array([X_dict[j] for j in VARS])
+    X   = np.transpose(X)
 
     prints.printbar()
     # =================================================================
     # *** MC ONLY ***
 
-    # @@ MC target definition here @@
-    print(__name__ + f'.load_root_file: MC target computed')
-    Y = TARFUNC(events)
-    prints.printbar()
+    if X_dict['is_mc'][0]: # Check based on the first event
 
+        # @@ MC target definition here @@
+        print(__name__ + f'.load_root_file: MC target computed')
+        Y = TARFUNC(events)
+        prints.printbar()
 
-    # @@ MC filtering done here @@
-    print(__name__ + f'.load_root_file: MC filter applied')
-    indmc = FILTERFUNC(X, VARS)
-    prints.printbar()
-    
-    Y = Y[indmc]
-    X = X[indmc,:]
+        # @@ MC filtering done here @@
+        print(__name__ + f'.load_root_file: MC filter applied')
+        indmc = FILTERFUNC(X, VARS)
+        prints.printbar()
+                
+        Y   = Y[indmc]
+        X   = X[indmc]
     # =================================================================
 
 
@@ -229,108 +289,16 @@ def load_root_file_new(root_path, class_id = []):
     print(__name__ + f".load_root_file: Prior cut selections: {N_before} events ")
 
     ### Select events
-    X  = X[ind,:]
-    Y  = Y[ind]
+    X = X[ind]
+    Y = Y[ind]
 
     N_after = X.shape[0]
     print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after/N_before:.3f})")
 
     # PROCESS only MAXEVENTS
-    X = X[0:np.min([X.shape[0],MAXEVENTS]),:]
-    Y = Y[0:np.min([Y.shape[0],MAXEVENTS])]
-    
-    return X, Y, VARS
+    maxind = np.min([X.shape[0], MAXEVENTS])
 
+    X = X[0:maxind]
+    Y = Y[0:maxind]
 
-
-
-
-def load_root_file(root_path, class_id = []):
-    """ Loads the root file.
-
-    Args:
-        root_path : paths to root files
-        cutfunc   : basic cutfunction handle
-        class_id  : class ids
-    Returns:
-        X,Y       : input, output matrices
-        VARS      : variable names
-    """
-
-    # SET GLOBALS
-
-    ### From root trees
-    print('\n')
-    print( __name__ + '.load_root_file: Loading from file ' + root_path)
-    file = uproot.open(root_path)
-    events = file["ntuplizer"]["tree"]
-
-    print(events.name)
-    print(events.title)
-    print(__name__ + f'.load_root_file: events.numentries = {events.numentries}')
-
-    ### First load all data
-    VARS   = [x.decode() for x in events.keys()]
-
-    ### Load only non-jagged data (EXTEND THIS!)
-    VARS   = [x.decode() for x in events.keys() if b'image_' not in x]
-
-    X_dict = events.arrays(VARS, namedecode = "utf-8")
-
-        
-    # Print out some statistics
-    labels1 = ['is_e', 'is_egamma']
-    #labels2 = ['has_trk','has_seed','has_gsf','has_ele']
-    #labels3 = ['seed_trk_driven','seed_ecal_driven']
-
-    aux.count_targets(events=events, names=labels1)
-    #aux.count_targets(events=events, names=labels2)
-    #aux.count_targets(events=events, names=labels3)
-    
-    # -----------------------------------------------------------------
-    ### Convert input to matrix
-    X = np.array([X_dict[j] for j in VARS])
-    X = np.transpose(X)
-
-
-    prints.printbar()
-    # =================================================================
-    # *** MC ONLY ***
-
-    # @@ MC target definition here @@
-    print(__name__ + f'.load_root_file: MC target computed')
-    Y = TARFUNC(events)
-    prints.printbar()
-
-
-    # @@ MC filtering done here @@
-    print(__name__ + f'.load_root_file: MC filter applied')
-    indmc = FILTERFUNC(X, VARS)
-    prints.printbar()
-    
-    Y = Y[indmc]
-    X = X[indmc,:]
-    # =================================================================
-
-
-    # -----------------------------------------------------------------
-    # @@ Observable cut selections done here @@
-    print(__name__ + f'.load_root_file: Observable cuts')
-    ind = CUTFUNC(X, VARS)
-    # -----------------------------------------------------------------
-
-    N_before = X.shape[0]
-    print(__name__ + f".load_root_file: Prior cut selections: {N_before} events ")
-
-    ### Select events
-    X  = X[ind,:]
-    Y  = Y[ind]
-
-    N_after = X.shape[0]
-    print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after/N_before:.3f})")
-
-    # PROCESS only MAXEVENTS
-    X = X[0:np.min([X.shape[0],MAXEVENTS]),:]
-    Y = Y[0:np.min([Y.shape[0],MAXEVENTS])]
-    
     return X, Y, VARS

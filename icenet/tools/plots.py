@@ -23,7 +23,7 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
         fig: figure handle
         ax:  figure axis
     """
-
+    
     fig,ax = plt.subplots(1,2,figsize=(8,6))
     
     ax[0].plot(losses)
@@ -198,11 +198,7 @@ def plot_correlations(X, netvars, colorbar = False):
     """ Plot cross-correlations
     Data in format (# samples x # dimensions)
     """
-
-    import pandas as pd
-    from sklearn import neighbors
-    import seaborn as sns
-
+    
     C = np.corrcoef(X, rowvar = False) * 100
     C[np.abs(C) < 0.5] = 0 # round near zero to 0
 
@@ -216,6 +212,8 @@ def plot_correlations(X, netvars, colorbar = False):
     
     if colorbar:
         cb = plt.colorbar()
+
+    print(__name__ + f'.plot_correlations: [done]')
 
     return fig,ax
 
