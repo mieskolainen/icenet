@@ -17,10 +17,6 @@ import numba
 from numba import jit
 
 # icenet
-import sys
-sys.path.append(".")
-import _icepaths_
-
 import iceplot
 from icenet.tools import aux
 from icenet.tools import io

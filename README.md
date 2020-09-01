@@ -1,7 +1,7 @@
 # icenet
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-work in progress!
+01/09/2020 -- work in progress!
 
 ## Dependencies
 ```
@@ -91,8 +91,9 @@ python brk_fit.py   --config tune0 --tag <xyz>
 3. Multinomial Logistic Regression [pytorch]
 4. MAXOUT multilayer feedforward network [pytorch]
 5. Deep Normalizing Flow (BNAF) based likelihoods & ratios [pytorch]
-6. Graph Convolution Network (GCN) [pytorch]
-7. Permutation Equivariant Networks [pytorch]
+6. Permutation Equivariant Networks [pytorch]
+7. CNN Networks [pytorch]
+8. Graph Neural Nets [pytorch-geometric]
 ...
 ```
 

@@ -76,7 +76,7 @@ def predict(X, models, EPS=1E-12) :
     Returns:
         LLR      : log-likelihood ratio
     """
-
+    
     print(__name__ + f': Likelihood (density) ratio pdf(x,S)/pdf(x,B) for N = {X.shape[0]} events ...')
 
     sgn_likelihood = get_pdf(models[1], X)

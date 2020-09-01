@@ -15,14 +15,11 @@ import numba
 from numba import jit
 
 # icenet
-import sys
-sys.path.append(".")
-import _icepaths_
-
 import iceplot
 from icenet.tools import aux
 from icenet.tools import io
 from icenet.tools import prints
+from icenet.deep import dopt
 
 # icebrk
 from icebrk import common
@@ -53,9 +50,11 @@ def main() :
         else:
             return X
     # ====================================================================
-    
-    # DEEPSETS
+    # Evaluate models
+
+    ### DEEPSETS
     DEPS_model = aux.load_torch_checkpoint(modeldir + '/DEPS_checkpoint.pth')
+    DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['deps_param']['device'])
     DEPS_model.eval() # Turn on eval mode!
 
     def func_predict_A(X):
@@ -67,20 +66,21 @@ def main() :
         Y  = standardize(X)
         X_ = aux.longvec2matrix(Y, M, D)
 
-        X_ptr = torch.from_numpy(X_).type(torch.FloatTensor)
-        y = DEPS_model.softpredict(X_ptr).detach().numpy()
+        X_ptr = torch.from_numpy(X_).type(torch.FloatTensor).to(device)
+        y = DEPS_model.softpredict(X_ptr).detach().cpu().numpy()
         return io.checkinfnan(y)
-        
-    # MAXOUT
+    
+    ### MAXOUT
     DMAX_model = aux.load_torch_checkpoint(modeldir + '/DMAX_checkpoint.pth')
+    DMAX_model, device = dopt.model_to_cuda(DMAX_model, device_type=args['dmax_param']['device'])
     DMAX_model.eval() # Turn on eval mode!
     
     def func_predict_B(X):
-        X_ptr = torch.from_numpy(standardize(X)).type(torch.FloatTensor)
-        y = DMAX_model.softpredict(X_ptr).detach().numpy()
+        X_ptr = torch.from_numpy(standardize(X)).type(torch.FloatTensor).to(device)
+        y = DMAX_model.softpredict(X_ptr).detach().cpu().numpy()
         return io.checkinfnan(y)
 
-    # XGB
+    ### XGB
     XGB_model = pickle.load(open(modeldir + '/XGB_model.dat', 'rb'))
     def func_predict_C(X):
         y = XGB_model.predict(xgboost.DMatrix(data = standardize(X)))

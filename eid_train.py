@@ -16,6 +16,7 @@ import sys
 import yaml
 import copy
 import graphviz
+import torch_geometric
 
 # xgboost
 import xgboost
@@ -28,10 +29,6 @@ from sklearn         import metrics
 from sklearn.metrics import accuracy_score
 
 # icenet
-import sys
-sys.path.append(".")
-import _icepaths_
-
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
@@ -44,6 +41,7 @@ from icenet.deep  import dbnf
 from icenet.deep  import mlgr
 from icenet.deep  import maxo
 from icenet.deep  import cnn
+from icenet.deep  import graph
 
 
 from icenet.optim import adam
@@ -54,20 +52,27 @@ from icenet.optim import scheduler
 from iceid import common
 
 
+modeldir = ''
+
 
 # Main function
 #
 def main() :
 
     ### Get input
-    data, args = common.init()
-    
+    data, args, features = common.init()
+
     ### Print ranges
     #prints.print_variables(X=data.trn.x, VARS=data.VARS)
-
+    
     ### Compute reweighting weights
     trn_weights = common.compute_reweights(data=data, args=args)
     
+    graph = {}
+    graph['trn'] = common.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features)
+    graph['val'] = common.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features)
+    graph['tst'] = common.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features)
+
     
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
@@ -76,11 +81,9 @@ def main() :
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, VARS = data.VARS,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
 
-    
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
-
-
+    
     ### Print scalar variables
     fig,ax = plots.plot_correlations(data.trn.x, data.VARS)
     targetdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
@@ -90,9 +93,62 @@ def main() :
     prints.print_variables(X=data.trn.x, VARS=data.VARS)
 
 
-    ### Execute
+    global modeldir
+    modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
+    
+    
+    ### Execute training
     train(data = data, data_tensor = data_tensor, data_kin = data_kin, trn_weights = trn_weights, args = args)
+    
+    ### Graph net based training
+    graph_train(data_trn=graph['trn'], data_val=graph['val'], args=args)
+    
     print(__name__ + ' [done]')
+
+
+# Graphnet training function
+#
+def graph_train(data_trn, data_val, args, num_classes=2):
+    
+    num_node_features = data_trn[0].x.shape[1]
+    
+    conv_type = args['gnet_param']['conv_type']
+    if   conv_type == 'GAT':
+        model = graph.GATNet(D = num_node_features, C = num_classes, task='graph')
+    elif conv_type == 'SG':
+        model = graph.SGNet(D = num_node_features, C = num_classes, task='graph')
+    elif conv_type == 'spline':
+        model = graph.SplineNet(D = num_node_features, C = num_classes, task='graph')
+    else:
+        raise Except(name__ + f'.graph_train: Unknown network convolution model "conv_type" = {conv_type}')
+
+    # CPU or GPU
+    model, device = dopt.model_to_cuda(model=model, device_type=args['gnet_param']['device'])
+
+    # Count the number of parameters
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(__name__ + f'.graph_train: Number of free parameters = {params}')
+
+    # Create optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=args['gnet_param']['learning_rate'], weight_decay=args['gnet_param']['weight_decay'])
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+
+    # Data loaders
+    train_loader = torch_geometric.data.DataLoader(data_trn, batch_size=args['gnet_param']['batch_size'], shuffle=True)
+    test_loader  = torch_geometric.data.DataLoader(data_val, batch_size=512, shuffle=False)
+    
+    for epoch in range(args['gnet_param']['epochs']):
+        loss               = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
+        test_acc, test_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
+
+        print(f'Epoch {epoch+1:03d}, Loss: {loss:.4f}, Test: {test_acc:.4f} (ACC), {test_auc:.4f} (AUC)')
+        scheduler.step()
+
+    ## Save
+    label = args['gnet_param']['label']
+    checkpoint = {'model': model, 'state_dict': model.state_dict()}
+    torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
 
 # Main training function
@@ -100,7 +156,6 @@ def main() :
 def train(data, data_tensor, data_kin, trn_weights, args) :
 
     print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
-    modeldir = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
     # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
@@ -189,8 +244,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Save
-        checkpoint = {'model': cnn.CNN(C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
-            dropout_cnn=args['cnn_param']['dropout_cnn'], dropout_mlp=args['cnn_param']['dropout_mlp'], mlp_dim=args['cnn_param']['mlp_dim']), 'state_dict': cnn_model.state_dict()}
+        checkpoint = {'model': cnn_model, 'state_dict': cnn_model.state_dict()}
         torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
         ### Plot contours
@@ -216,11 +270,9 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
         plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
         fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
+        
         ## Save
-        checkpoint = {'model': cnn.CNN_DMAX(D = X_trn.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
-            dropout_cnn = args['cdmx_param']['dropout_cnn'], neurons = args['cdmx_param']['neurons'], \
-            num_units = args['cdmx_param']['num_units'], dropout = args['cdmx_param']['dropout']), 'state_dict': cmdx_model.state_dict()}
+        checkpoint = {'model': cmdx_model, 'state_dict': cmdx_model.state_dict()}
         torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
         ### Plot contours
@@ -239,14 +291,23 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
             args['xgb_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
         print(f'\nTraining {label} classifier ...')
-        dtrain    = xgboost.DMatrix(data = data.trn.x, label = data.trn.y, weight = trn_weights)
-        dtest     = xgboost.DMatrix(data = data.val.x, label = data.val.y)
+
+        print(f'before extension: {data.trn.x.shape}')
+
+        # Extended data
+        x_trn_    = data.trn.x #np.c_[data.trn.x, data_tensor['trn'][:,0,:,:].reshape(len(data.trn.x), -1)]
+        x_val_    = data.val.x #np.c_[data.val.x, data_tensor['val'][:,0,:,:].reshape(len(data.val.x), -1)]
+        
+        print(f'after extension: {x_trn_.shape}')
+
+        dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y, weight = trn_weights)
+        dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
 
         evallist  = [(dtrain, 'train'), (dtest, 'eval')]
         results   = dict()
         xgb_model = xgboost.train(params = args['xgb_param'], dtrain = dtrain,
             num_boost_round = args['xgb_param']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
-
+        
         ## Save
         pickle.dump(xgb_model, open(modeldir + f'/{label}_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
 
@@ -304,9 +365,9 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
         plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
+        
         ## Save
-        checkpoint = {'model': mlgr.MLGR(D = X_trn.shape[1], C=2), 'state_dict': mlgr_model.state_dict()}
+        checkpoint = {'model': mlgr_model, 'state_dict': mlgr_model.state_dict()}
         torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
         ### Plot contours
@@ -365,7 +426,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
                         X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], trn_weights = weights, param = args['xtx_param'])
 
                     # Save
-                    checkpoint = {'model': maxo.MAXOUT(D = X_trn.shape[1], C = 2, num_units=args['xtx_param']['num_units'], neurons=args['xtx_param']['neurons'], dropout=args['xtx_param']['dropout']), 'state_dict': xtx_model.state_dict()}
+                    checkpoint = {'model': xtx_model, 'state_dict': xtx_model.state_dict()}
                     torch.save(checkpoint, f'{modeldir}/{label}_checkpoint_bin_{i}_{j}.pth')
 
                 except:
@@ -388,8 +449,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Save
-        checkpoint = {'model': maxo.MAXOUT(D = X_trn.shape[1], C=2, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout']), 'state_dict': dmax_model.state_dict()}
-        targetdir = f'./checkpoint/{args["config"]}/'; os.makedirs(targetdir, exist_ok = True)
+        checkpoint = {'model': dmax_model, 'state_dict': dmax_model.state_dict()}
         torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
         
         ### Plot contours

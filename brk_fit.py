@@ -3,6 +3,8 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
+"""
+
 import h5py
 import uproot
 import uproot_methods
@@ -17,10 +19,6 @@ import numba
 from numba import jit
 
 # icenet
-import sys
-sys.path.append(".")
-import _icepaths_
-
 import iceplot
 from icenet.tools import aux
 from icenet.tools import io
@@ -149,3 +147,5 @@ def main() :
 if __name__ == '__main__' :
 
     main()
+
+"""

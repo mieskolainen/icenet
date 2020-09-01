@@ -18,10 +18,6 @@ from sklearn.model_selection import train_test_split
 
 
 # icenet
-import sys
-sys.path.append(".")
-import _icepaths_
-
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
@@ -120,7 +116,7 @@ def main() :
 
 
     ### Weights: CURRENTLY UNIT WEIGHTS
-    # (UPDATE THIS TO IMPLEMENT E.G. PILEUP DEPENDENT WEIGHTS)!
+    # (UPDATE THIS TO IMPLEMENT E.G. PILE-UP DEPENDENT WEIGHTS)!
     trn_weights = np.ones(X.shape[0])
 
     # Number of classes (powerset dimension)
@@ -156,7 +152,7 @@ def main() :
     # ------------------------------------------------------------------------
     # PyTorch based training
     
-    # Output [** NOW SAME -- UPDATE THIS **]
+    # Target outputs [** NOW SAME -- UPDATE THIS **]
     Y_trn = torch.from_numpy(Y_i).type(torch.LongTensor)
     Y_val = torch.from_numpy(Y_i).type(torch.LongTensor)
     
@@ -172,7 +168,7 @@ def main() :
         X_trn = torch.from_numpy(X).type(torch.FloatTensor)
         X_val = torch.from_numpy(X).type(torch.FloatTensor)
 
-        print('\nTraining {label} classifier ...')
+        print(f'\nTraining {label} classifier ...')
         dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout'])
         dmax_model, losses, trn_aucs, val_aucs = dopt.train(model = dmax_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
             trn_weights = trn_weights, param = args['dmax_param'])
@@ -182,7 +178,7 @@ def main() :
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Save
-        checkpoint = {'model': maxo.MAXOUT(D = X_trn.shape[1], C = C, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout']), 'state_dict': dmax_model.state_dict()}
+        checkpoint = {'model': dmax_model, 'state_dict': dmax_model.state_dict()}
         torch.save(checkpoint, modeldir + '/DMAX_checkpoint.pth')
     
     # ====================================================================
@@ -214,7 +210,7 @@ def main() :
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Save
-        checkpoint = {'model': deps.DEPS(D = D, z_dim = args['deps_param']['z_dim'], C = C), 'state_dict': deps_model.state_dict()}
+        checkpoint = {'model': deps_model, 'state_dict': deps_model.state_dict()}
         torch.save(checkpoint, modeldir + '/DEPS_checkpoint.pth')
         
         
@@ -222,5 +218,5 @@ def main() :
 
     
 if __name__ == '__main__' :
-
+    
     main()

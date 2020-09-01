@@ -2,11 +2,11 @@
 #
 # General comments:
 #
-# - Keep the minibatch size small enough, otherwise weak convergence to optima
+# - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 200000
+MAXEVENTS: 10000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -14,9 +14,27 @@ inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
 targetfunc: 'target_e'         # Training target,    implemented under mctargets.py
 filterfunc: 'filter_no_egamma' # Training filtering, implemented under mcfilter.py
 
-cutfunc: 'cut_standard'        # Basic cuts,              implemented under cuts.py
+cutfunc: 'cut_standard'        # Basic cuts,         implemented under cuts.py
 frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
+
+
+# Image tensor construction
+image_param:
+
+  # See the corresponding construction under common.py
+  channels: 1                 # 1,2
+
+  # bin-edges
+  eta_bins: [-3. , -2.7, -2.4, -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3,  0. , 0.3,  0.6,  0.9,  1.2,  1.5,  1.8,  2.1,  2.4,  2.7,  3.]
+  phi_bins: [-3.14159 , -2.827431, -2.513272, -2.199113, -1.884954, -1.570795,-1.256636, -0.942477, -0.628318, -0.314159,  0.,
+              0.314159,0.628318,  0.942477,  1.256636,  1.570795,  1.884954,  2.199113, 2.513272,  2.827431,  3.14159]
+  
+  # transformations
+  # (not implemented yet)
+
+  # normalization
+  # (not implemented yet)
 
 
 # Imputation
@@ -38,7 +56,7 @@ outlier_param:
 
 ## Reweighting setup in the training phase
 reweight_param:
-  mode: 'background'           # 'none', 'signal', 'background'
+  mode:  'background'           # 'none', 'signal', 'background'
   algo: '2D'
   bins_pt:  [0.0, 300.0, 1000] # Make sure the bounds cover the phase space
   bins_eta: [-3.1, 3.1,   100] # 
@@ -58,6 +76,23 @@ plot_param:
 # ========================================================================
 ## Classifier setup
 # ========================================================================
+
+# Graph nets
+gnet_param:
+  active: true
+  label:  'GNET'  
+
+  # Convolution model
+  conv_type: 'spline'       # 'spline', 'SG', 'GAT'
+  
+  epochs: 50
+  batch_size: 64
+  learning_rate: 0.005
+  weight_decay: 0.01        # L2-regularization
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
 
 # Factorized Likelihood Ratio
 flr_param:
@@ -103,7 +138,7 @@ xgb_param:
   eval_metric: ['auc', 'logloss']  # for evaluation
 
 
-# Logistic Regression (convex algorithm = global optimum guarantee)
+# Logistic Regression (convex model = global optimum guarantee)
 mlgr_param:
   active: true
   label:  'MLGR'
@@ -123,14 +158,14 @@ mlgr_param:
 
 # Convolutional Neural Net
 cnn_param:
-  active: True
+  active: true
   label:  'CNN'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent
   optimizer: 'AdamW'
   noise_reg: 0.0            # Noise regularization
-
+  
   dropout_cnn: 0.1
   dropout_mlp: 0.5
   mlp_dim: 64
@@ -203,10 +238,10 @@ dmax_param:
 
   num_units: 15
   neurons:  50
-  dropout:  0.1
+  dropout:  0.4
   
-  epochs:  200
-  batch_size: 256
+  epochs:  100
+  batch_size: 128
   learning_rate: 0.005
   weight_decay: 0.01        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'

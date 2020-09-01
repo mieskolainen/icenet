@@ -1,4 +1,4 @@
-# Common input & data reading routine for train.py and eval.py
+# Common input & data reading routines for the electron ID
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
@@ -16,6 +16,9 @@ import yaml
 import numpy as np
 import torch
 import uproot
+from tqdm import tqdm
+
+from torch_geometric.data import Data
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -29,69 +32,11 @@ from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
-def splitfactor(data, args):
-    """
-    Split electron ID data into:
-        scalar data
-        jagged arrays ("images")
-        kinematic data
-    """
-
-    ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.VARS    = k_vars
-    
-    
-    ### Pick active jagged array / "image" variables out
-    j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
-    
-    data_image       = copy.deepcopy(data)
-    data_image.trn.x = data.trn.x[:, j_ind]
-    data_image.val.x = data.val.x[:, j_ind]
-    data_image.tst.x = data.tst.x[:, j_ind]
-    data_image.VARS  = j_vars 
-
-
-    # Pick tensor data out
-    data_tensor = {
-        'trn' : [],
-        'val' : [],
-        'tst' : []
-    }
-
-    eta_binedges = np.linspace(-3, 3, 21)
-    phi_binedges = np.linspace(-np.pi, np.pi, 21)
-    xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
-            ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
-
-    #xyz   = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
-
-    data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-    data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-    data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-
-
-    ### Pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
-    
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.VARS     = s_vars
-
-
-    return data, data_tensor, data_kin
-
-
 def init():
-    """ Initialize data input.
-    Args:
+    """ Initialize electron ID data input.
+    
     Returns:
+        jagged array data, arguments
     """
 
     parser = argparse.ArgumentParser()
@@ -105,6 +50,7 @@ def init():
     cli.datasets = cli.datasets.split(',')
 
     ## Read configuration
+    args = {}
     config_yaml_file = cli.config + '.yml'
     with open('./configs/eid/' + config_yaml_file, 'r') as stream:
         try:
@@ -159,6 +105,7 @@ def init():
             "knn_k":      args['imputation_param']['knn_k']
         }
 
+        # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with data
         data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
         data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
         data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
@@ -169,7 +116,7 @@ def init():
         data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
         data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
 
-    return data, args
+    return data, args, INPUTVAR
 
 
 def compute_reweights(data, args):
@@ -211,6 +158,170 @@ def compute_reweights(data, args):
     return trn_weights
 
 
+def splitfactor(data, args):
+    """
+    Split electron ID data into different datatypes.
+    
+    Args:
+        data:  jagged arrays
+        args:  arguments dictionary
+    
+    Returns:
+        scalar (vector) data
+        tensor data (images)
+        kinematic data
+    """
+
+    ### Pick kinematic variables out
+    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
+    
+    data_kin         = copy.deepcopy(data)
+    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
+    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
+    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
+    data_kin.VARS    = k_vars
+    
+    ### Pick active jagged array / "image" variables out
+    j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
+    
+    data_image       = copy.deepcopy(data)
+    data_image.trn.x = data.trn.x[:, j_ind]
+    data_image.val.x = data.val.x[:, j_ind]
+    data_image.tst.x = data.tst.x[:, j_ind]
+    data_image.VARS  = j_vars 
+
+    # Use single channel tensors
+    if   args['image_param']['channels'] == 1:
+        xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+
+    # Use multichannel tensors
+    elif args['image_param']['channels'] == 2:
+        xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
+                ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
+    else:
+        raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
+
+    eta_binedges = args['image_param']['eta_bins']
+    phi_binedges = args['image_param']['phi_bins']    
+
+    # Pick tensor data out
+    data_tensor = {}
+    data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    
+    ### Pick active scalar variables out
+    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    
+    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
+    data.val.x    = data.val.x[:, s_ind].astype(np.float)
+    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
+    data.VARS     = s_vars
+
+    return data, data_tensor, data_kin
+
+
+def parse_graph_data(X, VARS, features, Y=None, W=None):
+    """
+    Jagged array data into pytorch-geometric style data format.
+    
+    Args:
+        X        :  Jagged array of variables
+        VARS     :  Array of strings
+        features :  Array of active scalar feature names
+        Y        :  Target array (if any)
+        W        :  Weights array (if any)
+    
+    Returns:
+        Array of pytorch-geometric Data objects
+    """
+    
+    N_events = X.shape[0]
+    dataset  = []
+
+    print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
+
+    for e in tqdm(range(N_events)):
+
+        num_nodes = 1 + len(X[:, VARS.index('image_clu_eta')][e])
+        num_edges = num_nodes**2 # include self-connections
+
+        num_node_features = 3 + len(features)
+        num_edge_features = 1
+        num_classes       = 2
+
+        # ====================================================================
+        # INITIALIZE TENSORS
+
+        # Node feature matrix
+        x = torch.tensor(np.zeros((num_nodes, num_node_features)), dtype=torch.float)
+
+        # Graph connectivity: (~ adjacency matrix)
+        edge_index = torch.tensor(np.zeros((2, num_edges)), dtype=torch.long)
+
+        # Edge features: [num_edges, num_edge_features]
+        edge_attr  = torch.tensor(np.zeros((num_edges, num_edge_features)), dtype=torch.float)
+
+        # Node level target: [num_nodes, *] or graph level target: [1, *]
+        y = torch.tensor([0], dtype=torch.long)
+
+        # Training weights, note [] is important to have for right dimensions
+        if W is not None:
+            w = torch.tensor([W[e]], dtype=float)
+        else:
+            w = torch.tensor([1.0], dtype=float)
+
+        # ====================================================================
+        # CONSTRUCT TENSORS
+
+        # Construct node features
+        for i in range(num_nodes):
+
+            # Hand-crafted features replicated to all nodes (vertices)
+            # (RAM wasteful, think about alternative strategies)
+            k = 0
+            for name in features:
+                x[i,k] = torch.tensor(X[:, VARS.index(name)][e])
+                k += 1
+
+            if i > 0: # image features spesific to each node
+
+                x[i,k]   = torch.tensor(X[:, VARS.index('image_clu_eta')][e][i-1])
+                x[i,k+1] = torch.tensor(X[:, VARS.index('image_clu_phi')][e][i-1])
+                x[i,k+2] = torch.tensor(X[:, VARS.index('image_clu_e')][e][i-1])
+
+        # Construct edge connectivity and features
+        n = 0
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+
+                # Full connectivity (except self-connections i == j)
+                edge_index[0,n] = i
+                edge_index[1,n] = j
+
+                # L2-distance squared in (eta,phi) plane
+                if i > 0 and j > 0: # i,j = 0 case is virtual node
+                    dR2 = (X[:, VARS.index('image_clu_eta')][e][i-1] - X[:, VARS.index('image_clu_eta')][e][j-1])**2 + \
+                          (X[:, VARS.index('image_clu_phi')][e][i-1] - X[:, VARS.index('image_clu_phi')][e][j-1])**2
+                else:
+                    dR2 = 0
+
+                # Edge features
+                edge_attr[n,0] = dR2
+                n += 1
+
+        # Construct output class, note [] is important to have for right dimensions
+        if Y is not None:
+            y = torch.tensor([Y[e]], dtype=torch.long)
+        else:
+            y = torch.tensor([0],    dtype=torch.long)
+
+        # Add this event
+        dataset.append( Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w) )
+
+    return dataset
+
+
 def load_root_file_new(root_path, class_id = []):
     """ Loads the root file.
     
@@ -218,12 +329,11 @@ def load_root_file_new(root_path, class_id = []):
         root_path : paths to root files
         cutfunc   : basic cutfunction handle
         class_id  : class ids
+
     Returns:
         X,Y       : input, output matrices
         VARS      : variable names
     """
-
-    # SET GLOBALS
 
     ### From root trees
     print('\n')
@@ -236,13 +346,11 @@ def load_root_file_new(root_path, class_id = []):
     print(__name__ + f'.load_root_file: events.numentries = {events.numentries}')
 
     ### All variables
-    VARS    = [x.decode() for x in events.keys()]
+    VARS        = [x.decode() for x in events.keys()]
     VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
 
     # Turn into dictionaries
-    X_dict  = events.arrays(VARS,   namedecode = "utf-8")
-    #X_dict_j = events.arrays(VARS_j, namedecode = "utf-8")
-    
+    X_dict  = events.arrays(VARS, namedecode = "utf-8")
     
     # Print out some statistics
     labels1 = ['is_e', 'is_egamma']
@@ -250,19 +358,22 @@ def load_root_file_new(root_path, class_id = []):
     #labels3 = ['seed_trk_driven','seed_ecal_driven']
 
     aux.count_targets(events=events, names=labels1)
-    #aux.count_targets(events=events, names=labels2)
-    #aux.count_targets(events=events, names=labels3)
     
     # -----------------------------------------------------------------
     ### Convert input to matrix
-    X   = np.array([X_dict[j] for j in VARS])
-    X   = np.transpose(X)
+    
+    X = np.array([X_dict[j] for j in VARS])
+    X = np.transpose(X)
 
     prints.printbar()
+
+    Y = None
+
     # =================================================================
     # *** MC ONLY ***
+    isMC  = X_dict['is_mc'][0] # Decision based on the first event
 
-    if X_dict['is_mc'][0]: # Check based on the first event
+    if isMC:
 
         # @@ MC target definition here @@
         print(__name__ + f'.load_root_file: MC target computed')
@@ -270,35 +381,37 @@ def load_root_file_new(root_path, class_id = []):
         prints.printbar()
 
         # @@ MC filtering done here @@
+        print(__name__ + f".load_root_file: Prior MC filter: {len(X)} events ")
         print(__name__ + f'.load_root_file: MC filter applied')
         indmc = FILTERFUNC(X, VARS)
+        print(__name__ + f".load_root_file: After MC filter: {sum(indmc)} events ")
         prints.printbar()
-                
+
         Y   = Y[indmc]
         X   = X[indmc]
     # =================================================================
 
-
     # -----------------------------------------------------------------
     # @@ Observable cut selections done here @@
     print(__name__ + f'.load_root_file: Observable cuts')
-    ind = CUTFUNC(X, VARS)
+    cind = CUTFUNC(X, VARS)
     # -----------------------------------------------------------------
 
     N_before = X.shape[0]
     print(__name__ + f".load_root_file: Prior cut selections: {N_before} events ")
 
     ### Select events
-    X = X[ind]
-    Y = Y[ind]
+    X = X[cind]
+    if isMC: Y = Y[cind]
 
     N_after = X.shape[0]
-    print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after/N_before:.3f})")
+    print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after / N_before:.3f})")
 
+    # -----------------------------------------------------------------
     # PROCESS only MAXEVENTS
-    maxind = np.min([X.shape[0], MAXEVENTS])
+    maxind = np.arange(0,np.min([X.shape[0], MAXEVENTS]))
 
-    X = X[0:maxind]
-    Y = Y[0:maxind]
+    X = X[maxind]
+    if isMC: Y = Y[maxind]
 
     return X, Y, VARS

@@ -330,6 +330,21 @@ def binaryvec2int(X):
     return Y
 
 
+def weight2onehot(weights, Y, N_classes):
+    """
+    Weights into one-hot encoding.
+    Args:
+        weights   :
+        Y         : targets
+        N_classes : number of classes
+
+    """
+    one_hot_weights = np.zeros((len(weights), N_classes))
+    for i in range(N_classes):
+        one_hot_weights[Y == i, i] = weights[Y == i]
+
+    return one_hot_weights
+
 
 def int2onehot(Y, N_classes):
     """ Integer class vector to class "one-hot encoding"

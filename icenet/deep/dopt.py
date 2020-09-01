@@ -68,7 +68,7 @@ def weights_init_normal(m):
         m.bias.data.fill_(0)
 
 
-def multiclass_cross_entropy(p_hat, y, N_classes, weights, EPS = 1e-15) :
+def multiclass_cross_entropy(phat, y, N_classes, weights, EPS = 1e-15) :
     """ Per instance weighted cross entropy loss
     (negative log-likelihood)
     """
@@ -76,20 +76,20 @@ def multiclass_cross_entropy(p_hat, y, N_classes, weights, EPS = 1e-15) :
     y = F.one_hot(y, N_classes)
 
     # Protection
-    loss = -y*torch.log(p_hat + EPS) * weights
+    loss = -y*torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
 
     return loss
 
 
-def multiclass_focal_entropy(p_hat, y, N_classes, weights, gamma, EPS = 1e-15) :
+def multiclass_focal_entropy(phat, y, N_classes, weights, gamma, EPS = 1e-15) :
     """ Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
 
     """
 
     y = F.one_hot(y, N_classes)
-    loss = -y * torch.pow(1 - p_hat, gamma) * torch.log(p_hat + EPS) * weights
+    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
     
     return loss
@@ -227,10 +227,8 @@ def dualtrain(model, X1_trn, X2_trn, Y_trn, X1_val, X2_val, Y_val, trn_weights, 
     print(__name__ + '.train: Training loop ...')
 
     # Change the shape
-    trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
-    for i in range(model.C):
-        trn_one_hot_weights[YY == i, i] = trn_weights[YY == i]
-
+    trn_one_hot_weights = aux.weight2onehot(weights=trn_one_hot_weights, Y=YY, N_classes=model.C)
+    
     params = {'batch_size': param['batch_size'],
             'shuffle': True,
             'num_workers': param['num_workers'],

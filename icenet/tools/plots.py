@@ -49,7 +49,21 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
 
 
 def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
-    """ Evaluate AUC per bin
+    """ Evaluate AUC per (pt,eta) bin.
+    
+    Args:
+        func_predict :  Function handle of the classifier
+        X            :  Input data
+        y            :  Output (target) data
+        X_kin        :  Kinematic (pt,eta) data
+        VARS_kin     :  Kinematic variables (strings)
+        pt_edges     :  Edges of the pt-space cells
+        eta_edges    :  Edges of the eta-space cells
+        label        :  Label of the classifier (string)
+        
+    Returns:
+        fig,ax       :  Figure handle and axis
+        met          :  Metrics object
     """
 
     y_tot      = np.array([])
@@ -67,20 +81,31 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
             ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index('trk_pt')],   pt_range),
                                  aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
 
-            print('\nEvaluate classifier ...')
-            print(f'*** PT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], ETA = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
-            y_pred = func_predict(X[ind, :])
+            print(f'\nEvaluate classifier <{label}> ...')
+            print(f'*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
             
-            # Evaluate metric
-            met = aux.Metric(y_true = y[ind], y_soft = y_pred)
-            print('AUC = {:.5f}'.format(met.auc))
+            if np.sum(ind) > 0: # Do we have any events in this cell
 
-            # Accumulate
-            y_tot      = np.concatenate((y_tot, y[ind]))
-            y_pred_tot = np.concatenate((y_pred_tot, y_pred))
+                if type(X) is list: # if not numpy array
+                    y_pred = np.array([])
+                    for k in range(len(ind)):
+                        if ind[k]:
+                            y_pred = np.append(y_pred, func_predict(X[k]) )
+                else:
+                    y_pred = func_predict(X[ind])
+                
+                # Evaluate metric
+                met = aux.Metric(y_true = y[ind], y_soft = y_pred)
+                print('AUC = {:.5f}'.format(met.auc))
 
-            AUC[i,j]   = met.auc
+                # Accumulate
+                y_tot      = np.concatenate((y_tot, y[ind]))
+                y_pred_tot = np.concatenate((y_pred_tot, y_pred))
+                AUC[i,j]   = met.auc
 
+            else:
+                print('No events found in this (eta,pt) cell!')
+    
     # Evaluate total performance
     met = aux.Metric(y_true = y_tot, y_soft = y_pred_tot)
     fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
