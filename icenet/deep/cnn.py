@@ -27,24 +27,24 @@ class CNN_DMAX(nn.Module):
 
         # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
-
-            nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2), # 2x2 window
-
-            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2), # 2x2 window
-            nn.Dropout2d(p = self.dropout_cnn),
-
-            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2), # 2x2 window
-            nn.Dropout2d(p = self.dropout_cnn),
             
+            nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
+            # no batchnorm in the first layer
+            nn.ReLU(),
+            nn.MaxPool2d(2), # 2x2 window
+            
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.Dropout2d(p = self.dropout_cnn),
+
+            nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2), # 2x2 window
+            nn.Dropout2d(p = self.dropout_cnn),
+
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
@@ -120,12 +120,12 @@ class CNN(nn.Module):
         self.dropout_cnn = dropout_cnn
         self.dropout_mlp = dropout_mlp
         self.mlp_dim     = mlp_dim
-        
+
         # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
 
             nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
+            # no batchnorm in the first layer
             nn.ReLU(),
             nn.MaxPool2d(2), # 2x2 window
 
