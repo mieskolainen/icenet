@@ -319,6 +319,32 @@ def calc_madscore(X : np.array):
 
     return X_m, X_mad
 
+def calc_zscore_tensor(T):
+    """
+    Compute z-score normalization for tensors.
+    Args:
+        T : input tensor data (events x channels x rows x cols, ...)
+    Returns:
+        mu, std tensors
+    """
+    Y   = copy.deepcopy(T)
+    Y[~np.isfinite(Y)] = 0
+    mu  = np.mean(Y, axis=0)
+    std = np.std(Y, axis=0)
+
+    return mu, std
+
+def apply_zscore_tensor(T, mu, std, EPS=1E-12):
+    """
+    Apply z-score normalization for tensors.
+    """
+    Y = copy.deepcopy(T)
+    Y[~np.isfinite(Y)] = 0
+
+    # Over all events
+    for i in range(T.shape[0]):
+        Y[i,...] = (Y[i,...] - mu) / (std + EPS)
+    return Y
 
 def calc_zscore(X : np.array):
     """ Calculate 0-mean & unit-variance normalization.
@@ -349,25 +375,25 @@ def calc_zscore(X : np.array):
 
 
 @numba.njit(parallel=True)
-def apply_zscore(X : np.array, X_mu, X_std):
+def apply_zscore(X : np.array, X_mu, X_std, EPS=1E-12):
     """ Z-score normalization
     """
 
     Y = np.zeros(X.shape)
     for i in range(len(X_mu)):
-        Y[:,i] = (X[:,i] - X_mu[i]) / X_std[i]
+        Y[:,i] = (X[:,i] - X_mu[i]) / (X_std[i] + EPS)
     return Y
 
 
 @numba.njit(parallel=True)
-def apply_madscore(X : np.array, X_m, X_mad):
+def apply_madscore(X : np.array, X_m, X_mad, EPS=1E-12):
     """ MAD-score normalization
     """
 
     Y = np.zeros(X.shape)
     scale = 0.6745 # 0.75th of z-normal
     for i in range(len(X_m)):
-        Y[:,i] = scale * (X[:,i] - X_m[i]) / X_mad[i]
+        Y[:,i] = scale * (X[:,i] - X_m[i]) / (X_mad[i] + EPS)
     return Y
 
 

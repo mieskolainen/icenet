@@ -127,7 +127,15 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
     modeldir  = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
 
     pt_edges  = args['plot_param']['pt_edges']
-    eta_edges = args['plot_param']['eta_edges'] 
+    eta_edges = args['plot_param']['eta_edges']     
+
+
+    ### Tensor variable normalization
+    if args['varnorm_tensor'] == 'zscore':
+
+        print('\nZ-score normalizing tensor variables ...')
+        X_mu_tensor, X_std_tensor = pickle.load(open(modeldir + '/zscore_tensor.dat', 'rb'))
+        X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
     
     ### Variable normalization
     if args['varnorm'] == 'zscore':

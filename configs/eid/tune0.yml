@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 10000000
+MAXEVENTS: 1000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -17,6 +17,7 @@ filterfunc: 'filter_no_egamma' # Training filtering, implemented under mcfilter.
 cutfunc: 'cut_standard'        # Basic cuts,         implemented under cuts.py
 frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
+varnorm_tensor: 'zscore'       # Tensor variable normalization
 
 
 # Image tensor construction

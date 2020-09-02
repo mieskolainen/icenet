@@ -154,8 +154,20 @@ def graph_train(data_trn, data_val, args, num_classes=2):
 # Main training function
 #
 def train(data, data_tensor, data_kin, trn_weights, args) :
-
     print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
+
+    # @@ Tensor normalization @@
+    if args['varnorm_tensor'] == 'zscore':
+
+        print('\nZ-score normalizing tensor variables ...')
+        X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_tensor['trn'])
+        for key in ['trn', 'val']:
+            data_tensor[key] = io.apply_zscore_tensor(data_tensor[key], X_mu_tensor, X_std_tensor)
+        
+        # Save it for the evaluation
+        pickle.dump([X_mu_tensor, X_std_tensor], open(modeldir + '/zscore_tensor.dat', 'wb'))    
+    
+    # --------------------------------------------------------------------
 
     # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
