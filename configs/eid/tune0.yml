@@ -166,7 +166,7 @@ cnn_param:
   optimizer: 'AdamW'
   noise_reg: 0.0            # Noise regularization
   
-  dropout_cnn: 0.2
+  dropout_cnn: 0.25
   dropout_mlp: 0.5
   mlp_dim: 64
   
