@@ -16,7 +16,7 @@ class CNN_DMAX(nn.Module):
     
     # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.4, neurons=50, num_units=6, dropout=0.1):
+    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.0, neurons=50, num_units=6, dropout=0.1):
         super(CNN_DMAX, self).__init__()
         
         # -------------------------------------------
@@ -27,12 +27,12 @@ class CNN_DMAX(nn.Module):
 
         # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
-            
+
             nn.Conv2d(in_channels=nchannels, out_channels=32, kernel_size=3, padding=1),
             # no batchnorm in the first layer
             nn.ReLU(),
             nn.MaxPool2d(2), # 2x2 window
-            
+
             nn.Conv2d(in_channels=32,  out_channels=32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
@@ -113,7 +113,7 @@ class CNN_DMAX(nn.Module):
 class CNN(nn.Module):
     # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-    def __init__(self, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.25, dropout_mlp=0.5, mlp_dim=128):
+    def __init__(self, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.0, dropout_mlp=0.5, mlp_dim=128):
         super(CNN, self).__init__()
 
         self.C           = C
