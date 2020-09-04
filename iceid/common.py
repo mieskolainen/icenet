@@ -18,8 +18,6 @@ import torch
 import uproot
 from tqdm import tqdm
 
-from torch_geometric.data import Data
-
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
@@ -219,107 +217,6 @@ def splitfactor(data, args):
     data.VARS     = s_vars
 
     return data, data_tensor, data_kin
-
-
-def parse_graph_data(X, VARS, features, Y=None, W=None):
-    """
-    Jagged array data into pytorch-geometric style data format.
-    
-    Args:
-        X        :  Jagged array of variables
-        VARS     :  Array of strings
-        features :  Array of active scalar feature names
-        Y        :  Target array (if any)
-        W        :  Weights array (if any)
-    
-    Returns:
-        Array of pytorch-geometric Data objects
-    """
-    
-    N_events = X.shape[0]
-    dataset  = []
-
-    print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
-
-    for e in tqdm(range(N_events)):
-
-        num_nodes = 1 + len(X[:, VARS.index('image_clu_eta')][e])
-        num_edges = num_nodes**2 # include self-connections
-
-        num_node_features = 3 + len(features)
-        num_edge_features = 1
-        num_classes       = 2
-
-        # ====================================================================
-        # INITIALIZE TENSORS
-
-        # Node feature matrix
-        x = torch.tensor(np.zeros((num_nodes, num_node_features)), dtype=torch.float)
-
-        # Graph connectivity: (~ adjacency matrix)
-        edge_index = torch.tensor(np.zeros((2, num_edges)), dtype=torch.long)
-
-        # Edge features: [num_edges, num_edge_features]
-        edge_attr  = torch.tensor(np.zeros((num_edges, num_edge_features)), dtype=torch.float)
-
-        # Node level target: [num_nodes, *] or graph level target: [1, *]
-        y = torch.tensor([0], dtype=torch.long)
-
-        # Training weights, note [] is important to have for right dimensions
-        if W is not None:
-            w = torch.tensor([W[e]], dtype=float)
-        else:
-            w = torch.tensor([1.0], dtype=float)
-
-        # ====================================================================
-        # CONSTRUCT TENSORS
-
-        # Construct node features
-        for i in range(num_nodes):
-
-            # Hand-crafted features replicated to all nodes (vertices)
-            # (RAM wasteful, think about alternative strategies)
-            k = 0
-            for name in features:
-                x[i,k] = torch.tensor(X[:, VARS.index(name)][e])
-                k += 1
-
-            if i > 0: # image features spesific to each node
-
-                x[i,k]   = torch.tensor(X[:, VARS.index('image_clu_eta')][e][i-1])
-                x[i,k+1] = torch.tensor(X[:, VARS.index('image_clu_phi')][e][i-1])
-                x[i,k+2] = torch.tensor(X[:, VARS.index('image_clu_e')][e][i-1])
-
-        # Construct edge connectivity and features
-        n = 0
-        for i in range(num_nodes):
-            for j in range(num_nodes):
-
-                # Full connectivity (except self-connections i == j)
-                edge_index[0,n] = i
-                edge_index[1,n] = j
-
-                # L2-distance squared in (eta,phi) plane
-                if i > 0 and j > 0: # i,j = 0 case is virtual node
-                    dR2 = (X[:, VARS.index('image_clu_eta')][e][i-1] - X[:, VARS.index('image_clu_eta')][e][j-1])**2 + \
-                          (X[:, VARS.index('image_clu_phi')][e][i-1] - X[:, VARS.index('image_clu_phi')][e][j-1])**2
-                else:
-                    dR2 = 0
-
-                # Edge features
-                edge_attr[n,0] = dR2
-                n += 1
-
-        # Construct output class, note [] is important to have for right dimensions
-        if Y is not None:
-            y = torch.tensor([Y[e]], dtype=torch.long)
-        else:
-            y = torch.tensor([0],    dtype=torch.long)
-
-        # Add this event
-        dataset.append( Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w) )
-
-    return dataset
 
 
 def load_root_file_new(root_path, class_id = []):

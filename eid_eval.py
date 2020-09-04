@@ -41,6 +41,8 @@ from icenet.deep  import maxo
 # iceid
 from configs.eid.mvavars import *
 from iceid import common
+from iceid import graphio
+
 
 targetdir = ''
 
@@ -53,9 +55,10 @@ def main() :
     data, args, features = common.init()
 
     data_graph = {}
-    data_graph['trn'] = common.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features)
-    data_graph['val'] = common.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features)
-    data_graph['tst'] = common.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features)
+    data_graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features)
+    data_graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features)
+    data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features)
+
 
     #########################################################
     varname = 'ele_mva_value_depth15'
@@ -107,10 +110,11 @@ def saveit(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
     plt.savefig(filename, bbox_inches='tight')
 
 
-# Evaluate classifiers
-#
 def evaluate(data, data_tensor, data_kin, data_graph, args):
-
+    """
+    Evaluate classifiers.
+    """
+    
     # --------------------------------------------------------------------
     ### Collect data
     X        = data.tst.x

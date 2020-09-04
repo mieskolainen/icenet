@@ -24,7 +24,7 @@ varnorm_tensor: 'zscore'       # Tensor variable normalization
 image_param:
 
   # See the corresponding construction under common.py
-  channels: 1                 # 1,2
+  channels: 1                 # 1,2,...
 
   # bin-edges
   eta_bins: [-3. , -2.7, -2.4, -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3,  0. , 0.3,  0.6,  0.9,  1.2,  1.5,  1.8,  2.1,  2.4,  2.7,  3.]
@@ -32,9 +32,6 @@ image_param:
               0.314159,0.628318,  0.942477,  1.256636,  1.570795,  1.884954,  2.199113, 2.513272,  2.827431,  3.14159]
   
   # transformations
-  # (not implemented yet)
-
-  # normalization
   # (not implemented yet)
 
 
@@ -81,7 +78,7 @@ plot_param:
 # Graph nets
 gnet_param:
   active: true
-  label:  'GNET'  
+  label:  'GNET'
 
   # Convolution model
   conv_type: 'spline'       # 'spline', 'SG', 'GAT'
@@ -247,6 +244,7 @@ dmax_param:
   weight_decay: 0.01        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
+
 
 # Deep Normalizing Flow
 dbnf_param:

@@ -50,6 +50,7 @@ from icenet.optim import scheduler
 
 # iceid
 from iceid import common
+from iceid import graphio
 
 
 modeldir = ''
@@ -69,9 +70,9 @@ def main() :
     trn_weights = common.compute_reweights(data=data, args=args)
     
     graph = {}
-    graph['trn'] = common.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features)
-    graph['val'] = common.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features)
-    graph['tst'] = common.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features)
+    graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features)
+    graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features)
+    graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features)
 
     
     ### Plot variables
@@ -158,7 +159,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
 
     # @@ Tensor normalization @@
     if args['varnorm_tensor'] == 'zscore':
-
+        
         print('\nZ-score normalizing tensor variables ...')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_tensor['trn'])
         for key in ['trn', 'val']:
