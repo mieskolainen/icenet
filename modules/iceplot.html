@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>iceplot &mdash; icenet alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="icenet" href="icenet.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> icenet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.01
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-virtual-environment-setup">Conda virtual environment setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#xgboost-setup">XGBoost setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.em">icefit.em</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#iceid-graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-deep-graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">icenet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>iceplot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/iceplot.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="iceplot">
+<h1>iceplot<a class="headerlink" href="#iceplot" title="Permalink to this headline">¶</a></h1>
+<p>Advanced histogram visualization functions.</p>
+<div class="section" id="module-iceplot.iceplot">
+<span id="iceplot-iceplot"></span><h2>iceplot.iceplot<a class="headerlink" href="#module-iceplot.iceplot" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="iceplot.iceplot.create_axes">
+<code class="sig-name descname">create_axes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xlabel</span><span class="o">=</span><span class="default_value">'$x$'</span></em>, <em class="sig-param"><span class="n">ylabel</span><span class="o">=</span><span class="default_value">'Counts'</span></em>, <em class="sig-param"><span class="n">ylabel_ratio</span><span class="o">=</span><span class="default_value">'Ratio'</span></em>, <em class="sig-param"><span class="n">xlim</span><span class="o">=</span><span class="default_value">0, 1</span></em>, <em class="sig-param"><span class="n">ylim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ylim_ratio</span><span class="o">=</span><span class="default_value">0.7, 1.3</span></em>, <em class="sig-param"><span class="n">ratio_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">5, 4</span></em>, <em class="sig-param"><span class="n">fontsize</span><span class="o">=</span><span class="default_value">9</span></em>, <em class="sig-param"><span class="n">units</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#create_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.create_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Axes creator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.edge2centerbins">
+<code class="sig-name descname">edge2centerbins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bins</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#edge2centerbins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.edge2centerbins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get centerbins from edgebins.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.generate_colormap">
+<code class="sig-name descname">generate_colormap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#generate_colormap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.generate_colormap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default colormap.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.hist">
+<code class="sig-name descname">hist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">bins</span><span class="o">=</span><span class="default_value">30</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a histogram.</p>
+<p>** Implement under/overflows !! **</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.hist_filled_error">
+<code class="sig-name descname">hist_filled_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">cbins</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">err</span></em>, <em class="sig-param"><span class="n">color</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hist_filled_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.hist_filled_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stephist style error.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.hist_obj">
+<code class="sig-name descname">hist_obj</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">bins</span><span class="o">=</span><span class="default_value">30</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">density</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hist_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.hist_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper to return a histogram object.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="iceplot.iceplot.hobj">
+<em class="property">class </em><code class="sig-name descname">hobj</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">counts</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">errs</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">bins</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">cbins</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hobj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.hobj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimal histogram data object.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="iceplot.iceplot.imperial_green">
+<code class="sig-name descname">imperial_green</code><em class="property"> = (0.0, 0.54, 0.23)</em><a class="headerlink" href="#iceplot.iceplot.imperial_green" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global marker styles</p>
+<p>zorder : approximate plotting order
+lw     : linewidth
+ls     : linestyle</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.ordered_legend">
+<code class="sig-name descname">ordered_legend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">frameon</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unique</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#ordered_legend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.ordered_legend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ordered legends.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.plot_horizontal_line">
+<code class="sig-name descname">plot_horizontal_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">0.5, 0.5, 0.5</span></em>, <em class="sig-param"><span class="n">linewidth</span><span class="o">=</span><span class="default_value">0.9</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#plot_horizontal_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.plot_horizontal_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the ratio plot</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.ratioerr">
+<code class="sig-name descname">ratioerr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">B</span></em>, <em class="sig-param"><span class="n">sigma_A</span></em>, <em class="sig-param"><span class="n">sigma_B</span></em>, <em class="sig-param"><span class="n">sigma_AB</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-15</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#ratioerr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.ratioerr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ratio f(A,B) = A/B error, by Taylor expansion of f.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.set_axis_ticks">
+<code class="sig-name descname">set_axis_ticks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">ticks</span></em>, <em class="sig-param"><span class="n">dim</span><span class="o">=</span><span class="default_value">'x'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#set_axis_ticks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.set_axis_ticks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set ticks of the axis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.set_global_style">
+<code class="sig-name descname">set_global_style</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">120</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">4, 3.75</span></em>, <em class="sig-param"><span class="n">font</span><span class="o">=</span><span class="default_value">'serif'</span></em>, <em class="sig-param"><span class="n">font_size</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">legend_fontsize</span><span class="o">=</span><span class="default_value">7</span></em>, <em class="sig-param"><span class="n">legend_handlelength</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#set_global_style"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.set_global_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set global plot style.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.stepspace">
+<code class="sig-name descname">stepspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em>, <em class="sig-param"><span class="n">step</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#stepspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.stepspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear binning edges between [start, stop]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.superplot">
+<code class="sig-name descname">superplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></span></em>, <em class="sig-param"><span class="n">observable</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ratio_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">yscale</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">ratio_error_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">legend_counts</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#superplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.superplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superposition (overlaid) plotting.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.tick_calc">
+<code class="sig-name descname">tick_calc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lim</span></em>, <em class="sig-param"><span class="n">step</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">6</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#tick_calc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.tick_calc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tick spacing calculator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceplot.iceplot.tick_creator">
+<code class="sig-name descname">tick_creator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">xtick_step</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ytick_step</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ylim_ratio</span><span class="o">=</span><span class="default_value">0.7, 1.3</span></em>, <em class="sig-param"><span class="n">ratio_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">minorticks_on</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ytick_ratio_step</span><span class="o">=</span><span class="default_value">0.15</span></em>, <em class="sig-param"><span class="n">labelsize</span><span class="o">=</span><span class="default_value">9</span></em>, <em class="sig-param"><span class="n">labelsize_ratio</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#tick_creator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceplot.iceplot.tick_creator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Axis tick constructor.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="icenet.html" class="btn btn-neutral float-left" title="icenet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Mikael Mieskolainen, Blackett Laboratory, Imperial College London
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1837 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>icenet &mdash; icenet alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="iceplot" href="iceplot.html" />
+    <link rel="prev" title="iceid" href="iceid.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> icenet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.01
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-virtual-environment-setup">Conda virtual environment setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#xgboost-setup">XGBoost setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.em">icefit.em</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#iceid-graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.algo.flr">icenet.algo.flr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icenet-deep-graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.prints">icenet.tools.prints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">icenet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>icenet</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/icenet.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="icenet">
+<h1>icenet<a class="headerlink" href="#icenet" title="Permalink to this headline">¶</a></h1>
+<p>Core classes including deep learning, data structures, manipulations and visualizations.</p>
+<div class="section" id="icenet-algo">
+<h2>icenet.algo<a class="headerlink" href="#icenet-algo" title="Permalink to this headline">¶</a></h2>
+<p>Various algorithms.</p>
+<div class="section" id="module-icenet.algo.analytic">
+<span id="icenet-algo-analytic"></span><h3>icenet.algo.analytic<a class="headerlink" href="#module-icenet.algo.analytic" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="icenet.algo.analytic.ktmetric">
+<code class="sig-name descname">ktmetric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kt2_i</span></em>, <em class="sig-param"><span class="n">kt2_j</span></em>, <em class="sig-param"><span class="n">dR2_ij</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">R</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#ktmetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.algo.analytic.ktmetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>kt-algorithm type distance measure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kt2_i</strong> – Particle 1 pt squared</p></li>
+<li><p><strong>kt2_j</strong> – Particle 2 pt squared</p></li>
+<li><p><strong>delta2_ij</strong> – Angular seperation between particles squared (deta**2 + dphi**2)</p></li>
+<li><p><strong>R</strong> – Radius parameter</p></li>
+<li><p><strong>=  1</strong> (<em>p</em>) – (p=1) kt-like, (p=0) Cambridge/Aachen, (p=-1) anti-kt like</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>distance measure</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.algo.flr">
+<span id="icenet-algo-flr"></span><h3>icenet.algo.flr<a class="headerlink" href="#module-icenet.algo.flr" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="icenet.algo.flr.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">b_pdfs</span></em>, <em class="sig-param"><span class="n">s_pdfs</span></em>, <em class="sig-param"><span class="n">bin_edges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/flr.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.algo.flr.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the likelihood ratio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – input data [# vectors x # dimensions]</p></li>
+<li><p><strong>b_pdfs</strong> – background pdfs</p></li>
+<li><p><strong>s_pdfs</strong> – signal pdfs</p></li>
+<li><p><strong>bin_edges</strong> – bin edges</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>likelihood ratio</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>LR</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.algo.flr.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">param</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/flr.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.algo.flr.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factorized likelihood classifier training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – input data [# vectors x # dimensions]</p></li>
+<li><p><strong>y</strong> – target data</p></li>
+<li><p><strong>weights</strong> – weighted events</p></li>
+<li><p><strong>param</strong> – dictionary for the parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>background pdfs
+s_pdfs:    signal pdfs
+bin_edges: histogram bin edges</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>b_pdfs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="icenet-deep">
+<h2>icenet.deep<a class="headerlink" href="#icenet-deep" title="Permalink to this headline">¶</a></h2>
+<p>Deep learning model classes.</p>
+<div class="section" id="module-icenet.deep.bnaf">
+<span id="icenet-deep-bnaf"></span><h3>icenet.deep.bnaf<a class="headerlink" href="#module-icenet.deep.bnaf" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.bnaf.BNAF">
+<em class="property">class </em><code class="sig-name descname">BNAF</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">res</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#BNAF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.BNAF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that extends <code class="docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code> for constructing a Block Neural
+Normalizing Flow.</p>
+<dl class="py method">
+<dt id="icenet.deep.bnaf.BNAF.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#BNAF.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.BNAF.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>torch.Tensor</strong> – </p></li>
+<li><p><strong>The input tensor.</strong> (<em>required.</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output tensor and the log-det-Jacobian of this transformation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.bnaf.MaskedWeight">
+<em class="property">class </em><code class="sig-name descname">MaskedWeight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">out_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">bias</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#MaskedWeight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.MaskedWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module that implements a linear layer with block matrices with positive diagonal blocks.
+Moreover, it uses Weight Normalization (<a class="reference external" href="https://arxiv.org/abs/1602.07868">https://arxiv.org/abs/1602.07868</a>) for stability.</p>
+<dl class="py method">
+<dt id="icenet.deep.bnaf.MaskedWeight.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">grad</span><span class="p">:</span> <span class="n">torch.Tensor</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#MaskedWeight.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.MaskedWeight.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>, required. The input tensor.</p></li>
+<li><p><strong>grad</strong> – <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>, optional.</p></li>
+<li><p><strong>log diagonal block of the partial Jacobian of previous transformations.</strong> (<em>The</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output tensor and the log diagonal blocks of the partial log-Jacobian of previous
+transformations combined with this transformation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.bnaf.MaskedWeight.get_weights">
+<code class="sig-name descname">get_weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#MaskedWeight.get_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.MaskedWeight.get_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the weight matrix using masks and weight normalization.
+It also compute the log diagonal blocks of it.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.bnaf.Permutation">
+<em class="property">class </em><code class="sig-name descname">Permutation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Permutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Permutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module that outputs a permutation of its input.</p>
+<dl class="py method">
+<dt id="icenet.deep.bnaf.Permutation.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Permutation.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Permutation.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> – <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>, required. The input tensor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The permuted tensor and the log-det-Jacobian of this permutation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.bnaf.Sequential">
+<em class="property">class </em><code class="sig-name descname">Sequential</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Sequential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Sequential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that extends <code class="docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code> for computing the output of
+the function together with the log-det-Jacobian of such transformation.</p>
+<dl class="py method">
+<dt id="icenet.deep.bnaf.Sequential.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span><span class="p">:</span> <span class="n">torch.Tensor</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Sequential.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Sequential.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>torch.Tensor</strong> – </p></li>
+<li><p><strong>The input tensor.</strong> (<em>required.</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output tensor and the log-det-Jacobian of this transformation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.bnaf.Tanh">
+<em class="property">class </em><code class="sig-name descname">Tanh</code><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Tanh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Tanh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that extends <code class="docutils literal notranslate"><span class="pre">torch.nn.Tanh</span></code> additionally computing the log diagonal
+blocks of the Jacobian.</p>
+<dl class="py method">
+<dt id="icenet.deep.bnaf.Tanh.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">grad</span><span class="p">:</span> <span class="n">torch.Tensor</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Tanh.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Tanh.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>, required. The input tensor.</p></li>
+<li><p><strong>grad</strong> – <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>, optional.</p></li>
+<li><p><strong>log diagonal blocks of the partial Jacobian of previous transformations.</strong> (<em>The</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output tensor and the log diagonal blocks of the partial log-Jacobian of previous
+transformations combined with this transformation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.cnn">
+<span id="icenet-deep-cnn"></span><h3>icenet.deep.cnn<a class="headerlink" href="#module-icenet.deep.cnn" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.cnn.CNN">
+<em class="property">class </em><code class="sig-name descname">CNN</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">nchannels</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">nrows</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">ncols</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">dropout_cnn</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">dropout_mlp</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">mlp_dim</span><span class="o">=</span><span class="default_value">128</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.cnn.CNN.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.cnn.CNN.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.cnn.CNN_DMAX">
+<em class="property">class </em><code class="sig-name descname">CNN_DMAX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">nchannels</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">nrows</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">ncols</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">dropout_cnn</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">neurons</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">num_units</span><span class="o">=</span><span class="default_value">6</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dual (simultaneous) input network [image tensors x vectors]</p>
+<dl class="py method">
+<dt id="icenet.deep.cnn.CNN_DMAX.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.cnn.CNN_DMAX.maxout">
+<code class="sig-name descname">maxout</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">layer_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.maxout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.maxout" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAXOUT layer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.cnn.CNN_DMAX.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.dbnf">
+<span id="icenet-deep-dbnf"></span><h3>icenet.deep.dbnf<a class="headerlink" href="#module-icenet.deep.dbnf" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.dbnf.Dataset">
+<em class="property">class </em><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">W</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.compute_log_p_x">
+<code class="sig-name descname">compute_log_p_x</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#compute_log_p_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.compute_log_p_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model log-likelihood: log [ prod_{j=1}^N pdf(x_j)], where x ~ (iid) pdf(x)</p>
+<p>log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – model object</p></li>
+<li><p><strong>x</strong> – N minibatch vectors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>log-likelihood value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.create_model">
+<code class="sig-name descname">create_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">rngseed</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#create_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.create_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the network object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>param</strong> – parameters</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>model object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.get_pdf">
+<code class="sig-name descname">get_pdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#get_pdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.get_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate learned density (pdf) at point x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – model object</p></li>
+<li><p><strong>x</strong> – input vector(s)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pdf value</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>&gt; x = torch.tensor([[1.0, 2.0]])
+&gt; l = get_pdf(model,x)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.load_models">
+<code class="sig-name descname">load_models</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">paths</span></em>, <em class="sig-param"><span class="n">modeldir</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#load_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.load_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load models from files</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param</strong> – input parameters</p></li>
+<li><p><strong>X</strong> – pytorch tensor of vectors</p></li>
+<li><p><strong>models</strong> – list of model objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>log-likelihood ratio</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>LLR</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dbnf.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">trn_x</span></em>, <em class="sig-param"><span class="n">val_x</span></em>, <em class="sig-param"><span class="n">trn_weights</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">modeldir</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train the model density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – initialized model object</p></li>
+<li><p><strong>optimizer</strong> – optimizer object</p></li>
+<li><p><strong>scheduler</strong> – optimization scheduler</p></li>
+<li><p><strong>trn_x</strong> – training vectors</p></li>
+<li><p><strong>val_x</strong> – validation vectors</p></li>
+<li><p><strong>trn_weights</strong> – training weights</p></li>
+<li><p><strong>param</strong> – parameters</p></li>
+<li><p><strong>modeldir</strong> – directory to save the model</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.deps">
+<span id="icenet-deep-deps"></span><h3>icenet.deep.deps<a class="headerlink" href="#module-icenet.deep.deps" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.deps.DEPS">
+<em class="property">class </em><code class="sig-name descname">DEPS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">z_dim</span></em>, <em class="sig-param"><span class="n">C</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">pool</span><span class="o">=</span><span class="default_value">'max'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation equivariant networks.</p>
+<dl class="py method">
+<dt id="icenet.deep.deps.DEPS.binarypredict">
+<code class="sig-name descname">binarypredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS.binarypredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS.binarypredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.deps.DEPS.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.deps.DEPS.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.deps.PEN1_max">
+<em class="property">class </em><code class="sig-name descname">PEN1_max</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_dim</span></em>, <em class="sig-param"><span class="n">out_dim</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation Equivariant Network (PEN) max-type layers.</p>
+<p>Single dimensional model.</p>
+<dl class="py method">
+<dt id="icenet.deep.deps.PEN1_max.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_max.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_max.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.deps.PEN1_mean">
+<em class="property">class </em><code class="sig-name descname">PEN1_mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_dim</span></em>, <em class="sig-param"><span class="n">out_dim</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation Equivariant Network (PEN) mean-type layers.</p>
+<p>Single dimensional model.</p>
+<dl class="py method">
+<dt id="icenet.deep.deps.PEN1_mean.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_mean.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_mean.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.deps.PEN_max">
+<em class="property">class </em><code class="sig-name descname">PEN_max</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_dim</span></em>, <em class="sig-param"><span class="n">out_dim</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation Equivariant Network (PEN) max-type layers.</p>
+<p>Multidimensional model.</p>
+<dl class="py method">
+<dt id="icenet.deep.deps.PEN_max.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_max.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_max.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.deps.PEN_mean">
+<em class="property">class </em><code class="sig-name descname">PEN_mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_dim</span></em>, <em class="sig-param"><span class="n">out_dim</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation Equivariant Network (PEN) mean-type layers.</p>
+<p>Multidimensional model.</p>
+<dl class="py method">
+<dt id="icenet.deep.deps.PEN_mean.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_mean.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_mean.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.dopt">
+<span id="icenet-deep-dopt"></span><h3>icenet.deep.dopt<a class="headerlink" href="#module-icenet.deep.dopt" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.dopt.Dataset">
+<em class="property">class </em><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">W</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.dopt.DualDataset">
+<em class="property">class </em><code class="sig-name descname">DualDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X1</span></em>, <em class="sig-param"><span class="n">X2</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">W</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#DualDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.DualDataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.dualtrain">
+<code class="sig-name descname">dualtrain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">X1_trn</span></em>, <em class="sig-param"><span class="n">X2_trn</span></em>, <em class="sig-param"><span class="n">Y_trn</span></em>, <em class="sig-param"><span class="n">X1_val</span></em>, <em class="sig-param"><span class="n">X2_val</span></em>, <em class="sig-param"><span class="n">Y_val</span></em>, <em class="sig-param"><span class="n">trn_weights</span></em>, <em class="sig-param"><span class="n">param</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#dualtrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.dualtrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main training loop for dual object input</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.log_sum_exp">
+<code class="sig-name descname">log_sum_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#log_sum_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.log_sum_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/">http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.model_to_cuda">
+<code class="sig-name descname">model_to_cuda</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">device_type</span><span class="o">=</span><span class="default_value">'auto'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#model_to_cuda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.model_to_cuda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper function to handle CPU/GPU setup</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.multiclass_cross_entropy">
+<code class="sig-name descname">multiclass_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phat</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">N_classes</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-15</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_cross_entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_cross_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted cross entropy loss
+(negative log-likelihood)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.multiclass_focal_entropy">
+<code class="sig-name descname">multiclass_focal_entropy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phat</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">N_classes</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">gamma</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-15</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_focal_entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_focal_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted ‘focal entropy loss’
+<a class="reference external" href="https://arxiv.org/pdf/1708.02002.pdf">https://arxiv.org/pdf/1708.02002.pdf</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">X_trn</span></em>, <em class="sig-param"><span class="n">Y_trn</span></em>, <em class="sig-param"><span class="n">X_val</span></em>, <em class="sig-param"><span class="n">Y_val</span></em>, <em class="sig-param"><span class="n">trn_weights</span></em>, <em class="sig-param"><span class="n">param</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main training loop</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.weights_init_all">
+<code class="sig-name descname">weights_init_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">init_funcs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#weights_init_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.weights_init_all" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Examples</p>
+<p>model = MyNet()
+weights_init_all(model, init_funcs)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.weights_init_normal">
+<code class="sig-name descname">weights_init_normal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#weights_init_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.weights_init_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes module weights from normal distribution
+with a rule sigma ~ 1/sqrt(n)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.dopt.weights_init_uniform_rule">
+<code class="sig-name descname">weights_init_uniform_rule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#weights_init_uniform_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.weights_init_uniform_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes module weights from uniform [-a,a]</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.gcnn">
+<span id="icenet-deep-gcnn"></span><h3>icenet.deep.gcnn<a class="headerlink" href="#module-icenet.deep.gcnn" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.gcnn.GCN">
+<em class="property">class </em><code class="sig-name descname">GCN</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">Z</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graph Convolution Network</p>
+<dl class="py method">
+<dt id="icenet.deep.gcnn.GCN.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">adj_matrix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.gcnn.GCN_layer">
+<em class="property">class </em><code class="sig-name descname">GCN_layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D_in</span></em>, <em class="sig-param"><span class="n">D_out</span></em>, <em class="sig-param"><span class="n">bias</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graph Convolution Network Layer</p>
+<dl class="py method">
+<dt id="icenet.deep.gcnn.GCN_layer.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">adj_matrix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN_layer.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN_layer.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward operator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.gcnn.GCN_layer.reset_param">
+<code class="sig-name descname">reset_param</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN_layer.reset_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN_layer.reset_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 / sqrt(N) normalization</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="icenet-deep-graph">
+<h3>icenet.deep.graph<a class="headerlink" href="#icenet-deep-graph" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="module-icenet.deep.maxo">
+<span id="icenet-deep-maxo"></span><h3>icenet.deep.maxo<a class="headerlink" href="#module-icenet.deep.maxo" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.maxo.MAXOUT">
+<em class="property">class </em><code class="sig-name descname">MAXOUT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">num_units</span></em>, <em class="sig-param"><span class="n">neurons</span></em>, <em class="sig-param"><span class="n">dropout</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAXOUT network</p>
+<dl class="py method">
+<dt id="icenet.deep.maxo.MAXOUT.binarypredict">
+<code class="sig-name descname">binarypredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.binarypredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.binarypredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return max probability class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.maxo.MAXOUT.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.maxo.MAXOUT.maxout">
+<code class="sig-name descname">maxout</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">layer_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.maxout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.maxout" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAXOUT layer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.maxo.MAXOUT.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax probability</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.deep.mlgr">
+<span id="icenet-deep-mlgr"></span><h3>icenet.deep.mlgr<a class="headerlink" href="#module-icenet.deep.mlgr" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.mlgr.MLGR">
+<em class="property">class </em><code class="sig-name descname">MLGR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multinomial Logistic Regression model</p>
+<dl class="py method">
+<dt id="icenet.deep.mlgr.MLGR.binarypredict">
+<code class="sig-name descname">binarypredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR.binarypredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR.binarypredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return maximum probability class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.mlgr.MLGR.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.mlgr.MLGR.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax probability</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="icenet-optim">
+<h2>icenet.optim<a class="headerlink" href="#icenet-optim" title="Permalink to this headline">¶</a></h2>
+<p>Custom optimization functions.</p>
+<div class="section" id="module-icenet.optim.adam">
+<span id="icenet-optim-adam"></span><h3>icenet.optim.adam<a class="headerlink" href="#module-icenet.optim.adam" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.optim.adam.Adam">
+<em class="property">class </em><code class="sig-name descname">Adam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">lr</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">betas</span><span class="o">=</span><span class="default_value">0.9, 0.999</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">amsgrad</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">polyak</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adam.html#Adam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adam.Adam" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.optim.adam.Adam.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">closure</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adam.html#Adam.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adam.Adam.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single optimization step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>closure</strong> (<em>callable</em><em>, </em><em>optional</em>) – A closure that reevaluates the model
+and returns the loss.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.optim.adam.Adam.substitute">
+<code class="sig-name descname">substitute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adam.html#Adam.substitute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adam.Adam.substitute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.optim.adam.Adam.swap">
+<code class="sig-name descname">swap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adam.html#Adam.swap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adam.Adam.swap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swapping the running average of params and the current params for saving parameters using polyak averaging</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.optim.adamax">
+<span id="icenet-optim-adamax"></span><h3>icenet.optim.adamax<a class="headerlink" href="#module-icenet.optim.adamax" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.optim.adamax.Adamax">
+<em class="property">class </em><code class="sig-name descname">Adamax</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">lr</span><span class="o">=</span><span class="default_value">0.002</span></em>, <em class="sig-param"><span class="n">betas</span><span class="o">=</span><span class="default_value">0.9, 0.999</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">polyak</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adamax.html#Adamax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adamax.Adamax" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.optim.adamax.Adamax.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">closure</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adamax.html#Adamax.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adamax.Adamax.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a single optimization step (parameter update).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>closure</strong> (<em>callable</em>) – A closure that reevaluates the model and
+returns the loss. Optional for most optimizers.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="icenet.optim.adamax.Adamax.substitute">
+<code class="sig-name descname">substitute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adamax.html#Adamax.substitute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adamax.Adamax.substitute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.optim.adamax.Adamax.swap">
+<code class="sig-name descname">swap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/adamax.html#Adamax.swap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.adamax.Adamax.swap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swapping the running average of params and the current params for saving parameters using polyak averaging</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.optim.scheduler">
+<span id="icenet-optim-scheduler"></span><h3>icenet.optim.scheduler<a class="headerlink" href="#module-icenet.optim.scheduler" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.optim.scheduler.ReduceLROnPlateau">
+<em class="property">class </em><code class="sig-name descname">ReduceLROnPlateau</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">early_stopping</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/scheduler.html#ReduceLROnPlateau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.scheduler.ReduceLROnPlateau" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.optim.scheduler.ReduceLROnPlateau.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metrics</span></em>, <em class="sig-param"><span class="n">epoch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback_best</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback_reduce</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/optim/scheduler.html#ReduceLROnPlateau.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.optim.scheduler.ReduceLROnPlateau.step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="icenet-tools">
+<h2>icenet.tools<a class="headerlink" href="#icenet-tools" title="Permalink to this headline">¶</a></h2>
+<p>Tool and auxiliary functions.</p>
+<div class="section" id="module-icenet.tools.aux">
+<span id="icenet-tools-aux"></span><h3>icenet.tools.aux<a class="headerlink" href="#module-icenet.tools.aux" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.tools.aux.Metric">
+<em class="property">class </em><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y_true</span></em>, <em class="sig-param"><span class="n">y_soft</span></em>, <em class="sig-param"><span class="n">valrange</span><span class="o">=</span><span class="default_value">[0, 1]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.Metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier performance evaluation metrics.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.apply_cutflow">
+<code class="sig-name descname">apply_cutflow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cut</span></em>, <em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_cutflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.apply_cutflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply cutflow</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cut</strong> – list of pre-calculated cuts, each is a boolean array</p></li>
+<li><p><strong>names</strong> – list of names (description of each cut, for printout only)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of indices, 1 = pass, 0 = fail</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ind</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.arrays2matrix">
+<code class="sig-name descname">arrays2matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_arr</span></em>, <em class="sig-param"><span class="n">y_arr</span></em>, <em class="sig-param"><span class="n">z_arr</span></em>, <em class="sig-param"><span class="n">x_binedges</span></em>, <em class="sig-param"><span class="n">y_binedges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#arrays2matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.arrays2matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array representation summed to matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_arr</strong> – array of [x values]</p></li>
+<li><p><strong>y_arr</strong> – array of [y values]</p></li>
+<li><p><strong>z_arr</strong> – array of [z values]</p></li>
+<li><p><strong>x_binedges</strong> – array of binedges</p></li>
+<li><p><strong>y_binedges</strong> – array of binedges</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Matrix output</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.balanceweights">
+<code class="sig-name descname">balanceweights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights_doublet</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#balanceweights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.balanceweights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Balance class weights to sum to equal counts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.bin2int">
+<code class="sig-name descname">bin2int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#bin2int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.bin2int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binary vector to integer.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.bin_array">
+<code class="sig-name descname">bin_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num</span></em>, <em class="sig-param"><span class="n">N</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#bin_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.bin_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a positive integer num into an N-bit bit vector.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.binaryvec2int">
+<code class="sig-name descname">binaryvec2int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#binaryvec2int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.binaryvec2int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn a matrix of binary vectors row-by-row into integer reps.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.binom_coeff_all">
+<code class="sig-name descname">binom_coeff_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">MAX</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#binom_coeff_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.binom_coeff_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum all all binomial coefficients up to MAX.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.binomial">
+<code class="sig-name descname">binomial</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#binomial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.binomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binomial coefficient C(n,k).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.binvec2powersetindex">
+<code class="sig-name descname">binvec2powersetindex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">B</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#binvec2powersetindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.binvec2powersetindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binary vector to powerset index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – matrix of binary vectors [# number of vectors x dimension]</p></li>
+<li><p><strong>B</strong> – the powerset matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of powerset indices</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>y</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.binvec_are_equal">
+<code class="sig-name descname">binvec_are_equal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#binvec_are_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.binvec_are_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare equality of two binary vectors a and b.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – binary vectors</p></li>
+<li><p><strong>b</strong> – binary vectors</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>true or false</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.count_targets">
+<code class="sig-name descname">count_targets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">events</span></em>, <em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#count_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.count_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Targets statistics printout</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>events</strong> – uproot object</p></li>
+<li><p><strong>names</strong> – list of branch names</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Printout on stdout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.deltaphi">
+<code class="sig-name descname">deltaphi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phi1</span></em>, <em class="sig-param"><span class="n">phi2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#deltaphi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.deltaphi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deltaphi measure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.deltar">
+<code class="sig-name descname">deltar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta1</span></em>, <em class="sig-param"><span class="n">eta2</span></em>, <em class="sig-param"><span class="n">phi1</span></em>, <em class="sig-param"><span class="n">phi2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#deltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.deltar" title="Permalink to this definition">¶</a></dt>
+<dd><p>DeltaR measure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.generatebinary">
+<code class="sig-name descname">generatebinary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">M</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#generatebinary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.generatebinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to generate all 2**N binary vectors (as boolean matrix rows)
+with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.generatebinary_fixed">
+<code class="sig-name descname">generatebinary_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#generatebinary_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.generatebinary_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate all combinations of n bits with fixed k ones.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.hardclass">
+<code class="sig-name descname">hardclass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y_soft</span></em>, <em class="sig-param"><span class="n">valrange</span><span class="o">=</span><span class="default_value">[0, 1]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#hardclass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.hardclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Soft decision to hard decision at point (valrange[1] - valrange[0]) / 2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>y_soft</strong> – probabilities for two classes</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>classification results</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>y_out</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.int2onehot">
+<code class="sig-name descname">int2onehot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">N_classes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#int2onehot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.int2onehot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer class vector to class “one-hot encoding”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Y</strong> – Class indices (# samples)</p></li>
+<li><p><strong>N_classes</strong> – Number of classes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Onehot representation</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>onehot</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.jagged2tensor">
+<code class="sig-name descname">jagged2tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">xyz</span></em>, <em class="sig-param"><span class="n">x_binedges</span></em>, <em class="sig-param"><span class="n">y_binedges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.jagged2tensor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – input data (samples x dimensions) with jagged structure</p></li>
+<li><p><strong>VARS</strong> – all variable names</p></li>
+<li><p><strong>xyz</strong> – array of (x,y,z) channel triplet strings such as [[‘image_clu_eta’, ‘image_clu_phi’, ‘image_clu_e’]]</p></li>
+<li><p><strong>x_binedges</strong> – </p></li>
+<li><p><strong>y_binedges</strong> – arrays of bin edges</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tensor of size (samples x channels x rows x columns)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.load_torch_checkpoint">
+<code class="sig-name descname">load_torch_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#load_torch_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.load_torch_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load pytorch checkpoint</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.load_torch_model">
+<code class="sig-name descname">load_torch_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">load_start_epoch</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#load_torch_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.load_torch_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>PyTorch model loader</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.longvec2matrix">
+<code class="sig-name descname">longvec2matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">'F'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#longvec2matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.longvec2matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>A matrix representation / dimension converter function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Input matrix</p></li>
+<li><p><strong>M</strong> – Number of set elements</p></li>
+<li><p><strong>D</strong> – Feature dimension</p></li>
+<li><p><strong>order</strong> – Reshape direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Y</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>X = [# number of samples N ] x [# M x D long feature vectors]
+–&gt;
+Y = [# number of samples N ] x [# number of set elements M] x [# vector dimension D]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.los2lol">
+<code class="sig-name descname">los2lol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">listOsets</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#los2lol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.los2lol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of sets [{},{},..,{}] to a list of of lists [[], [], …, []].</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.merge_connected">
+<code class="sig-name descname">merge_connected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lists</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#merge_connected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.merge_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge sets with common elements (find connected graphs problem).</p>
+<p class="rubric">Examples</p>
+<p>Input:  [{0, 1}, {0, 1}, {2, 3}, {2, 3}, {4, 5}, {4, 5}, {6, 7}, {6, 7}, {8, 9}, {8, 9}, {10}, {11}]
+Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.multiclass_roc_auc_score">
+<code class="sig-name descname">multiclass_roc_auc_score</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y_true</span></em>, <em class="sig-param"><span class="n">y_soft</span></em>, <em class="sig-param"><span class="n">average</span><span class="o">=</span><span class="default_value">'macro'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#multiclass_roc_auc_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.multiclass_roc_auc_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiclass AUC (area under the curve).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> – True classifications</p></li>
+<li><p><strong>y_soft</strong> – Soft probabilities</p></li>
+<li><p><strong>average</strong> – Averaging strategy</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Area under the curve via averaging</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>auc</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.number_of_set_bits">
+<code class="sig-name descname">number_of_set_bits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#number_of_set_bits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.number_of_set_bits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return how many bits are active of an integer in a standard binary representation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.pick_ind">
+<code class="sig-name descname">pick_ind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">minmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pick_ind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.pick_ind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return indices between minmax[0] and minmax[1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input vector</p></li>
+<li><p><strong>minmax</strong> – Minimum and maximum values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.reweight_aux">
+<code class="sig-name descname">reweight_aux</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweight_aux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweight_aux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute reweighting coefficients for 2-classes.
+:param X: Input data (# samples)
+:param y: Class target data (# samples)
+:param binedges: One dimensional histogram edges
+:param shape_reference: Target class of re-weighting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Re-weight coefficients for two classes (# vectors x 2)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>weights_doublet</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.reweightcoeff1D">
+<code class="sig-name descname">reweightcoeff1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Observable of interest (N x 1)</p></li>
+<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
+<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>weights</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.reweightcoeff2D">
+<code class="sig-name descname">reweightcoeff2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges_A</span></em>, <em class="sig-param"><span class="n">binedges_B</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
+<p>Operates in full 2D without factorization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_A</strong> – Observable of interest (N x 1)</p></li>
+<li><p><strong>X_B</strong> – Observable of interest (N x 1)</p></li>
+<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
+<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of weights</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>w</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.reweightcoeff2DFP">
+<code class="sig-name descname">reweightcoeff2DFP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges_A</span></em>, <em class="sig-param"><span class="n">binedges_B</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2DFP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2DFP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
+<p>Operates in 2D with factorized marginal 1D distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_A</strong> – Observable of interest (N x 1)</p></li>
+<li><p><strong>X_B</strong> – Observable of interest (N x 1)</p></li>
+<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
+<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of weights</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>w</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.save_torch_model">
+<code class="sig-name descname">save_torch_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#save_torch_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.save_torch_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>PyTorch model saver</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.to_edges">
+<code class="sig-name descname">to_edges</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">l</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#to_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.to_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>treat <cite>l</cite> as a Graph and returns it’s edges</p>
+<p class="rubric">Examples</p>
+<p>to_edges([‘a’,’b’,’c’,’d’]) -&gt; [(a,b), (b,c),(c,d)]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.to_graph">
+<code class="sig-name descname">to_graph</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">l</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#to_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.to_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn the list into a graph.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.weight2onehot">
+<code class="sig-name descname">weight2onehot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">N_classes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#weight2onehot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.weight2onehot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights into one-hot encoding.
+:param weights:
+:param Y: targets
+:param N_classes: number of classes</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.x2ind">
+<code class="sig-name descname">x2ind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">binedges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#x2ind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.x2ind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return histogram bin indices for data in x, which needs to be an array [].
+:param x: data to be classified between bin edges
+:param binedges: histogram bin edges</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>histogram bin indices</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>inds</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.tools.io">
+<span id="icenet-tools-io"></span><h3>icenet.tools.io<a class="headerlink" href="#module-icenet.tools.io" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.tools.io.DATASET">
+<em class="property">class </em><code class="sig-name descname">DATASET</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func_loader</span></em>, <em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">frac</span></em>, <em class="sig-param"><span class="n">rngseed</span></em>, <em class="sig-param"><span class="n">class_id</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#DATASET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.DATASET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main class for datasets</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.tools.io.Data">
+<em class="property">class </em><code class="sig-name descname">Data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">array([], dtype=float64)</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">array([], dtype=float64)</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data                [# vectors x # dimensions]</p></li>
+<li><p><strong>y</strong> – target output data  [# vectors]</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="icenet.tools.io.Data.classfilter">
+<code class="sig-name descname">classfilter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classid</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#Data.classfilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.Data.classfilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.apply_madscore">
+<code class="sig-name descname">apply_madscore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">numpy.array</span></em>, <em class="sig-param"><span class="n">X_m</span></em>, <em class="sig-param"><span class="n">X_mad</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#apply_madscore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.apply_madscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAD-score normalization</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.apply_zscore">
+<code class="sig-name descname">apply_zscore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">numpy.array</span></em>, <em class="sig-param"><span class="n">X_mu</span></em>, <em class="sig-param"><span class="n">X_std</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#apply_zscore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.apply_zscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Z-score normalization</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.apply_zscore_tensor">
+<code class="sig-name descname">apply_zscore_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">std</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#apply_zscore_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.apply_zscore_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply z-score normalization for tensors.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.calc_madscore">
+<code class="sig-name descname">calc_madscore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">numpy.array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#calc_madscore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.calc_madscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate robust normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> – Input with [# vectors x # dimensions]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Median vector
+X_mad : Median deviation vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>X_m</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.calc_zscore">
+<code class="sig-name descname">calc_zscore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">numpy.array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#calc_zscore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.calc_zscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate 0-mean &amp; unit-variance normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> – Input with [# vectors x # dimensions]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean vector
+X_std : Standard deviation vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>X_mu</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.calc_zscore_tensor">
+<code class="sig-name descname">calc_zscore_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#calc_zscore_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.calc_zscore_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute z-score normalization for tensors.
+:param T: input tensor data (events x channels x rows x cols, …)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>mu, std tensors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.checkinfnan">
+<code class="sig-name descname">checkinfnan</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#checkinfnan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.checkinfnan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check inf and Nan values and replace with a default value.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.tools.io.fastarray1">
+<em class="property">class </em><code class="sig-name descname">fastarray1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">capacity</span><span class="o">=</span><span class="default_value">32</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#fastarray1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.fastarray1" title="Permalink to this definition">¶</a></dt>
+<dd><p>1D pre-memory occupied buffer arrays for histogramming etc.</p>
+<dl class="py method">
+<dt id="icenet.tools.io.fastarray1.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#fastarray1.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.fastarray1.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.tools.io.fastarray1.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#fastarray1.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.fastarray1.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.tools.io.fastarray1.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">row</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#fastarray1.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.fastarray1.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.tools.io.fastarray1.values">
+<code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#fastarray1.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.fastarray1.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.impute_data">
+<code class="sig-name descname">impute_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">imputer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dim</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">values</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'iterative'</span></em>, <em class="sig-param"><span class="n">fill_value</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">knn_k</span><span class="o">=</span><span class="default_value">6</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#impute_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.impute_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data imputation (treatment of missing values, Nan and Inf).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Input data matrix [# vectors x # dimensions]</p></li>
+<li><p><strong>imputer</strong> – Pre-trained imputator, default None</p></li>
+<li><p><strong>dim</strong> – Array of active dimensions to impute</p></li>
+<li><p><strong>values</strong> – List of special integer values indicating the need for imputation</p></li>
+<li><p><strong>labels</strong> – List containing textual description of input variables</p></li>
+<li><p><strong>algorithm</strong> – ‘constant’, mean’, ‘median’, ‘iterative’, knn_k’</p></li>
+<li><p><strong>knn_k</strong> – knn k-nearest neighbour parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Imputed output data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>X</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.pick_vars">
+<code class="sig-name descname">pick_vars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#icenet.tools.io.DATASET" title="icenet.tools.io.DATASET">icenet.tools.io.DATASET</a></span></em>, <em class="sig-param"><span class="n">set_of_variables</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#pick_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.pick_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choose the active set of input variables.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.split_data">
+<code class="sig-name descname">split_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">frac</span></em>, <em class="sig-param"><span class="n">rngseed</span></em>, <em class="sig-param"><span class="n">class_id</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split into [A = train &amp; validation] + [B = test] sets</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.tools.plots">
+<span id="icenet-tools-plots"></span><h3>icenet.tools.plots<a class="headerlink" href="#module-icenet.tools.plots" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="icenet.tools.plots.ROC_plot">
+<code class="sig-name descname">ROC_plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metrics</span></em>, <em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'ROC'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#ROC_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.ROC_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.annotate_heatmap">
+<code class="sig-name descname">annotate_heatmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">xlabels</span></em>, <em class="sig-param"><span class="n">ylabels</span></em>, <em class="sig-param"><span class="n">x_rot</span><span class="o">=</span><span class="default_value">90</span></em>, <em class="sig-param"><span class="n">y_rot</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">decimals</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#annotate_heatmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.annotate_heatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add text annotations to a matrix heatmap plot</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.binned_AUC">
+<code class="sig-name descname">binned_AUC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func_predict</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">X_kin</span></em>, <em class="sig-param"><span class="n">VARS_kin</span></em>, <em class="sig-param"><span class="n">pt_edges</span></em>, <em class="sig-param"><span class="n">eta_edges</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_AUC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.binned_AUC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate AUC per (pt,eta) bin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
+<li><p><strong>X</strong> – Input data</p></li>
+<li><p><strong>y</strong> – Output (target) data</p></li>
+<li><p><strong>X_kin</strong> – Kinematic (pt,eta) data</p></li>
+<li><p><strong>VARS_kin</strong> – Kinematic variables (strings)</p></li>
+<li><p><strong>pt_edges</strong> – Edges of the pt-space cells</p></li>
+<li><p><strong>eta_edges</strong> – Edges of the eta-space cells</p></li>
+<li><p><strong>label</strong> – Label of the classifier (string)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Figure handle and axis
+met          :  Metrics object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fig,ax</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plot_auc_matrix">
+<code class="sig-name descname">plot_auc_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">AUC</span></em>, <em class="sig-param"><span class="n">pt_edges</span></em>, <em class="sig-param"><span class="n">eta_edges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_auc_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plot_auc_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot AUC matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>AUC</strong> – auc matrix</p></li>
+<li><p><strong>pt_edges</strong> – transverse momentum histogram edges</p></li>
+<li><p><strong>eta_edges</strong> – pseudorapidity histogram edges</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>figure handle
+ax:        figure axis</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plot_correlations">
+<code class="sig-name descname">plot_correlations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">netvars</span></em>, <em class="sig-param"><span class="n">colorbar</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_correlations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plot_correlations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot cross-correlations
+Data in format (# samples x # dimensions)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plot_decision_contour">
+<code class="sig-name descname">plot_decision_contour</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pred_func</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">targetdir</span><span class="o">=</span><span class="default_value">'.'</span></em>, <em class="sig-param"><span class="n">matrix</span><span class="o">=</span><span class="default_value">'numpy'</span></em>, <em class="sig-param"><span class="n">reso</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">npoints</span><span class="o">=</span><span class="default_value">400</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_decision_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plot_decision_contour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decision contour pairwise for each dimension,
+other dimensions evaluated at zero=(0,0,…0)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plot_reweight_result">
+<code class="sig-name descname">plot_reweight_result</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">trn_weights</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">xlabel</span><span class="o">=</span><span class="default_value">'x'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_reweight_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plot_reweight_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here plot pure event counts
+so we see that also integrated class fractions are equalized (or not)!</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plot_train_evolution">
+<code class="sig-name descname">plot_train_evolution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">losses</span></em>, <em class="sig-param"><span class="n">trn_aucs</span></em>, <em class="sig-param"><span class="n">val_aucs</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_train_evolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plot_train_evolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Training evolution plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>losses</strong> – loss values</p></li>
+<li><p><strong>trn_aucs</strong> – training matrices</p></li>
+<li><p><strong>val_aucs</strong> – validation metrics</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>figure handle
+ax:  figure axis</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plothist1d">
+<code class="sig-name descname">plothist1d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">labels</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plothist1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plothist1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Histogram observables in 1D</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plotvar">
+<code class="sig-name descname">plotvar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">NBINS</span><span class="o">=</span><span class="default_value">70</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">targetdir</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plotvar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plotvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a single variable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.plots.plotvars">
+<code class="sig-name descname">plotvars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">NBINS</span><span class="o">=</span><span class="default_value">70</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">targetdir</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plotvars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.plots.plotvars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot all variables.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-icenet.tools.prints">
+<span id="icenet-tools-prints"></span><h3>icenet.tools.prints<a class="headerlink" href="#module-icenet.tools.prints" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="icenet.tools.prints.colored_row">
+<code class="sig-name descname">colored_row</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">active_color</span><span class="o">=</span><span class="default_value">'green'</span></em>, <em class="sig-param"><span class="n">inactive_color</span><span class="o">=</span><span class="default_value">'white'</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#colored_row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.colored_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color vector elements.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.print_colored_matrix">
+<code class="sig-name descname">print_colored_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_colored_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.print_colored_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print matrix with two colors (suitable for binary matrices).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.print_flow">
+<code class="sig-name descname">print_flow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flow</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.print_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a cut or infoflows.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.print_variables">
+<code class="sig-name descname">print_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="p">:</span> <span class="n">numpy.array</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">active_dim</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.print_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print in a format (# samples x # dimensions)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.printbar">
+<code class="sig-name descname">printbar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'-'</span></em>, <em class="sig-param"><span class="n">marks</span><span class="o">=</span><span class="default_value">75</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#printbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.printbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print bar.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.printbranch">
+<code class="sig-name descname">printbranch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#printbranch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.printbranch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a branch.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.prints.set_arr_format">
+<code class="sig-name descname">set_arr_format</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">precision</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#set_arr_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.prints.set_arr_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set numpy array print format.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="iceplot.html" class="btn btn-neutral float-right" title="iceplot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="iceid.html" class="btn btn-neutral float-left" title="iceid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Mikael Mieskolainen, Blackett Laboratory, Imperial College London
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
