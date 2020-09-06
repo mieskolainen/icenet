@@ -110,7 +110,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None):
                 # Add kt-metric like edge features, with p = -1,0,1 (for now only with p=-1)
                 for p in range(1):
                     edge_attr[n,p] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1+p, R=1.0)
-                
+
                 n += 1
 
         ### Construct edge connectivity

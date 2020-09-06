@@ -75,6 +75,7 @@ plot_param:
 ## Classifier setup
 # ========================================================================
 
+
 # Graph nets
 gnet_param:
   active: true

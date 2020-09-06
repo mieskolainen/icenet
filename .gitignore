@@ -13,11 +13,6 @@ style_output/
 debug_output/
 debut_output_e/
 
-docs/build/
-docs/source/
-docs/make.bat
-docs/Makefile
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
