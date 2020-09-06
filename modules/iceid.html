@@ -113,7 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.features">icebrk.features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
 </ul>
 </li>
@@ -123,7 +123,7 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">iceid</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-iceid.common">iceid.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iceid-graphio">iceid.graphio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-iceid.graphio">iceid.graphio</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a><ul>
@@ -139,7 +139,7 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-deep-graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 </ul>
@@ -306,8 +306,28 @@ kinematic data</p>
 </dd></dl>
 
 </div>
-<div class="section" id="iceid-graphio">
-<h2>iceid.graphio<a class="headerlink" href="#iceid-graphio" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-iceid.graphio">
+<span id="iceid-graphio"></span><h2>iceid.graphio<a class="headerlink" href="#module-iceid.graphio" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="iceid.graphio.parse_graph_data">
+<code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jagged array data into pytorch-geometric style Data format array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Jagged array of variables</p></li>
+<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>features</strong> – Array of active scalar feature strings</p></li>
+<li><p><strong>Y</strong> – Target class  array (if any, typically MC only)</p></li>
+<li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of pytorch-geometric Data objects</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 

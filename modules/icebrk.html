@@ -113,7 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icebrk.features">icebrk.features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icebrk.histos">icebrk.histos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.loop">icebrk.loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icebrk.tools">icebrk.tools</a></li>
 </ul>
 </li>
@@ -123,7 +123,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="iceid.html#iceid-graphio">iceid.graphio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.graphio">iceid.graphio</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a><ul>
@@ -139,7 +139,7 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-deep-graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 </ul>
@@ -471,8 +471,132 @@ mcinfostats_BC:</p>
 </dd></dl>
 
 </div>
-<div class="section" id="icebrk-loop">
-<h2>icebrk.loop<a class="headerlink" href="#icebrk-loop" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-icebrk.loop">
+<span id="icebrk-loop"></span><h2>icebrk.loop<a class="headerlink" href="#module-icebrk.loop" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="icebrk.loop.hdf5_append">
+<code class="sig-name descname">hdf5_append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datasets</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">chunk</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#hdf5_append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.hdf5_append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append chunk of data to HDF5 file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datasets</strong> – </p></li>
+<li><p><strong>key</strong> – </p></li>
+<li><p><strong>chunk</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>datasets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>f</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icebrk.loop.hdf5_write_handles">
+<code class="sig-name descname">hdf5_write_handles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">N_weights</span></em>, <em class="sig-param"><span class="n">rwmode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#hdf5_write_handles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.hdf5_write_handles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create HDF5 file handles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – </p></li>
+<li><p><strong>N_weights</strong> – </p></li>
+<li><p><strong>rwmode</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>datasets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>f</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icebrk.loop.hist_flush">
+<code class="sig-name descname">hist_flush</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reco</span></em>, <em class="sig-param"><span class="n">hobj</span></em>, <em class="sig-param"><span class="n">h5datasets</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#hist_flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.hist_flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Histogram observables with accumulation of previous histograms, and flush buffer arrays</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reco</strong> – </p></li>
+<li><p><strong>hobj</strong> – </p></li>
+<li><p><strong>h5datasets</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>w</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icebrk.loop.initarrays">
+<code class="sig-name descname">initarrays</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">BUFFER</span></em>, <em class="sig-param"><span class="n">func_predict</span></em>, <em class="sig-param"><span class="n">isMC</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#initarrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.initarrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init histogramming arrays and objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>BUFFER</strong> – </p></li>
+<li><p><strong>func_predict</strong> – </p></li>
+<li><p><strong>isMC</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>hobj:</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>reco</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icebrk.loop.poweranalysis">
+<code class="sig-name descname">poweranalysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">evt_index</span></em>, <em class="sig-param"><span class="n">batch_obs</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">func_predict</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">qsets</span></em>, <em class="sig-param"><span class="n">MAXT3</span></em>, <em class="sig-param"><span class="n">MAXN</span></em>, <em class="sig-param"><span class="n">isMC</span></em>, <em class="sig-param"><span class="n">reco</span></em>, <em class="sig-param"><span class="n">BMAT</span></em>, <em class="sig-param"><span class="n">WNORM</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#poweranalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.poweranalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Powerset analysis of the event
+N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evt_index</strong> – </p></li>
+<li><p><strong>batch_obs</strong> – </p></li>
+<li><p><strong>obs</strong> – </p></li>
+<li><p><strong>func_predict</strong> – </p></li>
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>qsets</strong> – </p></li>
+<li><p><strong>MAXT3</strong> – </p></li>
+<li><p><strong>MAXN</strong> – </p></li>
+<li><p><strong>isMC</strong> – </p></li>
+<li><p><strong>reco</strong> – </p></li>
+<li><p><strong>BMAT</strong> – </p></li>
+<li><p><strong>WNORM</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>w</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icebrk.loop.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">paths</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">func_predict</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isMC</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">MAXT3</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">MAXN</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">MAXEVENTS</span><span class="o">=</span><span class="default_value">10000000000</span></em>, <em class="sig-param"><span class="n">EVTGROUPSIZE</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">CHUNKBUFFER</span><span class="o">=</span><span class="default_value">512</span></em>, <em class="sig-param"><span class="n">VERBOSE</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">BMAT</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">WNORM</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">SUPERSETS</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">hd5dir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outputXY</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">outputP</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icebrk.loop.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main event processing loop</p>
+<p>Args:</p>
+<p>Returns:</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-icebrk.tools">
 <span id="icebrk-tools"></span><h2>icebrk.tools<a class="headerlink" href="#module-icebrk.tools" title="Permalink to this headline">¶</a></h2>

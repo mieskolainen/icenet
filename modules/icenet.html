@@ -113,7 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.features">icebrk.features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
 </ul>
 </li>
@@ -123,7 +123,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="iceid.html#iceid-graphio">iceid.graphio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.graphio">iceid.graphio</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">icenet</a><ul>
@@ -139,7 +139,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icenet-deep-graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 </ul>
@@ -333,6 +333,11 @@ Normalizing Flow.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="icenet.deep.bnaf.BNAF.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.bnaf.BNAF.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -365,6 +370,11 @@ transformations combined with this transformation.</p>
 It also compute the log diagonal blocks of it.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="icenet.deep.bnaf.MaskedWeight.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.bnaf.MaskedWeight.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -384,11 +394,16 @@ It also compute the log diagonal blocks of it.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="icenet.deep.bnaf.Permutation.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.bnaf.Permutation.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="icenet.deep.bnaf.Sequential">
-<em class="property">class </em><code class="sig-name descname">Sequential</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Sequential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Sequential" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">Sequential</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/bnaf.html#Sequential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.bnaf.Sequential" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class that extends <code class="docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code> for computing the output of
 the function together with the log-det-Jacobian of such transformation.</p>
 <dl class="py method">
@@ -406,6 +421,11 @@ the function together with the log-det-Jacobian of such transformation.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.bnaf.Sequential.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.bnaf.Sequential.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -432,6 +452,11 @@ transformations combined with this transformation.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="icenet.deep.bnaf.Tanh.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.bnaf.Tanh.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -443,20 +468,16 @@ transformations combined with this transformation.</p>
 <dd><dl class="py method">
 <dt id="icenet.deep.cnn.CNN.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN.softpredict">
 <code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.cnn.CNN.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.cnn.CNN.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -468,16 +489,7 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.maxout">
@@ -488,6 +500,11 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.softpredict">
 <code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.cnn.CNN_DMAX.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -617,20 +634,16 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.deps.DEPS.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.deps.DEPS.softpredict">
 <code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#DEPS.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.DEPS.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.deps.DEPS.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.deps.DEPS.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -643,16 +656,12 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.deps.PEN1_max.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_max.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_max.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.deps.PEN1_max.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.deps.PEN1_max.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -664,16 +673,12 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.deps.PEN1_mean.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN1_mean.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN1_mean.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.deps.PEN1_mean.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.deps.PEN1_mean.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -685,16 +690,12 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.deps.PEN_max.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_max.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_max.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.deps.PEN_max.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.deps.PEN_max.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -706,16 +707,12 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.deps.PEN_mean.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/deps.html#PEN_mean.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.deps.PEN_mean.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.deps.PEN_mean.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.deps.PEN_mean.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -801,16 +798,12 @@ with a rule sigma ~ 1/sqrt(n)</p>
 <dl class="py method">
 <dt id="icenet.deep.gcnn.GCN.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">adj_matrix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/gcnn.html#GCN.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.gcnn.GCN.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.gcnn.GCN.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.gcnn.GCN.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -830,11 +823,116 @@ registered hooks while the latter silently ignores them.</p>
 <dd><p>1 / sqrt(N) normalization</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="icenet.deep.gcnn.GCN_layer.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.gcnn.GCN_layer.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
-<div class="section" id="icenet-deep-graph">
-<h3>icenet.deep.graph<a class="headerlink" href="#icenet-deep-graph" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="module-icenet.deep.graph">
+<span id="icenet-deep-graph"></span><h3>icenet.deep.graph<a class="headerlink" href="#module-icenet.deep.graph" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="icenet.deep.graph.GATNet">
+<em class="property">class </em><code class="sig-name descname">GATNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.GATNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.GATNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.GATNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.GATNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.graph.SGNet">
+<em class="property">class </em><code class="sig-name descname">SGNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">K</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SGNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SGNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.SGNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SGNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SGNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.SGNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SGNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SGNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.SGNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.SGNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.graph.SplineNet">
+<em class="property">class </em><code class="sig-name descname">SplineNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SplineNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SplineNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.SplineNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SplineNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SplineNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.SplineNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SplineNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SplineNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.SplineNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.SplineNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.graph.test">
+<code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pytorch geometric based testing routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – pytorch geometric model</p></li>
+<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
+<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
+<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>accuracy, auc</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.graph.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">loader</span></em>, <em class="sig-param"><span class="n">optimizer</span></em>, <em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pytorch geometric based training routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – pytorch geometric model</p></li>
+<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
+<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
+<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>trained model (return implicit via input arguments)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-icenet.deep.maxo">
 <span id="icenet-deep-maxo"></span><h3>icenet.deep.maxo<a class="headerlink" href="#module-icenet.deep.maxo" title="Permalink to this headline">¶</a></h3>
@@ -851,16 +949,7 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.maxo.MAXOUT.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.maxo.MAXOUT.maxout">
@@ -873,6 +962,11 @@ registered hooks while the latter silently ignores them.</p>
 <code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/maxo.html#MAXOUT.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.softpredict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Softmax probability</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.maxo.MAXOUT.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.maxo.MAXOUT.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -892,22 +986,18 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt id="icenet.deep.mlgr.MLGR.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.mlgr.MLGR.softpredict">
 <code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/mlgr.html#MLGR.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.mlgr.MLGR.softpredict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Softmax probability</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.mlgr.MLGR.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.mlgr.MLGR.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -962,6 +1052,11 @@ and returns the loss.</p>
 returns the loss. Optional for most optimizers.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unless otherwise specified, this function should not modify the
+<code class="docutils literal notranslate"><span class="pre">.grad</span></code> field of the parameters.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
