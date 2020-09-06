@@ -107,12 +107,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/icebrk.html">icebrk</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-cutstats">icebrk.cutstats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-fasthistos">icebrk.fasthistos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-features">icebrk.features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-loop">icebrk.loop</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#icebrk-tools">icebrk.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules/icefit.html">icefit</a><ul>
@@ -264,9 +264,11 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.plots.annotate_heatmap">annotate_heatmap() (in module icenet.tools.plots)</a>
 </li>
+      <li><a href="modules/icenet.html#icenet.tools.aux.apply_cutflow">apply_cutflow() (in module icenet.tools.aux)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/icenet.html#icenet.tools.aux.apply_cutflow">apply_cutflow() (in module icenet.tools.aux)</a>
+      <li><a href="modules/icebrk.html#icebrk.cutstats.apply_cuts">apply_cuts() (in module icebrk.cutstats)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.apply_madscore">apply_madscore() (in module icenet.tools.io)</a>
 </li>
@@ -318,7 +320,15 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/icebrk.html#icebrk.histos.calc_batch_MC_observables">calc_batch_MC_observables() (in module icebrk.histos)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.histos.calc_batch_observables">calc_batch_observables() (in module icebrk.histos)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.io.calc_madscore">calc_madscore() (in module icenet.tools.io)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.histos.calc_MC_observables">calc_MC_observables() (in module icebrk.histos)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.histos.calc_observables">calc_observables() (in module icebrk.histos)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.calc_zscore">calc_zscore() (in module icenet.tools.io)</a>
 </li>
@@ -330,15 +340,31 @@
 </li>
       <li><a href="modules/icenet.html#icenet.deep.cnn.CNN">CNN (class in icenet.deep.cnn)</a>
 </li>
+      <li><a href="modules/icenet.html#icenet.deep.cnn.CNN_DMAX">CNN_DMAX (class in icenet.deep.cnn)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.cutstats.collect_info_stats">collect_info_stats() (in module icebrk.cutstats)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/icenet.html#icenet.deep.cnn.CNN_DMAX">CNN_DMAX (class in icenet.deep.cnn)</a>
+      <li><a href="modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats">collect_mcinfo_stats() (in module icebrk.cutstats)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.prints.colored_row">colored_row() (in module icenet.tools.prints)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.dbnf.compute_log_p_x">compute_log_p_x() (in module icenet.deep.dbnf)</a>
 </li>
       <li><a href="modules/iceid.html#iceid.common.compute_reweights">compute_reweights() (in module iceid.common)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.construct_input_vec">construct_input_vec() (in module icebrk.tools)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.construct_kinematics">construct_kinematics() (in module icebrk.tools)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.construct_MC_tree">construct_MC_tree() (in module icebrk.tools)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.construct_MC_truth">construct_MC_truth() (in module icebrk.tools)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.features.construct_new_branches">construct_new_branches() (in module icebrk.features)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.construct_output_vec">construct_output_vec() (in module icebrk.tools)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.count_targets">count_targets() (in module icenet.tools.aux)</a>
 </li>
@@ -362,11 +388,13 @@
       </ul></li>
       <li><a href="modules/icenet.html#icenet.tools.io.DATASET">DATASET (class in icenet.tools.io)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.deltaphi">deltaphi() (in module icenet.tools.aux)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.deltar">deltar() (in module icenet.tools.aux)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.deltar_3">deltar_3() (in module icebrk.tools)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.deps.DEPS">DEPS (class in icenet.deep.deps)</a>
 </li>
@@ -393,6 +421,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.io.fastarray1">fastarray1 (class in icenet.tools.io)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.find_connected_triplets">find_connected_triplets() (in module icebrk.tools)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.bnaf.BNAF.forward">forward() (BNAF method)</a>
 
@@ -442,15 +472,21 @@
 </li>
       <li><a href="modules/iceplot.html#iceplot.iceplot.generate_colormap">generate_colormap() (in module iceplot.iceplot)</a>
 </li>
+      <li><a href="modules/icebrk.html#icebrk.features.generate_feature_names">generate_feature_names() (in module icebrk.features)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.generatebinary">generatebinary() (in module icenet.tools.aux)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.generatebinary_fixed">generatebinary_fixed() (in module icenet.tools.aux)</a>
 </li>
+      <li><a href="modules/icebrk.html#icebrk.tools.get_first_indices">get_first_indices() (in module icebrk.tools)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.deep.dbnf.get_pdf">get_pdf() (in module icenet.deep.dbnf)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.bnaf.MaskedWeight.get_weights">get_weights() (MaskedWeight method)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.features.getdimension">getdimension() (in module icebrk.features)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -481,6 +517,41 @@
 
       <ul>
         <li><a href="modules/icebrk.html#module-icebrk.common">module</a>
+</li>
+      </ul></li>
+      <li>
+    icebrk.cutstats
+
+      <ul>
+        <li><a href="modules/icebrk.html#module-icebrk.cutstats">module</a>
+</li>
+      </ul></li>
+      <li>
+    icebrk.fasthistos
+
+      <ul>
+        <li><a href="modules/icebrk.html#module-icebrk.fasthistos">module</a>
+</li>
+      </ul></li>
+      <li>
+    icebrk.features
+
+      <ul>
+        <li><a href="modules/icebrk.html#module-icebrk.features">module</a>
+</li>
+      </ul></li>
+      <li>
+    icebrk.histos
+
+      <ul>
+        <li><a href="modules/icebrk.html#module-icebrk.histos">module</a>
+</li>
+      </ul></li>
+      <li>
+    icebrk.tools
+
+      <ul>
+        <li><a href="modules/icebrk.html#module-icebrk.tools">module</a>
 </li>
       </ul></li>
       <li>
@@ -546,6 +617,8 @@
         <li><a href="modules/icenet.html#module-icenet.deep.dopt">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.gcnn
 
@@ -560,8 +633,6 @@
         <li><a href="modules/icenet.html#module-icenet.deep.maxo">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.mlgr
 
@@ -629,12 +700,20 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.impute_data">impute_data() (in module icenet.tools.io)</a>
 </li>
+      <li><a href="modules/icebrk.html#icebrk.tools.index_of_first_signal">index_of_first_signal() (in module icebrk.tools)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.index_of_last_signal">index_of_last_signal() (in module icebrk.tools)</a>
+</li>
       <li><a href="modules/icebrk.html#icebrk.common.init">init() (in module icebrk.common)</a>
 
       <ul>
         <li><a href="modules/iceid.html#iceid.common.init">(in module iceid.common)</a>
 </li>
       </ul></li>
+      <li><a href="modules/icebrk.html#icebrk.cutstats.init_stat_objects">init_stat_objects() (in module icebrk.cutstats)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.fasthistos.initialize">initialize() (in module icebrk.fasthistos)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.aux.int2onehot">int2onehot() (in module icenet.tools.aux)</a>
 </li>
   </ul></td>
@@ -706,6 +785,16 @@
 
       <ul>
         <li><a href="modules/icebrk.html#module-icebrk.common">icebrk.common</a>
+</li>
+        <li><a href="modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a>
+</li>
+        <li><a href="modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a>
+</li>
+        <li><a href="modules/icebrk.html#module-icebrk.features">icebrk.features</a>
+</li>
+        <li><a href="modules/icebrk.html#module-icebrk.histos">icebrk.histos</a>
+</li>
+        <li><a href="modules/icebrk.html#module-icebrk.tools">icebrk.tools</a>
 </li>
         <li><a href="modules/icefit.html#module-icefit.em">icefit.em</a>
 </li>
@@ -792,6 +881,8 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.pick_vars">pick_vars() (in module icenet.tools.io)</a>
 </li>
+      <li><a href="modules/icebrk.html#icebrk.histos.pickle_files">pickle_files() (in module icebrk.histos)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.plots.plot_auc_matrix">plot_auc_matrix() (in module icenet.tools.plots)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.plots.plot_correlations">plot_correlations() (in module icenet.tools.plots)</a>
@@ -821,6 +912,8 @@
       <li><a href="modules/icenet.html#icenet.tools.prints.print_colored_matrix">print_colored_matrix() (in module icenet.tools.prints)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.prints.print_flow">print_flow() (in module icenet.tools.prints)</a>
+</li>
+      <li><a href="modules/icebrk.html#icebrk.tools.print_MC_event">print_MC_event() (in module icebrk.tools)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.prints.print_variables">print_variables() (in module icenet.tools.prints)</a>
 </li>
@@ -926,10 +1019,10 @@
 </li>
       <li><a href="modules/iceplot.html#iceplot.iceplot.tick_creator">tick_creator() (in module iceplot.iceplot)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.to_edges">to_edges() (in module icenet.tools.aux)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.to_graph">to_graph() (in module icenet.tools.aux)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.algo.flr.train">train() (in module icenet.algo.flr)</a>
@@ -940,6 +1033,8 @@
         <li><a href="modules/icenet.html#icenet.deep.dopt.train">(in module icenet.deep.dopt)</a>
 </li>
       </ul></li>
+      <li><a href="modules/icebrk.html#icebrk.cutstats.triplet_cuts">triplet_cuts() (in module icebrk.cutstats)</a>
+</li>
   </ul></td>
 </tr></table>
 

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>icebrk.common &mdash; icenet alpha documentation</title>
+  <title>icebrk.cutstats &mdash; icenet alpha documentation</title>
   
 
   
@@ -209,7 +209,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>icebrk.common</li>
+      <li>icebrk.cutstats</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -224,74 +224,104 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for icebrk.common</h1><div class="highlight"><pre>
-<span></span><span class="c1"># B/RK analyzer common input &amp; data reading routine</span>
+  <h1>Source code for icebrk.cutstats</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Cuts and statistics objects for B/RK analyzer</span>
 <span class="c1">#</span>
 <span class="c1"># Mikael Mieskolainen, 2020</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">yaml</span>
-
-<span class="kn">import</span> <span class="nn">uproot</span>
+<span class="kn">import</span> <span class="nn">icebrk.tools</span> <span class="k">as</span> <span class="nn">tools</span>
 
 
-<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Initialization function.</span>
+<div class="viewcode-block" id="apply_cuts"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.apply_cuts">[docs]</a><span class="k">def</span> <span class="nf">apply_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Selection cuts function.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        None</span>
+<span class="sd">        d:</span>
+<span class="sd">        evt_index:</span>
+<span class="sd">        cutflow:</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        paths :</span>
-<span class="sd">        args  :</span>
-<span class="sd">        cli   :</span>
-<span class="sd">        iodir :</span>
-
+<span class="sd">        True or False</span>
+<span class="sd">	</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>   <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--tag&quot;</span><span class="p">,</span>      <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tag0&#39;</span><span class="p">)</span>
 
-    <span class="n">cli</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	if (d[&#39;nSV&#39;][evt_index] != 1):</span>
+<span class="sd">		cutflow[&#39;nSV != 2&#39;] += 1</span>
+<span class="sd">		return False</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+	
+	<span class="k">return</span> <span class="kc">True</span></div>
 
-    
-    <span class="c1"># Input is [0,1,2,..]</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
-    <span class="c1">## Read configuration</span>
-    <span class="n">config_yaml_file</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span> <span class="o">+</span> <span class="s1">&#39;.yml&#39;</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;./configs/brk/&#39;</span> <span class="o">+</span> <span class="n">config_yaml_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+<div class="viewcode-block" id="triplet_cuts"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.triplet_cuts">[docs]</a><span class="k">def</span> <span class="nf">triplet_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Triplet cuts &quot;&quot;&quot;</span>
 
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
-    
-    <span class="c1">### Load data</span>
-    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
-        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span> <span class="o">+</span> <span class="s1">&#39;/BParkNANO_mc_relaxed_Kee_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.root&#39;</span><span class="p">)</span>
-    
-    <span class="c1">### Input-Output directory</span>
-    <span class="n">iodir</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./output/brk/</span><span class="si">{</span><span class="n">cli</span><span class="o">.</span><span class="n">tag</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">iodir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+	<span class="k">return</span> <span class="kc">True</span></div>
 
-    <span class="k">return</span> <span class="n">paths</span><span class="p">,</span><span class="n">args</span><span class="p">,</span><span class="n">cli</span><span class="p">,</span><span class="n">iodir</span></div>
+
+<div class="viewcode-block" id="collect_info_stats"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_info_stats">[docs]</a><span class="k">def</span> <span class="nf">collect_info_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Collect event information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        d:</span>
+<span class="sd">        evt_index:</span>
+<span class="sd">        infostats:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="c1"># Set event info</span>
+	<span class="k">if</span>   <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;nSV&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> <span class="n">infostats</span><span class="p">[</span><span class="s1">&#39;nSV == 0&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">elif</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;nSV&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span> <span class="n">infostats</span><span class="p">[</span><span class="s1">&#39;nSV == 1&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">elif</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;nSV&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span> <span class="n">infostats</span><span class="p">[</span><span class="s1">&#39;nSV == 2&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">elif</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;nSV&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span> <span class="n">infostats</span><span class="p">[</span><span class="s1">&#39;nSV == 3&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">elif</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;nSV&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">):</span> <span class="n">infostats</span><span class="p">[</span><span class="s1">&#39;nSV &gt;= 4&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+	<span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="collect_mcinfo_stats"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats">[docs]</a><span class="k">def</span> <span class="nf">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Collect MC only information.</span>
+<span class="sd">	</span>
+<span class="sd">    Args:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">	</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="n">index</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">index_of_last_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">MAXT3</span><span class="p">):</span> <span class="n">mcinfostats</span><span class="p">[</span><span class="s1">&#39;last index &gt;= MAXT3&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+	
+	<span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="init_stat_objects"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.init_stat_objects">[docs]</a><span class="k">def</span> <span class="nf">init_stat_objects</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Initialize cutflow and statistics objects.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cutflow:</span>
+<span class="sd">        infostats_BC:</span>
+<span class="sd">        mcinfostats_BC:</span>
+<span class="sd">	</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="n">cutflow</span>        <span class="o">=</span> <span class="p">{</span>
+	<span class="p">}</span>
+	<span class="n">infostats_BC</span>   <span class="o">=</span> <span class="p">{</span>
+		<span class="s1">&#39;nSV == 0&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="s1">&#39;nSV == 1&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="s1">&#39;nSV == 2&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="s1">&#39;nSV == 3&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="s1">&#39;nSV &gt;= 4&#39;</span> <span class="p">:</span> <span class="mi">0</span>
+	<span class="p">}</span>
+	<span class="n">mcinfostats_BC</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="s1">&#39;last index &gt;= MAXT3&#39;</span> <span class="p">:</span> <span class="mi">0</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">cutflow</span><span class="p">,</span> <span class="n">infostats_BC</span><span class="p">,</span> <span class="n">mcinfostats_BC</span></div>
+
 </pre></div>
 
            </div>
