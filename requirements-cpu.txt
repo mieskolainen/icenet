@@ -1,3 +1,4 @@
+xgboost
 scipy>=1.5.2
 matplotlib>=3.0.3
 numpy>=1.19.1
