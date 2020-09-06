@@ -5,7 +5,7 @@ icenet Documentation
 
 Under development!
 
-icenet is a deep learning driven python library for high energy physics, and beyond.
+icenet is a deep learning driven python library for high energy physics ++
 
 
 .. toctree::
