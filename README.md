@@ -1,6 +1,6 @@
 # icenet
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Travis CI](https://travis-ci.com/mieskolainen/icenet.svg?branch=master)
+[![Build Status](https://travis-ci.com/mieskolainen/icenet.svg?branch=master)](https://travis-ci.com/mieskolainen/icenet)
 
 See the documentation at:
 
