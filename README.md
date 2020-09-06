@@ -4,7 +4,7 @@
 
 See documentation at
 
-https://icenet.readthedocs.io
+https://github.com/mieskolainen/icenet/docs/build/html/index.html
 
 
 Mikael Mieskolainen, 2020\
