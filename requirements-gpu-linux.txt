@@ -1,7 +1,7 @@
 -r requirements.txt
 
 xgboost>=1.2.0
-https://download.pytorch.org/whl/test/cpu/torch-1.6.0+cu102-cp38-cp38-linux_x86_64.whl
+https://download.pytorch.org/whl/test/cpu/torch-1.6.0%2Bcpu-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0/torch_cluster-latest+cu102-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0/torch_scatter-latest+cu120-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.6.0/torch_sparse-latest+cu120-cp38-cp38-linux_x86_64.whl
