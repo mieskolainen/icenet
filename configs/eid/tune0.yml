@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 10000000
+MAXEVENTS: 1000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -82,7 +82,7 @@ gnet_param:
   label:  'GNET'
 
   # Convolution model
-  conv_type: 'spline'       # 'spline', 'SG', 'GAT'
+  conv_type: 'SG'           # 'DEC', spline', 'SG', 'GAT'
   
   epochs: 50
   batch_size: 64
@@ -179,7 +179,7 @@ cnn_param:
 
 # CNN + MAXOUT
 cdmx_param:
-  active: False
+  active: false
   label:  'CDMX'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -281,5 +281,4 @@ dbnf_param:
   tensorboard: 'tensorboard'
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
 

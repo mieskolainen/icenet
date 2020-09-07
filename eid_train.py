@@ -117,13 +117,15 @@ def graph_train(data_trn, data_val, args, num_classes=2):
     conv_type = args['gnet_param']['conv_type']
     if   conv_type == 'GAT':
         model = graph.GATNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+    elif conv_type == 'DEC':
+        model = graph.DECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'SG':
         model = graph.SGNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'spline':
         model = graph.SplineNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     else:
         raise Except(name__ + f'.graph_train: Unknown network convolution model "conv_type" = {conv_type}')
-
+    
     # CPU or GPU
     model, device = dopt.model_to_cuda(model=model, device_type=args['gnet_param']['device'])
 

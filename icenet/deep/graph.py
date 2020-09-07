@@ -115,8 +115,8 @@ class GATNet(torch.nn.Module):
         self.dropout = dropout
         self.task = task
 
-        self.conv1 = GATConv(self.D, self.D, heads=8, dropout=dropout)
-        self.conv2 = GATConv(self.D * 8, self.D, heads=1, concat=False, dropout=dropout)
+        self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
+        self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
         
         if (self.G > 0):
             self.Z = self.D + self.G
@@ -124,8 +124,6 @@ class GATNet(torch.nn.Module):
             self.Z = self.D
         self.mlp1 = Linear(self.Z, self.Z)
         self.mlp2 = Linear(self.Z, self.C)
-
-        self.task  = task
 
     def forward(self, data):
 
@@ -159,6 +157,97 @@ class GATNet(torch.nn.Module):
         else:
             return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
 
+
+def MLP(channels, batch_norm=True):
+    """
+    Multi Layer Perceptron with an arbitrary number of layers.
+    Args:
+        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        batch_norm : batch normalization
+    Returns:
+        nn.sequential object
+    """
+    if batch_norm:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU(),
+                nn.BatchNorm1d(channels[i])
+            )
+            for i in range(1,len(channels))
+        ])
+    else:
+        return nn.Sequential(*[
+        nn.Sequential(nn.Linear(channels[i - 1], channels[i]), nn.ReLU())
+        for i in range(1,len(channels))
+    ])
+
+
+# DynamicEdgeConv based graph net
+#
+# https://arxiv.org/abs/1801.07829
+#
+class DECNet(torch.nn.Module):
+    def __init__(self, D, C, G=0, k=8, task='node', aggr='max'):
+        super(DECNet, self).__init__()
+
+        self.D = D
+        self.C = C
+        self.G = G
+
+        self.task  = task
+
+        # Convolution layers
+        self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=aggr)
+        self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=aggr)
+        
+        # "Fusion" layer taking in conv1 and conv2 outputs
+        self.lin1  = MLP([32 + 64, 96])
+
+        if (self.G > 0):
+            self.Z = 96 + self.G
+        else:
+            self.Z = 96
+
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+    def forward(self, data):
+
+        if hasattr(data, 'batch'):
+            x1 = self.conv1(data.x, data.batch)
+            x2 = self.conv2(x1,     data.batch)
+        else:
+            x1 = self.conv1(data.x)
+            x2 = self.conv2(x1)
+
+        x = self.lin1(torch.cat([x1, x2], dim=1))
+        
+        # ** Mean pooling (to handle graph level classification) **
+        if self.task == 'graph' and hasattr(data,'batch'):
+            x = global_mean_pool(x, data.batch)
+        
+        # Global features concatenated
+        if self.G > 0:
+            if hasattr(data,'batch'):
+                u = data.u.view(-1, self.G)
+                x = torch.cat((x, u), 1)
+            else:
+                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+
+        # Final layers
+        x = self.mlp1(x)
+
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x) :
+        if hasattr(x, 'batch'):
+            return F.softmax(self.forward(x), dim=1)
+        else:
+            return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
+
+
 # SplineConv based graph net
 #
 # https://arxiv.org/abs/1711.08920
@@ -180,8 +269,6 @@ class SplineNet(torch.nn.Module):
             self.Z = self.D
         self.mlp1 = Linear(self.Z, self.Z)
         self.mlp2 = Linear(self.Z, self.C)
-
-        self.task  = task
 
     def forward(self, data):
 
