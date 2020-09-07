@@ -7,6 +7,8 @@ A deep learning driven library for high energy physics. See the documentation at
 https://mieskolainen.github.io/icenet
 
 </br>
+Or see: cat docs/source/notes/installation.rst
+</br>
 
 
 Mikael Mieskolainen, 2020\

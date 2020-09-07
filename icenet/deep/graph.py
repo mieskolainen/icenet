@@ -105,18 +105,26 @@ def test(model, loader, optimizer, device):
 # https://arxiv.org/abs/1710.10903
 #
 class GATNet(torch.nn.Module):
-    def __init__(self, D, C, dropout=0.25, task='node'):
+    def __init__(self, D, C, G=0, dropout=0.25, task='node'):
         super(GATNet, self).__init__()
 
         self.D = D
         self.C = C
+        self.G = G
+
         self.dropout = dropout
         self.task = task
 
         self.conv1 = GATConv(self.D, self.D, heads=8, dropout=dropout)
         self.conv2 = GATConv(self.D * 8, self.D, heads=1, concat=False, dropout=dropout)
         
-        self.mlp1  = Linear(self.D, self.C)
+        if (self.G > 0):
+            self.Z = self.D + self.G
+        else:
+            self.Z = self.D
+        self.mlp1 = Linear(self.Z, self.Z)
+        self.mlp2 = Linear(self.Z, self.C)
+
         self.task  = task
 
     def forward(self, data):
@@ -127,11 +135,20 @@ class GATNet(torch.nn.Module):
         x = F.elu(self.conv2(x,      data.edge_index))
         x = F.dropout(x, training=self.training)
 
-        x = F.relu(self.mlp1(x))
-
         # ** Mean pooling (to handle graph level classification) **
         if self.task == 'graph' and hasattr(data,'batch'):
             x = global_mean_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            if hasattr(data,'batch'):
+                u = data.u.view(-1, self.G)
+                x = torch.cat((x, u), 1)
+            else:
+                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+        
+        x = F.relu(self.mlp1(x))
+        x = F.relu(self.mlp2(x))
 
         return x
 
@@ -147,16 +164,23 @@ class GATNet(torch.nn.Module):
 # https://arxiv.org/abs/1711.08920
 #
 class SplineNet(torch.nn.Module):
-    def __init__(self, D, C, task='node'):
+    def __init__(self, D, C, G=0, task='node'):
         super(SplineNet, self).__init__()
 
         self.D     = D
         self.C     = C
+        self.G     = G
 
         self.conv1 = SplineConv(self.D, self.D, dim=1, degree=1, kernel_size=3)
         self.conv2 = SplineConv(self.D, self.D, dim=1, degree=1, kernel_size=5)
         
-        self.mlp1  = Linear(self.D, self.C)
+        if (self.G > 0):
+            self.Z = self.D + self.G
+        else:
+            self.Z = self.D
+        self.mlp1 = Linear(self.Z, self.Z)
+        self.mlp2 = Linear(self.Z, self.C)
+
         self.task  = task
 
     def forward(self, data):
@@ -167,11 +191,20 @@ class SplineNet(torch.nn.Module):
         x = F.elu(self.conv2(x,      data.edge_index, data.edge_attr))
         x = F.dropout(x, training=self.training)
 
-        x = F.relu(self.mlp1(x))
-
         # ** Mean pooling (to handle graph level classification) **
         if self.task == 'graph' and hasattr(data,'batch'):
             x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            if hasattr(data,'batch'):
+                u = data.u.view(-1, self.G)
+                x = torch.cat((x, u), 1)
+            else:
+                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+
+        x = F.relu(self.mlp1(x))
+        x = F.relu(self.mlp2(x))
 
         return x
 
@@ -187,16 +220,24 @@ class SplineNet(torch.nn.Module):
 # https://arxiv.org/abs/1902.07153
 # 
 class SGNet(torch.nn.Module):
-    def __init__(self, D, C, K=2, task='node'):
+    def __init__(self, D, C, G=0, K=2, task='node'):
         super(SGNet, self).__init__()
 
         self.D     = D
         self.C     = C
+        self.G     = G
         self.K     = K
+
         self.conv1 = SGConv(self.D, self.D, self.K, cached=False)
         self.conv2 = SGConv(self.D, self.D, self.K, cached=False)
         
-        self.mlp1  = Linear(self.D, self.C)
+        if (self.G > 0):
+            self.Z = self.D + self.G
+        else:
+            self.Z = self.D
+        self.mlp1 = Linear(self.Z, self.Z)
+        self.mlp2 = Linear(self.Z, self.C)
+
         self.task  = task
         
     def forward(self, data):
@@ -206,14 +247,23 @@ class SGNet(torch.nn.Module):
         x = F.elu(self.conv2(x,      data.edge_index))
         x = F.dropout(x, training=self.training)
 
-        x = F.relu(self.mlp1(x))
-
         # ** Mean pooling (to handle graph level classification) **
         if self.task == 'graph' and hasattr(data,'batch'):
             x = global_max_pool(x, data.batch)
 
-        return x
+        # Global features concatenated
+        if self.G > 0:
+            if hasattr(data,'batch'):
+                u = data.u.view(-1, self.G)
+                x = torch.cat((x, u), 1)
+            else:
+                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
 
+        x = F.relu(self.mlp1(x))
+        x = F.relu(self.mlp2(x))
+
+        return x
+    
     # Returns softmax probability
     def softpredict(self,x) :
         if hasattr(x, 'batch'):

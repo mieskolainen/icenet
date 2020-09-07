@@ -111,15 +111,16 @@ def main() :
 #
 def graph_train(data_trn, data_val, args, num_classes=2):
     
-    num_node_features = data_trn[0].x.shape[1]
+    num_node_features   = data_trn[0].x.shape[1]
+    num_global_features = len(data_trn[0].u)
     
     conv_type = args['gnet_param']['conv_type']
     if   conv_type == 'GAT':
-        model = graph.GATNet(D = num_node_features, C = num_classes, task='graph')
+        model = graph.GATNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'SG':
-        model = graph.SGNet(D = num_node_features, C = num_classes, task='graph')
+        model = graph.SGNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'spline':
-        model = graph.SplineNet(D = num_node_features, C = num_classes, task='graph')
+        model = graph.SplineNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     else:
         raise Except(name__ + f'.graph_train: Unknown network convolution model "conv_type" = {conv_type}')
 

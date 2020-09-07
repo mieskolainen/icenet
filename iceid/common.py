@@ -31,7 +31,10 @@ from configs.eid.cuts import *
 
 
 def init():
-    """ Initialize electron ID data input.
+    """ Initialize electron ID data.
+
+    Args:
+        Implicit commandline and yaml file input.
     
     Returns:
         jagged array data, arguments
@@ -82,7 +85,7 @@ def init():
     # Background (0) and signal (1)
     class_id = [0,1]
     data     = io.DATASET(func_loader=load_root_file_new, files=paths, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
-
+    
     # @@ Imputation @@
     if args['imputation_param']['active']:
 
@@ -224,9 +227,8 @@ def load_root_file_new(root_path, class_id = []):
     
     Args:
         root_path : paths to root files
-        cutfunc   : basic cutfunction handle
         class_id  : class ids
-
+    
     Returns:
         X,Y       : input, output matrices
         VARS      : variable names

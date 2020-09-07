@@ -20,7 +20,7 @@ import uproot
 
 
 def init():
-    """ Initialization function.
+    """ Data initialization function.
 
     Args:
         None
