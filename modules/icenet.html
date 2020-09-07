@@ -834,6 +834,26 @@ with a rule sigma ~ 1/sqrt(n)</p>
 <div class="section" id="module-icenet.deep.graph">
 <span id="icenet-deep-graph"></span><h3>icenet.deep.graph<a class="headerlink" href="#module-icenet.deep.graph" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
+<dt id="icenet.deep.graph.DECNet">
+<em class="property">class </em><code class="sig-name descname">DECNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em>, <em class="sig-param"><span class="n">aggr</span><span class="o">=</span><span class="default_value">'max'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#DECNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.DECNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.DECNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#DECNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.DECNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.DECNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#DECNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.DECNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.DECNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.DECNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="icenet.deep.graph.GATNet">
 <em class="property">class </em><code class="sig-name descname">GATNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -851,6 +871,19 @@ with a rule sigma ~ 1/sqrt(n)</p>
 <code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.GATNet.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.deep.graph.MLP">
+<code class="sig-name descname">MLP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channels</span></em>, <em class="sig-param"><span class="n">batch_norm</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#MLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.MLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi Layer Perceptron with an arbitrary number of layers.
+:param channels: input structure, such as [128, 64, 64] for a 3-layer network.
+:param batch_norm: batch normalization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nn.sequential object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
