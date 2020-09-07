@@ -258,7 +258,10 @@
 
 
 <div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Initialize electron ID data input.</span>
+    <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Implicit commandline and yaml file input.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        jagged array data, arguments</span>
@@ -309,7 +312,7 @@
     <span class="c1"># Background (0) and signal (1)</span>
     <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">data</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file_new</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">paths</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
-
+    
     <span class="c1"># @@ Imputation @@</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
@@ -451,9 +454,8 @@
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        root_path : paths to root files</span>
-<span class="sd">        cutfunc   : basic cutfunction handle</span>
 <span class="sd">        class_id  : class ids</span>
-
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        X,Y       : input, output matrices</span>
 <span class="sd">        VARS      : variable names</span>
