@@ -873,17 +873,81 @@ with a rule sigma ~ 1/sqrt(n)</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt id="icenet.deep.graph.GINENet">
+<em class="property">class </em><code class="sig-name descname">GINENet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GINENet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GINENet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.GINENet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GINENet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GINENet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.GINENet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GINENet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GINENet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.GINENet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.GINENet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt id="icenet.deep.graph.MLP">
 <code class="sig-name descname">MLP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channels</span></em>, <em class="sig-param"><span class="n">batch_norm</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#MLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.MLP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Multi Layer Perceptron with an arbitrary number of layers.
-:param channels: input structure, such as [128, 64, 64] for a 3-layer network.
-:param batch_norm: batch normalization</p>
+<dd><p>Return a Multi Layer Perceptron with an arbitrary number of layers.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>nn.sequential object</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> – input structure, such as [128, 64, 64] for a 3-layer network.</p></li>
+<li><p><strong>batch_norm</strong> – batch normalization</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nn.sequential object</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.graph.NNNet">
+<em class="property">class </em><code class="sig-name descname">NNNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">E</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">Q</span><span class="o">=</span><span class="default_value">96</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em>, <em class="sig-param"><span class="n">aggr</span><span class="o">=</span><span class="default_value">'add'</span></em>, <em class="sig-param"><span class="n">pooltype</span><span class="o">=</span><span class="default_value">'s2s'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#NNNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.NNNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.NNNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#NNNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.NNNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.NNNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#NNNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.NNNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.NNNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.NNNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="icenet.deep.graph.SAGENet">
+<em class="property">class </em><code class="sig-name descname">SAGENet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SAGENet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SAGENet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.SAGENet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SAGENet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SAGENet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.SAGENet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#SAGENet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.SAGENet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.SAGENet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.SAGENet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
