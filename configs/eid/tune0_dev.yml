@@ -48,7 +48,7 @@ imputation_param:
 ## Outlier protection in the training phase
 outlier_param:
   algo: 'truncate'   # algorithm: 'truncate', 'none'
-  qmin: 0.01         # in [0,100]
+  qmin: 0.01         # in [0,100] 
   qmax: 99.9         # in [0,100]
 
 
@@ -57,7 +57,7 @@ reweight_param:
   mode:  'background'           # 'none', 'signal', 'background'
   algo: '2D'
   bins_pt:  [0.0, 300.0, 1000] # Make sure the bounds cover the phase space
-  bins_eta: [-3.1, 3.1,   100] #
+  bins_eta: [-3.1, 3.1,   100] # 
   max_reg: 50.0                # maxweight regularization
 
 
@@ -83,19 +83,19 @@ gnet_param:
 
   # Convolution model
   conv_type: 'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  epochs: 300
+  
+  epochs: 100
   batch_size: 64
   learning_rate: 0.005
-  weight_decay: 0.001       # L2-regularization
-  
+  weight_decay:  0.001      # L2-regularization
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 
 # Factorized Likelihood Ratio
 flr_param:
-  active: true
+  active: false
   label: 'FLR'
   
   nbins: 60
@@ -106,7 +106,7 @@ flr_param:
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb_param:
-  active: true
+  active: false
   label: 'XGB'
   
   # general parameters
@@ -139,7 +139,7 @@ xgb_param:
 
 # Logistic Regression (convex model = global optimum guarantee)
 mlgr_param:
-  active: true
+  active: false
   label:  'MLGR'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -150,14 +150,14 @@ mlgr_param:
   epochs: 30
   batch_size: 196
   learning_rate: 0.003
-  weight_decay: 0.01        # L2-regularization
+  weight_decay: 0.001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 
 # Convolutional Neural Net
 cnn_param:
-  active: true
+  active: false
   label:  'CNN'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -227,7 +227,7 @@ xtx_param:
 
 # Deep MAXOUT network
 dmax_param:
-  active: true
+  active: false
   label:  'DMAX'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -242,7 +242,7 @@ dmax_param:
   epochs:  100
   batch_size: 128
   learning_rate: 0.005
-  weight_decay: 0.01        # L2-regularization
+  weight_decay: 0.001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 

@@ -111,7 +111,8 @@ def main() :
 #
 def graph_train(data_trn, data_val, args, num_classes=2):
     
-    num_node_features   = data_trn[0].x.shape[1]
+    num_node_features   = data_trn[0].x.size(-1)
+    num_edge_features   = data_trn[0].edge_attr.size(-1)
     num_global_features = len(data_trn[0].u)
     
     conv_type = args['gnet_param']['conv_type']
@@ -121,11 +122,17 @@ def graph_train(data_trn, data_val, args, num_classes=2):
         model = graph.DECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'SG':
         model = graph.SGNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+    elif conv_type == 'SAGE':
+        model = graph.SAGENet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+    elif conv_type == 'NN':
+        model = graph.NNNet(D = num_node_features, C = num_classes, E = num_edge_features, G = num_global_features, task='graph')
+    elif conv_type == 'GINE':
+        model = graph.GINENet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'spline':
         model = graph.SplineNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     else:
         raise Except(name__ + f'.graph_train: Unknown network convolution model "conv_type" = {conv_type}')
-    
+
     # CPU or GPU
     model, device = dopt.model_to_cuda(model=model, device_type=args['gnet_param']['device'])
 

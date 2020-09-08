@@ -266,6 +266,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
     plt.savefig(filename + '.pdf', bbox_inches='tight')
 
     plt.gca().set_xscale('log')
+    ax.set_aspect(1)
     plt.ylim(0.0, 1.0)
     plt.xlim(1e-4, 1.0)
     plt.savefig(filename + '_log.pdf', bbox_inches='tight')

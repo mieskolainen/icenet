@@ -5,21 +5,44 @@
 
 
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
+
+from   torch_geometric.nn import Set2Set, global_mean_pool, global_max_pool, global_sort_pool
+from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
+from   torch_geometric.nn import MessagePassing
 
 from   icenet.deep import dopt
 from   icenet.tools import aux
 
-from   torch_geometric.nn import max_pool, global_mean_pool, global_max_pool, global_sort_pool
-from   torch_geometric.nn import GATConv, SplineConv, GCNConv, SGConv, EdgeConv, DynamicEdgeConv
 
-from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
+def MLP(channels, batch_norm=True):
+    """
+    Return a Multi Layer Perceptron with an arbitrary number of layers.
 
-from   torch_geometric.nn import MessagePassing
-from   torch_geometric.nn import GATConv
-from   torch_geometric.nn import SplineConv
+    Args:
+        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        batch_norm : batch normalization
+    Returns:
+        nn.sequential object
+    """
+    if batch_norm:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU(),
+                nn.BatchNorm1d(channels[i])
+            )
+            for i in range(1,len(channels))
+        ])
+    else:
+        return nn.Sequential(*[
+        nn.Sequential(nn.Linear(channels[i - 1], channels[i]), nn.ReLU())
+        for i in range(1,len(channels))
+    ])
 
 
 def train(model, loader, optimizer, device):
@@ -126,61 +149,34 @@ class GATNet(torch.nn.Module):
         self.mlp2 = Linear(self.Z, self.C)
 
     def forward(self, data):
-
+        
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        
         x = F.elu(self.conv1(data.x, data.edge_index))
         x = F.dropout(x, training=self.training)
 
         x = F.elu(self.conv2(x,      data.edge_index))
         x = F.dropout(x, training=self.training)
 
-        # ** Mean pooling (to handle graph level classification) **
-        if self.task == 'graph' and hasattr(data,'batch'):
-            x = global_mean_pool(x, data.batch)
+        # ** Global pooling (to handle graph level classification) **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
-            if hasattr(data,'batch'):
-                u = data.u.view(-1, self.G)
-                x = torch.cat((x, u), 1)
-            else:
-                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
-        
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
         x = F.relu(self.mlp1(x))
         x = F.relu(self.mlp2(x))
 
         return x
 
     # Returns softmax probability
-    def softpredict(self,x) :
-        if hasattr(x, 'batch'):
-            return F.softmax(self.forward(x), dim=1)
-        else:
-            return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
-
-
-def MLP(channels, batch_norm=True):
-    """
-    Multi Layer Perceptron with an arbitrary number of layers.
-    Args:
-        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
-        batch_norm : batch normalization
-    Returns:
-        nn.sequential object
-    """
-    if batch_norm:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU(),
-                nn.BatchNorm1d(channels[i])
-            )
-            for i in range(1,len(channels))
-        ])
-    else:
-        return nn.Sequential(*[
-        nn.Sequential(nn.Linear(channels[i - 1], channels[i]), nn.ReLU())
-        for i in range(1,len(channels))
-    ])
+    def softpredict(self,x):
+        return F.softmax(self.forward(x), dim=1)
 
 
 # DynamicEdgeConv based graph net
@@ -203,7 +199,7 @@ class DECNet(torch.nn.Module):
         
         # "Fusion" layer taking in conv1 and conv2 outputs
         self.lin1  = MLP([32 + 64, 96])
-
+        
         if (self.G > 0):
             self.Z = 96 + self.G
         else:
@@ -214,26 +210,23 @@ class DECNet(torch.nn.Module):
 
     def forward(self, data):
 
-        if hasattr(data, 'batch'):
-            x1 = self.conv1(data.x, data.batch)
-            x2 = self.conv2(x1,     data.batch)
-        else:
-            x1 = self.conv1(data.x)
-            x2 = self.conv2(x1)
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
+        x1 = self.conv1(data.x, data.batch)
+        x2 = self.conv2(x1,     data.batch)
 
         x = self.lin1(torch.cat([x1, x2], dim=1))
-        
-        # ** Mean pooling (to handle graph level classification) **
-        if self.task == 'graph' and hasattr(data,'batch'):
-            x = global_mean_pool(x, data.batch)
-        
+
+        # ** Global pooling (to handle graph level classification) **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
+
         # Global features concatenated
         if self.G > 0:
-            if hasattr(data,'batch'):
-                u = data.u.view(-1, self.G)
-                x = torch.cat((x, u), 1)
-            else:
-                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
 
         # Final layers
         x = self.mlp1(x)
@@ -242,10 +235,81 @@ class DECNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        if hasattr(x, 'batch'):
-            return F.softmax(self.forward(x), dim=1)
+        return F.softmax(self.forward(x), dim=1)
+
+
+# NNConv based graph net
+#
+# https://arxiv.org/abs/1704.01212
+#
+class NNNet(torch.nn.Module):
+    def __init__(self, D, C, G=0, E=1, Q=96, task='node', aggr='add', pooltype='s2s'):
+        super(NNNet, self).__init__()
+
+        self.D = D  # node feature dimension
+        self.E = E  # edge feature dimension
+        self.G = G  # global feature dimension
+        self.C = C  # number output classes
+        
+        self.Q = Q  # latent dimension
+
+        self.task     = task
+        self.pooltype = pooltype
+
+        # Convolution layers
+        # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
+        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=aggr)
+        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=aggr)
+        
+        # "Fusion" layer taking in conv layer outputs
+        self.lin1  = MLP([D+D, Q])
+
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if pooltype == 's2s':
+            self.S2Spool = Set2Set(in_channels=Q, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*Q, Q)
+
+        if (self.G > 0):
+            self.Z = Q + self.G
         else:
-            return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
+            self.Z = Q
+        
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+
+    def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
+        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
+        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
+        x  = self.lin1(torch.cat([x1, x2], dim=1))
+
+        # ** Global pooling **
+        if self.task == 'graph':
+            if self.pooltype == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.pooltype == 'max':
+                x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat([x, u], 1)
+
+        # Final layers
+        x = self.mlp1(x)
+
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x) :
+        return F.softmax(self.forward(x), dim=1)
 
 
 # SplineConv based graph net
@@ -272,23 +336,24 @@ class SplineNet(torch.nn.Module):
 
     def forward(self, data):
 
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        
         x = F.elu(self.conv1(data.x, data.edge_index, data.edge_attr))
         x = F.dropout(x, training=self.training)
 
         x = F.elu(self.conv2(x,      data.edge_index, data.edge_attr))
         x = F.dropout(x, training=self.training)
 
-        # ** Mean pooling (to handle graph level classification) **
-        if self.task == 'graph' and hasattr(data,'batch'):
+        # ** Global pooling **
+        if self.task == 'graph':
             x = global_max_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
-            if hasattr(data,'batch'):
-                u = data.u.view(-1, self.G)
-                x = torch.cat((x, u), 1)
-            else:
-                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
 
         x = F.relu(self.mlp1(x))
         x = F.relu(self.mlp2(x))
@@ -297,10 +362,63 @@ class SplineNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        if hasattr(x, 'batch'):
-            return F.softmax(self.forward(x), dim=1)
+        return F.softmax(self.forward(x), dim=1)
+
+
+# SAGEConv based graph net
+#
+# https://arxiv.org/abs/1706.02216
+# 
+class SAGENet(torch.nn.Module):
+    def __init__(self, D, C, G=0, task='node'):
+        super(SAGENet, self).__init__()
+
+        self.D     = D
+        self.C     = C
+        self.G     = G
+
+        self.conv1 = SAGEConv(self.D, self.D)
+        self.conv2 = SAGEConv(self.D, self.D)
+        
+        if (self.G > 0):
+            self.Z = self.D + self.G
         else:
-            return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
+            self.Z = self.D
+        self.mlp1 = Linear(self.Z, self.Z)
+        self.mlp2 = Linear(self.Z, self.C)
+
+        self.task  = task
+        
+    def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
+        x = F.elu(self.conv1(data.x, data.edge_index))
+        x = F.dropout(x, training=self.training)
+
+        x = F.elu(self.conv2(x,      data.edge_index))
+        x = F.dropout(x, training=self.training)
+
+        # ** Global pooling **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
+        x = F.relu(self.mlp1(x))
+        x = F.relu(self.mlp2(x))
+
+        return x
+    
+    # Returns softmax probability
+    def softpredict(self,x) :
+        return F.softmax(self.forward(x), dim=1)
+
 
 # SGConv based graph net
 #
@@ -328,23 +446,25 @@ class SGNet(torch.nn.Module):
         self.task  = task
         
     def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
         x = F.elu(self.conv1(data.x, data.edge_index))
         x = F.dropout(x, training=self.training)
 
         x = F.elu(self.conv2(x,      data.edge_index))
         x = F.dropout(x, training=self.training)
 
-        # ** Mean pooling (to handle graph level classification) **
-        if self.task == 'graph' and hasattr(data,'batch'):
+        # ** Global pooling **
+        if self.task == 'graph':
             x = global_max_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
-            if hasattr(data,'batch'):
-                u = data.u.view(-1, self.G)
-                x = torch.cat((x, u), 1)
-            else:
-                x = torch.cat((x[0], data.u), 0).unsqueeze(0)
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
 
         x = F.relu(self.mlp1(x))
         x = F.relu(self.mlp2(x))
@@ -352,8 +472,79 @@ class SGNet(torch.nn.Module):
         return x
     
     # Returns softmax probability
-    def softpredict(self,x) :
-        if hasattr(x, 'batch'):
-            return F.softmax(self.forward(x), dim=1)
+    def softpredict(self,x):
+        return F.softmax(self.forward(x), dim=1)
+
+
+# GINEConv based graph net
+#
+# https://arxiv.org/abs/1810.00826
+# https://arxiv.org/abs/1905.12265
+#
+class GINENet(torch.nn.Module):
+    def __init__(self, D, C, G=0, task='node'):
+        super(GINENet, self).__init__()
+
+        self.D = D
+        self.C = C
+        self.G = G
+
+        self.task  = task
+
+        # Convolution layers
+        self.conv1 = GINEConv(MLP([self.D, self.D]))
+        self.conv2 = GINEConv(MLP([self.D, 64]))
+        
+        # "Fusion" layer taking in conv1 and conv2 outputs
+        self.lin1  = MLP([self.D + 64, 96])
+
+        if (self.G > 0):
+            self.Z = 96 + self.G
         else:
-            return F.softmax(self.forward(x), dim=1)[0].unsqueeze(0)
+            self.Z = 96
+
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+    def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
+        # ----------------------------------------------------------------
+        # GINEConv requires node features and edge features with the same dimension.
+        # Increase dimensionality below
+        D_n = data.x[0].size(-1)
+        D_e = data.edge_attr.size(-1)
+        if D_n > D_e:
+            lin = Linear(1, D_n)
+            x   = data.x
+            edge_attr = lin(data.edge_attr)
+        elif D_e > D_n:
+            lin = Linear(1, D_e)
+            x   = lin(data.x)
+            edge_attr = data.edge_attr
+        # ----------------------------------------------------------------
+
+        x1 = self.conv1(x,  data.edge_index, edge_attr)
+        x2 = self.conv2(x1, data.edge_index, edge_attr)
+
+        x  = self.lin1(torch.cat([x1, x2], dim=1))
+
+        # ** Global pooling **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
+        # Final layers
+        x = self.mlp1(x)
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x):
+        return F.softmax(self.forward(x), dim=1)
