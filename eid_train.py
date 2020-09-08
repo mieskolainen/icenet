@@ -143,7 +143,7 @@ def graph_train(data_trn, data_val, args, num_classes=2):
 
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args['gnet_param']['learning_rate'], weight_decay=args['gnet_param']['weight_decay'])
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
     
     # Data loaders
     train_loader = torch_geometric.data.DataLoader(data_trn, batch_size=args['gnet_param']['batch_size'], shuffle=True)
