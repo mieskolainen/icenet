@@ -7,13 +7,13 @@ import numpy as np
 import numba
 
 
-def target_e(events):
+def target_e(events, entrystart=0, entrystop=None):
     """ Classification signal target definition"""
-    return events.array("is_e")
+    return events.array("is_e", entrystart=entrystart, entrystop=entrystop)
 
-def target_egamma(events):
+def target_egamma(events, entrystart=0, entrystop=None):
     """ Classification signal target definition"""
-    return events.array("is_egamma")
+    return events.array("is_egamma", entrystart=entrystart, entrystop=entrystop)
 
 
 # Add alternatives here

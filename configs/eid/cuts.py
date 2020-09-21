@@ -8,12 +8,12 @@ import numba
 
 import icenet.tools.aux as aux
 
-def cut_nocut(X,VARS):
+def cut_nocut(X, VARS, xcorr_flow=False):
     """ No cuts """
     return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
 
 
-def cut_standard(X, VARS):
+def cut_standard(X, VARS, xcorr_flow=False):
     """ Function implements basic selections (cuts).
     Args:
     	X    : # Number of vectors x # Number of variables
@@ -33,8 +33,11 @@ def cut_standard(X, VARS):
     cut.append( np.abs(X[:, VARS.index('trk_eta')]) < MAXETA )
 
     # Apply cutflow
-    names = ['has_gsf == True', f'gsf_pt > {MINPT:0.2f}', f'|gsf_eta| < {MAXETA:0.2f}']
-    ind = aux.apply_cutflow(cut=cut, names=names)
+    names = [f'has_gsf == True',
+             f'gsf_pt > {MINPT:0.2f}',
+             f'|gsf_eta| < {MAXETA:0.2f}']
+    
+    ind = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
 
     return ind
 

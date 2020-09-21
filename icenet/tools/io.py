@@ -7,6 +7,8 @@
 import numpy as np
 import numba
 import copy
+import os
+import psutil
 
 import sys
 from termcolor import colored
@@ -16,6 +18,12 @@ from sklearn.impute import SimpleImputer
 
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+
+
+def process_memory_use():
+    pid = os.getpid()
+    py = psutil.Process(pid)
+    return py.memory_info()[0]/2.**30  # memory use in GB
 
 
 def checkinfnan(x, value = 0):

@@ -18,14 +18,18 @@ import icenet.tools.prints as prints
 import numba
 
 
-def apply_cutflow(cut, names):
+
+
+def apply_cutflow(cut, names, xcorr_flow=True):
     """ Apply cutflow
 
     Args:
-        cut   : list of pre-calculated cuts, each is a boolean array
-        names : list of names (description of each cut, for printout only)
+        cut        : list of pre-calculated cuts, each is a boolean array
+        names      : list of names (description of each cut, for printout only)
+        xcorr_flow : compute full N-point correlations
+    
     Returns:
-        ind   : list of indices, 1 = pass, 0 = fail
+        ind : list of indices, 1 = pass, 0 = fail
     """
     print(__name__ + '.apply_cutflow: \n')
 
@@ -37,40 +41,45 @@ def apply_cutflow(cut, names):
         print(f'cut[{i}] ({names[i]:>20}): pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
     
     # Print out "parallel flow"
-    vec = np.zeros((len(cut[0]), len(cut)))
-    for j in range(vec.shape[1]):
-        vec[:,j] = np.array(cut[j])
+    if xcorr_flow:
+        print('\n')
+        print(__name__ + '.apply_cutflow: Computing N-point correlations <xcorr_flow = True>')
+        vec = np.zeros((len(cut[0]), len(cut)))
+        for j in range(vec.shape[1]):
+            vec[:,j] = np.array(cut[j])
 
-    intmat = binaryvec2int(vec)
-    BMAT   = generatebinary(vec.shape[1])
-    print(f'\nBoolean combinations for {names}: \n')
-    for i in range(BMAT.shape[0]):
-        print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
+        intmat = binaryvec2int(vec)
+        BMAT   = generatebinary(vec.shape[1])
+        print(f'Boolean combinations for {names}: \n')
+        for i in range(BMAT.shape[0]):
+            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
+        print('\n')
     
     return ind
 
 
-def count_targets(events, names):
+def count_targets(events, names, entrystart=0, entrystop=None):
     """ Targets statistics printout
 
     Args:
-        events :  uproot object
-        names  :  list of branch names
+        events :     uproot object
+        names  :     list of branch names
+        entrystart : uproot starting point
+        entrystop  : uproot ending point
+
     Returns:
         Printout on stdout
     """
-
-    K     = len(names)
-    vec   = np.zeros((len(events), K))
-    for j in range(K):
-        vec[:,j] = events.array(names[j])
+    K   = len(names)
+    vec = np.array([events.array(name, entrystart=entrystart, entrystop=entrystop) for name in names])
+    vec = vec.T
 
     intmat = binaryvec2int(vec)
     BMAT   = generatebinary(K)
     print(__name__ + f'.count_targets: {names}')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
-
+    
     return
 
 

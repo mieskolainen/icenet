@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
 
 from   torch_geometric.nn import Set2Set, global_mean_pool, global_max_pool, global_sort_pool
-from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
+from   torch_geometric.nn import NNConv, GINConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
 
 from   icenet.deep import dopt

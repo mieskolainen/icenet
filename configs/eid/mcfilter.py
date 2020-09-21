@@ -11,12 +11,12 @@ import numba
 import icenet.tools.aux as aux
 
 
-def filter_nofilter(X, VARS):
+def filter_nofilter(X, VARS, xcorr_flow=False):
     """ All pass """
     return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
 
 
-def filter_charged(X, VARS):
+def filter_charged(X, VARS, xcorr_flow=False):
     """ Only generator level charged """
 
     # Construct passing filter
@@ -25,12 +25,12 @@ def filter_charged(X, VARS):
 
     # Apply filters
     names = ['|gen_charge| == 1']
-    ind = aux.apply_cutflow(cut=cut, names=names)
+    ind = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
 
     return ind
 
 
-def filter_no_egamma(X, VARS):
+def filter_no_egamma(X, VARS, xcorr_flow=False):
     """ No particle flow reconstructed electrons.
     Args:
     	X    : # Number of vectors x # Number of variables
@@ -50,8 +50,11 @@ def filter_no_egamma(X, VARS):
     cut.append( np.abs(X[:, VARS.index('tag_eta')]) < MAXETA )
 
     # Apply filters
-    names = ['is_egamma == False', f'tag_pt > {MINPT:0.2f}', f'|tag_eta| < {MAXETA:0.2f}']
-    ind = aux.apply_cutflow(cut=cut, names=names)
+    names = [f'is_egamma == False',
+             f'tag_pt > {MINPT:0.2f}',
+             f'|tag_eta| < {MAXETA:0.2f}']
+
+    ind   = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
 
     return ind
 

@@ -17,6 +17,7 @@ import yaml
 import copy
 import graphviz
 import torch_geometric
+from termcolor import cprint
 
 # xgboost
 import xgboost
@@ -139,8 +140,8 @@ def graph_train(data_trn, data_val, args, num_classes=2):
     # Count the number of parameters
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
-    print(__name__ + f'.graph_train: Number of free parameters = {params}')
-
+    cprint(__name__ + f'.graph_train: Number of free parameters = {params}', 'yellow')
+    
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args['gnet_param']['learning_rate'], weight_decay=args['gnet_param']['weight_decay'])
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
@@ -155,7 +156,7 @@ def graph_train(data_trn, data_val, args, num_classes=2):
 
         print(f'Epoch {epoch+1:03d}, Loss: {loss:.4f}, Test: {test_acc:.4f} (ACC), {test_auc:.4f} (AUC)')
         scheduler.step()
-
+    
     ## Save
     label = args['gnet_param']['label']
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
@@ -279,6 +280,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
     ### CLASSIFIER
     if args['cdmx_param']['active']:
 
+        """
         label = args['cdmx_param']['label']
 
         print(f'\nTraining {label} classifier ...')
@@ -297,6 +299,7 @@ def train(data, data_tensor, data_kin, trn_weights, args) :
         ## Save
         checkpoint = {'model': cmdx_model, 'state_dict': cmdx_model.state_dict()}
         torch.save(checkpoint, modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+        """
 
         ### Plot contours
         #if args['plot_param']['contours_on']:

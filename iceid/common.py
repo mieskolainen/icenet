@@ -7,6 +7,7 @@ import copy
 import math
 import argparse
 import pprint
+import psutil
 import os
 import datetime
 import json
@@ -16,6 +17,8 @@ import yaml
 import numpy as np
 import torch
 import uproot
+from termcolor import colored, cprint
+
 from tqdm import tqdm
 
 from icenet.tools import io
@@ -39,7 +42,7 @@ def init():
     Returns:
         jagged array data, arguments
     """
-
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--config",   type = str, default='tune0')
     parser.add_argument("--datapath", type = str, default=".")
@@ -61,20 +64,17 @@ def init():
 
     args['config'] = cli.config
     print(args)
-    print(torch.__version__)
+    print('')
+    print('torch.__version__: ' + torch.__version__)
 
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
-    global CUTFUNC, TARFUNC, FILTERFUNC, MAXEVENTS, INPUTVAR
-    CUTFUNC     = globals()[args['cutfunc']]
-    TARFUNC     = globals()[args['targetfunc']]
-    FILTERFUNC  = globals()[args['filterfunc']]
+    global ARGS
+    ARGS = args
 
-    MAXEVENTS   = args['MAXEVENTS']
-
-    print(__name__ + f'.init: inputvar:   <{args["inputvar"]}>')
-    print(__name__ + f'.init: cutfunc:    <{args["cutfunc"]}>')
-    print(__name__ + f'.init: targetfunc: <{args["targetfunc"]}>')
+    print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
+    print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
+    print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
     # --------------------------------------------------------------------
 
     ### Load data
@@ -117,6 +117,9 @@ def init():
         data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
         data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
 
+    cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
+        [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
+    
     return data, args, INPUTVAR
 
 
@@ -234,83 +237,103 @@ def load_root_file_new(root_path, class_id = []):
         VARS      : variable names
     """
 
+    # -----------------------------------------------
+    # ** GLOBALS **
+
+    CUTFUNC    = globals()[ARGS['cutfunc']]
+    TARFUNC    = globals()[ARGS['targetfunc']]
+    FILTERFUNC = globals()[ARGS['filterfunc']]
+    MAXEVENTS  = ARGS['MAXEVENTS']
+    # -----------------------------------------------
+
+    def showmem():
+        cprint(__name__ + f""".load_root_file: Process RAM usage: {io.process_memory_use():0.2f} GB 
+            [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
+    
     ### From root trees
     print('\n')
-    print( __name__ + '.load_root_file: Loading from file ' + root_path)
+    cprint( __name__ + '.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
     file = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
 
     print(events.name)
     print(events.title)
-    print(__name__ + f'.load_root_file: events.numentries = {events.numentries}')
+    cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
 
     ### All variables
-    VARS        = [x.decode() for x in events.keys()]
-    VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
+    VARS   = [x.decode() for x in events.keys()]
+    #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
 
     # Turn into dictionaries
-    X_dict  = events.arrays(VARS, namedecode = "utf-8")
-    
-    # Print out some statistics
-    labels1 = ['is_e', 'is_egamma']
-    #labels2 = ['has_trk','has_seed','has_gsf','has_ele']
-    #labels3 = ['seed_trk_driven','seed_ecal_driven']
+    X_dict = events.arrays(VARS, namedecode = "utf-8", entrystart=0, entrystop=MAXEVENTS)
 
-    aux.count_targets(events=events, names=labels1)
-    
+    # Is it MC (decision based on the first event)
+    isMC = X_dict['is_mc'][0]
+
+    showmem()
+
     # -----------------------------------------------------------------
-    ### Convert input to matrix
-    
+    ### Convert the input into an array of size (dimensions x events)
+    # Note that dimensions here can contain jagged information
+
+    print(__name__ + '.load_root_file: Constructing X array ...')
+
     X = np.array([X_dict[j] for j in VARS])
-    X = np.transpose(X)
+    X = X.T
+    Y = None
+
+
+    X_dict.clear() # Free memory
+    print(f'X.shape = {X.shape}')
+    showmem()
 
     prints.printbar()
 
-    Y = None
-
     # =================================================================
     # *** MC ONLY ***
-    isMC  = X_dict['is_mc'][0] # Decision based on the first event
 
     if isMC:
 
         # @@ MC target definition here @@
-        print(__name__ + f'.load_root_file: MC target computed')
-        Y = TARFUNC(events)
+        cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
+        Y = TARFUNC(events, entrystart=0, entrystop=MAXEVENTS)
+
+        # For info
+        labels1 = ['is_e', 'is_egamma']
+        aux.count_targets(events=events, names=labels1, entrystart=0, entrystop=MAXEVENTS)
+
         prints.printbar()
 
         # @@ MC filtering done here @@
-        print(__name__ + f".load_root_file: Prior MC filter: {len(X)} events ")
-        print(__name__ + f'.load_root_file: MC filter applied')
-        indmc = FILTERFUNC(X, VARS)
-        print(__name__ + f".load_root_file: After MC filter: {sum(indmc)} events ")
+        cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
+        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=ARGS['xcorr_flow'])
+
+        cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
+        cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
         prints.printbar()
 
-        Y   = Y[indmc]
-        X   = X[indmc]
+        Y = Y[indmc]
+        X = X[indmc]
     # =================================================================
-
+    
     # -----------------------------------------------------------------
     # @@ Observable cut selections done here @@
-    print(__name__ + f'.load_root_file: Observable cuts')
-    cind = CUTFUNC(X, VARS)
+    cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
+    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=ARGS['xcorr_flow'])
     # -----------------------------------------------------------------
 
     N_before = X.shape[0]
-    print(__name__ + f".load_root_file: Prior cut selections: {N_before} events ")
 
     ### Select events
     X = X[cind]
     if isMC: Y = Y[cind]
 
     N_after = X.shape[0]
-    print(__name__ + f".load_root_file: Post  cut selections: {N_after} events ({N_after / N_before:.3f})")
+    cprint(__name__ + f".load_root_file: Prior <cutfunc> selections: {N_before} events ", 'green')
+    cprint(__name__ + f".load_root_file: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
+    print('')
 
-    # -----------------------------------------------------------------
-    # PROCESS only MAXEVENTS
-    maxind = np.arange(0,np.min([X.shape[0], MAXEVENTS]))
-
-    X = X[maxind]
-    if isMC: Y = Y[maxind]
-
+    showmem()
+    prints.printbar()
+    
     return X, Y, VARS
