@@ -2,6 +2,7 @@ scipy>=1.5.2
 matplotlib>=3.0.3
 numpy>=1.19.1
 numba
+psutil
 networkx
 uproot>=3.11.1
 tqdm>=4.31.1
