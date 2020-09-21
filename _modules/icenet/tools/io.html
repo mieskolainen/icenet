@@ -234,6 +234,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
@@ -243,6 +245,12 @@
 
 <span class="kn">from</span> <span class="nn">sklearn.experimental</span> <span class="kn">import</span> <span class="n">enable_iterative_imputer</span>
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">IterativeImputer</span>
+
+
+<div class="viewcode-block" id="process_memory_use"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.process_memory_use">[docs]</a><span class="k">def</span> <span class="nf">process_memory_use</span><span class="p">():</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+    <span class="n">py</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">py</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="o">**</span><span class="mi">30</span>  <span class="c1"># memory use in GB</span></div>
 
 
 <div class="viewcode-block" id="checkinfnan"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.checkinfnan">[docs]</a><span class="k">def</span> <span class="nf">checkinfnan</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>

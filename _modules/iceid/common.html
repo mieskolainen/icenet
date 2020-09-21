@@ -234,6 +234,7 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -243,6 +244,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
+
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
@@ -266,7 +269,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        jagged array data, arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>   <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tune0&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -288,20 +291,17 @@
 
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;torch.__version__: &#39;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### SET GLOBALS (used only in this file)</span>
-    <span class="k">global</span> <span class="n">CUTFUNC</span><span class="p">,</span> <span class="n">TARFUNC</span><span class="p">,</span> <span class="n">FILTERFUNC</span><span class="p">,</span> <span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">INPUTVAR</span>
-    <span class="n">CUTFUNC</span>     <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
-    <span class="n">TARFUNC</span>     <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
-    <span class="n">FILTERFUNC</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
+    <span class="k">global</span> <span class="n">ARGS</span>
+    <span class="n">ARGS</span> <span class="o">=</span> <span class="n">args</span>
 
-    <span class="n">MAXEVENTS</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar:   &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc:    &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="c1"># --------------------------------------------------------------------</span>
 
     <span class="c1">### Load data</span>
@@ -344,6 +344,9 @@
         <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
 
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.common: Process RAM usage: </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
+<span class="s2">        [total RAM in use: </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">INPUTVAR</span></div>
 
 
@@ -461,85 +464,105 @@
 <span class="sd">        VARS      : variable names</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="c1"># ** GLOBALS **</span>
+
+    <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
+    <span class="n">TARFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
+    <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
+    <span class="n">MAXEVENTS</span>  <span class="o">=</span> <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
+    <span class="c1"># -----------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">showmem</span><span class="p">():</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.load_root_file: Process RAM usage: </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
+<span class="s2">            [total RAM in use </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    
     <span class="c1">### From root trees</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_root_file: Loading from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;ntuplizer&quot;</span><span class="p">][</span><span class="s2">&quot;tree&quot;</span><span class="p">]</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: events.numentries = </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">numentries</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: events.numentries = </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">numentries</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
     <span class="c1">### All variables</span>
-    <span class="n">VARS</span>        <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-    <span class="n">VARS_scalar</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="sa">b</span><span class="s1">&#39;image_&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+    <span class="n">VARS</span>   <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+    <span class="c1">#VARS_scalar = [x.decode() for x in events.keys() if b&#39;image_&#39; not in x]</span>
 
     <span class="c1"># Turn into dictionaries</span>
-    <span class="n">X_dict</span>  <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">VARS</span><span class="p">,</span> <span class="n">namedecode</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-    
-    <span class="c1"># Print out some statistics</span>
-    <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
-    <span class="c1">#labels2 = [&#39;has_trk&#39;,&#39;has_seed&#39;,&#39;has_gsf&#39;,&#39;has_ele&#39;]</span>
-    <span class="c1">#labels3 = [&#39;seed_trk_driven&#39;,&#39;seed_ecal_driven&#39;]</span>
+    <span class="n">X_dict</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">VARS</span><span class="p">,</span> <span class="n">namedecode</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
 
-    <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">labels1</span><span class="p">)</span>
-    
+    <span class="c1"># Is it MC (decision based on the first event)</span>
+    <span class="n">isMC</span> <span class="o">=</span> <span class="n">X_dict</span><span class="p">[</span><span class="s1">&#39;is_mc&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">showmem</span><span class="p">()</span>
+
     <span class="c1"># -----------------------------------------------------------------</span>
-    <span class="c1">### Convert input to matrix</span>
-    
+    <span class="c1">### Convert the input into an array of size (dimensions x events)</span>
+    <span class="c1"># Note that dimensions here can contain jagged information</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_root_file: Constructing X array ...&#39;</span><span class="p">)</span>
+
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">X_dict</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">VARS</span><span class="p">])</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="n">X_dict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span> <span class="c1"># Free memory</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">showmem</span><span class="p">()</span>
 
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
 
-    <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
-
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** MC ONLY ***</span>
-    <span class="n">isMC</span>  <span class="o">=</span> <span class="n">X_dict</span><span class="p">[</span><span class="s1">&#39;is_mc&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Decision based on the first event</span>
 
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
 
         <span class="c1"># @@ MC target definition here @@</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: MC target computed&#39;</span><span class="p">)</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
+
+        <span class="c1"># For info</span>
+        <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
+        <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
+
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
 
         <span class="c1"># @@ MC filtering done here @@</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: Prior MC filter: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2"> events &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: MC filter applied&#39;</span><span class="p">)</span>
-        <span class="n">indmc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: After MC filter: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">indmc</span><span class="p">)</span><span class="si">}</span><span class="s2"> events &quot;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;filterfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">indmc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="o">=</span><span class="n">VARS</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
+
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Prior MC &lt;filterfunc&gt;: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: After MC &lt;filterfunc&gt;: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">indmc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events &#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
 
-        <span class="n">Y</span>   <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
-        <span class="n">X</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
     <span class="c1"># =================================================================</span>
-
+    
     <span class="c1"># -----------------------------------------------------------------</span>
     <span class="c1"># @@ Observable cut selections done here @@</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Observable cuts&#39;</span><span class="p">)</span>
-    <span class="n">cind</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">),</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cind</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="o">=</span><span class="n">VARS</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="c1"># -----------------------------------------------------------------</span>
 
     <span class="n">N_before</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: Prior cut selections: </span><span class="si">{</span><span class="n">N_before</span><span class="si">}</span><span class="s2"> events &quot;</span><span class="p">)</span>
 
     <span class="c1">### Select events</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
 
     <span class="n">N_after</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: Post  cut selections: </span><span class="si">{</span><span class="n">N_after</span><span class="si">}</span><span class="s2"> events (</span><span class="si">{</span><span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: Prior &lt;cutfunc&gt; selections: </span><span class="si">{</span><span class="n">N_before</span><span class="si">}</span><span class="s2"> events &quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: Post  &lt;cutfunc&gt; selections: </span><span class="si">{</span><span class="n">N_after</span><span class="si">}</span><span class="s2"> events (</span><span class="si">{</span><span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-    <span class="c1"># -----------------------------------------------------------------</span>
-    <span class="c1"># PROCESS only MAXEVENTS</span>
-    <span class="n">maxind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAXEVENTS</span><span class="p">]))</span>
-
-    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">maxind</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">maxind</span><span class="p">]</span>
-
+    <span class="n">showmem</span><span class="p">()</span>
+    <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+    
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">VARS</span></div>
 </pre></div>
 

@@ -730,12 +730,6 @@ transformations combined with this transformation.</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="icenet.deep.dopt.dualtrain">
-<code class="sig-name descname">dualtrain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">X1_trn</span></em>, <em class="sig-param"><span class="n">X2_trn</span></em>, <em class="sig-param"><span class="n">Y_trn</span></em>, <em class="sig-param"><span class="n">X1_val</span></em>, <em class="sig-param"><span class="n">X2_val</span></em>, <em class="sig-param"><span class="n">Y_val</span></em>, <em class="sig-param"><span class="n">trn_weights</span></em>, <em class="sig-param"><span class="n">param</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#dualtrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.dualtrain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main training loop for dual object input</p>
-</dd></dl>
-
-<dl class="py function">
 <dt id="icenet.deep.dopt.log_sum_exp">
 <code class="sig-name descname">log_sum_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#log_sum_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.log_sum_exp" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/">http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/</a></p>
@@ -1197,13 +1191,14 @@ returns the loss. Optional for most optimizers.</p>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.apply_cutflow">
-<code class="sig-name descname">apply_cutflow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cut</span></em>, <em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_cutflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.apply_cutflow" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">apply_cutflow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cut</span></em>, <em class="sig-param"><span class="n">names</span></em>, <em class="sig-param"><span class="n">xcorr_flow</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_cutflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.apply_cutflow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply cutflow</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cut</strong> – list of pre-calculated cuts, each is a boolean array</p></li>
 <li><p><strong>names</strong> – list of names (description of each cut, for printout only)</p></li>
+<li><p><strong>xcorr_flow</strong> – compute full N-point correlations</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1311,13 +1306,15 @@ returns the loss. Optional for most optimizers.</p>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.count_targets">
-<code class="sig-name descname">count_targets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">events</span></em>, <em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#count_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.count_targets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">count_targets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">events</span></em>, <em class="sig-param"><span class="n">names</span></em>, <em class="sig-param"><span class="n">entrystart</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">entrystop</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#count_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.count_targets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Targets statistics printout</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>events</strong> – uproot object</p></li>
 <li><p><strong>names</strong> – list of branch names</p></li>
+<li><p><strong>entrystart</strong> – uproot starting point</p></li>
+<li><p><strong>entrystop</strong> – uproot ending point</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1789,6 +1786,11 @@ X_std : Standard deviation vector</p>
 <code class="sig-name descname">pick_vars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#icenet.tools.io.DATASET" title="icenet.tools.io.DATASET">icenet.tools.io.DATASET</a></span></em>, <em class="sig-param"><span class="n">set_of_variables</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#pick_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.pick_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Choose the active set of input variables.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.process_memory_use">
+<code class="sig-name descname">process_memory_use</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#process_memory_use"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.process_memory_use" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt id="icenet.tools.io.split_data">

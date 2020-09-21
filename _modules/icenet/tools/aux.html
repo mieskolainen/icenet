@@ -245,14 +245,18 @@
 <span class="kn">import</span> <span class="nn">numba</span>
 
 
-<div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Apply cutflow</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cut   : list of pre-calculated cuts, each is a boolean array</span>
-<span class="sd">        names : list of names (description of each cut, for printout only)</span>
+<span class="sd">        cut        : list of pre-calculated cuts, each is a boolean array</span>
+<span class="sd">        names      : list of names (description of each cut, for printout only)</span>
+<span class="sd">        xcorr_flow : compute full N-point correlations</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        ind   : list of indices, 1 = pass, 0 = fail</span>
+<span class="sd">        ind : list of indices, 1 = pass, 0 = fail</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -264,40 +268,45 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cut[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">&gt;20</span><span class="si">}</span><span class="s1">): pass </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="c1"># Print out &quot;parallel flow&quot;</span>
-    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point correlations &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 
-    <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
-    <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">ind</span></div>
 
 
-<div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+<div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Targets statistics printout</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        events :  uproot object</span>
-<span class="sd">        names  :  list of branch names</span>
+<span class="sd">        events :     uproot object</span>
+<span class="sd">        names  :     list of branch names</span>
+<span class="sd">        entrystart : uproot starting point</span>
+<span class="sd">        entrystop  : uproot ending point</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Printout on stdout</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">K</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-    <span class="n">vec</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">),</span> <span class="n">K</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
-        <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="n">K</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">])</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
 
     <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
     <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-
+    
     <span class="k">return</span></div>
 
 
