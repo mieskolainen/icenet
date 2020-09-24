@@ -268,7 +268,8 @@ conda install -c nvidia -c rapidsai py-xgboost
 </div>
 <div class="section" id="pytorch-and-torchvision-setup">
 <h2><a class="toc-backref" href="#id3">Pytorch and torchvision setup</a><a class="headerlink" href="#pytorch-and-torchvision-setup" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version (check CUDA version with nvidia-smi)
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version below
+# Check maximum CUDA version with nvidia-smi
 
 conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
 conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
@@ -277,10 +278,10 @@ conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
 </div>
 <div class="section" id="pytorch-geometric-setup">
 <h2><a class="toc-backref" href="#id4">Pytorch-geometric setup</a><a class="headerlink" href="#pytorch-geometric-setup" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version below
 
 export CUDA=cpu
-export CUDA=cu102 (or cu92, cu101)
+export CUDA=cu102 # (or cu92, cu101)
 
 pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
 pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
