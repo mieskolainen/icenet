@@ -655,9 +655,12 @@ def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
 
     # Loop and sum
     A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=np.float)
-    for i in range(len(x_ind)):
-        A[x_ind[i], y_ind[i]] += z_arr[i]
-
+    try:
+        for i in range(len(x_ind)):
+            A[x_ind[i], y_ind[i]] += z_arr[i]
+    except:
+        print(__name__ + f'.arrays2matrix: not valid input')
+    
     return A
 
 def x2ind(x, binedges) :
