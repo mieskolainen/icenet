@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#xgboost-setup">XGBoost setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#alternative-pip-automated-setup">Alternative pip automated setup</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
@@ -1757,6 +1758,18 @@ X_std : Standard deviation vector</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="icenet.tools.io.get_gpu_memory_map">
+<code class="sig-name descname">get_gpu_memory_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#get_gpu_memory_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.get_gpu_memory_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the GPU VRAM use in GB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary with keys as device ids [integers]
+and values the memory used by the GPU.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="icenet.tools.io.impute_data">
 <code class="sig-name descname">impute_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">imputer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dim</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">values</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'iterative'</span></em>, <em class="sig-param"><span class="n">fill_value</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">knn_k</span><span class="o">=</span><span class="default_value">6</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#impute_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.impute_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data imputation (treatment of missing values, Nan and Inf).</p>
@@ -1790,12 +1803,19 @@ X_std : Standard deviation vector</p>
 <dl class="py function">
 <dt id="icenet.tools.io.process_memory_use">
 <code class="sig-name descname">process_memory_use</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#process_memory_use"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.process_memory_use" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return system memory (RAM) used by the process in GB.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt id="icenet.tools.io.split_data">
 <code class="sig-name descname">split_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">frac</span></em>, <em class="sig-param"><span class="n">rngseed</span></em>, <em class="sig-param"><span class="n">class_id</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split into [A = train &amp; validation] + [B = test] sets</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.io.torch_cuda_total_memory">
+<code class="sig-name descname">torch_cuda_total_memory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#torch_cuda_total_memory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.io.torch_cuda_total_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return CUDA device VRAM available in GB.</p>
 </dd></dl>
 
 </div>

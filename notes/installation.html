@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#xgboost-setup">XGBoost setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#alternative-pip-automated-setup">Alternative pip automated setup</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
@@ -237,6 +238,7 @@
 <li><p><a class="reference internal" href="#xgboost-setup" id="id2">XGBoost setup</a></p></li>
 <li><p><a class="reference internal" href="#pytorch-and-torchvision-setup" id="id3">Pytorch and torchvision setup</a></p></li>
 <li><p><a class="reference internal" href="#pytorch-geometric-setup" id="id4">Pytorch-geometric setup</a></p></li>
+<li><p><a class="reference internal" href="#alternative-pip-automated-setup" id="id5">Alternative pip automated setup</a></p></li>
 </ul>
 </div>
 <div class="section" id="conda-virtual-environment-setup">
@@ -269,7 +271,7 @@ conda install -c nvidia -c rapidsai py-xgboost
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version (check CUDA version with nvidia-smi)
 
 conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
-conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=10.2 -c pytorch
+conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
 </pre></div>
 </div>
 </div>
@@ -285,6 +287,16 @@ pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torc
 pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
 pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
 pip install torch-geometric
+</pre></div>
+</div>
+</div>
+<div class="section" id="alternative-pip-automated-setup">
+<h2><a class="toc-backref" href="#id5">Alternative pip automated setup</a><a class="headerlink" href="#alternative-pip-automated-setup" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.8.5
+
+# Pick CPU or GPU version
+pip install -r requirements-cpu-linux.txt
+pip install -r requirements-gpu-linux.txt
 </pre></div>
 </div>
 </div>

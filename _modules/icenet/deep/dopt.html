@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#xgboost-setup">XGBoost setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#alternative-pip-automated-setup">Alternative pip automated setup</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
@@ -378,18 +379,32 @@
 <div class="viewcode-block" id="model_to_cuda"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.model_to_cuda">[docs]</a><span class="k">def</span> <span class="nf">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Wrapper function to handle CPU/GPU setup</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">GPU_chosen</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">device_type</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu:0&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span>
+            <span class="n">GPU_chosen</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu:0&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Multi-GPU setup</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: Multi-GPU </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: computing device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; chosen&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: Computing device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; chosen&#39;</span><span class="p">)</span>
     
+    <span class="k">if</span> <span class="n">GPU_chosen</span><span class="p">:</span>
+        <span class="n">used</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_gpu_memory_map</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">torch_cuda_total_memory</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; VRAM in use: </span><span class="si">{</span><span class="n">used</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> GB&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">device</span></div>
 
 
