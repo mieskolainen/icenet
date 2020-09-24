@@ -269,7 +269,7 @@ conda install -c nvidia -c rapidsai py-xgboost
 <div class="section" id="pytorch-and-torchvision-setup">
 <h2><a class="toc-backref" href="#id3">Pytorch and torchvision setup</a><a class="headerlink" href="#pytorch-and-torchvision-setup" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version below
-# Check maximum CUDA version with nvidia-smi
+# Check maximum CUDA version supported by your drivers with nvidia-smi
 
 conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
 conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
@@ -294,6 +294,7 @@ pip install torch-geometric
 <div class="section" id="alternative-pip-automated-setup">
 <h2><a class="toc-backref" href="#id5">Alternative pip automated setup</a><a class="headerlink" href="#alternative-pip-automated-setup" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.8.5
+conda activate icenet
 
 # Pick CPU or GPU version
 pip install -r requirements-cpu-linux.txt

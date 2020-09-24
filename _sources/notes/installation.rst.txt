@@ -39,7 +39,7 @@ Pytorch and torchvision setup
 .. code-block:: none
 
 	# Pick CPU or GPU version below
-	# Check maximum CUDA version with nvidia-smi
+	# Check maximum CUDA version supported by your drivers with nvidia-smi
 	
 	conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
 	conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
@@ -66,8 +66,9 @@ Alternative pip automated setup
 ----------------------------------
 .. code-block:: none
 	
-	conda create -y --name icenet python==3.8.5	
-
+	conda create -y --name icenet python==3.8.5
+	conda activate icenet
+	
 	# Pick CPU or GPU version	
 	pip install -r requirements-cpu-linux.txt
 	pip install -r requirements-gpu-linux.txt
