@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
 import copy
+from tqdm import tqdm
 
 from sklearn import metrics
 from scipy import stats
@@ -16,8 +17,6 @@ import scipy.special as special
 
 import icenet.tools.prints as prints
 import numba
-
-
 
 
 def apply_cutflow(cut, names, xcorr_flow=True):
@@ -627,7 +626,7 @@ def jagged2tensor(X, VARS, xyz, x_binedges, y_binedges):
         ind = [VARS.index(x) for x in xyz[c]]
 
         # Loop over all events
-        for i in range(X.shape[0]):
+        for i in tqdm(range(X.shape[0])):
             T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
                 x_binedges=x_binedges, y_binedges=y_binedges)
 
@@ -660,7 +659,7 @@ def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
             A[x_ind[i], y_ind[i]] += z_arr[i]
     except:
         print(__name__ + f'.arrays2matrix: not valid input')
-    
+
     return A
 
 def x2ind(x, binedges) :

@@ -209,6 +209,7 @@ def splitfactor(data, args):
     phi_binedges = args['image_param']['phi_bins']    
 
     # Pick tensor data out
+    cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
     data_tensor = {}
     data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
     data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
