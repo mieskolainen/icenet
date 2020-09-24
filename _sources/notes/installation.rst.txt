@@ -6,17 +6,33 @@ The framework installation goes as follows.
 .. contents::
     :local:
 
+Use conda & pip automated setup
+----------------------------------
+.. code-block:: none
+	
+	conda create -y --name icenet python==3.8.5
+	conda activate icenet
+	
+	# Pick CPU or GPU version	
+	pip install -r requirements-cpu-linux.txt
+	pip install -r requirements-gpu-linux.txt
+
+
+Alternatively, follow the instructions step-by-step below.
+
+
 Conda virtual environment setup
 --------------------------------
 .. code-block:: none
 
 	conda create -y --name icenet python==3.8.5
-	conda install -y --name icenet -c conda-forge --file requirements.txt
-
 	conda activate icenet
+	conda install -c conda-forge --file requirements.txt
+	
 	* xgboost, pytorch, torch-geometric ... setup now inside the environment *
 
 	...[do your work]...
+	
 	conda deactivate
 
 	conda info --envs
@@ -62,13 +78,3 @@ Pytorch-geometric setup
 	pip install torch-geometric
 
 
-Alternative pip automated setup
-----------------------------------
-.. code-block:: none
-	
-	conda create -y --name icenet python==3.8.5
-	conda activate icenet
-	
-	# Pick CPU or GPU version	
-	pip install -r requirements-cpu-linux.txt
-	pip install -r requirements-gpu-linux.txt
