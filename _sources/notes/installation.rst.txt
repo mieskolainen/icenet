@@ -41,8 +41,8 @@ Pytorch and torchvision setup
 	# Pick CPU or GPU version below
 	# Check maximum CUDA version supported by your drivers with nvidia-smi
 	
-	conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
-	conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
+	conda install pytorch==1.6.0 torchvision==0.6.1 cpuonly -c pytorch
+	conda install pytorch==1.6.0 torchvision==0.6.1 -c pytorch
 
 
 Pytorch-geometric setup
@@ -55,10 +55,10 @@ Pytorch-geometric setup
 	export CUDA=cpu
 	export CUDA=cu102 # (or cu92, cu101)
 
-	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
+	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
+	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
+	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 	pip install torch-geometric
 
 
