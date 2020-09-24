@@ -15,7 +15,7 @@ import pickle
 import sys
 import yaml
 import copy
-import graphviz
+#import graphviz
 import torch_geometric
 from termcolor import cprint
 

@@ -1,4 +1,4 @@
-# Input data containers
+# Input data containers and memory management
 # 
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
@@ -7,8 +7,10 @@
 import numpy as np
 import numba
 import copy
+import torch
 import os
 import psutil
+import subprocess
 
 import sys
 from termcolor import colored
@@ -20,10 +22,40 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
 
+
+def get_gpu_memory_map():
+    """Get the GPU VRAM use in GB.
+    
+    Returns:
+        dictionary with keys as device ids [integers]
+        and values the memory used by the GPU.
+    """
+    result = subprocess.check_output(
+        [
+            'nvidia-smi', '--query-gpu=memory.used',
+            '--format=csv,nounits,noheader'
+        ], encoding='utf-8')
+
+    # into dictionary
+    gpu_memory = [int(x)/1024.0 for x in result.strip().split('\n')]
+    gpu_memory_map = dict(zip(range(len(gpu_memory)), gpu_memory))
+    return gpu_memory_map
+
+
+def torch_cuda_total_memory(device):
+    """
+    Return CUDA device VRAM available in GB.
+    """
+    return torch.cuda.get_device_properties(device).total_memory / 1024.0**3
+
+
 def process_memory_use():
+    """
+    Return system memory (RAM) used by the process in GB.
+    """
     pid = os.getpid()
     py = psutil.Process(pid)
-    return py.memory_info()[0]/2.**30  # memory use in GB
+    return py.memory_info()[0]/2.**30
 
 
 def checkinfnan(x, value = 0):

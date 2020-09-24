@@ -41,7 +41,7 @@ Pytorch and torchvision setup
 	# Pick CPU or GPU version (check CUDA version with nvidia-smi)
 
 	conda install pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch
-	conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=10.2 -c pytorch
+	conda install pytorch==1.5.1 torchvision==0.6.1 -c pytorch
 
 
 Pytorch-geometric setup
@@ -59,3 +59,14 @@ Pytorch-geometric setup
 	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
 	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.5.0.html
 	pip install torch-geometric
+
+
+Alternative pip automated setup
+----------------------------------
+.. code-block:: none
+	
+	conda create -y --name icenet python==3.8.5	
+
+	# Pick CPU or GPU version	
+	pip install -r requirements-cpu-linux.txt
+	pip install -r requirements-gpu-linux.txt

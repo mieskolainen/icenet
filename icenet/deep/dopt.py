@@ -151,18 +151,32 @@ class DualDataset(torch.utils.data.Dataset):
 def model_to_cuda(model, device_type='auto'):
     """ Wrapper function to handle CPU/GPU setup
     """
+    GPU_chosen = False
+
     if device_type == 'auto':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu:0')
+        if torch.cuda.is_available():
+            device = torch.device('cuda:0')
+            GPU_chosen = True
+        else:
+            device = torch.device('cpu:0')
     else:
         device = param['device']
 
     model = model.to(device, non_blocking=True)
+
+    # Multi-GPU setup
     if torch.cuda.device_count() > 1:
         print(__name__ + f'.model_to_cuda: Multi-GPU {torch.cuda.device_count()}')
         model = nn.DataParallel(model)
 
-    print(__name__ + f'.model_to_cuda: computing device <{device}> chosen')
+    print(__name__ + f'.model_to_cuda: Computing device <{device}> chosen')
     
+    if GPU_chosen:
+        used  = io.get_gpu_memory_map()[0]
+        total = io.torch_cuda_total_memory(device)
+        cprint(__name__ + f'.model_to_cuda: device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')
+        print('')
+
     return model, device
 
 
