@@ -6,7 +6,14 @@ The framework installation goes as follows.
 .. contents::
     :local:
 
-Use conda & pip automated setup
+Preliminaries: Conda installation
+-------------------
+.. code-block:: none
+
+	wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
+
+
+Fully automated setup
 ----------------------------------
 .. code-block:: none
 	
@@ -18,8 +25,7 @@ Use conda & pip automated setup
 	pip install -r requirements-gpu-linux.txt
 
 
-Alternatively, follow the instructions step-by-step below.
-
+Alternatively if something fails, follow the instructions step-by-step below.
 
 Conda virtual environment setup
 --------------------------------
