@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
 
 from   torch_geometric.nn import Set2Set, global_mean_pool, global_max_pool, global_sort_pool
-from   torch_geometric.nn import NNConv, GINConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
+from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
 
 from   icenet.deep import dopt
@@ -184,15 +184,15 @@ class GATNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class DECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=8, task='node', aggr='max'):
+    def __init__(self, D, C, G=0, k=4, task='node', aggr='max'):
         super(DECNet, self).__init__()
-
+        
         self.D = D
         self.C = C
         self.G = G
 
         self.task  = task
-
+        
         # Convolution layers
         self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=aggr)
         self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=aggr)
@@ -317,15 +317,17 @@ class NNNet(torch.nn.Module):
 # https://arxiv.org/abs/1711.08920
 #
 class SplineNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, task='node'):
+    def __init__(self, D, C, E, G=0, task='node'):
         super(SplineNet, self).__init__()
 
         self.D     = D
         self.C     = C
+        self.E     = E
         self.G     = G
+        self.task  = task
 
-        self.conv1 = SplineConv(self.D, self.D, dim=1, degree=1, kernel_size=3)
-        self.conv2 = SplineConv(self.D, self.D, dim=1, degree=1, kernel_size=5)
+        self.conv1 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=3)
+        self.conv2 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=5)
         
         if (self.G > 0):
             self.Z = self.D + self.G
@@ -340,12 +342,13 @@ class SplineNet(torch.nn.Module):
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
+        # SplineConv supports only 1-dimensional edge attributes
         x = F.elu(self.conv1(data.x, data.edge_index, data.edge_attr))
         x = F.dropout(x, training=self.training)
 
         x = F.elu(self.conv2(x,      data.edge_index, data.edge_attr))
         x = F.dropout(x, training=self.training)
-
+        
         # ** Global pooling **
         if self.task == 'graph':
             x = global_max_pool(x, data.batch)

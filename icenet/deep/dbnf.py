@@ -261,10 +261,12 @@ def create_model(param, verbose=False, rngseed=0):
 def load_models(param, paths, modeldir):
     """ Load models from files
     """
-
+    
     models = []
     for i in range(len(paths)):
         print(__name__ + f'.load_models: Loading model[{i}] from {paths[i]}')
+
+        checkpoint = torch.load(modeldir + '/dbnf_' + paths[i] + '.pth')
         model = create_model(param, verbose=False)
         param['start_epoch'] = 0
         

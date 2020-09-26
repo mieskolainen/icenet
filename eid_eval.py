@@ -31,12 +31,7 @@ from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
 
-from icenet.algo  import flr
-from icenet.deep  import bnaf
-from icenet.deep  import dopt
-from icenet.deep  import dbnf
-from icenet.deep  import mlgr
-from icenet.deep  import maxo
+from icenet.deep import predict
 
 # iceid
 from configs.eid.mvavars import *
@@ -82,6 +77,7 @@ def main() :
     ### Execute
     global targetdir
     targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
+    args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
 
     evaluate(data=data, data_tensor=data_tensor, data_kin=data_kin, data_graph=data_graph, args=args)
 
@@ -155,183 +151,53 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
         X = io.apply_madscore(X, X_m, X_mad)
 
     # --------------------------------------------------------------------
-
-    ###
-    if args['xgb_param']['active']:
-        
-        label = args['xgb_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        xgb_model = pickle.load(open(modeldir + '/XGB_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
-        
-        def func_predict(x):
-            return xgb_model.predict(xgboost.DMatrix(data = x))
-
-        # Image data extended
-        X_ = X #np.c_[X, X_2D[:,0,:,:].reshape(len(X), -1)]
-
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-
-    
-    # --------------------------------------------------------------------
     # For pytorch based
     X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
     X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
 
-    ###
-    if args['xtx_param']['active']:
+    # Loop over active models
+    for i in range(len(args['active_models'])):
 
-        label = args['xtx_param']['label']
-        y_tot      = np.array([])
-        y_pred_tot = np.array([])
+        ID = args['active_models'][i]
+        param = args[f'{ID}_param']
+        print(f'Training <{ID}> | {param} \n')
 
-        AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
+        if   param['predict'] == 'torch_graph':
+            func_predict = predict.pred_torch(args=args, param=param)
+            saveit(func_predict = func_predict, X = X_graph, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-        for i in range(len(pt_edges) - 1):
-            for j in range(len(eta_edges) - 1):
+        elif param['predict'] == 'flr':
+            func_predict = predict.pred_flr(args=args, param=param)
+            saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-                pt_range  = [ pt_edges[i],  pt_edges[i+1]]
-                eta_range = [eta_edges[j], eta_edges[j+1]]
-                
-                # Indices
-                tst_ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index('trk_pt')],   pt_range),
-                                         aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
+        elif param['predict'] == 'xgb':
+            func_predict = predict.pred_xgb(args=args, param=param)
+            saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-                print('\nEvaluate {} classifier ...'.format(label))
-                print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(
-                    pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
+        elif param['predict'] == 'torch_image':
+            func_predict = predict.pred_torch(args=args, param=param)
+            saveit(func_predict = func_predict, X = X_2D_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-                try:
-                    
-                    xtx_model = aux.load_torch_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j)).to('cpu')
-                    xtx_model.eval() # Turn on eval mode!
-                    
-                    signalclass = 1
-                    y_pred = xtx_model.softpredict(X_ptr)[tst_ind, signalclass].detach().numpy()
-                    
-                    met_xtx = aux.Metric(y_true = y[tst_ind], y_soft = y_pred)
-                    print('AUC = {:.5f}'.format(met_xtx.auc))
-
-                    # Accumulate
-                    y_tot      = np.concatenate((y_tot, y[tst_ind]))
-                    y_pred_tot = np.concatenate((y_pred_tot, y_pred))
-
-                except:
-
-                    print('Error loading and evaluating the classifier.')
-
-                AUC[i,j]   = met_xtx.auc
-
-        # Evaluate total performance
-        met = aux.Metric(y_true = y_tot, y_soft = y_pred_tot)
-        roc_mstats.append(met)
-        roc_labels.append(label)
-
-        fig,ax = plots.plot_auc_matrix(AUC, pt_edges, eta_edges)
-        ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
+        #elif param['predict'] == 'xtx':
+        #    train.train_xtx(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, data_kin=data_kin, args=args, param=param)
         
-        targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
-        plt.savefig('{}/{}_AUC.pdf'.format(targetdir, label), bbox_inches='tight')
+        #elif param['predict'] == 'torch_dual':
+        #    func_predict = predict.pred_torch(args=args, param=param)
+        #    saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-    ###
-    if args['gnet_param']['active']:
-        
-        label = args['gnet_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
+        elif param['predict'] == 'torch_generic':
+            func_predict = predict.pred_torch(args=args, param=param)
+            saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
-        gnet_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth').to('cpu')
-        gnet_model.eval() # Turn on eval mode!
+        elif param['predict'] == 'torch_flow':
+            func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
+            saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
+        else:
+            raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
-        def func_predict(x):
-            signalclass = 1
-            return gnet_model.softpredict(x)[:, signalclass].detach().numpy()
 
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_graph, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-    
-    ###
-    if args['dmax_param']['active']:
-
-        label = args['dmax_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        dmax_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth').to('cpu')
-        dmax_model.eval() # Turn on eval mode!
-
-        def func_predict(x):
-            signalclass = 1
-            return dmax_model.softpredict(x)[:, signalclass].detach().numpy()
-
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-        
-    ###
-    if args['mlgr_param']['active']:
-
-        label = args['mlgr_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        mlgr_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth').to('cpu')
-        mlgr_model.eval() # Turn on eval mode!
-        
-        def func_predict(x):
-            signalclass = 1
-            return mlgr_model.softpredict(x)[:, signalclass].detach().numpy()
-
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-    
-    ###
-    if args['cnn_param']['active']:
-        
-        label = args['cnn_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        cnn_model = aux.load_torch_checkpoint(modeldir + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth').to('cpu')
-        cnn_model.eval() # Turn on eval mode!
-        
-        def func_predict(x):
-            signalclass = 1
-            return cnn_model.softpredict(x)[:, signalclass].detach().numpy()
-
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_2D_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-
-    ###
-    if args['dbnf_param']['active']:
-
-        label = args['dbnf_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        dbnf_param = args['dbnf_param']
-        dbnf_param['n_dims'] = X.shape[1]
-
-        # Load models
-        dbnf_models = dbnf.load_models(dbnf_param, ['class_0_rw_' + args['reweight_param']['mode'], 'class_1_rw_' + args['reweight_param']['mode']], modeldir)
-        
-        def func_predict(x):
-            return dbnf.predict(x, dbnf_models)
-        
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-
-     ###
-    if args['flr_param']['active']:
-
-        label = args['flr_param']['label']
-        print(f'\nEvaluate {label} classifier ...')
-
-        b_pdfs, s_pdfs, bin_edges = pickle.load(open(modeldir + '/FLR_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
-        def func_predict(x):
-            return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
-        
-        # Evaluate (pt,eta) binned AUC
-        saveit(func_predict = func_predict, X = X, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label)
-    
-
-    ### Plot ROC curves
+    ### Plot all ROC curves
     targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
     plots.ROC_plot(roc_mstats, roc_labels, title = 'reweight mode:' + args['reweight_param']['mode'],
         filename = targetdir + 'ROC')

@@ -63,6 +63,7 @@ CMSSW_MVA_ID_IMAGE = [
  'image_clu_eta',
  'image_clu_phi',
  'image_clu_e',
+ 'image_clu_nhit',
  'image_pf_n',
  'image_pf_eta',
  'image_pf_phi',

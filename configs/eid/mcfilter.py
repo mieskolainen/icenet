@@ -19,19 +19,21 @@ def filter_nofilter(X, VARS, xcorr_flow=False):
 def filter_charged(X, VARS, xcorr_flow=False):
     """ Only generator level charged """
 
-    # Construct passing filter
-    cut = []
-    cut.append( np.abs(X[:, VARS.index('gen_charge')]) == 1 )
+    # Construct passing cuts
+    cuts  = []
+    names = []
 
-    # Apply filters
-    names = ['|gen_charge| == 1']
+    #
+    cuts.append( np.abs(X[:, VARS.index('gen_charge')]) == 1 )
+    names.append(['|gen_charge| == 1'])
+
+    # Apply cuts
     ind = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
-
     return ind
 
 
 def filter_no_egamma(X, VARS, xcorr_flow=False):
-    """ No particle flow reconstructed electrons.
+    """ Basic MC filters.
     Args:
     	X    : # Number of vectors x # Number of variables
     	VARS : Variable name array
@@ -43,19 +45,22 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
     MINPT  = 5.0
     MAXETA = 2.5
 
-    # Construct passing filter
-    cut = []
-    cut.append( X[:, VARS.index('is_egamma')] == False )
-    cut.append( X[:, VARS.index('tag_pt')] > MINPT )
-    cut.append( np.abs(X[:, VARS.index('tag_eta')]) < MAXETA )
+    # Construct passing filters
+    cuts  = []
+    names = []
 
-    # Apply filters
-    names = [f'is_egamma == False',
-             f'tag_pt > {MINPT:0.2f}',
-             f'|tag_eta| < {MAXETA:0.2f}']
+    #
+    cuts.append( X[:, VARS.index('is_egamma')] == False )
+    names.append(f'is_egamma == False')
+    #
+    cuts.append( X[:, VARS.index('tag_pt')] > MINPT )
+    names.append(f'tag_pt > {MINPT:0.2f}')
+    #
+    cuts.append( np.abs(X[:, VARS.index('tag_eta')]) < MAXETA )
+    names.append(f'|tag_eta| < {MAXETA:0.2f}')
+    
 
-    ind   = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
-
+    ind   = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     return ind
 
 # Add alternative filters here ...

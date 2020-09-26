@@ -37,7 +37,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
     ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
         ind = np.logical_and(ind, cut[i])
-        print(f'cut[{i}] ({names[i]:>20}): pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
+        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:
@@ -470,10 +470,10 @@ def reweight_aux(X, y, binedges, shape_reference = 'signal', max_reg = 1E3, EPS=
 
 
 @numba.njit
-def balanceweights(weights_doublet, y):
+def balanceweights(weights_doublet, y, EPS=1e-12):
     """ Balance class weights to sum to equal counts.
     """
-    EQ = np.sum(weights_doublet[y == 0, 0]) / np.sum(weights_doublet[y == 1, 1])
+    EQ = np.sum(weights_doublet[y == 0, 0]) / (np.sum(weights_doublet[y == 1, 1]) + EPS)
     weights_doublet[y == 1,1] *= EQ
 
     return weights_doublet

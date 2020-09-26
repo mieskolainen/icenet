@@ -282,8 +282,7 @@ def load_root_file_new(root_path, class_id = []):
     X = np.array([X_dict[j] for j in VARS])
     X = X.T
     Y = None
-
-
+    
     X_dict.clear() # Free memory
     print(f'X.shape = {X.shape}')
     showmem()

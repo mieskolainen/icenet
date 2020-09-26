@@ -6,3 +6,5 @@ from .dopt import *
 from .gcnn import *
 from .maxo import *
 from .mlgr import *
+from .train import *
+from .predict import *

@@ -23,7 +23,9 @@ Fully automated setup
 	# Pick CPU or GPU version	
 	pip install -r requirements-cpu-linux.txt
 	pip install -r requirements-gpu-linux.txt
-
+	
+	# Install cudatoolkit (only if necessary)
+	conda install cudatoolkit=10.2
 
 Alternatively if something fails, follow the instructions step-by-step below.
 

@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 20000
+MAXEVENTS: 1500000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -50,7 +50,7 @@ imputation_param:
 ## Outlier protection in the training phase
 outlier_param:
   algo: 'truncate'   # algorithm: 'truncate', 'none'
-  qmin: 0.01         # in [0,100]
+  qmin: 0.01         # in [0,100] 
   qmax: 99.9         # in [0,100]
 
 
@@ -59,7 +59,7 @@ reweight_param:
   mode:  'background'           # 'none', 'signal', 'background'
   algo: '2D'
   bins_pt:  [0.0, 300.0, 1000] # Make sure the bounds cover the phase space
-  bins_eta: [-3.1, 3.1,   100] #
+  bins_eta: [-3.1, 3.1,   100] # 
   max_reg: 50.0                # maxweight regularization
 
 
@@ -70,7 +70,7 @@ plot_param:
   
   # (eta,pt)-binned plots
   pt_edges:  [0, 0.75, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
-  eta_edges: [-2.5, -1.5, -0.75, 0.0, 0.75, 1.5, 2.5]
+  eta_edges: [-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5]
 
 
 # ========================================================================
@@ -78,26 +78,99 @@ plot_param:
 # ========================================================================
 
 
-# Graph nets
-gnet_param:
-  active: true
-  label:  'GNET'
+# ** Activate models here **
+# Give all models some unique identifier and label
+active_models:
+  - gnet0
+  - gnet1
+  - gnet2
+  - gnet3
+
+#  - flr0
+  - xgb0
+
+#  - lgr0
+#  - cnn0
+#  - cdmx0
+#  - xtx0
+#  - dmx0
+#  - dbnf0
+
+
+# Graph net
+gnet0_param:
+  train:   'graph'
+  predict: 'torch_graph'
+  label:  'G-NN'
 
   # Convolution model
   conv_type: 'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   
-  epochs: 300
+  epochs: 20
   batch_size: 64
   learning_rate: 0.005
-  weight_decay: 0.001       # L2-regularization
+  weight_decay:  0.0005     # L2-regularization
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+# Graph net
+gnet1_param:
+  train: 'graph'
+  predict: 'torch_graph'
+  label:  'G-GAT'
+
+  # Convolution model
+  conv_type: 'GAT'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   
+  epochs: 20
+  batch_size: 64
+  learning_rate: 0.005
+  weight_decay:  0.0005     # L2-regularization
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+# Graph net
+gnet2_param:
+  train: 'graph'
+  predict: 'torch_graph'
+  label:  'G-DEC'
+
+  # Convolution model
+  conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  
+  epochs: 20
+  batch_size: 64
+  learning_rate: 0.005
+  weight_decay:  0.0005     # L2-regularization
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+# Graph net
+gnet3_param:
+  train: 'graph'
+  predict: 'torch_graph'
+  label:  'G-SPL'
+
+  # Convolution model
+  conv_type: 'spline'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  
+  epochs: 20
+  batch_size: 64
+  learning_rate: 0.005
+  weight_decay:  0.0005     # L2-regularization
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 
+
 # Factorized Likelihood Ratio
-flr_param:
-  active: true
+flr0_param:
+  train: 'flr'
+  predict: 'flr'
   label: 'FLR'
   
   nbins: 60
@@ -107,8 +180,9 @@ flr_param:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_param:
-  active: true
+xgb0_param:
+  train: 'xgb'
+  predict: 'xgb'
   label: 'XGB'
   
   # general parameters
@@ -140,9 +214,10 @@ xgb_param:
 
 
 # Logistic Regression (convex model = global optimum guarantee)
-mlgr_param:
-  active: true
-  label:  'MLGR'
+lgr0_param:
+  train: 'lgr'
+  predict: 'torch_generic'
+  label: 'LGR'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent
@@ -152,15 +227,16 @@ mlgr_param:
   epochs: 30
   batch_size: 196
   learning_rate: 0.003
-  weight_decay: 0.01        # L2-regularization
+  weight_decay: 0.001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 
 # Convolutional Neural Net
-cnn_param:
-  active: true
-  label:  'CNN'
+cnn0_param:
+  train: 'cnn'
+  predict: 'torch_image'
+  label: 'CNN'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
   gamma: 2                  # focal_entropy exponent
@@ -180,8 +256,9 @@ cnn_param:
 
 
 # CNN + MAXOUT
-cdmx_param:
-  active: false
+cdmx0_param:
+  train: 'cdmx'
+  predict: 'torch_dual'
   label:  'CDMX'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -206,8 +283,9 @@ cdmx_param:
 
 
 # XTX (hyperbinned) classifier
-xtx_param:
-  active: false
+xtx0_param:
+  train: 'xtx'
+  predict: 'xtx'
   label:  'XTX'
 
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -228,8 +306,9 @@ xtx_param:
 
 
 # Deep MAXOUT network
-dmax_param:
-  active: true
+dmx0_param:
+  train: 'dmax'
+  predict: 'torch_generic'
   label:  'DMAX'
   
   lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
@@ -244,18 +323,19 @@ dmax_param:
   epochs:  100
   batch_size: 128
   learning_rate: 0.005
-  weight_decay: 0.01        # L2-regularization
+  weight_decay: 0.001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 
 # Deep Normalizing Flow
-dbnf_param:
-  active: false
+dbnf0_param:
+  train: 'flow'
+  predict: 'torch_flow'
   label:  'DBNF'
   
   # Gradient descent
-  epochs: 1000
+  epochs: 100
   batch_size: 512
   optimizer: 'Adam'
   learning_rate: 0.05

@@ -346,9 +346,9 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
                 # Add AUC
                 if j == 0:
-                    trn_aucs.append(auc / k)
+                    trn_aucs.append(auc / (k + 1E-12))
                 else:
-                    val_aucs.append(auc / k)
+                    val_aucs.append(auc / (k + 1E-12))
                 j += 1
 
             print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))

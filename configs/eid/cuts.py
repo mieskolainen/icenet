@@ -5,6 +5,7 @@
 
 import numpy as np
 import numba
+import matplotlib.pyplot as plt
 
 import icenet.tools.aux as aux
 
@@ -21,24 +22,33 @@ def cut_standard(X, VARS, xcorr_flow=False):
     Returns:
     	ind  : Passing indices
     """
-
-    # Fiducial cuts
-    MINPT  = 0.5
-    MAXETA = 2.4
-
-    # Construct cuts
-    cut = []
-    cut.append( X[:, VARS.index('has_gsf')] == True )
-    cut.append( X[:, VARS.index('gsf_pt')]  > MINPT )
-    cut.append( np.abs(X[:, VARS.index('trk_eta')]) < MAXETA )
-
-    # Apply cutflow
-    names = [f'has_gsf == True',
-             f'gsf_pt > {MINPT:0.2f}',
-             f'|gsf_eta| < {MAXETA:0.2f}']
     
-    ind = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
+    # Fiducial cuts
+    #MINPT  = 0.5
+    #MAXETA = 2.4
+    MINPT  = 0.7
+    MAXETA = 1.5
+    
+    
+    # Construct cuts
+    cuts  = []
+    names = []
 
+    #
+    cuts.append( X[:,VARS.index('has_gsf')] == True )
+    names.append(f'has_gsf == True')
+    #
+    cuts.append( X[:,VARS.index('gsf_pt')] > MINPT )
+    names.append(f'gsf_pt > {MINPT:0.2f}')
+    #
+    cuts.append( np.abs(X[:,VARS.index('trk_eta')]) < MAXETA )
+    names.append(f'|gsf_eta| < {MAXETA:0.2f}')
+    #
+    #cuts.append( [(len(X[i,VARS.index('image_clu_eta')]) is not 0) for i in range(X.shape[0])] )
+    #names.append(f'len(image_clu_eta) != 0')
+    
+    
+    ind = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     return ind
 
 # Add alternative cuts here ...
