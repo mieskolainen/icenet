@@ -262,7 +262,7 @@
 <span class="kn">from</span> <span class="nn">configs.eid.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 
 
-<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
 
 <span class="sd">    Args:</span>
@@ -301,6 +301,9 @@
     <span class="k">global</span> <span class="n">ARGS</span>
     <span class="n">ARGS</span> <span class="o">=</span> <span class="n">args</span>
 
+    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAXEVENTS</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -334,7 +337,7 @@
             <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">],</span>
             <span class="s2">&quot;knn_k&quot;</span><span class="p">:</span>      <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;knn_k&#39;</span><span class="p">]</span>
         <span class="p">}</span>
-
+        
         <span class="c1"># NOTE, UPDATE NEEDED: one should save here &#39;imputer_trn&#39; to a disk -&gt; can be used with data</span>
         <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer_trn</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="o">**</span><span class="n">param</span><span class="p">)</span>
         <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>

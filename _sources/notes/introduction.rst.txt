@@ -11,6 +11,7 @@ Folder structure
 
 .. code-block:: none
 
+	-analysis     Main steering macros and scripts
 	-checkpoint   Saved models
 	-configs      Input configuration
 	-docs         Documentation
@@ -29,18 +30,18 @@ Electron ID classifier
 -----------------------
 .. code-block:: none
 
-	python eid_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
-	python eid_eval.py  --config tune0 --datapath <some path> --datasets <0,1,2,...>
+	python ./analysis/eid_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
+	python ./analysis/eid_eval.py  --config tune0 --datapath <some path> --datasets <0,1,2,...>
 
 
 B/R(K) analyzer
 -----------------------
 .. code-block:: none
 
-	python brk_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
-	python brk_calc.py  --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
-	python brk_print.py --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
-	python brk_fit.py   --config tune0 --tag <xyz>
+	python ./analysis/brk_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
+	python ./analysis/brk_calc.py  --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
+	python ./analysis/brk_print.py --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
+	python ./analysis/brk_fit.py   --config tune0 --tag <xyz>
 
 
 Algorithms/packages included

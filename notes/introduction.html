@@ -243,7 +243,8 @@
 </div>
 <div class="section" id="folder-structure">
 <h2><a class="toc-backref" href="#id1">Folder structure</a><a class="headerlink" href="#folder-structure" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>-checkpoint   Saved models
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>-analysis     Main steering macros and scripts
+-checkpoint   Saved models
 -configs      Input configuration
 -docs         Documentation
 -figs         Output figures
@@ -260,17 +261,17 @@
 </div>
 <div class="section" id="electron-id-classifier">
 <h2><a class="toc-backref" href="#id2">Electron ID classifier</a><a class="headerlink" href="#electron-id-classifier" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python eid_train.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
-python eid_eval.py  --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python ./analysis/eid_train.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
+python ./analysis/eid_eval.py  --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
 </pre></div>
 </div>
 </div>
 <div class="section" id="b-r-k-analyzer">
 <h2><a class="toc-backref" href="#id3">B/R(K) analyzer</a><a class="headerlink" href="#b-r-k-analyzer" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python brk_train.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
-python brk_calc.py  --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt; --tag &lt;xyz&gt;
-python brk_print.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt; --tag &lt;xyz&gt;
-python brk_fit.py   --config tune0 --tag &lt;xyz&gt;
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python ./analysis/brk_train.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt;
+python ./analysis/brk_calc.py  --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt; --tag &lt;xyz&gt;
+python ./analysis/brk_print.py --config tune0 --datapath &lt;some path&gt; --datasets &lt;0,1,2,...&gt; --tag &lt;xyz&gt;
+python ./analysis/brk_fit.py   --config tune0 --tag &lt;xyz&gt;
 </pre></div>
 </div>
 </div>
