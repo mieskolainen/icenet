@@ -11,6 +11,21 @@ from tqdm import tqdm
 
 from . import aux
 
+
+def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3)):
+    """
+    Visualize matrix.
+    """
+    fig,ax = plt.subplots(figsize=figsize)
+    
+    x,y    = np.meshgrid(x_bins, y_bins)
+    # Note transpose
+    c      = ax.pcolormesh(x, y, XY.T, cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.axis([x.min(), x.max(), y.min(), y.max()])
+
+    return fig,ax,c
+
+
 def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     """ Training evolution plots.
 

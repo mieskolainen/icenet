@@ -5,6 +5,9 @@
 
 """
 
+# icenet system paths
+import _icepaths_
+
 import h5py
 import uproot
 import uproot_methods

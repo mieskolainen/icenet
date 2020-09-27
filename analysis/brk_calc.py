@@ -3,6 +3,9 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
+# icenet system paths
+import _icepaths_
+
 import pickle
 import xgboost
 import matplotlib as plt

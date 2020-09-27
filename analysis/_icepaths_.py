@@ -4,7 +4,8 @@ import sys
 import os
 
 
-paths = ['/iceplot/',
+paths = ['',
+		 '/iceplot/',
 		 '/icenet/',
 		 '/icebrk/',
 		 '/iceid/',
@@ -13,4 +14,4 @@ paths = ['/iceplot/',
 for p in paths:
 	fullpath = os.path.abspath('.') + p
 	print(fullpath)
-	sys.path.insert(0, fullpath)
+	sys.path.insert(0,fullpath)

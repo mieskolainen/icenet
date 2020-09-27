@@ -5,7 +5,8 @@
 # is independent of these
 KINEMATIC_ID = [
   'trk_pt',
-  'trk_eta'
+  'trk_eta',
+  'trk_phi'
 ]
 
 

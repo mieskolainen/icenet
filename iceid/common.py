@@ -33,7 +33,7 @@ from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
-def init():
+def init(MAXEVENTS=None):
     """ Initialize electron ID data.
 
     Args:
@@ -72,6 +72,9 @@ def init():
     global ARGS
     ARGS = args
 
+    if MAXEVENTS is not None:
+        ARGS['MAXEVENTS'] = MAXEVENTS
+    
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
     print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
@@ -105,7 +108,7 @@ def init():
             "fill_value": args['imputation_param']['fill_value'],
             "knn_k":      args['imputation_param']['knn_k']
         }
-
+        
         # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with data
         data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
         data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
