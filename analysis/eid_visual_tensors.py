@@ -1,4 +1,4 @@
-# Electron ID [TRAINING] steering code
+# Electron ID [TENSOR VISUALIZATION] steering code
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
@@ -26,10 +26,13 @@ from termcolor import cprint
 from matplotlib import pyplot as plt
 
 from icenet.tools import plots
+from icenet.algo import nmf
 
 # iceid
 from iceid import common
 
+import numba
+import numpy as np
 
 
 # Main function
@@ -37,13 +40,53 @@ from iceid import common
 def main() :
 
     ### Get input
-    data, args, features = common.init(MAXEVENTS=3000)
+    data, args, features = common.init(MAXEVENTS=30000)
 
     
     targetdir = f'./figs/eid/{args["config"]}/image/'; os.makedirs(targetdir, exist_ok = True)
 
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
+
+
+    # --------------------------------------------------------------------
+    # NMF factorization
+
+    k = 3 # Number of basis components
+    channel = 0
+
+    for class_ind in [0,1]:
+        
+        V = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
+        print(V.shape)
+
+        V_new = np.zeros((V.shape[1]*V.shape[2], V.shape[0]))
+        for i in range(V.shape[0]):
+            V_new[:,i] = V[i,:,:].flatten() + 1e-12
+        print(V_new.shape)
+
+        W,H = nmf.ML_nmf(V=V_new, k=k, threshold=1e-5, maxiter=300)
+
+        for i in range(k):
+            B = W[:,i].reshape(V.shape[1],V.shape[2])
+            print(B.shape)
+
+            fig,ax,c = plots.plot_matrix(XY = B,
+                x_bins=args['image_param']['eta_bins'],
+                y_bins=args['image_param']['phi_bins'],
+                vmin=0, vmax=None, figsize=(5,3))
+
+            ax.set_xlabel('$\\eta$')
+            ax.set_ylabel('$\\phi$ [rad]')
+            fig.colorbar(c, ax=ax)
+            ax.set_title(f'basis vector $b_{{{i}}}$ | $\\langle E \\rangle$ GeV | class = {class_ind}')
+
+            os.makedirs(f'{targetdir}/NMF/', exist_ok = True)            
+            plt.savefig(f'{targetdir}/NMF/class_{class_ind}_basis_{i}.pdf', bbox_inches='tight')
+            #plt.show()
+            plt.close()
+
+    # --------------------------------------------------------------------
 
     ### Mean images
     VMAX    = 0.5 # GeV, maximum visualization scale
@@ -67,8 +110,10 @@ def main() :
         plt.savefig(f'{targetdir}/mean_E_channel_{channel}_class_{class_ind}.pdf', bbox_inches='tight')
         plt.close()
 
+
     ### Loop over individual events
-    for i in tqdm(range(np.min([100, data_tensor['trn'].shape[0]]))):
+    MAXN = 100 # max number
+    for i in tqdm(range(np.min([MAXN, data_tensor['trn'].shape[0]]))):
 
         fig,ax,c = plots.plot_matrix(XY=data_tensor['trn'][i,channel,:,:],
             x_bins=args['image_param']['eta_bins'],
@@ -87,6 +132,7 @@ def main() :
         os.makedirs(f'{targetdir}/channel_{channel}_class_{data.trn.y[i]:0.0f}/', exist_ok = True)
         plt.savefig(f'{targetdir}/channel_{channel}_class_{data.trn.y[i]:0.0f}/{i}.pdf', bbox_inches='tight')
         plt.close()
+
 
     print(__name__ + ' [done]')
 

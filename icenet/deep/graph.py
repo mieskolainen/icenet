@@ -128,7 +128,7 @@ def test(model, loader, optimizer, device):
 # https://arxiv.org/abs/1710.10903
 #
 class GATNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, dropout=0.25, task='node'):
+    def __init__(self, D, C, G=0, dropout=0.0, task='node'):
         super(GATNet, self).__init__()
 
         self.D = D
@@ -141,24 +141,27 @@ class GATNet(torch.nn.Module):
         self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
         
+        # "Fusion" layer taking in conv1 and conv2 outputs
+        self.lin1  = MLP([self.D*2 + self.D, 96])
+        
         if (self.G > 0):
-            self.Z = self.D + self.G
+            self.Z = 96 + self.G
         else:
-            self.Z = self.D
-        self.mlp1 = Linear(self.Z, self.Z)
-        self.mlp2 = Linear(self.Z, self.C)
+            self.Z = 96
+
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
 
     def forward(self, data):
         
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-        
-        x = F.elu(self.conv1(data.x, data.edge_index))
-        x = F.dropout(x, training=self.training)
 
-        x = F.elu(self.conv2(x,      data.edge_index))
-        x = F.dropout(x, training=self.training)
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+
+        x = self.lin1(torch.cat([x1, x2], dim=1))
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
@@ -169,14 +172,74 @@ class GATNet(torch.nn.Module):
             u = data.u.view(-1, self.G)
             x = torch.cat((x, u), 1)
 
-        x = F.relu(self.mlp1(x))
-        x = F.relu(self.mlp2(x))
+        # Final layers
+        x = self.mlp1(x)
 
         return x
 
     # Returns softmax probability
     def softpredict(self,x):
         return F.softmax(self.forward(x), dim=1)
+
+
+# Pure EdgeConv based graph net
+# 
+# https://arxiv.org/abs/1801.07829
+#
+class ECNet(torch.nn.Module):
+    def __init__(self, D, C, G=0, k=1, task='node', aggr='max'):
+        super(ECNet, self).__init__()
+        
+        self.D = D
+        self.C = C
+        self.G = G
+
+        self.task  = task
+        
+        # Convolution layers
+        self.conv1 = EdgeConv(MLP([2 * self.D, 32, 32]), aggr=aggr)
+        self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=aggr)
+        
+        # "Fusion" layer taking in conv1 and conv2 outputs
+        self.lin1  = MLP([32 + 64, 96])
+        
+        if (self.G > 0):
+            self.Z = 96 + self.G
+        else:
+            self.Z = 96
+
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+    def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        x = self.lin1(torch.cat([x1, x2], dim=1))
+
+        # ** Global pooling (to handle graph level classification) **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
+        # Final layers
+        x = self.mlp1(x)
+
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x) :
+        return F.softmax(self.forward(x), dim=1)
+
 
 
 # DynamicEdgeConv based graph net

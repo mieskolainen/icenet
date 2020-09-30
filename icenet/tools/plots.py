@@ -20,8 +20,10 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     
     x,y    = np.meshgrid(x_bins, y_bins)
     # Note transpose
-    c      = ax.pcolormesh(x, y, XY.T, cmap=cmap, vmin=vmin, vmax=vmax)
+    c      = ax.pcolormesh(x, y, XY.T, cmap=cmap, vmin=vmin, vmax=vmax, antialiased=True, linewidth=0.0)
+    
     ax.axis([x.min(), x.max(), y.min(), y.max()])
+
 
     return fig,ax,c
 

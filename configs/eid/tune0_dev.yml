@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 1500000
+MAXEVENTS: 1000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -88,8 +88,8 @@ plot_param:
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
-  - gnet0
-  - gnet1
+#  - gnet0
+#  - gnet1
   - gnet2
   - gnet3
 
@@ -147,7 +147,7 @@ gnet2_param:
   # Convolution model
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   
-  epochs: 20
+  epochs: 30
   batch_size: 64
   learning_rate: 0.005
   weight_decay:  0.0005     # L2-regularization
@@ -159,19 +159,18 @@ gnet2_param:
 gnet3_param:
   train: 'graph'
   predict: 'torch_graph'
-  label:  'G-SPL'
+  label:  'G-EC'
 
   # Convolution model
-  conv_type: 'spline'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_type: 'EC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   
-  epochs: 20
+  epochs: 30
   batch_size: 64
   learning_rate: 0.005
   weight_decay:  0.0005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
-
 
 
 # Factorized Likelihood Ratio

@@ -15,16 +15,17 @@ import uproot_methods
 import icenet.algo.analytic as analytic
 
 
-def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12):
+def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=False):
     """
     Jagged array data into pytorch-geometric style Data format array.
 
     Args:
-        X        :  Jagged array of variables
-        VARS     :  Variable names as an array of strings
-        features :  Array of active scalar feature strings
-        Y        :  Target class  array (if any, typically MC only)
-        W        :  (Re-)weighting array (if any, typically MC only)
+        X         :  Jagged array of variables
+        VARS      :  Variable names as an array of strings
+        features  :  Array of active scalar feature strings
+        Y         :  Target class  array (if any, typically MC only)
+        W         :  (Re-)weighting array (if any, typically MC only)
+        global_on :  Global features on / off
         
     Returns:
         Array of pytorch-geometric Data objects
@@ -42,8 +43,8 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12):
         num_nodes = 1 + len(X[e, VARS.index('image_clu_eta')]) # + 1 virtual node
         num_edges = num_nodes**2 # include self-connections
 
-        num_node_features = 7
-        num_edge_features = 3
+        num_node_features = 4
+        num_edge_features = 1
         num_classes       = 2
         
         # Construct 4-vector for the track, with zero-mass
@@ -110,10 +111,12 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12):
                 x[i,3] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
 
                 # Relative coordinates
+                '''
                 diff   = p4track - p4vec[i-1]
                 x[i,4] = diff.x
                 x[i,5] = diff.y
                 x[i,6] = diff.z
+                '''
 
         # ----------------------------------------------------------------
         ### Construct edge features
@@ -135,8 +138,8 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12):
                 edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
                 
                 # Lorentz scalars
-                edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
-                edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
+                #edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
+                #edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
 
                 n += 1
 
@@ -161,6 +164,9 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12):
                 n += 1
 
         # Add this event
+        if global_on == False: # Null the global features
+            u = torch.tensor(np.zeros(len(features)) + 1, dtype=torch.float)
+
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
 
     return dataset

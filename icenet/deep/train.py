@@ -71,6 +71,8 @@ def train_graph(data_trn, data_val, args, param):
         model = graph.GATNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'DEC':
         model = graph.DECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+    elif conv_type == 'EC':
+        model = graph.ECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')    
     elif conv_type == 'SG':
         model = graph.SGNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
     elif conv_type == 'SAGE':
