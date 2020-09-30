@@ -314,7 +314,7 @@ kinematic data</p>
 <span id="iceid-graphio"></span><h2>iceid.graphio<a class="headerlink" href="#module-iceid.graphio" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="iceid.graphio.parse_graph_data">
-<code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em>, <em class="sig-param"><span class="n">global_on</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jagged array data into pytorch-geometric style Data format array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -324,6 +324,7 @@ kinematic data</p>
 <li><p><strong>features</strong> – Array of active scalar feature strings</p></li>
 <li><p><strong>Y</strong> – Target class  array (if any, typically MC only)</p></li>
 <li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
+<li><p><strong>global_on</strong> – Global features on / off</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

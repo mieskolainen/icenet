@@ -850,8 +850,28 @@ with a rule sigma ~ 1/sqrt(n)</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="icenet.deep.graph.ECNet">
+<em class="property">class </em><code class="sig-name descname">ECNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em>, <em class="sig-param"><span class="n">aggr</span><span class="o">=</span><span class="default_value">'max'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#ECNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.ECNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="icenet.deep.graph.ECNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#ECNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.ECNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="icenet.deep.graph.ECNet.softpredict">
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#ECNet.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.ECNet.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="icenet.deep.graph.ECNet.training">
+<code class="sig-name descname">training</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></em><a class="headerlink" href="#icenet.deep.graph.ECNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="icenet.deep.graph.GATNet">
-<em class="property">class </em><code class="sig-name descname">GATNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">GATNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">'node'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="icenet.deep.graph.GATNet.forward">
 <code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#GATNet.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.graph.GATNet.forward" title="Permalink to this definition">¶</a></dt>

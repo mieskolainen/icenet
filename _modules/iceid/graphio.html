@@ -244,16 +244,17 @@
 <span class="kn">import</span> <span class="nn">icenet.algo.analytic</span> <span class="k">as</span> <span class="nn">analytic</span>
 
 
-<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jagged array data into pytorch-geometric style Data format array.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        X        :  Jagged array of variables</span>
-<span class="sd">        VARS     :  Variable names as an array of strings</span>
-<span class="sd">        features :  Array of active scalar feature strings</span>
-<span class="sd">        Y        :  Target class  array (if any, typically MC only)</span>
-<span class="sd">        W        :  (Re-)weighting array (if any, typically MC only)</span>
+<span class="sd">        X         :  Jagged array of variables</span>
+<span class="sd">        VARS      :  Variable names as an array of strings</span>
+<span class="sd">        features  :  Array of active scalar feature strings</span>
+<span class="sd">        Y         :  Target class  array (if any, typically MC only)</span>
+<span class="sd">        W         :  (Re-)weighting array (if any, typically MC only)</span>
+<span class="sd">        global_on :  Global features on / off</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        Array of pytorch-geometric Data objects</span>
@@ -271,8 +272,8 @@
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">)])</span> <span class="c1"># + 1 virtual node</span>
         <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span> <span class="c1"># include self-connections</span>
 
-        <span class="n">num_node_features</span> <span class="o">=</span> <span class="mi">7</span>
-        <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">num_node_features</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">num_classes</span>       <span class="o">=</span> <span class="mi">2</span>
         
         <span class="c1"># Construct 4-vector for the track, with zero-mass</span>
@@ -339,10 +340,12 @@
                 <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_nhit&#39;</span><span class="p">)][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
                 <span class="c1"># Relative coordinates</span>
-                <span class="n">diff</span>   <span class="o">=</span> <span class="n">p4track</span> <span class="o">-</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">x</span>
-                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">y</span>
-                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">z</span>
+                <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                diff   = p4track - p4vec[i-1]</span>
+<span class="sd">                x[i,4] = diff.x</span>
+<span class="sd">                x[i,5] = diff.y</span>
+<span class="sd">                x[i,6] = diff.z</span>
+<span class="sd">                &#39;&#39;&#39;</span>
 
         <span class="c1"># ----------------------------------------------------------------</span>
         <span class="c1">### Construct edge features</span>
@@ -364,8 +367,8 @@
                 <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="o">=</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="o">=</span><span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="o">=</span><span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
                 
                 <span class="c1"># Lorentz scalars</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">+</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">p2</span>  <span class="c1"># Mandelstam s-like</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">-</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">p2</span>  <span class="c1"># Mandelstam t-like</span>
+                <span class="c1">#edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like</span>
+                <span class="c1">#edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like</span>
 
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -390,6 +393,9 @@
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># Add this event</span>
+        <span class="k">if</span> <span class="n">global_on</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># Null the global features</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">dataset</span></div>
