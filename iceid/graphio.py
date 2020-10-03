@@ -139,7 +139,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         u = torch.tensor(np.zeros(len(features)), dtype=torch.float)
         for i in range(len(features)):
             u[i] = torch.tensor(X[e, VARS.index(features[i])], dtype=torch.float)
-
+        
         # ====================================================================
         # CONSTRUCT TENSORS
 

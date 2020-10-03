@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 1500000
+MAXEVENTS: 15000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -93,21 +93,19 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - gxgb0
 #  - dmlp
 #  - cnn0
-#  - gnet3
 #  - gnet0
   - gnet1
+#  - gnet3
 #  - gnet2
-
 #  - flr0
   - xgb0
-
 #  - lgr0
 #  - xtx0
 #  - dmx0
 #  - dbnf0
+  - gxgb0 # Keep this last (fix the bug) !
 
 
 # Dual graph + XGB network

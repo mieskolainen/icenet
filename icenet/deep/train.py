@@ -158,7 +158,7 @@ def train_graph_xgb(data_trn, data_val, trn_weights, args, param):
         y_trn[i]   = data_trn[i].y.numpy()
 
     for i in range(x_val.shape[0]):
-
+        
         xconv = graph_model.forward(data=data_val[i], conv_only=True).detach().numpy()
         x_val[i,:] = np.c_[xconv, [data_val[i].u.numpy()]]
         y_val[i]   = data_val[i].y.numpy()
