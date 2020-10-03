@@ -179,13 +179,13 @@ class GATNet(torch.nn.Module):
         self.C = C
         self.G = G
 
-        self.dropout = dropout
-        self.task = task
+        self.dropout     = dropout
+        self.task        = task
         self.global_pool = global_pool
 
         self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
-        
+
         # "Fusion" layer taking in conv1 and conv2 outputs
         self.lin1  = MLP([self.D*2 + self.D, 96])
         
@@ -197,7 +197,7 @@ class GATNet(torch.nn.Module):
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
         
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -216,6 +216,9 @@ class GATNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -263,7 +266,7 @@ class SUPNet(torch.nn.Module):
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -282,7 +285,9 @@ class SUPNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
-
+        
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -297,8 +302,6 @@ class SUPNet(torch.nn.Module):
     # Returns softmax probability
     def softpredict(self,x) :
         return F.softmax(self.forward(x), dim=1)
-
-
 
 
 # Pure EdgeConv based graph net
@@ -331,7 +334,7 @@ class ECNet(torch.nn.Module):
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -351,6 +354,9 @@ class ECNet(torch.nn.Module):
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
 
+        if conv_only: # Return convolution part
+            return x
+
         # Global features concatenated
         if self.G > 0:
             u = data.u.view(-1, self.G)
@@ -364,7 +370,6 @@ class ECNet(torch.nn.Module):
     # Returns softmax probability
     def softpredict(self,x) :
         return F.softmax(self.forward(x), dim=1)
-
 
 
 # DynamicEdgeConv based graph net
@@ -397,7 +402,7 @@ class DECNet(torch.nn.Module):
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -416,6 +421,9 @@ class DECNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -473,7 +481,7 @@ class NNNet(torch.nn.Module):
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -494,6 +502,9 @@ class NNNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -535,7 +546,7 @@ class SplineNet(torch.nn.Module):
         self.mlp1 = Linear(self.Z, self.Z)
         self.mlp2 = Linear(self.Z, self.C)
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -556,6 +567,9 @@ class SplineNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -597,7 +611,7 @@ class SAGENet(torch.nn.Module):
         self.task  = task
         self.global_pool = global_pool
         
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -617,6 +631,9 @@ class SAGENet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -659,7 +676,7 @@ class SGNet(torch.nn.Module):
         self.task  = task
         self.global_pool = global_pool
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -679,6 +696,9 @@ class SGNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:
@@ -727,7 +747,7 @@ class GINENet(torch.nn.Module):
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
 
-    def forward(self, data):
+    def forward(self, data, conv_only=False):
 
         if not hasattr(data,'batch'):
             # Create virtual null batch if singlet graph input
@@ -761,6 +781,9 @@ class GINENet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+        
+        if conv_only: # Return convolution part
+            return x
 
         # Global features concatenated
         if self.G > 0:

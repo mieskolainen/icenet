@@ -126,6 +126,102 @@ def train_graph(data_trn, data_val, args, param):
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
     torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
 
+    return model
+
+
+def train_graph_xgb(data_trn, data_val, trn_weights, args, param):
+
+    label = param['label']
+
+    if param['xgb']['tree_method'] == 'auto':
+        param['xgb'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+
+    print(f'\nTraining {label} classifier ...')
+
+    ### Compute graphnet convolution output
+    graph_model = train_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
+    graph_model = graph_model.to('cpu')    
+
+    xtest = graph_model.forward(data=data_trn[0], conv_only=True).detach().numpy()
+    Z = xtest.shape[1]  # Find out dimension of the convolution output
+
+    x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
+    x_val = np.zeros((len(data_val), Z + len(data_val[0].u)))
+
+    y_trn = np.zeros(len(data_trn))
+    y_val = np.zeros(len(data_val))
+
+    for i in range(x_trn.shape[0]):
+
+        xconv = graph_model.forward(data=data_trn[i], conv_only=True).detach().numpy()
+        x_trn[i,:] = np.c_[xconv, [data_trn[i].u.numpy()]]
+        y_trn[i]   = data_trn[i].y.numpy()
+
+    for i in range(x_val.shape[0]):
+
+        xconv = graph_model.forward(data=data_val[i], conv_only=True).detach().numpy()
+        x_val[i,:] = np.c_[xconv, [data_val[i].u.numpy()]]
+        y_val[i]   = data_val[i].y.numpy()
+
+
+    print(f'after extension: {x_trn.shape}')
+
+    dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
+    dtest     = xgboost.DMatrix(data = x_val, label = y_val)
+
+
+    evallist  = [(dtrain, 'train'), (dtest, 'eval')]
+    results   = dict()
+    model     = xgboost.train(params = param['xgb'], dtrain = dtrain,
+        num_boost_round = param['xgb']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
+    
+    ## Save
+    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_checkpoint_rw_" + args['reweight_param']['mode'] + '.dat', 'wb'))
+
+    losses   = results['train']['logloss']
+    trn_aucs = results['train']['auc']
+    val_aucs = results['eval']['auc']
+
+    # Plot evolution
+    plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['xgb']['label'])
+    plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
+
+
+    # ------------------------------------------------------------------------------------
+    ## Plot feature importance (xgb does Not return it for all of them)
+    fscores  = model.get_score(importance_type='gain')
+    print(fscores)
+
+    D  = x_trn.shape[1]
+    xx = np.arange(D)
+    yy = np.zeros(D)
+
+    for i in range(D):
+        try:
+            yy[i] = fscores['f' + str(i)]
+        except:
+            yy[i] = 0.0
+
+
+    fig  = plt.figure(figsize=(12,8))
+    bars = plt.barh(xx, yy, align='center', height=0.5)
+    plt.xlabel('f-score (gain)')
+
+    targetdir = f'./figs/eid/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+    plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+
+
+    ## Plot decision tree
+    #xgboost.plot_tree(xgb_model, num_trees=2)
+    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
+
+    ### Plot contours
+    if args['plot_param']['contours_on']:
+        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
+            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
+
 
 def train_dmax(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
 
@@ -334,7 +430,7 @@ def train_xgb(data, trn_weights, args, param):
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
     ## Save
-    pickle.dump(model, open(args['modeldir'] + f'/{label}_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
+    pickle.dump(model, open(args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
 
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
@@ -353,7 +449,7 @@ def train_xgb(data, trn_weights, args, param):
     D  = data.trn.x.shape[1]
     xx = np.arange(D)
     yy = np.zeros(D)
-
+    
     for i in range(D):
         try:
             yy[i] = fscores['f' + str(i)]

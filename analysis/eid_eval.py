@@ -164,9 +164,13 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
         ID = args['active_models'][i]
         param = args[f'{ID}_param']
         print(f'Training <{ID}> | {param} \n')
-
+        
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch(args=args, param=param)
+            saveit(func_predict = func_predict, X = X_graph, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
+        
+        elif param['predict'] == 'graph_xgb':
+            func_predict = predict.pred_graph_xgb(args=args, param=param)
             saveit(func_predict = func_predict, X = X_graph, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
         elif param['predict'] == 'flr':

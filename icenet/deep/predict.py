@@ -45,6 +45,31 @@ from iceid import common
 from iceid import graphio
 
 
+
+def pred_graph_xgb(args, param):
+
+    label = param['label']
+    print(f'\nEvaluate {label} classifier ...')
+    
+    graph_model = aux.load_torch_checkpoint(args['modeldir'] + 
+        f"/{param['graph']['label']}_checkpoint_rw_" + args['reweight_param']['mode'] + ".pth").to('cpu')
+    graph_model.eval() # Turn eval mode one!
+
+    xgb_model   = pickle.load(open(args['modeldir'] + 
+        f"/{param['xgb']['label']}_checkpoint_rw_"   + args['reweight_param']['mode'] + ".dat", 'rb'))
+    
+    def func_predict(data):
+
+        conv_x = graph_model.forward(data=data, conv_only=True).detach().numpy()
+
+        # Concatenate convolution features and global features
+        x_tot = np.c_[conv_x, [data.u.numpy()]]
+
+        return xgb_model.predict(xgboost.DMatrix(data = x_tot))
+
+    return func_predict
+
+
 def pred_torch(args, param):
 
     label = param['label']
@@ -122,7 +147,7 @@ def pred_xgb(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
-    xgb_model = pickle.load(open(args['modeldir'] + '/XGB_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
+    xgb_model = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
     
     def func_predict(x):
         return xgb_model.predict(xgboost.DMatrix(data = x))

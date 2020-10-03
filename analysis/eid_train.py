@@ -22,9 +22,6 @@ import copy
 import torch_geometric
 from termcolor import cprint
 
-# xgboost
-import xgboost
-
 # matplotlib
 from matplotlib import pyplot as plt
 
@@ -165,7 +162,10 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
 
         if   param['train'] == 'graph':
             train.train_graph(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)
-            
+
+        elif param['train'] == 'graph_xgb':
+            train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
+        
         elif param['train'] == 'flr':
             train.train_flr(data=data, trn_weights=trn_weights, args=args,param=param)
         

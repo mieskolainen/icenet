@@ -92,6 +92,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
                 X[e, VARS.index('image_clu_phi')], 0) # Massless
         
         # Construct Gram matrix
+        '''
         if len(p4vec) > 0 and global_on:
 
             G1 = gram_matrix(p4vec, type='dot'); G1 /= (np.linalg.norm(G1) + 1e-9)
@@ -106,6 +107,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
             d1    = 0
             d2    = 0
             d3    = 0  
+        '''
 
         #print(f"N: {len(G1)} | det1: {d1:0.3E} | det2: {d2:0.3E} | det3: {d3:0.3E} | is_e: {X[e,VARS.index('is_e')]}")
 
@@ -134,17 +136,9 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
             w = torch.tensor([1.0], dtype=torch.float)
 
         # Construct global feature vector
-        u = torch.tensor(np.zeros(len(features)) + 1 + 3, dtype=torch.float)
+        u = torch.tensor(np.zeros(len(features)), dtype=torch.float)
         for i in range(len(features)):
             u[i] = torch.tensor(X[e, VARS.index(features[i])], dtype=torch.float)
-
-        # New global features
-        # + 1
-        if len(p4vec) > 0:
-            u[-1] = p4vec.sum().p2 # Total invariant mass**2 of clusters
-            u[-2] = d1
-            u[-3] = d2
-            u[-4] = d3
 
         # ====================================================================
         # CONSTRUCT TENSORS

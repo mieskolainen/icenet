@@ -93,11 +93,12 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - dmlp
-  - cnn0
-  - gnet3
+  - gxgb0
+#  - dmlp
+#  - cnn0
+#  - gnet3
 #  - gnet0
-#  - gnet1
+  - gnet1
 #  - gnet2
 
 #  - flr0
@@ -107,6 +108,73 @@ active_models:
 #  - xtx0
 #  - dmx0
 #  - dbnf0
+
+
+# Dual graph + XGB network
+gxgb0_param:
+
+  train:   'graph_xgb'
+  predict: 'graph_xgb'
+  label:   'GXGB'
+
+  # ** GRAPH NETWORK **
+  graph:
+    train: 'graph'
+    predict: 'torch_graph'
+    label:  'GXGB-G'
+
+    # Convolution model
+    conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+    conv_aggr:   'add'
+    global_pool: 'max'
+    
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005     # L2-regularization
+
+    # Scheduler
+    step_size: 200
+    gamma: 0.1
+
+    device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+    num_workers: 1
+
+  # ** XGBOOST **
+  xgb:
+    train: 'xgb'
+    predict: 'xgb'
+    label: 'GXGB-XGB'
+    
+    # general parameters
+    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 300    # Number of epochs
+    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+    # booster parameters
+    learning_rate: 0.05
+    
+    # Tree parameters
+    n_estimators: 500
+    max_depth: 10
+    min_child_weight: 1.0
+    gamma: 0.0
+    max_delta_step: 0
+    subsample: 1.0
+
+    colsample_bytree:  1
+    colsample_bylevel: 1
+    colsample_bynode:  1
+    
+    reg_lambda: 2.0       # L2 regularization
+    reg_alpha: 0.0        # L1 regularization
+    
+    scale_pos_weight: 1
+
+    # learning task parameters
+    objective: 'binary:logistic'     #
+    eval_metric: ['auc', 'logloss']  # for evaluation
+
 
 # Graph net
 gnet3_param:
@@ -163,9 +231,9 @@ gnet1_param:
   # Convolution model
   conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
-  global_pool: 'add'
+  global_pool: 'max'
   
-  epochs: 150
+  epochs: 50
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -227,6 +295,8 @@ xgb0_param:
   # booster parameters
   learning_rate: 0.15
   
+  # Tree parameters
+  n_estimators: 500
   max_depth: 15
   min_child_weight: 1.0
   gamma: 0.0
@@ -257,12 +327,12 @@ dmlp_param:
   gamma: 2                  # focal_entropy exponent
   optimizer: 'AdamW'
   noise_reg: 0.0            # Noise regularization
-
+  
   epochs: 30
   batch_size: 196
   learning_rate: 0.003
-  weight_decay: 0.00001       # L2-regularization
-
+  weight_decay: 0.00001     # L2-regularization
+  
   mlp_dim: [64, 64, 64]     # hidden layer dimensions
   batch_norm: True    
 
