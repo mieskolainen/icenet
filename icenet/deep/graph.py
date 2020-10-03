@@ -3,7 +3,6 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
-
 import numpy as np
 
 import torch
@@ -455,7 +454,7 @@ class NNNet(torch.nn.Module):
         
         # "Fusion" layer taking in conv layer outputs
         self.lin1  = MLP([D+D, Q])
-        
+
         # Set2Set pooling operation produces always output with 2 x input dimension
         # => use linear layer to project down
         if self.global_pool == 's2s':

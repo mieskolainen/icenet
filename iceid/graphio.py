@@ -72,24 +72,24 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         num_nodes = 1 + len(X[e, VARS.index('image_clu_eta')]) # + 1 virtual node
         num_edges = num_nodes**2 # include self-connections
 
-        num_node_features = 5
+        num_node_features = 6
         num_edge_features = 3
         num_classes       = 2
         
-        # Construct 4-vector for the track, with zero-mass
+        # Construct 4-vector for the track, with pion mass
         p4track = uproot_methods.TLorentzVector.from_ptetaphim(
             X[e, VARS.index('trk_pt')],
             X[e, VARS.index('trk_eta')],
             X[e, VARS.index('trk_phi')],
-            0)
+            0.13957)
 
-        # Construct 4-vector for each cluster [@@ JAGGED @@]
+        # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
         p4vec = []
         if len(X[e, VARS.index('image_clu_eta')]) > 0:
             p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
                 X[e, VARS.index('image_clu_e')] / np.cosh(X[e, VARS.index('image_clu_eta')]),
                 X[e, VARS.index('image_clu_eta')],
-                X[e, VARS.index('image_clu_phi')], 0)
+                X[e, VARS.index('image_clu_phi')], 0) # Massless
 
         # Construct Gram matrix
         if len(p4vec) > 0 and global_on:
@@ -142,12 +142,10 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         # + 1
         if len(p4vec) > 0:
             u[-1] = p4vec.sum().p2 # Total invariant mass**2 of clusters
-            
             u[-2] = d1
             u[-3] = d2
             u[-4] = d3
-            
-
+        
         # ====================================================================
         # CONSTRUCT TENSORS
 
@@ -156,7 +154,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         for i in range(num_nodes):
 
             if i > 0:
-                # Features spesific to each node
+                
                 if   coord == 'ptetaphim':
                     x[i,0] = torch.tensor(p4vec[i-1].pt)
                     x[i,1] = torch.tensor(p4vec[i-1].eta)
@@ -170,7 +168,10 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
                 else:
                     raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')      
                 
+                # other features
                 x[i,4] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
+                x[i,5] = p4track.delta_r(p4vec[i-1])
+
 
         # ----------------------------------------------------------------
         ### Construct edge features
@@ -179,21 +180,19 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
             for j in range(num_nodes):
 
                 if i > 0 and j > 0: # i,j = 0 case is the virtual node
-                    p4_i = p4vec[i-1]
-                    p4_j = p4vec[j-1]
-                else:
-                    p4_i = zerovec
-                    p4_j = zerovec
 
-                # kt-metric (anti)
-                dR2_ij = ((p4_i.eta - p4_j.eta)**2 + (p4_i.phi - p4_j.phi)**2)
-                kt2_i  = p4_i.pt**2 + EPS 
-                kt2_j  = p4_j.pt**2 + EPS
-                edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
-                
-                # Lorentz scalars
-                edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
-                edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
+                    p4_i   = p4vec[i-1]
+                    p4_j   = p4vec[j-1]
+
+                    # kt-metric (anti)
+                    dR2_ij = ((p4_i.eta - p4_j.eta)**2 + (p4_i.phi - p4_j.phi)**2)
+                    kt2_i  = p4_i.pt**2 + EPS 
+                    kt2_j  = p4_j.pt**2 + EPS
+                    edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
+                    
+                    # Lorentz scalars
+                    edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
+                    edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
 
                 n += 1
 
@@ -212,11 +211,11 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         for i in range(num_nodes):
             for j in range(num_nodes):
                 
-                if i > 0 and j > 0: # Skip virtual node
+                #if i > 0 and j > 0: # Skip virtual node
 
-                    # Full connectivity, including self-loops
-                    edge_index[0,n] = i
-                    edge_index[1,n] = j
+                # Full connectivity, including self-loops
+                edge_index[0,n] = i
+                edge_index[1,n] = j
             n += 1
 
         # Add this event
