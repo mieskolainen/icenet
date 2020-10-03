@@ -409,13 +409,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span>     <span class="o">=</span> <span class="n">dropout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>        <span class="o">=</span> <span class="n">task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
-        
+
         <span class="c1"># &quot;Fusion&quot; layer taking in conv1 and conv2 outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
         
@@ -427,7 +427,7 @@
         <span class="c1"># Final layers concatenating everything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
-<div class="viewcode-block" id="GATNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GATNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="GATNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GATNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -446,6 +446,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -493,7 +496,7 @@
         <span class="c1"># Final layers concatenating everything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
-<div class="viewcode-block" id="SUPNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="SUPNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -512,7 +515,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
-
+        
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -527,8 +532,6 @@
     <span class="c1"># Returns softmax probability</span>
 <div class="viewcode-block" id="SUPNet.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
-
-
 
 
 <span class="c1"># Pure EdgeConv based graph net</span>
@@ -561,7 +564,7 @@
         <span class="c1"># Final layers concatenating everything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
-<div class="viewcode-block" id="ECNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.ECNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="ECNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.ECNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -581,6 +584,9 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
+
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -594,7 +600,6 @@
     <span class="c1"># Returns softmax probability</span>
 <div class="viewcode-block" id="ECNet.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.ECNet.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
-
 
 
 <span class="c1"># DynamicEdgeConv based graph net</span>
@@ -627,7 +632,7 @@
         <span class="c1"># Final layers concatenating everything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
-<div class="viewcode-block" id="DECNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.DECNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="DECNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.DECNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -646,6 +651,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -703,7 +711,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="NNNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.NNNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="NNNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.NNNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -724,6 +732,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -765,7 +776,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp2</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SplineNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SplineNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="SplineNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SplineNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -786,6 +797,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -827,7 +841,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
         
-<div class="viewcode-block" id="SAGENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SAGENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="SAGENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SAGENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -847,6 +861,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -889,7 +906,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
-<div class="viewcode-block" id="SGNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SGNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="SGNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SGNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -909,6 +926,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -957,7 +977,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="GINENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GINENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="GINENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GINENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -991,6 +1011,9 @@
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

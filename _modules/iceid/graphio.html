@@ -322,20 +322,22 @@
                 <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_phi&#39;</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Massless</span>
         
         <span class="c1"># Construct Gram matrix</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p4vec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">global_on</span><span class="p">:</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        if len(p4vec) &gt; 0 and global_on:</span>
 
-            <span class="n">G1</span> <span class="o">=</span> <span class="n">gram_matrix</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">);</span> <span class="n">G1</span> <span class="o">/=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)</span>
-            <span class="n">G2</span> <span class="o">=</span> <span class="n">gram_matrix</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">);</span>   <span class="n">G2</span> <span class="o">/=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)</span>
-            <span class="n">G3</span> <span class="o">=</span> <span class="n">gram_matrix</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">);</span>   <span class="n">G3</span> <span class="o">/=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G3</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)</span>
+<span class="sd">            G1 = gram_matrix(p4vec, type=&#39;dot&#39;); G1 /= (np.linalg.norm(G1) + 1e-9)</span>
+<span class="sd">            G2 = gram_matrix(p4vec, type=&#39;s&#39;);   G2 /= (np.linalg.norm(G2) + 1e-9)</span>
+<span class="sd">            G3 = gram_matrix(p4vec, type=&#39;t&#39;);   G3 /= (np.linalg.norm(G3) + 1e-9)</span>
 
-            <span class="c1"># Determinant</span>
-            <span class="n">d1</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">G1</span><span class="p">)</span>
-            <span class="n">d2</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">G2</span><span class="p">)</span>
-            <span class="n">d3</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">G3</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">d1</span>    <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">d2</span>    <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">d3</span>    <span class="o">=</span> <span class="mi">0</span>  
+<span class="sd">            # Determinant</span>
+<span class="sd">            d1    = np.linalg.det(G1)</span>
+<span class="sd">            d2    = np.linalg.det(G2)</span>
+<span class="sd">            d3    = np.linalg.det(G3)</span>
+<span class="sd">        else:</span>
+<span class="sd">            d1    = 0</span>
+<span class="sd">            d2    = 0</span>
+<span class="sd">            d3    = 0  </span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="c1">#print(f&quot;N: {len(G1)} | det1: {d1:0.3E} | det2: {d2:0.3E} | det3: {d3:0.3E} | is_e: {X[e,VARS.index(&#39;is_e&#39;)]}&quot;)</span>
 
@@ -364,17 +366,9 @@
             <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="c1"># Construct global feature vector</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)):</span>
             <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">])],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-
-        <span class="c1"># New global features</span>
-        <span class="c1"># + 1</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p4vec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4vec</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">p2</span> <span class="c1"># Total invariant mass**2 of clusters</span>
-            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">d1</span>
-            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2</span>
-            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">d3</span>
 
         <span class="c1"># ====================================================================</span>
         <span class="c1"># CONSTRUCT TENSORS</span>
