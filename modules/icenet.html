@@ -487,12 +487,17 @@ transformations combined with this transformation.</p>
 
 <dl class="py class">
 <dt id="icenet.deep.cnn.CNN_DMAX">
-<em class="property">class </em><code class="sig-name descname">CNN_DMAX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">nchannels</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">nrows</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">ncols</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">dropout_cnn</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">neurons</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">num_units</span><span class="o">=</span><span class="default_value">6</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dual (simultaneous) input network [image tensors x vectors]</p>
+<em class="property">class </em><code class="sig-name descname">CNN_DMAX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">C</span></em>, <em class="sig-param"><span class="n">nchannels</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">nrows</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">ncols</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">dropout_cnn</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">mlp_dim</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">num_units</span><span class="o">=</span><span class="default_value">6</span></em>, <em class="sig-param"><span class="n">dropout_mlp</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dual (simultaneous) input network [image tensors x global vectors]</p>
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.forward" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Input data dictionary with members</dt><dd><p>‘x’ : as image tensor
+‘u’’ : global feature tensor</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.maxout">
@@ -502,7 +507,7 @@ transformations combined with this transformation.</p>
 
 <dl class="py method">
 <dt id="icenet.deep.cnn.CNN_DMAX.softpredict">
-<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">softpredict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -729,7 +734,7 @@ transformations combined with this transformation.</p>
 
 <dl class="py class">
 <dt id="icenet.deep.dopt.DualDataset">
-<em class="property">class </em><code class="sig-name descname">DualDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X1</span></em>, <em class="sig-param"><span class="n">X2</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">W</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#DualDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.DualDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">DualDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">W</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#DualDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dopt.DualDataset" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

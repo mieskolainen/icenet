@@ -241,12 +241,13 @@
 
 <div class="viewcode-block" id="CNN_DMAX"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX">[docs]</a><span class="k">class</span> <span class="nc">CNN_DMAX</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dual (simultaneous) input network [image tensors x vectors]</span>
+<span class="sd">    Dual (simultaneous) input network [image tensors x global vectors]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Note: MaxPool(Relu(x)) = Relu(MaxPool(x))</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">nchannels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">dropout_cnn</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">neurons</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">nchannels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                    <span class="n">dropout_cnn</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">mlp_dim</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">dropout_mlp</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CNN_DMAX</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="c1"># -------------------------------------------</span>
@@ -291,9 +292,9 @@
         <span class="c1"># MAXOUT BLOCK</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span>         <span class="o">=</span> <span class="n">D</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span>   <span class="o">=</span> <span class="n">neurons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp_dim</span>   <span class="o">=</span> <span class="n">mlp_dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_units</span> <span class="o">=</span> <span class="n">num_units</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span>   <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span>   <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">dropout_mlp</span><span class="p">)</span>
 
         <span class="c1"># Network modules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span>  <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
@@ -301,10 +302,10 @@
 
         
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_units</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="n">neurons</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="n">mlp_dim</span><span class="p">))</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="c1"># xavier init</span>
             
-            <span class="bp">self</span><span class="o">.</span><span class="n">fc2_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">neurons</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fc2_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mlp_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">))</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="c1"># xavier init</span>
 
         <span class="c1"># -------------------------------------------</span>
@@ -318,15 +319,20 @@
         <span class="k">return</span> <span class="n">max_output</span></div>
 
 
-<div class="viewcode-block" id="CNN_DMAX.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_DMAX.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Input data dictionary with members</span>
+<span class="sd">            &#39;x&#39; : as image tensor</span>
+<span class="sd">            &#39;u&#39;&#39; : global feature tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># print(f&#39;\nINPUT: {x.shape}&#39;)</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
         <span class="c1"># print(f&#39;\nAFTER BLOCK 1: {x.shape}&#39;)</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
 
         <span class="c1"># ***</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="c1"># ***</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxout</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span><span class="p">)</span>
@@ -336,8 +342,8 @@
         <span class="k">return</span> <span class="n">x</span></div>
 
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN_DMAX.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="p">:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="CNN_DMAX.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CNN"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN">[docs]</a><span class="k">class</span> <span class="nc">CNN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
