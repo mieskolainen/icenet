@@ -233,7 +233,6 @@
 <span class="c1"># Mikael Mieskolainen, 2020</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -685,7 +684,7 @@
         
         <span class="c1"># &quot;Fusion&quot; layer taking in conv layer outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="n">D</span><span class="o">+</span><span class="n">D</span><span class="p">,</span> <span class="n">Q</span><span class="p">])</span>
-        
+
         <span class="c1"># Set2Set pooling operation produces always output with 2 x input dimension</span>
         <span class="c1"># =&gt; use linear layer to project down</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
