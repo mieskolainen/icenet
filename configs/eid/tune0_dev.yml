@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 15000
+MAXEVENTS: 50000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -113,7 +113,7 @@ gxgb0_param:
 
   train:   'graph_xgb'
   predict: 'graph_xgb'
-  label:   'GXGB'
+  label:   'DGXGB'
 
   # ** GRAPH NETWORK **
   graph:
