@@ -14,7 +14,7 @@ from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
 from   typing import Union, Tuple, Callable
 from   torch_geometric.typing import OptTensor, OptPairTensor, Adj, Size
 
-from   torch_geometric.nn import Set2Set, global_mean_pool, global_max_pool, global_sort_pool
+from   torch_geometric.nn import Set2Set, global_add_pool, global_mean_pool, global_max_pool, global_sort_pool
 from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
 
@@ -179,7 +179,8 @@ class GATNet(torch.nn.Module):
 
         self.dropout = dropout
         self.task = task
-
+        self.global_pool = global_pool
+        
         self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
         
@@ -207,7 +208,12 @@ class GATNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -237,7 +243,8 @@ class SUPNet(torch.nn.Module):
         self.C = C
         self.G = G
 
-        self.task  = task
+        self.task        = task
+        self.global_pool = global_pool
 
         # Convolution layers
         self.conv1 = SuperEdgeConv(MLP([2 * self.D + E, 32, 32]), aggr=conv_aggr)
@@ -267,7 +274,13 @@ class SUPNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
+
 
         # Global features concatenated
         if self.G > 0:
@@ -299,6 +312,7 @@ class ECNet(torch.nn.Module):
         self.G = G
 
         self.task  = task
+        self.global_pool = global_pool
         
         # Convolution layers
         self.conv1 = EdgeConv(MLP([2 * self.D, 32, 32]), aggr=conv_aggr)
@@ -328,7 +342,12 @@ class ECNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -359,6 +378,7 @@ class DECNet(torch.nn.Module):
         self.G = G
 
         self.task  = task
+        self.global_pool = global_pool
         
         # Convolution layers
         self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=conv_aggr)
@@ -388,7 +408,12 @@ class DECNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -461,8 +486,12 @@ class NNNet(torch.nn.Module):
             if self.global_pool == 's2s':
                 x = self.S2Spool(x, data.batch)
                 x = self.S2Slin(x)
-            elif self.global_pool == 'max':
+            elif global_pool == 'max':
                 x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -492,6 +521,7 @@ class SplineNet(torch.nn.Module):
         self.E     = E
         self.G     = G
         self.task  = task
+        self.global_pool = global_pool
 
         self.conv1 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=3)
         self.conv2 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=5)
@@ -518,7 +548,12 @@ class SplineNet(torch.nn.Module):
         
         # ** Global pooling **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -558,6 +593,7 @@ class SAGENet(torch.nn.Module):
         self.mlp2 = Linear(self.Z, self.C)
 
         self.task  = task
+        self.global_pool = global_pool
         
     def forward(self, data):
 
@@ -573,7 +609,12 @@ class SAGENet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -614,7 +655,8 @@ class SGNet(torch.nn.Module):
         self.mlp2 = Linear(self.Z, self.C)
 
         self.task  = task
-        
+        self.global_pool = global_pool
+
     def forward(self, data):
 
         if not hasattr(data,'batch'):
@@ -629,7 +671,12 @@ class SGNet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
@@ -660,6 +707,7 @@ class GINENet(torch.nn.Module):
         self.G = G
 
         self.task  = task
+        self.global_pool = global_pool
 
         # Convolution layers
         self.conv1 = GINEConv(MLP([self.D, self.D]))
@@ -675,6 +723,7 @@ class GINENet(torch.nn.Module):
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
+
 
     def forward(self, data):
 
@@ -704,7 +753,12 @@ class GINENet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            x = global_max_pool(x, data.batch)
+            if   global_pool == 'max':
+                x = global_max_pool(x, data.batch)
+            elif global_pool == 'add':
+                x = global_add_pool(x, data.batch)
+            elif global_pool == 'mean':
+                x = global_mean_pool(x, data.batch)
 
         # Global features concatenated
         if self.G > 0:
