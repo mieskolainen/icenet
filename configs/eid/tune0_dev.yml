@@ -92,7 +92,7 @@ plot_param:
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
-#  - gnet0
+  - gnet0
   - gnet1
   - gnet2
   - gnet3
@@ -118,9 +118,9 @@ gnet0_param:
   conv_aggr:   'max'
   global_pool: 'max'
 
-  epochs: 500
-  batch_size: 32
-  learning_rate: 0.005
+  epochs: 30
+  batch_size: 64
+  learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
@@ -131,13 +131,13 @@ gnet1_param:
   train: 'graph'
   predict: 'torch_graph'
   label:  'G-SUP'
-  
+
   # Convolution model
   conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
   global_pool: 'add'
   
-  epochs: 500
+  epochs: 30
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -156,7 +156,7 @@ gnet2_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 500
+  epochs: 30
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005      # L2-regularization
@@ -175,7 +175,7 @@ gnet3_param:
   conv_aggr:   'max'
   global_pool: 'max'
   
-  epochs: 500
+  epochs: 30
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization

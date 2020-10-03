@@ -180,7 +180,7 @@ class GATNet(torch.nn.Module):
         self.dropout = dropout
         self.task = task
         self.global_pool = global_pool
-        
+
         self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
         
@@ -458,7 +458,7 @@ class NNNet(torch.nn.Module):
 
         # Set2Set pooling operation produces always output with 2 x input dimension
         # => use linear layer to project down
-        if pooltype == 's2s':
+        if self.global_pool == 's2s':
             self.S2Spool = Set2Set(in_channels=Q, processing_steps=3, num_layers=1)
             self.S2Slin  = Linear(2*Q, Q)
 
@@ -486,7 +486,7 @@ class NNNet(torch.nn.Module):
             if self.global_pool == 's2s':
                 x = self.S2Spool(x, data.batch)
                 x = self.S2Slin(x)
-            elif global_pool == 'max':
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
