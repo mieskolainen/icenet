@@ -92,7 +92,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
                 X[e, VARS.index('image_clu_phi')], 0)
 
         # Construct Gram matrix
-        if len(p4vec) > 0:
+        if len(p4vec) > 0 and global_on:
 
             G1 = gram_matrix(p4vec, type='dot'); G1 /= (np.linalg.norm(G1) + 1e-9)
             G2 = gram_matrix(p4vec, type='s');   G2 /= (np.linalg.norm(G2) + 1e-9)
