@@ -168,8 +168,8 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
                     x[i,2] = torch.tensor(p4vec[i-1].z)
                     x[i,3] = torch.tensor(p4vec[i-1].t)    
                 else:
-                    raise Exception('parse_graph_data: Unknown coordinate representation')      
-
+                    raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')      
+                
                 x[i,4] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
 
         # ----------------------------------------------------------------

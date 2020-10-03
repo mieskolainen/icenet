@@ -118,7 +118,7 @@ gnet0_param:
   conv_aggr:   'max'
   global_pool: 'max'
 
-  epochs: 50
+  epochs: 500
   batch_size: 32
   learning_rate: 0.005
   weight_decay:  0.00005     # L2-regularization
@@ -137,7 +137,7 @@ gnet1_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 50
+  epochs: 500
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -156,7 +156,7 @@ gnet2_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 50
+  epochs: 500
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005      # L2-regularization
@@ -175,7 +175,7 @@ gnet3_param:
   conv_aggr:   'max'
   global_pool: 'max'
   
-  epochs: 50
+  epochs: 500
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
