@@ -11,6 +11,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
 
+from   typing import Union, Tuple, Callable
+from   torch_geometric.typing import OptTensor, OptPairTensor, Adj, Size
+
 from   torch_geometric.nn import Set2Set, global_mean_pool, global_max_pool, global_sort_pool
 from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
@@ -19,15 +22,54 @@ from   icenet.deep import dopt
 from   icenet.tools import aux
 
 
+from typing import Callable, Union, Optional
+from torch_geometric.typing import OptTensor, PairTensor, PairOptTensor, Adj
+
+import torch
+from torch import Tensor
+from torch_geometric.nn.conv import MessagePassing
+
+
+class SuperEdgeConv(MessagePassing):
+    r"""
+    Custom convolution operator.
+    """
+
+    def __init__(self, nn: Callable, aggr: str = 'max', **kwargs):
+        super(SuperEdgeConv, self).__init__(aggr=aggr, **kwargs)
+        self.nn = nn
+        #self.reset_parameters()
+
+    #def reset_parameters(self):
+        #reset(self.nn)
+
+    def forward(self, x: Union[Tensor, PairTensor], edge_index: Adj,
+            edge_attr: OptTensor = None, size: Size = None) -> Tensor:
+        """"""
+        if isinstance(x, Tensor):
+            x: PairTensor = (x, x)
+
+        # propagate_type: (x: PairTensor)
+        return self.propagate(edge_index, x=x, edge_attr=edge_attr, size=None)
+
+    def message(self, x_i: Tensor, x_j: Tensor, edge_attr: Tensor) -> Tensor:
+
+        return self.nn(torch.cat([x_i, x_j - x_i, edge_attr], dim=-1))
+
+    def __repr__(self):
+        return '{}(nn={})'.format(self.__class__.__name__, self.nn)
+
+
 def MLP(channels, batch_norm=True):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
-
+    
     Args:
         channels   : input structure, such as [128, 64, 64] for a 3-layer network.
         batch_norm : batch normalization
     Returns:
         nn.sequential object
+    
     """
     if batch_norm:
         return nn.Sequential(*[
@@ -128,7 +170,7 @@ def test(model, loader, optimizer, device):
 # https://arxiv.org/abs/1710.10903
 #
 class GATNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, dropout=0.0, task='node'):
+    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
         super(GATNet, self).__init__()
 
         self.D = D
@@ -182,12 +224,74 @@ class GATNet(torch.nn.Module):
         return F.softmax(self.forward(x), dim=1)
 
 
+
+# SuperEdgeConv based graph net
+#
+# https://arxiv.org/abs/xyz
+#
+class SUPNet(torch.nn.Module):
+    def __init__(self, D, C, G=0, k=1, E=None, task='node', conv_aggr='max', global_pool='max'):
+        super(SUPNet, self).__init__()
+        
+        self.D = D
+        self.C = C
+        self.G = G
+
+        self.task  = task
+
+        # Convolution layers
+        self.conv1 = SuperEdgeConv(MLP([2 * self.D + E, 32, 32]), aggr=conv_aggr)
+        self.conv2 = SuperEdgeConv(MLP([2 * 32 + E, 64]), aggr=conv_aggr)
+        
+        # "Fusion" layer taking in conv1 and conv2 outputs
+        self.lin1  = MLP([32 + 64, 96])
+        
+        if (self.G > 0):
+            self.Z = 96 + self.G
+        else:
+            self.Z = 96
+
+        # Final layers concatenating everything
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+    def forward(self, data):
+
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        
+        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
+        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
+        
+        x  = self.lin1(torch.cat([x1, x2], dim=1))
+
+        # ** Global pooling (to handle graph level classification) **
+        if self.task == 'graph':
+            x = global_max_pool(x, data.batch)
+
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
+        # Final layers
+        x = self.mlp1(x)
+
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x) :
+        return F.softmax(self.forward(x), dim=1)
+
+
+
+
 # Pure EdgeConv based graph net
 # 
 # https://arxiv.org/abs/1801.07829
 #
 class ECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, task='node', aggr='max'):
+    def __init__(self, D, C, G=0, k=1, E=None, task='node', conv_aggr='max', global_pool='max'):
         super(ECNet, self).__init__()
         
         self.D = D
@@ -197,8 +301,8 @@ class ECNet(torch.nn.Module):
         self.task  = task
         
         # Convolution layers
-        self.conv1 = EdgeConv(MLP([2 * self.D, 32, 32]), aggr=aggr)
-        self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=aggr)
+        self.conv1 = EdgeConv(MLP([2 * self.D, 32, 32]), aggr=conv_aggr)
+        self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
         self.lin1  = MLP([32 + 64, 96])
@@ -220,7 +324,7 @@ class ECNet(torch.nn.Module):
         x1 = self.conv1(data.x, data.edge_index)
         x2 = self.conv2(x1,     data.edge_index)
         
-        x = self.lin1(torch.cat([x1, x2], dim=1))
+        x  = self.lin1(torch.cat([x1, x2], dim=1))
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
@@ -247,7 +351,7 @@ class ECNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class DECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=4, task='node', aggr='max'):
+    def __init__(self, D, C, G=0, k=4, E=None, task='node', conv_aggr='max', global_pool='max'):
         super(DECNet, self).__init__()
         
         self.D = D
@@ -257,8 +361,8 @@ class DECNet(torch.nn.Module):
         self.task  = task
         
         # Convolution layers
-        self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=aggr)
-        self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=aggr)
+        self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=conv_aggr)
+        self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
         self.lin1  = MLP([32 + 64, 96])
@@ -306,7 +410,7 @@ class DECNet(torch.nn.Module):
 # https://arxiv.org/abs/1704.01212
 #
 class NNNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=1, Q=96, task='node', aggr='add', pooltype='s2s'):
+    def __init__(self, D, C, G=0, E=1, Q=96, task='node', conv_aggr='add', global_pool='s2s'):
         super(NNNet, self).__init__()
 
         self.D = D  # node feature dimension
@@ -316,13 +420,13 @@ class NNNet(torch.nn.Module):
         
         self.Q = Q  # latent dimension
 
-        self.task     = task
-        self.pooltype = pooltype
+        self.task        = task
+        self.global_pool = global_pool
 
         # Convolution layers
         # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
-        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=aggr)
-        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=aggr)
+        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
+        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv layer outputs
         self.lin1  = MLP([D+D, Q])
@@ -354,10 +458,10 @@ class NNNet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            if self.pooltype == 's2s':
+            if self.global_pool == 's2s':
                 x = self.S2Spool(x, data.batch)
                 x = self.S2Slin(x)
-            elif self.pooltype == 'max':
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
 
         # Global features concatenated
@@ -380,7 +484,7 @@ class NNNet(torch.nn.Module):
 # https://arxiv.org/abs/1711.08920
 #
 class SplineNet(torch.nn.Module):
-    def __init__(self, D, C, E, G=0, task='node'):
+    def __init__(self, D, C, G=0,  E=None, conv_aggr=None, global_pool='max', task='node'):
         super(SplineNet, self).__init__()
 
         self.D     = D
@@ -436,7 +540,7 @@ class SplineNet(torch.nn.Module):
 # https://arxiv.org/abs/1706.02216
 # 
 class SAGENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, task='node'):
+    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', task='node'):
         super(SAGENet, self).__init__()
 
         self.D     = D
@@ -491,7 +595,7 @@ class SAGENet(torch.nn.Module):
 # https://arxiv.org/abs/1902.07153
 # 
 class SGNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, K=2, task='node'):
+    def __init__(self, D, C, G=0, K=2, E=None, conv_aggr=None, global_pool='max', task='node'):
         super(SGNet, self).__init__()
 
         self.D     = D
@@ -548,7 +652,7 @@ class SGNet(torch.nn.Module):
 # https://arxiv.org/abs/1905.12265
 #
 class GINENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, task='node'):
+    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', task='node'):
         super(GINENet, self).__init__()
 
         self.D = D

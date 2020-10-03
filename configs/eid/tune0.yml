@@ -22,6 +22,11 @@ varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', '
 varnorm_tensor: 'zscore'       # Tensor variable normalization
 
 
+# Graph parameters
+graph_param:
+  global_on: True
+
+
 # Image tensor construction
 image_param:
 

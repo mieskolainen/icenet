@@ -64,28 +64,38 @@ def train_graph(data_trn, data_val, args, param):
     num_edge_features   = data_trn[0].edge_attr.size(-1)
     num_global_features = len(data_trn[0].u)
     
-    conv_type = param['conv_type']
-
-
+    conv_type   = param['conv_type']
+    netparam = {
+        'C' : num_classes,
+        'D' : num_node_features,
+        'E' : num_edge_features,
+        'G' : num_global_features,
+        'conv_aggr'   : param['conv_aggr'],
+        'global_pool' : param['global_pool'],
+        'task'        : 'graph'
+    }
+    
     if   conv_type == 'GAT':
-        model = graph.GATNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+        model = graph.GATNet(**netparam)
     elif conv_type == 'DEC':
-        model = graph.DECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+        model = graph.DECNet(**netparam)
     elif conv_type == 'EC':
-        model = graph.ECNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')    
+        model = graph.ECNet(**netparam)
+    elif conv_type == 'SUP':
+        model = graph.SUPNet(**netparam)
     elif conv_type == 'SG':
-        model = graph.SGNet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+        model = graph.SGNet(**netparam)
     elif conv_type == 'SAGE':
-        model = graph.SAGENet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+        model = graph.SAGENet(**netparam)
     elif conv_type == 'NN':
-        model = graph.NNNet(D = num_node_features, C = num_classes, E = num_edge_features, G = num_global_features, task='graph')
+        model = graph.NNNet(**netparam)
     elif conv_type == 'GINE':
-        model = graph.GINENet(D = num_node_features, C = num_classes, G = num_global_features, task='graph')
+        model = graph.GINENet(**netparam)
     elif conv_type == 'spline':
-        model = graph.SplineNet(D = num_node_features, C = num_classes, E = num_edge_features, G = num_global_features, task='graph')
+        model = graph.SplineNet(**netparam)
     else:
         raise Except(name__ + f'.graph_train: Unknown network convolution model "conv_type" = {conv_type}')
-
+    
     # CPU or GPU
     model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
 

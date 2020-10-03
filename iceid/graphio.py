@@ -15,7 +15,36 @@ import uproot_methods
 import icenet.algo.analytic as analytic
 
 
-def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=False):
+
+def gram_matrix(X, type='dot'):
+    """
+    Gram matrix for 4-vectors.
+
+    Args:
+        X : Array of 4-vectors (N)
+        type : Type of Lorentz scalars computed ('dot', 's', 't')
+
+    Returns:
+        G : Gram matrix (NxN)
+    """
+
+    N = len(X)
+    G = np.zeros((N,N))
+    for i in range(len(X)):
+        for j in range(len(X)):
+            if   type == 'dot':
+                G[i,j] = X[i].dot(X[j])   ## 4-dot product
+            elif type == 's':
+                G[i,j] = (X[i] + X[j]).p2 ## s-type
+            elif type == 't':
+                G[i,j] = (X[i] - X[j]).p2 ## t-type
+            else:
+                raise Exception('gram_matrix: Unknown type!')
+
+    return G
+
+
+def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=True):
     """
     Jagged array data into pytorch-geometric style Data format array.
 
@@ -35,7 +64,6 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
     dataset  = []
 
     print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
-
     zerovec = uproot_methods.TLorentzVector.from_ptetaphim(0,0,0,0)
 
     for e in tqdm(range(N_events)):
@@ -43,8 +71,8 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
         num_nodes = 1 + len(X[e, VARS.index('image_clu_eta')]) # + 1 virtual node
         num_edges = num_nodes**2 # include self-connections
 
-        num_node_features = 4
-        num_edge_features = 1
+        num_node_features = 5
+        num_edge_features = 3
         num_classes       = 2
         
         # Construct 4-vector for the track, with zero-mass
@@ -60,7 +88,25 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
             p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
                 X[e, VARS.index('image_clu_e')] / np.cosh(X[e, VARS.index('image_clu_eta')]),
                 X[e, VARS.index('image_clu_eta')],
-                X[e, VARS.index('image_clu_phi')], 0) # Set photon mass
+                X[e, VARS.index('image_clu_phi')], 0)
+
+        # Construct Gram matrix
+        if len(p4vec) > 0:
+
+            G1 = gram_matrix(p4vec, type='dot'); G1 /= (np.linalg.norm(G1) + 1e-9)
+            G2 = gram_matrix(p4vec, type='s');   G2 /= (np.linalg.norm(G2) + 1e-9)
+            G3 = gram_matrix(p4vec, type='t');   G3 /= (np.linalg.norm(G3) + 1e-9)
+
+            # Determinant
+            d1    = np.linalg.det(G1)
+            d2    = np.linalg.det(G2)
+            d3    = np.linalg.det(G3)
+        else:
+            d1    = 0
+            d2    = 0
+            d3    = 0  
+
+        #print(f"N: {len(G1)} | det1: {d1:0.3E} | det2: {d2:0.3E} | det3: {d3:0.3E} | is_e: {X[e,VARS.index('is_e')]}")
 
         # ====================================================================
         # INITIALIZE TENSORS
@@ -87,7 +133,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
             w = torch.tensor([1.0], dtype=torch.float)
 
         # Construct global feature vector
-        u = torch.tensor(np.zeros(len(features)) + 1, dtype=torch.float)
+        u = torch.tensor(np.zeros(len(features)) + 1 + 3, dtype=torch.float)
         for i in range(len(features)):
             u[i] = torch.tensor(X[e, VARS.index(features[i])], dtype=torch.float)
 
@@ -95,6 +141,11 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
         # + 1
         if len(p4vec) > 0:
             u[-1] = p4vec.sum().p2 # Total invariant mass**2 of clusters
+            
+            u[-2] = d1
+            u[-3] = d2
+            u[-4] = d3
+            
 
         # ====================================================================
         # CONSTRUCT TENSORS
@@ -105,19 +156,12 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
 
             if i > 0:
                 # Features spesific to each node
-                x[i,0] = torch.tensor(X[e, VARS.index('image_clu_eta')][i-1])
-                x[i,1] = torch.tensor(X[e, VARS.index('image_clu_phi')][i-1])
-                x[i,2] = torch.tensor(X[e, VARS.index('image_clu_e')][i-1])
-                x[i,3] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
-
-                # Relative coordinates
-                '''
-                diff   = p4track - p4vec[i-1]
-                x[i,4] = diff.x
-                x[i,5] = diff.y
-                x[i,6] = diff.z
-                '''
-
+                x[i,0] = torch.tensor(p4vec[i-1].x)
+                x[i,1] = torch.tensor(p4vec[i-1].y)
+                x[i,2] = torch.tensor(p4vec[i-1].z)
+                x[i,3] = torch.tensor(p4vec[i-1].t)
+                x[i,4] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
+        
         # ----------------------------------------------------------------
         ### Construct edge features
         n = 0
@@ -138,8 +182,8 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
                 edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
                 
                 # Lorentz scalars
-                #edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
-                #edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
+                edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
+                edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
 
                 n += 1
 
@@ -158,14 +202,16 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Fal
         for i in range(num_nodes):
             for j in range(num_nodes):
                 
-                # Full connectivity, including self-loops
-                edge_index[0,n] = i
-                edge_index[1,n] = j
-                n += 1
+                if i > 0 and j > 0: # Skip virtual node
+
+                    # Full connectivity, including self-loops
+                    edge_index[0,n] = i
+                    edge_index[1,n] = j
+            n += 1
 
         # Add this event
         if global_on == False: # Null the global features
-            u = torch.tensor(np.zeros(len(features)) + 1, dtype=torch.float)
+            u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
 
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
 

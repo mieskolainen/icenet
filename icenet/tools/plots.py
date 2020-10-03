@@ -24,7 +24,6 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     
     ax.axis([x.min(), x.max(), y.min(), y.max()])
 
-
     return fig,ax,c
 
 
@@ -264,31 +263,34 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
     """ Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
     """
 
-    fig,ax = plt.subplots()
-    xx = np.logspace(-5, 0, 100)
-    plt.plot(xx, xx, linestyle='--', color='black', linewidth=1) # ROC diagonal
+    for k in [0,1]: # linear & log
 
-    for i in range(len(metrics)) :
-        plt.plot(metrics[i].fpr, metrics[i].tpr, label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
+        fig,ax = plt.subplots()
+        xx = np.logspace(-5, 0, 100)
+        plt.plot(xx, xx, linestyle='--', color='black', linewidth=1) # ROC diagonal
 
-    plt.legend()
+        for i in range(len(metrics)) :
+            plt.plot(metrics[i].fpr, metrics[i].tpr, label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
 
-    ax.set_xlabel('False Positive (background) rate $\\alpha$')
-    ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
-    ax.set_title(title)
-    ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
+        plt.legend(loc=4)
+        ax.set_xlabel('False Positive (background) rate $\\alpha$')
+        ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
+        ax.set_title(title)
 
-    plt.ylim(0.0, 1.0)
-    plt.xlim(0.0, 1.0)
-    plt.savefig(filename + '.pdf', bbox_inches='tight')
+        if k == 0:
+            plt.ylim(0.0, 1.0)
+            plt.xlim(0.0, 1.0)
+            ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
+            plt.savefig(filename + '.pdf', bbox_inches='tight')
 
-    plt.gca().set_xscale('log')
-    ax.set_aspect(1)
-    plt.ylim(0.0, 1.0)
-    plt.xlim(1e-4, 1.0)
-    plt.savefig(filename + '_log.pdf', bbox_inches='tight')
+        if k == 1:
+            plt.ylim(0.0, 1.0)
+            plt.xlim(1e-4, 1.0)
+            plt.gca().set_xscale('log')
+            ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
+            plt.savefig(filename + '_log.pdf', bbox_inches='tight')
 
-    plt.close()
+        plt.close()
 
 
 def plothist1d(X, y, labels) :

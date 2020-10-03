@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 1000000
+MAXEVENTS: 500000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -20,9 +20,15 @@ cutfunc: 'cut_standard'        # Basic cuts,         implemented under cuts.py
 frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
 varnorm_tensor: 'zscore'       # Tensor variable normalization
+#varnorm_graph: 'none'         # Not implemented yet
 
 
-# Image tensor construction
+# ** Graph object construction **
+graph_param:
+  global_on: False
+
+
+# ** Image tensor object construction **
 image_param:
 
   # See the corresponding construction under common.py
@@ -39,9 +45,6 @@ image_param:
         1.04719667,  1.256636  ,  1.46607533,  1.67551467,  1.884954  ,
         2.09439333,  2.30383267,  2.513272  ,  2.72271133,  2.93215067,
         3.14159   ]
-  
-  # transformations
-  # (not implemented yet)
 
 
 # Imputation
@@ -89,10 +92,9 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 #  - gnet0
-#  - gnet1
+  - gnet1
   - gnet2
   - gnet3
-
 #  - flr0
   - xgb0
 
@@ -111,10 +113,12 @@ gnet0_param:
   label:  'G-NN'
 
   # Convolution model
-  conv_type: 'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  
-  epochs: 20
-  batch_size: 64
+  conv_type:   'NN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_aggr:   'max'
+  global_pool: 'max'
+
+  epochs: 50
+  batch_size: 32
   learning_rate: 0.005
   weight_decay:  0.0005     # L2-regularization
 
@@ -125,15 +129,17 @@ gnet0_param:
 gnet1_param:
   train: 'graph'
   predict: 'torch_graph'
-  label:  'G-GAT'
+  label:  'G-SUP'
 
   # Convolution model
-  conv_type: 'GAT'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_aggr:   'add'
+  global_pool: 'max'
   
-  epochs: 20
-  batch_size: 64
-  learning_rate: 0.005
-  weight_decay:  0.0005     # L2-regularization
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.003
+  weight_decay:  0.005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -142,32 +148,36 @@ gnet1_param:
 gnet2_param:
   train: 'graph'
   predict: 'torch_graph'
-  label:  'G-DEC'
+  label:  'G-EC-add'
 
   # Convolution model
-  conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_type: 'EC'            # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_aggr:   'add'
+  global_pool: 'max'
   
-  epochs: 30
-  batch_size: 64
-  learning_rate: 0.005
-  weight_decay:  0.0005     # L2-regularization
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.003
+  weight_decay:  0.005      # L2-regularization
 
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
 # Graph net
 gnet3_param:
   train: 'graph'
   predict: 'torch_graph'
-  label:  'G-EC'
+  label:  'G-EC-max'
 
   # Convolution model
   conv_type: 'EC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_aggr:   'max'
+  global_pool: 'max'
   
-  epochs: 30
-  batch_size: 64
-  learning_rate: 0.005
-  weight_decay:  0.0005     # L2-regularization
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.003
+  weight_decay:  0.005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
