@@ -93,6 +93,7 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
+  - dmlp
   - cnn0
   - gnet3
 #  - gnet0
@@ -246,6 +247,29 @@ xgb0_param:
   eval_metric: ['auc', 'logloss']  # for evaluation
 
 
+# Deep MLP
+dmlp_param:
+  train: 'dmlp'
+  predict: 'torch_generic'
+  label: 'DMLP'
+  
+  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  gamma: 2                  # focal_entropy exponent
+  optimizer: 'AdamW'
+  noise_reg: 0.0            # Noise regularization
+
+  epochs: 30
+  batch_size: 196
+  learning_rate: 0.003
+  weight_decay: 0.00001       # L2-regularization
+
+  mlp_dim: [64, 64, 64]     # hidden layer dimensions
+  batch_norm: True    
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
   train: 'lgr'
@@ -260,7 +284,7 @@ lgr0_param:
   epochs: 30
   batch_size: 196
   learning_rate: 0.003
-  weight_decay: 0.001       # L2-regularization
+  weight_decay: 0.00001       # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -330,7 +354,7 @@ dmx0_param:
   epochs:  100
   batch_size: 128
   learning_rate: 0.005
-  weight_decay: 0.001       # L2-regularization
+  weight_decay: 0.00001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 

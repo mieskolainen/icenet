@@ -177,6 +177,9 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
             
         #elif param['train'] == 'xtx':
         #    train.train_xtx(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, data_kin=data_kin, args=args, param=param)
+
+        elif param['train'] == 'dmlp':
+            train.train_dmlp(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
         
         elif param['train'] == 'lgr':
             train.train_lgr(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)

@@ -41,6 +41,8 @@ from icenet.deep  import bnaf
 from icenet.deep  import dopt
 from icenet.deep  import dbnf
 from icenet.deep  import mlgr
+from icenet.deep  import dmlp
+
 from icenet.deep  import maxo
 from icenet.deep  import cnn
 from icenet.deep  import graph
@@ -240,6 +242,31 @@ def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
         dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
                     trn_weights = trn_weights, param = param)
 
+    # Plot evolution
+    plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+    
+    ## Save
+    checkpoint = {'model': model, 'state_dict': model.state_dict()}
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+
+    ### Plot contours
+    if args['plot_param']['contours_on']:
+        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+        plots.plot_decision_contour(lambda x : model.softpredict(x),
+            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+
+
+def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
+
+    label = param['label']
+    
+    print(f'\nTraining {label} classifier ...')
+    model = dmlp.DMLP(D = X_trn.shape[1], mlp_dim=param['mlp_dim'], batch_norm=param['batch_norm'], C=2)
+    model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+        trn_weights = trn_weights, param = param)
+    
     # Plot evolution
     plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
