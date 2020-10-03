@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 1500000
+MAXEVENTS: 1000000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -93,21 +93,19 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - gxgb0
 #  - dmlp
 #  - cnn0
-#  - gnet3
 #  - gnet0
-#  - gnet1
+  - gnet1
+#  - gnet3
 #  - gnet2
-
 #  - flr0
   - xgb0
-
 #  - lgr0
 #  - xtx0
 #  - dmx0
 #  - dbnf0
+  - gxgb0 # Keep this last (fix the bug) !
 
 
 # Dual graph + XGB network
@@ -115,7 +113,7 @@ gxgb0_param:
 
   train:   'graph_xgb'
   predict: 'graph_xgb'
-  label:   'GXGB'
+  label:   'DGXGB'
 
   # ** GRAPH NETWORK **
   graph:
@@ -126,9 +124,9 @@ gxgb0_param:
     # Convolution model
     conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
     conv_aggr:   'add'
-    global_pool: 'add'
+    global_pool: 'max'
     
-    epochs: 50
+    epochs: 20
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005     # L2-regularization
@@ -148,15 +146,15 @@ gxgb0_param:
     
     # general parameters
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 300    # Number of epochs
+    num_boost_round: 2000    # Number of epochs
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     # booster parameters
-    learning_rate: 0.15
+    learning_rate: 0.05
     
     # Tree parameters
     n_estimators: 500
-    max_depth: 15
+    max_depth: 10
     min_child_weight: 1.0
     gamma: 0.0
     max_delta_step: 0
@@ -231,9 +229,9 @@ gnet1_param:
   # Convolution model
   conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
-  global_pool: 'add'
+  global_pool: 'max'
   
-  epochs: 150
+  epochs: 20
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -289,7 +287,7 @@ xgb0_param:
   
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 300    # Number of epochs
+  num_boost_round: 2000    # Number of epochs
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
   # booster parameters
