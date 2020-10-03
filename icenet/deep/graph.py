@@ -81,9 +81,11 @@ def MLP(channels, batch_norm=True):
         ])
     else:
         return nn.Sequential(*[
-        nn.Sequential(nn.Linear(channels[i - 1], channels[i]), nn.ReLU())
+            nn.Sequential(nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU()
+            )
         for i in range(1,len(channels))
-    ])
+        ])
 
 
 def train(model, loader, optimizer, device):
