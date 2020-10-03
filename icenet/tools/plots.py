@@ -82,11 +82,19 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
         met          :  Metrics object
     """
 
-    y_tot      = np.array([])
-    y_pred_tot = np.array([])
-
     AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
 
+
+    # ** Compute predictions **
+    if type(X) is list:  # Evaluate one by one
+        y_pred = np.zeros(len(X))
+        for k in range(len(y_pred)):
+            y_pred[k] = func_predict(X[k])
+    else:
+        y_pred = func_predict(X)
+
+
+    # Loop over bins
     for i in range(len(pt_edges) - 1):
         for j in range(len(eta_edges) - 1):
 
@@ -102,28 +110,16 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
             
             if np.sum(ind) > 0: # Do we have any events in this cell
 
-                if type(X) is list: # if not numpy array
-                    y_pred = np.array([])
-                    for k in range(len(ind)):
-                        if ind[k]:
-                            y_pred = np.append(y_pred, func_predict(X[k]) )
-                else:
-                    y_pred = func_predict(X[ind])
-                
                 # Evaluate metric
-                met = aux.Metric(y_true = y[ind], y_soft = y_pred)
+                met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])
                 print('AUC = {:.5f}'.format(met.auc))
-
-                # Accumulate
-                y_tot      = np.concatenate((y_tot, y[ind]))
-                y_pred_tot = np.concatenate((y_pred_tot, y_pred))
-                AUC[i,j]   = met.auc
+                AUC[i,j] = met.auc
 
             else:
                 print('No events found in this (eta,pt) cell!')
     
     # Evaluate total performance
-    met = aux.Metric(y_true = y_tot, y_soft = y_pred_tot)
+    met = aux.Metric(y_true = y, y_soft = y_pred)
     fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
     ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
 

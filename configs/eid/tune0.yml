@@ -26,7 +26,7 @@ varnorm_tensor: 'zscore'       # Tensor variable normalization
 # ** Graph object construction **
 graph_param:
   global_on: True
-  coord: 'pxpypze'           # 'ptetaphim', 'pxpypze'
+  coord: 'pxpypze'             # 'ptetaphim', 'pxpypze'
 
 
 # ** Image tensor object construction **
@@ -92,16 +92,17 @@ plot_param:
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
+
+  - cnn0
   - gnet3
-  - gnet0
-  - gnet1
-  - gnet2
+#  - gnet0
+#  - gnet1
+#  - gnet2
+
 #  - flr0
   - xgb0
 
 #  - lgr0
-#  - cnn0
-#  - cdmx0
 #  - xtx0
 #  - dmx0
 #  - dbnf0
@@ -122,6 +123,10 @@ gnet3_param:
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
 
+  # Scheduler
+  step_size: 200
+  gamma: 0.1
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
@@ -140,6 +145,10 @@ gnet0_param:
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
+
+  # Scheduler
+  step_size: 200
+  gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -160,6 +169,10 @@ gnet1_param:
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
 
+  # Scheduler
+  step_size: 200
+  gamma: 0.1
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
@@ -178,6 +191,10 @@ gnet2_param:
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  step_size: 200
+  gamma: 0.1
 
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -244,6 +261,7 @@ lgr0_param:
   batch_size: 196
   learning_rate: 0.003
   weight_decay: 0.001       # L2-regularization
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
@@ -264,33 +282,6 @@ cnn0_param:
   mlp_dim: 64
   
   epochs: 100
-  batch_size: 128
-  learning_rate: 0.001
-  weight_decay: 0.00        # L2-regularization
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
-
-
-# CNN + MAXOUT
-cdmx0_param:
-  train: 'cdmx'
-  predict: 'torch_dual'
-  label:  'CDMX'
-  
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent
-  optimizer: 'AdamW'
-  noise_reg: 0.0            # Noise regularization
-  
-  # CNN param
-  dropout_cnn: 0.4
-  
-  # MAXOUT param
-  num_units: 15
-  neurons:  50
-  dropout:  0.1
-
-  epochs: 60
   batch_size: 128
   learning_rate: 0.001
   weight_decay: 0.00        # L2-regularization

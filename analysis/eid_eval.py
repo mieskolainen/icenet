@@ -179,15 +179,16 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch(args=args, param=param)
-            saveit(func_predict = func_predict, X = X_2D_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
+
+            X_ = {}
+            X_['x'] = X_2D_ptr # image tensors
+            X_['u'] = X_ptr    # global features
+            
+            saveit(func_predict = func_predict, X = X_, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
 
         #elif param['predict'] == 'xtx':
         #    train.train_xtx(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, data_kin=data_kin, args=args, param=param)
         
-        #elif param['predict'] == 'torch_dual':
-        #    func_predict = predict.pred_torch(args=args, param=param)
-        #    saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
-
         elif param['predict'] == 'torch_generic':
             func_predict = predict.pred_torch(args=args, param=param)
             saveit(func_predict = func_predict, X = X_ptr, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])

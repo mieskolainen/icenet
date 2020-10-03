@@ -26,12 +26,13 @@ from icenet.tools import io
 
 
 init_funcs = {
-    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.),  # bias terms
-    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),   # weight terms
-    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.),  # conv1D filter
-    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.),  # conv2D filter
-    "default": lambda x: torch.nn.init.constant(x, 1.),      # others
+    1: lambda x: torch.nn.init.normal_(x, mean=0.0, std=1.0),  # bias terms
+    2: lambda x: torch.nn.init.xavier_normal_(x,   gain=1.0),  # weight terms
+    3: lambda x: torch.nn.init.xavier_uniform_(x,  gain=1.0),  # conv1D filter
+    4: lambda x: torch.nn.init.xavier_uniform_(x,  gain=1.0),  # conv2D filter
+    "default": lambda x: torch.nn.init.constant(x, 1.0),       # others
 }
+
 
 def weights_init_all(model, init_funcs):
     """
@@ -130,22 +131,27 @@ class Dataset(torch.utils.data.Dataset):
 
 class DualDataset(torch.utils.data.Dataset):
 
-    def __init__(self, X1, X2, Y, W):
+    def __init__(self, X, Y, W):
         """ Initialization """
-        self.X1 = X1
-        self.X2 = X2
+        self.x = X['x'] # e.g. image tensors
+        self.u = X['u'] # e.g. global features 
         
-        self.Y  = Y
-        self.W  = W
-
+        self.Y = Y
+        self.W = W
+    
     def __len__(self):
         """ Return the total number of samples """
-        return self.X1.shape[0]
+        return self.x.shape[0]
 
     def __getitem__(self, index):
         """ Generates one sample of data """
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
-        return self.X1[index,...], self.X2[index,...], self.Y[index], self.W[index,:]
+
+        O      = {}
+        O['x'] = self.x[index,...]
+        O['u'] = self.u[index,...]
+
+        return O, self.Y[index], self.W[index,:]
 
 
 def model_to_cuda(model, device_type='auto'):
@@ -198,7 +204,11 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
     # --------------------------------------------------------------------
 
-    print(__name__ + '.train: Training samples = {}, Validation samples = {}'.format(X_trn.shape[0], X_val.shape[0]))
+    if type(X_trn) is dict:
+        print(__name__ + f".train: Training samples = {X_trn['x'].shape[0]}, Validation samples = {X_val['x'].shape[0]}")
+    else:
+        print(__name__ + f'.train: Training samples = {X_trn.shape[0]}, Validation samples = {X_val.shape[0]}')
+
 
     # Prints the weights and biases
     print(model)
@@ -228,6 +238,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
         print(f' {i:4d} : {frac[i]:5.6f} ({sum(YY == i)} counts)')
     print(__name__ + f'.train: Found {len(np.unique(YY))} / {model.C} classes in the training sample')
     
+
     # Define the optimizer
     if   param['optimizer'] == 'AdamW':
         optimizer = torch.optim.AdamW(model.parameters(), lr=param['learning_rate'], weight_decay=param['weight_decay'])
@@ -237,7 +248,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
         optimizer = torch.optim.SGD(model.parameters(),   lr=param['learning_rate'], weight_decay=param['weight_decay'])
     else:
         raise Exception(__name__ + f'.train: Unknown optimizer {param["optimizer"]} (use "Adam", "AdamW" or "SGD")')
-    
+
+
     # List to store losses
     losses   = []
     trn_aucs = []
@@ -251,21 +263,26 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
         trn_one_hot_weights[YY == i, i] = trn_weights[YY == i]
 
     params = {'batch_size': param['batch_size'],
-            'shuffle': True,
-            'num_workers': param['num_workers'],
-            'pin_memory': True}
+            'shuffle'     : True,
+            'num_workers' : param['num_workers'],
+            'pin_memory'  : True}
 
-    # Training generator
-    training_set         = Dataset(X_trn, Y_trn, trn_one_hot_weights)
-    training_generator   = torch.utils.data.DataLoader(training_set, **params)
-
-    # Validation generator
     val_one_hot_weights  = np.ones((len(Y_val), model.C))
-    validation_set       = Dataset(X_val, Y_val, val_one_hot_weights)
+
+
+    ### Generators
+    if type(X_trn) is dict:
+        training_set   = DualDataset(X_trn, Y_trn, trn_one_hot_weights)
+        validation_set = DualDataset(X_val, Y_val, val_one_hot_weights)
+    else:
+        training_set   = Dataset(X_trn, Y_trn, trn_one_hot_weights)
+        validation_set = Dataset(X_val, Y_val, val_one_hot_weights)
+
+    training_generator   = torch.utils.data.DataLoader(training_set,   **params)
     validation_generator = torch.utils.data.DataLoader(validation_set, **params)
 
 
-    # Epoch loop
+    ### Epoch loop
     for epoch in tqdm(range(param['epochs']), ncols = 60):
 
         # Minibatch loop
@@ -274,14 +291,22 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
 
         for batch_x, batch_y, batch_weights in training_generator:
             
+            # ----------------------------------------------------------------
             # Transfer to (GPU) device memory
-            batch_x, batch_y, batch_weights = \
-                batch_x.to(device, non_blocking=True), batch_y.to(device, non_blocking=True), batch_weights.to(device, non_blocking=True)
-            
-            # Noise regularization
-            if param['noise_reg'] > 0:
-                noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
-                batch_x = batch_x + noise
+            if type(batch_x) is dict: # If multiobject type
+                for key in batch_x.keys():
+                    batch_x[key] = batch_x[key].to(device, non_blocking=True, dtype=torch.float)
+            else:
+                batch_x   = batch_x.to(device, non_blocking=True, dtype=torch.float)
+
+            batch_y       = batch_y.to(device, non_blocking=True)
+            batch_weights = batch_weights.to(device, non_blocking=True)
+            # ----------------------------------------------------------------
+
+            # Noise regularization (NOT ACTIVE)
+            #if param['noise_reg'] > 0:
+            #    noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
+            #    batch_x = batch_x + noise
             
             # Predict probabilities
             phat = model.softpredict(batch_x)
@@ -325,10 +350,19 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
                 auc = 0
                 k   = 0
                 for batch_x, batch_y, batch_weights in gen:
-                    
+                                    
+                    # ----------------------------------------------------------------
                     # Transfer to (GPU) device memory
-                    batch_x, batch_y, batch_weights = \
-                        batch_x.to(device, non_blocking=True), batch_y.to(device, non_blocking=True), batch_weights.to(device, non_blocking=True)
+                    if type(batch_x) is dict: # If multiobject type
+                        for key in batch_x.keys():
+                            batch_x[key] = batch_x[key].to(device, non_blocking=True, dtype=torch.float)
+                    else:
+                        batch_x   = batch_x.to(device, non_blocking=True, dtype=torch.float)
+
+                    batch_y       = batch_y.to(device, non_blocking=True)
+                    batch_weights = batch_weights.to(device, non_blocking=True)
+                    # ----------------------------------------------------------------
+
                     phat = model.softpredict(batch_x)
 
                     # 2-class problems

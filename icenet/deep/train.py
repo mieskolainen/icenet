@@ -106,7 +106,7 @@ def train_graph(data_trn, data_val, args, param):
     
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=param['learning_rate'], weight_decay=param['weight_decay'])
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=param['step_size'], gamma=param['gamma'])
     
     # Data loaders
     train_loader = torch_geometric.data.DataLoader(data_trn, batch_size=param['batch_size'], shuffle=True)
@@ -116,7 +116,7 @@ def train_graph(data_trn, data_val, args, param):
         loss               = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
         test_acc, test_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
 
-        print(f'Epoch {epoch+1:03d}, Loss: {loss:.4f}, Test: {test_acc:.4f} (ACC), {test_auc:.4f} (AUC)')
+        print(f'Epoch {epoch+1:03d}, Loss: {loss:.4f} | Validate: {test_acc:.4f} (acc), {test_auc:.4f} (AUC)')
         scheduler.step()
     
     ## Save
@@ -209,7 +209,7 @@ def train_cdmx(data_tensor, Y_trn, Y_val, trn_weights, args, param):
     #        X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
 
-def train_cnn(data_tensor, Y_trn, Y_val, trn_weights, args, param):
+def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
 
     label = param['label']
 
@@ -219,16 +219,27 @@ def train_cnn(data_tensor, Y_trn, Y_val, trn_weights, args, param):
     X_trn_2D = torch.tensor(data_tensor['trn'], dtype=torch.float)
     X_val_2D = torch.tensor(data_tensor['val'], dtype=torch.float)
     DIM      = X_trn_2D.shape
+    
+    # Train
+    X_trn = {}
+    X_trn['x'] = X_trn_2D
+    X_trn['u'] = data.trn.x
+
+    # Validation
+    X_val = {}
+    X_val['x'] = X_val_2D
+    X_val['u'] = data.val.x
+
     # -------------------------------------------------------------------------------
 
     print(f'\nTraining {label} classifier ...')
-    model = cnn.CNN(C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
         dropout_cnn = param['dropout_cnn'], dropout_mlp = param['dropout_mlp'], mlp_dim = param['mlp_dim'])
 
     model, losses, trn_aucs, val_aucs = \
-        dopt.train(model = model, X_trn = X_trn_2D, Y_trn = Y_trn, X_val = X_val_2D, Y_val = Y_val,
+        dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
                     trn_weights = trn_weights, param = param)
-    
+
     # Plot evolution
     plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)

@@ -11,12 +11,13 @@ import torch.nn.functional as F
 
 class CNN_DMAX(nn.Module):
     """
-    Dual (simultaneous) input network [image tensors x vectors]
+    Dual (simultaneous) input network [image tensors x global vectors]
     """
     
     # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.0, neurons=50, num_units=6, dropout=0.1):
+    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32,
+                    dropout_cnn=0.0, mlp_dim=50, num_units=6, dropout_mlp=0.1):
         super(CNN_DMAX, self).__init__()
         
         # -------------------------------------------
@@ -61,9 +62,9 @@ class CNN_DMAX(nn.Module):
         # MAXOUT BLOCK
 
         self.D         = D
-        self.neurons   = neurons
+        self.mlp_dim   = mlp_dim
         self.num_units = num_units
-        self.dropout   = nn.Dropout(p = dropout)
+        self.dropout   = nn.Dropout(p = dropout_mlp)
 
         # Network modules
         self.fc1_list  = nn.ModuleList()
@@ -71,10 +72,10 @@ class CNN_DMAX(nn.Module):
 
         
         for _ in range(self.num_units):
-            self.fc1_list.append(nn.Linear(self.D + self.Z, neurons))
+            self.fc1_list.append(nn.Linear(self.D + self.Z, mlp_dim))
             nn.init.xavier_normal_(self.fc1_list[-1].weight) # xavier init
             
-            self.fc2_list.append(nn.Linear(neurons, self.C))
+            self.fc2_list.append(nn.Linear(mlp_dim, self.C))
             nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
 
         # -------------------------------------------
@@ -88,15 +89,20 @@ class CNN_DMAX(nn.Module):
         return max_output
 
 
-    def forward(self, x1, x2):
+    def forward(self, data):
+        """
+        Input data dictionary with members
+            'x' : as image tensor
+            'u'' : global feature tensor
+        """
 
         # print(f'\nINPUT: {x.shape}')
-        x1 = self.block1(x1)
+        x1 = self.block1(data['x'])
         # print(f'\nAFTER BLOCK 1: {x.shape}')
         x1 = x1.view(-1, self.Z)
 
         # ***
-        x = torch.cat((x1, x2), 1)
+        x = torch.cat((x1, data['u']), 1)
         # ***
 
         x = self.maxout(x, self.fc1_list)
@@ -106,8 +112,8 @@ class CNN_DMAX(nn.Module):
         return x
 
     # Returns softmax probability
-    def softpredict(self,x1,x2) :
-        return F.softmax(self.forward(x1,x2), dim=1)
+    def softpredict(self, data) :
+        return F.softmax(self.forward(data), dim=1)
 
 
 class CNN(nn.Module):
