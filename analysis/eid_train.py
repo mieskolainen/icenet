@@ -62,11 +62,12 @@ def main() :
     
     ### Parse data into graphs
     graph = {}
-    graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-    graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-    #graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-
+    graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, 
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS,
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
+
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
         print(__name__ + f': plotting basic histograms ...')

@@ -44,7 +44,7 @@ def gram_matrix(X, type='dot'):
     return G
 
 
-def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=True):
+def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=True, coord='ptetaphim'):
     """
     Jagged array data into pytorch-geometric style Data format array.
 
@@ -55,6 +55,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
         Y         :  Target class  array (if any, typically MC only)
         W         :  (Re-)weighting array (if any, typically MC only)
         global_on :  Global features on / off
+        coord     :  Coordinates used for nodes ('ptetaphim', 'pxpypze')
         
     Returns:
         Array of pytorch-geometric Data objects
@@ -156,12 +157,21 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
 
             if i > 0:
                 # Features spesific to each node
-                x[i,0] = torch.tensor(p4vec[i-1].x)
-                x[i,1] = torch.tensor(p4vec[i-1].y)
-                x[i,2] = torch.tensor(p4vec[i-1].z)
-                x[i,3] = torch.tensor(p4vec[i-1].t)
+                if   coord == 'ptetaphim':
+                    x[i,0] = torch.tensor(p4vec[i-1].pt)
+                    x[i,1] = torch.tensor(p4vec[i-1].eta)
+                    x[i,2] = torch.tensor(p4vec[i-1].phi)
+                    x[i,3] = torch.tensor(p4vec[i-1].mass)
+                elif coord == 'pxpypze':
+                    x[i,0] = torch.tensor(p4vec[i-1].x)
+                    x[i,1] = torch.tensor(p4vec[i-1].y)
+                    x[i,2] = torch.tensor(p4vec[i-1].z)
+                    x[i,3] = torch.tensor(p4vec[i-1].t)    
+                else:
+                    raise Exception('parse_graph_data: Unknown coordinate representation')      
+
                 x[i,4] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
-        
+
         # ----------------------------------------------------------------
         ### Construct edge features
         n = 0

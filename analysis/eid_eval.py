@@ -53,10 +53,9 @@ def main() :
     data, args, features = common.init()
 
     data_graph = {}
-    #data_graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-    #data_graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-    data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS, features=features, global_on=args['graph_param']['global_on'])
-       
+    data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS,
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    
     
     #########################################################
     varname = 'ele_mva_value_depth15'
