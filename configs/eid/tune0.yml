@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 #
 
-MAXEVENTS: 150000
+MAXEVENTS: 1500000
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -26,7 +26,7 @@ varnorm_tensor: 'zscore'       # Tensor variable normalization
 # ** Graph object construction **
 graph_param:
   global_on: True
-  coord: 'ptetaphim'           # 'ptetaphim', 'pxpypze'
+  coord: 'pxpypze'           # 'ptetaphim', 'pxpypze'
 
 
 # ** Image tensor object construction **
@@ -117,7 +117,7 @@ gnet3_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 30
+  epochs: 150
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -136,7 +136,7 @@ gnet0_param:
   conv_aggr:   'max'
   global_pool: 'max'
 
-  epochs: 30
+  epochs: 150
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -155,7 +155,7 @@ gnet1_param:
   conv_aggr:   'add'
   global_pool: 'add'
   
-  epochs: 30
+  epochs: 150
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -174,7 +174,7 @@ gnet2_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 30
+  epochs: 150
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005      # L2-regularization

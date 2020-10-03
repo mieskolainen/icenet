@@ -90,7 +90,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
                 X[e, VARS.index('image_clu_e')] / np.cosh(X[e, VARS.index('image_clu_eta')]),
                 X[e, VARS.index('image_clu_eta')],
                 X[e, VARS.index('image_clu_phi')], 0) # Massless
-
+        
         # Construct Gram matrix
         if len(p4vec) > 0 and global_on:
 
@@ -145,7 +145,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, EPS=1e-12, global_on=Tru
             u[-2] = d1
             u[-3] = d2
             u[-4] = d3
-        
+
         # ====================================================================
         # CONSTRUCT TENSORS
 
