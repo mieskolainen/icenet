@@ -120,7 +120,7 @@ gnet0_param:
   epochs: 50
   batch_size: 32
   learning_rate: 0.005
-  weight_decay:  0.0005     # L2-regularization
+  weight_decay:  0.00005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -137,9 +137,9 @@ gnet1_param:
   global_pool: 'max'
   
   epochs: 50
-  batch_size: 32
+  batch_size: 64
   learning_rate: 0.003
-  weight_decay:  0.005     # L2-regularization
+  weight_decay:  0.00005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -156,9 +156,9 @@ gnet2_param:
   global_pool: 'max'
   
   epochs: 50
-  batch_size: 32
+  batch_size: 64
   learning_rate: 0.003
-  weight_decay:  0.005      # L2-regularization
+  weight_decay:  0.00005      # L2-regularization
 
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -175,9 +175,9 @@ gnet3_param:
   global_pool: 'max'
   
   epochs: 50
-  batch_size: 32
+  batch_size: 64
   learning_rate: 0.003
-  weight_decay:  0.005     # L2-regularization
+  weight_decay:  0.00005     # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
