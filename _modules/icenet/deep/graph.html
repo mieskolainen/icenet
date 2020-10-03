@@ -31,6 +31,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -240,6 +241,9 @@
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 <span class="kn">from</span>   <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNorm1d</span>
 
+<span class="kn">from</span>   <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span>   <span class="nn">torch_geometric.typing</span> <span class="kn">import</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">OptPairTensor</span><span class="p">,</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">Size</span>
+
 <span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">Set2Set</span><span class="p">,</span> <span class="n">global_mean_pool</span><span class="p">,</span> <span class="n">global_max_pool</span><span class="p">,</span> <span class="n">global_sort_pool</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">NNConv</span><span class="p">,</span> <span class="n">GINEConv</span><span class="p">,</span> <span class="n">GATConv</span><span class="p">,</span> <span class="n">SplineConv</span><span class="p">,</span> <span class="n">GCNConv</span><span class="p">,</span> <span class="n">SGConv</span><span class="p">,</span> <span class="n">SAGEConv</span><span class="p">,</span> <span class="n">EdgeConv</span><span class="p">,</span> <span class="n">DynamicEdgeConv</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
@@ -248,15 +252,54 @@
 <span class="kn">from</span>   <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.typing</span> <span class="kn">import</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">,</span> <span class="n">PairOptTensor</span><span class="p">,</span> <span class="n">Adj</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.nn.conv</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
+
+
+<div class="viewcode-block" id="SuperEdgeConv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv">[docs]</a><span class="k">class</span> <span class="nc">SuperEdgeConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom convolution operator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">aggr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SuperEdgeConv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn</span> <span class="o">=</span> <span class="n">nn</span>
+        <span class="c1">#self.reset_parameters()</span>
+
+    <span class="c1">#def reset_parameters(self):</span>
+        <span class="c1">#reset(self.nn)</span>
+
+<div class="viewcode-block" id="SuperEdgeConv.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">],</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span>
+            <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="n">Size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">PairTensor</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># propagate_type: (x: PairTensor)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SuperEdgeConv.message"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_i</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">x_j</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span> <span class="o">-</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(nn=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MLP"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.MLP">[docs]</a><span class="k">def</span> <span class="nf">MLP</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a Multi Layer Perceptron with an arbitrary number of layers.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        channels   : input structure, such as [128, 64, 64] for a 3-layer network.</span>
 <span class="sd">        batch_norm : batch normalization</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        nn.sequential object</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">batch_norm</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
@@ -357,7 +400,7 @@
 <span class="c1"># https://arxiv.org/abs/1710.10903</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="GATNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GATNet">[docs]</a><span class="k">class</span> <span class="nc">GATNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GATNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
@@ -411,12 +454,74 @@
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
 
 
+
+<span class="c1"># SuperEdgeConv based graph net</span>
+<span class="c1">#</span>
+<span class="c1"># https://arxiv.org/abs/xyz</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="SUPNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet">[docs]</a><span class="k">class</span> <span class="nc">SUPNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SUPNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+
+        <span class="c1"># Convolution layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">+</span> <span class="n">E</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">E</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+        
+        <span class="c1"># &quot;Fusion&quot; layer taking in conv1 and conv2 outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="mi">96</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="mi">96</span>
+
+        <span class="c1"># Final layers concatenating everything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SUPNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
+            <span class="c1"># Create virtual null batch if singlet graph input</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;batch&#39;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">))</span>
+        
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        
+        <span class="n">x</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="c1"># Global features concatenated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Final layers</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x</span></div>
+
+    <span class="c1"># Returns softmax probability</span>
+<div class="viewcode-block" id="SUPNet.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SUPNet.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+
+
+
+
 <span class="c1"># Pure EdgeConv based graph net</span>
 <span class="c1"># </span>
 <span class="c1"># https://arxiv.org/abs/1801.07829</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="ECNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.ECNet">[docs]</a><span class="k">class</span> <span class="nc">ECNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ECNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
@@ -426,8 +531,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
         
         <span class="c1"># Convolution layers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
         
         <span class="c1"># &quot;Fusion&quot; layer taking in conv1 and conv2 outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
@@ -449,7 +554,7 @@
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">x</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
@@ -476,7 +581,7 @@
 <span class="c1"># https://arxiv.org/abs/1801.07829</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="DECNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.DECNet">[docs]</a><span class="k">class</span> <span class="nc">DECNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DECNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
@@ -486,8 +591,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
         
         <span class="c1"># Convolution layers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
         
         <span class="c1"># &quot;Fusion&quot; layer taking in conv1 and conv2 outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
@@ -535,7 +640,7 @@
 <span class="c1"># https://arxiv.org/abs/1704.01212</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="NNNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.NNNet">[docs]</a><span class="k">class</span> <span class="nc">NNNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">pooltype</span><span class="o">=</span><span class="s1">&#39;s2s&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;s2s&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">NNNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>  <span class="c1"># node feature dimension</span>
@@ -545,13 +650,13 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span>  <span class="c1"># latent dimension</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>     <span class="o">=</span> <span class="n">task</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pooltype</span> <span class="o">=</span> <span class="n">pooltype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>        <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
         <span class="c1"># Convolution layers</span>
         <span class="c1"># nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="o">*</span><span class="n">D</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="o">*</span><span class="n">D</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="o">*</span><span class="n">D</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="o">*</span><span class="n">D</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
         
         <span class="c1"># &quot;Fusion&quot; layer taking in conv layer outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="n">D</span><span class="o">+</span><span class="n">D</span><span class="p">,</span> <span class="n">Q</span><span class="p">])</span>
@@ -583,10 +688,10 @@
 
         <span class="c1"># ** Global pooling **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooltype</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Spool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Slin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooltype</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
@@ -609,7 +714,7 @@
 <span class="c1"># https://arxiv.org/abs/1711.08920</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="SplineNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SplineNet">[docs]</a><span class="k">class</span> <span class="nc">SplineNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SplineNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span>     <span class="o">=</span> <span class="n">D</span>
@@ -665,7 +770,7 @@
 <span class="c1"># https://arxiv.org/abs/1706.02216</span>
 <span class="c1"># </span>
 <div class="viewcode-block" id="SAGENet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SAGENet">[docs]</a><span class="k">class</span> <span class="nc">SAGENet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SAGENet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span>     <span class="o">=</span> <span class="n">D</span>
@@ -720,7 +825,7 @@
 <span class="c1"># https://arxiv.org/abs/1902.07153</span>
 <span class="c1"># </span>
 <div class="viewcode-block" id="SGNet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SGNet">[docs]</a><span class="k">class</span> <span class="nc">SGNet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SGNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span>     <span class="o">=</span> <span class="n">D</span>
@@ -777,7 +882,7 @@
 <span class="c1"># https://arxiv.org/abs/1905.12265</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="GINENet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GINENet">[docs]</a><span class="k">class</span> <span class="nc">GINENet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conv_aggr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GINENet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
