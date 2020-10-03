@@ -244,7 +244,7 @@
 <span class="kn">from</span>   <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.typing</span> <span class="kn">import</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">OptPairTensor</span><span class="p">,</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">Size</span>
 
-<span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">Set2Set</span><span class="p">,</span> <span class="n">global_mean_pool</span><span class="p">,</span> <span class="n">global_max_pool</span><span class="p">,</span> <span class="n">global_sort_pool</span>
+<span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">Set2Set</span><span class="p">,</span> <span class="n">global_add_pool</span><span class="p">,</span> <span class="n">global_mean_pool</span><span class="p">,</span> <span class="n">global_max_pool</span><span class="p">,</span> <span class="n">global_sort_pool</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">NNConv</span><span class="p">,</span> <span class="n">GINEConv</span><span class="p">,</span> <span class="n">GATConv</span><span class="p">,</span> <span class="n">SplineConv</span><span class="p">,</span> <span class="n">GCNConv</span><span class="p">,</span> <span class="n">SGConv</span><span class="p">,</span> <span class="n">SAGEConv</span><span class="p">,</span> <span class="n">EdgeConv</span><span class="p">,</span> <span class="n">DynamicEdgeConv</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
 
@@ -409,7 +409,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
         
@@ -437,7 +438,12 @@
 
         <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -467,7 +473,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>        <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
         <span class="c1"># Convolution layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">+</span> <span class="n">E</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
@@ -497,7 +504,13 @@
 
         <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -529,6 +542,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
         
         <span class="c1"># Convolution layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
@@ -558,7 +572,12 @@
 
         <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -589,6 +608,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
         
         <span class="c1"># Convolution layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
@@ -618,7 +638,12 @@
 
         <span class="c1"># ** Global pooling (to handle graph level classification) **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -691,8 +716,12 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Spool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Slin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -722,6 +751,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">E</span>     <span class="o">=</span> <span class="n">E</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span>     <span class="o">=</span> <span class="n">G</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -748,7 +778,12 @@
         
         <span class="c1"># ** Global pooling **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -788,6 +823,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp2</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
         
 <div class="viewcode-block" id="SAGENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SAGENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
@@ -803,7 +839,12 @@
 
         <span class="c1"># ** Global pooling **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -844,7 +885,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp2</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
+
 <div class="viewcode-block" id="SGNet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SGNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">):</span>
@@ -859,7 +901,12 @@
 
         <span class="c1"># ** Global pooling **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -890,6 +937,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span>  <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">=</span> <span class="n">global_pool</span>
 
         <span class="c1"># Convolution layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">]))</span>
@@ -905,6 +953,7 @@
 
         <span class="c1"># Final layers concatenating everything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp1</span>  <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">])</span>
+
 
 <div class="viewcode-block" id="GINENet.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GINENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
@@ -934,7 +983,12 @@
 
         <span class="c1"># ** Global pooling **</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">if</span>   <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Global features concatenated</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
