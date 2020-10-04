@@ -233,7 +233,6 @@
 <span class="c1"># Mikael Mieskolainen, 2020</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
@@ -241,7 +240,6 @@
 <span class="kn">from</span> <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="kn">import</span> <span class="nn">uproot_methods</span>
-
 <span class="kn">import</span> <span class="nn">icenet.algo.analytic</span> <span class="k">as</span> <span class="nn">analytic</span>
 
 
@@ -249,7 +247,7 @@
 <div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s1">&#39;ptetaphim&#39;</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jagged array data into pytorch-geometric style Data format array.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X         :  Jagged array of variables</span>
 <span class="sd">        VARS      :  Variable names as an array of strings</span>

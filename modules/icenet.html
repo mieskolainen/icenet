@@ -602,7 +602,7 @@ transformations combined with this transformation.</p>
 
 <dl class="py function">
 <dt id="icenet.deep.dbnf.load_models">
-<code class="sig-name descname">load_models</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">paths</span></em>, <em class="sig-param"><span class="n">modeldir</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#load_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.load_models" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_models</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">modelnames</span></em>, <em class="sig-param"><span class="n">modeldir</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#load_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.deep.dbnf.load_models" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load models from files</p>
 </dd></dl>
 
@@ -1324,8 +1324,20 @@ returns the loss. Optional for most optimizers.</p>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.balanceweights">
-<code class="sig-name descname">balanceweights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights_doublet</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#balanceweights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.balanceweights" title="Permalink to this definition">¶</a></dt>
-<dd><p>Balance class weights to sum to equal counts.</p>
+<code class="sig-name descname">balanceweights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights_doublet</span></em>, <em class="sig-param"><span class="n">reference_class</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#balanceweights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.balanceweights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Balance N-class weights to sum to equal counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weights_doublet</strong> – N-class event weights (events x classes)</p></li>
+<li><p><strong>reference_class</strong> – which class gives the reference (integer)</p></li>
+<li><p><strong>y</strong> – class targets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>weights doublet with new weights per event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1580,6 +1592,18 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="icenet.tools.aux.pdf_1D_hist">
+<code class="sig-name descname">pdf_1D_hist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">binedges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pdf_1D_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.pdf_1D_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute re-weighting 1D pdfs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.pdf_2D_hist">
+<code class="sig-name descname">pdf_2D_hist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">binedges_A</span></em>, <em class="sig-param"><span class="n">binedges_B</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pdf_2D_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.pdf_2D_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute re-weighting 2D pdfs.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="icenet.tools.aux.pick_ind">
 <code class="sig-name descname">pick_ind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">minmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pick_ind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.pick_ind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return indices between minmax[0] and minmax[1].</p>
@@ -1597,83 +1621,87 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="icenet.tools.aux.reweight_aux">
-<code class="sig-name descname">reweight_aux</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweight_aux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweight_aux" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute reweighting coefficients for 2-classes.
+<dt id="icenet.tools.aux.reweight_1D">
+<code class="sig-name descname">reweight_1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">pdf</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">N_class</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">reference_class</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweight_1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweight_1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute N-class density reweighting coefficients.
 :param X: Input data (# samples)
+:param pdf: Dictionary of pdfs for each class
 :param y: Class target data (# samples)
-:param binedges: One dimensional histogram edges
-:param shape_reference: Target class of re-weighting</p>
+:param N_class: Number of classes
+:param reference_class: Target class of re-weighting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Re-weight coefficients for two classes (# vectors x 2)</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>weights_doublet</p>
+<dd class="field-odd"><p>weights for each event</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.reweightcoeff1D">
-<code class="sig-name descname">reweightcoeff1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
+<code class="sig-name descname">reweightcoeff1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">pdf</span></em>, <em class="sig-param"><span class="n">N_class</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">reference_class</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">equal_frac</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute N-class density reweighting coefficients.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – Observable of interest (N x 1)</p></li>
-<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
-<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+<li><p><strong>y</strong> – Class labels (0,1,…) (N x 1)</p></li>
+<li><p><strong>pdf</strong> – PDF for each class</p></li>
+<li><p><strong>N_class</strong> – Number of classes</p></li>
+<li><p><strong>equal_frac</strong> – equalize class fractions</p></li>
+<li><p><strong>reference_class</strong> – e.g. 0 (background) or 1 (signal)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>weights</p>
+<dd class="field-even"><p>weights for each event</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.reweightcoeff2D">
-<code class="sig-name descname">reweightcoeff2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges_A</span></em>, <em class="sig-param"><span class="n">binedges_B</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
+<code class="sig-name descname">reweightcoeff2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">pdf</span></em>, <em class="sig-param"><span class="n">N_class</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">reference_class</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">equal_frac</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute N-class density reweighting coefficients.</p>
 <p>Operates in full 2D without factorization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X_A</strong> – Observable of interest (N x 1)</p></li>
-<li><p><strong>X_B</strong> – Observable of interest (N x 1)</p></li>
-<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
-<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+<li><p><strong>X_A</strong> – Observable A of interest (N x 1)</p></li>
+<li><p><strong>X_B</strong> – Observable B of interest (N x 1)</p></li>
+<li><p><strong>y</strong> – Signal (1) and background (0) labels (N x 1)</p></li>
+<li><p><strong>pdf</strong> – Density histograms for each class</p></li>
+<li><p><strong>N_class</strong> – Number of classes</p></li>
+<li><p><strong>reference_class</strong> – e.g. Background (0) or signal (1)</p></li>
+<li><p><strong>equal_frac</strong> – Equalize class fractions</p></li>
+<li><p><strong>max_reg</strong> – Regularize the maximum reweight coefficient</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>array of weights</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>w</p>
+<dd class="field-even"><p>weights for each event</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="icenet.tools.aux.reweightcoeff2DFP">
-<code class="sig-name descname">reweightcoeff2DFP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">binedges_A</span></em>, <em class="sig-param"><span class="n">binedges_B</span></em>, <em class="sig-param"><span class="n">shape_reference</span><span class="o">=</span><span class="default_value">'signal'</span></em>, <em class="sig-param"><span class="n">equalize_classes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2DFP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2DFP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute TRAINING re-weighting coefficients for each vector.</p>
-<p>Operates in 2D with factorized marginal 1D distributions.</p>
+<code class="sig-name descname">reweightcoeff2DFP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X_A</span></em>, <em class="sig-param"><span class="n">X_B</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">pdf_A</span></em>, <em class="sig-param"><span class="n">pdf_B</span></em>, <em class="sig-param"><span class="n">N_class</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">reference_class</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">equal_frac</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">max_reg</span><span class="o">=</span><span class="default_value">1000.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#reweightcoeff2DFP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.reweightcoeff2DFP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute N-class density reweighting coefficients.</p>
+<p>Operates in 2D with FACTORIZED PRODUCT marginal 1D distributions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X_A</strong> – Observable of interest (N x 1)</p></li>
 <li><p><strong>X_B</strong> – Observable of interest (N x 1)</p></li>
-<li><p><strong>y</strong> – Signal (1) and background (0) labels</p></li>
-<li><p><strong>shape_reference</strong> – ‘signal’ or ‘background’ or ‘none’</p></li>
+<li><p><strong>y</strong> – Signal (1) and background (0) targets</p></li>
+<li><p><strong>pdf_A</strong> – Density of observable A</p></li>
+<li><p><strong>pdf_B</strong> – Density of observable B</p></li>
+<li><p><strong>N_class</strong> – Number of classes</p></li>
+<li><p><strong>reference_class</strong> – e.g. 0 (background) or 1 (signal)</p></li>
+<li><p><strong>equal_frac</strong> – Equalize integrated class fractions</p></li>
+<li><p><strong>max_reg</strong> – Maximum weight regularization</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>array of weights</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>w</p>
+<dd class="field-even"><p>weights for each event</p>
 </dd>
 </dl>
 </dd></dl>
