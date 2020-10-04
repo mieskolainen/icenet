@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 1000000
+MAXEVENTS: 300000
 
 
 rngseed: 123456                # Fixed seed for training data mixing
@@ -96,7 +96,7 @@ active_models:
 #  - dmlp
 #  - cnn0
 #  - gnet0
-  - gnet1
+#  - gnet1
 #  - gnet3
 #  - gnet2
 #  - flr0
