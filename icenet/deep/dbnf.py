@@ -119,7 +119,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         modeldir    : directory to save the model
     """
     label = param['label']
-    
+
     model, device = dopt.model_to_cuda(model, param['device'])
 
     # TensorboardX
@@ -201,8 +201,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             break
     
     # Re-load the model        
-    aux.load_torch_model(model, optimizer, param, modeldir + '/dbnf_' + param['model'] + '.pth')()
-
+    aux.load_torch_model(model, optimizer, param, modeldir + f'/{label}_' + param['model'] + '.pth')()
+    
     optimizer.swap()
     validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
                                      for x_mb, in validation_generator], -1).mean()
