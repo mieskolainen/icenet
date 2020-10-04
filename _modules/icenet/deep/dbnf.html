@@ -349,7 +349,7 @@
 <span class="sd">        modeldir    : directory to save the model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-    
+
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
 
     <span class="c1"># TensorboardX</span>
@@ -431,8 +431,8 @@
             <span class="k">break</span>
     
     <span class="c1"># Re-load the model        </span>
-    <span class="n">aux</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="s1">&#39;/dbnf_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)()</span>
-
+    <span class="n">aux</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)()</span>
+    
     <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
     <span class="n">validation_loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x_mb</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
                                      <span class="k">for</span> <span class="n">x_mb</span><span class="p">,</span> <span class="ow">in</span> <span class="n">validation_generator</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
