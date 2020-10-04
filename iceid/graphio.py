@@ -73,7 +73,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
         # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
         p4vec = []
         if len(X[e, ind__image_clu_e]) > 0:
-            pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta])
+            pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta]) # Massless approx.
             p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
                 pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
 
@@ -154,7 +154,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
                     edge_attr[n,3] = p4_i.dot(p4_j)    # 4-dot
 
                 n += 1
-        
+
         # ----------------------------------------------------------------
         ### Construct edge connectivity
         n = 0
