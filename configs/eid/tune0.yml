@@ -4,9 +4,9 @@
 #
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
-#
 
-MAXEVENTS: 1000000
+MAXEVENTS: 2000000
+
 
 rngseed: 123456                # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
@@ -146,14 +146,14 @@ gxgb0_param:
     
     # general parameters
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 2000    # Number of epochs
+    num_boost_round: 1000    # Number of epochs
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     # booster parameters
     learning_rate: 0.05
     
     # Tree parameters
-    n_estimators: 500
+    n_estimators: 300
     max_depth: 10
     min_child_weight: 1.0
     gamma: 0.0
@@ -287,14 +287,14 @@ xgb0_param:
   
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 2000    # Number of epochs
+  num_boost_round: 1000    # Number of epochs
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
   # booster parameters
   learning_rate: 0.15
   
   # Tree parameters
-  n_estimators: 500
+  n_estimators: 300
   max_depth: 15
   min_child_weight: 1.0
   gamma: 0.0
