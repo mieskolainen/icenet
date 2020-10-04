@@ -118,6 +118,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         param       : parameters
         modeldir    : directory to save the model
     """
+    label = param['label']
     
     model, device = dopt.model_to_cuda(model, param['device'])
 
@@ -187,9 +188,9 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
 
         stop = scheduler.step(validation_loss,
             callback_best   = aux.save_torch_model(model, optimizer, epoch + 1,
-                modeldir + '/dbnf_' + param['model'] + '.pth'),
+                modeldir + f'/{label}_' + param['model'] + '.pth'),
             callback_reduce = aux.load_torch_model(model, optimizer, param,
-                modeldir + '/dbnf_' + param['model'] + '.pth'))
+                modeldir + f'/{label}_' + param['model'] + '.pth'))
         
         if param['tensorboard']:
             writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch + 1)

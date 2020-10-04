@@ -99,17 +99,17 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - dmlp
-  - cnn0
+#  - dmlp
+#  - cnn0
 #  - gnet0
-  - gnet1
+#  - gnet1
 #  - gnet3
 #  - gnet2
-  - flr0
+#  - flr0
   - xgb0
-  - lgr0
+#  - lgr0
 #  - xtx0
-  - dmx0
+#  - dmx0
   - dbnf0
 #  - gxgb0 # Keep this last (fix the bug) !
 
@@ -142,7 +142,7 @@ gxgb0_param:
     gamma: 0.1
 
     device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-    num_workers: 1
+    num_workers: 4
 
   # ** XGBOOST **
   xgb:
@@ -200,7 +200,7 @@ gnet3_param:
   gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 # Graph net
 gnet0_param:
@@ -223,7 +223,7 @@ gnet0_param:
   gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 # Graph net
 gnet1_param:
@@ -246,7 +246,7 @@ gnet1_param:
   gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 # Graph net
 gnet2_param:
@@ -269,7 +269,7 @@ gnet2_param:
   gamma: 0.1
 
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # Factorized Likelihood Ratio
@@ -339,7 +339,7 @@ dmlp_param:
   batch_norm: True    
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -359,7 +359,7 @@ lgr0_param:
   weight_decay: 0.00001       # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # Convolutional Neural Net
@@ -382,7 +382,7 @@ cnn0_param:
   learning_rate: 0.001
   weight_decay: 0.00        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # XTX (hyperbinned) classifier
@@ -405,7 +405,7 @@ xtx0_param:
   learning_rate: 0.005
   weight_decay: 0.01        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # Deep MAXOUT network
@@ -428,7 +428,7 @@ dmx0_param:
   learning_rate: 0.005
   weight_decay: 0.00001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
 
 
 # Deep Normalizing Flow
