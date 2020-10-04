@@ -115,16 +115,16 @@ def train_graph(data_trn, data_val, args, param):
     test_loader  = torch_geometric.data.DataLoader(data_val, batch_size=512, shuffle=False)
     
     for epoch in range(param['epochs']):
-        loss               = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
-        test_acc, test_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
+        loss                       = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
+        validate_acc, validate_AUC = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
 
-        print(f'Epoch {epoch+1:03d}, Loss: {loss:.4f} | Validate: {test_acc:.4f} (acc), {test_auc:.4f} (AUC)')
+        print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
         scheduler.step()
     
     ## Save
     label = param['label']
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     return model
 
@@ -176,7 +176,7 @@ def train_graph_xgb(data_trn, data_val, trn_weights, args, param):
         num_boost_round = param['xgb']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
     ## Save
-    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_checkpoint_rw_" + args['reweight_param']['mode'] + '.dat', 'wb'))
+    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_checkpoint" + '.dat', 'wb'))
 
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
@@ -239,7 +239,7 @@ def train_dmax(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
 
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
     
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -255,7 +255,7 @@ def train_flr(data, trn_weights, args, param):
     print(f'\nTraining {label} classifier ...')
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data.trn.x, y = data.trn.y, weights = trn_weights, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
-        open(args['modeldir'] + f'/{label}_model_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
+        open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'wb'))
 
     def func_predict(X):
         return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
@@ -297,7 +297,7 @@ def train_cdmx(data_tensor, Y_trn, Y_val, trn_weights, args, param):
     
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
     '''
 
     ### Plot contours
@@ -345,7 +345,7 @@ def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
     
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -370,7 +370,7 @@ def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
     
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -395,7 +395,7 @@ def train_lgr(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
     
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth')
+    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -430,7 +430,7 @@ def train_xgb(data, trn_weights, args, param):
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
     ## Save
-    pickle.dump(model, open(args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.dat', 'wb'))
+    pickle.dump(model, open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'wb'))
 
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
@@ -531,15 +531,15 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param):
                     format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
 
 
-def train_flow(data, trn_weights, args, param):
+def train_flow(data, trn_weights, args, param, N_class=2):
 
     label = param['label']
     param['n_dims'] = data.trn.x.shape[1]
 
     print(f'\nTraining {label} classifier ...')
-
-    for classid in [0,1] :
-        param['model'] = 'class_' + str(classid) + '_rw_' + args['reweight_param']['mode']
+    
+    for classid in range(N_class):
+        param['model'] = 'class_' + str(classid)
 
         # Load datasets
         trn = data.trn.classfilter(classid)

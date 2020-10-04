@@ -3,7 +3,6 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
-
 import numpy as np
 from tqdm import tqdm
 
@@ -11,7 +10,6 @@ import torch
 from torch_geometric.data import Data
 
 import uproot_methods
-
 import icenet.algo.analytic as analytic
 
 
@@ -19,7 +17,7 @@ import icenet.algo.analytic as analytic
 def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
-
+    
     Args:
         X         :  Jagged array of variables
         VARS      :  Variable names as an array of strings

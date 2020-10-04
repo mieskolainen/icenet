@@ -52,11 +52,11 @@ def pred_graph_xgb(args, param):
     print(f'\nEvaluate {label} classifier ...')
     
     graph_model = aux.load_torch_checkpoint(args['modeldir'] + 
-        f"/{param['graph']['label']}_checkpoint_rw_" + args['reweight_param']['mode'] + ".pth").to('cpu')
+        f"/{param['graph']['label']}_checkpoint" + ".pth").to('cpu')
     graph_model.eval() # Turn eval mode one!
 
     xgb_model   = pickle.load(open(args['modeldir'] + 
-        f"/{param['xgb']['label']}_checkpoint_rw_"   + args['reweight_param']['mode'] + ".dat", 'rb'))
+        f"/{param['xgb']['label']}_checkpoint" + ".dat", 'rb'))
     
     def func_predict(data):
 
@@ -76,7 +76,7 @@ def pred_torch(args, param):
 
     print(f'\nEvaluate {label} classifier ...')
     
-    model = aux.load_torch_checkpoint(args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.pth').to('cpu')
+    model = aux.load_torch_checkpoint(args['modeldir'] + f'/{label}_checkpoint' + '.pth').to('cpu')
     model.eval() # Turn on eval mode!
 
     def func_predict(x):
@@ -147,7 +147,7 @@ def pred_xgb(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
-    xgb_model = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
+    xgb_model = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'rb'))
     
     def func_predict(x):
         return xgb_model.predict(xgboost.DMatrix(data = x))
@@ -155,14 +155,19 @@ def pred_xgb(args, param):
     return func_predict
 
 
-def pred_flow(args, param, n_dims):
+def pred_flow(args, param, n_dims, N_class=2):
 
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
     # Load models
-    param['n_dims'] = n_dims
-    models = dbnf.load_models(param, ['class_0_rw_' + args['reweight_param']['mode'], 'class_1_rw_' + args['reweight_param']['mode']], args['modeldir'])
+    param['n_dims'] = n_dims # Set input dimension
+    
+    modelnames = []
+    for i in range(N_class):
+        modelnames.append(f'{label}_class_{i}')
+
+    models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
     
     def func_predict(x):
         return dbnf.predict(x, models)
@@ -175,7 +180,7 @@ def pred_flr(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + '/FLR_model_rw_' + args['reweight_param']['mode'] + '.dat', 'rb'))
+    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     

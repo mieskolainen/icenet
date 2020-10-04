@@ -52,7 +52,7 @@ def init(MAXEVENTS=None):
 
     # Input is [0,1,2,..]
     cli.datasets = cli.datasets.split(',')
-    
+
     ## Read configuration
     args = {}
     config_yaml_file = cli.config + '.yml'
@@ -136,32 +136,55 @@ def compute_reweights(data, args):
         weights : array of re-weights
     """
 
+    # Re-weighting variables
     PT           = data.trn.x[:,data.VARS.index('trk_pt')]
     ETA          = data.trn.x[:,data.VARS.index('trk_eta')]
-
-    pt_binedges  = np.linspace(args['reweight_param']['bins_pt'][0],
+    pt_binedges  = np.linspace(
+                         args['reweight_param']['bins_pt'][0],
                          args['reweight_param']['bins_pt'][1],
                          args['reweight_param']['bins_pt'][2])
-
-    eta_binedges = np.linspace(args['reweight_param']['bins_eta'][0],
+    eta_binedges = np.linspace(
+                         args['reweight_param']['bins_eta'][0],
                          args['reweight_param']['bins_eta'][1],
                          args['reweight_param']['bins_eta'][2])
 
-    print(__name__ + f".compute_reweights: Re-weighting coefficients with mode <{args['reweight_param']['mode']}> chosen")
-    trn_weights = aux.reweightcoeff2D(PT, ETA, data.trn.y, pt_binedges, eta_binedges,
-        shape_reference = args['reweight_param']['mode'], max_reg = args['reweight_param']['max_reg'])
+    print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
 
-    ### Plot some kinematic variables
-    targetdir = f'./figs/eid/{args["config"]}/reweight/1D_kinematic/'
-    os.makedirs(targetdir, exist_ok = True)
+    ### Compute 2D-pdfs for each class
+    N_class = 2
+    pdf     = {}
+    for c in range(N_class):
+        pdf[c] = aux.pdf_2D_hist(X_A=PT[data.trn.y==c], X_B=ETA[data.trn.y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
 
-    tvar = ['trk_pt', 'trk_eta', 'trk_phi', 'trk_p']
-    for k in tvar:
-        plots.plotvar(x = data.trn.x[:, data.VARS.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
-            targetdir = targetdir, title = 'training reweight reference: {}'.format(args['reweight_param']['mode']))
+    pdf['binedges_A'] = pt_binedges
+    pdf['binedges_B'] = eta_binedges
 
-    print(__name__ + '.compute_reweights: [done]')
+    # Compute event-by-event weights
+    if args['reweight_param']['reference_class'] is not -1:
+        
+        trn_weights = aux.reweightcoeff2D(
+            X_A = PT, X_B = ETA, pdf = pdf, y = data.trn.y, N_class=N_class,
+            equal_frac       = args['reweight_param']['equal_frac'],
+            reference_class  = args['reweight_param']['reference_class'],
+            max_reg          = args['reweight_param']['max_reg'])
+    else:
+        # No re-weighting
+        weights_doublet = np.zeros((data.trn.x.shape[0], N_class))
+        for c in range(N_class):    
+            weights_doublet[data.trn.y == c, c] = 1
+        trn_weights = np.sum(weights_doublet, axis=1)
 
+    # Compute the sum of weights per class for the output print
+    frac = np.zeros(N_class)
+    sums = np.zeros(N_class)
+    for c in range(N_class):
+        frac[c] = np.sum(data.trn.y == c)
+        sums[c] = np.sum(trn_weights[data.trn.y == c])
+    
+    print(__name__ + f'.compute_reweights: sum(trn.y==c): {frac}')
+    print(__name__ + f'.compute_reweights: sum(trn_weights[trn.y==c]): {sums}')
+    print(__name__ + f'.compute_reweights: [done]\n')
+    
     return trn_weights
 
 

@@ -203,10 +203,10 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
-
+    
     ### Plot all ROC curves
     targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
-    plots.ROC_plot(roc_mstats, roc_labels, title = 'reweight mode:' + args['reweight_param']['mode'],
+    plots.ROC_plot(roc_mstats, roc_labels, title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
         filename = targetdir + 'ROC')
 
 

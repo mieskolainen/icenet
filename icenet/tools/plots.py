@@ -196,7 +196,8 @@ def plotvar(x, y, var, weights, NBINS = 70, title = '', targetdir = '.'):
     """
     bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), NBINS)
     plot_reweight_result(x, y, bins, weights, title = title, xlabel = var)
-    plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight'); plt.close()
+    plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
+    plt.close()
 
 
 
@@ -220,8 +221,8 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
         for c in range(2) :
             w = trn_weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
-                histtype = 'step', fill = False, linestyle = '--', linewidth = 1.5)
-
+                histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
+        
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
 
