@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 300000
+MAXEVENTS: 1000000
 
 
 rngseed: 123456                # Fixed seed for training data mixing
@@ -96,7 +96,7 @@ active_models:
 #  - dmlp
 #  - cnn0
 #  - gnet0
-#  - gnet1
+  - gnet1
 #  - gnet3
 #  - gnet2
 #  - flr0
@@ -105,7 +105,7 @@ active_models:
 #  - xtx0
 #  - dmx0
 #  - dbnf0
-  - gxgb0 # Keep this last (fix the bug) !
+#  - gxgb0 # Keep this last (fix the bug) !
 
 
 # Dual graph + XGB network
@@ -230,7 +230,7 @@ gnet1_param:
   conv_aggr:   'add'
   global_pool: 'max'
   
-  epochs: 20
+  epochs: 50
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
