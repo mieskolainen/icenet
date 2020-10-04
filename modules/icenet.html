@@ -240,6 +240,26 @@
 <div class="section" id="module-icenet.algo.analytic">
 <span id="icenet-algo-analytic"></span><h3>icenet.algo.analytic<a class="headerlink" href="#module-icenet.algo.analytic" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
+<dt id="icenet.algo.analytic.gram_matrix">
+<code class="sig-name descname">gram_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'dot'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#gram_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.algo.analytic.gram_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gram matrix for 4-vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Array (list of N) of 4-vectors</p></li>
+<li><p><strong>type</strong> – Type of Lorentz scalars computed (‘dot’, ‘s’, ‘t’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Gram matrix (NxN)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>G</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="icenet.algo.analytic.ktmetric">
 <code class="sig-name descname">ktmetric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kt2_i</span></em>, <em class="sig-param"><span class="n">kt2_j</span></em>, <em class="sig-param"><span class="n">dR2_ij</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">R</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#ktmetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.algo.analytic.ktmetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>kt-algorithm type distance measure.</p>

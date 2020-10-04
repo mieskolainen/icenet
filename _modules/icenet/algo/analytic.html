@@ -235,6 +235,34 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+
+
+<div class="viewcode-block" id="gram_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.gram_matrix">[docs]</a><span class="k">def</span> <span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gram matrix for 4-vectors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X    : Array (list of N) of 4-vectors</span>
+<span class="sd">        type : Type of Lorentz scalars computed (&#39;dot&#39;, &#39;s&#39;, &#39;t&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        G : Gram matrix (NxN)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="k">if</span>   <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;dot&#39;</span><span class="p">:</span>
+                <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>   <span class="c1">## 4-dot product</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+                <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">p2</span> <span class="c1">## s-type</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
+                <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">p2</span> <span class="c1">## t-type</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;gram_matrix: Unknown type!&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">G</span></div>
 
 
 <div class="viewcode-block" id="ktmetric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a><span class="k">def</span> <span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
@@ -242,13 +270,13 @@
 <span class="sd">    kt-algorithm type distance measure.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        kt2_i      : Particle 1 pt squared</span>
-<span class="sd">        kt2_j      : Particle 2 pt squared</span>
-<span class="sd">        delta2_ij  : Angular seperation between particles squared (deta**2 + dphi**2)</span>
-<span class="sd">        R          : Radius parameter</span>
+<span class="sd">        kt2_i     : Particle 1 pt squared</span>
+<span class="sd">        kt2_j     : Particle 2 pt squared</span>
+<span class="sd">        delta2_ij : Angular seperation between particles squared (deta**2 + dphi**2)</span>
+<span class="sd">        R         : Radius parameter</span>
 <span class="sd">        </span>
-<span class="sd">        p =  1     : (p=1) kt-like, (p=0) Cambridge/Aachen, (p=-1) anti-kt like</span>
-
+<span class="sd">        p =  1    : (p=1) kt-like, (p=0) Cambridge/Aachen, (p=-1) anti-kt like</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        distance measure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
