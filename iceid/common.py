@@ -52,7 +52,7 @@ def init(MAXEVENTS=None):
 
     # Input is [0,1,2,..]
     cli.datasets = cli.datasets.split(',')
-
+    
     ## Read configuration
     args = {}
     config_yaml_file = cli.config + '.yml'

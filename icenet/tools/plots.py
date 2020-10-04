@@ -58,8 +58,8 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     ax[0].set_aspect(1.0/ax[0].get_data_ratio()*ratio)
 
     for i in [1]:
-        ax[i].set_ylim([0.5, 1.0])
-        ax[i].set_aspect(1.0/ax[i].get_data_ratio()*ratio)
+        ax[1].set_ylim([0.5, 1.0])
+        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*ratio)
 
     return fig,ax
 
