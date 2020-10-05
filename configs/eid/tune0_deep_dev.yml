@@ -5,8 +5,8 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 150000             # Maximum total number of events to process
-blocksize: 10000              # Maximum number of events simultaneously in RAM
+MAXEVENTS: 100000000000        # Maximum total number of events to process
+blocksize: 1000000             # Maximum number of events simultaneously in RAM
 
 
 rngseed: 123456                # Fixed seed for training data mixing
@@ -22,7 +22,6 @@ frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
 varnorm_tensor: 'zscore'       # Tensor variable normalization
 #varnorm_graph: 'none'         # Not implemented yet
-
 
 
 # ** Graph object construction **
@@ -52,7 +51,7 @@ image_param:
 
 ## Reweighting setup in the training phase
 reweight_param:
-  
+
   maxevents: 1000000           # Maximum number of events for the PDF construction
 
   reference_class: 0           # Reference class: -1 = (turned off), 0 = (background), 1 = (signal), 
@@ -110,7 +109,7 @@ active_models:
 #  - gnet3
   - gnet2
 #  - flr0
-  - xgb0
+#  - xgb0
 #  - lgr0
 #  - xtx0
 #  - dmx0

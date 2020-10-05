@@ -17,8 +17,11 @@ import yaml
 import numpy as np
 import torch
 import uproot
-from termcolor import colored, cprint
 
+from concurrent.futures import ThreadPoolExecutor
+
+
+from termcolor import colored, cprint
 from tqdm import tqdm
 
 from icenet.tools import io
@@ -259,7 +262,7 @@ def splitfactor(data, args):
     return data, data_tensor, data_kin
 
 
-def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = [], args=None):
+def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class_id = [], args=None):
     """ Loads the root file.
     
     Args:
@@ -302,29 +305,26 @@ def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = [], a
     cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
 
     ### All variables
-    VARS   = [x.decode() for x in events.keys()]
+    if VARS is None:
+        VARS   = [x.decode() for x in events.keys()]
     #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
 
     # Turn into dictionaries
-    X_dict = events.arrays(VARS, namedecode = "utf-8", entrystart=entrystart, entrystop=entrystop)
+    executor = ThreadPoolExecutor(4)
 
+    # Check is it MC (based on the first event)
+    X_test = events.arrays('is_mc', outputtype=list, executor=executor, namedecode = "utf-8", entrystart=entrystart, entrystop=entrystop)
+    isMC   = bool(X_test[0][0])
+    N      = len(X_test)
+    print(__name__ + f'.load_root_file: isMC: {isMC}')
 
-    # Is it MC (decision based on the first event)
-    isMC = X_dict['is_mc'][0]
-
-    showmem()
-
-    # -----------------------------------------------------------------
-    ### Convert the input into an array of size (dimensions x events)
-    # Note that dimensions here can contain jagged information
-
-    print(__name__ + '.load_root_file: Constructing X array ...')
-
-    X = np.array([X_dict[j] for j in VARS])
+    # Now read the data
+    print(__name__ + '.load_root_file: Loading root file ...')
+    X = np.array(events.arrays(VARS, outputtype=list, executor=executor, namedecode = "utf-8", entrystart=entrystart, entrystop=entrystop))
     X = X.T
     Y = None
-    
-    X_dict.clear() # Free memory
+
+
     print(f'X.shape = {X.shape}')
     showmem()
 
@@ -376,5 +376,5 @@ def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = [], a
 
     showmem()
     prints.printbar()
-    
+        
     return X, Y, VARS
