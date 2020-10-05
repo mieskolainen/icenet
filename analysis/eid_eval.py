@@ -19,6 +19,8 @@ import sys
 import yaml
 import copy
 
+from termcolor import cprint
+
 # xgboost
 import xgboost
 
@@ -131,27 +133,31 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
     pt_edges  = args['plot_param']['pt_edges']
     eta_edges = args['plot_param']['eta_edges']     
 
+    try:
 
-    ### Tensor variable normalization
-    if args['varnorm_tensor'] == 'zscore':
+        ### Tensor variable normalization
+        if args['varnorm_tensor'] == 'zscore':
 
-        print('\nZ-score normalizing tensor variables ...')
-        X_mu_tensor, X_std_tensor = pickle.load(open(modeldir + '/zscore_tensor.dat', 'rb'))
-        X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
+            print('\nZ-score normalizing tensor variables ...')
+            X_mu_tensor, X_std_tensor = pickle.load(open(modeldir + '/zscore_tensor.dat', 'rb'))
+            X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
+        
+        ### Variable normalization
+        if args['varnorm'] == 'zscore':
+
+            print('\nZ-score normalizing variables ...')
+            X_mu, X_std = pickle.load(open(modeldir + '/zscore.dat', 'rb'))
+            X = io.apply_zscore(X, X_mu, X_std)
+
+        elif args['varnorm'] == 'madscore':
+
+            print('\nMAD-score normalizing variables ...')
+            X_m, X_mad = pickle.load(open(modeldir + '/madscore.dat', 'rb'))
+            X = io.apply_madscore(X, X_m, X_mad)
+
+    except:
+        cprint('\n' + __name__ + f' WARNING: Problem in normalization. Continuing without! \n', 'red')
     
-    ### Variable normalization
-    if args['varnorm'] == 'zscore':
-
-        print('\nZ-score normalizing variables ...')
-        X_mu, X_std = pickle.load(open(modeldir + '/zscore.dat', 'rb'))
-        X = io.apply_zscore(X, X_mu, X_std)
-
-    elif args['varnorm'] == 'madscore':
-
-        print('\nMAD-score normalizing variables ...')
-        X_m, X_mad = pickle.load(open(modeldir + '/madscore.dat', 'rb'))
-        X = io.apply_madscore(X, X_m, X_mad)
-
     # --------------------------------------------------------------------
     # For pytorch based
     X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
