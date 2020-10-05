@@ -265,7 +265,8 @@
     <span class="k">return</span> <span class="n">G</span></div>
 
 
-<div class="viewcode-block" id="ktmetric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a><span class="k">def</span> <span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+<div class="viewcode-block" id="ktmetric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    kt-algorithm type distance measure.</span>
 <span class="sd">    </span>
@@ -280,8 +281,11 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        distance measure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">kt2_i</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">),</span> <span class="n">kt2_j</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">)])</span> <span class="o">*</span> <span class="p">(</span><span class="n">dR2_ij</span><span class="o">/</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">kt2_i</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">kt2_j</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="p">)</span> 
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">dR2_ij</span><span class="o">/</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

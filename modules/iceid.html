@@ -319,6 +319,21 @@ kinematic data</p>
 <div class="section" id="module-iceid.graphio">
 <span id="iceid-graphio"></span><h2>iceid.graphio<a class="headerlink" href="#module-iceid.graphio" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
+<dt id="iceid.graphio.get_edge_features">
+<code class="sig-name descname">get_edge_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p4vec</span></em>, <em class="sig-param"><span class="n">num_nodes</span></em>, <em class="sig-param"><span class="n">num_edges</span></em>, <em class="sig-param"><span class="n">num_edge_features</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#get_edge_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.get_edge_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="iceid.graphio.get_edge_index">
+<code class="sig-name descname">get_edge_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_nodes</span></em>, <em class="sig-param"><span class="n">num_edges</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#get_edge_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.get_edge_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="iceid.graphio.get_node_features">
+<code class="sig-name descname">get_node_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p4vec</span></em>, <em class="sig-param"><span class="n">p4track</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">num_nodes</span></em>, <em class="sig-param"><span class="n">num_node_features</span></em>, <em class="sig-param"><span class="n">coord</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#get_node_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.get_node_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt id="iceid.graphio.parse_graph_data">
 <code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_on</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">coord</span><span class="o">=</span><span class="default_value">'ptetaphim'</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jagged array data into pytorch-geometric style Data format array.</p>
