@@ -5,29 +5,29 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 100000000000        # Maximum total number of events to process
-blocksize: 15000000            # Maximum number of events simultaneously in RAM
+MAXEVENTS: 10000000             # Maximum total number of events to process (effective in shallow training / testing)
+blocksize: 10000000             # Maximum number of events simultaneously in RAM (effective deep training)
 
 
-rngseed: 123456                # Fixed seed for training data mixing
-inputvar: 'CMSSW_MVA_ID_ORIG'  # Input variables, implemented under mvavars.py
+rngseed: 123456                 # Fixed seed for training data mixing
+inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
 
-targetfunc: 'target_e'         # Training target,    implemented under mctargets.py
-filterfunc: 'filter_no_egamma' # Training filtering, implemented under mcfilter.py
-xcorr_flow: True               # Full N-point correlations computed between cuts
+targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
+filterfunc: 'filter_no_egamma'  # Training filtering, implemented under mcfilter.py
+xcorr_flow: True                # Full N-point correlations computed between cuts
 
 
-cutfunc: 'cut_standard'        # Basic cuts,         implemented under cuts.py
-frac: 0.9                      # Train/validate/test split fraction
-varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
-varnorm_tensor: 'zscore'       # Tensor variable normalization
-#varnorm_graph: 'none'         # Not implemented yet
+cutfunc: 'cut_standard'         # Basic cuts,         implemented under cuts.py
+frac: 0.9                       # Train/validate/test split fraction
+varnorm: 'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
+varnorm_tensor: 'zscore'        # Tensor variable normalization
+#varnorm_graph: 'none'          # Not implemented yet
 
 
 # ** Graph object construction **
 graph_param:
   global_on: True
-  coord: 'pxpypze'             # 'ptetaphim', 'pxpypze'
+  coord: 'pxpypze'              # 'ptetaphim', 'pxpypze'
 
 
 # ** Image tensor object construction **

@@ -123,10 +123,9 @@ def main():
 
     file   = uproot.open(root_path)
     EVENTS = file["ntuplizer"]["tree"].numentries
-    EVENTS = np.min([args['MAXEVENTS'], EVENTS])
     file.close()
-
-
+    
+    
     # =========================================================================
     # LOAD DATA
     X,Y,VARS = common.load_root_file_new(root_path, entrystart=0, entrystop=args['reweight_param']['maxevents'], args=args)
@@ -151,7 +150,7 @@ def main():
 
     pdf['binedges_A'] = pt_binedges
     pdf['binedges_B'] = eta_binedges
-    
+
     # ----------------------------------------------------------
     ### Initialize all models
     model     = {}
@@ -173,8 +172,8 @@ def main():
     block_size = args['blocksize']
     N_blocks   = int(np.ceil(EVENTS / args['blocksize']))
     block_ind  = aux.split_start_end(range(EVENTS), N_blocks)
-    
-    
+
+
     # Over blocks of data
     for block in range(N_blocks):
                     
