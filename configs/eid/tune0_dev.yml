@@ -5,8 +5,8 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 150000             # Maximum total number of events to process  (effective in shallow training / testing)
-blocksize: 10000              # Maximum number of events simultaneously in RAM (effective in deep training)
+MAXEVENTS: 150000              # Maximum total number of events to process  (effective in shallow training / testing)
+blocksize: 10000               # Maximum number of events simultaneously in RAM (effective in deep training)
 
 
 rngseed: 123456                # Fixed seed for training data mixing
