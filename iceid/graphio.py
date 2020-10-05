@@ -4,6 +4,7 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
+import numba
 from tqdm import tqdm
 
 import torch
@@ -11,7 +12,6 @@ from torch_geometric.data import Data
 
 import uproot_methods
 import icenet.algo.analytic as analytic
-
 
 
 def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
@@ -77,16 +77,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
 
         # ====================================================================
-        # INITIALIZE TENSORS
-
-        # Node feature matrix
-        x = torch.tensor(np.zeros((num_nodes, num_node_features)), dtype=torch.float)
-
-        # Graph connectivity: (~ sparse adjacency matrix)
-        edge_index = torch.tensor(np.zeros((2, num_edges)), dtype=torch.long)
-
-        # Edge features: [num_edges, num_edge_features]
-        edge_attr  = torch.tensor(np.zeros((num_edges, num_edge_features)), dtype=torch.float)
+        # CONSTRUCT TENSORS
 
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
@@ -100,71 +91,21 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
         else:
             w = torch.tensor([1.0], dtype=torch.float)
 
-        # Construct global feature vector
+        ## Construct global feature vector
         u = torch.tensor(X[e, feature_ind].tolist(), dtype=torch.float)
         
+        ## Construct node features
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = torch.tensor(x, dtype=torch.float)
 
-        # ====================================================================
-        # CONSTRUCT TENSORS
+        ## Construct edge features
+        edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
 
-        # ----------------------------------------------------------------
-        # Construct node features
-        for i in range(num_nodes):
+        ## Construct edge connectivity
+        edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
+        edge_index = torch.tensor(edge_index, dtype=torch.long)
 
-            if i > 0:
-                if   coord == 'ptetaphim':
-                    x[i,0] = torch.tensor(p4vec[i-1].pt)
-                    x[i,1] = torch.tensor(p4vec[i-1].eta)
-                    x[i,2] = torch.tensor(p4vec[i-1].phi)
-                    x[i,3] = torch.tensor(p4vec[i-1].mass)
-                elif coord == 'pxpypze':
-                    x[i,0] = torch.tensor(p4vec[i-1].x)
-                    x[i,1] = torch.tensor(p4vec[i-1].y)
-                    x[i,2] = torch.tensor(p4vec[i-1].z)
-                    x[i,3] = torch.tensor(p4vec[i-1].t)
-                else:
-                    raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
-                
-                # other features
-                x[i,4] = torch.tensor(X[e, VARS.index('image_clu_nhit')][i-1])
-                x[i,5] = p4track.delta_r(p4vec[i-1])
-
-        # ----------------------------------------------------------------
-        ### Construct edge features
-        n = 0
-        for i in range(num_nodes):
-            for j in range(num_nodes):
-
-                if i > 0 and j > 0: # i,j = 0 case is the virtual node
-
-                    p4_i   = p4vec[i-1]
-                    p4_j   = p4vec[j-1]
-
-                    # kt-metric (anti)
-                    dR2_ij = ((p4_i.eta - p4_j.eta)**2 + (p4_i.phi - p4_j.phi)**2)
-                    kt2_i  = p4_i.pt**2 + EPS 
-                    kt2_j  = p4_j.pt**2 + EPS
-                    edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
-                    
-                    # Lorentz scalars
-                    edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
-                    edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
-                    edge_attr[n,3] = p4_i.dot(p4_j)    # 4-dot
-
-                n += 1
-
-        # ----------------------------------------------------------------
-        ### Construct edge connectivity
-        n = 0
-        for i in range(num_nodes):
-            for j in range(num_nodes):
-                
-                #if i > 0 and j > 0: # Skip virtual node
-
-                # Full connectivity, including self-loops
-                edge_index[0,n] = i
-                edge_index[1,n] = j
-            n += 1
 
         # Add this event
         if global_on == False: # Null the global features
@@ -173,6 +114,96 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
 
     return dataset
+
+
+def get_node_features(p4vec, p4track, X, VARS, num_nodes, num_node_features, coord):
+
+    # Node feature matrix
+    x = np.zeros((num_nodes, num_node_features))
+
+    for i in range(num_nodes):
+
+        # i = 0 case is the virtual node
+        if i > 0:
+            if   coord == 'ptetaphim':
+                x[i,0] = p4vec[i-1].pt
+                x[i,1] = p4vec[i-1].eta
+                x[i,2] = p4vec[i-1].phi
+                x[i,3] = p4vec[i-1].mass
+            elif coord == 'pxpypze':
+                x[i,0] = p4vec[i-1].x
+                x[i,1] = p4vec[i-1].y
+                x[i,2] = p4vec[i-1].z
+                x[i,3] = p4vec[i-1].t
+            else:
+                raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
+            
+            # other features
+            x[i,4] = X[VARS.index('image_clu_nhit')][i-1]
+            x[i,5] = p4track.delta_r(p4vec[i-1])
+
+    return x
+
+
+@numba.njit
+def get_edge_index(num_nodes, num_edges):
+
+    # Graph connectivity: (~ sparse adjacency matrix)
+    edge_index = np.zeros((2, num_edges))
+
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            # Full connectivity
+            edge_index[0,n] = i
+            edge_index[1,n] = j
+            n += 1
+    
+    return edge_index
+
+
+def get_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EPS=1E-12):
+
+    # Edge features: [num_edges, num_edge_features]
+    edge_attr = np.zeros((num_edges, num_edge_features), dtype=float)
+    indexlist = np.zeros((num_nodes, num_nodes), dtype=int)
+    
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            # Compute only non-zero
+            if (i > 0 and j > 0) and (j > i):
+
+                p4_i   = p4vec[i-1]
+                p4_j   = p4vec[j-1]
+
+                # kt-metric (anti)
+                dR2_ij = ((p4_i.eta - p4_j.eta)**2 + (p4_i.phi - p4_j.phi)**2)
+                kt2_i  = p4_i.pt2 + EPS 
+                kt2_j  = p4_j.pt2 + EPS
+                edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
+                
+                # Lorentz scalars
+                edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
+                edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
+                edge_attr[n,3] = p4_i.dot(p4_j)    # 4-dot
+
+            indexlist[i,j] = n
+            n += 1
+
+    ### Copy to the lower triangle for speed (we have symmetric adjacency)
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            # Copy only non-zero
+            if (i > 0 and j > 0) and (j < i):
+                edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !
+            n += 1
+
+    return edge_attr
 
 
 '''

@@ -35,6 +35,7 @@ def gram_matrix(X, type='dot'):
     return G
 
 
+@numba.njit
 def ktmetric(kt2_i, kt2_j, dR2_ij, p = -1, R = 1.0):
     """
     kt-algorithm type distance measure.
@@ -50,5 +51,8 @@ def ktmetric(kt2_i, kt2_j, dR2_ij, p = -1, R = 1.0):
     Returns:
         distance measure
     """
-
-    return np.min([kt2_i**(2*p), kt2_j**(2*p)]) * (dR2_ij/R**2)
+    a = kt2_i**(2*p)
+    b = kt2_j**(2*p) 
+    c = (dR2_ij/R**2)
+    
+    return (a * c) if (a < b) else (b * c)
