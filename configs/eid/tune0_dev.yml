@@ -8,8 +8,9 @@
 MAXEVENTS: 1500000             # maximum number of events to process
 
 
-blocksize: 100000              # approximate blocksize for sequential training
-miniepochs: 10                 # number of miniepochs
+# Sequential training
+blocksize: 1000000             # approximate blocksize for sequential training
+miniepochs: 3                  # number of miniepochs
 
 
 rngseed: 123456                # Fixed seed for training data mixing
