@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
 MAXEVENTS: 10000000             # Maximum total number of events to process (effective in shallow training / testing)
-blocksize: 10000000             # Maximum number of events simultaneously in RAM (effective deep training)
+blocksize: 10000000             # Maximum number of events simultaneously in RAM (effective in deep training)
 
 
 rngseed: 123456                 # Fixed seed for training data mixing
