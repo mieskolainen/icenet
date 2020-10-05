@@ -40,7 +40,7 @@ def read_config():
     parser.add_argument("--datasets", type = str, default="0")
 
     cli = parser.parse_args()
-
+    
     # Input is [0,1,2,..]
     cli.datasets = cli.datasets.split(',')
 
@@ -58,7 +58,10 @@ def read_config():
     print('')
     print('torch.__version__: ' + torch.__version__)
 
-    return args
+    features = globals()[args['imputation_param']['var']]
+
+    return args, cli, features
+
 
 def init(MAXEVENTS=None):
     """ Initialize electron ID data.
@@ -70,7 +73,7 @@ def init(MAXEVENTS=None):
         jagged array data, arguments
     """
     
-    args = read_config()
+    args, cli, features = read_config()
 
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
@@ -101,8 +104,7 @@ def init(MAXEVENTS=None):
         print(__name__ + f': Imputing data for special values {special_values} for variables in <{args["imputation_param"]["var"]}>')
 
         # Choose active dimensions
-        INPUTVAR = globals()[args['imputation_param']['var']]
-        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in INPUTVAR], dtype=int)
+        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in features], dtype=int)
 
         # Parameters
         param = {
@@ -257,7 +259,7 @@ def splitfactor(data, args):
     return data, data_tensor, data_kin
 
 
-def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = []):
+def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = [], args=None):
     """ Loads the root file.
     
     Args:
@@ -272,12 +274,15 @@ def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = []):
     # -----------------------------------------------
     # ** GLOBALS **
 
-    CUTFUNC    = globals()[ARGS['cutfunc']]
-    TARFUNC    = globals()[ARGS['targetfunc']]
-    FILTERFUNC = globals()[ARGS['filterfunc']]
+    if args is None:
+        args = ARGS
+
+    CUTFUNC    = globals()[args['cutfunc']]
+    TARFUNC    = globals()[args['targetfunc']]
+    FILTERFUNC = globals()[args['filterfunc']]
 
     if entrystop is None:
-        entrystop = ARGS['MAXEVENTS']
+        entrystop = args['MAXEVENTS']
     # -----------------------------------------------
 
     def showmem():
@@ -342,7 +347,7 @@ def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = []):
 
         # @@ MC filtering done here @@
         cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
-        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=ARGS['xcorr_flow'])
+        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
 
         cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
         cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
@@ -355,9 +360,9 @@ def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = []):
     # -----------------------------------------------------------------
     # @@ Observable cut selections done here @@
     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=ARGS['xcorr_flow'])
+    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
     # -----------------------------------------------------------------
-
+    
     N_before = X.shape[0]
 
     ### Select events

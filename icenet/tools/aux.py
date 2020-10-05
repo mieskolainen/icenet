@@ -19,6 +19,36 @@ import icenet.tools.prints as prints
 import numba
 
 
+def split(a, n):
+    """
+    Generator which returns approx equally sized chunks.
+    Args:
+        a : Total number
+        n : Number of chunks
+    Example:
+        list(split(10, 3))
+    """
+    k, m = divmod(len(a), n)
+    return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+
+def split_start_end(a, n):
+    """
+    Returns approx equally sized chunks.
+    Args:
+        a : Total number
+        n : Number of chunks
+    Example:
+        list(split(10, 3))
+    """
+    ll = list(split(a,n))
+    out = []
+    for i in range(len(ll)):
+        out.append([ll[i][0], ll[i][-1]])
+
+    return out
+
+
 def apply_cutflow(cut, names, xcorr_flow=True):
     """ Apply cutflow
 
@@ -342,15 +372,18 @@ def weight2onehot(weights, Y, N_classes):
     """
     Weights into one-hot encoding.
     Args:
-        weights   :
+        weights   : array of weights
         Y         : targets
         N_classes : number of classes
 
     """
     one_hot_weights = np.zeros((len(weights), N_classes))
     for i in range(N_classes):
-        one_hot_weights[Y == i, i] = weights[Y == i]
-
+        try:
+            one_hot_weights[Y == i, i] = weights[Y == i]
+        except:
+            print(__name__ + f'weight2onehot: Failed with class = {i} (zero samples)')
+    
     return one_hot_weights
 
 

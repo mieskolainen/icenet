@@ -5,7 +5,11 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 1000000
+MAXEVENTS: 1500000             # maximum number of events to process
+
+
+blocksize: 100000              # approximate blocksize for sequential training
+miniepochs: 10                 # number of miniepochs
 
 
 rngseed: 123456                # Fixed seed for training data mixing
@@ -21,6 +25,7 @@ frac: 0.9                      # Train/validate/test split fraction
 varnorm: 'zscore'              # Variable normalization: 'zscore', 'madscore', 'none'
 varnorm_tensor: 'zscore'       # Tensor variable normalization
 #varnorm_graph: 'none'         # Not implemented yet
+
 
 
 # ** Graph object construction **
@@ -120,7 +125,7 @@ gxgb0_param:
   train:   'graph_xgb'
   predict: 'graph_xgb'
   label:   'DGXGB'
-  
+
   # ** GRAPH NETWORK **
   graph:
     train: 'graph'
@@ -213,7 +218,7 @@ gnet0_param:
   conv_aggr:   'max'
   global_pool: 'max'
 
-  epochs: 150
+  epochs: 30
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
