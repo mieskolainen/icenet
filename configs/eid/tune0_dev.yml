@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 1500000             # maximum number of events to process
+MAXEVENTS: 15000             # maximum number of events to process
 
 
 # Sequential training

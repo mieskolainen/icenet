@@ -130,7 +130,7 @@ def init(MAXEVENTS=None):
     cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
     
-    return data, args, INPUTVAR
+    return data, args, features
 
 
 def compute_reweights(data, args):
