@@ -262,17 +262,8 @@
 <span class="kn">from</span> <span class="nn">configs.eid.mvavars</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.eid.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 
+<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">():</span>
 
-<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        Implicit commandline and yaml file input.</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        jagged array data, arguments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>   <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tune0&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -296,6 +287,20 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;torch.__version__: &#39;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">args</span></div>
+
+<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Implicit commandline and yaml file input.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        jagged array data, arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">args</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">()</span>
 
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### SET GLOBALS (used only in this file)</span>
@@ -390,7 +395,7 @@
     <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eta_binedges</span>
 
     <span class="c1"># Compute event-by-event weights</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
         
         <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">reweightcoeff2D</span><span class="p">(</span>
             <span class="n">X_A</span> <span class="o">=</span> <span class="n">PT</span><span class="p">,</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">ETA</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="n">N_class</span><span class="p">,</span>
@@ -482,7 +487,7 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="n">data_kin</span></div>
 
 
-<div class="viewcode-block" id="load_root_file_new"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.load_root_file_new">[docs]</a><span class="k">def</span> <span class="nf">load_root_file_new</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[]):</span>
+<div class="viewcode-block" id="load_root_file_new"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.load_root_file_new">[docs]</a><span class="k">def</span> <span class="nf">load_root_file_new</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[]):</span>
     <span class="sd">&quot;&quot;&quot; Loads the root file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -500,7 +505,9 @@
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">TARFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
-    <span class="n">MAXEVENTS</span>  <span class="o">=</span> <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">entrystop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">entrystop</span> <span class="o">=</span> <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
     <span class="c1"># -----------------------------------------------</span>
 
     <span class="k">def</span> <span class="nf">showmem</span><span class="p">():</span>
@@ -509,7 +516,9 @@
     
     <span class="c1">### From root trees</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: entrystart = </span><span class="si">{</span><span class="n">entrystart</span><span class="si">}</span><span class="s1">, entrystop = </span><span class="si">{</span><span class="n">entrystop</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
     <span class="n">file</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;ntuplizer&quot;</span><span class="p">][</span><span class="s2">&quot;tree&quot;</span><span class="p">]</span>
 
@@ -522,7 +531,8 @@
     <span class="c1">#VARS_scalar = [x.decode() for x in events.keys() if b&#39;image_&#39; not in x]</span>
 
     <span class="c1"># Turn into dictionaries</span>
-    <span class="n">X_dict</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">VARS</span><span class="p">,</span> <span class="n">namedecode</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
+    <span class="n">X_dict</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">VARS</span><span class="p">,</span> <span class="n">namedecode</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
+
 
     <span class="c1"># Is it MC (decision based on the first event)</span>
     <span class="n">isMC</span> <span class="o">=</span> <span class="n">X_dict</span><span class="p">[</span><span class="s1">&#39;is_mc&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -552,11 +562,11 @@
 
         <span class="c1"># @@ MC target definition here @@</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
 
         <span class="c1"># For info</span>
         <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
-        <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">MAXEVENTS</span><span class="p">)</span>
+        <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
 
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
 
