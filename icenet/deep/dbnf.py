@@ -206,7 +206,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     optimizer.swap()
     validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
                                      for x_mb, in validation_generator], -1).mean()
-
+    
     print('###### Stop training after {} epochs!'.format(epoch + 1))
     print('Validation loss: {:4.3f}'.format(validation_loss.item()))
 

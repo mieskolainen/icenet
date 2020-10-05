@@ -101,16 +101,16 @@ active_models:
 
 #  - dmlp
 #  - cnn0
-#  - gnet0
-#  - gnet1
+  - gnet0
+  - gnet1
 #  - gnet3
-#  - gnet2
+  - gnet2
 #  - flr0
   - xgb0
 #  - lgr0
 #  - xtx0
 #  - dmx0
-  - dbnf0
+#  - dbnf0
 #  - gxgb0 # Keep this last (fix the bug) !
 
 
@@ -120,7 +120,7 @@ gxgb0_param:
   train:   'graph_xgb'
   predict: 'graph_xgb'
   label:   'DGXGB'
-
+  
   # ** GRAPH NETWORK **
   graph:
     train: 'graph'

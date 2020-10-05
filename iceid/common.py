@@ -32,17 +32,8 @@ from configs.eid.mcfilter  import *
 from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
+def read_config():
 
-def init(MAXEVENTS=None):
-    """ Initialize electron ID data.
-
-    Args:
-        Implicit commandline and yaml file input.
-    
-    Returns:
-        jagged array data, arguments
-    """
-    
     parser = argparse.ArgumentParser()
     parser.add_argument("--config",   type = str, default='tune0')
     parser.add_argument("--datapath", type = str, default=".")
@@ -66,6 +57,20 @@ def init(MAXEVENTS=None):
     print(args)
     print('')
     print('torch.__version__: ' + torch.__version__)
+
+    return args
+
+def init(MAXEVENTS=None):
+    """ Initialize electron ID data.
+
+    Args:
+        Implicit commandline and yaml file input.
+    
+    Returns:
+        jagged array data, arguments
+    """
+    
+    args = read_config()
 
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
@@ -160,7 +165,7 @@ def compute_reweights(data, args):
     pdf['binedges_B'] = eta_binedges
 
     # Compute event-by-event weights
-    if args['reweight_param']['reference_class'] is not -1:
+    if args['reweight_param']['reference_class'] != -1:
         
         trn_weights = aux.reweightcoeff2D(
             X_A = PT, X_B = ETA, pdf = pdf, y = data.trn.y, N_class=N_class,
@@ -252,7 +257,7 @@ def splitfactor(data, args):
     return data, data_tensor, data_kin
 
 
-def load_root_file_new(root_path, class_id = []):
+def load_root_file_new(root_path, entrystart=0, entrystop=None, class_id = []):
     """ Loads the root file.
     
     Args:
@@ -270,7 +275,9 @@ def load_root_file_new(root_path, class_id = []):
     CUTFUNC    = globals()[ARGS['cutfunc']]
     TARFUNC    = globals()[ARGS['targetfunc']]
     FILTERFUNC = globals()[ARGS['filterfunc']]
-    MAXEVENTS  = ARGS['MAXEVENTS']
+
+    if entrystop is None:
+        entrystop = ARGS['MAXEVENTS']
     # -----------------------------------------------
 
     def showmem():
@@ -279,7 +286,9 @@ def load_root_file_new(root_path, class_id = []):
     
     ### From root trees
     print('\n')
-    cprint( __name__ + '.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
+    cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
+    cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
+
     file = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
 
@@ -292,7 +301,8 @@ def load_root_file_new(root_path, class_id = []):
     #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
 
     # Turn into dictionaries
-    X_dict = events.arrays(VARS, namedecode = "utf-8", entrystart=0, entrystop=MAXEVENTS)
+    X_dict = events.arrays(VARS, namedecode = "utf-8", entrystart=entrystart, entrystop=entrystop)
+
 
     # Is it MC (decision based on the first event)
     isMC = X_dict['is_mc'][0]
@@ -322,11 +332,11 @@ def load_root_file_new(root_path, class_id = []):
 
         # @@ MC target definition here @@
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(events, entrystart=0, entrystop=MAXEVENTS)
+        Y = TARFUNC(events, entrystart=entrystart, entrystop=entrystop)
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, names=labels1, entrystart=0, entrystop=MAXEVENTS)
+        aux.count_targets(events=events, names=labels1, entrystart=entrystart, entrystop=entrystop)
 
         prints.printbar()
 
