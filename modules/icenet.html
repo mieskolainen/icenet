@@ -1713,6 +1713,26 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="icenet.tools.aux.split">
+<code class="sig-name descname">split</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator which returns approx equally sized chunks.
+:param a: Total number
+:param n: Number of chunks</p>
+<p class="rubric">Example</p>
+<p>list(split(10, 3))</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="icenet.tools.aux.split_start_end">
+<code class="sig-name descname">split_start_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#split_start_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.split_start_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns approx equally sized chunks.
+:param a: Total number
+:param n: Number of chunks</p>
+<p class="rubric">Example</p>
+<p>list(split(10, 3))</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="icenet.tools.aux.to_edges">
 <code class="sig-name descname">to_edges</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">l</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#to_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.to_edges" title="Permalink to this definition">¶</a></dt>
 <dd><p>treat <cite>l</cite> as a Graph and returns it’s edges</p>
@@ -1730,7 +1750,7 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <dt id="icenet.tools.aux.weight2onehot">
 <code class="sig-name descname">weight2onehot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">N_classes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#weight2onehot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#icenet.tools.aux.weight2onehot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weights into one-hot encoding.
-:param weights:
+:param weights: array of weights
 :param Y: targets
 :param N_classes: number of classes</p>
 </dd></dl>
