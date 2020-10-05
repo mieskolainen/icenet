@@ -243,7 +243,7 @@ def main():
                 validate_acc, validate_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
                 scheduler[ID].step()
                 
-                print(f'block {block+1:03d} [epoch: {epoch:03d}] train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
+                print(f'block {block+1:03d} [epoch: {epoch:03d}] train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_lr()[0]}')
             
             ## Save
             args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
