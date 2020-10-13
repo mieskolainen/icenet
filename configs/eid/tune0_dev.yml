@@ -25,7 +25,7 @@ varnorm_tensor: 'zscore'        # Tensor variable normalization
 
 # ** Graph object construction **
 graph_param:
-  global_on: False
+  global_on: True
   coord: 'pxpypze'              # 'ptetaphim', 'pxpypze'
 
 
