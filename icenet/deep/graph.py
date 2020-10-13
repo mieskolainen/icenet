@@ -172,12 +172,13 @@ def test(model, loader, optimizer, device):
 # https://arxiv.org/abs/1710.10903
 #
 class GATNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
+    def __init__(self, D, C, G=0, E=None, CDIM=96, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
         super(GATNet, self).__init__()
 
         self.D = D
         self.C = C
         self.G = G
+        self.CDIM = CDIM
 
         self.dropout     = dropout
         self.task        = task
@@ -187,12 +188,12 @@ class GATNet(torch.nn.Module):
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
 
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D*2 + self.D, 96])
+        self.lin1  = MLP([self.D*2 + self.D, self.CDIM])
         
         if (self.G > 0):
-            self.Z = 96 + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = 96
+            self.Z = self.CDIM
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -241,12 +242,13 @@ class GATNet(torch.nn.Module):
 # https://arxiv.org/abs/xyz
 #
 class SUPNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=1, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
         super(SUPNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
+        self.CDIM = CDIM
 
         self.task        = task
         self.global_pool = global_pool
@@ -256,12 +258,12 @@ class SUPNet(torch.nn.Module):
         self.conv2 = SuperEdgeConv(MLP([2 * 32 + E, 64]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, 96])
+        self.lin1  = MLP([32 + 64, self.CDIM])
         
         if (self.G > 0):
-            self.Z = 96 + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = 96
+            self.Z = self.CDIM
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -309,12 +311,13 @@ class SUPNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class ECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=1, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
         super(ECNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
+        self.CDIM = CDIM
 
         self.task  = task
         self.global_pool = global_pool
@@ -324,12 +327,12 @@ class ECNet(torch.nn.Module):
         self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, 96])
+        self.lin1  = MLP([32 + 64, self.CDIM])
         
         if (self.G > 0):
-            self.Z = 96 + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = 96
+            self.Z = self.CDIM
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -377,12 +380,13 @@ class ECNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class DECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=4, E=None, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=4, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
         super(DECNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
+        self.CDIM = CDIM
 
         self.task  = task
         self.global_pool = global_pool
@@ -392,12 +396,12 @@ class DECNet(torch.nn.Module):
         self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, 96])
+        self.lin1  = MLP([32 + 64, self.CDIM])
         
         if (self.G > 0):
-            self.Z = 96 + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = 96
+            self.Z = self.CDIM
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -445,7 +449,7 @@ class DECNet(torch.nn.Module):
 # https://arxiv.org/abs/1704.01212
 #
 class NNNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=1, Q=96, task='node', conv_aggr='add', global_pool='s2s'):
+    def __init__(self, D, C, G=0, E=1, CDIM=96, task='node', conv_aggr='add', global_pool='s2s'):
         super(NNNet, self).__init__()
 
         self.D = D  # node feature dimension
@@ -453,7 +457,7 @@ class NNNet(torch.nn.Module):
         self.G = G  # global feature dimension
         self.C = C  # number output classes
         
-        self.Q = Q  # latent dimension
+        self.CDIM = CDIM  # latent dimension
 
         self.task        = task
         self.global_pool = global_pool
@@ -464,18 +468,18 @@ class NNNet(torch.nn.Module):
         self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv layer outputs
-        self.lin1  = MLP([D+D, Q])
+        self.lin1  = MLP([D+D, self.CDIM])
 
         # Set2Set pooling operation produces always output with 2 x input dimension
         # => use linear layer to project down
         if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=Q, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*Q, Q)
+            self.S2Spool = Set2Set(in_channels=self.CDIM, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.CDIM, self.CDIM)
 
         if (self.G > 0):
-            self.Z = Q + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = Q
+            self.Z = self.CDIM
         
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -721,12 +725,13 @@ class SGNet(torch.nn.Module):
 # https://arxiv.org/abs/1905.12265
 #
 class GINENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', task='node'):
+    def __init__(self, D, C, G=0, E=None, CDIM=96, conv_aggr=None, global_pool='max', task='node'):
         super(GINENet, self).__init__()
 
         self.D = D
         self.C = C
         self.G = G
+        self.CDIM = CDIM
 
         self.task  = task
         self.global_pool = global_pool
@@ -736,12 +741,12 @@ class GINENet(torch.nn.Module):
         self.conv2 = GINEConv(MLP([self.D, 64]))
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D + 64, 96])
+        self.lin1  = MLP([self.D + 64, self.CDIM])
 
         if (self.G > 0):
-            self.Z = 96 + self.G
+            self.Z = self.CDIM + self.G
         else:
-            self.Z = 96
+            self.Z = self.CDIM
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])

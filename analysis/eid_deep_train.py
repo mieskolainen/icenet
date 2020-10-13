@@ -244,7 +244,7 @@ def main():
                 scheduler[ID].step()
                 
                 print(f'block {block+1:03d} [epoch: {epoch:03d}] train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}')
-            
+             
             ## Save
             args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
             checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}

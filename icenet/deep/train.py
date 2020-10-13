@@ -59,9 +59,8 @@ from iceid import graphio
 
 # Graphnet training function
 #
-def train_graph(data_trn, data_val, args, param):
+def train_graph(data_trn, data_val, args, param, num_classes=2):
     
-    num_classes         = 2
     num_node_features   = data_trn[0].x.size(-1)
     num_edge_features   = data_trn[0].edge_attr.size(-1)
     num_global_features = len(data_trn[0].u)
@@ -72,6 +71,7 @@ def train_graph(data_trn, data_val, args, param):
         'D' : num_node_features,
         'E' : num_edge_features,
         'G' : num_global_features,
+        'CDIM'        : param['CDIM'],
         'conv_aggr'   : param['conv_aggr'],
         'global_pool' : param['global_pool'],
         'task'        : 'graph'
@@ -129,7 +129,7 @@ def train_graph(data_trn, data_val, args, param):
     return model
 
 
-def train_graph_xgb(data_trn, data_val, trn_weights, args, param):
+def train_graph_xgb(data_trn, data_val, trn_weights, args, param, num_classes=2):
 
     label = param['label']
 
@@ -223,12 +223,12 @@ def train_graph_xgb(data_trn, data_val, trn_weights, args, param):
             X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
 
 
-def train_dmax(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
+def train_dmax(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes=2):
 
     label = param['label']
     
     print(f'\nTraining {label} classifier ...')
-    model = maxo.MAXOUT(D = X_trn.shape[1], C=2, num_units=param['num_units'], neurons=param['neurons'], dropout=param['dropout'])
+    model = maxo.MAXOUT(D = X_trn.shape[1], C=num_classes, num_units=param['num_units'], neurons=param['neurons'], dropout=param['dropout'])
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
         trn_weights = trn_weights, param = param)
 
@@ -269,13 +269,13 @@ def train_flr(data, trn_weights, args, param):
     """
 
 
-def train_cdmx(data_tensor, Y_trn, Y_val, trn_weights, args, param):
+def train_cdmx(data_tensor, Y_trn, Y_val, trn_weights, args, param, num_classes=2):
 
     '''
     label = args['cdmx_param']['label']
 
     print(f'\nTraining {label} classifier ...')
-    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=num_classes, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
         dropout_cnn = param['dropout_cnn'], neurons = param['neurons'], \
         num_units = param['num_units'], dropout = param['dropout'])
 
@@ -307,7 +307,7 @@ def train_cdmx(data_tensor, Y_trn, Y_val, trn_weights, args, param):
     #        X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
 
-def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
+def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param, num_classes=2):
 
     label = param['label']
 
@@ -331,7 +331,7 @@ def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
     # -------------------------------------------------------------------------------
 
     print(f'\nTraining {label} classifier ...')
-    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=2, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=num_classes, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
         dropout_cnn = param['dropout_cnn'], dropout_mlp = param['dropout_mlp'], mlp_dim = param['mlp_dim'])
 
     model, losses, trn_aucs, val_aucs = \
@@ -354,12 +354,12 @@ def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param):
             X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
 
-def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
+def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes=2):
 
     label = param['label']
     
     print(f'\nTraining {label} classifier ...')
-    model = dmlp.DMLP(D = X_trn.shape[1], mlp_dim=param['mlp_dim'], batch_norm=param['batch_norm'], C=2)
+    model = dmlp.DMLP(D = X_trn.shape[1], mlp_dim=param['mlp_dim'], batch_norm=param['batch_norm'], C=num_classes)
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
         trn_weights = trn_weights, param = param)
     
@@ -379,12 +379,12 @@ def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
             X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
 
 
-def train_lgr(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param):
+def train_lgr(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes=2):
 
     label = param['label']
     
     print(f'\nTraining {label} classifier ...')
-    model = mlgr.MLGR(D = X_trn.shape[1], C=2)
+    model = mlgr.MLGR(D = X_trn.shape[1], C=num_classes)
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
         trn_weights = trn_weights, param = param)
     
@@ -475,7 +475,7 @@ def train_xgb(data, trn_weights, args, param):
             X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
 
 
-def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param):
+def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param, num_classes=2):
     
     label     = param['label']
     pt_edges  = args['plot_param']['pt_edges']
@@ -515,7 +515,7 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param):
 
                 # Train
                 #xtx_model = mlgr.MLGR(D = X_trn.shape[1], C = 2)
-                model = maxo.MAXOUT(D = X_trn.shape[1], C = 2, num_units=param['num_units'], \
+                model = maxo.MAXOUT(D = X_trn.shape[1], C = num_classes, num_units=param['num_units'], \
                     neurons=param['neurons'], dropout=args['xtx_param']['dropout'])
 
                 model, losses, trn_aucs, val_aucs = dopt.train(model = model,
@@ -531,14 +531,14 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param):
                     format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
 
 
-def train_flow(data, trn_weights, args, param, N_class=2):
+def train_flow(data, trn_weights, args, param, num_classes=2):
 
     label = param['label']
     param['n_dims'] = data.trn.x.shape[1]
 
     print(f'\nTraining {label} classifier ...')
     
-    for classid in range(N_class):
+    for classid in range(num_classes):
         param['model'] = 'class_' + str(classid)
 
         # Load datasets
