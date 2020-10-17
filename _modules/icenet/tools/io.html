@@ -417,12 +417,12 @@
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rngseed</span><span class="p">))</span> <span class="c1"># seed it!</span>
     <span class="n">randi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Squeeze, so it is for sure a single dimensional</span>
     
     <span class="n">N</span>     <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">N_A</span>   <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>
     <span class="n">N_B</span>   <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">N_A</span>
-
+    
     <span class="n">N_trn</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N_A</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>
     <span class="n">N_val</span> <span class="o">=</span> <span class="n">N_A</span> <span class="o">-</span> <span class="n">N_trn</span>
     <span class="n">N_tst</span> <span class="o">=</span> <span class="n">N_B</span>
@@ -454,13 +454,13 @@
     <span class="k">else</span><span class="p">:</span>
 
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_id</span> <span class="p">:</span> 
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_trn</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_trn</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
             <span class="n">trn</span> <span class="o">+=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
 
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_val</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_val</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
             <span class="n">val</span> <span class="o">+=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
 
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_tst</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_tst</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
             <span class="n">tst</span> <span class="o">+=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_tst</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
 
     <span class="c1">### Permute events once again to have random mixing between classes</span>

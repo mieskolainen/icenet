@@ -20,14 +20,25 @@ Fully automated setup
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
-	# Pick CPU or GPU version	
+	# Pick CPU or GPU version (GPU version works for CPU too)	
 	pip install -r requirements-cpu-linux.txt
 	pip install -r requirements-gpu-linux.txt
-	
-	# Install cudatoolkit (only if necessary)
+
+
+Install cudatoolkit if and only if not already provided by your system
+
+.. code-block:: none
 	conda install cudatoolkit=10.2
 
-Alternatively if something fails, follow the instructions step-by-step below.
+
+Note: If you experience ´No space left on device´ problem with pip, set the temporary path
+
+.. code-block:: none
+	export TMPDIR="somepath"
+
+
+Then if something else fails, follow the instructions step-by-step below.
+
 
 Conda virtual environment setup
 --------------------------------
