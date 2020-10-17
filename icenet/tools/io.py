@@ -187,12 +187,12 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     np.random.seed(int(rngseed)) # seed it!
     randi = np.random.permutation(X.shape[0])
     X = X[randi]
-    Y = Y[randi]
+    Y = Y[randi].squeeze() # Squeeze, so it is for sure a single dimensional
     
     N     = X.shape[0]
     N_A   = round(N * frac)
     N_B   = N - N_A
-
+    
     N_trn = round(N_A * frac)
     N_val = N_A - N_trn
     N_tst = N_B
@@ -224,13 +224,13 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     else:
 
         for c in class_id : 
-            ind  = (Y_trn == c)
+            ind  = (Y_trn[:,...] == c)
             trn += Data(x = X_trn[ind], y = np.ones(ind.sum())*c)
 
-            ind  = (Y_val == c)
+            ind  = (Y_val[:,...] == c)
             val += Data(x = X_val[ind], y = np.ones(ind.sum())*c)
 
-            ind  = (Y_tst == c)
+            ind  = (Y_tst[:,...] == c)
             tst += Data(x = X_tst[ind], y = np.ones(ind.sum())*c)
 
     ### Permute events once again to have random mixing between classes

@@ -104,9 +104,9 @@ active_models:
 #  - dmlp
 #  - cnn0
   - gnet0
-#  - gnet1
-#  - gnet3
-#  - gnet2
+  - gnet1
+  - gnet3
+  - gnet2
 #  - flr0
   - xgb0
 #  - lgr0

@@ -9,11 +9,11 @@ import numba
 
 def target_e(events, entrystart=0, entrystop=None):
     """ Classification signal target definition"""
-    return events.array("is_e", entrystart=entrystart, entrystop=entrystop)
+    return events.arrays("is_e", library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
 
 def target_egamma(events, entrystart=0, entrystop=None):
     """ Classification signal target definition"""
-    return events.array("is_egamma", entrystart=entrystart, entrystop=entrystop)
+    return events.arrays("is_egamma", library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
 
 
 # Add alternatives here

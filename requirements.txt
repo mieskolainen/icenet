@@ -4,7 +4,9 @@ numpy>=1.19.1
 numba
 psutil
 networkx
-uproot>=3.11.1
+uproot
+uproot4
+awkward1
 tqdm>=4.31.1
 scikit-learn>=0.23.1
 tensorboardX>=2.0
