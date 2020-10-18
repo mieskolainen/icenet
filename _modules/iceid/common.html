@@ -300,7 +300,8 @@
     <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">data</span> <span class="o">+</span> <span class="s1">&#39;.root&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">filepath</span> <span class="o">!=</span> <span class="p">[]:</span>
-            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="c1"># -------------------------------------------------------------------</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
