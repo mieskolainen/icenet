@@ -5,13 +5,13 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 100000                # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000000  # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
 batch_train_param:
-  blocksize: 1000000            # Maximum number of events simultaneously in RAM
-  epochs: 50                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
+  blocksize: 3000000            # Maximum number of events simultaneously in RAM
+  epochs: 200                   # Number of global epochs (1 epoch = one iteration over the full input dataset)
   local_epochs: 1               # Number of local epochs per algorithm. If 0, then use the custom value per model.
 
 
