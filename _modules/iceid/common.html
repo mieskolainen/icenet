@@ -251,6 +251,10 @@
 
 <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
 
+<span class="c1"># Command line arguments</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">braceexpand</span> <span class="kn">import</span> <span class="n">braceexpand</span>
+
 
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -271,13 +275,11 @@
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>   <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tune0&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
 
     <span class="n">cli</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
     
-    <span class="c1"># Input is [0,1,2,..]</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-
+    <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Read configuration</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">config_yaml_file</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span> <span class="o">+</span> <span class="s1">&#39;.yml&#39;</span>
@@ -286,11 +288,31 @@
             <span class="n">args</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-
+            
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
+
+    <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1"># Do brace expansion</span>
+    <span class="n">datasets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">braceexpand</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">))</span>
+
+    <span class="c1"># Parse input files into a list</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">data</span> <span class="o">+</span> <span class="s1">&#39;.root&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filepath</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># -------------------------------------------------------------------</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;torch.__version__: &#39;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; torch.__version__: &quot;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Try &#39;filename_*&#39; &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Try &#39;filename_[0-99]&#39; &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Try &#39;filename_0&#39; &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Try &#39;filename_{0,3,4}&#39; &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Google &lt;glob wildcards&gt; and brace expansion.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="n">features</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
 
@@ -323,14 +345,12 @@
     <span class="c1"># --------------------------------------------------------------------</span>
 
     <span class="c1">### Load data</span>
-    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
-        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span> <span class="o">+</span> <span class="s1">&#39;/output_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.root&#39;</span><span class="p">)</span>
 
     <span class="c1"># Background (0) and signal (1)</span>
     <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">data</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file_new</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">paths</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+    <span class="n">data</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file_new</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
     
+
     <span class="c1"># @@ Imputation @@</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
@@ -550,8 +570,7 @@
     <span class="k">if</span> <span class="n">VARS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">VARS</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#[x for x in events.keys()]</span>
     <span class="c1">#VARS_scalar = [x.decode() for x in events.keys() if b&#39;image_&#39; not in x]</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="n">VARS</span><span class="p">)</span>
+    <span class="c1">#print(VARS)</span>
 
     <span class="c1"># Check is it MC (based on the first event)</span>
     <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="s1">&#39;is_mc&#39;</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
@@ -562,7 +581,7 @@
 
     <span class="c1"># Now read the data</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_root_file: Loading root file variables ...&#39;</span><span class="p">)</span>
-    
+
     <span class="c1"># --------------------------------------------------------------</span>
     <span class="c1"># Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)</span>
 
