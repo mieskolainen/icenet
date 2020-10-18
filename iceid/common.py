@@ -70,7 +70,8 @@ def read_config():
     for data in datasets:
         filepath = glob(cli.datapath + '/' + data + '.root')
         if filepath != []:
-            args['root_files'].append(filepath[0])
+            for i in range(len(filepath)):
+                args['root_files'].append(filepath[i])
     # -------------------------------------------------------------------
     
     print(args)
