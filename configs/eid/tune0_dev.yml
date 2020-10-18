@@ -140,7 +140,7 @@ gxgb0_param:
     conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
     conv_aggr:   'add'
     global_pool: 'max'
-    CDIM: 196                   # Convolution output dimension
+    CDIM: 96                   # Convolution output dimension
 
     epochs: 50
     batch_size: 64
@@ -199,7 +199,7 @@ gnet3_param:
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
   global_pool: 'max'
-  CDIM: 196                   # Convolution output dimension
+  CDIM: 96                   # Convolution output dimension
   
   epochs: 50
   batch_size: 64
@@ -223,7 +223,7 @@ gnet0_param:
   conv_type:   'NN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'max'
   global_pool: 'max'
-  CDIM: 196                   # Convolution output dimension
+  CDIM: 96                   # Convolution output dimension
 
   epochs: 50
   batch_size: 64
@@ -247,7 +247,7 @@ gnet1_param:
   conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
   global_pool: 'max'
-  CDIM: 196                   # Convolution output dimension
+  CDIM: 96                   # Convolution output dimension
   
   epochs: 50
   batch_size: 64
@@ -271,7 +271,7 @@ gnet2_param:
   conv_type: 'EC'            # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
   global_pool: 'max'
-  CDIM: 196                   # Convolution output dimension
+  CDIM: 96                   # Convolution output dimension
   
   epochs: 50
   batch_size: 64
