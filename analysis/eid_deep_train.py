@@ -46,7 +46,7 @@ from iceid import common
 from iceid import graphio
 
 
-def get_model(X, Y, VARS, features, args, param):
+def get_model(X, Y, VARS, features, args, param, N_class=2):
 
     # ---------------------------------------------------------------
     # Read test graph data to get dimensions
@@ -58,14 +58,13 @@ def get_model(X, Y, VARS, features, args, param):
     # =========================================================================
     # INITIALIZE GRAPH MODEL
 
-    num_classes         = 2
     num_node_features   = gdata['trn'][0].x.size(-1)
     num_edge_features   = gdata['trn'][0].edge_attr.size(-1)
     num_global_features = len(gdata['trn'][0].u)
     
     conv_type = param['conv_type']
     netparam = {
-        'C' :           num_classes,
+        'C' :           N_class,
         'D' :           num_node_features,
         'E' :           num_edge_features,
         'G' :           num_global_features,
@@ -168,8 +167,8 @@ def main():
 
     N_class = 2
     pdf,X,Y,VARS = compute_reweight(root_files=root_files, N_events=N_events, args=args, N_class=N_class)
-
-
+    
+    
     # =========================================================================
     ### Initialize all models
     model     = {}
@@ -188,7 +187,7 @@ def main():
             param[ID]['epochs'] = int(args['batch_train_param']['local_epochs'])
 
         model[ID], device[ID], optimizer[ID], scheduler[ID] = \
-            get_model(X=X,Y=Y,VARS=VARS,features=features,args=args,param=param[ID])
+            get_model(X=X,Y=Y,VARS=VARS,features=features,args=args,param=param[ID],N_class=N_class)
     # ----------------------------------------------------------
 
     visited    = False
