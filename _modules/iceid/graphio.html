@@ -261,7 +261,7 @@
 
 <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s1">&#39;ptetaphim&#39;</span><span class="p">,</span> <span class="n">CPU_count</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s1">&#39;ptetaphim&#39;</span><span class="p">,</span> <span class="n">CPU_count</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jagged array data into pytorch-geometric style Data format array.</span>
 <span class="sd">    </span>
@@ -273,7 +273,8 @@
 <span class="sd">        W         :  (Re-)weighting array (if any, typically MC only)</span>
 <span class="sd">        global_on :  Global features on / off</span>
 <span class="sd">        coord     :  Coordinates used for nodes (&#39;ptetaphim&#39;, &#39;pxpypze&#39;)</span>
-<span class="sd">        </span>
+<span class="sd">        CPU_count :  Number of CPU processes used. If None, set it automatically (might overflow RAM)</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Array of pytorch-geometric Data objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
