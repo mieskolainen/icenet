@@ -4,7 +4,6 @@ numpy>=1.19.1
 numba
 psutil
 networkx
-glob
 braceexpand
 uproot
 uproot4
