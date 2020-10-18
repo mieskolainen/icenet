@@ -5,12 +5,19 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 150000               # Maximum total number of events to process (effective in shallow training / testing)
-blocksize: 10000                # Maximum number of events simultaneously in RAM (effective in deep training)
+MAXEVENTS: 10000                # Maximum total number of events (per root file) to process
+
+
+# Batched "deep" training
+batch_train_param:
+  blocksize: 1000000            # Maximum number of events simultaneously in RAM
+  epochs: 50                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
+  local_epochs: 1               # Number of local epochs per algorithm. If 0, then use the custom value per model.
 
 
 rngseed: 123456                 # Fixed seed for training data mixing
 inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
+
 targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
 filterfunc: 'filter_no_egamma'  # Training filtering, implemented under mcfilter.py
 xcorr_flow: True                # Full N-point correlations computed between cuts
@@ -105,15 +112,15 @@ active_models:
 #  - cnn0
   - gnet0
   - gnet1
-  - gnet3
+#  - gnet3
   - gnet2
 #  - flr0
-  - xgb0
+#  - xgb0
 #  - lgr0
 #  - xtx0
 #  - dmx0
 #  - dbnf0
-  - gxgb0 # Keep this last (fix the bug) !
+#  - gxgb0 # Keep this last (fix the bug) !
 
 
 # Dual graph + XGB network
@@ -192,7 +199,7 @@ gnet3_param:
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
   conv_aggr:   'add'
   global_pool: 'max'
-  CDIM: 196                  # Convolution output dimension
+  CDIM: 196                   # Convolution output dimension
   
   epochs: 50
   batch_size: 64

@@ -21,6 +21,10 @@ import awkward1 as ak
 
 from concurrent.futures import ThreadPoolExecutor
 
+# Command line arguments
+from glob import glob
+from braceexpand import braceexpand
+
 
 from termcolor import colored, cprint
 from tqdm import tqdm
@@ -41,13 +45,11 @@ def read_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config",   type = str, default='tune0')
     parser.add_argument("--datapath", type = str, default=".")
-    parser.add_argument("--datasets", type = str, default="0")
+    parser.add_argument("--datasets", type = str, default="*")
 
     cli = parser.parse_args()
     
-    # Input is [0,1,2,..]
-    cli.datasets = cli.datasets.split(',')
-
+    # -------------------------------------------------------------------
     ## Read configuration
     args = {}
     config_yaml_file = cli.config + '.yml'
@@ -56,11 +58,31 @@ def read_config():
             args = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-
+            
     args['config'] = cli.config
+
+    # -------------------------------------------------------------------
+    # Do brace expansion
+    datasets = list(braceexpand(cli.datasets))
+
+    # Parse input files into a list
+    args['root_files'] = list()
+    for data in datasets:
+        filepath = glob(cli.datapath + '/' + data + '.root')
+        if filepath != []:
+            args['root_files'].append(filepath[0])
+    # -------------------------------------------------------------------
+    
     print(args)
     print('')
-    print('torch.__version__: ' + torch.__version__)
+    print(" torch.__version__: " + torch.__version__)
+    print("")
+    print(" Try 'filename_*' ")
+    print(" Try 'filename_[0-99]' ")
+    print(" Try 'filename_0' ")
+    print(" Try 'filename_{0,3,4}' ")
+    print(" Google <glob wildcards> and brace expansion.")
+    print("")
 
     features = globals()[args['imputation_param']['var']]
 
@@ -93,14 +115,12 @@ def init(MAXEVENTS=None):
     # --------------------------------------------------------------------
 
     ### Load data
-    paths = []
-    for i in cli.datasets:
-        paths.append(cli.datapath + '/output_' + str(i) + '.root')
 
     # Background (0) and signal (1)
     class_id = [0,1]
-    data     = io.DATASET(func_loader=load_root_file_new, files=paths, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+    data     = io.DATASET(func_loader=load_root_file_new, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
+
     # @@ Imputation @@
     if args['imputation_param']['active']:
 
@@ -320,8 +340,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     if VARS is None:
         VARS = events.keys() #[x for x in events.keys()]
     #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
-    
-    print(VARS)
+    #print(VARS)
 
     # Check is it MC (based on the first event)
     X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
@@ -332,7 +351,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
 
     # Now read the data
     print(__name__ + '.load_root_file: Loading root file variables ...')
-    
+
     # --------------------------------------------------------------
     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
 

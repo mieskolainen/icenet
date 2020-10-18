@@ -41,7 +41,6 @@ from icenet.tools import prints
 from icenet.deep  import train
 import icenet.deep as deep
 
-
 # iceid
 from iceid import common
 from iceid import graphio
@@ -53,7 +52,7 @@ def get_model(X, Y, VARS, features, args, param):
     # Read test graph data to get dimensions
 
     gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X[0:100], Y=Y[0:100], VARS=VARS, 
+    gdata['trn'] = graphio.parse_graph_data(X=X[0:1], Y=Y[0:1], VARS=VARS, 
         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
 
     # =========================================================================
@@ -111,24 +110,13 @@ def get_model(X, Y, VARS, features, args, param):
     return model, device, optimizer, scheduler
 
 
-# Main function
-#
-def main():
+def compute_reweight(root_files, N_events, args, N_class=2):
 
-    ### Get input
-    args, cli, features = common.read_config()
+    index        = 0 # Use the first file by default
+    cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    ### Load data (ONLY ONE FILE SUPPORTED FOR NOW)
-    root_path = cli.datapath + '/output_' + str(cli.datasets[0]) + '.root'
-
-    file   = uproot.open(root_path)
-    EVENTS = file["ntuplizer"]["tree"].numentries
-    file.close()
-    
-    
-    # =========================================================================
-    # LOAD DATA
-    X,Y,VARS = common.load_root_file_new(root_path, entrystart=0, entrystop=args['reweight_param']['maxevents'], args=args)
+    entrystop    = np.min([args['reweight_param']['maxevents'], N_events[index]])
+    X,Y,VARS     = common.load_root_file_new(root_files[index], entrystart=0, entrystop=entrystop, args=args)
 
 
     ### Compute differential re-weighting 2D-PDFs
@@ -137,13 +125,12 @@ def main():
 
     bins_pt      = args['reweight_param']['bins_pt']
     bins_eta     = args['reweight_param']['bins_eta']
-    pt_binedges  = np.linspace(bins_pt[0], bins_pt[1], bins_pt[2])
+    pt_binedges  = np.linspace(bins_pt[0],  bins_pt[1],  bins_pt[2])
     eta_binedges = np.linspace(bins_eta[0], bins_eta[1], bins_eta[2])
     
     print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
 
     ### Compute 2D-pdfs for each class
-    N_class = 2
     pdf     = {}
     for c in range(N_class):
         pdf[c] = aux.pdf_2D_hist(X_A=PT[Y==c], X_B=ETA[Y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
@@ -151,7 +138,39 @@ def main():
     pdf['binedges_A'] = pt_binedges
     pdf['binedges_B'] = eta_binedges
 
-    # ----------------------------------------------------------
+    return pdf, X, Y, VARS
+
+
+# Main function
+#
+def main():
+
+    ### Get input
+    args, cli, features = common.read_config()
+    root_files = args['root_files']
+    
+    # Find number of events in each file
+    N_events = np.zeros(len(root_files), dtype=np.int)
+
+    for i in range(len(root_files)):
+        file        = uproot.open(root_files[i])
+        N_events[i] = int(file["ntuplizer"]["tree"].numentries)
+        file.close()
+    
+        # ** Apply MAXEVENTS cutoff for each file **
+        N_events[i] = np.min([N_events[i], args['MAXEVENTS']])
+
+    print(f'Number of events per file: {N_events}')
+
+
+    # =========================================================================
+    # Load data for each re-weight PDFs
+
+    N_class = 2
+    pdf,X,Y,VARS = compute_reweight(root_files=root_files, N_events=N_events, args=args, N_class=N_class)
+
+
+    # =========================================================================
     ### Initialize all models
     model     = {}
     device    = {}
@@ -164,91 +183,119 @@ def main():
         param[ID] = args[f'{ID}_param']
         print(f'Training <{ID}> | {param[ID]} \n')
 
+        # If not zero, then force the same value for every model
+        if args['batch_train_param']['local_epochs'] != 0:
+            param[ID]['epochs'] = int(args['batch_train_param']['local_epochs'])
+
         model[ID], device[ID], optimizer[ID], scheduler[ID] = \
             get_model(X=X,Y=Y,VARS=VARS,features=features,args=args,param=param[ID])
     # ----------------------------------------------------------
 
-    ### EPOCH LOOP HERE
-    block_size = args['blocksize']
-    N_blocks   = int(np.ceil(EVENTS / args['blocksize']))
-    block_ind  = aux.split_start_end(range(EVENTS), N_blocks)
+    visited    = False
+    N_epochs   = args['batch_train_param']['epochs']
+    block_size = args['batch_train_param']['blocksize']
 
+    ### Over each epoch
+    for epoch in range(N_epochs):
 
-    # Over blocks of data
-    for block in range(N_blocks):
+        prints.printbar('=')
+        cprint(__name__ + f".epoch {epoch+1} / {N_epochs} \n", 'yellow')
+
+        ### Over each file
+        for f in range(len(root_files)):
+
+            prints.printbar('=')
+            cprint(__name__ + f'.file {f+1} / {len(root_files)} \n', 'yellow')
+
+            # ------------------------------------------------------------
+            N_blocks   = int(np.ceil(N_events[f] / args['batch_train_param']['blocksize']))
+            block_ind  = aux.split_start_end(range(N_events[f]), N_blocks)
+            # ------------------------------------------------------------
+
+            ### Over blocks of data from this file
+            for block in range(N_blocks):
+                
+                entrystart = block_ind[block][0]
+                entrystop  = block_ind[block][-1]
+
+                prints.printbar('=')
+                cprint(__name__ + f'.block {block+1} / {N_blocks} \n', 'yellow')
+
+                # =========================================================================
+                # LOAD DATA
+                if (N_blocks > 1) or (len(root_files) > 1) or (len(root_files) == 1 and N_blocks == 1 and visited == False):
+
+                    visited = True # For the special case
+
+                    X,Y,VARS      = common.load_root_file_new(root_files[f], entrystart=entrystart, entrystop=entrystop, args=args)
+                    trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
+
+                    # =========================================================================
+                    # COMPUTE RE-WEIGHTS
+                    # Re-weighting variables
+
+                    PT  = trn.x[:, VARS.index('trk_pt')]
+                    ETA = trn.x[:, VARS.index('trk_eta')]
+
+                    # Compute event-by-event weights
+                    if args['reweight_param']['reference_class'] != -1:
+                            
+                        trn_weights = aux.reweightcoeff2D(
+                            X_A = PT, X_B = ETA, pdf = pdf, y = trn.y, N_class=N_class,
+                            equal_frac       = args['reweight_param']['equal_frac'],
+                            reference_class  = args['reweight_param']['reference_class'],
+                            max_reg          = args['reweight_param']['max_reg'])
+                    else:
+                        # No re-weighting
+                        weights_doublet = np.zeros((trn.x.shape[0], N_class))
+                        for c in range(N_class):    
+                            weights_doublet[trn.y == c, c] = 1
+                        trn_weights = np.sum(weights_doublet, axis=1)
+
+                    # Compute the sum of weights per class for the output print
+                    frac = np.zeros(N_class)
+                    sums = np.zeros(N_class)
+                    for c in range(N_class):
+                        frac[c] = np.sum(trn.y == c)
+                        sums[c] = np.sum(trn_weights[trn.y == c])
                     
-        entrystart = block_ind[block][0]
-        entrystop  = block_ind[block][-1]
+                    print(__name__ + f'.compute_reweights: sum(Y==c): {frac}')
+                    print(__name__ + f'.compute_reweights: sum(trn_weights[Y==c]): {sums}')
+                    print(__name__ + f'.compute_reweights: [done]\n')
 
-        print(__name__ + f'.block {block+1} / {N_blocks} \n\n\n\n')
+                    # =========================================================================
+                    ### Parse data into graphs
 
-        # =========================================================================
-        # LOAD DATA
-        X,Y,VARS      = common.load_root_file_new(root_path, entrystart=entrystart, entrystop=entrystop, args=args)
-        trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
+                    gdata = {}
+                    gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, VARS=VARS, 
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                    gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, VARS=VARS,
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
 
-        # =========================================================================
-        # COMPUTE RE-WEIGHTS
-        # Re-weighting variables
+                # =========================================================================
+                ### Train all model over this block of data
+                for ID in model.keys():
+                    cprint(__name__ + f' Training model <{ID}>', 'green')
 
-        PT  = trn.x[:, VARS.index('trk_pt')]
-        ETA = trn.x[:, VARS.index('trk_eta')]
+                    train_loader = torch_geometric.data.DataLoader(gdata['trn'], batch_size=param[ID]['batch_size'], shuffle=True)
+                    test_loader  = torch_geometric.data.DataLoader(gdata['val'], batch_size=512, shuffle=False)
 
-        # Compute event-by-event weights
-        if args['reweight_param']['reference_class'] != -1:
-                
-            trn_weights = aux.reweightcoeff2D(
-                X_A = PT, X_B = ETA, pdf = pdf, y = trn.y, N_class=N_class,
-                equal_frac       = args['reweight_param']['equal_frac'],
-                reference_class  = args['reweight_param']['reference_class'],
-                max_reg          = args['reweight_param']['max_reg'])
-        else:
-            # No re-weighting
-            weights_doublet = np.zeros((trn.x.shape[0], N_class))
-            for c in range(N_class):    
-                weights_doublet[trn.y == c, c] = 1
-            trn_weights = np.sum(weights_doublet, axis=1)
+                    # Local epoch loop
+                    for local_epoch in range(param[ID]['epochs']):
 
-        # Compute the sum of weights per class for the output print
-        frac = np.zeros(N_class)
-        sums = np.zeros(N_class)
-        for c in range(N_class):
-            frac[c] = np.sum(trn.y == c)
-            sums[c] = np.sum(trn_weights[trn.y == c])
-        
-        print(__name__ + f'.compute_reweights: sum(Y==c): {frac}')
-        print(__name__ + f'.compute_reweights: sum(trn_weights[Y==c]): {sums}')
-        print(__name__ + f'.compute_reweights: [done]\n')
+                        loss                       = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
+                        validate_acc, validate_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                        scheduler[ID].step()
+                        
+                        print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}, local epoch: {local_epoch+1:03d}/{param[ID]['epochs']:03d}] "
+                            f"train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
+                    
+                    ## Save
+                    args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
+                    checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
+                    torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_checkpoint' + '.pth')
 
-        # =========================================================================
-        ### Parse data into graphs
-
-        gdata = {}
-        gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, VARS=VARS, 
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-        gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, VARS=VARS,
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-
-        # =========================================================================
-        ### Train all model over this block of data
-        for ID in model.keys():
-            print(__name__ + f' Training model <{ID}>')
-
-            train_loader = torch_geometric.data.DataLoader(gdata['trn'], batch_size=param[ID]['batch_size'], shuffle=True)
-            test_loader  = torch_geometric.data.DataLoader(gdata['val'], batch_size=512, shuffle=False)
-
-            for epoch in range(param[ID]['epochs']):
-
-                loss                       = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
-                validate_acc, validate_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
-                scheduler[ID].step()
-                
-                print(f'block {block+1:03d} [epoch: {epoch:03d}] train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}')
-             
-            ## Save
-            args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
-            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
-            torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_checkpoint' + '.pth')
+    print(__name__ + f' [Done!]')
 
             
 if __name__ == '__main__' :

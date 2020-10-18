@@ -156,7 +156,7 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
             X = io.apply_madscore(X, X_m, X_mad)
 
     except:
-        cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continuing without! \n', 'red')
+        cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
     
     # --------------------------------------------------------------------
     # For pytorch based
