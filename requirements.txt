@@ -3,6 +3,7 @@ matplotlib>=3.0.3
 numpy>=1.19.1
 numba
 psutil
+uuid
 networkx
 braceexpand
 uproot

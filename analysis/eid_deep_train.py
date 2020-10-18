@@ -53,8 +53,9 @@ def get_model(X, Y, VARS, features, args, param, N_class=2):
 
     gdata = {}
     gdata['trn'] = graphio.parse_graph_data(X=X[0:1], Y=Y[0:1], VARS=VARS, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
+        CPU_count=args['batch_train_param']['num_cpu'])
+    
     # =========================================================================
     # INITIALIZE GRAPH MODEL
 
@@ -167,8 +168,8 @@ def main():
 
     N_class = 2
     pdf,X,Y,VARS = compute_reweight(root_files=root_files, N_events=N_events, args=args, N_class=N_class)
-    
-    
+
+
     # =========================================================================
     ### Initialize all models
     model     = {}
@@ -267,9 +268,11 @@ def main():
 
                     gdata = {}
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, VARS=VARS, 
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
+                        CPU_count=args['batch_train_param']['num_cpu'])
                     gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, VARS=VARS,
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
+                        CPU_count=args['batch_train_param']['num_cpu'])
 
                 # =========================================================================
                 ### Train all model over this block of data
@@ -288,7 +291,7 @@ def main():
                         
                         print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}, local epoch: {local_epoch+1:03d}/{param[ID]['epochs']:03d}] "
                             f"train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
-                    
+                        
                     ## Save
                     args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
                     checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
@@ -296,8 +299,8 @@ def main():
 
     print(__name__ + f' [Done!]')
 
-            
+        
 if __name__ == '__main__' :
 
-   main()
+    main()
 
