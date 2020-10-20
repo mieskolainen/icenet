@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 100000                # Maximum total number of events (per root file) to process
+MAXEVENTS: 1500000                # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
@@ -61,7 +61,7 @@ reweight_param:
 
   maxevents: 1000000           # Maximum number of events for the PDF construction
 
-  reference_class: 0           # Reference class: -1 = (turned off), 0 = (background), 1 = (signal), 
+  reference_class: 1           # Reference class: -1 = (turned off), 0 = (background), 1 = (signal), 
   # Note about asymmetry: Keep the reference class as 0 == background, because signal
   # MC has much longer tail over pt. Thus, it is not possible to re-weight background
   # to signal very easily, but it is possible to re-weight signal to background.
@@ -110,13 +110,13 @@ plot_param:
 active_models:
 
 #  - dmlp
-  - cnn0
+#  - cnn0
 #  - gnet0
 #  - gnet1
 #  - gnet3
 #  - gnet2
 #  - flr0
-#  - xgb0
+  - xgb0
 #  - lgr0
 #  - xtx0
 #  - dmx0

@@ -9,6 +9,10 @@ KINEMATIC_ID = [
   'trk_phi'
 ]
 
+UNIT_TEST_ID = [
+  'trk_pt',
+  'trk_eta'
+]
 
 CMSSW_MVA_ID = [
   'gsf_bdtout1',

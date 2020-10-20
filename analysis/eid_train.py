@@ -112,7 +112,7 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
 
     # @@ Tensor normalization @@
     if args['image_on'] and (args['varnorm_tensor'] == 'zscore'):
-        
+            
         print('\nZ-score normalizing tensor variables ...')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_tensor['trn'])
         for key in ['trn', 'val']:
@@ -193,7 +193,7 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
             train.train_dmlp(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
         
         elif param['train'] == 'lgr':
-            train.train_lgr(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
+            train.train_lgr(X_trn=X_trn,  Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
                 
         elif param['train'] == 'dmax':
             train.train_dmax(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
