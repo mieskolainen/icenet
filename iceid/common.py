@@ -302,14 +302,14 @@ def compute_reweights(data, args, N_class=2, EPS=1e-12):
     RV = {}
     RV['pt']  = data.trn.x[:,data.VARS.index('trk_pt')].astype(np.float)
     RV['eta'] = data.trn.x[:,data.VARS.index('trk_eta')].astype(np.float)
-    
-    
+
+
     ### Pre-transform
     for var in ['pt', 'eta']:
         mode = args['reweight_param'][f'transform_{var}']
 
         if   mode == 'log10':
-            RV[var] = np.log(RV[var] + EPS)
+            RV[var] = np.log10(RV[var] + EPS)
 
             # Bins
             args['reweight_param'][f'bins_{var}'][0] = np.log10(args['reweight_param'][f'bins_{var}'][0] + EPS)
