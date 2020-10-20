@@ -302,18 +302,18 @@ def compute_reweights(data, args, N_class=2, EPS=1e-12):
     RV = {}
     RV['pt']  = data.trn.x[:,data.VARS.index('trk_pt')].astype(np.float)
     RV['eta'] = data.trn.x[:,data.VARS.index('trk_eta')].astype(np.float)
-
-
+    
+    
     ### Pre-transform
     for var in ['pt', 'eta']:
         mode = args['reweight_param'][f'transform_{var}']
 
-        if   mode == 'log':
+        if   mode == 'log10':
             RV[var] = np.log(RV[var] + EPS)
 
             # Bins
-            args['reweight_param'][f'bins_{var}'][0] = np.log(args['reweight_param'][f'bins_{var}'][0] + EPS)
-            args['reweight_param'][f'bins_{var}'][1] = np.log(args['reweight_param'][f'bins_{var}'][1])
+            args['reweight_param'][f'bins_{var}'][0] = np.log10(args['reweight_param'][f'bins_{var}'][0] + EPS)
+            args['reweight_param'][f'bins_{var}'][1] = np.log10(args['reweight_param'][f'bins_{var}'][1])
 
         elif mode == 'sqrt':
             RV[var] = np.sqrt(RV[var])
@@ -347,7 +347,7 @@ def compute_reweights(data, args, N_class=2, EPS=1e-12):
             binedges[var] = np.logspace(
                                  np.log10(np.max([args['reweight_param'][f'bins_{var}'][0], EPS])),
                                  np.log10(args['reweight_param'][f'bins_{var}'][1]),
-                                 args['reweight_param'][f'bins_{var}'][2])
+                                 args['reweight_param'][f'bins_{var}'][2], base=10)
         else:
             raise Except(__name__ + ': Unknown re-weight binning mode ')
 
