@@ -289,7 +289,7 @@ def init(MAXEVENTS=None):
     return data, args, features
 
 
-def compute_reweights(data, args):
+def compute_reweights(data, args, N_class=2, EPS=1e-12):
     """ Compute (eta,pt) reweighting coefficients.
     Args:
         data    : training data object
@@ -298,34 +298,77 @@ def compute_reweights(data, args):
         weights : array of re-weights
     """
 
-    # Re-weighting variables
-    PT           = data.trn.x[:,data.VARS.index('trk_pt')]
-    ETA          = data.trn.x[:,data.VARS.index('trk_eta')]
-    pt_binedges  = np.linspace(
-                         args['reweight_param']['bins_pt'][0],
-                         args['reweight_param']['bins_pt'][1],
-                         args['reweight_param']['bins_pt'][2])
-    eta_binedges = np.linspace(
-                         args['reweight_param']['bins_eta'][0],
-                         args['reweight_param']['bins_eta'][1],
-                         args['reweight_param']['bins_eta'][2])
+    ### Re-weighting variables
+    RV = {}
+    RV['pt']  = data.trn.x[:,data.VARS.index('trk_pt')].astype(np.float)
+    RV['eta'] = data.trn.x[:,data.VARS.index('trk_eta')].astype(np.float)
+
+
+    ### Pre-transform
+    for var in ['pt', 'eta']:
+        mode = args['reweight_param'][f'transform_{var}']
+
+        if   mode == 'log':
+            RV[var] = np.log(RV[var] + EPS)
+
+            # Bins
+            args['reweight_param'][f'bins_{var}'][0] = np.log(args['reweight_param'][f'bins_{var}'][0] + EPS)
+            args['reweight_param'][f'bins_{var}'][1] = np.log(args['reweight_param'][f'bins_{var}'][1])
+
+        elif mode == 'sqrt':
+            RV[var] = np.sqrt(RV[var])
+
+            # Bins
+            args['reweight_param'][f'bins_{var}'][0] = np.sqrt(args['reweight_param'][f'bins_{var}'][0])
+            args['reweight_param'][f'bins_{var}'][1] = np.sqrt(args['reweight_param'][f'bins_{var}'][1])
+
+        elif mode == 'square':
+            RV[var] = RV[var]**2
+
+            # Bins
+            args['reweight_param'][f'bins_{var}'][0] = (args['reweight_param'][f'bins_{var}'][0])**2
+            args['reweight_param'][f'bins_{var}'][1] = (args['reweight_param'][f'bins_{var}'][1])**2
+
+        elif mode == None:
+            True
+        else:
+            raise Except(__name__ + '.compute_reweights: Unknown pre-transform')
+
+    # Binning setup
+    binedges = {}
+    for var in ['pt', 'eta']:
+        if   args['reweight_param'][f'binmode_{var}'] == 'linear':
+            binedges[var] = np.linspace(
+                                 args['reweight_param'][f'bins_{var}'][0],
+                                 args['reweight_param'][f'bins_{var}'][1],
+                                 args['reweight_param'][f'bins_{var}'][2])
+
+        elif args['reweight_param'][f'binmode_{var}'] == 'log':
+            binedges[var] = np.logspace(
+                                 np.log10(np.max([args['reweight_param'][f'bins_{var}'][0], EPS])),
+                                 np.log10(args['reweight_param'][f'bins_{var}'][1]),
+                                 args['reweight_param'][f'bins_{var}'][2])
+        else:
+            raise Except(__name__ + ': Unknown re-weight binning mode ')
 
     print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
 
-    ### Compute 2D-pdfs for each class
-    N_class = 2
+
+    ### Compute 2D-PDFs for each class
     pdf     = {}
     for c in range(N_class):
-        pdf[c] = aux.pdf_2D_hist(X_A=PT[data.trn.y==c], X_B=ETA[data.trn.y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
+        pdf[c] = aux.pdf_2D_hist(X_A=RV['pt'][data.trn.y==c], X_B=RV['eta'][data.trn.y==c],
+                                    binedges_A=binedges['pt'], binedges_B=binedges['eta'])
 
-    pdf['binedges_A'] = pt_binedges
-    pdf['binedges_B'] = eta_binedges
+    pdf['binedges_A'] = binedges['pt']
+    pdf['binedges_B'] = binedges['eta']
+
 
     # Compute event-by-event weights
     if args['reweight_param']['reference_class'] != -1:
         
         trn_weights = aux.reweightcoeff2D(
-            X_A = PT, X_B = ETA, pdf = pdf, y = data.trn.y, N_class=N_class,
+            X_A = RV['pt'], X_B = RV['eta'], pdf = pdf, y = data.trn.y, N_class=N_class,
             equal_frac       = args['reweight_param']['equal_frac'],
             reference_class  = args['reweight_param']['reference_class'],
             max_reg          = args['reweight_param']['max_reg'])
@@ -343,9 +386,9 @@ def compute_reweights(data, args):
         frac[c] = np.sum(data.trn.y == c)
         sums[c] = np.sum(trn_weights[data.trn.y == c])
     
-    print(__name__ + f'.compute_reweights: sum(trn.y==c): {frac}')
-    print(__name__ + f'.compute_reweights: sum(trn_weights[trn.y==c]): {sums}')
-    print(__name__ + f'.compute_reweights: [done]\n')
+    print(__name__ + f'.compute_reweights: sum[trn.y==c]: {frac}')
+    print(__name__ + f'.compute_reweights: sum[trn_weights[trn.y==c]]: {sums}')
+    print(__name__ + f'.compute_reweights: [done] \n')
     
     return trn_weights
 
@@ -360,56 +403,9 @@ def compute_reweights_XY(X, Y, VARS, args):
         weights : array of re-weights
     """
 
-    # Re-weighting variables
-    PT           = X[:, VARS.index('trk_pt')]
-    ETA          = X[:, VARS.index('trk_eta')]
-    pt_binedges  = np.linspace(
-                         args['reweight_param']['bins_pt'][0],
-                         args['reweight_param']['bins_pt'][1],
-                         args['reweight_param']['bins_pt'][2])
-    eta_binedges = np.linspace(
-                         args['reweight_param']['bins_eta'][0],
-                         args['reweight_param']['bins_eta'][1],
-                         args['reweight_param']['bins_eta'][2])
-
-    print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
-
-    ### Compute 2D-pdfs for each class
-    N_class = 2
-    pdf     = {}
-    for c in range(N_class):
-        pdf[c] = aux.pdf_2D_hist(X_A=PT[Y==c], X_B=ETA[Y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
-
-    pdf['binedges_A'] = pt_binedges
-    pdf['binedges_B'] = eta_binedges
-
-    # Compute event-by-event weights
-    if args['reweight_param']['reference_class'] != -1:
-        
-        trn_weights = aux.reweightcoeff2D(
-            X_A = PT, X_B = ETA, pdf = pdf, y = Y, N_class=N_class,
-            equal_frac       = args['reweight_param']['equal_frac'],
-            reference_class  = args['reweight_param']['reference_class'],
-            max_reg          = args['reweight_param']['max_reg'])
-    else:
-        # No re-weighting
-        weights_doublet = np.zeros((X.shape[0], N_class))
-        for c in range(N_class):
-            weights_doublet[Y == c, c] = 1
-        trn_weights = np.sum(weights_doublet, axis=1)
-
-    # Compute the sum of weights per class for the output print
-    frac = np.zeros(N_class)
-    sums = np.zeros(N_class)
-    for c in range(N_class):
-        frac[c] = np.sum(Y == c)
-        sums[c] = np.sum(trn_weights[Y == c])
+    # ...
     
-    print(__name__ + f'.compute_reweights: sum(Y==c): {frac}')
-    print(__name__ + f'.compute_reweights: sum(trn_weights[Y==c]): {sums}')
-    print(__name__ + f'.compute_reweights: [done]\n')
-    
-    return trn_weights
+    return True
 
 
 def splitfactor(data, args):
