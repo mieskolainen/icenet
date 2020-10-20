@@ -239,6 +239,22 @@
 <dl class="py function">
 <dt id="iceid.common.compute_reweights">
 <code class="sig-name descname">compute_reweights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#compute_reweights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.common.compute_reweights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute (eta,pt) reweighting coefficients.
+:param data: training data object
+:param args: arguments object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>array of re-weights</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>weights</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceid.common.compute_reweights_XY">
+<code class="sig-name descname">compute_reweights_XY</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#compute_reweights_XY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.common.compute_reweights_XY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute (eta,pt) reweighting coefficients.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -274,6 +290,25 @@
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt id="iceid.common.init_multiprocess">
+<code class="sig-name descname">init_multiprocess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">MAXEVENTS</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#init_multiprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.common.init_multiprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize electron ID data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>commandline and yaml file input.</strong> (<em>Implicit</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>jagged array data, arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceid.common.load_root_file_multiprocess">
+<code class="sig-name descname">load_root_file_multiprocess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">procnumber</span></em>, <em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">return_dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#load_root_file_multiprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.common.load_root_file_multiprocess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt id="iceid.common.load_root_file_new">
@@ -344,13 +379,13 @@ kinematic data</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="iceid.graphio.innerwrap">
-<code class="sig-name descname">innerwrap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">block_ind</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#innerwrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.innerwrap" title="Permalink to this definition">¶</a></dt>
+<dt id="iceid.graphio.graph2torch">
+<code class="sig-name descname">graph2torch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#graph2torch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.graph2torch" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="iceid.graphio.parse_graph_data">
-<code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_on</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">coord</span><span class="o">=</span><span class="default_value">'ptetaphim'</span></em>, <em class="sig-param"><span class="n">CPU_count</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse_graph_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_on</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">coord</span><span class="o">=</span><span class="default_value">'ptetaphim'</span></em>, <em class="sig-param"><span class="n">EPS</span><span class="o">=</span><span class="default_value">1e-12</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jagged array data into pytorch-geometric style Data format array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -362,11 +397,48 @@ kinematic data</p>
 <li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
 <li><p><strong>global_on</strong> – Global features on / off</p></li>
 <li><p><strong>coord</strong> – Coordinates used for nodes (‘ptetaphim’, ‘pxpypze’)</p></li>
-<li><p><strong>CPU_count</strong> – Number of CPU processes used. If None, set it automatically (might overflow RAM)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Array of pytorch-geometric Data objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceid.graphio.parse_graph_data_np">
+<code class="sig-name descname">parse_graph_data_np</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">W</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_on</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">coord</span><span class="o">=</span><span class="default_value">'ptetaphim'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data_np"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data_np" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Jagged array of variables</p></li>
+<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>features</strong> – Array of active scalar feature strings</p></li>
+<li><p><strong>Y</strong> – Target class  array (if any, typically MC only)</p></li>
+<li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
+<li><p><strong>global_on</strong> – Global features on / off</p></li>
+<li><p><strong>coord</strong> – Coordinates used for nodes (‘ptetaphim’, ‘pxpypze’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of pytorch-geometric Data objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="iceid.graphio.parse_tensor_data">
+<code class="sig-name descname">parse_tensor_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">VARS</span></em>, <em class="sig-param"><span class="n">image_vars</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_tensor_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iceid.graphio.parse_tensor_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Jagged array of variables</p></li>
+<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>args</strong> – Arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tensor of pytorch-geometric Data objects</p>
 </dd>
 </dl>
 </dd></dl>
