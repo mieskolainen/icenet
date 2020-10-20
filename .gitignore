@@ -4,6 +4,7 @@
 *.profile
 *.hd5
 *.pkl
+*.zip
 tensorboard/
 data/
 trash/
