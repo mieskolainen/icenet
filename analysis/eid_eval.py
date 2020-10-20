@@ -55,9 +55,10 @@ def main() :
     data, args, features = common.init()
 
     data_graph = {}
-    data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS,
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-    
+    if args['graph_on']:
+        data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, VARS=data.VARS,
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+        
     
     #########################################################
     varname = 'ele_mva_value_depth15'
@@ -120,8 +121,10 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
     X        = data.tst.x
     y        = data.tst.y
     X_kin    = data_kin.tst.x
-    X_2D     = data_tensor['tst']
-    X_graph  = data_graph['tst']
+    if args['image_on']:
+        X_2D     = data_tensor['tst']
+    if args['graph_on']:
+        X_graph  = data_graph['tst']
 
     VARS_kin = data_kin.VARS
     # --------------------------------------------------------------------
@@ -136,7 +139,7 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
     try:
 
         ### Tensor variable normalization
-        if args['varnorm_tensor'] == 'zscore':
+        if args['image_on'] and (args['varnorm_tensor'] == 'zscore'):
 
             print('\nZ-score normalizing tensor variables ...')
             X_mu_tensor, X_std_tensor = pickle.load(open(modeldir + '/zscore_tensor.dat', 'rb'))
@@ -161,7 +164,8 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
     # --------------------------------------------------------------------
     # For pytorch based
     X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
-    X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
+    if args['image_on']:
+        X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
 
     # Loop over active models

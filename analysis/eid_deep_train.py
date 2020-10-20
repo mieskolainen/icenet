@@ -47,14 +47,13 @@ from iceid import graphio
 
 
 def get_model(X, Y, VARS, features, args, param, N_class=2):
-
+    
     # ---------------------------------------------------------------
     # Read test graph data to get dimensions
 
     gdata = {}
     gdata['trn'] = graphio.parse_graph_data(X=X[0:1], Y=Y[0:1], VARS=VARS, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
-        CPU_count=args['batch_train_param']['num_cpu'])
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # =========================================================================
     # INITIALIZE GRAPH MODEL
@@ -168,8 +167,8 @@ def main():
 
     N_class = 2
     pdf,X,Y,VARS = compute_reweight(root_files=root_files, N_events=N_events, args=args, N_class=N_class)
-
-
+    
+    
     # =========================================================================
     ### Initialize all models
     model     = {}
@@ -268,12 +267,10 @@ def main():
 
                     gdata = {}
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, VARS=VARS, 
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
-                        CPU_count=args['batch_train_param']['num_cpu'])
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
                     gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, VARS=VARS,
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'],
-                        CPU_count=args['batch_train_param']['num_cpu'])
-
+                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                
                 # =========================================================================
                 ### Train all model over this block of data
                 for ID in model.keys():

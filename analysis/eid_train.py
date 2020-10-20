@@ -50,12 +50,13 @@ def main() :
     ### Get input
     data, args, features = common.init()
 
+
     ### Print ranges
     #prints.print_variables(X=data.trn.x, VARS=data.VARS)
     
     ### Compute reweighting weights
     trn_weights = common.compute_reweights(data=data, args=args)
-    
+        
 
     ### Plot some kinematic variables
     targetdir = f'./figs/eid/{args["config"]}/reweight/1D_kinematic/'
@@ -68,10 +69,11 @@ def main() :
 
     ### Parse data into graphs
     graph = {}
-    graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-    graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS,
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    if args['graph_on']:
+        graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, 
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+        graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, VARS=data.VARS,
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
 
     ### Plot variables
@@ -109,7 +111,7 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
     print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
 
     # @@ Tensor normalization @@
-    if args['varnorm_tensor'] == 'zscore':
+    if args['image_on'] and (args['varnorm_tensor'] == 'zscore'):
         
         print('\nZ-score normalizing tensor variables ...')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_tensor['trn'])

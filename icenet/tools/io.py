@@ -13,7 +13,8 @@ import psutil
 import subprocess
 
 import sys
-from termcolor import colored
+
+from termcolor import colored, cprint
 
 from sklearn.impute import KNNImputer
 from sklearn.impute import SimpleImputer
@@ -21,6 +22,10 @@ from sklearn.impute import SimpleImputer
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
+
+def showmem(color='red'):
+    cprint(__name__ + f""".load_root_file: Process RAM usage: {process_memory_use():0.2f} GB 
+        [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
 
 
 def get_gpu_memory_map():

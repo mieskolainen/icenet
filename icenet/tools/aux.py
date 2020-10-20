@@ -87,7 +87,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
     return ind
 
 
-def count_targets(events, names, entrystart=0, entrystop=None):
+def count_targets(events, names, entrystart=0, entrystop=None, new=False):
     """ Targets statistics printout
 
     Args:
@@ -100,10 +100,14 @@ def count_targets(events, names, entrystart=0, entrystop=None):
         Printout on stdout
     """
     K   = len(names)
-    vec = events.arrays(names, library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
-    vec = np.asarray(vec).T
+    if new:
+        vec = events.arrays(names, library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        vec = np.asarray(vec)
+    else:
+        vec = np.array([events.array(name, entrystart=entrystart, entrystop=entrystop) for name in names])
+    vec = vec.T
     
-    print(__name__ + f'count_targets: vec.shape = {vec.shape}')
+    print(__name__ + f'.count_targets: vec.shape = {vec.shape}')
 
     intmat = binaryvec2int(vec)
     BMAT   = generatebinary(K)

@@ -5,36 +5,88 @@
 
 import numpy as np
 import numba
-from tqdm import tqdm
+from   tqdm import tqdm
 import copy
 import pickle
 import os
 import uuid
 
+from termcolor import colored, cprint
+
 import torch
-from torch_geometric.data import Data
-import multiprocessing
+from   torch_geometric.data import Data
 
 import uproot_methods
+import multiprocessing
+from   torch.utils.data import dataloader
+from   torch.multiprocessing import reductions
+from   multiprocessing.reduction import ForkingPickler
+
 import icenet.algo.analytic as analytic
-
-from icenet.tools import aux
-
-
-from torch.utils.data import dataloader
-from torch.multiprocessing import reductions
-from multiprocessing.reduction import ForkingPickler
-
-default_collate_func = dataloader.default_collate
+from   icenet.tools import aux
 
 
+# Torch conversion
+def graph2torch(X):
 
-data = []
+    # Turn into torch geometric Data object
+    Y = np.zeros(len(X), dtype=object)
+    for i in range(len(X)):
 
-def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim', CPU_count=None):
+        d = X[i]
+        Y[i] = Data(x=torch.tensor(d['x'], dtype=torch.float),
+                    edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
+                    edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
+                    y=torch.tensor(d['y'], dtype=torch.long),
+                    w=torch.tensor(d['w'], dtype=torch.float),
+                    u=torch.tensor(d['u'], dtype=torch.float))
+    return Y
+
+
+def parse_tensor_data(X, VARS, image_vars, args):
     """
-    Jagged array data into pytorch-geometric style Data format array.
+    Args:
+        X     :  Jagged array of variables
+        VARS  :  Variable names as an array of strings
+        args  :  Arguments
     
+    Returns:
+        Tensor of pytorch-geometric Data objects
+    """
+
+    newind  = np.where(np.isin(VARS, image_vars))
+    newind  = np.array(newind).flatten()
+    newvars = []
+    for i in newind :
+        newvars.append(VARS[i])
+
+    # Pick image data
+    X_image = X[:, newind]
+
+    # Use single channel tensors
+    if   args['image_param']['channels'] == 1:
+        xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+
+    # Use multichannel tensors
+    elif args['image_param']['channels'] == 2:
+        xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
+               ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
+    else:
+        raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
+
+    eta_binedges = args['image_param']['eta_bins']
+    phi_binedges = args['image_param']['phi_bins']    
+
+    # Pick tensor data out
+    cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
+    tensor = aux.jagged2tensor(X=X_image, VARS=newvars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+
+    return tensor
+
+
+def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim'):
+
+    """
     Args:
         X         :  Jagged array of variables
         VARS      :  Variable names as an array of strings
@@ -47,78 +99,6 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
     Returns:
         Array of pytorch-geometric Data objects
     """
-    
-    os.makedirs("./tmp", exist_ok = True)
-    
-    if CPU_count is None:
-        CPU_count = int(np.ceil(multiprocessing.cpu_count()/2))
-
-    # Compute indices
-    N_events  = X.shape[0]
-    print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs with {CPU_count} CPU processes ...')
-
-    if N_events <= 256:
-        CPU_count = 1
-
-    # Get indices per thread
-    block_ind = aux.split_start_end(range(N_events), CPU_count)
-    print(block_ind)
-
-    global data
-    data = {
-        'X'         : X,
-        'VARS'      : VARS,
-        'features'  : features,
-        'Y'         : Y,
-        'W'         : W,
-        'global_on' : global_on,
-        'coord'     : coord,
-        'UUID'      : uuid.uuid1()
-    }
-
-    # Parallel processing (crashes with torch outputs, so use numpy only!)
-    pool   = multiprocessing.Pool(CPU_count)
-    output = pool.map(innerwrap, block_ind)
-
-    # Fuse results from the processes
-    result = []
-    for i in range(CPU_count):
-
-        with open(f"./tmp/graph-dump_{block_ind[i][0]}_{block_ind[i][1]}_{data['UUID']}.pkl", 'rb') as handle:
-            dataset = pickle.load(handle)
-
-        # Turn into torch geometric Data object
-        dd = []
-        for e in range(len(dataset)):
-
-            d = dataset[e]
-            dd.append( Data(x=torch.tensor(d['x'], dtype=torch.float),
-                            edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
-                            edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
-                            y=torch.tensor(d['y'], dtype=torch.long),
-                            w=torch.tensor(d['w'], dtype=torch.float),
-                            u=torch.tensor(d['u'], dtype=torch.float)))
-
-        result = result + dd
-
-    # Remove tmp files
-    for i in range(CPU_count):
-        os.system(f"rm ./tmp/graph-dump_{block_ind[i][0]}_{block_ind[i][1]}_{data['UUID']}.pkl")
-
-    return result
-
-
-def innerwrap(block_ind, EPS=1e-12):
-
-    global data
-
-    X         = data['X']
-    VARS      = data['VARS']
-    features  = data['features']
-    Y         = data['Y']
-    W         = data['W']
-    global_on = data['global_on']
-    coord     = data['coord']
 
     # -------------------------------------------
 
@@ -147,7 +127,7 @@ def innerwrap(block_ind, EPS=1e-12):
 
 
     # Loop over events
-    for e in tqdm(range(block_ind[0], block_ind[1]+1)): # Note +1
+    for e in tqdm(range(N_events)):
 
         num_nodes = 1 + len(X[e, ind__image_clu_eta]) # +1 virtual node
         num_edges = num_nodes**2 # include self-connections
@@ -198,14 +178,113 @@ def innerwrap(block_ind, EPS=1e-12):
             u = np.zeros(len(u))
             ###u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
 
+        # Pure dictionary
         dataset.append({'x':x, 'edge_index':edge_index, 'edge_attr':edge_attr, 'y':y, 'w':w, 'u':u})
         #dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
 
-    # Save to disk
-    with open(f"./tmp/graph-dump_{block_ind[0]}_{block_ind[1]}_{data['UUID']}.pkl", 'wb') as handle:
-        pickle.dump(dataset, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return dataset
 
-    return True
+
+def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
+    """
+    Jagged array data into pytorch-geometric style Data format array.
+    
+    Args:
+        X         :  Jagged array of variables
+        VARS      :  Variable names as an array of strings
+        features  :  Array of active scalar feature strings
+        Y         :  Target class  array (if any, typically MC only)
+        W         :  (Re-)weighting array (if any, typically MC only)
+        global_on :  Global features on / off
+        coord     :  Coordinates used for nodes ('ptetaphim', 'pxpypze')
+        
+    Returns:
+        Array of pytorch-geometric Data objects
+    """
+
+    num_node_features = 6
+    num_edge_features = 4
+    num_classes       = 2
+
+    N_events = X.shape[0]
+    dataset  = []
+
+    print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
+    zerovec = uproot_methods.TLorentzVector(0,0,0,0)
+
+    # Collect feature indices
+    feature_ind = np.zeros(len(features), dtype=np.int32)
+    for i in range(len(features)):
+        feature_ind[i] = VARS.index(features[i])
+
+
+    # Collect indices
+    ind__trk_pt        = VARS.index('trk_pt')
+    ind__trk_eta       = VARS.index('trk_eta')
+    ind__trk_phi       = VARS.index('trk_phi')
+
+    ind__image_clu_e   = VARS.index('image_clu_e')
+    ind__image_clu_eta = VARS.index('image_clu_eta')
+    ind__image_clu_phi = VARS.index('image_clu_phi')
+
+
+    # Loop over events
+    for e in tqdm(range(N_events)):
+
+        num_nodes = 1 + len(X[e, ind__image_clu_eta]) # + 1 virtual node
+        num_edges = num_nodes**2 # include self-connections
+        
+        # Construct 4-vector for the track, with pion mass
+        p4track = \
+            uproot_methods.TLorentzVector.from_ptetaphim(
+                X[e, ind__trk_pt], X[e, ind__trk_eta], X[e, ind__trk_phi], 0.13957)
+
+        # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
+        p4vec = []
+        if len(X[e, ind__image_clu_e]) > 0:
+            pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta]) # Massless approx.
+            p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
+                pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
+
+
+        # ====================================================================
+        # CONSTRUCT TENSORS
+
+        # Construct output class, note [] is important to have for right dimensions
+        if Y is not None:
+            y = torch.tensor([Y[e]], dtype=torch.long)
+        else:
+            y = torch.tensor([0], dtype=torch.long)
+
+        # Training weights, note [] is important to have for right dimensions
+        if W is not None:
+            w = torch.tensor([W[e]], dtype=torch.float)
+        else:
+            w = torch.tensor([1.0], dtype=torch.float)
+
+        ## Construct global feature vector
+        u = torch.tensor(X[e, feature_ind].tolist(), dtype=torch.float)
+        
+        ## Construct node features
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = torch.tensor(x, dtype=torch.float)
+
+        ## Construct edge features
+        edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
+
+        ## Construct edge connectivity
+        edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
+        edge_index = torch.tensor(edge_index, dtype=torch.long)
+
+
+        # Add this event
+        if global_on == False: # Null the global features
+            u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
+
+        dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
+
+    return dataset
 
 
 

@@ -6,10 +6,10 @@
 
 CONFIG="tune0_dev"
 
-#DATAPATH="/home/user/imperial_trees/2019sep13"
+DATAPATH="/home/user/imperial_trees/2019sep13"
 #DATAPATH="/home/user/imperial_new_trees"
 #DATAPATH="/home/user/imperial_old_trees"
-DATAPATH="/vols/cms/icenet/data/2020Oct16/"
+#DATAPATH="/vols/cms/icenet/data/2020Oct16/"
 
 
 # Use * or other glob wildcards for filenames

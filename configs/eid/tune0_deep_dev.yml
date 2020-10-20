@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 1000000              # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000              # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
@@ -113,8 +113,8 @@ active_models:
 #  - cnn0
   - gnet0
   - gnet1
-#  - gnet3
   - gnet2
+  - gnet3
 #  - flr0
 #  - xgb0
 #  - lgr0
@@ -259,7 +259,7 @@ gnet1_param:
   step_size: 200
   gamma: 0.1
 
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
 # Graph net
@@ -277,7 +277,7 @@ gnet2_param:
   epochs: 50
   batch_size: 64
   learning_rate: 0.003
-  weight_decay:  0.00005      # L2-regularization
+  weight_decay:  0.00005     # L2-regularization
 
   # Scheduler
   step_size: 200
