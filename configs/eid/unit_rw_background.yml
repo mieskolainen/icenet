@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 150000              # Maximum total number of events (per root file) to process
+MAXEVENTS: 15000000             # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
@@ -76,7 +76,7 @@ reweight_param:
   binmode_eta: 'linear'
   
   # ! Variable, and binning min/max boundaries are both transformed !
-  transform_pt:  'log10'         # 'log10', 'sqrt', 'square', 'null'
+  transform_pt: 'log10'        # 'log10', 'sqrt', 'square', 'null'
   transform_eta: null
   
   max_reg: 200.0               # Maximum weight cut-off regularization
