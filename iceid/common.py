@@ -349,8 +349,8 @@ def compute_reweights(data, args, N_class=2, EPS=1e-12):
                                  np.log10(args['reweight_param'][f'bins_{var}'][1]),
                                  args['reweight_param'][f'bins_{var}'][2], base=10)
         else:
-            raise Except(__name__ + ': Unknown re-weight binning mode ')
-
+            raise Except(__name__ + ': Unknown re-weight binning mode')
+    
     print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
 
 

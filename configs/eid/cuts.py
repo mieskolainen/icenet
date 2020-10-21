@@ -27,6 +27,7 @@ def cut_standard(X, VARS, xcorr_flow=False):
     #MINPT  = 0.5
     #MAXETA = 2.4
     MINPT  = 0.7
+    MAXPT  = 10
     MAXETA = 1.5
     
     
@@ -40,6 +41,9 @@ def cut_standard(X, VARS, xcorr_flow=False):
     #
     cuts.append( X[:,VARS.index('gsf_pt')] > MINPT )
     names.append(f'gsf_pt > {MINPT:0.2f}')
+    #
+    cuts.append( X[:,VARS.index('gsf_pt')] < MAXPT )
+    names.append(f'gsf_pt < {MAXPT:0.2f}')
     #
     cuts.append( np.abs(X[:,VARS.index('trk_eta')]) < MAXETA )
     names.append(f'|gsf_eta| < {MAXETA:0.2f}')
