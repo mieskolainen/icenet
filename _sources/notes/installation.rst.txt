@@ -11,7 +11,8 @@ Preliminaries: Conda installation
 .. code-block:: none
 
 	wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
-
+      
+Then add rights (chmod +x) and execute with 'source filename.sh'
 
 Fully automated setup
 ----------------------------------
