@@ -8,6 +8,7 @@ networkx
 braceexpand
 uproot
 uproot4
+uproot-methods
 awkward1
 tqdm>=4.31.1
 scikit-learn>=0.23.1
