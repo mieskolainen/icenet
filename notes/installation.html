@@ -262,8 +262,14 @@ pip install -r requirements-gpu-linux.txt
 </pre></div>
 </div>
 <p>Install cudnn if and only if not already provided by your system with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda install -c anaconda cudnn
+</pre></div>
+</div>
 <p>Lacking this may give error ‘ImportError: libcudnn.so.7: cannot open shared object file’</p>
 <p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export TMPDIR=&quot;somepath&quot;
+</pre></div>
+</div>
 <p>Then if something else fails, follow the instructions step-by-step below.</p>
 </div>
 <div class="section" id="conda-virtual-environment-setup">

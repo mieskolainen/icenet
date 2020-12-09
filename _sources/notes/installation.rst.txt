@@ -29,6 +29,7 @@ Fully automated setup
 Install cudnn if and only if not already provided by your system with
 
 .. code-block:: none
+
 	conda install -c anaconda cudnn
 
 Lacking this may give error 'ImportError: libcudnn.so.7: cannot open shared object file'
@@ -36,6 +37,7 @@ Lacking this may give error 'ImportError: libcudnn.so.7: cannot open shared obje
 Note: If you experience ´No space left on device´ problem with pip, set the temporary path
 
 .. code-block:: none
+
 	export TMPDIR="somepath"
 
 
