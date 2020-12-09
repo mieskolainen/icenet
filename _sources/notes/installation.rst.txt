@@ -28,7 +28,7 @@ Fully automated setup
 	pip install -r requirements-gpu-linux.txt
 
 Note: Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7".
-This can be installed inside icenet conda environment with
+This can be installed inside the conda environment with
 
 .. code-block:: none
 
