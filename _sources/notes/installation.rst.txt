@@ -10,7 +10,7 @@ Preliminaries: Conda installation
 -------------------
 .. code-block:: none
 
-	wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
+	wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
       
 Then add rights (chmod +x) and execute with './filename.sh'
 
@@ -20,7 +20,7 @@ Fully automated setup
 
 	git clone https://github.com/mieskolainen/icenet && cd icenet
 		
-	conda create -y --name icenet python==3.8.5
+	conda create -y --name icenet python==3.9.1
 	conda activate icenet
 	
 	# Pick CPU or GPU version (GPU version works for CPU too)	
@@ -91,8 +91,8 @@ Pytorch-geometric setup
 	# Pick CPU or GPU version below
 	
 	export CUDA=cpu
-	export CUDA=cu102 # (or cu92, cu101)
-
+	export CUDA=cu102 # (or cu92, cu101, cu110)
+	
 	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
