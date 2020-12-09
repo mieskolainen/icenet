@@ -17,6 +17,7 @@ Then add rights (chmod +x) and execute with './filename.sh'
 Fully automated setup
 ----------------------------------
 .. code-block:: none
+
 	git clone https://github.com/mieskolainen/icenet && cd icenet
 		
 	conda create -y --name icenet python==3.8.5
