@@ -271,9 +271,12 @@ This can be installed inside icenet conda environment with</p>
 </pre></div>
 </div>
 <p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export TMPDIR=&quot;somepath&quot;
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir $HOME/tmp
+export TMPDIR=$HOME/tmp
 </pre></div>
 </div>
+<p>Note: If you experience ´Requirements already satisfied´ infinite loop with pip, try manually
+censoring requirements.txt to isolate the dependency problem.</p>
 <p>Then if something else fails, follow the instructions step-by-step below.</p>
 </div>
 <div class="section" id="conda-virtual-environment-setup">

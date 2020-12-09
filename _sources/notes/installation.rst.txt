@@ -37,8 +37,12 @@ This can be installed inside icenet conda environment with
 Note: If you experience ´No space left on device´ problem with pip, set the temporary path
 
 .. code-block:: none
+	
+	mkdir $HOME/tmp
+	export TMPDIR=$HOME/tmp
 
-	export TMPDIR="somepath"
+Note: If you experience ´Requirements already satisfied´ infinite loop with pip, try manually
+censoring requirements.txt to isolate the dependency problem.
 
 Then if something else fails, follow the instructions step-by-step below.
 
