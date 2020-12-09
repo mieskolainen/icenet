@@ -25,7 +25,7 @@ Fully automated setup
 	pip install -r requirements-cpu-linux.txt
 	pip install -r requirements-gpu-linux.txt
 
-Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7: cannot open shared object file'.
+Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7".
 In that case, install these with
 
 .. code-block:: none
@@ -96,5 +96,27 @@ Pytorch-geometric setup
 	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 	pip install torch-geometric
+
+
+GPU-support commands
+---------------------
+
+Show the graphics card status
+
+.. code-block:: none
+	
+	nvidia-smi	
+
+Show Tensorflow and Pytorch GPU support in python
+
+.. code-block:: none
+	
+	import tensorflow
+	from tensorflow.python.client import device_lib
+	print(device_lib.list_local_devices())
+
+	import torch
+	torch.cuda.is_available()
+	print(torch.cuda.get_device_name(0))
 
 

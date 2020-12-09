@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#xgboost-setup">XGBoost setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pytorch-and-torchvision-setup">Pytorch and torchvision setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pytorch-geometric-setup">Pytorch-geometric setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-support-commands">GPU-support commands</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
@@ -242,6 +243,7 @@
 <li><p><a class="reference internal" href="#xgboost-setup" id="id4">XGBoost setup</a></p></li>
 <li><p><a class="reference internal" href="#pytorch-and-torchvision-setup" id="id5">Pytorch and torchvision setup</a></p></li>
 <li><p><a class="reference internal" href="#pytorch-geometric-setup" id="id6">Pytorch-geometric setup</a></p></li>
+<li><p><a class="reference internal" href="#gpu-support-commands" id="id7">GPU-support commands</a></p></li>
 </ul>
 </div>
 <div class="section" id="preliminaries-conda-installation">
@@ -261,7 +263,7 @@ pip install -r requirements-cpu-linux.txt
 pip install -r requirements-gpu-linux.txt
 </pre></div>
 </div>
-<p>Lacking cudnn (or cudatoolkit) may give an error such as: ‘ImportError: libcudnn.so.7: cannot open shared object file’.
+<p>Lacking cudnn (or cudatoolkit) may give an error such as: ‘ImportError: libcudnn.so.7”.
 In that case, install these with</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda install -c anaconda cudnn
 </pre></div>
@@ -320,6 +322,23 @@ pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torc
 pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
 pip install torch-geometric
+</pre></div>
+</div>
+</div>
+<div class="section" id="gpu-support-commands">
+<h2><a class="toc-backref" href="#id7">GPU-support commands</a><a class="headerlink" href="#gpu-support-commands" title="Permalink to this headline">¶</a></h2>
+<p>Show the graphics card status</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>nvidia-smi
+</pre></div>
+</div>
+<p>Show Tensorflow and Pytorch GPU support in python</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>import tensorflow
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+
+import torch
+torch.cuda.is_available()
+print(torch.cuda.get_device_name(0))
 </pre></div>
 </div>
 </div>
