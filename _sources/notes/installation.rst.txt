@@ -25,13 +25,18 @@ Fully automated setup
 	pip install -r requirements-cpu-linux.txt
 	pip install -r requirements-gpu-linux.txt
 
-	# Install this if and only if not already in your system
+Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7: cannot open shared object file'.
+In that case, install these with
+
+.. code-block:: none
+
 	conda install -c anaconda cudnn
 
-Installing cudnn will install also cudatoolkit. Lacking cudnn may give an error such as: 'ImportError: libcudnn.so.7: cannot open shared object file'
+Note: If you experience ´No space left on device´ problem with pip, set the temporary path with
 
-Note: If you experience ´No space left on device´ problem with pip, set the temporary path
-with: export TMPDIR="somepath"
+.. code-block:: none
+
+	export TMPDIR="somepath"
 
 Then if something else fails, follow the instructions step-by-step below.
 

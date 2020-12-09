@@ -259,14 +259,17 @@ conda activate icenet
 # Pick CPU or GPU version (GPU version works for CPU too)
 pip install -r requirements-cpu-linux.txt
 pip install -r requirements-gpu-linux.txt
-
-# Install this if and only if not already in your system
-conda install -c anaconda cudnn
 </pre></div>
 </div>
-<p>Installing cudnn will install also cudatoolkit. Lacking cudnn may give an error such as: ‘ImportError: libcudnn.so.7: cannot open shared object file’</p>
-<p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path
-with: export TMPDIR=”somepath”</p>
+<p>Lacking cudnn (or cudatoolkit) may give an error such as: ‘ImportError: libcudnn.so.7: cannot open shared object file’.
+In that case, install these with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda install -c anaconda cudnn
+</pre></div>
+</div>
+<p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export TMPDIR=&quot;somepath&quot;
+</pre></div>
+</div>
 <p>Then if something else fails, follow the instructions step-by-step below.</p>
 </div>
 <div class="section" id="conda-virtual-environment-setup">
