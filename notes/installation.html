@@ -275,8 +275,11 @@ This can be installed inside icenet conda environment with</p>
 export TMPDIR=$HOME/tmp
 </pre></div>
 </div>
-<p>Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try manually
-censoring requirements.txt to isolate the dependency problem.</p>
+<p>Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
+removing ´tensorflow´ from requirements.txt, and install it separately with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install tensorflow
+</pre></div>
+</div>
 <p>Then if something else fails, follow the instructions step-by-step below.</p>
 </div>
 <div class="section" id="conda-virtual-environment-setup">

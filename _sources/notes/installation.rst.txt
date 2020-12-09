@@ -41,8 +41,13 @@ Note: If you experience ´No space left on device´ problem with pip, set the te
 	mkdir $HOME/tmp
 	export TMPDIR=$HOME/tmp
 
-Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try manually
-censoring requirements.txt to isolate the dependency problem.
+Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
+removing ´tensorflow´ from requirements.txt, and install it separately with
+
+.. code-block:: none
+	
+	pip install tensorflow
+
 
 Then if something else fails, follow the instructions step-by-step below.
 
