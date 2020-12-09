@@ -41,7 +41,7 @@ Note: If you experience ´No space left on device´ problem with pip, set the te
 	mkdir $HOME/tmp
 	export TMPDIR=$HOME/tmp
 
-Note: If you experience ´Requirements already satisfied´ infinite loop with pip, try manually
+Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try manually
 censoring requirements.txt to isolate the dependency problem.
 
 Then if something else fails, follow the instructions step-by-step below.
