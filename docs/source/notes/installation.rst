@@ -17,7 +17,7 @@ Then add rights (chmod +x) and execute with './filename.sh'
 Fully automated setup
 ----------------------------------
 .. code-block:: none
-	
+
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
@@ -26,11 +26,12 @@ Fully automated setup
 	pip install -r requirements-gpu-linux.txt
 
 
-Install cudatoolkit if and only if not already provided by your system
+Install cudnn if and only if not already provided by your system with
 
 .. code-block:: none
-	conda install cudatoolkit=10.2
+	conda install -c anaconda cudnn
 
+Lacking this may give error 'ImportError: libcudnn.so.7: cannot open shared object file'
 
 Note: If you experience ´No space left on device´ problem with pip, set the temporary path
 
