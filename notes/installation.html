@@ -255,20 +255,12 @@
 </div>
 <div class="section" id="fully-automated-setup">
 <h2><a class="toc-backref" href="#id2">Fully automated setup</a><a class="headerlink" href="#fully-automated-setup" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.8.5
-conda activate icenet
-
-# Pick CPU or GPU version (GPU version works for CPU too)
-pip install -r requirements-cpu-linux.txt
-pip install -r requirements-gpu-linux.txt
-</pre></div>
-</div>
 <p>Note: Lacking cudnn (or cudatoolkit) may give an error such as: ‘ImportError: libcudnn.so.7”.
 This can be solved with</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda install -c anaconda cudnn
 </pre></div>
 </div>
-<p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path with</p>
+<p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export TMPDIR=&quot;somepath&quot;
 </pre></div>
 </div>
