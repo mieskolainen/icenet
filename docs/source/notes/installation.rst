@@ -42,7 +42,7 @@ Note: If you experience ´No space left on device´ problem with pip, set the te
 	export TMPDIR=$HOME/tmp
 
 Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
-removing ´tensorflow´ from requirements.txt, and install it separately with
+removing e.g. ´tensorflow´ from requirements.txt, and install it separately with
 
 .. code-block:: none
 	
@@ -56,7 +56,7 @@ Conda virtual environment setup
 --------------------------------
 .. code-block:: none
 
-	conda create -y --name icenet python==3.8.5
+	conda create -y --name icenet python==3.9.1
 	conda activate icenet
 	conda install -c conda-forge --file requirements.txt
 	
