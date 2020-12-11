@@ -179,7 +179,13 @@ def test_ratios():
 
 		print(f'Poisson ratio uncertainty CI68: {ppois68}')
 		print(f'Poisson ratio uncertainty CI95: {ppois95}')
-
+		
+		# Systematic residual from target ratio = 1 at CI95 level
+		covers = lambda n,a,b : (n - a)*(n - b) <= 0
+		res = 0 if covers(1, ppois95[0], ppois95[1]) else np.min(np.abs(ppois95 - 1))
+		print(f'Systematic residual: {res:0.2f}')
+		
+		
 		# Single sample Poisson tail integral
 		ppois = poisson_tail(k1=k_pre[i], k2=k_obs[i])
 		print(f'Poisson tail p = {ppois:0.3E} ({p2zscore(ppois):0.2f} sigmas)')
