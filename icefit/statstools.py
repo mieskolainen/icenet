@@ -27,7 +27,7 @@ def prodratio_eprop(A, B, sigmaA, sigmaB, sigmaAB=0, mode='ratio'):
 	return np.sqrt((A/B)**2*((sigmaA/A)**2 + (sigmaB/B)**2 + sign*2*sigmaAB/(A*B)))
 
 
-def Welch_ttest(X1, X2, s1, s2, n1, n2):
+def welch_ttest(X1, X2, s1, s2, n1, n2):
 	"""
 	Welch's two sample t-test for normally distributed variables.
 	https://en.wikipedia.org/wiki/Welch%27s_t-test
