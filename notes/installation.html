@@ -30,7 +30,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -257,7 +256,7 @@
 <h2><a class="toc-backref" href="#id2">Fully automated setup</a><a class="headerlink" href="#fully-automated-setup" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/mieskolainen/icenet &amp;&amp; cd icenet
 
-conda create -y --name icenet python==3.9.1
+conda create -y --name icenet python==3.8.5
 conda activate icenet
 
 # Pick CPU or GPU version (GPU version works for CPU too)
@@ -284,7 +283,7 @@ removing e.g. ´tensorflow´ from requirements.txt, and install it separately wi
 </div>
 <div class="section" id="conda-virtual-environment-setup">
 <h2><a class="toc-backref" href="#id3">Conda virtual environment setup</a><a class="headerlink" href="#conda-virtual-environment-setup" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.9.1
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.8.5
 conda activate icenet
 conda install -c conda-forge --file requirements.txt
 
@@ -313,8 +312,8 @@ conda install -c nvidia -c rapidsai py-xgboost
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Pick CPU or GPU version below
 # Check maximum CUDA version supported by your drivers with nvidia-smi
 
-conda install pytorch==1.6.0 torchvision==0.6.1 cpuonly -c pytorch
-conda install pytorch==1.6.0 torchvision==0.6.1 -c pytorch
+conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
+conda install pytorch==1.7.1 torchvision==0.8.2 -c pytorch
 </pre></div>
 </div>
 </div>
@@ -325,10 +324,10 @@ conda install pytorch==1.6.0 torchvision==0.6.1 -c pytorch
 export CUDA=cpu
 export CUDA=cu102 # (or cu92, cu101, cu110)
 
-pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
+pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
 pip install torch-geometric
 </pre></div>
 </div>

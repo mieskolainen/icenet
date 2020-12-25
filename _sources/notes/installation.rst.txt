@@ -20,7 +20,7 @@ Fully automated setup
 
 	git clone https://github.com/mieskolainen/icenet && cd icenet
 		
-	conda create -y --name icenet python==3.9.1
+	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
 	# Pick CPU or GPU version (GPU version works for CPU too)	
@@ -56,7 +56,7 @@ Conda virtual environment setup
 --------------------------------
 .. code-block:: none
 
-	conda create -y --name icenet python==3.9.1
+	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	conda install -c conda-forge --file requirements.txt
 	
@@ -88,9 +88,8 @@ Pytorch and torchvision setup
 	# Pick CPU or GPU version below
 	# Check maximum CUDA version supported by your drivers with nvidia-smi
 	
-	conda install pytorch==1.6.0 torchvision==0.6.1 cpuonly -c pytorch
-	conda install pytorch==1.6.0 torchvision==0.6.1 -c pytorch
-
+	conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
+	conda install pytorch==1.7.1 torchvision==0.8.2 -c pytorch
 
 Pytorch-geometric setup
 --------------------------
@@ -102,10 +101,10 @@ Pytorch-geometric setup
 	export CUDA=cpu
 	export CUDA=cu102 # (or cu92, cu101, cu110)
 	
-	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
-	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.6.0.html
+	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
 	pip install torch-geometric
 
 
