@@ -8,7 +8,6 @@ uuid
 networkx
 braceexpand
 uproot
-uproot4
 uproot-methods
 awkward
 awkward0
