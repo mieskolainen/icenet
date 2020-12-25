@@ -16,9 +16,9 @@ import sys
 import yaml
 import numpy as np
 import torch
-import uproot4
+#import uproot4
 import uproot
-import awkward1 as ak
+import awkward as ak
 
 import multiprocessing
 
