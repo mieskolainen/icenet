@@ -20,7 +20,7 @@ Fully automated setup
 
 	git clone https://github.com/mieskolainen/icenet && cd icenet
 		
-	conda create -y --name icenet python==3.8.7
+	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
 	# Pick CPU or GPU version (GPU version works for CPU too)	
@@ -56,7 +56,7 @@ Conda virtual environment setup
 --------------------------------
 .. code-block:: none
 
-	conda create -y --name icenet python==3.8.7
+	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	conda install -c conda-forge --file requirements.txt
 	
