@@ -79,15 +79,17 @@ def I_score(C, normalized=None, EPS=1E-15):
     I = np.clip(I, 0.0, None)
 
     # Normalization
-    if normalized == 'additive':
+    if   normalized == None:
+        return I
+    elif normalized == 'additive':
         return 2*I/(H_score(Pi) + H_score(Pj))
-    if normalized == 'multiplicative':
+    elif normalized == 'multiplicative':
         return I/np.sqrt(H_score(Pi) * H_score(Pj))
+    else:
+        raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
-    return I
 
-
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=False, alpha=0.5):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, alpha=0.5):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -97,7 +99,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         w         : weights (default None)
         bins_x    : x binning array  If None, then automatic.
         bins_y    : y binning array.
-        normalized: normalize with 2I/[H(x) + H(y)]
+        normalized: normalize the mutual information (see I_score() function)
         alpha     : 0.5 (autobinning parameter)
     
     Returns:
@@ -181,5 +183,5 @@ def test_data():
 
 
 # Run tests
-#test_gaussian()
-#test_data()
+test_gaussian()
+test_data()
