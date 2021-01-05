@@ -183,5 +183,5 @@ def test_data():
 
 
 # Run tests
-test_gaussian()
-test_data()
+#test_gaussian()
+#test_data()
