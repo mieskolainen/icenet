@@ -60,7 +60,7 @@ def I_score(C, normalized=None, EPS=1E-15):
         mutual information score
     """
     def Pnorm(x):
-        return np.maximum(x / np.sum(x[:]), EPS)
+        return np.maximum(x / np.sum(x.flatten()), EPS)
 
     nX, nY   = np.nonzero(C)
     Pi       = np.ravel(np.sum(C,axis=1))
@@ -89,7 +89,7 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, alpha=0.5):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, alpha=0.25, minbins=8):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -100,16 +100,17 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_x    : x binning array  If None, then automatic.
         bins_y    : y binning array.
         normalized: normalize the mutual information (see I_score() function)
-        alpha     : 0.5 (autobinning parameter)
-    
+        alpha     : 0.25 (autobinning parameter)
+        minbins   : minimum number of bins per dimension
+
     Returns:
         mutual information
     """
     
     if bins_x is None:
-        bins_x = np.linspace(np.min(x), np.max(x), int(alpha*freedman_diaconis(x,'bins')))
+        bins_x = np.linspace(np.min(x), np.max(x), np.maximum(int(alpha*freedman_diaconis(x,'bins')), minbins))
     if bins_y is None:
-        bins_y = np.linspace(np.min(y), np.max(y), int(alpha*freedman_diaconis(y,'bins')))
+        bins_y = np.linspace(np.min(y), np.max(y), np.maximum(int(alpha*freedman_diaconis(y,'bins')), minbins))
 
     XY = np.histogram2d(x=x, y=y, bins=[bins_x,bins_y], weights=weights)[0]
     mi = I_score(C=XY, normalized=normalized)
@@ -183,5 +184,5 @@ def test_data():
 
 
 # Run tests
-#test_gaussian()
-#test_data()
+test_gaussian()
+test_data()
