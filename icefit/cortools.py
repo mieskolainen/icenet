@@ -5,6 +5,7 @@
 import numpy as np
 import numba
 import copy
+import scipy
 import scipy.stats as stats
 
 # Needed for tests only
@@ -43,7 +44,7 @@ def H_score(p):
         entropy
     """
     # Make sure it is normalized
-    p_ = p[p>0]/np.sum(p[p>0])
+    p_ = (p[p>0]/np.sum(p[p>0])).astype(np.float64)
 
     return -np.sum(p_*np.log(p_))
 
@@ -67,11 +68,11 @@ def I_score(C, normalized=None, EPS=1E-15):
     Pj       = np.ravel(np.sum(C,axis=0))
     
     # Joint 2D
-    P_ij     = Pnorm(C[nX, nY])
+    P_ij     = Pnorm(C[nX, nY]).astype(np.float64)
     log_P_ij = np.log(P_ij)
     
     # Factorized 1D x 1D
-    Pi_Pj = Pi.take(nX) * Pj.take(nY)
+    Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
     Pi_Pj = Pi_Pj / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
 
     # Definition
@@ -117,7 +118,6 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
 
     return mi
 
-
 def gaussian_mutual_information(rho):
     """
     Analytical 2D-Gaussian mutual information
@@ -132,22 +132,66 @@ def gaussian_mutual_information(rho):
     return -0.5*np.log(1-rho**2)
 
 
+
+def pearson_corr(x, y):
+    """
+    Pearson Correlation Coefficient
+    https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+
+    Args:    
+        x,y : arrays of values
+    Returns: 
+        correlation coefficient [-1,1], p-value
+    """
+
+    if len(x) != len(y):
+        raise Exception('pearson_corr: x and y with different size.')
+
+    x     = np.asarray(x)
+    y     = np.asarray(y)
+    dtype = type(1.0 + x[0] + y[0]) # Should be at least float64
+
+    # Astype guarantees precision. Loss of precision might happen here.
+    x_ = x.astype(dtype) - x.mean(dtype=dtype)
+    y_ = y.astype(dtype) - y.mean(dtype=dtype)
+
+    # Correlation coefficient
+    r  = np.dot(x_,y_) / (np.linalg.norm(x_) * np.linalg.norm(y_))
+    r  = np.clip(r, -1.0, 1.0) # Safety
+
+    # 2-sided p-value from the Beta-distribution
+    ab   = len(x)/2 - 1
+    dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
+    prob = 2*dist.cdf(-abs(r))
+
+    return r, prob
+
+
 def test_gaussian():
 
-    ## Create synthetic gaussian data
-    N = int(1e6)
+    ## Create synthetic Gaussian data
+    N = int(1e2)
 
-    for rho in np.linspace(-0.99, 0.99, 10):
+    for rho in np.linspace(-0.99, 0.99, 11):
     
+        # Create correlation via 1D-Cholesky
         z1  = np.random.randn(N)
         z2  = np.random.randn(N)
         
         x1  = z1
         x2  = rho*z1 + np.sqrt(1-rho**2)*z2
 
+        # ---------------------------------------------------------------
+
         print(f'<rho = {rho:.3f}>')
-        print(f'Gaussian exact MI = {gaussian_mutual_information(rho)}')
-        print(f'Numerical      MI = {mutual_information(x=x1, y=x2)}')
+
+        r,prob = pearson_corr(x=x1, y=x2)
+        MI_G   = gaussian_mutual_information(rho)
+        MI     = mutual_information(x=x1, y=x2)
+
+        print(f'Pearson corrcoeff = {r:.3f} (p-value = {prob:0.3E})')
+        print(f'Gaussian exact MI = {MI_G:.3f}')
+        print(f'Numerical      MI = {MI:.3f}')
         print('')
 
 
@@ -186,3 +230,4 @@ def test_data():
 # Run tests
 #test_gaussian()
 #test_data()
+
