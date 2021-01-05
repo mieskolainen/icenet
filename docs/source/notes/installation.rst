@@ -7,12 +7,21 @@ The framework installation goes as follows.
     :local:
 
 Preliminaries: Conda installation
--------------------
+----------------------------------
 .. code-block:: none
 
 	wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
-      
+
 Then add rights (chmod +x) and execute with './filename.sh'
+
+Preliminaries: CUDA paths
+---------------------------
+.. code-block:: none
+
+	source /vols/software/cuda/setup.sh 11.2.0
+
+This is for IC machines, mutatis mutandis for other environments.
+(or 10.2.2, see ls /vols/software/cuda)
 
 Fully automated setup
 ----------------------------------
@@ -23,9 +32,9 @@ Fully automated setup
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
-	# Pick CPU or GPU version (GPU version works for CPU too)	
-	pip install -r requirements-cpu-linux.txt
+	# Pick GPU or CPU version (GPU version works for CPU too)	
 	pip install -r requirements-gpu-linux.txt
+	pip install -r requirements-cpu-linux.txt
 
 Note: Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7'.
 This can be installed inside the conda environment with
@@ -117,16 +126,21 @@ Show the graphics card status
 	
 	nvidia-smi	
 
-Show Tensorflow and Pytorch GPU support in python
+Show CUDA-compiler tools status
+
+.. code-block:: none
+	
+	nvcc --version	
+
+Show Tensorflow and Pytorch GPU support in Python
 
 .. code-block:: none
 	
 	import tensorflow
 	from tensorflow.python.client import device_lib
 	print(device_lib.list_local_devices())
-
+	
 	import torch
 	torch.cuda.is_available()
 	print(torch.cuda.get_device_name(0))
-
 
