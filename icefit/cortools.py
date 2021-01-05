@@ -48,14 +48,14 @@ def H_score(p):
     return -np.sum(p_*np.log(p_))
 
 
-def I_score(C, normalized=False, EPS=1E-15):
+def I_score(C, normalized=None, EPS=1E-15):
     """
     Mutual information score (log_e ~ nats units)
 
     Args:
         C : (X,Y) 2D-histogram array with event counts
-        normalized : return normalized version (output in [0,1])
-
+        normalized : return normalized version (None, 'additive', 'multiplicative')
+    
     Returns:
         mutual information score
     """
@@ -78,8 +78,11 @@ def I_score(C, normalized=False, EPS=1E-15):
     I = np.sum(P_ij * (log_P_ij - np.log(Pi_Pj) ))
     I = np.clip(I, 0.0, None)
 
-    if normalized: # Additive normalization
+    # Normalization
+    if normalized == 'additive':
         return 2*I/(H_score(Pi) + H_score(Pj))
+    if normalized == 'multiplicative':
+        return I/np.sqrt(H_score(Pi) * H_score(Pj))
 
     return I
 
@@ -155,20 +158,26 @@ def test_data():
 
     # Build MI matrix for each pair of features
     D = df.shape[1]
-    MI  = np.zeros((D,D))
-    MIn = np.zeros((D,D))
+    MI   = np.zeros((D,D))
+    MI_A = np.zeros((D,D))
+    MI_M = np.zeros((D,D))
+
     for i,col_i in enumerate(df):
         for j,col_j in enumerate(df):
 
-            MI[i,j]  = mutual_information(x=df[col_i], y=df[col_j], normalized=False)
-            MIn[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized=True)
+            MI[i,j]   = mutual_information(x=df[col_i], y=df[col_j], normalized=None)
+            MI_A[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized='additive')
+            MI_M[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized='multiplicative')
 
     # Print out
-    print('Raw Mutual Information:')
-    print(pd.DataFrame(MI, columns = df.columns, index = df.columns))
+    print('>> Raw Mutual Information')
+    print(pd.DataFrame(MI,   columns = df.columns, index = df.columns))
     print('')
-    print('Normalized Mutual Information:')
-    print(pd.DataFrame(MIn, columns = df.columns, index = df.columns))
+    print('>> Additively Normalized Mutual Information')
+    print(pd.DataFrame(MI_A, columns = df.columns, index = df.columns))
+    print('')
+    print('>> Multiplicatively Normalized Mutual Information')
+    print(pd.DataFrame(MI_M, columns = df.columns, index = df.columns))
 
 
 # Run tests
