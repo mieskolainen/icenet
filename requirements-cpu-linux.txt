@@ -14,4 +14,4 @@ https://pytorch-geometric.com/whl/torch-1.7.0/torch_cluster-latest+cpu-cp38-cp38
 https://pytorch-geometric.com/whl/torch-1.7.0/torch_scatter-latest+cpu-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.7.0/torch_sparse-latest+cpu-cp38-cp38-linux_x86_64.whl
 https://pytorch-geometric.com/whl/torch-1.7.0/torch_spline_conv-latest+cpu-cp38-cp38-linux_x86_64.whl
-torch-geometric==1.6.3
+torch-geometric>=1.6.3
