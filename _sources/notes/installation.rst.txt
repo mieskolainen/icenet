@@ -69,6 +69,34 @@ removing e.g. ´tensorflow´ from requirements.txt, and install it separately wi
 Then if something else fails, study the instructions step-by-step below.
 
 
+GPU-support commands
+---------------------
+
+Show the graphics card status
+
+.. code-block:: none
+	
+	nvidia-smi	
+
+Show CUDA-compiler tools status
+
+.. code-block:: none
+	
+	nvcc --version	
+
+Show Tensorflow and Pytorch GPU support in Python
+
+.. code-block:: none
+	
+	import tensorflow
+	from tensorflow.python.client import device_lib
+	print(device_lib.list_local_devices())
+	
+	import torch
+	torch.cuda.is_available()
+	print(torch.cuda.get_device_name(0))
+
+
 Conda virtual environment setup
 --------------------------------
 .. code-block:: none
@@ -127,31 +155,4 @@ Pytorch-geometric setup
 	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
 	pip install torch-geometric
 
-
-GPU-support commands
----------------------
-
-Show the graphics card status
-
-.. code-block:: none
-	
-	nvidia-smi	
-
-Show CUDA-compiler tools status
-
-.. code-block:: none
-	
-	nvcc --version	
-
-Show Tensorflow and Pytorch GPU support in Python
-
-.. code-block:: none
-	
-	import tensorflow
-	from tensorflow.python.client import device_lib
-	print(device_lib.list_local_devices())
-	
-	import torch
-	torch.cuda.is_available()
-	print(torch.cuda.get_device_name(0))
 
