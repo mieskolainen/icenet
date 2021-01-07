@@ -35,7 +35,7 @@ Fully automated setup
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
 	
-	# Install cudatoolkit and cudnn (unless latest already on the system)
+	# Install cudatoolkit and cudnn (make sure no other installations overlap)
 	conda install -c nvidia cudatoolkit==11.1.74 cudnn==8.0.4
 	
 	# Pick GPU or CPU version (GPU version works for CPU too)	
