@@ -6,6 +6,7 @@ The framework installation goes as follows.
 .. contents::
     :local:
 
+
 Preliminaries: Conda installation
 ----------------------------------
 .. code-block:: none
@@ -14,34 +15,33 @@ Preliminaries: Conda installation
 
 Then add rights (chmod +x) and execute with './filename.sh'
 
-Preliminaries: CUDA paths
+
+Pre-installed CUDA paths (optional)
 ---------------------------
 .. code-block:: none
 
 	source /vols/software/cuda/setup.sh 11.2.0
 
-This is for IC machines, mutatis mutandis for other environments.
-(or 10.2.2, see ls /vols/software/cuda)
+This can be used with IC machines, however, is not needed with conda driven setup.
+
 
 Fully automated setup
 ----------------------------------
 .. code-block:: none
 
 	git clone https://github.com/mieskolainen/icenet && cd icenet
-		
+	
+	# Create environment
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
+	
+	# Install cudatoolkit and cudnn (unless already on the system)
+	conda install -c nvidia cudnn
 	
 	# Pick GPU or CPU version (GPU version works for CPU too)	
 	pip install -r requirements-gpu-linux.txt
 	pip install -r requirements-cpu-linux.txt
 
-Note: Lacking cudnn (or cudatoolkit) may give an error such as: 'ImportError: libcudnn.so.7'.
-This can be installed inside the conda environment with
-
-.. code-block:: none
-
-	conda install -c anaconda cudnn
 
 Note: If you experience ´No space left on device´ problem with pip, set the temporary path
 
@@ -49,6 +49,14 @@ Note: If you experience ´No space left on device´ problem with pip, set the te
 	
 	mkdir $HOME/tmp
 	export TMPDIR=$HOME/tmp
+
+
+Note: If you experience ´Could not load dynamic library libcusolver.so.10´ with tensorflow, make a symbolic link
+
+.. code-block:: none
+
+	ln -s ~/anaconda3/envs/icenet/lib/libcusolver.so.11 ~/anaconda3/envs/icenet/lib/libcusolver.so.10
+
 
 Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
 removing e.g. ´tensorflow´ from requirements.txt, and install it separately with
@@ -58,7 +66,7 @@ removing e.g. ´tensorflow´ from requirements.txt, and install it separately wi
 	pip install tensorflow
 
 
-Then if something else fails, follow the instructions step-by-step below.
+Then if something else fails, study the instructions step-by-step below.
 
 
 Conda virtual environment setup
@@ -77,6 +85,9 @@ Conda virtual environment setup
 
 	conda info --envs
 	conda list --name icenet
+	
+	# Remove environment completely
+	conda env remove --name icenet
 
 
 XGBoost setup
@@ -108,7 +119,7 @@ Pytorch-geometric setup
 	# Pick CPU or GPU version below
 	
 	export CUDA=cpu
-	export CUDA=cu102 # (or cu92, cu101, cu110)
+	export CUDA=cu110 # (or cu92, cu101, cu110)
 	
 	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
 	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
