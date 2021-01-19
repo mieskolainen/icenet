@@ -1,6 +1,6 @@
 # Binned chi2 histogram fit with iminuit (minuit from python) and jax (autograds)
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -12,14 +12,15 @@ config.update("jax_enable_x64", True) # enable float64 precision
 from jax import numpy as np           # jax replacement for normal numpy
 from jax.scipy.special import erf
 from jax import jit, grad
-from iminuit import Minuit
 
+import iminuit
 import matplotlib.pyplot as plt
+
 
 # iceplot
 import sys
 sys.path.append(".")
-import _icepaths_
+
 import iceplot
 
 # numpy
@@ -96,14 +97,15 @@ start_values = (100, 100, 3.0, 0.1, 0.5)
 limits = ((0, 1e6), (0, 1e6), (2.5, 3.5), (0.1, 0.2), (0.5, 2.5))
 
 
-m1 = Minuit.from_array_func( jit(chi2_loss), start_values, limit=limits, pedantic=False)
+m1 = iminuit.Minuit(jit(chi2_loss), start_values)
+m1.limits = limits
 m1.strategy = 0
 
 m1.migrad()
-par = m1.np_values()
+par = m1.values
 
 m1.hesse()
-cov = m1.np_covariance()
+cov = m1.covariance
 
 print(f'Parameters: {par}')
 print(f'Covariance: {cov}')

@@ -118,6 +118,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
 
     return mi
 
+
 def gaussian_mutual_information(rho):
     """
     Analytical 2D-Gaussian mutual information
@@ -170,29 +171,31 @@ def pearson_corr(x, y):
 def test_gaussian():
 
     ## Create synthetic Gaussian data
-    N = int(1e2)
+    for N in [int(1e2), int(1e3), int(1e4), int(1e5)]:
 
-    for rho in np.linspace(-0.99, 0.99, 11):
-    
-        # Create correlation via 1D-Cholesky
-        z1  = np.random.randn(N)
-        z2  = np.random.randn(N)
+        print(f'*************** statistics N = {N} ***************')
+
+        for rho in np.linspace(-0.99, 0.99, 11):
         
-        x1  = z1
-        x2  = rho*z1 + np.sqrt(1-rho**2)*z2
+            # Create correlation via 1D-Cholesky
+            z1  = np.random.randn(N)
+            z2  = np.random.randn(N)
+            
+            x1  = z1
+            x2  = rho*z1 + np.sqrt(1-rho**2)*z2
 
-        # ---------------------------------------------------------------
+            # ---------------------------------------------------------------
 
-        print(f'<rho = {rho:.3f}>')
+            print(f'<rho = {rho:.3f}>')
 
-        r,prob = pearson_corr(x=x1, y=x2)
-        MI_G   = gaussian_mutual_information(rho)
-        MI     = mutual_information(x=x1, y=x2)
+            r,prob = pearson_corr(x=x1, y=x2)
+            MI_G   = gaussian_mutual_information(rho)
+            MI     = mutual_information(x=x1, y=x2)
 
-        print(f'Pearson corrcoeff = {r:.3f} (p-value = {prob:0.3E})')
-        print(f'Gaussian exact MI = {MI_G:.3f}')
-        print(f'Numerical      MI = {MI:.3f}')
-        print('')
+            print(f'Pearson corrcoeff = {r:.3f} (p-value = {prob:0.3E})')
+            print(f'Gaussian exact MI = {MI_G:.3f}')
+            print(f'Numerical      MI = {MI:.3f}')
+            print('')
 
 
 def test_data():
@@ -228,6 +231,6 @@ def test_data():
 
 
 # Run tests
-#test_gaussian()
-#test_data()
+test_gaussian()
+test_data()
 
