@@ -330,12 +330,7 @@ def test_gaussian():
             x2  = rho*z1 + np.sqrt(1-rho**2)*z2
             
             # ---------------------------------------------------------------
-
-            #maxbins = 100
-            #print(f'1-dim: optbins:  = {optbins(z1, maxbins)}, freedman_diaconis = {freedman_diaconis(z2, maxbins)}')
-            #print(f'2-dim: optbins2d = {optbins2d(x=z1, y=z2, maxM=(maxbins,maxbins), mode="nbins")}')
-            #print('')
-
+            
             print(f'<rho = {rho:.3f}>')
 
             r,prob = pearson_corr(x=x1, y=x2)
