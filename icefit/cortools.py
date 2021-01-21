@@ -381,6 +381,6 @@ def test_data():
 
 
 # Run tests
-test_gaussian()
+#test_gaussian()
 #test_data()
 
