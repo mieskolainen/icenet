@@ -20,6 +20,8 @@ def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     D. Freedman & P. Diaconis (1981)
     “On the histogram as a density estimator: L2 theory”.
     
+    ~ N**(-1/3)
+
     Args:
         x     : array of 1D data
         mode  : return 'width' or 'nbins'
@@ -44,6 +46,8 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01):
     Scott, D.W. (1992),
     Multivariate Density Estimation: Theory, Practice, and Visualization -- 2D-Gaussian case
     
+    ~ N**(-1/4)
+
     Args:
         x     : array of 1D data (one dimension of the bivariate distribution)
         rho   : Linear correlation coefficient
@@ -151,9 +155,9 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
             NB = FD_autobin(data)
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
-        
+
         return np.linspace(np.percentile(data, alpha*100), np.percentile(data, 100*(1-alpha)), NB + 1)
-    
+
     if bins_x is None:
         bins_x = autobinwrap(x)
     if bins_y is None:
