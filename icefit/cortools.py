@@ -1,37 +1,62 @@
 # Linear (correlation) and non-linear dependency tools
 #
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
 import numba
 import copy
 import scipy
+import scipy.special as special
 import scipy.stats as stats
 
 # Needed for tests only
 import pandas as pd
 
 
-def freedman_diaconis(x, mode="nbins"):
+def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     """
-    Freedman-Diaconis rule for a histogram bin width
+    Freedman-Diaconis rule for a 1D-histogram bin width
     
     D. Freedman & P. Diaconis (1981)
     “On the histogram as a density estimator: L2 theory”.
     
     Args:
-        x    : array of 1D data
-        mode : return 'width' or 'nbins'
+        x     : array of 1D data
+        mode  : return 'width' or 'nbins'
+        alpha : outlier percentile
+
     """
     IQR  = stats.iqr(x, rng=(25, 75), scale=1.0, nan_policy="omit")
     N    = len(x)
     bw   = (2 * IQR) / N**(1.0/3.0)
 
     if mode == "width":
-        y = bw
+        return bw
     else:
-        y = int((np.max(x) - np.min(x)) / bw + 1)
-    return y
+        return np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw)
+
+
+def scott_bin(x, rho, mode="nbins", alpha=0.01):
+
+    """ 
+    Scott rule for a 2D-histogram bin widths
+    
+    Scott, D.W. (1992),
+    Multivariate Density Estimation: Theory, Practice, and Visualization -- 2D-Gaussian case
+    
+    Args:
+        x     : array of 1D data (one dimension of the bivariate distribution)
+        rho   : Linear correlation coefficient
+        mode  : return 'width' or 'nbins'
+        alpha : outlier percentile
+    """
+    N  = len(x)
+    bw = 3.504*np.std(x)*(1 - rho**2)**(3.0/8.0)/len(x)**(1.0/4.0)
+
+    if mode == "width":
+        return bw
+    else:
+        return np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw)
 
 
 def H_score(p):
@@ -90,28 +115,49 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, alpha=0.25, minbins=8):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Scott2D', minbins=4, alpha=0.01, gamma=0.25):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
     Args:
-        x         : array of values
-        y         : array of values
-        w         : weights (default None)
-        bins_x    : x binning array  If None, then automatic.
-        bins_y    : y binning array.
-        normalized: normalize the mutual information (see I_score() function)
-        alpha     : 0.25 (autobinning parameter)
-        minbins   : minimum number of bins per dimension
+        x          : array of values
+        y          : array of values
+        w          : weights (default None)
+        bins_x     : x binning array  If None, then automatic.
+        bins_y     : y binning array.
+        normalized : normalize the mutual information (see I_score() function)
 
+    Autobinning args:    
+        automethod : 'Scott2D' or 'FD1D' (Freedman-Diaconis applied per dimension)
+        minbins    : minimum number of bins per dimension
+        alpha      : outlier protection percentile
+        gamma      : FD ad-hoc scale parameter
+    
     Returns:
         mutual information
     """
     
+    def FD_autobin(data):
+        return int(np.maximum(np.ceil(gamma*freedman_diaconis_bin(x=data,mode='bins',alpha=alpha)), minbins))
+
+    def Scott_autobin(data):
+        rho,_ = pearson_corr(x,y)
+        return int(np.maximum(scott_bin(x=data,rho=rho, mode='bins',alpha=alpha), minbins))
+
+    def autobinwrap(data):
+        if   automethod== 'Scott2D':
+            NB = Scott_autobin(data)
+        elif automethod == 'FD1D':
+            NB = FD_autobin(data)
+        else:
+            raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
+        
+        return np.linspace(np.percentile(data, alpha*100), np.percentile(data, 100*(1-alpha)), NB + 1)
+    
     if bins_x is None:
-        bins_x = np.linspace(np.min(x), np.max(x), np.maximum(int(alpha*freedman_diaconis(x,'bins')), minbins))
+        bins_x = autobinwrap(x)
     if bins_y is None:
-        bins_y = np.linspace(np.min(y), np.max(y), np.maximum(int(alpha*freedman_diaconis(y,'bins')), minbins))
+        bins_y = autobinwrap(y)
 
     XY = np.histogram2d(x=x, y=y, bins=[bins_x,bins_y], weights=weights)[0]
     mi = I_score(C=XY, normalized=normalized)
@@ -131,7 +177,6 @@ def gaussian_mutual_information(rho):
         mutual information
     """
     return -0.5*np.log(1-rho**2)
-
 
 
 def pearson_corr(x, y):
@@ -168,23 +213,124 @@ def pearson_corr(x, y):
     return r, prob
 
 
+def optbins(x, maxM=150, mode="nbins", alpha=0.025):
+    """
+
+    NOTE: Weak performance, study the method !!
+    
+    Optimal 1D-histogram binning via Bayesian Brute Force search algorithm.
+    
+    K.H Knuth, 2012, Entropy.
+    https://arxiv.org/abs/physics/0605197
+    
+    Args:
+        x     : data points
+        maxM  : maximum number of bins
+        mode  : "nbins" or "width"
+        alpha : outlier protection percentile
+
+    Returns:
+        optimal number of bins
+    """
+    N = len(x)
+
+    # Outlier protection
+    lo,hi  = np.percentile(x, alpha*100), np.percentile(x, 100*(1-alpha))
+    ind = (x > lo) & (x < hi)
+
+    # Loop over number of bins and compute (relative) posterior probability
+    logp = np.ones(maxM)*(-1E32) # keep it negative for 0-bin
+
+    for M in range(1,maxM):
+        n       = np.histogram(x[ind], bins=M)[0]
+        part1   = N*np.log(M) + special.gammaln(M/2) - special.gammaln(N+M/2)
+        part2   = -M*special.gammaln(1/2) + np.sum(special.gammaln(n+0.5))
+        logp[M] = part1 + part2;
+
+    optM = np.argmax(logp)
+
+    if mode == "width":
+        return (np.max(x[ind]) - np.min(x[ind])) / optM
+    else:
+        return optM
+
+
+def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
+    """
+    
+    NOTE: Weak performance, study the method !!
+
+    Optimal 2D-histogram binning via Bayesian Brute Force search algorithm.
+    
+    K.H Knuth, 2012, Entropy.
+    https://arxiv.org/abs/physics/0605197
+    
+    Args:
+        x     : data points
+        maxM  : maximum number of bins per dimension
+        mode  : "nbins" or "width"
+        alpha : outlier protection percentile
+    
+    Returns:
+        optimal number of bins
+    """
+    N = len(x)
+
+    if len(x) != len(y):
+        raise Exception('optbins2d: len(x) != len(y)')
+
+    # Outlier protection
+    x_lo,x_hi  = np.percentile(x, alpha*100), np.percentile(x, 100*(1-alpha))
+    y_lo,y_hi  = np.percentile(y, alpha*100), np.percentile(y, 100*(1-alpha))
+
+    ind = (x > x_lo) & (x < x_hi) & (y > y_lo) & (y < y_hi)
+
+    # Loop over number of bins and compute (relative) posterior probability
+    logp = np.ones(maxM)*(-1E32) # keep it negative for 0-bin
+
+    for Mx in range(1,maxM[0]):
+        for My in range(1,maxM[1]):
+            n         = np.histogram2d(x=x[ind],y=y[ind], bins=(Mx,My))[0].flatten()
+            M         = Mx*My
+            part1     = N*np.log(M) + special.gammaln(M/2) - special.gammaln(N+M/2)
+            part2     = -M*special.gammaln(1/2) + np.sum(special.gammaln(n+0.5))
+            logp[Mx,My] = part1 + part2;
+
+    # Find optimal number of (x,y) bins
+    optM = np.unravel_index(logp.argmax(), logp.shape)
+
+    if mode == "width":
+        return ((np.max(x[ind]) - np.min(x[ind])) / optM[0],
+                (np.max(y[ind]) - np.min(y[ind])) / optM[1])
+    else:
+        return optM
+
+
 def test_gaussian():
+    """
+    Gaussian unit test of the dependence estimators.
+    """
 
     ## Create synthetic Gaussian data
-    for N in [int(1e2), int(1e3), int(1e4), int(1e5)]:
+    for N in [int(1e2), int(1e3), int(1e4)]:
 
         print(f'*************** statistics N = {N} ***************')
 
         for rho in np.linspace(-0.99, 0.99, 11):
         
-            # Create correlation via 1D-Cholesky
+            # Create correlation via 2D-Cholesky
             z1  = np.random.randn(N)
             z2  = np.random.randn(N)
             
             x1  = z1
             x2  = rho*z1 + np.sqrt(1-rho**2)*z2
-
+            
             # ---------------------------------------------------------------
+
+            #maxbins = 100
+            #print(f'1-dim: optbins:  = {optbins(z1, maxbins)}, freedman_diaconis = {freedman_diaconis(z2, maxbins)}')
+            #print(f'2-dim: optbins2d = {optbins2d(x=z1, y=z2, maxM=(maxbins,maxbins), mode="nbins")}')
+            #print('')
 
             print(f'<rho = {rho:.3f}>')
 
@@ -232,5 +378,5 @@ def test_data():
 
 # Run tests
 test_gaussian()
-test_data()
+#test_data()
 
