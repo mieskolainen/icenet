@@ -159,7 +159,7 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Hacine2D', minbins=4, alpha=0.01):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Scott2D', minbins=4, alpha=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
