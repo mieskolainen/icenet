@@ -13,6 +13,46 @@ import scipy.stats as stats
 import pandas as pd
 
 
+def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
+    """
+    Hacine-Gharbi, A., P. Ravier, R. Harba, and T. Mohamadi. “Low Bias
+    Histogram-Based Estimation of Mutual Information for Feature Selection.”
+    Pattern Recognition Letters, 2012.
+
+    Args:
+        See scott_bin()
+    """
+
+    N  = len(x)
+    xi = (8 + 324*N + 12*np.sqrt(36*N + 729*N**2))**(1/3)
+    nb = np.round(xi/6 + 2/(3*xi) + 1/3)
+
+    if mode == "width":
+        return (np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / nb
+    else:
+        return int(nb)
+
+def hacine_joint_entropy_bin(x, rho, mode="nbins", alpha=0.01):
+    """
+    Hacine-Gharbi, A., and P. Ravier. "A Binning Formula of Bi-histogram
+    for Joint Entropy Estimation Using Mean Square Error Minimization.”
+    Pattern Recognition Letters, 2018.
+
+    Args:
+        See scott_bin()
+    """
+
+    N = len(x)
+
+    # BX=BY
+    nb = np.round(1/np.sqrt(2) * np.sqrt(1 + np.sqrt(1 + 24*N/(1-rho**2))))
+
+    if mode == "width":
+        return (np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / nb
+    else:
+        return int(nb)
+
+
 def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     """
     Freedman-Diaconis rule for a 1D-histogram bin width
@@ -35,7 +75,7 @@ def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw)
+        return int(np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw))
 
 
 def scott_bin(x, rho, mode="nbins", alpha=0.01):
@@ -60,7 +100,7 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw)
+        return int(np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw))
 
 
 def H_score(p):
@@ -119,7 +159,7 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Scott2D', minbins=4, alpha=0.01, gamma=0.25):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Hacine2D', minbins=4, alpha=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -130,9 +170,9 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_x     : x binning array  If None, then automatic.
         bins_y     : y binning array.
         normalized : normalize the mutual information (see I_score() function)
-
+    
     Autobinning args:    
-        automethod : 'Scott2D' or 'FD1D' (Freedman-Diaconis applied per dimension)
+        automethod : 'Hacine2D', 'Scott2D'
         minbins    : minimum number of bins per dimension
         alpha      : outlier protection percentile
         gamma      : FD ad-hoc scale parameter
@@ -140,22 +180,17 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     Returns:
         mutual information
     """
-    
-    def FD_autobin(data):
-        return int(np.maximum(np.ceil(gamma*freedman_diaconis_bin(x=data,mode='bins',alpha=alpha)), minbins))
-
-    def Scott_autobin(data):
-        rho,_ = pearson_corr(x,y)
-        return int(np.maximum(scott_bin(x=data,rho=rho, mode='bins',alpha=alpha), minbins))
+    rho,_ = pearson_corr(x,y)
 
     def autobinwrap(data):
-        if   automethod== 'Scott2D':
-            NB = Scott_autobin(data)
-        elif automethod == 'FD1D':
-            NB = FD_autobin(data)
+        if   automethod == 'Scott2D':
+            NB = scott_bin(x=data,rho=rho, mode='nbins',alpha=alpha)
+        elif automethod == 'Hacine2D':
+            NB = hacine_joint_entropy_bin(x=data, rho=rho, mode='nbins', alpha=alpha)
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
+        NB = int(np.maximum(minbins, NB))
         return np.linspace(np.percentile(data, alpha*100), np.percentile(data, 100*(1-alpha)), NB + 1)
 
     if bins_x is None:
@@ -330,7 +365,7 @@ def test_gaussian():
             x2  = rho*z1 + np.sqrt(1-rho**2)*z2
             
             # ---------------------------------------------------------------
-            
+
             print(f'<rho = {rho:.3f}>')
 
             r,prob = pearson_corr(x=x1, y=x2)
