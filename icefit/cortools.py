@@ -15,10 +15,10 @@ import pandas as pd
 
 def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     """
-    Hacine-Gharbi, A., P. Ravier, R. Harba, and T. Mohamadi. “Low Bias
-    Histogram-Based Estimation of Mutual Information for Feature Selection.”
+    Hacine-Gharbi et al. 
+    “Low Bias Histogram-Based Estimation of Mutual Information for Feature Selection.”
     Pattern Recognition Letters, 2012.
-
+    
     Args:
         See scott_bin()
     """
@@ -34,7 +34,7 @@ def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
 
 def hacine_joint_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     """
-    Hacine-Gharbi, A., and P. Ravier. "A Binning Formula of Bi-histogram
+    Hacine-Gharbi, Ravier. "A Binning Formula of Bi-histogram
     for Joint Entropy Estimation Using Mean Square Error Minimization.”
     Pattern Recognition Letters, 2018.
 
