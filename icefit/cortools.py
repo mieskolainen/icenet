@@ -103,7 +103,7 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01):
         return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
 
 
-def H_score(p):
+def H_score(p, EPS=1E-15):
     """
     Shannon Entropy (log_e ~ nats units)
 
@@ -113,8 +113,8 @@ def H_score(p):
         entropy
     """
     # Make sure it is normalized
-    p_ = (p[p>0]/np.sum(p[p>0])).astype(np.float64)
-
+    p_ = (p[p > EPS]/np.sum(p[p > EPS])).astype(np.float64)
+    
     return -np.sum(p_*np.log(p_))
 
 
@@ -145,7 +145,7 @@ def I_score(C, normalized=None, EPS=1E-15):
 
     # Choose non-zero
     ind = (P_ij > EPS) & (Pi_Pj > EPS)
-    
+
     # Definition
     I = np.sum(P_ij[ind] * (np.log(P_ij[ind]) - np.log(Pi_Pj[ind]) ))
     I = np.clip(I, 0.0, None)
@@ -420,6 +420,6 @@ def test_data():
 
 
 # Run tests
-test_gaussian()
+#test_gaussian()
 #test_data()
 
