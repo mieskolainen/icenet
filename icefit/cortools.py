@@ -142,8 +142,8 @@ def I_score(C, normalized=None, EPS=1E-15):
     
     # Factorized 1D x 1D
     Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
-    Pi_Pj = Pi_Pj / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
-
+    Pi_Pj = np.maximum(Pi_Pj, EPS) / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
+    
     # Definition
     I = np.sum(P_ij * (log_P_ij - np.log(Pi_Pj) ))
     I = np.clip(I, 0.0, None)
