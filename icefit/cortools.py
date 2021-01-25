@@ -201,9 +201,9 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_y = autobinwrap(y)
 
     XY = np.histogram2d(x=x, y=y, bins=[bins_x,bins_y], weights=weights)[0]
-    XY[XY < 0] = 0
+    XY[XY < 0] = 0 # Entropy defined only for positive definite
     mi = I_score(C=XY, normalized=normalized)
-
+    
     return mi
 
 
