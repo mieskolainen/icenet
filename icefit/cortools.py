@@ -3,7 +3,7 @@
 # m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
-import numba
+#import numba
 import copy
 import scipy
 import scipy.special as special
@@ -138,14 +138,16 @@ def I_score(C, normalized=None, EPS=1E-15):
     
     # Joint 2D
     P_ij     = Pnorm(C[nX, nY]).astype(np.float64)
-    log_P_ij = np.log(P_ij)
     
     # Factorized 1D x 1D
     Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
-    Pi_Pj = np.maximum(Pi_Pj, EPS) / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
+    Pi_Pj = Pi_Pj / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
 
+    # Choose non-zero
+    ind = (P_ij > EPS) & (Pi_Pj > EPS)
+    
     # Definition
-    I = np.sum(P_ij * (log_P_ij - np.log(Pi_Pj) ))
+    I = np.sum(P_ij[ind] * (np.log(P_ij[ind]) - np.log(Pi_Pj[ind]) ))
     I = np.clip(I, 0.0, None)
 
     # Normalization
@@ -418,6 +420,6 @@ def test_data():
 
 
 # Run tests
-#test_gaussian()
+test_gaussian()
 #test_data()
 
