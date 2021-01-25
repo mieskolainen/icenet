@@ -75,10 +75,10 @@ def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
+        return bw2bins(bw=bw, x=x, alpha=alpha)
 
 
-def scott_bin(x, rho, mode="nbins", alpha=0.01):
+def scott_bin(x, rho, mode="nbins", alpha=0.01, EPS=1e-15):
 
     """ 
     Scott rule for a 2D-histogram bin widths
@@ -100,8 +100,26 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
+        return bw2bins(bw=bw, x=x, alpha=alpha)
 
+def bw2bins(x, bw, alpha):
+    """
+    Convert a histogram binwidth to number of bins
+    
+    Args:
+        x     : data array
+        bw    : binwidth
+        alpha : outlier percentile
+
+    Returns:
+        number of bins, if something fails return 1
+    """
+    if not np.isfinite(bw):
+        return 1
+    elif bw > 0:
+        return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
+    else:
+        return 1
 
 def H_score(p, EPS=1E-15):
     """
@@ -251,9 +269,14 @@ def pearson_corr(x, y, weights = None):
     y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
 
     # corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}
-    r = np.sum(w*x_*y_) / np.sqrt(np.sum(w*(x_**2))*np.sum(w*(y_**2)))
-    r = np.clip(r, -1.0, 1.0) # Safety
+    if (np.sum(x_**2) > 0) & (np.sum(y_**2) > 0):
+        r = np.sum(w*x_*y_) / np.sqrt(np.sum(w*(x_**2))*np.sum(w*(y_**2)))
+    else:
+        r = 0
 
+     # Safety
+    r = np.clip(r, -1.0, 1.0)
+    
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
@@ -388,6 +411,20 @@ def test_gaussian():
             print('')
 
 
+def test_constant():
+    """
+    Constant input unit test
+    """
+
+    x1 = np.ones(100)
+    x2 = np.ones(100)
+
+    rho,prob = pearson_corr(x=x1, y=x2)
+    MI       = mutual_information(x=x1, y=x2)
+
+    print(f'test_constant: pearson_corr = {rho}, mutual_information = {MI}')
+
+
 def test_data():
 
     # Read toy dataset
@@ -422,5 +459,6 @@ def test_data():
 
 # Run tests
 #test_gaussian()
+#test_constant()
 #test_data()
 
