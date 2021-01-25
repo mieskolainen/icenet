@@ -28,7 +28,7 @@ def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     nb = np.round(xi/6 + 2/(3*xi) + 1/3)
 
     if mode == "width":
-        return (np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / nb
+        return (np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / nb
     else:
         return int(nb)
 
@@ -48,7 +48,7 @@ def hacine_joint_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     nb = np.round(1/np.sqrt(2) * np.sqrt(1 + np.sqrt(1 + 24*N/(1-rho**2))))
 
     if mode == "width":
-        return (np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / nb
+        return (np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / nb
     else:
         return int(nb)
 
@@ -75,7 +75,7 @@ def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return int(np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw))
+        return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
 
 
 def scott_bin(x, rho, mode="nbins", alpha=0.01):
@@ -100,7 +100,7 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01):
     if mode == "width":
         return bw
     else:
-        return int(np.ceil((np.percentile(x, 100*(1-alpha)) - np.percentile(x, 100*alpha)) / bw))
+        return int(np.ceil((np.percentile(x, 100*(1-alpha/2)) - np.percentile(x, 100*alpha/2)) / bw))
 
 
 def H_score(p):
@@ -143,7 +143,7 @@ def I_score(C, normalized=None, EPS=1E-15):
     # Factorized 1D x 1D
     Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
     Pi_Pj = np.maximum(Pi_Pj, EPS) / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
-    
+
     # Definition
     I = np.sum(P_ij * (log_P_ij - np.log(Pi_Pj) ))
     I = np.clip(I, 0.0, None)
@@ -191,7 +191,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
         NB = int(np.maximum(minbins, NB))
-        return np.linspace(np.percentile(data, alpha*100), np.percentile(data, 100*(1-alpha)), NB + 1)
+        return np.linspace(np.percentile(data, alpha/2*100), np.percentile(data, 100*(1-alpha/2)), NB + 1)
 
     if bins_x is None:
         bins_x = autobinwrap(x)
@@ -281,7 +281,7 @@ def optbins(x, maxM=150, mode="nbins", alpha=0.025):
     N = len(x)
 
     # Outlier protection
-    lo,hi  = np.percentile(x, alpha*100), np.percentile(x, 100*(1-alpha))
+    lo,hi  = np.percentile(x, alpha/2*100), np.percentile(x, 100*(1-alpha/2))
     ind = (x > lo) & (x < hi)
 
     # Loop over number of bins and compute (relative) posterior probability
@@ -326,8 +326,8 @@ def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
         raise Exception('optbins2d: len(x) != len(y)')
 
     # Outlier protection
-    x_lo,x_hi  = np.percentile(x, alpha*100), np.percentile(x, 100*(1-alpha))
-    y_lo,y_hi  = np.percentile(y, alpha*100), np.percentile(y, 100*(1-alpha))
+    x_lo,x_hi  = np.percentile(x, alpha/2*100), np.percentile(x, 100*(1-alpha/2))
+    y_lo,y_hi  = np.percentile(y, alpha/2*100), np.percentile(y, 100*(1-alpha/2))
 
     ind = (x > x_lo) & (x < x_hi) & (y > y_lo) & (y < y_hi)
 
