@@ -114,7 +114,7 @@ def H_score(p, EPS=1E-15):
     """
     # Make sure it is normalized
     p_ = (p[p > EPS]/np.sum(p[p > EPS])).astype(np.float64)
-    
+
     return -np.sum(p_*np.log(p_))
 
 
@@ -123,7 +123,7 @@ def I_score(C, normalized=None, EPS=1E-15):
     Mutual information score (log_e ~ nats units)
 
     Args:
-        C : (X,Y) 2D-histogram array with event counts
+        C : (X,Y) 2D-histogram array with positive definite event counts
         normalized : return normalized version (None, 'additive', 'multiplicative')
     
     Returns:
@@ -201,6 +201,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_y = autobinwrap(y)
 
     XY = np.histogram2d(x=x, y=y, bins=[bins_x,bins_y], weights=weights)[0]
+    XY[XY < 0] = 0
     mi = I_score(C=XY, normalized=normalized)
 
     return mi
