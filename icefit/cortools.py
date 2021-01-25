@@ -218,13 +218,14 @@ def gaussian_mutual_information(rho):
     return -0.5*np.log(1-rho**2)
 
 
-def pearson_corr(x, y):
+def pearson_corr(x, y, weights = None):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
-
-    Args:    
-        x,y : arrays of values
+    
+    Args:
+        x,y     : arrays of values
+        weights : possible event weights
     Returns: 
         correlation coefficient [-1,1], p-value
     """
@@ -236,13 +237,19 @@ def pearson_corr(x, y):
     y     = np.asarray(y)
     dtype = type(1.0 + x[0] + y[0]) # Should be at least float64
 
-    # Astype guarantees precision. Loss of precision might happen here.
-    x_ = x.astype(dtype) - x.mean(dtype=dtype)
-    y_ = y.astype(dtype) - y.mean(dtype=dtype)
+    if weights is None:
+        weights = np.ones(len(x), dtype=dtype)
 
-    # Correlation coefficient
-    r  = np.dot(x_,y_) / (np.linalg.norm(x_) * np.linalg.norm(y_))
-    r  = np.clip(r, -1.0, 1.0) # Safety
+    # Normalize to sum to one
+    w = weights / np.sum(weights) 
+
+    # Astype guarantees precision. Loss of precision might happen here.
+    x_ = x.astype(dtype) - np.sum(w*x, dtype=dtype)
+    y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
+
+    # corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}
+    r = np.sum(w*x_*y_) / np.sqrt(np.sum(w*(x_**2))*np.sum(w*(y_**2)))
+    r = np.clip(r, -1.0, 1.0) # Safety
 
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
