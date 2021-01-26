@@ -380,16 +380,19 @@ def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
 
 def test_gaussian():
     """
-    Gaussian unit test of the dependence estimators.
+    Gaussian unit test of the estimators.
     """
+    import pytest
 
     ## Create synthetic Gaussian data
-    for N in [int(1e2), int(1e3), int(1e4)]:
+    for N in [int(1e4), int(1e5)]:
 
         print(f'*************** statistics N = {N} ***************')
 
         for rho in np.linspace(-0.99, 0.99, 11):
         
+            print(f'<<<rho = {rho:.3f}>>>')
+
             # Create correlation via 2D-Cholesky
             z1  = np.random.randn(N)
             z2  = np.random.randn(N)
@@ -399,32 +402,56 @@ def test_gaussian():
             
             # ---------------------------------------------------------------
 
-            print(f'<rho = {rho:.3f}>')
-
+            # Linear correlation
             r,prob = pearson_corr(x=x1, y=x2)
-            MI_G   = gaussian_mutual_information(rho)
-            MI     = mutual_information(x=x1, y=x2)
+            assert  r == pytest.approx(rho, abs=0.1)
+            print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
 
-            print(f'Pearson corrcoeff = {r:.3f} (p-value = {prob:0.3E})')
-            print(f'Gaussian exact MI = {MI_G:.3f}')
-            print(f'Numerical      MI = {MI:.3f}')
+            # MI Reference
+            MI_REF = gaussian_mutual_information(rho)
+            print(f'Gaussian exact MI = {MI_REF:.3f}')
+
+            # MI with different autobinnings
+            automethod = ['Scott2D', 'Hacine2D']
+
+            for method in automethod:
+                MI     = mutual_information(x=x1, y=x2, automethod=method)
+                assert MI == pytest.approx(MI_REF, abs=0.15)
+                print(f'Numerical      MI = {MI:.3f} ({method})')
+
             print('')
 
 
 def test_constant():
     """
-    Constant input unit test
+    Constant input unit test of the estimators.
     """
 
+    import pytest
+
+    # Both ones
     x1 = np.ones(100)
     x2 = np.ones(100)
 
-    rho,prob = pearson_corr(x=x1, y=x2)
+    r,prob = pearson_corr(x=x1, y=x2)
+    assert   r == pytest.approx(1)
+
     MI       = mutual_information(x=x1, y=x2)
+    assert  MI == pytest.approx(0)
 
-    print(f'test_constant: pearson_corr = {rho}, mutual_information = {MI}')
+    # --------------------------------------------
+    # Other zeros
+    
+    x2 = np.zeros(100)
+
+    r,prob = pearson_corr(x=x1, y=x2)
+    assert   r == pytest.approx(0)
+
+    MI       = mutual_information(x=x1, y=x2)
+    assert  MI == pytest.approx(0)
 
 
+"""
 def test_data():
 
     # Read toy dataset
@@ -455,10 +482,4 @@ def test_data():
     print('')
     print('>> Multiplicatively Normalized Mutual Information')
     print(pd.DataFrame(MI_M, columns = df.columns, index = df.columns))
-
-
-# Run tests
-#test_gaussian()
-#test_constant()
-#test_data()
-
+"""

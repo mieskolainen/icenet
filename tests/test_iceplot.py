@@ -11,7 +11,6 @@ import os
 
 import sys
 sys.path.append(".")
-import _icepaths_
 import iceplot
 
 import pathlib
