@@ -65,7 +65,7 @@ def ML_nmf(V, k, threshold=1e-8, maxiter=500):
         error = np.linalg.norm(np.dot(W,H) - V) / n
 
         if np.abs(error - prev_error) / error < threshold: break
-        print(__name__ + f'.ML_nmf: iter {i:3}, cost = {error:0.5E}')
+        #print(__name__ + f'.ML_nmf: iter {i:3}, cost = {error:0.5E}')
         prev_error = error
 
     return W, H

@@ -135,3 +135,5 @@ ndof = len(counts) - len(par) - 1
 plt.title(f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}$");
 
 plt.show()
+
+

@@ -269,12 +269,13 @@ def pearson_corr(x, y, weights = None):
     y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
 
     # corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}
-    if (np.sum(x_**2) > 0) & (np.sum(y_**2) > 0):
-        r = np.sum(w*x_*y_) / np.sqrt(np.sum(w*(x_**2))*np.sum(w*(y_**2)))
+    denom = np.sum(w*(x_**2))*np.sum(w*(y_**2))
+    if denom > 0:
+        r = np.sum(w*x_*y_) / np.sqrt(denom)
     else:
         r = 0
-
-     # Safety
+    
+    # Safety
     r = np.clip(r, -1.0, 1.0)
     
     # 2-sided p-value from the Beta-distribution

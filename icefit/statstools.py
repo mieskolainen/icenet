@@ -126,7 +126,11 @@ def poisson_ratio(k1,k2, CL=np.array([0.025, 0.975])):
 	"""
 
 	theta = clopper_pearson_err(k=k1, n=k1+k2, CL=CL)
-	R     = theta / (1 - theta)
+
+	if (1-theta).all() > 0:
+		R = theta / (1 - theta)
+	else:
+		R = np.array([0,0])
 
 	return R
 
