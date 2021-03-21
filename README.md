@@ -13,7 +13,7 @@ Or within:
 docs/source/notes/installation.rst
 ```
 </br>
+</br>
 
-
-Mikael Mieskolainen, 2020\
+Mikael Mieskolainen, 2021\
 m.mieskolainen@imperial.ac.uk
