@@ -186,10 +186,11 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
+def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
     """
     Main training loop
-    """    
+    """
+
     cprint(__name__ + f""".train: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
     
@@ -337,6 +338,11 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param) :
         avgloss = sumloss / nbatch
         losses.append(avgloss)
 
+        ### SAVE MODEL
+        checkpoint = {'model': model, 'state_dict': model.state_dict()}
+        torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
+        
+        
         # ================================================================
         # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)
         if (epoch % 5 == 0) :

@@ -164,6 +164,10 @@ gxgb0_param:
     device: 'auto'            # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
 
+    # Read/Write of epochs
+    savemode: 'all'              # 'all', 'latest'
+    readmode: -1                 # -1 is the last saved epoch
+
   # ** XGBOOST **
   xgb:
     train: 'xgb'
@@ -198,6 +202,10 @@ gxgb0_param:
     objective: 'binary:logistic'     #
     eval_metric: ['auc', 'logloss']  # for evaluation
 
+    # Read/Write of epochs
+    savemode: 'all'              # 'all', 'latest'
+    readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet3_param:
@@ -223,6 +231,11 @@ gnet3_param:
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
 # Graph net
 gnet0_param:
   train:   'graph'
@@ -246,6 +259,11 @@ gnet0_param:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet1_param:
@@ -271,6 +289,11 @@ gnet1_param:
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
 # Graph net
 gnet2_param:
   train: 'graph'
@@ -295,6 +318,10 @@ gnet2_param:
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Factorized Likelihood Ratio
 flr0_param:
@@ -305,6 +332,10 @@ flr0_param:
   nbins: 60
   qmin:  0.5 # in [0,100]
   qmax: 99.5 # in [0,100]
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # XGBoost
@@ -342,6 +373,10 @@ xgb0_param:
   objective: 'binary:logistic'     #
   eval_metric: ['auc', 'logloss']  # for evaluation
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Deep MLP
 dmlp_param:
@@ -365,6 +400,10 @@ dmlp_param:
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
@@ -384,6 +423,10 @@ lgr0_param:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Convolutional Neural Net
@@ -408,6 +451,10 @@ cnn0_param:
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # XTX (hyperbinned) classifier
 xtx0_param:
@@ -431,6 +478,10 @@ xtx0_param:
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Deep MAXOUT network
 dmx0_param:
@@ -453,6 +504,10 @@ dmx0_param:
   weight_decay: 0.00001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Deep Normalizing Flow
@@ -490,4 +545,8 @@ dbnf0_param:
   tensorboard: 'tensorboard'
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 

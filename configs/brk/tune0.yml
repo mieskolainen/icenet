@@ -118,6 +118,10 @@ xgb_param:
   objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
   eval_metric: ['mlogloss']   # 'mlogloss' is multiclass log-loss
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Deep MaxOut network
 dmax_param:
@@ -140,6 +144,11 @@ dmax_param:
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
 # Permutation Equivariant Network
 deps_param:
   active: true
@@ -158,4 +167,7 @@ deps_param:
   weight_decay: 0.01            # L2-regularization
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
-
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch

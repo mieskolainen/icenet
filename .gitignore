@@ -22,3 +22,5 @@ __pycache__/
 todo
 test.py
 dev_*
+
+.pytest_cache

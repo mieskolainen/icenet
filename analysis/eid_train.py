@@ -65,9 +65,10 @@ def main() :
         plots.plotvar(x = data.trn.x[:, data.VARS.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
             targetdir = targetdir, title = f"training re-weight reference_class: {args['reweight_param']['reference_class']}")
     
-    # --------------------------------------------------------------------
 
+    # --------------------------------------------------------------------
     ### Parse data into graphs
+
     graph = {}
     if args['graph_on']:
         graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, VARS=data.VARS, 
@@ -98,7 +99,7 @@ def main() :
     # Add args['modeldir']
     args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
     
-
+    
     ### Execute training
     trainloop(data = data, data_tensor = data_tensor, data_kin = data_kin, data_graph = graph, trn_weights = trn_weights, args = args)
     

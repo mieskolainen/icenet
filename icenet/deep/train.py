@@ -81,6 +81,8 @@ def train_graph(data_trn, data_val, args, param, num_classes=2):
         model = graph.GATNet(**netparam)
     elif conv_type == 'DEC':
         model = graph.DECNet(**netparam)
+    elif conv_type == 'PAN':
+        model = graph.PANNet(**netparam)
     elif conv_type == 'EC':
         model = graph.ECNet(**netparam)
     elif conv_type == 'SUP':
@@ -121,10 +123,9 @@ def train_graph(data_trn, data_val, args, param, num_classes=2):
         print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
         scheduler.step()
     
-    ## Save
-    label = param['label']
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
+        ## Save
+        checkpoint = {'model': model, 'state_dict': model.state_dict()}
+        torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
 
     return model
 
@@ -176,7 +177,8 @@ def train_graph_xgb(data_trn, data_val, trn_weights, args, param, num_classes=2)
         num_boost_round = param['xgb']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
     ## Save
-    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_checkpoint" + '.dat', 'wb'))
+    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_" + str(0) + '.dat', 'wb'))
+
 
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
@@ -230,16 +232,13 @@ def train_dmax(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes
     print(f'\nTraining {label} classifier ...')
     model = maxo.MAXOUT(D = X_trn.shape[1], C=num_classes, num_units=param['num_units'], neurons=param['neurons'], dropout=param['dropout'])
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param)
+        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
 
     # Plot evolution
     plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
     fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
-    ## Save
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
     
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -255,7 +254,7 @@ def train_flr(data, trn_weights, args, param):
     print(f'\nTraining {label} classifier ...')
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data.trn.x, y = data.trn.y, weights = trn_weights, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
-        open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'wb'))
+        open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'wb'))
 
     def func_predict(X):
         return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
@@ -336,16 +335,13 @@ def train_cnn(data, data_tensor, Y_trn, Y_val, trn_weights, args, param, num_cla
 
     model, losses, trn_aucs, val_aucs = \
         dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-                    trn_weights = trn_weights, param = param)
+                    trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
 
     # Plot evolution
     plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-    
-    ## Save
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
+
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -361,16 +357,13 @@ def train_dmlp(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes
     print(f'\nTraining {label} classifier ...')
     model = dmlp.DMLP(D = X_trn.shape[1], mlp_dim=param['mlp_dim'], batch_norm=param['batch_norm'], C=num_classes)
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param)
+        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
     
     # Plot evolution
     plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
     
-    ## Save
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -386,16 +379,13 @@ def train_lgr(X_trn, Y_trn, X_val, Y_val, trn_weights, args, param, num_classes=
     print(f'\nTraining {label} classifier ...')
     model = mlgr.MLGR(D = X_trn.shape[1], C=num_classes)
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param)
+        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
     
     # Plot evolution
     plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
     
-    ## Save
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -430,8 +420,9 @@ def train_xgb(data, trn_weights, args, param):
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
     ## Save
-    pickle.dump(model, open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'wb'))
-
+    pickle.dump(model, open(args['modeldir'] + f'/{label}_' + str(0) + '.dat', 'wb'))
+    
+    
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
     val_aucs = results['eval']['auc']
@@ -480,7 +471,7 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param, num_classes=2):
     label     = param['label']
     pt_edges  = args['plot_param']['pt_edges']
     eta_edges = args['plot_param']['eta_edges'] 
-    
+
     for i in range(len(pt_edges) - 1):
         for j in range(len(eta_edges) - 1):
 
@@ -498,6 +489,7 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param, num_classes=2):
                 print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.
                     format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
 
+
                 # Compute weights for this hyperbin (balance class ratios)
                 yy = data.trn.y[trn_ind]
                 frac = [0,0]
@@ -511,20 +503,21 @@ def train_xtx(X_trn, Y_trn, X_val, Y_val, data_kin, args, param, num_classes=2):
                 for k in range(weights.shape[0]):
                     weights[k] = 1.0 / frac[int(yy[k])] / yy.shape[0] / 2
                 
-                print('weightsum = {}'.format(np.sum(weights[yy == 0])))
+                print(f'weightsum = {np.sum(weights[yy == 0])}')
+
 
                 # Train
                 #xtx_model = mlgr.MLGR(D = X_trn.shape[1], C = 2)
                 model = maxo.MAXOUT(D = X_trn.shape[1], C = num_classes, num_units=param['num_units'], \
                     neurons=param['neurons'], dropout=args['xtx_param']['dropout'])
 
+                # Set hyperbin label
+                param['label'] = f'{label}_bin_{i}_{j}'
+
                 model, losses, trn_aucs, val_aucs = dopt.train(model = model,
                     X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
-                    X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], trn_weights = weights, param = param)
+                    X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], trn_weights = weights, param = param, modeldir=args['modeldir'])
 
-                # Save
-                checkpoint = {'model': model, 'state_dict': model.state_dict()}
-                torch.save(checkpoint, f'{args["modeldir"]}/{label}_checkpoint_bin_{i}_{j}.pth')
 
             except:
                 print('Problem with training *** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.

@@ -19,6 +19,7 @@ import sys
 import yaml
 import copy
 
+
 from termcolor import cprint
 
 # xgboost
@@ -26,6 +27,7 @@ import xgboost
 
 # matplotlib
 from matplotlib import pyplot as plt
+
 
 # scikit
 from sklearn         import metrics
@@ -168,6 +170,7 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
 
+
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -176,7 +179,7 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
         print(f'Training <{ID}> | {param} \n')
         
         if   param['predict'] == 'torch_graph':
-            func_predict = predict.pred_torch(args=args, param=param)
+            func_predict = predict.pred_torch_graph(args=args, param=param)
             saveit(func_predict = func_predict, X = X_graph, y = y, X_kin = X_kin, VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = param['label'])
         
         elif param['predict'] == 'graph_xgb':

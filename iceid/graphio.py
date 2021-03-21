@@ -16,7 +16,7 @@ from termcolor import colored, cprint
 import torch
 from   torch_geometric.data import Data
 
-import uproot_methods
+#import uproot_methods
 import multiprocessing
 from   torch.utils.data import dataloader
 from   torch.multiprocessing import reductions
@@ -24,6 +24,7 @@ from   multiprocessing.reduction import ForkingPickler
 
 import icenet.algo.analytic as analytic
 from   icenet.tools import aux
+from   icenet.tools.icevec import vec4
 
 
 # Torch conversion
@@ -108,7 +109,8 @@ def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord
 
     N_events = X.shape[0]
     dataset  = []
-    zerovec  = uproot_methods.TLorentzVector(0,0,0,0)
+    zerovec  = vec4()
+
 
     # Collect feature indices
     feature_ind = np.zeros(len(features), dtype=np.int32)
@@ -133,16 +135,13 @@ def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord
         num_edges = num_nodes**2 # include self-connections
         
         # Construct 4-vector for the track, with pion mass
-        p4track = \
-            uproot_methods.TLorentzVector.from_ptetaphim(
-                X[e, ind__trk_pt], X[e, ind__trk_eta], X[e, ind__trk_phi], 0.13957)
+        p4track = vec4.setPtEtaPhiM(X[e, ind__trk_pt], X[e, ind__trk_eta], X[e, ind__trk_phi], 0.13957)
 
         # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
         p4vec = []
         if len(X[e, ind__image_clu_e]) > 0:
             pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta]) # Massless approx.
-            p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
-                pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
+            p4vec = vec4.setPtEtaPhiM(pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
 
 
         # ====================================================================
@@ -210,7 +209,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
     dataset  = []
 
     print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
-    zerovec = uproot_methods.TLorentzVector(0,0,0,0)
+    zerovec = vec4()
 
     # Collect feature indices
     feature_ind = np.zeros(len(features), dtype=np.int32)
@@ -229,22 +228,33 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
 
     # Loop over events
-    for e in tqdm(range(N_events)):
+    for i in tqdm(range(N_events)):
 
-        num_nodes = 1 + len(X[e, ind__image_clu_eta]) # + 1 virtual node
-        num_edges = num_nodes**2 # include self-connections
+        num_nodes = 1 + len(X[i, ind__image_clu_eta]) # + 1 virtual node
+        num_edges = num_nodes**2                      # include self-connections
         
         # Construct 4-vector for the track, with pion mass
-        p4track = \
-            uproot_methods.TLorentzVector.from_ptetaphim(
-                X[e, ind__trk_pt], X[e, ind__trk_eta], X[e, ind__trk_phi], 0.13957)
+        p4track = vec4()
+        p4track.setPtEtaPhiM(X[i, ind__trk_pt], X[i, ind__trk_eta], X[i, ind__trk_phi], 0.13957)
 
         # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
         p4vec = []
-        if len(X[e, ind__image_clu_e]) > 0:
-            pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta]) # Massless approx.
-            p4vec = uproot_methods.TLorentzVectorArray.from_ptetaphim(
-                pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
+        NC = len(X[i, ind__image_clu_e])
+
+        if NC > 0:
+            for k in range(NC): 
+                
+                pt    = X[i, ind__image_clu_e][k] / np.cosh(X[i, ind__image_clu_eta][k]) # Massless approx.
+                eta   = X[i, ind__image_clu_eta][k]
+                phi   = X[i, ind__image_clu_phi][k]
+
+                v = vec4()
+                v.setPtEtaPhiM(pt, eta, phi, 0)
+
+                p4vec.append( v )
+        else:
+            print(__name__ + f'parse_graph_data: Empty ECAL cluster event {i}')
+            continue # Skip empty ECAL cluster events
 
 
         # ====================================================================
@@ -252,21 +262,22 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
-            y = torch.tensor([Y[e]], dtype=torch.long)
+            y = torch.tensor([Y[i]], dtype=torch.long)
         else:
-            y = torch.tensor([0], dtype=torch.long)
+            y = torch.tensor([0],    dtype=torch.long)
 
         # Training weights, note [] is important to have for right dimensions
         if W is not None:
-            w = torch.tensor([W[e]], dtype=torch.float)
+            w = torch.tensor([W[i]], dtype=torch.float)
         else:
-            w = torch.tensor([1.0], dtype=torch.float)
+            w = torch.tensor([1.0],  dtype=torch.float)
+
 
         ## Construct global feature vector
-        u = torch.tensor(X[e, feature_ind].tolist(), dtype=torch.float)
+        u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[i], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
@@ -301,18 +312,18 @@ def get_node_features(p4vec, p4track, X, VARS, num_nodes, num_node_features, coo
                 x[i,0] = p4vec[i-1].pt
                 x[i,1] = p4vec[i-1].eta
                 x[i,2] = p4vec[i-1].phi
-                x[i,3] = p4vec[i-1].mass
+                x[i,3] = p4vec[i-1].m
             elif coord == 'pxpypze':
-                x[i,0] = p4vec[i-1].x
-                x[i,1] = p4vec[i-1].y
-                x[i,2] = p4vec[i-1].z
-                x[i,3] = p4vec[i-1].t
+                x[i,0] = p4vec[i-1].px
+                x[i,1] = p4vec[i-1].py
+                x[i,2] = p4vec[i-1].pz
+                x[i,3] = p4vec[i-1].e
             else:
                 raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
             
             # other features
             x[i,4] = X[VARS.index('image_clu_nhit')][i-1]
-            x[i,5] = p4track.delta_r(p4vec[i-1])
+            x[i,5] = p4track.deltaR(p4vec[i-1])
 
     return x
 
@@ -352,15 +363,15 @@ def get_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EPS=1E-12)
                 p4_j   = p4vec[j-1]
 
                 # kt-metric (anti)
-                dR2_ij = ((p4_i.eta - p4_j.eta)**2 + (p4_i.phi - p4_j.phi)**2)
+                dR2_ij = p4_i.deltaR(p4_j)**2
                 kt2_i  = p4_i.pt2 + EPS 
                 kt2_j  = p4_j.pt2 + EPS
                 edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
                 
                 # Lorentz scalars
-                edge_attr[n,1] = (p4_i + p4_j).p2  # Mandelstam s-like
-                edge_attr[n,2] = (p4_i - p4_j).p2  # Mandelstam t-like
-                edge_attr[n,3] = p4_i.dot(p4_j)    # 4-dot
+                edge_attr[n,1] = (p4_i + p4_j).m2  # Mandelstam s-like
+                edge_attr[n,2] = (p4_i - p4_j).m2  # Mandelstam t-like
+                edge_attr[n,3] = p4_i.dot4(p4_j)     # 4-dot
 
             indexlist[i,j] = n
             n += 1

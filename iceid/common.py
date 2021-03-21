@@ -687,7 +687,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
     cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
 
-    file = uproot4.open(root_path)
+    file   = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
 
     print(events)
@@ -704,10 +704,10 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     # Check is it MC (based on the first event)
     X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
     
-    isMC   = bool(X_test['0'])
+    isMC   = bool(X_test[0]['is_mc'])
     N      = len(X_test)
     print(__name__ + f'.load_root_file: isMC: {isMC}')
-
+    
     # Now read the data
     print(__name__ + '.load_root_file: Loading root file variables ...')
 

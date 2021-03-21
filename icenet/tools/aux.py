@@ -11,6 +11,8 @@ import sklearn
 import copy
 from tqdm import tqdm
 
+import os
+
 from sklearn import metrics
 from scipy import stats
 import scipy.special as special
@@ -421,19 +423,53 @@ def deltar(eta1,eta2, phi1,phi2):
     return np.sqrt((eta1 - eta2)**2 + deltaphi(phi1,phi2)**2)
 
 
-def load_torch_checkpoint(filepath) :
+def create_model_filename(path, label, epoch, filetype):
+
+    def createfilename(i):
+        return path + '/' + label + '_' + str(i) + filetype
+
+    # Loop over epochs
+    i = 0
+    last_found  = -1
+    while True:
+        filename = createfilename(i)
+        if os.path.exists(filename):
+            last_found = i
+        else:
+            break
+        i += 1
+
+    epoch = last_found if epoch == -1 else epoch
+    return createfilename(epoch)
+
+
+def load_torch_checkpoint(path='/', label='mynet', epoch=-1) :
     """ Load pytorch checkpoint
+
+    Args:
+        path  : folder path
+        label : model label name
+        epoch : epoch index. Use -1 for the last epoch
+    
+    Returns:
+        pytorch model
     """
-    checkpoint = torch.load(filepath)
-    model = checkpoint['model']
+
+    filename = create_model_filename(path=path, label=label, epoch=epoch, filetype='.pth')
+    print(__name__ + f'.load_torch_checkpoint: Loading checkpoint {filename}')
+
+    # Load the model
+    checkpoint = torch.load(filename)
+    model      = checkpoint['model']
     model.load_state_dict(checkpoint['state_dict'])
     for parameter in model.parameters():
         parameter.requires_grad = False
 
-    model.eval()
+    model.eval() # Set it in the evaluation mode
     return model
 
-def save_torch_model(model, optimizer, epoch, path):
+
+def save_torch_model(model, optimizer, epoch, filename):
     """ PyTorch model saver
     """
     def f():
@@ -442,23 +478,21 @@ def save_torch_model(model, optimizer, epoch, path):
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
             'epoch': epoch
-        }, (path))
-    
+        }, (filename))
     return f
 
 
-def load_torch_model(model, optimizer, param, path, load_start_epoch = False):
+def load_torch_model(model, optimizer, filename, load_start_epoch = False):
     """ PyTorch model loader
     """
     def f():
         print('Loading model..')
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(filename)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         
         if load_start_epoch:
             param.start_epoch = checkpoint['epoch']
-
     return f
 
 

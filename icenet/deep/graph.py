@@ -17,6 +17,10 @@ from   torch_geometric.nn import Set2Set, global_add_pool, global_mean_pool, glo
 from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
 
+from torch_scatter import scatter_add, scatter_max, scatter_mean
+
+
+from   icenet.deep.pgraph import *
 from   icenet.deep import dopt
 from   icenet.tools import aux
 
@@ -165,6 +169,100 @@ def test(model, loader, optimizer, device):
         k += 1
 
     return correct / len(loader.dataset), aucsum / k
+
+
+# PANConv based graph net
+# https://arxiv.org/abs/2006.16811
+#
+class PANNet(torch.nn.Module):
+    def __init__(self, D, C, G=0, E=None, CDIM=64, dropout=0.5, conv_aggr=None, global_pool='max', filter_size=5, task='node'):
+
+        super(PANNet, self).__init__()
+
+        self.D = D
+        self.C = C
+        self.G = G
+        self.CDIM = CDIM
+
+        self.dropout     = dropout
+        self.task        = task
+        self.global_pool = global_pool
+        self.task = task
+
+        # --------------------------------------------
+
+        self.conv1 = PANConv(D, CDIM, filter_size)
+        self.pool1 = PANXUMPooling(CDIM)
+        # self.drop1 = PANDropout()
+
+        self.conv2 = PANConv(CDIM, CDIM, filter_size)
+        self.pool2 = PANXUMPooling(CDIM)
+        # self.drop2 = PANDropout()
+
+        self.conv3 = PANConv(CDIM, CDIM, filter_size)
+        self.pool3 = PANXUMPooling(CDIM)
+        
+        # ------------------------------
+        if (self.G > 0):
+            self.Z = self.CDIM + self.G
+        else:
+            self.Z = self.CDIM
+
+        self.mlp1  = MLP([self.Z, self.Z, self.C])
+
+
+    def forward(self, data, conv_only=False):
+        
+        if not hasattr(data,'batch'):
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+
+
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+        perm_list = list()
+        edge_mask_list = None
+
+        x = self.conv1(x, edge_index)
+        M = self.conv1.m
+        x, edge_index, _, batch, perm, score_perm = self.pool1(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
+
+        # AFTERDROP, edge_mask_list = self.drop1(edge_index, p=0.5)
+        x = self.conv2(x, edge_index, edge_mask_list=edge_mask_list)
+        M = self.conv2.m
+        x, edge_index, _, batch, perm, score_perm = self.pool2(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
+
+        # AFTERDROP, edge_mask_list = self.drop2(edge_index, p=0.5)
+        x = self.conv3(x, edge_index, edge_mask_list=edge_mask_list)
+        M = self.conv3.m
+        x, edge_index, _, batch, perm, score_perm = self.pool3(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
+
+        # ** Global pooling (to handle graph level classification) **
+        if self.task == 'graph':
+            if   self.global_pool == 'max':
+                x = global_max_pool(x, batch)
+            elif self.global_pool == 'add':
+                x = global_add_pool(x, batch)
+            elif self.global_pool == 'mean':
+                x = global_mean_pool(x, batch)
+
+        if conv_only: # Return convolution part
+            return x
+        
+        # Global features concatenated
+        if self.G > 0:
+            u = data.u.view(-1, self.G)
+            x = torch.cat((x, u), 1)
+
+        # Final layers
+        x = self.mlp1(x)
+        return x
+
+    # Returns softmax probability
+    def softpredict(self,x):
+        return F.softmax(self.forward(x), dim=1)
 
 
 # GATConv based graph net

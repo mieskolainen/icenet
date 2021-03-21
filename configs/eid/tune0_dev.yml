@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 1500000                # Maximum total number of events (per root file) to process
+MAXEVENTS: 15000                # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
@@ -118,18 +118,20 @@ plot_param:
 # Give all models some unique identifier and label
 active_models:
 
-#  - dmlp
-#  - cnn0
-#  - gnet0
+  - dmlp
+  - cnn0
+  - gnet0
 #  - gnet1
-#  - gnet3
 #  - gnet2
-#  - flr0
+#  - gnet3
+#  - gnet4
+
+  - flr0
   - xgb0
-#  - lgr0
+  - lgr0
 #  - xtx0
-#  - dmx0
-#  - dbnf0
+  - dmx0
+  - dbnf0
 #  - gxgb0 # Keep this last (fix the bug) !
 
 
@@ -147,12 +149,12 @@ gxgb0_param:
     label:  'GXGB-G'
 
     # Convolution model
-    conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+    conv_type:   'SUP'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
     conv_aggr:   'add'
     global_pool: 'max'
     CDIM: 96                   # Convolution output dimension
 
-    epochs: 50
+    epochs: 5
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005     # L2-regularization
@@ -163,6 +165,10 @@ gxgb0_param:
 
     device: 'auto'            # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
+    
+    # Read/Write of epochs
+    savemode: 'all'              # 'all', 'latest'
+    readmode: -1                 # -1 is the last saved epoch
 
   # ** XGBOOST **
   xgb:
@@ -198,12 +204,16 @@ gxgb0_param:
     objective: 'binary:logistic'     #
     eval_metric: ['auc', 'logloss']  # for evaluation
 
+    # Read/Write of epochs
+    savemode: 'all'              # 'all', 'latest'
+    readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet3_param:
-  train: 'graph'
+  train:   'graph'
   predict: 'torch_graph'
-  label:  'G-DEC-add'
+  label:   'G-DEC-add'
 
   # Convolution model
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
@@ -211,7 +221,7 @@ gnet3_param:
   global_pool: 'max'
   CDIM: 96                   # Convolution output dimension
   
-  epochs: 50
+  epochs: 5
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -220,8 +230,13 @@ gnet3_param:
   step_size: 200
   gamma: 0.1
 
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet0_param:
@@ -235,7 +250,7 @@ gnet0_param:
   global_pool: 'max'
   CDIM: 96                   # Convolution output dimension
 
-  epochs: 50
+  epochs: 5
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -246,6 +261,40 @@ gnet0_param:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Graph net
+gnet4_param:
+  train:   'graph'
+  predict: 'torch_graph'
+  label:  'G-PAN'
+
+  # Convolution model
+  conv_type:   'PAN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_aggr:   'max'
+  global_pool: 'max'
+  CDIM: 64                   # Convolution output dimension
+
+  epochs: 5
+  batch_size: 64
+  learning_rate: 0.003
+  weight_decay:  0.00005     # L2-regularization
+
+  # Scheduler
+  step_size: 200
+  gamma: 0.1
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet1_param:
@@ -259,7 +308,7 @@ gnet1_param:
   global_pool: 'max'
   CDIM: 96                   # Convolution output dimension
   
-  epochs: 50
+  epochs: 5
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005     # L2-regularization
@@ -270,6 +319,11 @@ gnet1_param:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Graph net
 gnet2_param:
@@ -283,7 +337,7 @@ gnet2_param:
   global_pool: 'max'
   CDIM: 96                   # Convolution output dimension
   
-  epochs: 50
+  epochs: 5
   batch_size: 64
   learning_rate: 0.003
   weight_decay:  0.00005      # L2-regularization
@@ -294,6 +348,10 @@ gnet2_param:
 
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Factorized Likelihood Ratio
@@ -342,6 +400,10 @@ xgb0_param:
   objective: 'binary:logistic'     #
   eval_metric: ['auc', 'logloss']  # for evaluation
 
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
 
 # Deep MLP
 dmlp_param:
@@ -354,7 +416,7 @@ dmlp_param:
   optimizer: 'AdamW'
   noise_reg: 0.0            # Noise regularization
   
-  epochs: 50
+  epochs: 5
   batch_size: 196
   learning_rate: 0.003
   weight_decay: 0.00001     # L2-regularization
@@ -364,6 +426,10 @@ dmlp_param:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -377,13 +443,17 @@ lgr0_param:
   optimizer: 'AdamW'
   noise_reg: 0.0            # Noise regularization
 
-  epochs: 50
+  epochs: 5
   batch_size: 196
   learning_rate: 0.003
   weight_decay: 0.00001       # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Convolutional Neural Net
@@ -401,12 +471,16 @@ cnn0_param:
   dropout_mlp: 0.5
   mlp_dim: 64
   
-  epochs: 50
+  epochs: 5
   batch_size: 128
   learning_rate: 0.001
   weight_decay: 0.00        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # XTX (hyperbinned) classifier
@@ -424,12 +498,16 @@ xtx0_param:
   neurons:  20
   dropout:  0.5
   
-  epochs: 50
+  epochs: 5
   batch_size:  196
   learning_rate: 0.005
   weight_decay: 0.01        # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Deep MAXOUT network
@@ -447,12 +525,16 @@ dmx0_param:
   neurons:  50
   dropout:  0.4
   
-  epochs: 50
+  epochs: 5
   batch_size: 128
   learning_rate: 0.005
   weight_decay: 0.00001       # L2-regularization
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 
 
 # Deep Normalizing Flow
@@ -462,7 +544,7 @@ dbnf0_param:
   label:  'DBNF'
   
   # Gradient descent
-  epochs: 50
+  epochs: 5
   batch_size: 512
   optimizer: 'Adam'
   learning_rate: 0.05
@@ -490,4 +572,8 @@ dbnf0_param:
   tensorboard: 'tensorboard'
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
 

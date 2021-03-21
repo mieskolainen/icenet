@@ -187,28 +187,29 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             epoch + 1, param['start_epoch'] + param['epochs'], train_loss.item(), validation_loss.item()))
 
         stop = scheduler.step(validation_loss,
-            callback_best   = aux.save_torch_model(model, optimizer, epoch + 1,
-                modeldir + f'/{label}_' + param['model'] + '.pth'),
-            callback_reduce = aux.load_torch_model(model, optimizer, param,
-                modeldir + f'/{label}_' + param['model'] + '.pth'))
+            callback_best   = aux.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
+                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),
+            callback_reduce = aux.load_torch_model(model=model, optimizer=optimizer,
+                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'))
         
         if param['tensorboard']:
-            writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch + 1)
-            writer.add_scalar('loss/validation', validation_loss.item(), epoch + 1)
-            writer.add_scalar('loss/train', train_loss.item(), epoch + 1)
+            writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch)
+            writer.add_scalar('loss/validation', validation_loss.item(), epoch)
+            writer.add_scalar('loss/train', train_loss.item(), epoch)
         
         if stop:
             break
     
     # Re-load the model        
-    aux.load_torch_model(model, optimizer, param, modeldir + f'/{label}_' + param['model'] + '.pth')()
-    
+    aux.load_torch_model(model=model, optimizer=optimizer, \
+        filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth')()
+
     optimizer.swap()
     validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
                                      for x_mb, in validation_generator], -1).mean()
     
-    print('###### Stop training after {} epochs!'.format(epoch + 1))
-    print('Validation loss: {:4.3f}'.format(validation_loss.item()))
+    print(f'###### Stop training after {epoch} epochs!')
+    print(f'Validation loss: {validation_loss.item():4.3f}')
 
 
 def create_model(param, verbose=False, rngseed=0):
@@ -266,15 +267,17 @@ def load_models(param, modelnames, modeldir):
     models = []
     for i in range(len(modelnames)):
         print(__name__ + f'.load_models: Loading model[{i}] from {modelnames[i]}')
-        
-        checkpoint = torch.load(modeldir + f'/{modelnames[i]}' + '.pth')
-        model = create_model(param, verbose=False)
+
+        model      = create_model(param, verbose=False)
         param['start_epoch'] = 0
+
+        filename   = aux.create_model_filename(path=modeldir, label=modelnames[i], \
+            epoch=param['readmode'], filetype='.pth')
+        checkpoint = torch.load(filename)
         
-        checkpoint = torch.load(modeldir + f'/{modelnames[i]}' + '.pth')
         model.load_state_dict(checkpoint['model'])
-        
         model.eval() # Turn on eval mode!
+
         models.append(model)
 
     return models

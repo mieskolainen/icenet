@@ -3,9 +3,9 @@ import icenet.deep
 import icenet.optim
 import icenet.tools
 
-__version__  = '0.01'
+__version__  = '0.02'
 __release__  = 'alpha'
-__date__     = '18/10/2020'
+__date__     = '19/03/2021'
 __author__   = 'm.mieskolainen@imperial.ac.uk'
 __asciiart__ = \
 """

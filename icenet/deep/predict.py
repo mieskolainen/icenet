@@ -7,6 +7,8 @@
 import math
 import numpy as np
 import torch
+import torch_geometric
+
 import argparse
 import pprint
 import os
@@ -51,13 +53,16 @@ def pred_graph_xgb(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
     
-    graph_model = aux.load_torch_checkpoint(args['modeldir'] + 
-        f"/{param['graph']['label']}_checkpoint" + ".pth").to('cpu')
-    graph_model.eval() # Turn eval mode one!
 
-    xgb_model   = pickle.load(open(args['modeldir'] + 
-        f"/{param['xgb']['label']}_checkpoint" + ".dat", 'rb'))
+    graph_model = aux.load_torch_checkpoint(path=args['modeldir'], \
+        label=param['graph']['label'], epoch=param['readmode']).to('cpu')
+    graph_model.eval() # Turn eval mode one!
     
+
+    xgb_model   = pickle.load(open(create_model_filename(path=args['modeldir'], \
+        label=param['graph']['label'], epoch=param['readmode'], filetype='.dat'), 'rb'))
+
+
     def func_predict(data):
 
         conv_x = graph_model.forward(data=data, conv_only=True).detach().numpy()
@@ -70,18 +75,53 @@ def pred_graph_xgb(args, param):
     return func_predict
 
 
+def pred_torch_graph(args, param):
+
+    label = param['label']
+
+    print(f'\nEvaluate {label} classifier ...')
+    
+    model         = aux.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model, device = dopt.model_to_cuda(model, device_type=param['device'])
+    model.eval() # Turn on eval mode!
+
+    def func_predict(x):
+        signalclass = 1
+
+        if isinstance(x, list):
+            x_in = x
+        else:
+            x_in = [x]
+
+        # Geometric type -> need to use batch loader
+        loader  = torch_geometric.data.DataLoader(x_in, batch_size=len(x), shuffle=False)
+        for batch in loader:
+            return model.softpredict(batch.to(device))[:, signalclass].detach().cpu().numpy()
+
+    return func_predict
+
+
 def pred_torch(args, param):
 
     label = param['label']
 
     print(f'\nEvaluate {label} classifier ...')
     
-    model = aux.load_torch_checkpoint(args['modeldir'] + f'/{label}_checkpoint' + '.pth').to('cpu')
+    model         = aux.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model, device = dopt.model_to_cuda(model, device_type=param['device'])
     model.eval() # Turn on eval mode!
 
     def func_predict(x):
         signalclass = 1
-        return model.softpredict(x)[:, signalclass].detach().numpy()
+
+        if not isinstance(x, dict):
+            x_in = x.to(device)
+        else:
+            x_in = copy.deepcopy(x)
+            for key in x_in.keys():
+                x_in[key] = x_in[key].to(device)
+
+        return model.softpredict(x_in)[:, signalclass].detach().cpu().numpy()
 
     return func_predict
 
@@ -147,7 +187,8 @@ def pred_xgb(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
-    xgb_model = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'rb'))
+    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
+    xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
         return xgb_model.predict(xgboost.DMatrix(data = x))
@@ -180,7 +221,7 @@ def pred_flr(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
 
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_checkpoint' + '.dat', 'rb'))
+    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     
