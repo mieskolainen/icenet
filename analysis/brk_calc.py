@@ -52,11 +52,13 @@ def main() :
             return io.apply_zscore(io.checkinfnan(X), X_mu, X_std)
         else:
             return X
+    
     # ====================================================================
     # Evaluate models
 
     ### DEEPSETS
-    DEPS_model = aux.load_torch_checkpoint(modeldir + '/DEPS_checkpoint.pth')
+    DEPS_model = aux.load_torch_checkpoint(path=modeldir, label=args['deps_param']['label'], epoch=args['readmode'])
+
     DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['deps_param']['device'])
     DEPS_model.eval() # Turn on eval mode!
 
@@ -74,7 +76,8 @@ def main() :
         return io.checkinfnan(y)
     
     ### MAXOUT
-    DMAX_model = aux.load_torch_checkpoint(modeldir + '/DMAX_checkpoint.pth')
+    DMAX_model = aux.load_torch_checkpoint(path=modeldir, label=args['dmax_param']['label'], epoch=args['readmode'])
+    
     DMAX_model, device = dopt.model_to_cuda(DMAX_model, device_type=args['dmax_param']['device'])
     DMAX_model.eval() # Turn on eval mode!
     

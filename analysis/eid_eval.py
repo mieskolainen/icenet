@@ -176,7 +176,7 @@ def evaluate(data, data_tensor, data_kin, data_graph, args):
 
         ID = args['active_models'][i]
         param = args[f'{ID}_param']
-        print(f'Training <{ID}> | {param} \n')
+        print(f'Evaluating <{ID}> | {param} \n')
         
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)

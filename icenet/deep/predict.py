@@ -75,7 +75,7 @@ def pred_graph_xgb(args, param):
     return func_predict
 
 
-def pred_torch_graph(args, param):
+def pred_torch_graph(args, param, signalclass = 1):
 
     label = param['label']
 
@@ -86,7 +86,6 @@ def pred_torch_graph(args, param):
     model.eval() # Turn on eval mode!
 
     def func_predict(x):
-        signalclass = 1
 
         if isinstance(x, list):
             x_in = x
@@ -101,7 +100,7 @@ def pred_torch_graph(args, param):
     return func_predict
 
 
-def pred_torch(args, param):
+def pred_torch(args, param, signalclass = 1):
 
     label = param['label']
 
@@ -112,7 +111,6 @@ def pred_torch(args, param):
     model.eval() # Turn on eval mode!
 
     def func_predict(x):
-        signalclass = 1
 
         if not isinstance(x, dict):
             x_in = x.to(device)
@@ -202,7 +200,7 @@ def pred_flow(args, param, n_dims, N_class=2):
     print(f'\nEvaluate {label} classifier ...')
 
     # Load models
-    param['n_dims'] = n_dims # Set input dimension
+    param['model_param']['n_dims'] = n_dims # Set input dimension
     
     modelnames = []
     for i in range(N_class):

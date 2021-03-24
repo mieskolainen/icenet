@@ -175,14 +175,14 @@ def test(model, loader, optimizer, device):
 # https://arxiv.org/abs/2006.16811
 #
 class PANNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, CDIM=64, dropout=0.5, conv_aggr=None, global_pool='max', filter_size=5, task='node'):
+    def __init__(self, D, C, G=0, E=None, cdim=64, dropout=0.5, conv_aggr=None, global_pool='max', filter_size=5, task='node'):
 
         super(PANNet, self).__init__()
 
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.dropout     = dropout
         self.task        = task
@@ -191,22 +191,28 @@ class PANNet(torch.nn.Module):
 
         # --------------------------------------------
 
-        self.conv1 = PANConv(D, CDIM, filter_size)
-        self.pool1 = PANXUMPooling(CDIM)
+        self.conv1 = PANConv(D, cdim, filter_size)
+        self.pool1 = PANXUMPooling(cdim)
         # self.drop1 = PANDropout()
 
-        self.conv2 = PANConv(CDIM, CDIM, filter_size)
-        self.pool2 = PANXUMPooling(CDIM)
+        self.conv2 = PANConv(cdim, cdim, filter_size)
+        self.pool2 = PANXUMPooling(cdim)
         # self.drop2 = PANDropout()
 
-        self.conv3 = PANConv(CDIM, CDIM, filter_size)
-        self.pool3 = PANXUMPooling(CDIM)
+        self.conv3 = PANConv(cdim, cdim, filter_size)
+        self.pool3 = PANXUMPooling(cdim)
+        
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
         
         # ------------------------------
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
@@ -241,12 +247,17 @@ class PANNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -270,13 +281,13 @@ class PANNet(torch.nn.Module):
 # https://arxiv.org/abs/1710.10903
 #
 class GATNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, CDIM=96, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
+    def __init__(self, D, C, G=0, E=None, cdim=96, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
         super(GATNet, self).__init__()
 
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.dropout     = dropout
         self.task        = task
@@ -286,12 +297,18 @@ class GATNet(torch.nn.Module):
         self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
 
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D*2 + self.D, self.CDIM])
+        self.lin1  = MLP([self.D*2 + self.D, self.cdim])
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
+
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -309,12 +326,17 @@ class GATNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -340,13 +362,13 @@ class GATNet(torch.nn.Module):
 # https://arxiv.org/abs/xyz
 #
 class SUPNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=1, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
         super(SUPNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.task        = task
         self.global_pool = global_pool
@@ -356,12 +378,18 @@ class SUPNet(torch.nn.Module):
         self.conv2 = SuperEdgeConv(MLP([2 * 32 + E, 64]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.CDIM])
+        self.lin1  = MLP([32 + 64, self.cdim])
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
+
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -379,12 +407,17 @@ class SUPNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
         
         if conv_only: # Return convolution part
             return x
@@ -409,13 +442,13 @@ class SUPNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class ECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=1, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
         super(ECNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.task  = task
         self.global_pool = global_pool
@@ -425,12 +458,18 @@ class ECNet(torch.nn.Module):
         self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.CDIM])
+        self.lin1  = MLP([32 + 64, self.cdim])
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
+
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -448,12 +487,17 @@ class ECNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -478,13 +522,13 @@ class ECNet(torch.nn.Module):
 # https://arxiv.org/abs/1801.07829
 #
 class DECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=4, E=None, CDIM=96, task='node', conv_aggr='max', global_pool='max'):
+    def __init__(self, D, C, G=0, k=4, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
         super(DECNet, self).__init__()
         
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.task  = task
         self.global_pool = global_pool
@@ -494,12 +538,18 @@ class DECNet(torch.nn.Module):
         self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=conv_aggr)
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.CDIM])
+        self.lin1  = MLP([32 + 64, self.cdim])
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
+
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -517,12 +567,17 @@ class DECNet(torch.nn.Module):
 
         # ** Global pooling (to handle graph level classification) **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -547,7 +602,7 @@ class DECNet(torch.nn.Module):
 # https://arxiv.org/abs/1704.01212
 #
 class NNNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=1, CDIM=96, task='node', conv_aggr='add', global_pool='s2s'):
+    def __init__(self, D, C, G=0, E=1, cdim=96, task='node', conv_aggr='add', global_pool='s2s'):
         super(NNNet, self).__init__()
 
         self.D = D  # node feature dimension
@@ -555,7 +610,7 @@ class NNNet(torch.nn.Module):
         self.G = G  # global feature dimension
         self.C = C  # number output classes
         
-        self.CDIM = CDIM  # latent dimension
+        self.cdim = cdim  # latent dimension
 
         self.task        = task
         self.global_pool = global_pool
@@ -566,18 +621,18 @@ class NNNet(torch.nn.Module):
         self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv layer outputs
-        self.lin1  = MLP([D+D, self.CDIM])
+        self.lin1  = MLP([D+D, self.cdim])
 
         # Set2Set pooling operation produces always output with 2 x input dimension
         # => use linear layer to project down
         if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.CDIM, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.CDIM, self.CDIM)
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
 
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
         
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -604,6 +659,8 @@ class NNNet(torch.nn.Module):
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -641,6 +698,12 @@ class SplineNet(torch.nn.Module):
         self.conv1 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=3)
         self.conv2 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=5)
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.D, self.D)
+
         if (self.G > 0):
             self.Z = self.D + self.G
         else:
@@ -663,12 +726,17 @@ class SplineNet(torch.nn.Module):
         
         # ** Global pooling **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -703,6 +771,12 @@ class SAGENet(torch.nn.Module):
         self.conv1 = SAGEConv(self.D, self.D)
         self.conv2 = SAGEConv(self.D, self.D)
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.D, self.D)
+
         if (self.G > 0):
             self.Z = self.D + self.G
         else:
@@ -727,12 +801,17 @@ class SAGENet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -768,6 +847,12 @@ class SGNet(torch.nn.Module):
         self.conv1 = SGConv(self.D, self.D, self.K, cached=False)
         self.conv2 = SGConv(self.D, self.D, self.K, cached=False)
         
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.D, self.D)
+
         if (self.G > 0):
             self.Z = self.D + self.G
         else:
@@ -792,12 +877,17 @@ class SGNet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
 
         if conv_only: # Return convolution part
             return x
@@ -823,13 +913,13 @@ class SGNet(torch.nn.Module):
 # https://arxiv.org/abs/1905.12265
 #
 class GINENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, CDIM=96, conv_aggr=None, global_pool='max', task='node'):
+    def __init__(self, D, C, G=0, E=None, cdim=96, conv_aggr=None, global_pool='max', task='node'):
         super(GINENet, self).__init__()
 
         self.D = D
         self.C = C
         self.G = G
-        self.CDIM = CDIM
+        self.cdim = cdim
 
         self.task  = task
         self.global_pool = global_pool
@@ -839,12 +929,18 @@ class GINENet(torch.nn.Module):
         self.conv2 = GINEConv(MLP([self.D, 64]))
         
         # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D + 64, self.CDIM])
+        self.lin1  = MLP([self.D + 64, self.cdim])
+
+        # Set2Set pooling operation produces always output with 2 x input dimension
+        # => use linear layer to project down
+        if self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.cdim, self.cdim)
 
         if (self.G > 0):
-            self.Z = self.CDIM + self.G
+            self.Z = self.cdim + self.G
         else:
-            self.Z = self.CDIM
+            self.Z = self.cdim
 
         # Final layers concatenating everything
         self.mlp1  = MLP([self.Z, self.Z, self.C])
@@ -878,12 +974,17 @@ class GINENet(torch.nn.Module):
 
         # ** Global pooling **
         if self.task == 'graph':
-            if   self.global_pool == 'max':
+            if self.global_pool == 's2s':
+                x = self.S2Spool(x, data.batch)
+                x = self.S2Slin(x)
+            elif self.global_pool == 'max':
                 x = global_max_pool(x, data.batch)
             elif self.global_pool == 'add':
                 x = global_add_pool(x, data.batch)
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
+            else:
+                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
         
         if conv_only: # Return convolution part
             return x

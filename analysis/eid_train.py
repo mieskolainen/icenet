@@ -43,6 +43,8 @@ from iceid import common
 from iceid import graphio
 
 
+
+
 # Main function
 #
 def main() :
@@ -163,8 +165,8 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
 
     X_val = torch.from_numpy(data.val.x).type(torch.FloatTensor)
     Y_val = torch.from_numpy(data.val.y).type(torch.LongTensor)
-
-
+    
+    
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -173,7 +175,12 @@ def trainloop(data, data_tensor, data_kin, data_graph, trn_weights, args) :
         print(f'Training <{ID}> | {param} \n')
 
         if   param['train'] == 'graph':
-            train.train_graph(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)
+            
+            if args['raytune_param']['active']:
+                train.raytune_main(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)
+            else:
+                train.train_graph(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)
+
 
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  

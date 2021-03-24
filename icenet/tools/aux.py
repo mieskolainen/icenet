@@ -443,7 +443,7 @@ def create_model_filename(path, label, epoch, filetype):
     return createfilename(epoch)
 
 
-def load_torch_checkpoint(path='/', label='mynet', epoch=-1) :
+def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
     """ Load pytorch checkpoint
 
     Args:

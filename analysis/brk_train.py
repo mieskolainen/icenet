@@ -174,15 +174,12 @@ def main() :
         print(f'\nTraining {label} classifier ...')
         dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout'])
         dmax_model, losses, trn_aucs, val_aucs = dopt.train(model = dmax_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, param = args['dmax_param'])
+            trn_weights = trn_weights, param = args['dmax_param'], modeldir = modeldir)
         
         # Plot evolution
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-        
-        ## Save
-        checkpoint = {'model': dmax_model, 'state_dict': dmax_model.state_dict()}
-        torch.save(checkpoint, modeldir + '/DMAX_checkpoint.pth')
+
     
     # ====================================================================
     print('<< TRAINING DEEP SETS >>')
@@ -206,16 +203,12 @@ def main() :
         print(f'\nTraining {label} classifier ...')
         deps_model = deps.DEPS(D = D, z_dim = args['deps_param']['z_dim'], C = C)
         deps_model, losses, trn_aucs, val_aucs = dopt.train(model = deps_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val, 
-            trn_weights = trn_weights, param = args['deps_param'])
+            trn_weights = trn_weights, param = args['deps_param'], modeldir = modeldir)
         
         # Plot evolution
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-        
-        ## Save
-        checkpoint = {'model': deps_model, 'state_dict': deps_model.state_dict()}
-        torch.save(checkpoint, modeldir + '/DEPS_checkpoint.pth')
-        
+    
         
     print('\n' + __name__+ ' DONE')
 

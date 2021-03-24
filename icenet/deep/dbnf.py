@@ -126,13 +126,11 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     if param['tensorboard']:
         from tensorboardX import SummaryWriter
         writer = SummaryWriter(os.path.join(param['tensorboard'], param['modelname']))
-    
-    epoch = param['start_epoch']
 
-    params = {'batch_size': param['batch_size'],
-            'shuffle': True,
-            'num_workers': param['num_workers'],
-            'pin_memory': True}
+    params = {'batch_size': param['opt_param']['batch_size'],
+            'shuffle'     : True,
+            'num_workers' : param['num_workers'],
+            'pin_memory'  : True}
 
     # Training generator
     training_set         = Dataset(trn_x, trn_weights)
@@ -140,10 +138,10 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     
     # Validation generator
     validation_set       = torch.utils.data.TensorDataset(torch.from_numpy(val_x).float().to(device))
-    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=param['batch_size'], shuffle=False)
+    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=param['opt_param']['batch_size'], shuffle=False)
     
     # Training loop
-    for epoch in tqdm(range(param['start_epoch'], param['start_epoch'] + param['epochs']), ncols = 88):
+    for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
 
         train_loss  = []
         permutation = torch.randperm((trn_x.shape[0]))
@@ -155,21 +153,24 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
             
             # Noise regularization
-            if param['noise_reg'] > 0:
-                noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
+            if param['opt_param']['noise_reg'] > 0:
+                noise   = torch.empty(batch_x.shape).normal_(mean=0, \
+                    std=param['opt_param']['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
                 batch_x = batch_x + noise
-            
+
+
             # Per sample weights
             log_weights = torch.log(batch_weights + EPS)
             
             # Weighted negative log-likelihood loss
             lossvec = compute_log_p_x(model, batch_x)
-            loss    = - (lossvec + log_weights).sum()
-            
+            loss    = -(lossvec + log_weights).sum()
+
+
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=param['clip_norm'])
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=param['opt_param']['clip_norm'])
             optimizer.step()
 
             train_loss.append(loss)
@@ -184,7 +185,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         
 
         print('Epoch {:3}/{:3} -- train_loss: {:4.3f} -- validation_loss: {:4.3f}'.format(
-            epoch + 1, param['start_epoch'] + param['epochs'], train_loss.item(), validation_loss.item()))
+            epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
 
         stop = scheduler.step(validation_loss,
             callback_best   = aux.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
@@ -268,8 +269,8 @@ def load_models(param, modelnames, modeldir):
     for i in range(len(modelnames)):
         print(__name__ + f'.load_models: Loading model[{i}] from {modelnames[i]}')
 
-        model      = create_model(param, verbose=False)
-        param['start_epoch'] = 0
+        model      = create_model(param['model_param'], verbose=False)
+        param['opt_param']['start_epoch'] = 0
 
         filename   = aux.create_model_filename(path=modeldir, label=modelnames[i], \
             epoch=param['readmode'], filetype='.pth')

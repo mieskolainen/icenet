@@ -241,16 +241,19 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
     
 
     # Define the optimizer
-    if   param['optimizer'] == 'AdamW':
-        optimizer = torch.optim.AdamW(model.parameters(), lr=param['learning_rate'], weight_decay=param['weight_decay'])
-    elif param['optimizer'] == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(),  lr=param['learning_rate'], weight_decay=param['weight_decay'])
-    elif param['optimizer'] == 'SGD':
-        optimizer = torch.optim.SGD(model.parameters(),   lr=param['learning_rate'], weight_decay=param['weight_decay'])
+    opt           = param['opt_param']['optimizer']
+    learning_rate = param['opt_param']['learning_rate']
+    weight_decay  = param['opt_param']['weight_decay']
+    
+    if   opt == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
+    elif opt == 'Adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
+    elif opt == 'SGD':
+        optimizer = torch.optim.SGD(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
     else:
-        raise Exception(__name__ + f'.train: Unknown optimizer {param["optimizer"]} (use "Adam", "AdamW" or "SGD")')
-
-
+        raise Exception(__name__ + f'.train: Unknown optimizer {opt} (use "Adam", "AdamW" or "SGD")')
+    
     # List to store losses
     losses   = []
     trn_aucs = []
@@ -263,7 +266,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
     for i in range(model.C):
         trn_one_hot_weights[YY == i, i] = trn_weights[YY == i]
 
-    params = {'batch_size': param['batch_size'],
+    params = {'batch_size': param['opt_param']['batch_size'],
             'shuffle'     : True,
             'num_workers' : param['num_workers'],
             'pin_memory'  : True}
@@ -284,7 +287,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
 
 
     ### Epoch loop
-    for epoch in tqdm(range(param['epochs']), ncols = 60):
+    for epoch in tqdm(range(param['opt_param']['epochs']), ncols = 60):
 
         # Minibatch loop
         sumloss = 0
@@ -314,12 +317,12 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
 
             # Evaluate loss
             loss = 0
-            if   param['lossfunc'] == 'cross_entropy':
+            if   param['opt_param']['lossfunc'] == 'cross_entropy':
                 loss = multiclass_cross_entropy(phat, batch_y, model.C, batch_weights)
-            elif param['lossfunc'] == 'focal_entropy':
-                loss = multiclass_focal_entropy(phat, batch_y, model.C, batch_weights, param['gamma'])
-            elif param['lossfunc'] == 'inverse_focal':
-                loss = multiclass_inverse_focal(phat, batch_y, model.C, batch_weights, param['gamma'])
+            elif param['opt_param']['lossfunc'] == 'focal_entropy':
+                loss = multiclass_focal_entropy(phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
+            elif param['opt_param']['lossfunc'] == 'inverse_focal':
+                loss = multiclass_inverse_focal(phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
             else:
                 print(__name__ + '.train: Error with unknown lossfunc ')
 
@@ -373,15 +376,16 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
 
                     # 2-class problems
                     if model.C == 2:
-                        metric = aux.Metric(y_true = batch_y.detach().cpu().numpy(), y_soft = phat.detach().cpu().numpy()[:, SIGNAL_ID], valrange=[0,1])
+                        metric = aux.Metric(y_true = batch_y.detach().cpu().numpy(), \
+                            y_soft = phat.detach().cpu().numpy()[:, SIGNAL_ID], valrange=[0,1])
                         if metric.auc > 0:
                             auc += metric.auc
                             k += 1
 
                     # N-class problems
                     else:
-                        auc += sklearn.metrics.roc_auc_score(y_true = batch_y.detach().cpu().numpy(), y_score = phat.detach().cpu().numpy(), \
-                            average="weighted", multi_class='ovo', labels=class_labels)
+                        auc += sklearn.metrics.roc_auc_score(y_true = batch_y.detach().cpu().numpy(), \
+                            y_score = phat.detach().cpu().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
                         k += 1
 
                 # Add AUC
@@ -398,3 +402,4 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
             print('Epoch = {} : train loss = {:.3f}'. format(epoch, avgloss)) 
 
     return model, losses, trn_aucs, val_aucs
+

@@ -5,7 +5,7 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 15000                # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000                 # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
@@ -110,6 +110,54 @@ plot_param:
 
 
 # ========================================================================
+## Hyperparameter raytune setup
+# ========================================================================
+
+
+raytune_param:
+  active:         False
+  num_samples:    10
+  max_num_epochs: 10
+
+
+raytune_setup:
+
+  trial0:
+    search_algo: 'HyperOpt'
+
+    search_metric:
+      metric: 'AUC'
+      mode: 'max'
+
+    param:
+      cdim:
+        type: "tune.choice"
+        value: [32, 64, 96, 128, 196, 256, 512, 1024]
+
+      global_pool:
+        type: "tune.choice"
+        value: ['s2s', 'max', 'add', 'mean']
+
+      batch_size:
+        type: "tune.choice"
+        value: [16, 32, 64, 128]
+
+      learning_rate:
+        type: "tune.loguniform"
+        value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
+
+    #
+    #batch_size:
+    #  type: "tune.choice"
+    #  value: [32, 64, 128, 256]
+    #
+
+    # Add more steers here
+    # ...
+
+
+
+# ========================================================================
 ## Classifier setup
 # ========================================================================
 
@@ -121,10 +169,10 @@ active_models:
   - dmlp
   - cnn0
   - gnet0
-#  - gnet1
-#  - gnet2
-#  - gnet3
-#  - gnet4
+  - gnet1
+  - gnet2
+  - gnet3
+  - gnet4
 
   - flr0
   - xgb0
@@ -144,26 +192,33 @@ gxgb0_param:
 
   # ** GRAPH NETWORK **
   graph:
-    train: 'graph'
+    train:   'graph'
     predict: 'torch_graph'
-    label:  'GXGB-G'
+    label:   'GXGB-G'
+    raytune:  null
 
     # Convolution model
-    conv_type:   'SUP'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-    conv_aggr:   'add'
-    global_pool: 'max'
-    CDIM: 96                   # Convolution output dimension
+    conv_type:   'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
-    epochs: 5
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005     # L2-regularization
+    # Model
+    model_param:
+      conv_aggr:   'add'
+      global_pool: 's2s'
+      cdim: 96                   # Convolution output dimension
+
+    # Optimization
+    opt_param:  
+      epochs: 50
+      batch_size: 64
+      learning_rate: 0.003
+      weight_decay:  0.00005     # L2-regularization
 
     # Scheduler
-    step_size: 200
-    gamma: 0.1
+    scheduler_param:
+      step_size: 200
+      gamma: 0.1
 
-    device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+    device: 'auto'               # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
     
     # Read/Write of epochs
@@ -172,10 +227,11 @@ gxgb0_param:
 
   # ** XGBOOST **
   xgb:
-    train: 'xgb'
+    train:   'xgb'
     predict: 'xgb'
-    label: 'GXGB-XGB'
-    
+    label:   'GXGB-XGB'
+    raytune:  null
+
     # general parameters
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     num_boost_round: 300    # number of epochs (equal to the number of trees!)
@@ -210,25 +266,103 @@ gxgb0_param:
 
 
 # Graph net
-gnet3_param:
-  train:   'graph'
-  predict: 'torch_graph'
-  label:   'G-DEC-add'
+gnet0_param:
+  train:    'graph'
+  predict:  'torch_graph'
+  label:    'G-NN'
+  raytune:  'trial0'
 
-  # Convolution model
-  conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  conv_aggr:   'add'
-  global_pool: 'max'
-  CDIM: 96                   # Convolution output dimension
-  
-  epochs: 5
-  batch_size: 64
-  learning_rate: 0.003
-  weight_decay:  0.00005     # L2-regularization
+  conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+
+  # Model
+  model_param:
+    conv_aggr:   'max'
+    global_pool: 'mean'
+    cdim: 196                 # Convolution output dimension
+
+  # Optimization
+  opt_param:
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
-  step_size: 200
-  gamma: 0.1
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+
+# Graph net
+gnet1_param:
+  train:   'graph'
+  predict: 'torch_graph'
+  label:   'G-SUP'
+  raytune:  null
+
+  # Convolution model
+  conv_type: 'SUP'              # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+
+  # Model
+  model_param:
+    conv_aggr:   'add'
+    global_pool: 's2s'
+    cdim: 96                   # Convolution output dimension
+
+  # Optimization
+  opt_param:
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005     # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Graph net
+gnet2_param:
+  train:   'graph'
+  predict: 'torch_graph'
+  label:   'G-EC-add'
+  raytune:  null
+
+  # Convolution model
+  conv_type: 'EC'            # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+
+  # Model
+  model_param:
+    conv_aggr:   'add'
+    global_pool: 's2s'
+    cdim: 96                   # Convolution output dimension
+  
+  # Optimization
+  opt_param:
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
 
   device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -239,27 +373,34 @@ gnet3_param:
 
 
 # Graph net
-gnet0_param:
+gnet3_param:
   train:   'graph'
   predict: 'torch_graph'
-  label:  'G-NN'
+  label:   'G-DEC-add'
+  raytune:  'trial0'
 
   # Convolution model
-  conv_type:   'NN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  conv_aggr:   'max'
-  global_pool: 'max'
-  CDIM: 96                   # Convolution output dimension
+  conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
-  epochs: 5
-  batch_size: 64
-  learning_rate: 0.003
-  weight_decay:  0.00005     # L2-regularization
+  # Model
+  model_param:
+    conv_aggr:   'add'
+    global_pool: 's2s'
+    cdim: 96                   # Convolution output dimension
+  
+  # Optimization
+  opt_param:
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005     # L2-regularization
 
   # Scheduler
-  step_size: 200
-  gamma: 0.1
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
 
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
@@ -271,82 +412,31 @@ gnet0_param:
 gnet4_param:
   train:   'graph'
   predict: 'torch_graph'
-  label:  'G-PAN'
+  label:   'G-PAN'
+  raytune:  null
 
   # Convolution model
   conv_type:   'PAN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  conv_aggr:   'max'
-  global_pool: 'max'
-  CDIM: 64                   # Convolution output dimension
 
-  epochs: 5
-  batch_size: 64
-  learning_rate: 0.003
-  weight_decay:  0.00005     # L2-regularization
+  # Model
+  model_param:
+    conv_aggr:   'max'
+    global_pool: 's2s'
+    cdim: 64                   # Convolution output dimension
+
+  # Optimization
+  opt_param:
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005     # L2-regularization
 
   # Scheduler
-  step_size: 200
-  gamma: 0.1
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Graph net
-gnet1_param:
-  train: 'graph'
-  predict: 'torch_graph'
-  label:  'G-SUP'
-
-  # Convolution model
-  conv_type: 'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  conv_aggr:   'add'
-  global_pool: 'max'
-  CDIM: 96                   # Convolution output dimension
-  
-  epochs: 5
-  batch_size: 64
-  learning_rate: 0.003
-  weight_decay:  0.00005     # L2-regularization
-
-  # Scheduler
-  step_size: 200
-  gamma: 0.1
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Graph net
-gnet2_param:
-  train: 'graph'
-  predict: 'torch_graph'
-  label:  'G-EC-add'
-
-  # Convolution model
-  conv_type: 'EC'            # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-  conv_aggr:   'add'
-  global_pool: 'max'
-  CDIM: 96                   # Convolution output dimension
-  
-  epochs: 5
-  batch_size: 64
-  learning_rate: 0.003
-  weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  step_size: 200
-  gamma: 0.1
-
-  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
@@ -356,10 +446,11 @@ gnet2_param:
 
 # Factorized Likelihood Ratio
 flr0_param:
-  train: 'flr'
+  train:   'flr'
   predict: 'flr'
-  label: 'FLR'
-  
+  label:   'FLR'
+  raytune:  null
+
   nbins: 60
   qmin:  0.5 # in [0,100]
   qmax: 99.5 # in [0,100]
@@ -368,10 +459,11 @@ flr0_param:
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb0_param:
-  train: 'xgb'
+  train:   'xgb'
   predict: 'xgb'
-  label: 'XGB'
-  
+  label:   'XGB'
+  raytune:  null
+
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
   num_boost_round: 300    # number of epochs (equal to the number of trees!)
@@ -407,22 +499,29 @@ xgb0_param:
 
 # Deep MLP
 dmlp_param:
-  train: 'dmlp'
+  train:   'dmlp'
   predict: 'torch_generic'
-  label: 'DMLP'
+  label:   'DMLP'
+  raytune:  null
+
+  # Optimization
+  opt_param:
+
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent
+    optimizer: 'AdamW'
+    noise_reg: 0.0            # Noise regularization
+    
+    epochs: 50
+    batch_size: 196
+    learning_rate: 0.003
+    weight_decay: 0.00001     # L2-regularization
   
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent
-  optimizer: 'AdamW'
-  noise_reg: 0.0            # Noise regularization
-  
-  epochs: 5
-  batch_size: 196
-  learning_rate: 0.003
-  weight_decay: 0.00001     # L2-regularization
-  
-  mlp_dim: [64, 64, 64]     # hidden layer dimensions
-  batch_norm: True    
+  # Model
+  model_param:
+    mlp_dim: [64, 64, 64]     # hidden layer dimensions
+    batch_norm: True    
+
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -434,19 +533,21 @@ dmlp_param:
 
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
-  train: 'lgr'
+  train:   'lgr'
   predict: 'torch_generic'
-  label: 'LGR'
-  
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent
-  optimizer: 'AdamW'
-  noise_reg: 0.0            # Noise regularization
+  label:   'LGR'
+  raytune:  null
 
-  epochs: 5
-  batch_size: 196
-  learning_rate: 0.003
-  weight_decay: 0.00001       # L2-regularization
+  opt_param:
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent
+    optimizer: 'AdamW'
+    noise_reg: 0.0            # Noise regularization
+
+    epochs: 50
+    batch_size: 196
+    learning_rate: 0.003
+    weight_decay: 0.00001       # L2-regularization
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -458,23 +559,29 @@ lgr0_param:
 
 # Convolutional Neural Net
 cnn0_param:
-  train: 'cnn'
+  train:   'cnn'
   predict: 'torch_image'
-  label: 'CNN'
+  label:   'CNN'
+  raytune:  null
 
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent
-  optimizer: 'AdamW'
-  noise_reg: 0.0            # Noise regularization
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent
+    optimizer: 'AdamW'
+    noise_reg: 0.0            # Noise regularization
   
-  dropout_cnn: 0.25
-  dropout_mlp: 0.5
-  mlp_dim: 64
+    epochs: 50
+    batch_size: 128
+    learning_rate: 0.001
+    weight_decay: 0.00        # L2-regularization
   
-  epochs: 5
-  batch_size: 128
-  learning_rate: 0.001
-  weight_decay: 0.00        # L2-regularization
+  # Model
+  model_param:
+    dropout_cnn: 0.25
+    dropout_mlp: 0.5
+    mlp_dim: 64
+    
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -485,23 +592,29 @@ cnn0_param:
 
 # XTX (hyperbinned) classifier
 xtx0_param:
-  train: 'xtx'
+  train:   'xtx'
   predict: 'xtx'
-  label:  'XTX'
+  label:   'XTX'
+  raytune:  null
 
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent parameter
-  optimizer: 'AdamW'        # Adam, AdamW
-  noise_reg: 0.0            # Noise regularization
+  # Optimization
+  opt_param:
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent parameter
+    optimizer: 'AdamW'        # Adam, AdamW
+    noise_reg: 0.0            # Noise regularization
+    
+    epochs: 50
+    batch_size:  196
+    learning_rate: 0.005
+    weight_decay: 0.01        # L2-regularization
 
-  num_units: 2
-  neurons:  20
-  dropout:  0.5
-  
-  epochs: 5
-  batch_size:  196
-  learning_rate: 0.005
-  weight_decay: 0.01        # L2-regularization
+  # Model param
+  model_param:
+    num_units: 2
+    neurons:  20
+    dropout:  0.5
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -512,23 +625,29 @@ xtx0_param:
 
 # Deep MAXOUT network
 dmx0_param:
-  train: 'dmax'
+  train:   'dmax'
   predict: 'torch_generic'
-  label:  'DMAX'
-  
-  lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-  gamma: 2                  # focal_entropy exponent parameter
-  optimizer: 'AdamW'        # Adam, AdamW
-  noise_reg: 0.0            # Noise regularization
+  label:   'DMAX'
+  raytune:  null
 
-  num_units: 15
-  neurons:  50
-  dropout:  0.4
-  
-  epochs: 5
-  batch_size: 128
-  learning_rate: 0.005
-  weight_decay: 0.00001       # L2-regularization
+  # Optimization
+  opt_param:
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent parameter
+    optimizer: 'AdamW'        # Adam, AdamW
+    noise_reg: 0.0            # Noise regularization
+
+    epochs: 50
+    batch_size: 128
+    learning_rate: 0.005
+    weight_decay: 0.00001       # L2-regularization
+
+  # Model parameter
+  model_param:  
+    num_units: 15
+    neurons:  50
+    dropout:  0.4
+    
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -539,36 +658,40 @@ dmx0_param:
 
 # Deep Normalizing Flow
 dbnf0_param:
-  train: 'flow'
+  train:   'flow'
   predict: 'torch_flow'
-  label:  'DBNF'
-  
+  label:   'DBNF'
+  raytune:  null
+
   # Gradient descent
-  epochs: 5
-  batch_size: 512
-  optimizer: 'Adam'
-  learning_rate: 0.05
-  weight_decay: 0.0         # L2-regularization
-  noise_reg: 0.001          # Noise regularization
-  polyak: 0.998
-  clip_norm: 0.1
-  
+  opt_param:
+    epochs: 50
+    batch_size: 512
+    optimizer: 'Adam'
+    learning_rate: 0.05
+    weight_decay: 0.0         # L2-regularization
+    noise_reg: 0.001          # Noise regularization
+    polyak: 0.998
+    clip_norm: 0.1
+    start_epoch: 0
+
   # Learning rate reduction on plateau
-  factor:  0.1
-  patience: 20
-  cooldown: 10
-  min_lr: 0.0005
-  early_stopping: 100
+  scheduler_param:  
+    factor:  0.1
+    patience: 20
+    cooldown: 10
+    min_lr: 0.0005
+    early_stopping: 100
 
   # Model structure
-  flows: 10                 # number of flow blocks
-  layers: 0                 # intermediate layers in a flow block
-  hidden_dim: 10            # 
-  residual: 'gated'         # choises 'none', 'normal', 'gated'
-  perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
+  model_param:  
+    flows: 10                 # number of flow blocks
+    layers: 0                 # intermediate layers in a flow block
+    hidden_dim: 10            # 
+    residual: 'gated'         # choises 'none', 'normal', 'gated'
+    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
   
   modelname: 'null'
-  start_epoch: 0
   tensorboard: 'tensorboard'
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
