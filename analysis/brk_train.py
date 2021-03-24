@@ -124,8 +124,8 @@ def main() :
 
     # Number of classes (powerset dimension)
     C = BMAT.shape[0]
-
-
+    
+    
     # ====================================================================
     # Training
     print('<< TRAINING XGBOOST >>')
@@ -172,7 +172,7 @@ def main() :
         X_val = torch.from_numpy(X).type(torch.FloatTensor)
 
         print(f'\nTraining {label} classifier ...')
-        dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, num_units=args['dmax_param']['num_units'], neurons=args['dmax_param']['neurons'], dropout=args['dmax_param']['dropout'])
+        dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, **args['dmax_param']['model_param'])
         dmax_model, losses, trn_aucs, val_aucs = dopt.train(model = dmax_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
             trn_weights = trn_weights, param = args['dmax_param'], modeldir = modeldir)
         
@@ -201,7 +201,7 @@ def main() :
         label = args['deps_param']['label']
         
         print(f'\nTraining {label} classifier ...')
-        deps_model = deps.DEPS(D = D, z_dim = args['deps_param']['z_dim'], C = C)
+        deps_model = deps.DEPS(D = D, C = C, **args['deps_param']['model_param'])
         deps_model, losses, trn_aucs, val_aucs = dopt.train(model = deps_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val, 
             trn_weights = trn_weights, param = args['deps_param'], modeldir = modeldir)
         

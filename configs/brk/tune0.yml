@@ -128,19 +128,23 @@ dmax_param:
   active: true
   label:  'DMAX'
 
-  lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
-  gamma: 2 # focal_entropy exponent parameter
-  optimizer: 'AdamW'
-  noise_reg: 0.0                # Noise regularization
-
-  num_units: 12
-  neurons:  36
-  dropout:  0.5
+  # Optimization
+  opt_param:
+    lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
+    gamma: 2 # focal_entropy exponent parameter
+    optimizer: 'AdamW'
+    noise_reg: 0.0                # Noise regularization
+    epochs:  200
+    batch_size:  256
+    learning_rate: 0.005
+    weight_decay: 0.01            # L2-regularization
   
-  epochs:  200
-  batch_size:  256
-  learning_rate: 0.005
-  weight_decay: 0.01            # L2-regularization
+  # Model parameters
+  model_param:
+    num_units: 12
+    neurons:  36
+    dropout:  0.5
+    
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
 
@@ -154,20 +158,24 @@ deps_param:
   active: true
   label:  'DEPS'
 
-  lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
-  gamma: 2 # focal_entropy exponent parameter
-  optimizer: 'AdamW'
-  noise_reg: 0.0                # Noise regularization
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy'     # cross_entropy, focal_entropy
+    gamma: 2 # focal_entropy exponent parameter
+    optimizer: 'AdamW'
+    noise_reg: 0.0                # Noise regularization
+    epochs:  200
+    batch_size:  256
+    learning_rate: 0.005
+    weight_decay: 0.01            # L2-regularization
+  
+  # Model parameters
+  model_param:  
+    z_dim: 64                   # Latent dimension
 
-  z_dim: 64 # Latent dimension
-
-  epochs:  200
-  batch_size:  256
-  learning_rate: 0.005
-  weight_decay: 0.01            # L2-regularization
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
