@@ -77,7 +77,7 @@ def ABCD_err(b,c,d, method='errorprop', N=int(1e5), alpha=0.32, lrange=5):
             ind      = np.random.randint(len(data)-1, size=len(data))
             bs       = data[ind]
             A_new[i] = ABCD_eq(b=np.sum(bs==T[0]), c=np.sum(bs==T[1]), d=np.sum(bs==T[2]))
-        
+
         return prc_CI(x=A_new, alpha=alpha)
 
     elif method == 'likelihood':
@@ -117,7 +117,7 @@ def ABCD_err(b,c,d, method='errorprop', N=int(1e5), alpha=0.32, lrange=5):
 @numba.njit
 def ABCD_2NLL(B,C,D, mu, mu_B, mu_D, EPS=1e-32):
     """
-    ABCD estimator for the negative log-likelihood function
+    ABCD estimators negative log-likelihood function
     
     DEFINITION: A = B x C / D
     
