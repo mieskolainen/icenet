@@ -48,7 +48,7 @@ class Mine(nn.Module):
         return output
 
 
-def train_mine(joint, marginal, net, opt, ma_eT, alpha=0.01, loss='mine_ema'):
+def train_mine(joint, marginal, net, opt, ma_eT, alpha=0.01, loss='MINE_EMA'):
     """
     Args:
         batch : a tuple of (joint, marginal)
