@@ -1,5 +1,7 @@
 # Linear (correlation) and non-linear dependency tools
 #
+# Run with: pytest ./icefit/cortools -rP (can take few minutes)
+#
 # m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
@@ -11,6 +13,9 @@ import scipy.stats as stats
 
 # Needed for tests only
 import pandas as pd
+
+
+from icefit import mine
 
 
 def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
@@ -381,12 +386,14 @@ def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
 
 def test_gaussian():
     """
-    Gaussian unit test of the estimators.
+    #Gaussian unit test of the estimators.
     """
     import pytest
 
+    EPS = 0.3
+
     ## Create synthetic Gaussian data
-    for N in [int(1e4), int(1e5)]:
+    for N in [int(1e3), int(1e4)]:
 
         print(f'*************** statistics N = {N} ***************')
 
@@ -408,7 +415,7 @@ def test_gaussian():
             assert  r == pytest.approx(rho, abs=0.1)
             print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
 
-            # MI Reference
+            # MI Reference (exact analytic)
             MI_REF = gaussian_mutual_information(rho)
             print(f'Gaussian exact MI = {MI_REF:.3f}')
 
@@ -417,8 +424,16 @@ def test_gaussian():
 
             for method in automethod:
                 MI     = mutual_information(x=x1, y=x2, automethod=method)
-                assert MI == pytest.approx(MI_REF, abs=0.15)
+                assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Numerical      MI = {MI:.3f} ({method})')
+
+            # Neural MI
+            neuromethod = ['MINE_EMA', 'MINE']
+
+            for method in neuromethod:
+                MI,MI_err  = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
+                assert MI == pytest.approx(MI_REF, abs=EPS)
+                print(f'Neural         MI = {MI:.3f} +- {MI_err:.3f} ({method})')
 
             print('')
 
@@ -430,26 +445,33 @@ def test_constant():
 
     import pytest
 
-    # Both ones
+    EPS = 1E-3
+
+    ### Both ones
     x1 = np.ones(100)
     x2 = np.ones(100)
 
-    r,prob = pearson_corr(x=x1, y=x2)
-    assert   r == pytest.approx(1)
+    r,prob    = pearson_corr(x=x1, y=x2)
+    assert   r == pytest.approx(1, abs=EPS)
 
-    MI       = mutual_information(x=x1, y=x2)
-    assert  MI == pytest.approx(0)
+    MI        = mutual_information(x=x1, y=x2)
+    assert  MI == pytest.approx(0, abs=EPS)
 
-    # --------------------------------------------
-    # Other zeros
-    
+    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    assert  MI_mine == pytest.approx(0, abs=EPS)
+
+
+    ### Other zeros    
     x2 = np.zeros(100)
 
-    r,prob = pearson_corr(x=x1, y=x2)
-    assert   r == pytest.approx(0)
+    r,prob    = pearson_corr(x=x1, y=x2)
+    assert   r == pytest.approx(0, abs=EPS)
 
-    MI       = mutual_information(x=x1, y=x2)
-    assert  MI == pytest.approx(0)
+    MI        = mutual_information(x=x1, y=x2)
+    assert  MI == pytest.approx(0, abs=EPS)
+
+    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    assert  MI_mine == pytest.approx(0, abs=EPS)
 
 
 """

@@ -75,11 +75,12 @@ def test_lognormal():
 
     import pytest
 
-    N  = int(1e7)
-
+    N     = int(1e7)
+    
     # Nominal value
     b0    = 3
-
+    
+    
     # Different relative uncertainties
     delta_val = np.array([0.1, 0.5, 1.0])
 
