@@ -412,7 +412,7 @@ def test_gaussian():
 
             # Linear correlation
             r,prob = pearson_corr(x=x1, y=x2)
-            assert  r == pytest.approx(rho, abs=0.1)
+            assert  r == pytest.approx(rho, abs=EPS)
             print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
 
             # MI Reference (exact analytic)
@@ -428,13 +428,16 @@ def test_gaussian():
                 print(f'Numerical      MI = {MI:.3f} ({method})')
 
             # Neural MI
-            neuromethod = ['MINE_EMA', 'MINE']
+            neuromethod = ['MINE', 'MINE_EMA']
 
             for method in neuromethod:
+
+                # Test with 2D vectors
+                #MI,MI_err  = mine.estimate(X=np.vstack((x1,x1)).T, Z=np.vstack((x2,x2)).T, num_iter=2000, loss=method)
                 MI,MI_err  = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural         MI = {MI:.3f} +- {MI_err:.3f} ({method})')
-
+            
             print('')
 
 
