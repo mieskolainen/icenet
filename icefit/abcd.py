@@ -154,6 +154,9 @@ def test_abcd():
     
     import pytest
 
+    EPS = 1.5
+
+
     # ---------------------------
     # INPUT DATA
     B = 100
@@ -166,11 +169,6 @@ def test_abcd():
     # Uncertainty estimates
     alpha  = 1 - 0.68 # confidence level
 
-    CL_epr = ABCD_err(b=B, c=C, d=D, method='errorprop',     alpha=alpha)
-    CL_poi = ABCD_err(b=B, c=C, d=D, method='poisson_prc',   alpha=alpha)
-    CL_bst = ABCD_err(b=B, c=C, d=D, method='bootstrap_prc', alpha=alpha)
-    CL_nll = ABCD_err(b=B, c=C, d=D, method='likelihood',    alpha=alpha)
-
 
     print(f'INPUT')
     print(f'  B = {B}, C = {C}, D = {D}')
@@ -179,9 +177,18 @@ def test_abcd():
     print(f'  A = B x C / D = {A:0.1f}')
     print(f'')
     print(f'CONFIDENCE INTERVAL on A (alpha = {alpha:0.2f})')
-    print(f'  errorprop     CI = [{CL_epr[0]:0.2f}, {CL_epr[1]:0.2f}]')
-    print(f'  poisson_prc   CI = [{CL_poi[0]:0.2f}, {CL_poi[1]:0.2f}]')
-    print(f'  bootstrap_prc CI = [{CL_bst[0]:0.2f}, {CL_bst[1]:0.2f}]')
-    print(f'  likelihood    CI = [{CL_nll[0]:0.2f}, {CL_nll[1]:0.2f}]')
+    
+    
+    methods = ['errorprop', 'poisson_prc', 'bootstrap_prc', 'likelihood']
+    for method in methods:
+
+        CI = ABCD_err(b=B, c=C, d=D, method=method, alpha=alpha)
+        print(f'  {method:15s}  CI = [{CI[0]:0.2f}, {CI[1]:0.2f}]')
+
+        # Test
+        assert  5  == pytest.approx(CI[0], abs=EPS)
+        assert  15 == pytest.approx(CI[1], abs=EPS)
+
+
 
 
