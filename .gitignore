@@ -5,6 +5,7 @@
 *.hd5
 *.pkl
 *.zip
+dataset/
 tensorboard/
 data/
 trash/

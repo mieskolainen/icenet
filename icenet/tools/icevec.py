@@ -269,23 +269,23 @@ class vec4:
         s = np.sin(angle)
         c = np.cos(angle)
         x = self.x
-        
+
         self._x = c*x - s*self.y
         self._y = s*x + c*self.y
 
 
-    def boost(self, b, sign=1):
+    def boost(self, b, sign=-1):
         """
         Lorentz boost
-        
-        Args:   
+        Args:
                    b : Boost 4-momentum (e.g. system)
-                sign : 1 or -1 (direction of the boost, in or out)
+                sign : 1 or -1 (direction of the boost,
+                               to the rest frame -1, out from the rest 1, typically)
         Returns:
                 pout : Boosted 4-vector
         """
 
-        # Beta and gamma factors    
+        # Beta and gamma factors
         betaX = sign*b.px / b.e  # px / E
         betaY = sign*b.py / b.e  # py / E
         betaZ = sign*b.pz / b.e  # pz / E
