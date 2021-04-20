@@ -1,10 +1,13 @@
 # Advanced histogramming & automated plotting functions
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg') # Important for multithreaded applications
+from matplotlib import pyplot as plt
+
 import numpy as np
 import math
 
@@ -25,8 +28,18 @@ def set_global_style(dpi=120, figsize=(4,3.75), font='serif', font_size=8, legen
 # Colors
 imperial_dark_blue  = (0, 0.24, 0.45)
 imperial_light_blue = (0, 0.43, 0.69)
-imperial_dark_red   = (0.65, 0.10, 0.0)
+imperial_dark_red   = (0.75, 0.10, 0.0)
 imperial_green      = (0.0, 0.54, 0.23)
+
+
+def colors(i, power=0.34):
+
+    c = [imperial_dark_red, imperial_dark_blue, imperial_green, imperial_light_blue]
+
+    if i < len(c):
+        return c[i]
+    else:
+        return c[i%len(c)] * (1.0/power)
 
 
 """ Global marker styles
@@ -151,7 +164,7 @@ def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.7, 1.3),
 
 def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
     xlim=(0,1), ylim=None, ylim_ratio=(0.7, 1.3),
-    ratio_plot=True, figsize=(5,4), fontsize=9, units='', **kwargs):
+    ratio_plot=True, figsize=(5,4), fontsize=9, units={'x': '', 'y': ''}, **kwargs):
     """ Axes creator.
     """
 
@@ -168,13 +181,11 @@ def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
         ax[0].set_ylim(*ylim)
 
     # Axes labels
-    if units:
-        if kwargs['density']:
-            ylabel = f'{ylabel} / [{units}]'
-        else:
-            binwidth = kwargs['bins'][1] - kwargs['bins'][0]
-            ylabel = f'{ylabel} / [{binwidth:.2f} {units}]'
-        xlabel = f'{xlabel} [{units}]'
+    if kwargs['density']:
+        ylabel = f'$1/N$  {ylabel} / [{units["x"]}]'
+    else:
+        ylabel = f'{ylabel}  [{units["y"]} / {units["x"]}]'
+    xlabel = f'{xlabel} [{units["x"]}]'
     
     ax[0].set_ylabel(ylabel, fontsize=fontsize)
     ax[-1].set_xlabel(xlabel, fontsize=fontsize)
@@ -234,9 +245,13 @@ def hist(x, bins=30, weights=None, density=False):
     ** Implement under/overflows !! **
     """
 
+    x = np.array(x)
+
     # Calculate histogram
     if weights is None:
         weights = np.ones(x.shape)
+
+    weights = np.array(weights)
 
     counts, bins = np.histogram(x, bins=bins, weights=weights)
     cbins = edge2centerbins(bins)
@@ -284,8 +299,7 @@ def hist_filled_error(ax, bins, cbins, y, err, color, **kwargs):
     # The last bin
     ax.fill_between(bins[-2:],  (y-err)[-2:], (y+err)[-2:], step='pre', alpha=0.3, color=color, **new_args)
 
-
-def superplot(data : dict, observable=None, ratio_plot=True, yscale='linear', ratio_error_plot=True, legend_counts = False, color=None):
+def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_error_plot=True, legend_counts=False, color=None):
     """ Superposition (overlaid) plotting.
     """
 
@@ -296,8 +310,7 @@ def superplot(data : dict, observable=None, ratio_plot=True, yscale='linear', ra
 
     if color == None:
         color = generate_colormap()
-
-
+    
     legend_labels = []
 
     # Plot histograms
@@ -378,7 +391,7 @@ def superplot(data : dict, observable=None, ratio_plot=True, yscale='linear', ra
                 new_args = data[i]['style'].copy()
                 new_args['lw'] = 0
                 ax[1].fill_between(cbins, ratio-ratio_errs, ratio+ratio_errs, alpha=0.3, color=c, **new_args)
-
+    
     # Legend
     if legend_labels != []:
         ordered_legend(ax = ax[0], order=legend_labels)

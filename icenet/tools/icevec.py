@@ -1,10 +1,14 @@
-# Lorentz vectors
+# Simple Lorentz vectors with HEP metric (+,---)
 #
 # Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
 
+
+def hepmc2vec4(p):
+    # HepMC 4-vector
+    return vec4(x=p.px, y=p.py, z=p.pz, t=p.e)
 
 
 class vec4:
@@ -48,15 +52,16 @@ class vec4:
     def __str__(self):
         return f"[x = {self.x}, y = {self.y}, z = {self.z}, t = {self.t}]"
 
-    
-
     def scale(self, a):
+        # Scale all components
         self.x, self.y, self.z, self.t = a*self.x, a*self.y, a*self.y, a*self.t
 
     def dot4(self, other):
+        # 4-vector dot product
         return self.t*other.t - (self.x*other.x + self.y*other.y + self.z*other.z)
 
     def dot3(self, other):
+        # 3-vector dot product
         return self.x*other.x + self.y*other.y + self.z*other.z
 
 
@@ -121,6 +126,7 @@ class vec4:
     
 
     def phi_PIPI(self, x):
+        # Transverse angle between [-pi,pi]
         while (x >= np.pi):
             x -= 2*np.pi
         while (x < -np.pi):
@@ -128,36 +134,42 @@ class vec4:
         return x
 
     def deltaR(self, v):
+        # (eta,phi)-plane separation
         deta = self.eta - v.eta
         dphi = self.phi_PIPI(self.phi - v.phi)
         return np.sqrt(deta**2 + dphi**2)
-
-
+    
+    
     ## Return properties
     
     @property
+    # 3-vector
+    def p3(self):
+        return np.array([self.x, self.y, self.z])
+    
+    @property
+    # Transverse mass
     def mt(self):
         return np.sqrt(self.m2 + self.pt2)
 
     @property
-    def p(self):
-        return np.array([self.x, self.y, self.t])
-    
-    @property
+    # Mass
     def m(self):
         M2 = self.m2
         return np.sqrt(M2) if M2 > 0 else 0.0 # Return 0 also if q^2 < 0
 
     @property
+    # Mass squared
     def m2(self):
         return self.t**2 - (self.x**2 + self.y**2 + self.z**2)
 
-
     @property
+    # 3-vector norm squared
     def p3mod2(self):
         return self.x**2 + self.y**2 + self.z**2
 
     @property
+    # 3-vector norm
     def p3mod(self):
         if (self.x == 0) and (self.y == 0) and (self.z == 0):
             return 0.0
@@ -166,22 +178,27 @@ class vec4:
     
 
     @property
+    # Lorentz beta
     def beta(self):
         return self.p3mod / self.e
 
     @property
+    # Lorentz gamma
     def gamma(self):
         return self.e / self.m
 
     @property
+    # Transverse momentum
     def pt(self):
         return np.sqrt(self.pt2)
 
     @property
+    # Transverse momentum squared
     def pt2(self):
         return self.x**2 + self.y**2
 
     @property
+    # Transverse plane angle
     def phi(self):
         if (self.x == 0.0) and (self.y == 0.0):
             return 0.0
@@ -189,10 +206,12 @@ class vec4:
             return np.arctan2(self.y, self.x)
 
     @property
+    # Longitudinal angle cosine
     def costheta(self):
         return np.cos(self.theta)
 
     @property
+    # Longitudinal angle
     def theta(self):
         if (self.x == 0.0) and (self.y == 0.0) and (self.z == 0.0):
             return 0.0
@@ -200,10 +219,12 @@ class vec4:
             return np.arctan2(self.pt, self.z)
 
     @property
+    # Longitudinal rapidity
     def rapidity(self):
         return 0.5*np.log((self.e + self.pz)/(self.e - self.pz))
 
     @property
+    # Pseudorapidity
     def eta(self):
         cosTheta = self.costheta
         if (cosTheta**2 < 1):
@@ -269,7 +290,7 @@ class vec4:
         s = np.sin(angle)
         c = np.cos(angle)
         x = self.x
-
+        
         self._x = c*x - s*self.y
         self._y = s*x + c*self.y
 
@@ -277,15 +298,15 @@ class vec4:
     def boost(self, b, sign=-1):
         """
         Lorentz boost
-        Args:
+        
+        Args:   
                    b : Boost 4-momentum (e.g. system)
-                sign : 1 or -1 (direction of the boost,
-                               to the rest frame -1, out from the rest 1, typically)
+                sign : 1 or -1 (direction of the boost, in to the rest (-1) or out (1))
         Returns:
                 pout : Boosted 4-vector
         """
 
-        # Beta and gamma factors
+        # Beta and gamma factors    
         betaX = sign*b.px / b.e  # px / E
         betaY = sign*b.py / b.e  # py / E
         betaZ = sign*b.pz / b.e  # pz / E

@@ -1,6 +1,6 @@
 # Graph data readers and parsers for electron ID
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np

@@ -1,6 +1,6 @@
-# Iceplot examples
+# Iceplot tests
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -45,7 +45,7 @@ obs_pt2 = {
 'ylim'    : None,
 'xlabel'  : r'$p_t^2$',
 'ylabel'  : r'Counts',
-'units'   : r'GeV$^2$',
+'units'   : {'x': r'GeV$^2$', 'y' : r'counts'},
 'label'   : r'Transverse momentum squared',
 'figsize' : (4,4),
 
@@ -118,6 +118,7 @@ data2 = data_template.copy()
 data3 = data_template.copy()
 data4 = data_template.copy()
 
+
 data1.update({
     'data'   : r1,
     'legend' : 'Data $\\alpha$',
@@ -157,8 +158,6 @@ fig5, ax5 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_erro
 fig4.savefig('./testfigs/testplot_4.pdf', bbox_inches='tight')
 fig5.savefig('./testfigs/testplot_5.pdf', bbox_inches='tight')
 
-plt.show()
-
-
-
+print('Done!')
+#plt.show()
 
