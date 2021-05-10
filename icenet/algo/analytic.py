@@ -1,11 +1,44 @@
-# "Analytic" algorithms and metrics
-#
+# "Analytic" algorithms, observables, metrics etc.
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
 import numba
+from scipy import special as special
+
+
+def fox_wolfram_boost_inv(p, L=10):
+    """
+    arxiv.org/pdf/1508.03144, (Formula 5.6)
+
+    Args:
+        p : list of 4-momentum vectors
+        L : maximum angular moment order
+    Returns:
+        S : list of moments of order 0,1,...,L
+
+    [untested function]
+    """
+    N  = len(p)
+    S  = np.zeros(L+1)
+    k  = special.jn_zeros(0, L+1)
+    pt = [p[i].pt for i in range(N)]
+
+    dR = np.zeros((N,N))
+    for i in range(N):
+        for j in range(N):
+            if i > j:
+                dR[i,j] = p[i].deltaR(p[j])
+    
+    # Compute moments
+    for n in range(len(S)):
+        for i in range(N):
+            for j in range(N):
+                if i >= j: # count also the case i==j
+                    S[n] += pt[i] * pt[j] * special.j0(k[n]*dR[i,j])
+
+    return S
 
 
 def gram_matrix(X, type='dot'):

@@ -1,14 +1,14 @@
 # Simple Lorentz vectors with HEP metric (+,---)
 #
-# Mikael Mieskolainen, 2021
-# m.mieskolainen@imperial.ac.uk
+# (c) 2021 Mikael Mieskolainen
+# Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 import numpy as np
 
 
 def hepmc2vec4(p):
-    # HepMC 4-vector
-    return vec4(x=p.px, y=p.py, z=p.pz, t=p.e)
+    """ HepMC3 python binding FourVector to vec4 """
+    return vec4(x=p.px(), y=p.py(), z=p.pz(), t=p.e())
 
 
 class vec4:
@@ -23,6 +23,20 @@ class vec4:
             self._x, self._y, self._z, self._t = 0,0,0,0
         else:
             raise Exception('vec4: Unknown initialization.')
+
+    # -----------------------------------
+    # Needed for python built-in sum()
+
+    def __iter__(self):
+        for value in self.values():
+            yield value
+
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+    # -----------------------------------
 
     # Addition
     def __add__(self, rhs):
@@ -119,6 +133,10 @@ class vec4:
         self._z = z
         self._t = np.sqrt(m**2 + x**2 + y**2 + z**2)
 
+    def setP3(self, p3):
+        self._x = p3[0]
+        self._y = p3[1]
+        self._z = p3[2]        
 
     def setPtEtaPhiM(self, pt, eta, phi, m):
         self.setPtEtaPhi(pt, eta, phi)
@@ -132,6 +150,12 @@ class vec4:
         while (x < -np.pi):
             x += 2*np.pi
         return x
+
+    def deltaphi(self, v):
+        return self.phi_PIPI(self.phi - v.phi)
+
+    def abs_delta_phi(self, v):
+        return np.abs(self.deltaphi(v))
 
     def deltaR(self, v):
         # (eta,phi)-plane separation
@@ -268,6 +292,12 @@ class vec4:
         return self._t
 
 
+    def rotateSO3(self, R):
+        v = np.dot(R, self.p3)
+        self._x = v[0]
+        self._y = v[1]
+        self._z = v[2]
+
     def rotateX(self, angle):
         s = np.sin(angle)
         c = np.cos(angle)
@@ -276,7 +306,6 @@ class vec4:
         self._y = c*y - s*self.z
         self._z = s*y + c*self.z
     
-
     def rotateY(self, angle):
         s = np.sin(angle)
         c = np.cos(angle)
@@ -284,7 +313,6 @@ class vec4:
         
         self._z = c*z - s*self.x
         self._x = s*z + c*self.x
-
 
     def rotateZ(self, angle):
         s = np.sin(angle)
@@ -298,19 +326,18 @@ class vec4:
     def boost(self, b, sign=-1):
         """
         Lorentz boost
-        
-        Args:   
+        Args:
                    b : Boost 4-momentum (e.g. system)
-                sign : 1 or -1 (direction of the boost, in to the rest (-1) or out (1))
-        Returns:
-                pout : Boosted 4-vector
+                sign : 1 or -1 (direction of the boost, into the rest (-1) or out (1))
         """
-
+        if np.isclose(b.e, 0.0):
+            raise Exception(__name__ + '.boost: Input boost 4-momentum with e = 0')
+        
         # Beta and gamma factors    
         betaX = sign*b.px / b.e  # px / E
         betaY = sign*b.py / b.e  # py / E
         betaZ = sign*b.pz / b.e  # pz / E
-        gamma = b.gamma          # E / m
+        gamma = b.gamma          # E  / m
 
         # Momentum and energy product
         aux1  = betaX*self.px + betaY*self.py + betaZ*self.pz
@@ -321,5 +348,4 @@ class vec4:
         self._y = self.py + aux2*betaY
         self._z = self.pz + aux2*betaZ
         self._e = gamma*(self.e + aux1)
-
 
