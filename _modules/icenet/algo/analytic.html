@@ -30,6 +30,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -233,14 +234,47 @@
            <div itemprop="articleBody">
             
   <h1>Source code for icenet.algo.analytic</h1><div class="highlight"><pre>
-<span></span><span class="c1"># &quot;Analytic&quot; algorithms and metrics</span>
-<span class="c1">#</span>
+<span></span><span class="c1"># &quot;Analytic&quot; algorithms, observables, metrics etc.</span>
 <span class="c1">#</span>
 <span class="c1"># Mikael Mieskolainen, 2020</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">special</span>
+
+
+<div class="viewcode-block" id="fox_wolfram_boost_inv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.fox_wolfram_boost_inv">[docs]</a><span class="k">def</span> <span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    arxiv.org/pdf/1508.03144, (Formula 5.6)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        p : list of 4-momentum vectors</span>
+<span class="sd">        L : maximum angular moment order</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        S : list of moments of order 0,1,...,L</span>
+
+<span class="sd">    [untested function]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">S</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">k</span>  <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">jn_zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
+
+    <span class="n">dR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">dR</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    
+    <span class="c1"># Compute moments</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">j</span><span class="p">:</span> <span class="c1"># count also the case i==j</span>
+                    <span class="n">S</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="n">pt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">pt</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">special</span><span class="o">.</span><span class="n">j0</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="n">dR</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">S</span></div>
 
 
 <div class="viewcode-block" id="gram_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.gram_matrix">[docs]</a><span class="k">def</span> <span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>

@@ -30,6 +30,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -242,8 +243,8 @@
 <div class="section" id="module-icefit.em">
 <span id="icefit-em"></span><h2>icefit.em<a class="headerlink" href="#module-icefit.em" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
-<dt id="icefit.em.EM_frac">
-<code class="sig-name descname"><span class="pre">EM_frac</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#EM_frac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.EM_frac" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icefit.em.EM_frac">
+<span class="sig-name descname"><span class="pre">EM_frac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#EM_frac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.EM_frac" title="Permalink to this definition">¶</a></dt>
 <dd><p>EM-algorithm for unknown integrated class fractions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -262,14 +263,14 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="icefit.em.gausspdf">
-<code class="sig-name descname"><span class="pre">gausspdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#gausspdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.gausspdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icefit.em.gausspdf">
+<span class="sig-name descname"><span class="pre">gausspdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#gausspdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.gausspdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gaussian pdf</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="icefit.em.mixture_nll">
-<code class="sig-name descname"><span class="pre">mixture_nll</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#mixture_nll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.mixture_nll" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icefit.em.mixture_nll">
+<span class="sig-name descname"><span class="pre">mixture_nll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#mixture_nll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.mixture_nll" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mixture model negative Log-Likelihood</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -291,8 +292,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="icefit.em.test_EM">
-<code class="sig-name descname"><span class="pre">test_EM</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#test_EM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.test_EM" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icefit.em.test_EM">
+<span class="sig-name descname"><span class="pre">test_EM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#test_EM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.test_EM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test function to test EM iteration</p>
 </dd></dl>
 
