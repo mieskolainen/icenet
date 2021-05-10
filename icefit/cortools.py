@@ -433,7 +433,6 @@ def test_gaussian():
             for method in neuromethod:
 
                 # Test with 2D vectors
-                #MI,MI_err  = mine.estimate(X=np.vstack((x1,x1)).T, Z=np.vstack((x2,x2)).T, num_iter=2000, loss=method)
                 MI,MI_err  = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural         MI = {MI:.3f} +- {MI_err:.3f} ({method})')
