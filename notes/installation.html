@@ -276,6 +276,7 @@ conda activate icenet
 
 # Install cudatoolkit and cudnn (make sure no other installations overlap)
 conda install -c nvidia cudatoolkit==11.1.74 cudnn==8.0.4
+conda install -c conda-forge cudatoolkit-dev
 
 # Pick GPU or CPU version (GPU version works for CPU too)
 pip install -r requirements-gpu-linux.txt
