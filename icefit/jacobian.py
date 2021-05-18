@@ -144,7 +144,7 @@ def test_dimension_interfaces():
             print('\n')
 
 
-def test_jacobians(EPS=1e-3):
+def test_jacobians(EPS=1e-6):
     """
     Test Jacobians from:
     https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant
