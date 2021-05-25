@@ -71,26 +71,22 @@ def weights_init_normal(m):
         m.bias.data.fill_(0)
 
 
-def multiclass_cross_entropy(phat, y, N_classes, weights, EPS = 1e-15) :
+def multiclass_cross_entropy(phat, y, N_classes, weights, EPS = 1e-30) :
     """ Per instance weighted cross entropy loss
     (negative log-likelihood)
+    N.B. Be careful with the EPS, it may have large impact on gradients!
     """
-    
-    y = F.one_hot(y, N_classes)
-
-    # Protection
+    y    = F.one_hot(y, N_classes)
     loss = -y*torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
 
     return loss
 
 
-def multiclass_focal_entropy(phat, y, N_classes, weights, gamma, EPS = 1e-15) :
+def multiclass_focal_entropy(phat, y, N_classes, weights, gamma, EPS = 1e-30) :
     """ Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
-
     """
-
     y = F.one_hot(y, N_classes)
     loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
@@ -186,11 +182,11 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
+def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_gradients=True):
     """
     Main training loop
     """
-
+    
     cprint(__name__ + f""".train: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
     
@@ -329,7 +325,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir) :
             # ------------------------------------------------------------
             optimizer.zero_grad() # Zero gradients
             loss.backward()       # Compute gradients
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # Clip gradient for NaN problems
+            if clip_gradients:
+            	torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # Clip gradient for NaN problems
 
             # Update parameters
             optimizer.step()
