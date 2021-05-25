@@ -112,8 +112,11 @@ class CNN_DMAX(nn.Module):
         return x
 
     # Returns softmax probability
-    def softpredict(self, data) :
-        return F.softmax(self.forward(data), dim=1)
+    def softpredict(self, x) :
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 class CNN(nn.Module):
@@ -181,5 +184,8 @@ class CNN(nn.Module):
         return x
 
     # Returns softmax probability
-    def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+    def softpredict(self, x) :
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)

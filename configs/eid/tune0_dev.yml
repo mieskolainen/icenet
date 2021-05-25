@@ -5,13 +5,13 @@
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
-MAXEVENTS: 100000                 # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000               # Maximum total number of events (per root file) to process
 
 
 # Batched "deep" training
 batch_train_param:
   blocksize: 1000000            # Maximum number of events simultaneously in RAM
-  epochs: 50                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
+  epochs: 150                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
   local_epochs: 1               # Number of local epochs per algorithm. If 0, then use the custom value per model.
   num_cpu: null                 # Set null for auto, or an integer for manual.
 
@@ -166,20 +166,20 @@ raytune_setup:
 # Give all models some unique identifier and label
 active_models:
 
-  - dmlp
-  - cnn0
+#  - dmlp
+#  - cnn0
   - gnet0
   - gnet1
   - gnet2
   - gnet3
   - gnet4
 
-  - flr0
+#  - flr0
   - xgb0
-  - lgr0
+#  - lgr0
 #  - xtx0
-  - dmx0
-  - dbnf0
+#  - dmx0
+#  - dbnf0
 #  - gxgb0 # Keep this last (fix the bug) !
 
 
@@ -205,10 +205,10 @@ gxgb0_param:
       conv_aggr:   'add'
       global_pool: 's2s'
       cdim: 96                   # Convolution output dimension
-
+    
     # Optimization
     opt_param:  
-      epochs: 50
+      epochs: 150
       batch_size: 64
       learning_rate: 0.003
       weight_decay:  0.00005     # L2-regularization
@@ -217,7 +217,7 @@ gxgb0_param:
     scheduler_param:
       step_size: 200
       gamma: 0.1
-
+    
     device: 'auto'               # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
     
@@ -282,7 +282,7 @@ gnet0_param:
 
   # Optimization
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005      # L2-regularization
@@ -318,7 +318,7 @@ gnet1_param:
 
   # Optimization
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005     # L2-regularization
@@ -354,7 +354,7 @@ gnet2_param:
   
   # Optimization
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005      # L2-regularization
@@ -390,7 +390,7 @@ gnet3_param:
   
   # Optimization
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005     # L2-regularization
@@ -412,11 +412,11 @@ gnet3_param:
 gnet4_param:
   train:   'graph'
   predict: 'torch_graph'
-  label:   'G-PAN'
+  label:   'G-GAT'
   raytune:  null
 
   # Convolution model
-  conv_type:   'PAN'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+  conv_type:   'GAT'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
   # Model
   model_param:
@@ -426,7 +426,7 @@ gnet4_param:
 
   # Optimization
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005     # L2-regularization
@@ -512,7 +512,7 @@ dmlp_param:
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
     
-    epochs: 50
+    epochs: 150
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001     # L2-regularization
@@ -544,7 +544,7 @@ lgr0_param:
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
 
-    epochs: 50
+    epochs: 150
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
@@ -571,7 +571,7 @@ cnn0_param:
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
   
-    epochs: 50
+    epochs: 150
     batch_size: 128
     learning_rate: 0.001
     weight_decay: 0.00        # L2-regularization
@@ -604,7 +604,7 @@ xtx0_param:
     optimizer: 'AdamW'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
     
-    epochs: 50
+    epochs: 150
     batch_size:  196
     learning_rate: 0.005
     weight_decay: 0.01        # L2-regularization
@@ -637,7 +637,7 @@ dmx0_param:
     optimizer: 'AdamW'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
 
-    epochs: 50
+    epochs: 150
     batch_size: 128
     learning_rate: 0.005
     weight_decay: 0.00001       # L2-regularization
@@ -665,7 +665,7 @@ dbnf0_param:
 
   # Gradient descent
   opt_param:
-    epochs: 50
+    epochs: 150
     batch_size: 512
     optimizer: 'Adam'
     learning_rate: 0.05

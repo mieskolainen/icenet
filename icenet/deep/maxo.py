@@ -53,12 +53,15 @@ class MAXOUT(nn.Module):
         for _, layer in enumerate(layer_list, start=1):
             max_output = torch.max(layer(x), max_output)
         return max_output
-
+    
     def softpredict(self, x) :
         """ Softmax probability
         """
-        return F.softmax(self.forward(x), dim = 1)
-        
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
+    
     def binarypredict(self, x) :
         """ Return max probability class.
         """        

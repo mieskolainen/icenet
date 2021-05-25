@@ -165,8 +165,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             # Weighted negative log-likelihood loss
             lossvec = compute_log_p_x(model, batch_x)
             loss    = -(lossvec + log_weights).sum()
-
-
+            
+            
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
             loss.backward()

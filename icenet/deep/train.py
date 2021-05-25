@@ -250,9 +250,10 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
     
 
     for epoch in range(opt_param['epochs']):
+
         loss                       = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
         validate_acc, validate_AUC = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
-
+        
         print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
         scheduler.step()
 

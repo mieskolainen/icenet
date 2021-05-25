@@ -152,11 +152,14 @@ class DEPS(nn.Module):
         x = x.mean(1)
         x = self.ro(x)
         return x
-
+    
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
-
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
+    
     # Return class
     def binarypredict(self,x) :
         prob = list(self.softpredict(x).detach().numpy())

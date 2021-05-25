@@ -120,7 +120,7 @@ def pred_torch(args, param, signalclass = 1):
                 x_in[key] = x_in[key].to(device)
 
         return model.softpredict(x_in)[:, signalclass].detach().cpu().numpy()
-
+    
     return func_predict
 
 

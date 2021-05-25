@@ -71,15 +71,65 @@ def weights_init_normal(m):
         m.bias.data.fill_(0)
 
 
+def logsumexp(x,dim=-1):
+    # https://en.wikipedia.org/wiki/LogSumExp
+
+    xmax, idx = torch.max(x, dim=dim, keepdim=True)
+    return xmax + torch.log(torch.sum(torch.exp(x - xmax), dim=dim, keepdim=True))
+
+
+def log_softmax(x, dim=-1):
+    """
+    Log of softmax
+    
+    Args:
+        x : network output without softmax
+    
+    Returns:
+        logsoftmax values
+    """
+    log_z = logsumexp(x, dim=dim)
+    y = x - log_z
+    return y
+
+
+def multiclass_cross_entropy_logprob(log_phat, y, N_classes, weights):
+    """ Per instance weighted cross entropy loss
+    (negative log-likelihood)
+    
+    Numerically more stable version.
+    """
+    
+    y    = F.one_hot(y, N_classes)
+    loss = - y*log_phat * weights
+    loss = loss.sum() / y.shape[0]
+
+    return loss
+
+
+
 def multiclass_cross_entropy(phat, y, N_classes, weights, EPS = 1e-30) :
     """ Per instance weighted cross entropy loss
     (negative log-likelihood)
-    N.B. Be careful with the EPS, it may have large impact on gradients!
     """
-    y    = F.one_hot(y, N_classes)
-    loss = -y*torch.log(phat + EPS) * weights
+    
+    y = F.one_hot(y, N_classes)
+
+    # Protection
+    loss = - y*torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
 
+    return loss
+
+
+def multiclass_focal_entropy_logprob(log_phat, y, N_classes, weights, gamma) :
+    """ Per instance weighted 'focal entropy loss'
+    https://arxiv.org/pdf/1708.02002.pdf
+    """
+    y = F.one_hot(y, N_classes)
+    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
+    loss = loss.sum() / y.shape[0]
+    
     return loss
 
 
@@ -281,6 +331,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
     training_generator   = torch.utils.data.DataLoader(training_set,   **params)
     validation_generator = torch.utils.data.DataLoader(validation_set, **params)
 
+    # Training mode on!
+    model.train()
 
     ### Epoch loop
     for epoch in tqdm(range(param['opt_param']['epochs']), ncols = 60):
@@ -309,16 +361,16 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
             #    batch_x = batch_x + noise
             
             # Predict probabilities
-            phat = model.softpredict(batch_x)
+            log_phat = model.softpredict(batch_x)
 
             # Evaluate loss
             loss = 0
             if   param['opt_param']['lossfunc'] == 'cross_entropy':
-                loss = multiclass_cross_entropy(phat, batch_y, model.C, batch_weights)
+                loss = multiclass_cross_entropy_logprob(log_phat, batch_y, model.C, batch_weights)
             elif param['opt_param']['lossfunc'] == 'focal_entropy':
-                loss = multiclass_focal_entropy(phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
+                loss = multiclass_focal_entropy_logprob(log_phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
             elif param['opt_param']['lossfunc'] == 'inverse_focal':
-                loss = multiclass_inverse_focal(phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
+                loss = multiclass_inverse_focal_logprob(log_phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
             else:
                 print(__name__ + '.train: Error with unknown lossfunc ')
 
@@ -345,7 +397,11 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
         
         # ================================================================
         # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)
+
         if (epoch % 5 == 0) :
+
+            # Evaluation mode on (crucial e.g. for batchnorm etc.)!
+            model.eval()
 
             SIGNAL_ID    = 1
             class_labels = np.arange(model.C)
@@ -393,7 +449,10 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
                 j += 1
 
             print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))
-                            
+            
+            # Back to training mode!
+            model.train()
+
         # Just print the loss
         else:
             print('Epoch = {} : train loss = {:.3f}'. format(epoch, avgloss)) 

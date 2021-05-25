@@ -111,19 +111,19 @@ def train(model, loader, optimizer, device):
     total_loss = 0
     n = 0
     for batch in loader:
-
+        
         # Change the shape
         w = torch.tensor(aux.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)).to(device)
 
         # Predict probabilities
         batch = batch.to(device)
         optimizer.zero_grad()
-        phat = model.softpredict(batch)
+        log_phat = model.softpredict(batch)
 
-        # Evaluate loss
-        loss = dopt.multiclass_cross_entropy(phat=phat, y=batch.y, N_classes=model.C, weights=w)
+        # Compute loss
+        loss = dopt.multiclass_cross_entropy_logprob(log_phat=log_phat, y=batch.y, N_classes=model.C, weights=w)
         loss.backward()
-
+        
         total_loss += loss.item() * batch.num_graphs
         optimizer.step()
         n += batch.num_graphs
@@ -158,7 +158,7 @@ def test(model, loader, optimizer, device):
 
             phat = model.softpredict(data)
             pred = phat.max(dim=1)[1]
-
+            
             y_true  = data.y.to('cpu').numpy()
             y_soft  = phat[:, signal_class].to('cpu').numpy()
 
@@ -270,10 +270,13 @@ class PANNet(torch.nn.Module):
         # Final layers
         x = self.mlp1(x)
         return x
-
+    
     # Returns softmax probability
     def softpredict(self,x):
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # GATConv based graph net
@@ -353,7 +356,10 @@ class GATNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x):
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 
@@ -434,7 +440,10 @@ class SUPNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # Pure EdgeConv based graph net
@@ -514,7 +523,10 @@ class ECNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # DynamicEdgeConv based graph net
@@ -594,7 +606,10 @@ class DECNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # NNConv based graph net
@@ -674,10 +689,13 @@ class NNNet(torch.nn.Module):
         x = self.mlp1(x)
 
         return x
-
+    
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # SplineConv based graph net
@@ -753,7 +771,10 @@ class SplineNet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # SAGEConv based graph net
@@ -828,7 +849,10 @@ class SAGENet(torch.nn.Module):
     
     # Returns softmax probability
     def softpredict(self,x) :
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # SGConv based graph net
@@ -904,7 +928,10 @@ class SGNet(torch.nn.Module):
     
     # Returns softmax probability
     def softpredict(self,x):
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
 
 
 # GINEConv based graph net
@@ -1000,4 +1027,7 @@ class GINENet(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x):
-        return F.softmax(self.forward(x), dim=1)
+        if self.training:
+            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        else:
+            return F.softmax(self.forward(x), dim=-1)
