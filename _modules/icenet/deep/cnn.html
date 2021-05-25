@@ -348,8 +348,11 @@
         <span class="k">return</span> <span class="n">x</span></div>
 
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN_DMAX.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="CNN_DMAX.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CNN"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN">[docs]</a><span class="k">class</span> <span class="nc">CNN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -417,8 +420,11 @@
         <span class="k">return</span> <span class="n">x</span></div>
 
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="CNN.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

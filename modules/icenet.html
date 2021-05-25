@@ -566,7 +566,7 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX.softpredict">
-<span class="sig-name descname"><span class="pre">softpredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">softpredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -842,10 +842,29 @@ registered hooks while the latter silently ignores them.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.log_softmax">
+<span class="sig-name descname"><span class="pre">log_softmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#log_softmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.log_softmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of softmax</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – network output without softmax</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>logsoftmax values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dopt.log_sum_exp">
 <span class="sig-name descname"><span class="pre">log_sum_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#log_sum_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.log_sum_exp" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/">http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/</a></p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.logsumexp">
+<span class="sig-name descname"><span class="pre">logsumexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#logsumexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.logsumexp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dopt.model_to_cuda">
@@ -857,13 +876,27 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="icenet.deep.dopt.multiclass_cross_entropy">
 <span class="sig-name descname"><span class="pre">multiclass_cross_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_cross_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_cross_entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Per instance weighted cross entropy loss
-(negative log-likelihood)
-N.B. Be careful with the EPS, it may have large impact on gradients!</p>
+(negative log-likelihood)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.multiclass_cross_entropy_logprob">
+<span class="sig-name descname"><span class="pre">multiclass_cross_entropy_logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_cross_entropy_logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_cross_entropy_logprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted cross entropy loss
+(negative log-likelihood)</p>
+<p>Numerically more stable version.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dopt.multiclass_focal_entropy">
 <span class="sig-name descname"><span class="pre">multiclass_focal_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_focal_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_focal_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted ‘focal entropy loss’
+<a class="reference external" href="https://arxiv.org/pdf/1708.02002.pdf">https://arxiv.org/pdf/1708.02002.pdf</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.multiclass_focal_entropy_logprob">
+<span class="sig-name descname"><span class="pre">multiclass_focal_entropy_logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#multiclass_focal_entropy_logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.multiclass_focal_entropy_logprob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Per instance weighted ‘focal entropy loss’
 <a class="reference external" href="https://arxiv.org/pdf/1708.02002.pdf">https://arxiv.org/pdf/1708.02002.pdf</a></p>
 </dd></dl>

@@ -307,15 +307,65 @@
         <span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="logsumexp"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.logsumexp">[docs]</a><span class="k">def</span> <span class="nf">logsumexp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># https://en.wikipedia.org/wiki/LogSumExp</span>
+
+    <span class="n">xmax</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">xmax</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="log_softmax"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.log_softmax">[docs]</a><span class="k">def</span> <span class="nf">log_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log of softmax</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x : network output without softmax</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        logsoftmax values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log_z</span> <span class="o">=</span> <span class="n">logsumexp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">log_z</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="multiclass_cross_entropy_logprob"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.multiclass_cross_entropy_logprob">[docs]</a><span class="k">def</span> <span class="nf">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Per instance weighted cross entropy loss</span>
+<span class="sd">    (negative log-likelihood)</span>
+<span class="sd">    </span>
+<span class="sd">    Numerically more stable version.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">y</span>    <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">y</span><span class="o">*</span><span class="n">log_phat</span> <span class="o">*</span> <span class="n">weights</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">loss</span></div>
+
+
+
 <div class="viewcode-block" id="multiclass_cross_entropy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.multiclass_cross_entropy">[docs]</a><span class="k">def</span> <span class="nf">multiclass_cross_entropy</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1e-30</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Per instance weighted cross entropy loss</span>
 <span class="sd">    (negative log-likelihood)</span>
-<span class="sd">    N.B. Be careful with the EPS, it may have large impact on gradients!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">y</span>    <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">)</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phat</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
+    
+    <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">)</span>
+
+    <span class="c1"># Protection</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">y</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phat</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
     <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
+    <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="multiclass_focal_entropy_logprob"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.multiclass_focal_entropy_logprob">[docs]</a><span class="k">def</span> <span class="nf">multiclass_focal_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Per instance weighted &#39;focal entropy loss&#39;</span>
+<span class="sd">    https://arxiv.org/pdf/1708.02002.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">phat</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phat</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
     <span class="k">return</span> <span class="n">loss</span></div>
 
 
@@ -517,6 +567,8 @@
     <span class="n">training_generator</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span>   <span class="o">**</span><span class="n">params</span><span class="p">)</span>
     <span class="n">validation_generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
+    <span class="c1"># Training mode on!</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
     <span class="c1">### Epoch loop</span>
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">60</span><span class="p">):</span>
@@ -545,16 +597,16 @@
             <span class="c1">#    batch_x = batch_x + noise</span>
             
             <span class="c1"># Predict probabilities</span>
-            <span class="n">phat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">batch_x</span><span class="p">)</span>
+            <span class="n">log_phat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">batch_x</span><span class="p">)</span>
 
             <span class="c1"># Evaluate loss</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cross_entropy&#39;</span><span class="p">:</span>
-                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_cross_entropy</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;focal_entropy&#39;</span><span class="p">:</span>
-                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_focal_entropy</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_focal_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
             <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;inverse_focal&#39;</span><span class="p">:</span>
-                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_inverse_focal</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_inverse_focal_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">batch_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.train: Error with unknown lossfunc &#39;</span><span class="p">)</span>
 
@@ -581,7 +633,11 @@
         
         <span class="c1"># ================================================================</span>
         <span class="c1"># TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)</span>
+
         <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+
+            <span class="c1"># Evaluation mode on (crucial e.g. for batchnorm etc.)!</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
             <span class="n">SIGNAL_ID</span>    <span class="o">=</span> <span class="mi">1</span>
             <span class="n">class_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
@@ -629,7 +685,10 @@
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch = </span><span class="si">{}</span><span class="s1"> : train loss = </span><span class="si">{:.3f}</span><span class="s1"> [trn AUC = </span><span class="si">{:.3f}</span><span class="s1">, val AUC = </span><span class="si">{:.3f}</span><span class="s1">]&#39;</span><span class="o">.</span> <span class="nb">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">avgloss</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
-                            
+            
+            <span class="c1"># Back to training mode!</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
         <span class="c1"># Just print the loss</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch = </span><span class="si">{}</span><span class="s1"> : train loss = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span> <span class="nb">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">avgloss</span><span class="p">))</span> 
