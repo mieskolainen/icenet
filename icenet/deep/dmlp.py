@@ -30,7 +30,7 @@ class DMLP(nn.Module):
             channels.append(mlp_dim[i])
         channels.append(C)
 
-        self.mlp = graph.MLP(channels, batch_norm=True)
+        self.mlp = graph.MLP(channels, batch_norm=batch_norm)
 
     def forward(self,x):
         
