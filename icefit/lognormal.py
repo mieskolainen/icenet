@@ -71,15 +71,27 @@ def rand_lognormal(m, v, N, inmode='mean'):
     return y
 
 
+def rand_powexp(sigma, N):
+    """
+    Power+exp type parametrization (positive definite)
+    
+    Args:
+        sigma : standard deviation
+        N     : number of samples
+    """
+    theta = np.random.randn(N) # theta ~ exp(-0.5 * sigma^2)
+
+    return (1 + sigma)**theta
+
+
 def test_lognormal():
 
     import pytest
 
-    N     = int(1e7)
+    N     = int(1e6)
     
     # Nominal value
-    b0    = 3
-    
+    b0    = 1
     
     # Different relative uncertainties
     delta_val = np.array([0.1, 0.5, 1.0])
@@ -92,14 +104,15 @@ def test_lognormal():
         delta = delta_val[i]
         for j in range(len(modes)):
 
-            # Generate log-normally distributed variables
-            b   = rand_lognormal(m=b0, v=(delta*b0)**2, N=N, inmode=modes[j])
+            # 1. Generate log-normally distributed variables
+            sigma = delta*b0
+            b   = rand_lognormal(m=b0, v=sigma**2, N=N, inmode=modes[j])
 
             # Computete statistics
             mean = np.mean(b)
             med  = np.median(b)
             std  = np.std(b)
-
+            
             # Find mode
             bins = np.linspace(0, 5*b0, 300)
             counts, xval = np.histogram(b, bins)
@@ -111,8 +124,13 @@ def test_lognormal():
             if (i == 0):
                 ax[i,j].set_title(f'<{modes[j]}> as the target')
 
-            ax[i,j].hist(b, bins, label=label)
-            #ax[i,j].legend(fontsize=7)
+            # 2. Generate power-exp distributed variables
+            c  = rand_powexp(sigma=sigma, N=N)
+
+            ax[i,j].hist(b, bins, label=f'log-norm: $b_0 = {b0:0.2f}, \\Delta = {delta:0.2f}$', histtype='step')
+            ax[i,j].hist(c, bins, label=f'pow-exp: $\\sigma = {delta:0.2f}$', histtype='step')
+            
+            ax[i,j].legend(fontsize=9)
             ax[i,j].set_xlim([0, b0*3])
             ax[i,j].set_xlabel('$b$')
 
