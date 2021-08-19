@@ -12,12 +12,14 @@ from tqdm import tqdm
 from . import aux
 
 
-def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3)):
+def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3), grid_on=False):
     """
     Visualize matrix.
     """
     fig,ax = plt.subplots(figsize=figsize)
     
+    ax.grid(grid_on)
+
     x,y    = np.meshgrid(x_bins, y_bins)
     # Note transpose
     c      = ax.pcolormesh(x, y, XY.T, cmap=cmap, vmin=vmin, vmax=vmax, antialiased=True, linewidth=0.0)

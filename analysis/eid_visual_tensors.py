@@ -1,5 +1,10 @@
 # Electron ID [TENSOR VISUALIZATION] steering code
 #
+# N.B. One needs to have a classifier with
+# predict: 'torch_image' turned on in the steering .json file.
+# (otherwise no image tensor input is processed)
+#
+#
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
@@ -52,9 +57,9 @@ def main() :
     # --------------------------------------------------------------------
     # NMF factorization
 
-    k = 3 # Number of basis components
     channel = 0
-
+    k = 3        # Number of basis components
+    
     for class_ind in [0,1]:
         
         V = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
@@ -65,8 +70,10 @@ def main() :
             V_new[:,i] = V[i,:,:].flatten() + 1e-12
         print(V_new.shape)
 
+        # Non-Negative matrix factorization
         W,H = nmf.ML_nmf(V=V_new, k=k, threshold=1e-5, maxiter=300)
 
+        # Loop over "basis" components
         for i in range(k):
             B = W[:,i].reshape(V.shape[1],V.shape[2])
             print(B.shape)
@@ -74,12 +81,12 @@ def main() :
             fig,ax,c = plots.plot_matrix(XY = B,
                 x_bins=args['image_param']['eta_bins'],
                 y_bins=args['image_param']['phi_bins'],
-                vmin=0, vmax=None, figsize=(5,3))
+                vmin=0, vmax=None, figsize=(5,3), cmap='hot')
 
             ax.set_xlabel('$\\eta$')
             ax.set_ylabel('$\\phi$ [rad]')
             fig.colorbar(c, ax=ax)
-            ax.set_title(f'basis vector $b_{{{i}}}$ | $\\langle E \\rangle$ GeV | class = {class_ind}')
+            ax.set_title(f'basis matrix $b_{{{i}}}$ | $E$ GeV | class = {class_ind}')
 
             os.makedirs(f'{targetdir}/NMF/', exist_ok = True)            
             plt.savefig(f'{targetdir}/NMF/class_{class_ind}_basis_{i}.pdf', bbox_inches='tight')
@@ -88,31 +95,39 @@ def main() :
 
     # --------------------------------------------------------------------
 
-    ### Mean images
+    ### Moment images
     VMAX    = 0.5 # GeV, maximum visualization scale
+    
     channel = 0
     
     for class_ind in [0,1]:
 
-        # <E>
-        XY = np.mean(data_tensor['trn'][(data.trn.y == class_ind), channel, :,:], axis=0)
+        for moment in ['mean', 'std']:
 
-        fig,ax,c = plots.plot_matrix(XY = XY,
-            x_bins=args['image_param']['eta_bins'],
-            y_bins=args['image_param']['phi_bins'],
-            vmin=0, vmax=VMAX, figsize=(5,3), cmap='hot')
+            XY = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
 
-        ax.set_xlabel('$\\eta$')
-        ax.set_ylabel('$\\phi$ [rad]')
+            if   moment == 'mean':
+                XY = np.mean(XY, axis=0)
+            elif moment == 'std':
+                XY = np.std(XY, axis=0)
 
-        fig.colorbar(c, ax=ax)
-        ax.set_title(f'$\\langle E \\rangle$ GeV | class = {class_ind}')
-        plt.savefig(f'{targetdir}/mean_E_channel_{channel}_class_{class_ind}.pdf', bbox_inches='tight')
-        plt.close()
+            fig,ax,c = plots.plot_matrix(XY = XY,
+                x_bins=args['image_param']['eta_bins'],
+                y_bins=args['image_param']['phi_bins'],
+                vmin=0, vmax=VMAX, figsize=(5,3), cmap='hot')
+
+            ax.set_xlabel('$\\eta$')
+            ax.set_ylabel('$\\phi$ [rad]')
+
+            fig.colorbar(c, ax=ax)
+            ax.set_title(f'{moment}$(E)$ GeV | class = {class_ind}')
+            plt.savefig(f'{targetdir}/{moment}_E_channel_{channel}_class_{class_ind}.pdf', bbox_inches='tight')
+            plt.close()
 
 
     ### Loop over individual events
-    MAXN = 100 # max number
+    MAXN = 30 # max number
+
     for i in tqdm(range(np.min([MAXN, data_tensor['trn'].shape[0]]))):
 
         fig,ax,c = plots.plot_matrix(XY=data_tensor['trn'][i,channel,:,:],

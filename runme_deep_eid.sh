@@ -4,7 +4,7 @@
 #
 # Run with: source runme.sh
 
-CONFIG="tune0_deep_dev"
+CONFIG="tune0"
 
 DATAPATH="/home/user/imperial_trees/2019sep13"
 #DATAPATH="/home/user/imperial_new_trees"
