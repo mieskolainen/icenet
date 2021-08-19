@@ -59,7 +59,7 @@ def main() :
 
     channel = 0
     k = 3        # Number of basis components
-    
+
     for class_ind in [0,1]:
         
         V = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
@@ -82,7 +82,7 @@ def main() :
                 x_bins=args['image_param']['eta_bins'],
                 y_bins=args['image_param']['phi_bins'],
                 vmin=0, vmax=None, figsize=(5,3), cmap='hot')
-
+            
             ax.set_xlabel('$\\eta$')
             ax.set_ylabel('$\\phi$ [rad]')
             fig.colorbar(c, ax=ax)
