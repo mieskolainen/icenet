@@ -130,7 +130,7 @@ def test_lognormal():
             ax[i,j].hist(b, bins, label=f'exact log-N: $m = {b0:0.2f}, \\sqrt{{v}} = {delta:0.2f}$', histtype='step')
             ax[i,j].hist(c, bins, label=f'approx power: $s = {delta:0.2f}$', histtype='step')
             
-            ax[i,j].legend(fontsize=9)
+            ax[i,j].legend(fontsize=9, loc='lower right')
             ax[i,j].set_xlim([0, b0*3])
             ax[i,j].set_xlabel('$x$')
 
