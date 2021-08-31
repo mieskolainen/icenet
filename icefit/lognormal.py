@@ -187,5 +187,5 @@ def test_accuracy():
 
 
 
-test_lognormal()
-test_accuracy()
+#test_lognormal()
+#test_accuracy()
