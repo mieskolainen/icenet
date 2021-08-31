@@ -94,12 +94,12 @@ def test_lognormal():
     b0    = 1
     
     # Different relative uncertainties
-    delta_val = np.array([0.1, 0.5, 1.0])
+    delta_val = np.array([0.1, 0.4, 1.5])
 
     # Different input modes
     modes = ['mean', 'median', 'mode']
 
-    fig, ax = plt.subplots(nrows=len(delta_val), ncols=len(modes), figsize=(12,6))
+    fig, ax = plt.subplots(nrows=len(delta_val), ncols=len(modes), figsize=(14,9))
     for i in range(len(delta_val)):
         delta = delta_val[i]
         for j in range(len(modes)):
@@ -122,18 +122,70 @@ def test_lognormal():
             print(f'{label} \n')
 
             if (i == 0):
-                ax[i,j].set_title(f'<{modes[j]}> as the target')
+                ax[i,j].set_title(f'<{modes[j]}> as the target $m$')
 
             # 2. Generate power-exp distributed variables
             c  = rand_powexp(sigma=sigma, N=N)
 
-            ax[i,j].hist(b, bins, label=f'log-norm: $b_0 = {b0:0.2f}, \\Delta = {delta:0.2f}$', histtype='step')
-            ax[i,j].hist(c, bins, label=f'pow-exp: $\\sigma = {delta:0.2f}$', histtype='step')
+            ax[i,j].hist(b, bins, label=f'exact log-N: $m = {b0:0.2f}, \\sqrt{{v}} = {delta:0.2f}$', histtype='step')
+            ax[i,j].hist(c, bins, label=f'approx power: $s = {delta:0.2f}$', histtype='step')
             
             ax[i,j].legend(fontsize=9)
             ax[i,j].set_xlim([0, b0*3])
-            ax[i,j].set_xlabel('$b$')
+            ax[i,j].set_xlabel('$x$')
 
         print('----------------------------------------------------------')
+
+    plt.savefig('sampling.pdf', bbox_inches='tight')
     plt.show()
 
+
+def test_accuracy():
+    """
+    Test accuracy made in the power-exp approximation with median = 1
+    """
+    def func_s(v, order=1):
+
+        A = np.sqrt(v)
+
+        if order >= 2:
+            A += v/2
+        if order >= 3:
+            A += -7*v**(3/2)/12
+        if order >= 4:
+            A += -17*v**2/24
+        if order >= 5:
+            A += 163*v**(5/2)/160
+        if order >= 6:
+            A += 1111*v**3/720
+        if order >= 7:
+            A += -96487*v**(7/2)/40320
+
+        return A / (np.exp(np.sqrt(np.log(1/2 * (1 + np.sqrt(1 + 4*v))))) - 1)
+
+
+    v = np.linspace(1e-9, 1.5**2, 10000)
+    fig, ax = plt.subplots()
+    plt.plot(np.sqrt(v), np.ones(len(v)), color=(0.5,0.5,0.5), ls='--')
+
+    for i in range(1,7+1):
+        if i % 2:
+            txt = f'$O(v^{{{i:.0f}/2}})$'
+        else:
+            txt = f'$O(v^{{{i/2:.0f}}})$'
+        plt.plot(np.sqrt(v), func_s(v=v, order=i), label=f'{txt}')
+
+    plt.ylabel('[Expansion of $s$ $|_{near \\;\\; v=0}$] / Exact $s$')
+    plt.xlabel('$\\sqrt{v}$')
+
+    plt.legend()
+    plt.xlim([0, 1.5])
+    plt.ylim([0.8, 1.5])
+
+    plt.savefig('series_approx.pdf', bbox_inches='tight')
+    plt.show()
+
+
+
+test_lognormal()
+test_accuracy()
