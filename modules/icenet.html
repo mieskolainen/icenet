@@ -1539,14 +1539,14 @@ returns the loss. Optional for most optimizers.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.apply_algebra_operator">
 <span class="sig-name descname"><span class="pre">apply_algebra_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ope_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_algebra_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.apply_algebra_operator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Algebraic operators applied</p>
+<dd><p>Algebraic operators applied as g(f(a), b)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>a</strong> – left hand side (string)</p></li>
 <li><p><strong>ope</strong> – algebraic operator (string)</p></li>
 <li><p><strong>b</strong> – right hand side (bool, float)</p></li>
-<li><p><strong>ope_lhs</strong> – operator applied on left hand side first (e.g. ‘abs’)</p></li>
+<li><p><strong>ope_lhs</strong> – operator applied on left hand side first (e.g. ‘ABS’)</p></li>
 </ul>
 </dd>
 </dl>
@@ -1909,6 +1909,25 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <dt class="sig sig-object py" id="icenet.tools.aux.number_of_set_bits">
 <span class="sig-name descname"><span class="pre">number_of_set_bits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#number_of_set_bits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.number_of_set_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return how many bits are active of an integer in a standard binary representation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.parse_syntax_tree">
+<span class="sig-name descname"><span class="pre">parse_syntax_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#parse_syntax_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.parse_syntax_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax tree binary tree parser.
+s
+See: <a class="reference external" href="https://stackoverflow.com/questions/11133339/">https://stackoverflow.com/questions/11133339/</a></p>
+<blockquote>
+<div><p>parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>instring</strong> – input string, e.g. “pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)”</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Syntax tree as a list of lists</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

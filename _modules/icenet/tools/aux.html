@@ -246,6 +246,7 @@
 <span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">pyparsing</span> <span class="k">as</span> <span class="nn">pp</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -257,24 +258,60 @@
 <span class="kn">import</span> <span class="nn">numba</span>
 
 
-<div class="viewcode-block" id="apply_algebra_operator"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_algebra_operator">[docs]</a><span class="k">def</span> <span class="nf">apply_algebra_operator</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ope</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">ope_lhs</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_syntax_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.parse_syntax_tree">[docs]</a><span class="k">def</span> <span class="nf">parse_syntax_tree</span><span class="p">(</span><span class="n">instring</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Algebraic operators applied</span>
+<span class="sd">    Syntax tree binary tree parser.</span>
+<span class="sd">    s</span>
+<span class="sd">    See: https://stackoverflow.com/questions/11133339/</span>
+<span class="sd">            parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        instring : input string, e.g. &quot;pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Syntax tree as a list of lists</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">operator</span>        <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;&gt;=|&lt;=|!=|&gt;|&lt;|==&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="s2">&quot;operator&quot;</span><span class="p">)</span>
+    <span class="n">number</span>          <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?&quot;</span><span class="p">)</span>
+    <span class="n">identifier</span>      <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Word</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">alphas</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="n">comparison_term</span> <span class="o">=</span> <span class="n">identifier</span> <span class="o">|</span> <span class="n">number</span> 
+    <span class="n">condition</span>       <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">comparison_term</span> <span class="o">+</span> <span class="n">operator</span> <span class="o">+</span> <span class="n">comparison_term</span><span class="p">)</span>
+
+    <span class="n">expr</span>            <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">operatorPrecedence</span><span class="p">(</span><span class="n">condition</span><span class="p">,[</span>
+                                <span class="p">(</span><span class="s2">&quot;AND&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="p">),</span>
+                                <span class="p">(</span><span class="s2">&quot;OR&quot;</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="p">),</span>
+                                <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">instring</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="apply_algebra_operator"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_algebra_operator">[docs]</a><span class="k">def</span> <span class="nf">apply_algebra_operator</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ope</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">ope_lhs</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Algebraic operators applied as g(f(a), b)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        a       : left hand side (string)</span>
 <span class="sd">        ope     : algebraic operator (string)</span>
 <span class="sd">        b       : right hand side (bool, float)</span>
-<span class="sd">        ope_lhs : operator applied on left hand side first (e.g. &#39;abs&#39;)</span>
+<span class="sd">        ope_lhs : operator applied on left hand side first (e.g. &#39;ABS&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Left hand side</span>
-    <span class="k">if</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;abs&#39;</span><span class="p">:</span>
+    <span class="c1"># Left hand side unary operators f(x)</span>
+    <span class="k">if</span>   <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;ABS__&#39;</span><span class="p">:</span>
         <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;INV__&#39;</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">x</span>
+    <span class="k">elif</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;SQRT__&#39;</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;POW2__&#39;</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;apply_algebra_operator: Unknown lhs operator = </span><span class="si">{</span><span class="n">ope_lhs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Algebra</span>
+    <span class="c1"># Middle binary operators g(x,y)</span>
     <span class="k">if</span>   <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
         <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span>
     <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
@@ -303,7 +340,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list of 4-tuplets of cuts (var, operator, value, lhs_operator)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tuplets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tuplets</span>       <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">LHS_operators</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ABS__&#39;</span><span class="p">,</span> <span class="s1">&#39;INV__&#39;</span><span class="p">,</span> <span class="s1">&#39;SQRT__&#39;</span><span class="p">,</span> <span class="s1">&#39;POW2__&#39;</span><span class="p">}</span>
 
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cutlist</span><span class="p">:</span>
             
@@ -316,12 +354,12 @@
         <span class="n">var</span>   <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Construct (possible) left hand side operators</span>
-        <span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;|&#39;</span> <span class="ow">and</span> <span class="n">var</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;|&#39;</span><span class="p">:</span>
-            <span class="n">var</span>     <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">lhs_ope</span> <span class="o">=</span> <span class="s1">&#39;abs&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">var</span>     <span class="o">=</span> <span class="n">var</span>
-            <span class="n">lhs_ope</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">lhs_ope</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">LHS_operators</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                <span class="n">var</span>     <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">o</span><span class="p">):]</span>
+                <span class="n">lhs_ope</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="k">break</span>
 
         <span class="c1"># Middle operator</span>
         <span class="n">ope</span>   <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
