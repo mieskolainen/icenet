@@ -8,8 +8,8 @@ import numpy as np
 
 def parse_syntax_tree(instring):
     """
-    Syntax tree binary tree parser.
-
+    Binary selection syntax tree parser
+    
     Args:
         instring : input string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
     
