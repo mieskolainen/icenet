@@ -23,6 +23,7 @@ import torch.nn.functional as F
 
 from icenet.tools import aux
 from icenet.tools import io
+from icefit import mine
 
 
 init_funcs = {
@@ -374,6 +375,23 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
             else:
                 print(__name__ + '.train: Error with unknown lossfunc ')
 
+            # ------------------------------------------------------------
+            # Mutual information regularization for the output independence w.r.t the target variable
+            """
+            if param['opt_param']['MI_reg_on'] == True:
+
+                # Input variables, make output orthogonal with respect to 'ortho' variable
+                x1 = log_phat
+                x2 = batch_x['ortho']
+
+                MI, MI_err = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
+
+                # Adaptive gradient clipping
+                # ...
+
+                # Add to the loss
+                loss += param['opt_param']['MI_reg_beta'] * MI
+            """
             # ------------------------------------------------------------
             optimizer.zero_grad() # Zero gradients
             loss.backward()       # Compute gradients

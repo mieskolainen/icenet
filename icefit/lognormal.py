@@ -71,7 +71,7 @@ def rand_lognormal(m, v, N, inmode='mean'):
     return y
 
 
-def rand_powexp(sigma, N):
+def rand_powexp(b, sigma, N):
     """
     Power+exp type parametrization (positive definite)
     
@@ -81,7 +81,7 @@ def rand_powexp(sigma, N):
     """
     theta = np.random.randn(N) # theta ~ exp(-0.5 * sigma^2)
 
-    return (1 + sigma)**theta
+    return b*(1 + sigma)**theta
 
 
 def test_lognormal():
@@ -91,7 +91,7 @@ def test_lognormal():
     N     = int(1e6)
     
     # Nominal value
-    b0    = 1
+    b0    = 1.5
     
     # Different relative uncertainties
     delta_val = np.array([0.1, 0.4, 1.5])
@@ -125,7 +125,7 @@ def test_lognormal():
                 ax[i,j].set_title(f'<{modes[j]}> as the target $m$')
 
             # 2. Generate power-exp distributed variables
-            c  = rand_powexp(sigma=sigma, N=N)
+            c  = rand_powexp(b=b0, sigma=sigma, N=N)
 
             ax[i,j].hist(b, bins, label=f'exact log-N: $m = {b0:0.2f}, \\sqrt{{v}} = {delta:0.2f}$', histtype='step')
             ax[i,j].hist(c, bins, label=f'approx power: $s = {delta:0.2f}$', histtype='step')

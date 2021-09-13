@@ -21,6 +21,123 @@ import icenet.tools.prints as prints
 import numba
 
 
+def apply_algebra_operator(a, ope, b, ope_lhs = ''):
+    """
+    Algebraic operators applied
+    
+    Args:
+        a       : left hand side (string)
+        ope     : algebraic operator (string)
+        b       : right hand side (bool, float)
+        ope_lhs : operator applied on left hand side first (e.g. 'abs')
+    """
+
+    # Left hand side
+    if ope_lhs == 'abs':
+        f = lambda x : np.abs(x)
+    else:
+        f = lambda x : x
+
+    # Algebra
+    if   ope == '<':
+        g = lambda x,y : x < y
+    elif ope == '>':
+        g = lambda x,y : x > y
+    elif ope == '!=':
+        g = lambda x,y : x != y
+    elif ope == '==':
+        g = lambda x,y : x == y
+    elif ope == '<=':
+        g = lambda x,y : x <= y
+    elif ope == '>=':
+        g = lambda x,y : x >= y
+    else:
+        raise Exception(f'Unknown algebraic operator "{ope}"')
+
+    return g(f(a), b)
+
+
+def construct_cut_tuplets(cutlist):
+    """
+    Construct cuts 4-tuplets from a list of strings.
+    
+    Args:
+        cutlist : For example ['var_y < 0.5', 'var_x == True']
+
+    Returns:
+        list of 4-tuplets of cuts (var, operator, value, lhs_operator)
+    """
+    tuplets = []
+
+    for s in cutlist:
+            
+        # Split into [a <operator> b]
+        splitted = s.split()
+
+        if len(splitted) != 3:
+            raise Except(__name__ + f'.construct_cut_triplets: Problem parsing cut string {s} [len(s) != 3]')
+
+        var   = splitted[0]
+
+        # Construct (possible) left hand side operators
+        if var[0] == '|' and var[-1] == '|':
+            var     = var[1:-1]
+            lhs_ope = 'abs'
+        else:
+            var     = var
+            lhs_ope = ''
+
+        # Middle operator
+        ope   = splitted[1]
+
+        # RHS value
+        value = splitted[2]
+        if   (value == 'True')  or (value == 'true'):
+            value = True
+        elif (value == 'False') or (value == 'false'):
+            value = False
+        else:
+            value = float(value)
+
+        trp = (var, ope, value, lhs_ope)
+        tuplets.append(trp)
+
+    return tuplets
+
+
+def construct_columnar_cuts(X, VARS, cutlist):
+    """
+    Construct cuts and corresponding names.
+
+    Args:
+        X       : Input columnar data matrix
+        VARS    : Variable names for each column of X
+        cutlist : Selection cuts as strings, such as ['|eta| < 0.5', 'trigger0 == True']
+    
+    Returns:
+        cuts, names
+    """
+    cuts    = []
+    names   = []
+    tuplets = construct_cut_tuplets(cutlist)
+
+    for tup in tuplets:
+
+        if len(tup) != 4:
+            raise Exception(__name__ + f'.construct_columnar_cuts: Problem with the input structure.')
+
+        # Apply Algebraic Operators
+        var     = tup[0]
+        ope     = tup[1]
+        value   = tup[2]
+        ope_lhs = tup[3]
+
+        cuts.append( apply_algebra_operator(a=X[:, VARS.index(var)], ope=ope, b=value, ope_lhs=ope_lhs))
+        names.append(f'{ope_lhs}({var}) {ope} {value}')
+
+    return cuts,names
+
+
 def split(a, n):
     """
     Generator which returns approx equally sized chunks.

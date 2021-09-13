@@ -23,19 +23,16 @@ def cut_standard(X, VARS, xcorr_flow=False):
     	ind  : Passing indices
     """
     
-    # Fiducial cuts
-    MINPT   = 0.7
-    MAXETA  = 1.5
+    cutlist = ['e1_hlt_pms2         < 10000',
+               'e1_hlt_invEInvP     < 0.2',
+               'e1_hlt_trkDEtaSeed  < 0.01',
+               'e1_hlt_trkDPhi      < 0.2',
+               'e1_hlt_trkChi2      < 40',
+               'e1_hlt_trkValidHits >= 5',
+               'e1_hlt_trkNrLayerIT >= 2']
     
-    # Define cuts
-    cutlist = [f'has_gsf == True' ,
-               f'gsf_pt    > {MINPT}',
-               f'|trk_eta| < {MAXETA}']
-
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
     ind = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
     return ind
-
-# Add alternative cuts here ...

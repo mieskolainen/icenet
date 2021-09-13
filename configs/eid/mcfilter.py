@@ -19,16 +19,13 @@ def filter_nofilter(X, VARS, xcorr_flow=False):
 def filter_charged(X, VARS, xcorr_flow=False):
     """ Only generator level charged """
 
-    # Construct passing cuts
-    cuts  = []
-    names = []
+    # Define cuts
+    cutlist = [f'|gen_charge| == 1']
 
-    #
-    cuts.append( np.abs(X[:, VARS.index('gen_charge')]) == 1 )
-    names.append(['|gen_charge| == 1'])
-
-    # Apply cuts
-    ind = aux.apply_cutflow(cut=cut, names=names, xcorr_flow=xcorr_flow)
+    # Construct and apply
+    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
+    ind         = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    
     return ind
 
 
@@ -42,25 +39,19 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
     """
 
     # Fiducial cuts for the tag-side muon trigger object
-    MINPT  = 5.0
-    MAXETA = 2.5
+    MINPT   = 5.0
+    MAXETA  = 2.5
 
-    # Construct passing filters
-    cuts  = []
-    names = []
+    # Define cuts
+    cutlist = [f'is_egamma == False' ,
+               f'tag_pt     > {MINPT}',
+               f'|tag_eta|  < {MAXETA}']
 
-    #
-    cuts.append( X[:, VARS.index('is_egamma')] == False )
-    names.append(f'is_egamma == False')
-    #
-    cuts.append( X[:, VARS.index('tag_pt')] > MINPT )
-    names.append(f'tag_pt > {MINPT:0.2f}')
-    #
-    cuts.append( np.abs(X[:, VARS.index('tag_eta')]) < MAXETA )
-    names.append(f'|tag_eta| < {MAXETA:0.2f}')
-    
+    # Construct and apply
+    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
+    ind         = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
 
-    ind   = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     return ind
+
 
 # Add alternative filters here ...
