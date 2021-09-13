@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import sklearn
 import copy
 from tqdm import tqdm
+import pyparsing as pp
 
 import os
 
@@ -21,24 +22,60 @@ import icenet.tools.prints as prints
 import numba
 
 
-def apply_algebra_operator(a, ope, b, ope_lhs = ''):
+def parse_syntax_tree(instring):
     """
-    Algebraic operators applied
+    Syntax tree binary tree parser.
+    s
+    See: https://stackoverflow.com/questions/11133339/
+            parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
+    
+    Args:
+        instring : input string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
+    
+    Returns:
+        Syntax tree as a list of lists
+    """
+
+    operator        = pp.Regex(">=|<=|!=|>|<|==").setName("operator")
+    number          = pp.Regex(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
+    identifier      = pp.Word(pp.alphas, pp.alphanums + "_")
+    comparison_term = identifier | number 
+    condition       = pp.Group(comparison_term + operator + comparison_term)
+
+    expr            = pp.operatorPrecedence(condition,[
+                                ("AND", 2, pp.opAssoc.LEFT, ),
+                                ("OR",  2, pp.opAssoc.LEFT, ),
+                                ])
+
+    return expr.parseString(instring)
+
+
+def apply_algebra_operator(a, ope, b, ope_lhs=''):
+    """
+    Algebraic operators applied as g(f(a), b)
     
     Args:
         a       : left hand side (string)
         ope     : algebraic operator (string)
         b       : right hand side (bool, float)
-        ope_lhs : operator applied on left hand side first (e.g. 'abs')
+        ope_lhs : operator applied on left hand side first (e.g. 'ABS')
     """
 
-    # Left hand side
-    if ope_lhs == 'abs':
+    # Left hand side unary operators f(x)
+    if   ope_lhs == 'ABS__':
         f = lambda x : np.abs(x)
-    else:
+    elif ope_lhs == 'INV__':
+        f = lambda x : 1.0 / x
+    elif ope_lhs == 'SQRT__':
+        f = lambda x : np.sqrt(x)
+    elif ope_lhs == 'POW2__':
+        f = lambda x : x**2
+    elif ope_lhs == '':
         f = lambda x : x
+    else:
+        raise Exception(__name__ + f'apply_algebra_operator: Unknown lhs operator = {ope_lhs}')
 
-    # Algebra
+    # Middle binary operators g(x,y)
     if   ope == '<':
         g = lambda x,y : x < y
     elif ope == '>':
@@ -67,7 +104,8 @@ def construct_cut_tuplets(cutlist):
     Returns:
         list of 4-tuplets of cuts (var, operator, value, lhs_operator)
     """
-    tuplets = []
+    tuplets       = []
+    LHS_operators = {'ABS__', 'INV__', 'SQRT__', 'POW2__'}
 
     for s in cutlist:
             
@@ -80,12 +118,12 @@ def construct_cut_tuplets(cutlist):
         var   = splitted[0]
 
         # Construct (possible) left hand side operators
-        if var[0] == '|' and var[-1] == '|':
-            var     = var[1:-1]
-            lhs_ope = 'abs'
-        else:
-            var     = var
-            lhs_ope = ''
+        lhs_ope = ''
+        for o in LHS_operators:
+            if o in var:
+                var     = var[len(o):]
+                lhs_ope = str(o)
+                break
 
         # Middle operator
         ope   = splitted[1]

@@ -5,7 +5,6 @@
 
 import numpy as np
 import numba
-import matplotlib.pyplot as plt
 
 import icenet.tools.aux as aux
 
@@ -15,10 +14,12 @@ def cut_nocut(X, VARS, xcorr_flow=False):
 
 
 def cut_standard(X, VARS, xcorr_flow=False):
-    """ Function implements basic selections (cuts).
+    """ Function implements basic selections (cuts)
+
     Args:
     	X    : # Number of vectors x # Number of variables
     	VARS : Variable name array
+
     Returns:
     	ind  : Passing indices
     """
@@ -28,9 +29,9 @@ def cut_standard(X, VARS, xcorr_flow=False):
     MAXETA  = 1.5
     
     # Define cuts
-    cutlist = [f'has_gsf == True' ,
-               f'gsf_pt    > {MINPT}',
-               f'|trk_eta| < {MAXETA}']
+    cutlist = [f'has_gsf     == True' ,
+               f'gsf_pt       > {MINPT}',
+               f'ABS__trk_eta < {MAXETA}']
 
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)

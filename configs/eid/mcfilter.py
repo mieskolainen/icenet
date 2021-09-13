@@ -20,7 +20,7 @@ def filter_charged(X, VARS, xcorr_flow=False):
     """ Only generator level charged """
 
     # Define cuts
-    cutlist = [f'|gen_charge| == 1']
+    cutlist = [f'ABS__gen_charge == 1']
 
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
@@ -41,11 +41,11 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
     # Fiducial cuts for the tag-side muon trigger object
     MINPT   = 5.0
     MAXETA  = 2.5
-
+    
     # Define cuts
-    cutlist = [f'is_egamma == False' ,
-               f'tag_pt     > {MINPT}',
-               f'|tag_eta|  < {MAXETA}']
+    cutlist = [f'is_egamma   == False' ,
+               f'tag_pt       > {MINPT}',
+               f'ABS__tag_eta < {MAXETA}']
 
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
