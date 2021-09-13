@@ -257,6 +257,123 @@
 <span class="kn">import</span> <span class="nn">numba</span>
 
 
+<div class="viewcode-block" id="apply_algebra_operator"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_algebra_operator">[docs]</a><span class="k">def</span> <span class="nf">apply_algebra_operator</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ope</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">ope_lhs</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Algebraic operators applied</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        a       : left hand side (string)</span>
+<span class="sd">        ope     : algebraic operator (string)</span>
+<span class="sd">        b       : right hand side (bool, float)</span>
+<span class="sd">        ope_lhs : operator applied on left hand side first (e.g. &#39;abs&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Left hand side</span>
+    <span class="k">if</span> <span class="n">ope_lhs</span> <span class="o">==</span> <span class="s1">&#39;abs&#39;</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span>
+
+    <span class="c1"># Algebra</span>
+    <span class="k">if</span>   <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ope</span> <span class="o">==</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">y</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown algebraic operator &quot;</span><span class="si">{</span><span class="n">ope</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="construct_cut_tuplets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.construct_cut_tuplets">[docs]</a><span class="k">def</span> <span class="nf">construct_cut_tuplets</span><span class="p">(</span><span class="n">cutlist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct cuts 4-tuplets from a list of strings.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cutlist : For example [&#39;var_y &lt; 0.5&#39;, &#39;var_x == True&#39;]</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of 4-tuplets of cuts (var, operator, value, lhs_operator)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tuplets</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cutlist</span><span class="p">:</span>
+            
+        <span class="c1"># Split into [a &lt;operator&gt; b]</span>
+        <span class="n">splitted</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splitted</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Except</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.construct_cut_triplets: Problem parsing cut string </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1"> [len(s) != 3]&#39;</span><span class="p">)</span>
+
+        <span class="n">var</span>   <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Construct (possible) left hand side operators</span>
+        <span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;|&#39;</span> <span class="ow">and</span> <span class="n">var</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;|&#39;</span><span class="p">:</span>
+            <span class="n">var</span>     <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">lhs_ope</span> <span class="o">=</span> <span class="s1">&#39;abs&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span>     <span class="o">=</span> <span class="n">var</span>
+            <span class="n">lhs_ope</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="c1"># Middle operator</span>
+        <span class="n">ope</span>   <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># RHS value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span>   <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">)</span>  <span class="ow">or</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">trp</span> <span class="o">=</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ope</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">lhs_ope</span><span class="p">)</span>
+        <span class="n">tuplets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trp</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tuplets</span></div>
+
+
+<div class="viewcode-block" id="construct_columnar_cuts"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.construct_columnar_cuts">[docs]</a><span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct cuts and corresponding names.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X       : Input columnar data matrix</span>
+<span class="sd">        VARS    : Variable names for each column of X</span>
+<span class="sd">        cutlist : Selection cuts as strings, such as [&#39;|eta| &lt; 0.5&#39;, &#39;trigger0 == True&#39;]</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cuts, names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cuts</span>    <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span>   <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tuplets</span> <span class="o">=</span> <span class="n">construct_cut_tuplets</span><span class="p">(</span><span class="n">cutlist</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">tuplets</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.construct_columnar_cuts: Problem with the input structure.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Apply Algebraic Operators</span>
+        <span class="n">var</span>     <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ope</span>     <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">value</span>   <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ope_lhs</span> <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">cuts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">apply_algebra_operator</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">X</span><span class="p">[:,</span> <span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)],</span> <span class="n">ope</span><span class="o">=</span><span class="n">ope</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">ope_lhs</span><span class="o">=</span><span class="n">ope_lhs</span><span class="p">))</span>
+        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ope_lhs</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">) </span><span class="si">{</span><span class="n">ope</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cuts</span><span class="p">,</span><span class="n">names</span></div>
+
+
 <div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generator which returns approx equally sized chunks.</span>

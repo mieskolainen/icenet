@@ -1537,6 +1537,22 @@ returns the loss. Optional for most optimizers.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.apply_algebra_operator">
+<span class="sig-name descname"><span class="pre">apply_algebra_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ope_lhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_algebra_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.apply_algebra_operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Algebraic operators applied</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – left hand side (string)</p></li>
+<li><p><strong>ope</strong> – algebraic operator (string)</p></li>
+<li><p><strong>b</strong> – right hand side (bool, float)</p></li>
+<li><p><strong>ope_lhs</strong> – operator applied on left hand side first (e.g. ‘abs’)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.apply_cutflow">
 <span class="sig-name descname"><span class="pre">apply_cutflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xcorr_flow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#apply_cutflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.apply_cutflow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply cutflow</p>
@@ -1659,6 +1675,38 @@ returns the loss. Optional for most optimizers.</p>
 </dl>
 <dl class="simple">
 <dt>Returns</dt><dd><p>true or false</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.construct_columnar_cuts">
+<span class="sig-name descname"><span class="pre">construct_columnar_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutlist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#construct_columnar_cuts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.construct_columnar_cuts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct cuts and corresponding names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Input columnar data matrix</p></li>
+<li><p><strong>VARS</strong> – Variable names for each column of X</p></li>
+<li><p><strong>cutlist</strong> – Selection cuts as strings, such as [‘<a href="#id1"><span class="problematic" id="id2">|eta|</span></a> &lt; 0.5’, ‘trigger0 == True’]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>cuts, names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.construct_cut_tuplets">
+<span class="sig-name descname"><span class="pre">construct_cut_tuplets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutlist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#construct_cut_tuplets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.construct_cut_tuplets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct cuts 4-tuplets from a list of strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cutlist</strong> – For example [‘var_y &lt; 0.5’, ‘var_x == True’]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of 4-tuplets of cuts (var, operator, value, lhs_operator)</p>
 </dd>
 </dl>
 </dd></dl>

@@ -259,6 +259,7 @@
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
 
 <span class="n">init_funcs</span> <span class="o">=</span> <span class="p">{</span>
@@ -610,6 +611,23 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.train: Error with unknown lossfunc &#39;</span><span class="p">)</span>
 
+            <span class="c1"># ------------------------------------------------------------</span>
+            <span class="c1"># Mutual information regularization for the output independence w.r.t the target variable</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            if param[&#39;opt_param&#39;][&#39;MI_reg_on&#39;] == True:</span>
+
+<span class="sd">                # Input variables, make output orthogonal with respect to &#39;ortho&#39; variable</span>
+<span class="sd">                x1 = log_phat</span>
+<span class="sd">                x2 = batch_x[&#39;ortho&#39;]</span>
+
+<span class="sd">                MI, MI_err = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)</span>
+
+<span class="sd">                # Adaptive gradient clipping</span>
+<span class="sd">                # ...</span>
+
+<span class="sd">                # Add to the loss</span>
+<span class="sd">                loss += param[&#39;opt_param&#39;][&#39;MI_reg_beta&#39;] * MI</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="c1"># ------------------------------------------------------------</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span> <span class="c1"># Zero gradients</span>
             <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>       <span class="c1"># Compute gradients</span>
