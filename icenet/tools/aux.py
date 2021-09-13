@@ -100,7 +100,7 @@ def construct_cut_tuplets(cutlist):
     
     Args:
         cutlist : For example ['var_y < 0.5', 'var_x == True']
-
+    
     Returns:
         list of 4-tuplets of cuts (var, operator, value, lhs_operator)
     """
@@ -204,7 +204,6 @@ def split_start_end(a, n):
         out.append([ll[i][0], ll[i][-1]])
 
     return out
-
 
 def apply_cutflow(cut, names, xcorr_flow=True):
     """ Apply cutflow
