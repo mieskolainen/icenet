@@ -117,7 +117,7 @@ def eval_boolean_exptree(root, X, VARS):
     def is_in(a, b):
         """ Helper function """
         if isinstance(a, str):
-
+            
             # Split '__' because of function operators (see below)
             return a.split('__')[-1] in b
         else:
