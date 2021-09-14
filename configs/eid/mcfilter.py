@@ -46,7 +46,7 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
     cutlist = [f'is_egamma   == False' ,
                f'tag_pt       > {MINPT}',
                f'ABS__tag_eta < {MAXETA}']
-
+    
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
     ind         = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)

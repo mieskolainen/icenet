@@ -32,7 +32,7 @@ def cut_standard(X, VARS, xcorr_flow=False):
     cutlist = [f'has_gsf     == True' ,
                f'gsf_pt       > {MINPT}',
                f'ABS__trk_eta < {MAXETA}']
-
+    
     # Construct and apply
     cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
     ind = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)

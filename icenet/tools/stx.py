@@ -114,6 +114,15 @@ def eval_boolean_exptree(root, X, VARS):
         boolean selection list of size N
     """
 
+    def is_in(a, b):
+        """ Helper function """
+        if isinstance(a, str):
+
+            # Split '__' because of function operators (see below)
+            return a.split('__')[-1] in b
+        else:
+            return False
+
     # Empty tree
     if root is None:
         return 0
@@ -121,12 +130,17 @@ def eval_boolean_exptree(root, X, VARS):
     # Leaf node
     if root.left is None and root.right is None:
 
-        if root.data in VARS:
+        if is_in(root.data, VARS):
             return root.data
         else:
-            return float(root.data)
-
-    # Evaluate left and right tree
+            if   is_in(root.data, ['True', 'true']):
+                return True
+            elif is_in(root.data, ['False', 'false']):
+                return False
+            else:
+                return float(root.data)
+    
+    # Evaluate left and right trees
     left_sum  = eval_boolean_exptree(root=root.left,  X=X, VARS=VARS)
     right_sum = eval_boolean_exptree(root=root.right, X=X, VARS=VARS)
 
@@ -140,7 +154,8 @@ def eval_boolean_exptree(root, X, VARS):
     # We have ended up with numerical comparison
     operator = root.data
 
-    if left_sum in VARS:
+    if isinstance(left_sum, str) and is_in(left_sum, VARS):
+
         lhs = left_sum
         rhs = right_sum
 
@@ -158,28 +173,68 @@ def eval_boolean_exptree(root, X, VARS):
         elif operator == '<':
             operator = '>'
 
-    ind     = VARS.index(lhs)
+    # Vector index
+    split = lhs.split('__')
+    ind   = VARS.index(split[-1])
+    
+    # -------------------------------------------------
+    # Construct possible function operator
+    f = lambda x : x
 
-    if   operator == '<=':
-        return X[:, ind] <= float(rhs)
+    if len(split) == 2: # We have 'OPERATOR__x' type input
+        
+        func_name = split[0]
 
-    elif operator == '>=':
-        return X[:, ind] >= float(rhs)
+        if   func_name == 'ABS':
+            f = lambda x : np.abs(x)
+        elif func_name == 'POW2':
+            f = lambda x : x**2
+        elif func_name == 'SQRT':
+            f = lambda x : np.sqrt(x)
+        elif func_name == 'INV':
+            f = lambda x : 1.0/x
+        else:
+            raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
+    # -------------------------------------------------
 
+    # Middle binary operators g(x,y)
+    if   operator == '<':
+        g = lambda x,y : x < float(y)
     elif operator == '>':
-        return X[:, ind] > float(rhs)
-
-    elif operator == '<':
-        return X[:, ind] < float(rhs)
-
-    elif root.data == '!=':
-        return X[:, ind] != int(rhs)
-
-    elif root.data == '==':
-        return X[:, ind] == int(rhs)
-
+        g = lambda x,y : x > float(y)
+    elif operator == '!=':
+        g = lambda x,y : x != int(y)
+    elif operator == '==':
+        g = lambda x,y : x == int(y)
+    elif operator == '<=':
+        g = lambda x,y : x <= float(y)
+    elif operator == '>=':
+        g = lambda x,y : x >= float(y)
     else:
-        raise Exception(__name__ + f': Unknown binary operator "{root.data}"')
+        raise Exception(__name__ + f'.eval_boolean_exptree: Unknown binary operator "{operator}"')
+
+    # Evaluate
+    return g(f(X[:, ind]), rhs)
+
+
+def eval_boolean_syntax(expr, X, VARS):
+    """
+    A complete wrapper to evaluate boolean syntax.
+
+    Args:
+        expr : boolean expression string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
+        X    : input data (N x dimensions)
+        VARS : variable names as a list
+
+    Returns:
+        boolean list of size N
+    """
+
+    treelist = parse_boolean_exptree(expr)
+    treeobj  = construct_exptree(treelist)
+    output   = eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
+
+    return output
 
 
 def test_syntax_tree_simple():
@@ -194,11 +249,18 @@ def test_syntax_tree_simple():
         VARS     = ['x', 'y', 'z']
 
         ### TEST 1
-        expr     = 'x >= 0.0 AND z < 50'
+        expr     = 'x >= 0.0 AND POW2__z < 2500'
 
         treelist = parse_boolean_exptree(expr)
         treeobj  = construct_exptree(treelist)
-        assert np.all(eval_boolean_exptree(root=treeobj, X=X, VARS=VARS))
+        output   = eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
+        assert np.all(output)
+
+        # One-Liner
+        output2  = eval_boolean_syntax(expr=expr, X=X, VARS=VARS)
+        assert np.all(output2)
+
+        assert np.all(output == output2)
         
 
 def test_syntax_tree_flip():
@@ -213,9 +275,9 @@ def test_syntax_tree_flip():
         VARS         = ['x', 'y', 'z']
 
         ### TEST
-        expr_strings = ['x > 3.8 OR (x > 7 AND (y >= 2 OR z <= 4))', '((y >= 2 OR z <= 4) AND 7 < x) OR 3.8 < x']
+        expr_strings = ['ABS__x > 3.8 OR (x > 7 AND (y >= 2 OR z <= 4))', '((y >= 2 OR z <= 4) AND 7 < x) OR 3.8 < ABS__x']
         output = []
-
+        
         # Test both syntax strings
         for i in range(len(expr_strings)):
             treelist = parse_boolean_exptree(expr_strings[i])

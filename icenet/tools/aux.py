@@ -6,6 +6,7 @@
 import math
 import torch
 import numpy as np
+import numba
 import matplotlib.pyplot as plt
 import sklearn
 import copy
@@ -19,128 +20,7 @@ from scipy import stats
 import scipy.special as special
 
 import icenet.tools.prints as prints
-import numba
-
-
-def parse_syntax_tree(instring):
-    """
-    Syntax tree binary tree parser.
-    s
-    See: https://stackoverflow.com/questions/11133339/
-            parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
-    
-    Args:
-        instring : input string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
-    
-    Returns:
-        Syntax tree as a list of lists
-    """
-
-    operator        = pp.Regex(">=|<=|!=|>|<|==").setName("operator")
-    number          = pp.Regex(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
-    identifier      = pp.Word(pp.alphas, pp.alphanums + "_")
-    comparison_term = identifier | number 
-    condition       = pp.Group(comparison_term + operator + comparison_term)
-
-    expr            = pp.operatorPrecedence(condition,[
-                                ("AND", 2, pp.opAssoc.LEFT, ),
-                                ("OR",  2, pp.opAssoc.LEFT, ),
-                                ])
-
-    return expr.parseString(instring)
-
-
-def apply_algebra_operator(a, ope, b, ope_lhs=''):
-    """
-    Algebraic operators applied as g(f(a), b)
-    
-    Args:
-        a       : left hand side (string)
-        ope     : algebraic operator (string)
-        b       : right hand side (bool, float)
-        ope_lhs : operator applied on left hand side first (e.g. 'ABS')
-    """
-
-    # Left hand side unary operators f(x)
-    if   ope_lhs == 'ABS__':
-        f = lambda x : np.abs(x)
-    elif ope_lhs == 'INV__':
-        f = lambda x : 1.0 / x
-    elif ope_lhs == 'SQRT__':
-        f = lambda x : np.sqrt(x)
-    elif ope_lhs == 'POW2__':
-        f = lambda x : x**2
-    elif ope_lhs == '':
-        f = lambda x : x
-    else:
-        raise Exception(__name__ + f'apply_algebra_operator: Unknown lhs operator = {ope_lhs}')
-
-    # Middle binary operators g(x,y)
-    if   ope == '<':
-        g = lambda x,y : x < y
-    elif ope == '>':
-        g = lambda x,y : x > y
-    elif ope == '!=':
-        g = lambda x,y : x != y
-    elif ope == '==':
-        g = lambda x,y : x == y
-    elif ope == '<=':
-        g = lambda x,y : x <= y
-    elif ope == '>=':
-        g = lambda x,y : x >= y
-    else:
-        raise Exception(f'Unknown algebraic operator "{ope}"')
-
-    return g(f(a), b)
-
-
-def construct_cut_tuplets(cutlist):
-    """
-    Construct cuts 4-tuplets from a list of strings.
-    
-    Args:
-        cutlist : For example ['var_y < 0.5', 'var_x == True']
-    
-    Returns:
-        list of 4-tuplets of cuts (var, operator, value, lhs_operator)
-    """
-    tuplets       = []
-    LHS_operators = {'ABS__', 'INV__', 'SQRT__', 'POW2__'}
-
-    for s in cutlist:
-            
-        # Split into [a <operator> b]
-        splitted = s.split()
-
-        if len(splitted) != 3:
-            raise Except(__name__ + f'.construct_cut_triplets: Problem parsing cut string {s} [len(s) != 3]')
-
-        var   = splitted[0]
-
-        # Construct (possible) left hand side operators
-        lhs_ope = ''
-        for o in LHS_operators:
-            if o in var:
-                var     = var[len(o):]
-                lhs_ope = str(o)
-                break
-
-        # Middle operator
-        ope   = splitted[1]
-
-        # RHS value
-        value = splitted[2]
-        if   (value == 'True')  or (value == 'true'):
-            value = True
-        elif (value == 'False') or (value == 'false'):
-            value = False
-        else:
-            value = float(value)
-
-        trp = (var, ope, value, lhs_ope)
-        tuplets.append(trp)
-
-    return tuplets
+import icenet.tools.stx as stx
 
 
 def construct_columnar_cuts(X, VARS, cutlist):
@@ -155,23 +35,17 @@ def construct_columnar_cuts(X, VARS, cutlist):
     Returns:
         cuts, names
     """
-    cuts    = []
-    names   = []
-    tuplets = construct_cut_tuplets(cutlist)
+    cuts  = []
+    names = []
 
-    for tup in tuplets:
+    for expr in cutlist:
 
-        if len(tup) != 4:
-            raise Exception(__name__ + f'.construct_columnar_cuts: Problem with the input structure.')
+        treelist = stx.parse_boolean_exptree(expr)
+        treeobj  = stx.construct_exptree(treelist)
+        output   = stx.eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
 
-        # Apply Algebraic Operators
-        var     = tup[0]
-        ope     = tup[1]
-        value   = tup[2]
-        ope_lhs = tup[3]
-
-        cuts.append( apply_algebra_operator(a=X[:, VARS.index(var)], ope=ope, b=value, ope_lhs=ope_lhs))
-        names.append(f'{ope_lhs}({var}) {ope} {value}')
+        cuts.append(output)
+        names.append(expr)
 
     return cuts,names
 
