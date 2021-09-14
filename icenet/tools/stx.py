@@ -164,9 +164,9 @@ def eval_boolean_exptree(root, X, VARS):
         lhs = right_sum
         rhs = left_sum
 
-        flips    = {'<=':'>=', '>=':'<=', '>':'<', '<':'>'}
+        flips    = {'<=':'>=', '>=':'<=', '>':'<', '<':'>', '==':'==', '!=':'!='}
         operator = flips[operator]
-    
+
     # Vector index
     split = lhs.split('__')
     ind   = VARS.index(split[-1])
