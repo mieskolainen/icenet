@@ -150,6 +150,58 @@ def poisson_tail(k1, k2):
 	else:
 		return P
 
+
+@numba.njit
+def monte_carlo_extreme_npdf(x, N, mu=0, sigma=1, trials=int(1e5)):
+	"""
+	Extreme value distribution for normal pdf via Monte Carlo
+	
+	Args:
+		x      : value to evaluate the extreme value pdf upper tail integral
+		mu     : mean of normal pdf
+		sigma  : std of normal pdf
+		N      : sample size
+		trials : number of Monte Carlo samples, as large as possible CPU wise
+	
+	Returns:
+		p_value : probability for the value x or more extreme
+		maxvals : full MC distribution of extreme values obtained
+	"""
+
+	maxvals = np.zeros(trials)
+	for i in range(trials):
+		sample     = np.random.normal(loc=mu, scale=sigma, size=N)
+		maxvals[i] = np.max(sample)
+
+	p_value = np.sum(maxvals >= x) / trials
+
+	return p_value, maxvals
+
+def analytical_extreme_npdf(N, mu=0, sigma=1):
+	"""
+	Analytical expectation (mean) value approximation
+	for a normal pdf max (extreme) values with a sample size of N.
+	
+	Reference, see the youtube talk:
+	"From one extreme to another: the statistics of extreme events, Jon Keating, Oxford"
+	"""
+	return mu + sigma*np.sqrt(2*np.log(N)) - 0.5*sigma*(np.log(np.log(N))) / (np.sqrt(2*np.log(N)))
+
+def test_extreme_npdf():
+
+	mu    = 0 # standard normal
+	sigma = 1
+
+	x = 3.0  # we test for "3 sigma deviation"
+	N = 100  # data sample size
+
+	p_value, maxvals = monte_carlo_extreme_npdf(x=x, N=N, mu=mu, sigma=sigma)
+
+	print(f'Extreme value p-value for standard normal-pdf for x >= {x} is {p_value:0.5f} (with N = {N})')
+	print(f'Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
+	print(f'Analytical expectation:  <extreme> = {analytical_extreme_npdf(N=N, mu=mu, sigma=sigma):0.3f}')
+
+
 def test_ratios():
 	"""
 	Test function
