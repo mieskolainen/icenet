@@ -2,7 +2,7 @@
 #
 # Note! Real observable cuts are defined in cuts.py, not here.
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -32,10 +32,10 @@ def filter_charged(X, VARS, xcorr_flow=False):
 def filter_no_egamma(X, VARS, xcorr_flow=False):
     """ Basic MC filters.
     Args:
-    	X    : # Number of vectors x # Number of variables
-    	VARS : Variable name array
+    	X    : Data matrix (N events x D dimensions)
+    	VARS : Variable name list (D)
     Returns:
-    	ind  : Passing indices
+    	ind  : Passing indices list
     """
 
     # Fiducial cuts for the tag-side muon trigger object

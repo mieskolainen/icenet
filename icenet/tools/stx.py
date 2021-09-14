@@ -133,9 +133,9 @@ def eval_boolean_exptree(root, X, VARS):
         if is_in(root.data, VARS):
             return root.data
         else:
-            if   is_in(root.data, ['True', 'true']):
+            if   isinstance(root.data, str) and root.data in ['True', 'true']:
                 return True
-            elif is_in(root.data, ['False', 'false']):
+            elif isinstance(root.data, str) and root.data in ['False', 'false']:
                 return False
             else:
                 return float(root.data)

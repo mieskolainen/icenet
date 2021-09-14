@@ -1,6 +1,6 @@
 # Basic selection cuts, use only variables available in real data.
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -17,11 +17,10 @@ def cut_standard(X, VARS, xcorr_flow=False):
     """ Function implements basic selections (cuts)
 
     Args:
-    	X    : # Number of vectors x # Number of variables
-    	VARS : Variable name array
-
+        X    : Data matrix (N events x D dimensions)
+        VARS : Variable name list (D)
     Returns:
-    	ind  : Passing indices
+        ind  : Passing indices list
     """
     
     # Fiducial cuts
