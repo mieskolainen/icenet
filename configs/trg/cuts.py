@@ -16,11 +16,13 @@ def cut_nocut(X, VARS, xcorr_flow=False):
 
 def cut_standard(X, VARS, xcorr_flow=False):
     """ Function implements basic selections (cuts).
+
     Args:
-    	X    : # Number of vectors x # Number of variables
-    	VARS : Variable name array
+        X    : Number of events N x Number of variables D
+        VARS : Variable name array (D)
+    
     Returns:
-    	ind  : Passing indices
+        ind  : Passing indices (N)
     """
     
     cutlist = ['e1_hlt_pms2         < 10000',
