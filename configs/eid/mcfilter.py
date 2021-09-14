@@ -42,8 +42,8 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
     MINPT   = 5.0
     MAXETA  = 2.5
     
-    # Define cuts (syntax accepts: ==, >=, <=, <, >, !=, ==, AND and OR,
-    #                                 also ABS__, POW2__, SQRT__, INV__)
+    # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
+    #                              also ABS__, POW2__, SQRT__, INV__)
     cutlist = [f'is_egamma   == False' ,
                f'tag_pt       > {MINPT}',
                f'ABS__tag_eta < {MAXETA}']

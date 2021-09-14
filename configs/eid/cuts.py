@@ -27,8 +27,8 @@ def cut_standard(X, VARS, xcorr_flow=False):
     MINPT   = 0.7
     MAXETA  = 1.5
     
-    # Define cuts (syntax accepts: ==, >=, <=, <, >, !=, ==, AND and OR,
-    #                                 also ABS__, POW2__, SQRT__, INV__)
+    # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
+    #                              also ABS__, POW2__, SQRT__, INV__)
     cutlist = [f'has_gsf     == True' ,
                f'gsf_pt       > {MINPT}',
                f'ABS__trk_eta < {MAXETA}']
