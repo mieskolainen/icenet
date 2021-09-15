@@ -34,6 +34,8 @@ from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
 from icenet.tools import prints
+from icenet.tools import process
+
 
 # deep learning
 from icenet.deep  import train
@@ -57,9 +59,9 @@ def main() :
     #prints.print_variables(X=data.trn.x, VARS=data.VARS)
     
     ### Compute reweighting weights
-    trn_weights = common.compute_reweights(data=data, args=args)
-        
-
+    trn_weights = process.compute_eta_pt_reweights(data=data, args=args)
+    
+    
     ### Plot some kinematic variables
     targetdir = f'./figs/eid/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)

@@ -151,8 +151,7 @@ def poisson_tail(k1, k2):
 		return P
 
 
-@numba.njit
-def monte_carlo_extreme_npdf(x, N, mu=0, sigma=1, trials=int(1e5)):
+def mc_extreme_npdf(x, N, mu=0, sigma=1, trials=int(1e6)):
 	"""
 	Extreme value distribution for normal pdf via Monte Carlo
 	
@@ -168,14 +167,35 @@ def monte_carlo_extreme_npdf(x, N, mu=0, sigma=1, trials=int(1e5)):
 		maxvals : full MC distribution of extreme values obtained
 	"""
 
-	maxvals = np.zeros(trials)
-	for i in range(trials):
-		sample     = np.random.normal(loc=mu, scale=sigma, size=N)
-		maxvals[i] = np.max(sample)
-
+	sample  = np.random.normal(mu, sigma, size=(trials, N))
+	maxvals = np.amax(sample, 1) # max per each row (trial)
 	p_value = np.sum(maxvals >= x) / trials
 
 	return p_value, maxvals
+
+
+def mc_extreme_multivariate_npdf(x, mu, cov, trials=int(1e6)):
+	"""
+	Extreme value distribution for a multivariate normal pdf via Monte Carlo,
+	e.g. for "correlated measurements or bins"
+	
+	Args:
+		x       : scalar value to evaluate the extreme value pdf upper tail integral
+		mu      : mean vector (N)
+		cov     : covariance matrix (NxN)
+		trials  : number of Monte Carlo samples, as large as possible CPU wise
+	
+	Returns:
+		p_value : probability for the value x or more extreme
+		maxvals : full MC distribution of extreme values obtained
+	"""
+
+	sample  = np.random.multivariate_normal(mean=mu, cov=cov, size=trials)
+	maxvals = np.amax(sample, 1) # max per each row (trial)
+	p_value = np.sum(maxvals >= x) / trials
+
+	return p_value, maxvals
+
 
 def analytical_extreme_npdf(N, mu=0, sigma=1):
 	"""
@@ -187,19 +207,71 @@ def analytical_extreme_npdf(N, mu=0, sigma=1):
 	"""
 	return mu + sigma*np.sqrt(2*np.log(N)) - 0.5*sigma*(np.log(np.log(N))) / (np.sqrt(2*np.log(N)))
 
+
+def cormat2covmat(R,s):
+	""" Convert a correlation matrix to a covariance matrix.
+	
+	Args:
+		R : correlation matrix (NxN)
+		s : vector of standard deviations (N)
+	Returns:
+		covariance matrix
+	"""
+
+	if np.any(s <= 0):
+		raise Exception('cormat2covmat: s vector elements must be positive')
+
+	if np.any(np.abs(R) > 1):
+		raise Exception('cormat2covmat: R matrix elements must be between [-1,1]')
+
+	return np.diag(s) @ R @ np.diag(s)
+
+
 def test_extreme_npdf():
 
 	mu    = 0 # standard normal
 	sigma = 1
 
-	x = 3.0  # we test for "3 sigma deviation"
-	N = 100  # data sample size
+	x = 3.0   # we test for "x sigma deviation"
+	N = 100   # data sample size
 
-	p_value, maxvals = monte_carlo_extreme_npdf(x=x, N=N, mu=mu, sigma=sigma)
+	# -------
+	print('Independent standard normal PDF')
 
-	print(f'Extreme value p-value for standard normal-pdf for x >= {x} is {p_value:0.5f} (with N = {N})')
-	print(f'Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
-	print(f'Analytical expectation:  <extreme> = {analytical_extreme_npdf(N=N, mu=mu, sigma=sigma):0.3f}')
+	p_value, maxvals = mc_extreme_npdf(x=x, N=N, mu=mu, sigma=sigma)
+
+	print(f' Extreme value p-value for x >= {x} is {p_value:0.2E} [with N = {N}]')
+	print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
+	print(f' Analytical expectation:  <extreme> = {analytical_extreme_npdf(N=N, mu=mu, sigma=sigma):0.3f}')
+
+	# -------
+	# Uncorrelated case, will return the same as independent Gaussians
+	print('\nIndependent standard N-dim normal PDF')
+
+	mu  = np.zeros(N) # Mean vector
+	cov = np.eye(N)   # Covariance matrix
+
+	p_value, maxvals = mc_extreme_multivariate_npdf(x=x, mu=mu, cov=cov)
+
+	print(f' Extreme value p-value for x >= {x} is {p_value:0.2E}')
+	print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
+
+	# -------
+	# Correlated bins
+	ccoef = 0.7
+	print(f'\nCorrelated N-dim normal PDF [ccoef = {ccoef:0.3f}]')
+
+	mu  = np.zeros(N)             # Mean vector
+
+	R   = np.ones((N,N)) * ccoef  # Correlation matrix
+	np.fill_diagonal(R, 1.0)
+	s   = np.ones(N)              # Vector of standard deviations
+	cov = cormat2covmat(R=R,s=s)  # --> Covariance matrix
+
+	p_value, maxvals = mc_extreme_multivariate_npdf(x=x, mu=mu, cov=cov)
+	
+	print(f' Extreme value p-value for x >= {x} is {p_value:0.2E}')
+	print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
 
 
 def test_ratios():
