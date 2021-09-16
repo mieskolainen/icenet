@@ -177,7 +177,8 @@ def mc_extreme_npdf(x, N, mu=0, sigma=1, trials=int(1e6)):
 def mc_extreme_multivariate_npdf(x, mu, cov, trials=int(1e6)):
 	"""
 	Extreme value distribution for a multivariate normal pdf via Monte Carlo,
-	e.g. for "correlated measurements or bins"
+	e.g. for "correlated measurements or bins" -- casted as a univariate problem
+	such that maximum of components is taken (not a "vector maximum")
 	
 	Args:
 		x       : scalar value to evaluate the extreme value pdf upper tail integral
@@ -202,8 +203,12 @@ def analytical_extreme_npdf(N, mu=0, sigma=1):
 	Analytical expectation (mean) value approximation
 	for a normal pdf max (extreme) values with a sample size of N.
 	
-	Reference, see the youtube talk:
-	"From one extreme to another: the statistics of extreme events, Jon Keating, Oxford"
+	References:
+		Youtube talk:
+		"From one extreme to another: the statistics of extreme events, Jon Keating, Oxford"
+		
+		https://en.wikipedia.org/wiki/Extreme_value_theory
+		https://en.wikipedia.org/wiki/Gumbel_distribution
 	"""
 	return mu + sigma*np.sqrt(2*np.log(N)) - 0.5*sigma*(np.log(np.log(N))) / (np.sqrt(2*np.log(N)))
 
