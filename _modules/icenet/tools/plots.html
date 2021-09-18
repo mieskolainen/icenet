@@ -26,7 +26,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.02
+                0.03
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -145,7 +145,7 @@
   <h1>Source code for icenet.tools.plots</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Plotting functions</span>
 <span class="c1"># </span>
-<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># Mikael Mieskolainen, 2021</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -154,7 +154,7 @@
 <span class="kn">import</span> <span class="nn">xgboost</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
 
 <div class="viewcode-block" id="plot_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_matrix</span><span class="p">(</span><span class="n">XY</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">grid_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -211,22 +211,24 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="binned_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_AUC</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Evaluate AUC per (pt,eta) bin.</span>
+<div class="viewcode-block" id="binned_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_AUC</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;var_pt&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;var_eta&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">}):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate AUC per (pt,eta) bin.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        func_predict :  Function handle of the classifier</span>
-<span class="sd">        X            :  Input data</span>
-<span class="sd">        y            :  Output (target) data</span>
-<span class="sd">        X_kin        :  Kinematic (pt,eta) data</span>
-<span class="sd">        VARS_kin     :  Kinematic variables (strings)</span>
-<span class="sd">        pt_edges     :  Edges of the pt-space cells</span>
-<span class="sd">        eta_edges    :  Edges of the eta-space cells</span>
-<span class="sd">        label        :  Label of the classifier (string)</span>
+<span class="sd">        func_predict:  Function handle of the classifier</span>
+<span class="sd">        X           :  Input data</span>
+<span class="sd">        y           :  Output (truth level target) data</span>
+<span class="sd">        X_kin       :  Kinematic (pt,eta) data</span>
+<span class="sd">        VARS_kin    :  Kinematic variables (strings)</span>
+<span class="sd">        pt_edges    :  Edges of the pt-space cells</span>
+<span class="sd">        eta_edges   :  Edges of the eta-space cells</span>
+<span class="sd">        label       :  Label of the classifier (string)</span>
+<span class="sd">        ids         :  Variable identifiers</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        fig,ax       :  Figure handle and axis</span>
-<span class="sd">        met          :  Metrics object</span>
+<span class="sd">        fig,ax      :  Figure handle and axis</span>
+<span class="sd">        met         :  Metrics object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">AUC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eta_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -234,11 +236,18 @@
 
     <span class="c1"># ** Compute predictions **</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># Evaluate one by one</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_AUC: one by one evaluation required&#39;</span><span class="p">)</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)):</span>
             <span class="n">y_pred</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_AUC: len(y_pred) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="s1"> != len(y) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
     <span class="c1"># Loop over bins</span>
@@ -249,14 +258,14 @@
             <span class="n">eta_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">eta_edges</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">eta_edges</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
 
             <span class="c1"># Indices</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">)],</span>   <span class="n">pt_range</span><span class="p">),</span>
-                                 <span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_eta&#39;</span><span class="p">)],</span> <span class="n">eta_range</span><span class="p">))</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="s1">&#39;var_pt&#39;</span><span class="p">])],</span>   <span class="n">pt_range</span><span class="p">),</span>
+                                 <span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="s1">&#39;var_eta&#39;</span><span class="p">])],</span> <span class="n">eta_range</span><span class="p">))</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Evaluate classifier &lt;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&gt; ...&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*** pT = [</span><span class="si">{</span><span class="n">pt_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">pt_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">], eta = [</span><span class="si">{</span><span class="n">eta_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">eta_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">] ***&#39;</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Do we have any events in this cell</span>
-
+                
                 <span class="c1"># Evaluate metric</span>
                 <span class="n">met</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_soft</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;AUC = </span><span class="si">{:.5f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
@@ -319,7 +328,7 @@
         <span class="n">ylabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">pt_edges</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
 
     <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">origin</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$\eta$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">eta$&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$p_t$ (GeV)&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;AUC x 100&#39;</span><span class="p">)</span>
     
@@ -329,12 +338,12 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="plotvars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvars">[docs]</a><span class="k">def</span> <span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">NBINS</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="plotvars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvars">[docs]</a><span class="k">def</span> <span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">NBINS</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Plot all variables.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">var</span> <span class="o">=</span> <span class="n">VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">plotvar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">NBINS</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">)</span></div>
 
 
@@ -345,7 +354,6 @@
     <span class="n">plot_reweight_result</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">title</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="n">var</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
 
 
 <div class="viewcode-block" id="plot_reweight_result"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_reweight_result">[docs]</a><span class="k">def</span> <span class="nf">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
@@ -403,12 +411,12 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># linear &amp; log</span>
-
+        
         <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># ROC diagonal</span>
@@ -416,7 +424,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">))</span> <span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: AUC = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive (background) rate $</span><span class="se">\\</span><span class="s1">alpha$&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True Positive (signal) rate $1-</span><span class="se">\\</span><span class="s1">beta$&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>

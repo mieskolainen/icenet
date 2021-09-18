@@ -26,7 +26,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.02
+                0.03
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -145,54 +145,23 @@
   <h1>Source code for icenet.tools.aux</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Auxialary functions</span>
 <span class="c1"># </span>
-<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># Mikael Mieskolainen, 2021</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">pyparsing</span> <span class="k">as</span> <span class="nn">pp</span>
-
 <span class="kn">import</span> <span class="nn">os</span>
 
+<span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 
 <span class="kn">import</span> <span class="nn">icenet.tools.prints</span> <span class="k">as</span> <span class="nn">prints</span>
 <span class="kn">import</span> <span class="nn">icenet.tools.stx</span> <span class="k">as</span> <span class="nn">stx</span>
-
-
-<div class="viewcode-block" id="construct_columnar_cuts"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.construct_columnar_cuts">[docs]</a><span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Construct cuts and corresponding names.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        X       : Input columnar data matrix</span>
-<span class="sd">        VARS    : Variable names for each column of X</span>
-<span class="sd">        cutlist : Selection cuts as strings, such as [&#39;|eta| &lt; 0.5&#39;, &#39;trigger0 == True&#39;]</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        cuts, names</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cuts</span>  <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">cutlist</span><span class="p">:</span>
-
-        <span class="n">treelist</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-        <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
-        <span class="n">output</span>   <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="o">=</span><span class="n">VARS</span><span class="p">)</span>
-
-        <span class="n">cuts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">cuts</span><span class="p">,</span><span class="n">names</span></div>
 
 
 <div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
@@ -224,69 +193,32 @@
 
     <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Apply cutflow</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        cut        : list of pre-calculated cuts, each is a boolean array</span>
-<span class="sd">        names      : list of names (description of each cut, for printout only)</span>
-<span class="sd">        xcorr_flow : compute full N-point correlations</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        ind : list of indices, 1 = pass, 0 = fail</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Print out &quot;serial flow&quot;</span>
-    <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)):</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cut[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">&gt;25</span><span class="si">}</span><span class="s1">]: pass </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    
-    <span class="c1"># Print out &quot;parallel flow&quot;</span>
-    <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point correlations &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
-        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-
-        <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
-        <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">ind</span></div>
-
-
-<div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Targets statistics printout</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        events :     uproot object</span>
-<span class="sd">        names  :     list of branch names</span>
-<span class="sd">        entrystart : uproot starting point</span>
-<span class="sd">        entrystop  : uproot ending point</span>
-
+<span class="sd">        ids    :     list of branch identifiers</span>
+<span class="sd">        entrystart:  uproot starting point</span>
+<span class="sd">        entrystop :  uproot ending point</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        Printout on stdout</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">K</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+    <span class="n">K</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">new</span><span class="p">:</span>
-        <span class="n">vec</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">])</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: vec.shape = </span><span class="si">{</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
     <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
     
@@ -616,247 +548,6 @@
     <span class="k">return</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_torch_checkpoint"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.load_torch_checkpoint">[docs]</a><span class="k">def</span> <span class="nf">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mynet&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Load pytorch checkpoint</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        path  : folder path</span>
-<span class="sd">        label : model label name</span>
-<span class="sd">        epoch : epoch index. Use -1 for the last epoch</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        pytorch model</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_torch_checkpoint: Loading checkpoint </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Load the model</span>
-    <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">model</span>      <span class="o">=</span> <span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;state_dict&#39;</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
-        <span class="n">parameter</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Set it in the evaluation mode</span>
-    <span class="k">return</span> <span class="n">model</span></div>
-
-
-<div class="viewcode-block" id="save_torch_model"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.save_torch_model">[docs]</a><span class="k">def</span> <span class="nf">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; PyTorch model saver</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving model..&#39;</span><span class="p">)</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">({</span>
-            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-            <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-            <span class="s1">&#39;epoch&#39;</span><span class="p">:</span> <span class="n">epoch</span>
-        <span class="p">},</span> <span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">f</span></div>
-
-
-<div class="viewcode-block" id="load_torch_model"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.load_torch_model">[docs]</a><span class="k">def</span> <span class="nf">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">load_start_epoch</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; PyTorch model loader</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading model..&#39;</span><span class="p">)</span>
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">])</span>
-        
-        <span class="k">if</span> <span class="n">load_start_epoch</span><span class="p">:</span>
-            <span class="n">param</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">f</span></div>
-
-
-<div class="viewcode-block" id="reweight_1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.reweight_1D">[docs]</a><span class="k">def</span> <span class="nf">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reference_class</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        X   :             Input data (# samples)</span>
-<span class="sd">        pdf :             Dictionary of pdfs for each class</span>
-<span class="sd">        y   :             Class target data (# samples)</span>
-<span class="sd">        N_class :         Number of classes</span>
-<span class="sd">        reference_class : Target class of re-weighting</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights for each event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Re-weighting weights</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N_class</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
-
-    <span class="c1"># Weight each class against the reference class</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-        <span class="n">inds</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Reference class stays intact</span>
-
-    <span class="c1"># Maximum weight cut-off regularization</span>
-    <span class="n">weights_doublet</span><span class="p">[</span><span class="n">weights_doublet</span> <span class="o">&gt;</span> <span class="n">max_reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reg</span>
-
-    <span class="c1"># Save weights</span>
-    <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">C0</span>
-    <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">C1</span>
-
-    <span class="k">return</span> <span class="n">weights_doublet</span></div>
-
-
-<div class="viewcode-block" id="reweightcoeff1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.reweightcoeff1D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reference_class</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">equal_frac</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        X  :   Observable of interest (N x 1)</span>
-<span class="sd">        y  :   Class labels (0,1,...) (N x 1)</span>
-<span class="sd">        pdf:   PDF for each class</span>
-<span class="sd">        N_class : Number of classes</span>
-<span class="sd">        equal_frac:  equalize class fractions</span>
-<span class="sd">        reference_class : e.g. 0 (background) or 1 (signal)</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights for each event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="n">N_class</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span><span class="o">=</span><span class="n">max_reg</span><span class="p">)</span>
-
-    <span class="c1"># Apply class balance equalizing weight</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">equal_frac</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
-
-    <span class="c1"># Get 1D array</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">weights</span></div>
-
-
-<div class="viewcode-block" id="reweightcoeff2DFP"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.reweightcoeff2DFP">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff2DFP</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf_A</span><span class="p">,</span> <span class="n">pdf_B</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reference_class</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">equal_frac</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
-<span class="sd">    </span>
-<span class="sd">    Operates in 2D with FACTORIZED PRODUCT marginal 1D distributions.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        X_A   :  Observable of interest (N x 1)</span>
-<span class="sd">        X_B   :  Observable of interest (N x 1)</span>
-<span class="sd">        y     :  Signal (1) and background (0) targets</span>
-<span class="sd">        pdf_A :  Density of observable A</span>
-<span class="sd">        pdf_B :  Density of observable B</span>
-<span class="sd">        N_class: Number of classes</span>
-<span class="sd">        reference_class: e.g. 0 (background) or 1 (signal)</span>
-<span class="sd">        equal_frac:      Equalize integrated class fractions</span>
-<span class="sd">        max_reg:         Maximum weight regularization</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights for each event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">weights_doublet_A</span> <span class="o">=</span> <span class="n">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_A</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf_A</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="n">N_class</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span><span class="o">=</span><span class="n">max_reg</span><span class="p">)</span>
-    <span class="n">weights_doublet_B</span> <span class="o">=</span> <span class="n">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_B</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf_B</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="n">N_class</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span><span class="o">=</span><span class="n">max_reg</span><span class="p">)</span>
-
-    <span class="c1"># Factorized product</span>
-    <span class="n">weights_doublet</span>   <span class="o">=</span> <span class="n">weights_doublet_A</span> <span class="o">*</span> <span class="n">weights_doublet_B</span>
-
-    <span class="c1"># Apply class balance equalizing weight</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">equal_frac</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
-
-    <span class="c1"># Get 1D array</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">weights</span></div>
-
-
-<div class="viewcode-block" id="reweightcoeff2D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.reweightcoeff2D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reference_class</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">equal_frac</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
-<span class="sd">    </span>
-<span class="sd">    Operates in full 2D without factorization.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        X_A : Observable A of interest (N x 1)</span>
-<span class="sd">        X_B : Observable B of interest (N x 1)</span>
-<span class="sd">        y   : Signal (1) and background (0) labels (N x 1)</span>
-<span class="sd">        pdf : Density histograms for each class</span>
-<span class="sd">        N_class :         Number of classes</span>
-<span class="sd">        reference_class : e.g. Background (0) or signal (1)</span>
-<span class="sd">        equal_frac :      Equalize class fractions</span>
-<span class="sd">        max_reg :         Regularize the maximum reweight coefficient</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights for each event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="c1"># Re-weighting weights</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N_class</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
-
-    <span class="c1"># Weight each class against the reference class</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-        <span class="n">inds_A</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">X_A</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">])</span>
-        <span class="n">inds_B</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">X_B</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds_A</span><span class="p">,</span> <span class="n">inds_B</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds_A</span><span class="p">,</span> <span class="n">inds_B</span><span class="p">]</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Reference class stays intact</span>
-
-    <span class="c1"># Maximum weight cut-off regularization</span>
-    <span class="n">weights_doublet</span><span class="p">[</span><span class="n">weights_doublet</span> <span class="o">&gt;</span> <span class="n">max_reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reg</span>
-
-    <span class="c1"># Apply class balance equalizing weight</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">equal_frac</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
-
-    <span class="c1"># Get 1D array</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">weights</span></div>
-
-
-<div class="viewcode-block" id="pdf_1D_hist"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.pdf_1D_hist">[docs]</a><span class="k">def</span> <span class="nf">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">binedges</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Compute re-weighting 1D pdfs.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Take re-weighting variables</span>
-    <span class="n">pdf</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">)</span>
-
-    <span class="c1"># Make them densities</span>
-    <span class="n">pdf</span>  <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">pdf</span></div>
-
-
-<div class="viewcode-block" id="pdf_2D_hist"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.pdf_2D_hist">[docs]</a><span class="k">def</span> <span class="nf">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">binedges_A</span><span class="p">,</span> <span class="n">binedges_B</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute re-weighting 2D pdfs.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Take re-weighting variables</span>
-    <span class="n">pdf</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_A</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">binedges_A</span><span class="p">,</span> <span class="n">binedges_B</span><span class="p">])</span>
-
-    <span class="c1"># Make them densities</span>
-    <span class="n">pdf</span>  <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">pdf</span></div>
-
-
-<div class="viewcode-block" id="balanceweights"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.balanceweights">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Balance N-class weights to sum to equal counts.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        weights_doublet: N-class event weights (events x classes)</span>
-<span class="sd">        reference_class: which class gives the reference (integer)</span>
-<span class="sd">        y : class targets</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights doublet with new weights per event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="n">weights_doublet</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">ref_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">[(</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">),</span> <span class="n">reference_class</span><span class="p">])</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
-            <span class="n">EQ</span> <span class="o">=</span> <span class="n">ref_sum</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">EQ</span>
-
-    <span class="k">return</span> <span class="n">weights_doublet</span></div>
-
-
 <div class="viewcode-block" id="pick_ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.pick_ind">[docs]</a><span class="k">def</span> <span class="nf">pick_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">minmax</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Return indices between minmax[0] and minmax[1].</span>
 <span class="sd">    </span>
@@ -869,12 +560,12 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">VARS</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        </span>
 <span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
-<span class="sd">        VARS       : all variable names</span>
+<span class="sd">        ids        : all variable names</span>
 <span class="sd">        xyz        : array of (x,y,z) channel triplet strings such as [[&#39;image_clu_eta&#39;, &#39;image_clu_phi&#39;, &#39;image_clu_e&#39;]]</span>
 <span class="sd">        x_binedges</span>
 <span class="sd">        y_binedges : arrays of bin edges</span>
@@ -888,7 +579,7 @@
 
     <span class="c1"># Choose targets</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)):</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
 
         <span class="c1"># Loop over all events</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
@@ -898,6 +589,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2tensor: Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">T</span></div>
+
 
 <div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -966,6 +658,7 @@
     <span class="n">y_out</span><span class="p">[</span><span class="n">y_out</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">y_out</span></div>
+
 
 <div class="viewcode-block" id="multiclass_roc_auc_score"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.multiclass_roc_auc_score">[docs]</a><span class="k">def</span> <span class="nf">multiclass_roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Multiclass AUC (area under the curve).</span>

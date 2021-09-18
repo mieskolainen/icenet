@@ -29,7 +29,7 @@
             <a href="../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.02
+                0.03
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -190,7 +190,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.common.load_root_file_new">
-<span class="sig-name descname"><span class="pre">load_root_file_new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#load_root_file_new"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.load_root_file_new" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_root_file_new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#load_root_file_new"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.load_root_file_new" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the root file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -201,7 +201,7 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>input, output matrices
-VARS      : variable names</p>
+ids      : variable names</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>X,Y</p>
@@ -248,7 +248,7 @@ kinematic data</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.graphio.get_node_features">
-<span class="sig-name descname"><span class="pre">get_node_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p4vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p4track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#get_node_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.get_node_features" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_node_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p4vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p4track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#get_node_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.get_node_features" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -258,13 +258,13 @@ kinematic data</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.graphio.parse_graph_data">
-<span class="sig-name descname"><span class="pre">parse_graph_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ptetaphim'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_graph_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ptetaphim'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jagged array data into pytorch-geometric style Data format array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – Jagged array of variables</p></li>
-<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>ids</strong> – Variable names as an array of strings</p></li>
 <li><p><strong>features</strong> – Array of active scalar feature strings</p></li>
 <li><p><strong>Y</strong> – Target class  array (if any, typically MC only)</p></li>
 <li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
@@ -280,12 +280,12 @@ kinematic data</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.graphio.parse_graph_data_np">
-<span class="sig-name descname"><span class="pre">parse_graph_data_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ptetaphim'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data_np" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_graph_data_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ptetaphim'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_graph_data_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_graph_data_np" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – Jagged array of variables</p></li>
-<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>ids</strong> – Variable names as an array of strings</p></li>
 <li><p><strong>features</strong> – Array of active scalar feature strings</p></li>
 <li><p><strong>Y</strong> – Target class  array (if any, typically MC only)</p></li>
 <li><p><strong>W</strong> – (Re-)weighting array (if any, typically MC only)</p></li>
@@ -301,12 +301,12 @@ kinematic data</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.graphio.parse_tensor_data">
-<span class="sig-name descname"><span class="pre">parse_tensor_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_tensor_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_tensor_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_tensor_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/graphio.html#parse_tensor_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.graphio.parse_tensor_data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – Jagged array of variables</p></li>
-<li><p><strong>VARS</strong> – Variable names as an array of strings</p></li>
+<li><p><strong>ids</strong> – Variable names as an array of strings</p></li>
 <li><p><strong>args</strong> – Arguments</p></li>
 </ul>
 </dd>

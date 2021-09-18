@@ -26,7 +26,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.02
+                0.03
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -145,7 +145,7 @@
   <h1>Source code for icenet.tools.io</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Input data containers and memory management</span>
 <span class="c1"># </span>
-<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># Mikael Mieskolainen, 2021</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
@@ -169,7 +169,7 @@
 
 
 <div class="viewcode-block" id="showmem"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.showmem">[docs]</a><span class="k">def</span> <span class="nf">showmem</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">):</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.load_root_file: Process RAM usage: </span><span class="si">{</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.showmem: Process RAM usage: </span><span class="si">{</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
 <span class="s2">        [total RAM in use </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span></div>
 
 
@@ -266,15 +266,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[]):</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">class_id</span> <span class="o">==</span> <span class="p">[])</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">class_id</span> <span class="o">==</span> <span class="p">[]):</span>
             <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># By default two classes [0,1]</span>
         
+        <span class="k">if</span> <span class="p">(</span><span class="n">files</span> <span class="o">==</span> <span class="p">[]):</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.DATASET.__init__: files = [], relying on func_loader()&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dummy.root&#39;</span><span class="p">]</span> <span class="c1"># Will be defined in func_loader</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.DATASET.__init__: files = </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">trn</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tst</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
         
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="p">:</span>
-            <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">VARS</span> <span class="o">=</span> <span class="n">func_loader</span><span class="p">(</span><span class="n">root_path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">)</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">func_loader</span><span class="p">(</span><span class="n">root_path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">)</span>
             <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span>   <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">rngseed</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">trn</span> <span class="o">+=</span> <span class="n">trn</span>
@@ -282,16 +288,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">tst</span> <span class="o">+=</span> <span class="n">tst</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.__init__: n_dims = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.__init__: n_dims = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
-<span class="sd">        x : data                [# vectors x # dimensions]</span>
-<span class="sd">        y : target output data  [# vectors]</span>
+<span class="sd">        x : data                [N vectors x D dimensions]</span>
+<span class="sd">        y : target output data  [N vectors]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="c1"># constructor</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -591,11 +597,11 @@
     <span class="sd">&quot;&quot;&quot; Choose the active set of input variables.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">newind</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">VARS</span><span class="p">,</span> <span class="n">set_of_variables</span><span class="p">))</span>
+    <span class="n">newind</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">set_of_variables</span><span class="p">))</span>
     <span class="n">newind</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">newind</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
     <span class="n">newvars</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">newind</span> <span class="p">:</span>
-        <span class="n">newvars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">VARS</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">newvars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">newind</span><span class="p">,</span> <span class="n">newvars</span></div>
 </pre></div>
