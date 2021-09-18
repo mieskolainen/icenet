@@ -8,32 +8,32 @@
 import numpy as np
 import numba
 
-import icenet.tools.aux as aux
+from icenet.tools import stx
 
 
-def filter_nofilter(X, VARS, xcorr_flow=False):
+def filter_nofilter(X, ids, xcorr_flow=False):
     """ All pass """
     return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
 
 
-def filter_charged(X, VARS, xcorr_flow=False):
+def filter_charged(X, ids, xcorr_flow=False):
     """ Only generator level charged """
 
     # Define cuts
     cutlist = [f'ABS__gen_charge == 1']
 
     # Construct and apply
-    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
-    ind         = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
     return ind
 
 
-def filter_no_egamma(X, VARS, xcorr_flow=False):
+def filter_no_egamma(X, ids, xcorr_flow=False):
     """ Basic MC filters.
     Args:
     	X    : Data matrix (N events x D dimensions)
-    	VARS : Variable name list (D)
+    	ids : Variable name list (D)
     Returns:
     	ind  : Passing indices list
     """
@@ -49,8 +49,8 @@ def filter_no_egamma(X, VARS, xcorr_flow=False):
                f'ABS__tag_eta < {MAXETA}']
     
     # Construct and apply
-    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
-    ind         = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
 
     return ind
 

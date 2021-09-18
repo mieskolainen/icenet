@@ -1,6 +1,6 @@
 # Plotting functions
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ import torch
 import xgboost
 from tqdm import tqdm
 
-from . import aux
+from icenet.tools import aux
 
 
 def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3), grid_on=False):
@@ -66,22 +66,24 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
-    """ Evaluate AUC per (pt,eta) bin.
+def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}):
+    """
+    Evaluate AUC per (pt,eta) bin.
     
     Args:
-        func_predict :  Function handle of the classifier
-        X            :  Input data
-        y            :  Output (target) data
-        X_kin        :  Kinematic (pt,eta) data
-        VARS_kin     :  Kinematic variables (strings)
-        pt_edges     :  Edges of the pt-space cells
-        eta_edges    :  Edges of the eta-space cells
-        label        :  Label of the classifier (string)
+        func_predict:  Function handle of the classifier
+        X           :  Input data
+        y           :  Output (truth level target) data
+        X_kin       :  Kinematic (pt,eta) data
+        VARS_kin    :  Kinematic variables (strings)
+        pt_edges    :  Edges of the pt-space cells
+        eta_edges   :  Edges of the eta-space cells
+        label       :  Label of the classifier (string)
+        ids         :  Variable identifiers
         
     Returns:
-        fig,ax       :  Figure handle and axis
-        met          :  Metrics object
+        fig,ax      :  Figure handle and axis
+        met         :  Metrics object
     """
 
     AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
@@ -89,11 +91,18 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
 
     # ** Compute predictions **
     if type(X) is list:  # Evaluate one by one
+
+        print(__name__ + f'.binned_AUC: one by one evaluation required')
         y_pred = np.zeros(len(X))
+
         for k in range(len(y_pred)):
             y_pred[k] = func_predict(X[k])
     else:
         y_pred = func_predict(X)
+
+
+    if len(y_pred) != len(y):
+        raise Exception(__name__ + f'.binned_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
 
 
     # Loop over bins
@@ -104,14 +113,14 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label):
             eta_range = [eta_edges[j], eta_edges[j+1]]
 
             # Indices
-            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index('trk_pt')],   pt_range),
-                                 aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
+            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_pt'])],   pt_range),
+                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_eta'])], eta_range))
 
             print(f'\nEvaluate classifier <{label}> ...')
             print(f'*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
             
             if np.sum(ind) > 0: # Do we have any events in this cell
-
+                
                 # Evaluate metric
                 met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])
                 print('AUC = {:.5f}'.format(met.auc))
@@ -174,7 +183,7 @@ def plot_auc_matrix(AUC, pt_edges, eta_edges):
         ylabels.append('[{},{}]'.format(pt_edges[k], pt_edges[k+1]))
 
     ax.imshow(AUC, origin = 'lower')
-    ax.set_xlabel('$\eta$')
+    ax.set_xlabel('$\\eta$')
     ax.set_ylabel('$p_t$ (GeV)')
     ax.set_title('AUC x 100')
     
@@ -184,12 +193,12 @@ def plot_auc_matrix(AUC, pt_edges, eta_edges):
     return fig, ax
 
 
-def plotvars(X, y, VARS, weights, NBINS = 70, title = '', targetdir = '.'):
+def plotvars(X, y, ids, weights, NBINS = 70, title = '', targetdir = '.'):
     """ Plot all variables.
     """
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
-        var = VARS[i]
+        var = ids[i]
         plotvar(x, y, var, weights, NBINS, title, targetdir)
 
 
@@ -200,7 +209,6 @@ def plotvar(x, y, var, weights, NBINS = 70, title = '', targetdir = '.'):
     plot_reweight_result(x, y, bins, weights, title = title, xlabel = var)
     plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
     plt.close()
-
 
 
 def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
@@ -258,12 +266,12 @@ def plot_correlations(X, netvars, colorbar = False):
     return fig,ax
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
+def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
     """ Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
     """
 
     for k in [0,1]: # linear & log
-
+        
         fig,ax = plt.subplots()
         xx = np.logspace(-5, 0, 100)
         plt.plot(xx, xx, linestyle='--', color='black', linewidth=1) # ROC diagonal
@@ -271,7 +279,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC') :
         for i in range(len(metrics)) :
             plt.plot(metrics[i].fpr, metrics[i].tpr, label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
 
-        plt.legend(loc=4)
+        plt.legend(fontsize=legend_fontsize)
         ax.set_xlabel('False Positive (background) rate $\\alpha$')
         ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
         ax.set_title(title)

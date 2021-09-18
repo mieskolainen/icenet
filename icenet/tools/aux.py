@@ -1,53 +1,22 @@
 # Auxialary functions
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import math
-import torch
 import numpy as np
 import numba
-import matplotlib.pyplot as plt
-import sklearn
 import copy
 from tqdm import tqdm
-import pyparsing as pp
-
 import os
 
+import sklearn
 from sklearn import metrics
 from scipy import stats
 import scipy.special as special
 
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
-
-
-def construct_columnar_cuts(X, VARS, cutlist):
-    """
-    Construct cuts and corresponding names.
-
-    Args:
-        X       : Input columnar data matrix
-        VARS    : Variable names for each column of X
-        cutlist : Selection cuts as strings, such as ['|eta| < 0.5', 'trigger0 == True']
-    
-    Returns:
-        cuts, names
-    """
-    cuts  = []
-    names = []
-
-    for expr in cutlist:
-
-        treelist = stx.parse_boolean_exptree(expr)
-        treeobj  = stx.construct_exptree(treelist)
-        output   = stx.eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
-
-        cuts.append(output)
-        names.append(expr)
-
-    return cuts,names
 
 
 def split(a, n):
@@ -79,69 +48,32 @@ def split_start_end(a, n):
 
     return out
 
-def apply_cutflow(cut, names, xcorr_flow=True):
-    """ Apply cutflow
 
-    Args:
-        cut        : list of pre-calculated cuts, each is a boolean array
-        names      : list of names (description of each cut, for printout only)
-        xcorr_flow : compute full N-point correlations
-    
-    Returns:
-        ind : list of indices, 1 = pass, 0 = fail
-    """
-    print(__name__ + '.apply_cutflow: \n')
-
-    # Print out "serial flow"
-    N   = len(cut[0])
-    ind = np.ones(N, dtype=np.uint8)
-    for i in range(len(cut)):
-        ind = np.logical_and(ind, cut[i])
-        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
-    
-    # Print out "parallel flow"
-    if xcorr_flow:
-        print('\n')
-        print(__name__ + '.apply_cutflow: Computing N-point correlations <xcorr_flow = True>')
-        vec = np.zeros((len(cut[0]), len(cut)))
-        for j in range(vec.shape[1]):
-            vec[:,j] = np.array(cut[j])
-
-        intmat = binaryvec2int(vec)
-        BMAT   = generatebinary(vec.shape[1])
-        print(f'Boolean combinations for {names}: \n')
-        for i in range(BMAT.shape[0]):
-            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
-        print('\n')
-    
-    return ind
-
-
-def count_targets(events, names, entrystart=0, entrystop=None, new=False):
+def count_targets(events, ids, entrystart=0, entrystop=None, new=False):
     """ Targets statistics printout
 
     Args:
         events :     uproot object
-        names  :     list of branch names
-        entrystart : uproot starting point
-        entrystop  : uproot ending point
-
+        ids    :     list of branch identifiers
+        entrystart:  uproot starting point
+        entrystop :  uproot ending point
+    
     Returns:
         Printout on stdout
     """
-    K   = len(names)
+    K   = len(ids)
     if new:
-        vec = events.arrays(names, library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        vec = events.arrays(ids, library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
         vec = np.asarray(vec)
     else:
-        vec = np.array([events.array(name, entrystart=entrystart, entrystop=entrystop) for name in names])
+        vec = np.array([events.array(name, entrystart=entrystart, entrystop=entrystop) for name in ids])
     vec = vec.T
     
     print(__name__ + f'.count_targets: vec.shape = {vec.shape}')
 
     intmat = binaryvec2int(vec)
     BMAT   = generatebinary(K)
-    print(__name__ + f'.count_targets: {names}')
+    print(__name__ + f'.count_targets: {ids}')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
     
@@ -471,247 +403,6 @@ def create_model_filename(path, label, epoch, filetype):
     return createfilename(epoch)
 
 
-def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
-    """ Load pytorch checkpoint
-
-    Args:
-        path  : folder path
-        label : model label name
-        epoch : epoch index. Use -1 for the last epoch
-    
-    Returns:
-        pytorch model
-    """
-
-    filename = create_model_filename(path=path, label=label, epoch=epoch, filetype='.pth')
-    print(__name__ + f'.load_torch_checkpoint: Loading checkpoint {filename}')
-
-    # Load the model
-    checkpoint = torch.load(filename)
-    model      = checkpoint['model']
-    model.load_state_dict(checkpoint['state_dict'])
-    for parameter in model.parameters():
-        parameter.requires_grad = False
-
-    model.eval() # Set it in the evaluation mode
-    return model
-
-
-def save_torch_model(model, optimizer, epoch, filename):
-    """ PyTorch model saver
-    """
-    def f():
-        print('Saving model..')
-        torch.save({
-            'model': model.state_dict(),
-            'optimizer': optimizer.state_dict(),
-            'epoch': epoch
-        }, (filename))
-    return f
-
-
-def load_torch_model(model, optimizer, filename, load_start_epoch = False):
-    """ PyTorch model loader
-    """
-    def f():
-        print('Loading model..')
-        checkpoint = torch.load(filename)
-        model.load_state_dict(checkpoint['model'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
-        
-        if load_start_epoch:
-            param.start_epoch = checkpoint['epoch']
-    return f
-
-
-def reweight_1D(X, pdf, y, N_class=2, reference_class = 0, max_reg = 1E3, EPS=1E-12) :
-    """ Compute N-class density reweighting coefficients.
-    Args:
-        X   :             Input data (# samples)
-        pdf :             Dictionary of pdfs for each class
-        y   :             Class target data (# samples)
-        N_class :         Number of classes
-        reference_class : Target class of re-weighting
-    
-    Returns:
-        weights for each event
-    """
-
-    # Re-weighting weights
-    weights_doublet = np.zeros((X.shape[0], N_class)) # Init with zeros!!
-
-    # Weight each class against the reference class
-    for c in range(N_class):
-        inds = x2ind(X[y == c], pdf['binedges'])
-        if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds] / (pdf[c][inds] + EPS)
-        else:
-            weights_doublet[y == c, c] = 1 # Reference class stays intact
-
-    # Maximum weight cut-off regularization
-    weights_doublet[weights_doublet > max_reg] = max_reg
-
-    # Save weights
-    weights_doublet[y == 0, 0] = C0
-    weights_doublet[y == 1, 1] = C1
-
-    return weights_doublet
-
-
-def reweightcoeff1D(X, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3) :
-    """ Compute N-class density reweighting coefficients.
-    
-    Args:
-        X  :   Observable of interest (N x 1)
-        y  :   Class labels (0,1,...) (N x 1)
-        pdf:   PDF for each class
-        N_class : Number of classes
-        equal_frac:  equalize class fractions
-        reference_class : e.g. 0 (background) or 1 (signal)
-    
-    Returns:
-        weights for each event
-    """
-    weights_doublet = reweight_1D(X=X, pdf=pdf, y=y, N_class=N_class, reference_class=reference_class, max_reg=max_reg)
-
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-
-    return weights
-
-
-def reweightcoeff2DFP(X_A, X_B, y, pdf_A, pdf_B, N_class=2, reference_class = 0,
-    equal_frac = True, max_reg = 1e3) :
-    """ Compute N-class density reweighting coefficients.
-    
-    Operates in 2D with FACTORIZED PRODUCT marginal 1D distributions.
-    
-    Args:
-        X_A   :  Observable of interest (N x 1)
-        X_B   :  Observable of interest (N x 1)
-        y     :  Signal (1) and background (0) targets
-        pdf_A :  Density of observable A
-        pdf_B :  Density of observable B
-        N_class: Number of classes
-        reference_class: e.g. 0 (background) or 1 (signal)
-        equal_frac:      Equalize integrated class fractions
-        max_reg:         Maximum weight regularization
-    
-    Returns:
-        weights for each event
-    """
-
-    weights_doublet_A = reweight_1D(X=X_A, pdf=pdf_A, N_class=N_class, y=y, reference_class=reference_class, max_reg=max_reg)
-    weights_doublet_B = reweight_1D(X=X_B, pdf=pdf_B, N_class=N_class, y=y, reference_class=reference_class, max_reg=max_reg)
-
-    # Factorized product
-    weights_doublet   = weights_doublet_A * weights_doublet_B
-
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=reference_class, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-
-    return weights
-
-
-def reweightcoeff2D(X_A, X_B, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3, EPS=1E-12) :
-    """ Compute N-class density reweighting coefficients.
-    
-    Operates in full 2D without factorization.
-
-    Args:
-        X_A : Observable A of interest (N x 1)
-        X_B : Observable B of interest (N x 1)
-        y   : Signal (1) and background (0) labels (N x 1)
-        pdf : Density histograms for each class
-        N_class :         Number of classes
-        reference_class : e.g. Background (0) or signal (1)
-        equal_frac :      Equalize class fractions
-        max_reg :         Regularize the maximum reweight coefficient
-    
-    Returns:
-        weights for each event
-    """
-    
-    # Re-weighting weights
-    weights_doublet = np.zeros((X_A.shape[0], N_class)) # Init with zeros!!
-
-    # Weight each class against the reference class
-    for c in range(N_class):
-        inds_A = x2ind(X_A[y == c], pdf['binedges_A'])
-        inds_B = x2ind(X_B[y == c], pdf['binedges_B'])
-        if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds_A, inds_B] / (pdf[c][inds_A, inds_B] + EPS)
-        else:
-            weights_doublet[y == c, c] = 1 # Reference class stays intact
-
-    # Maximum weight cut-off regularization
-    weights_doublet[weights_doublet > max_reg] = max_reg
-
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=reference_class, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-    return weights
-
-
-def pdf_1D_hist(X, binedges):
-    """ 
-    Compute re-weighting 1D pdfs.
-    """
-
-    # Take re-weighting variables
-    pdf,_,_ = plt.hist(x = X, bins = binedges)
-
-    # Make them densities
-    pdf  /= np.sum(pdf.flatten())
-    return pdf
-
-
-def pdf_2D_hist(X_A, X_B, binedges_A, binedges_B):
-    """
-    Compute re-weighting 2D pdfs.
-    """
-
-    # Take re-weighting variables
-    pdf,_,_,_ = plt.hist2d(x = X_A, y = X_B, bins = [binedges_A, binedges_B])
-
-    # Make them densities
-    pdf  /= np.sum(pdf.flatten())
-    return pdf
-
-
-@numba.njit
-def balanceweights(weights_doublet, reference_class, y, EPS=1e-12):
-    """ Balance N-class weights to sum to equal counts.
-    
-    Args:
-        weights_doublet: N-class event weights (events x classes)
-        reference_class: which class gives the reference (integer)
-        y : class targets
-    Returns:
-        weights doublet with new weights per event
-    """
-    N = weights_doublet.shape[1]
-    ref_sum = np.sum(weights_doublet[(y == reference_class), reference_class])
-
-    for i in range(N):
-        if i is not reference_class:
-            EQ = ref_sum / (np.sum(weights_doublet[y == i, i]) + EPS)
-            weights_doublet[y == i, i] *= EQ
-
-    return weights_doublet
-
-
 def pick_ind(x, minmax):
     """ Return indices between minmax[0] and minmax[1].
     
@@ -724,12 +415,12 @@ def pick_ind(x, minmax):
     return (x >= minmax[0]) & (x <= minmax[1])
 
 
-def jagged2tensor(X, VARS, xyz, x_binedges, y_binedges):
+def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
     """
     Args:
         
         X          : input data (samples x dimensions) with jagged structure
-        VARS       : all variable names
+        ids        : all variable names
         xyz        : array of (x,y,z) channel triplet strings such as [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
         x_binedges
         y_binedges : arrays of bin edges
@@ -743,7 +434,7 @@ def jagged2tensor(X, VARS, xyz, x_binedges, y_binedges):
 
     # Choose targets
     for c in range(len(xyz)):
-        ind = [VARS.index(x) for x in xyz[c]]
+        ind = [ids.index(x) for x in xyz[c]]
 
         # Loop over all events
         for i in tqdm(range(X.shape[0])):
@@ -753,6 +444,7 @@ def jagged2tensor(X, VARS, xyz, x_binedges, y_binedges):
     print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
 
     return T
+
 
 def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
     """
@@ -821,6 +513,7 @@ def hardclass(y_soft, valrange = [0,1]):
     y_out[y_out <= boundary] = 0
 
     return y_out
+
 
 def multiclass_roc_auc_score(y_true, y_soft, average="macro"):
     """ Multiclass AUC (area under the curve).

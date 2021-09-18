@@ -359,12 +359,12 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     ## Plot decision tree
     #xgboost.plot_tree(xgb_model, num_trees=2)
     #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
-
+    
     ### Plot contours
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
 
 def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -387,7 +387,7 @@ def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
@@ -407,7 +407,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : func_predict(x),
-            X = data.trn.x, y = data.trn.y, labels = data.VARS, targetdir = targetdir, matrix = 'numpy')
+            X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
 
 
@@ -446,7 +446,7 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
     #if args['plot_param']['contours_on']:
     #    targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
     #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
-    #        X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+    #        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
 def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -489,7 +489,7 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
 def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -511,7 +511,7 @@ def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
 def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -534,7 +534,7 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'torch')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
 def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
@@ -591,7 +591,7 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
             yy[i] = 0.0
 
     fig  = plt.figure(figsize=(12,8))
-    bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.VARS)
+    bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
     plt.xlabel('f-score (gain)')
 
 
@@ -606,7 +606,7 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.VARS, targetdir = targetdir, matrix = 'xgboost')
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None, num_classes=2):
@@ -623,11 +623,11 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
                 eta_range = [eta_edges[j], eta_edges[j+1]]
 
                 # Indices
-                trn_ind = np.logical_and(aux.pick_ind(data_kin.trn.x[:, data_kin.VARS.index('trk_pt')],   pt_range),
-                                         aux.pick_ind(data_kin.trn.x[:, data_kin.VARS.index('trk_eta')], eta_range))
+                trn_ind = np.logical_and(aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index('trk_pt')],   pt_range),
+                                         aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index('trk_eta')], eta_range))
 
-                val_ind = np.logical_and(aux.pick_ind(data_kin.val.x[:, data_kin.VARS.index('trk_pt')],   pt_range),
-                                         aux.pick_ind(data_kin.val.x[:, data_kin.VARS.index('trk_eta')], eta_range))
+                val_ind = np.logical_and(aux.pick_ind(data_kin.val.x[:, data_kin.ids.index('trk_pt')],   pt_range),
+                                         aux.pick_ind(data_kin.val.x[:, data_kin.ids.index('trk_eta')], eta_range))
 
                 print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.
                     format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))

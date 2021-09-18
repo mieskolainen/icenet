@@ -1,40 +1,39 @@
-# Basic selection cuts, use only variables available in real data.
+# Basic kinematic fiducial cuts, use only variables available in real data.
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
 import numba
 import matplotlib.pyplot as plt
 
-import icenet.tools.aux as aux
+from icenet.tools import stx
 
-def cut_nocut(X, VARS, xcorr_flow=False):
+
+def cut_nocut(X, ids, isMC, xcorr_flow=False):
     """ No cuts """
     return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
 
-
-def cut_standard(X, VARS, xcorr_flow=False):
+def cut_fiducial(X, ids, isMC, xcorr_flow=False):
     """ Function implements basic selections (cuts).
 
     Args:
         X    : Number of events N x Number of variables D
-        VARS : Variable name array (D)
+        ids  : Variable name array (D)
+        isMC : is it MC or Data
     
     Returns:
         ind  : Passing indices (N)
     """
     
-    cutlist = ['e1_hlt_pms2         < 10000',
-               'e1_hlt_invEInvP     < 0.2',
-               'e1_hlt_trkDEtaSeed  < 0.01',
-               'e1_hlt_trkDPhi      < 0.2',
-               'e1_hlt_trkChi2      < 40',
-               'e1_hlt_trkValidHits >= 5',
-               'e1_hlt_trkNrLayerIT >= 2']
-    
+    if isMC:
+        cutlist = ['e1_l1_pt >= 6',
+                   'e2_l1_pt >= 6']
+    else:
+        cutlist = ['l1_doubleE6 == 1']
+
     # Construct and apply
-    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
-    ind = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
-    
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+
     return ind

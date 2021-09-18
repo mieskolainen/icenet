@@ -20,6 +20,7 @@ from numba import jit
 # icenet
 import iceplot
 from icenet.tools import aux
+from icenet.tools import aux_torch
 from icenet.tools import io
 from icenet.tools import prints
 from icenet.deep import dopt
@@ -57,7 +58,7 @@ def main() :
     # Evaluate models
 
     ### DEEPSETS
-    DEPS_model = aux.load_torch_checkpoint(path=modeldir, label=args['deps_param']['label'], epoch=args['readmode'])
+    DEPS_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['deps_param']['label'], epoch=args['readmode'])
 
     DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['deps_param']['device'])
     DEPS_model.eval() # Turn on eval mode!
@@ -76,7 +77,7 @@ def main() :
         return io.checkinfnan(y)
     
     ### MAXOUT
-    DMAX_model = aux.load_torch_checkpoint(path=modeldir, label=args['dmax_param']['label'], epoch=args['readmode'])
+    DMAX_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['dmax_param']['label'], epoch=args['readmode'])
     
     DMAX_model, device = dopt.model_to_cuda(DMAX_model, device_type=args['dmax_param']['device'])
     DMAX_model.eval() # Turn on eval mode!

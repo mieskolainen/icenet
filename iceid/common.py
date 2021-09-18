@@ -99,7 +99,7 @@ def init_multiprocess(MAXEVENTS=None):
         for k in range(len(block_ind)):
             inputs = {
                 'root_path'  : args['root_files'][i],
-                'VARS'       : None,
+                'ids'       : None,
                 'entrystart' : block_ind[k][0],
                 'entrystop'  : block_ind[k][1],
                 'image_on'   : args['image_on'],
@@ -138,7 +138,7 @@ def init_multiprocess(MAXEVENTS=None):
             'Y'        : np.zeros((N_tot), dtype=np.long),
             'X_tensor' : np.zeros((N_tot, td[0], td[1], td[2]), dtype=np.float),
             'X_graph'  : np.zeros((N_tot), dtype=object),
-            'VARS'     : return_dict[0]['VARS']
+            'ids'     : return_dict[0]['ids']
         }
 
         for k in tqdm(range(len(procs))):
@@ -194,13 +194,13 @@ def init(MAXEVENTS=None):
         print(__name__ + f': Imputing data for special values {special_values} for variables in <{args["imputation_param"]["var"]}>')
 
         # Choose active dimensions
-        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in features], dtype=int)
+        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
 
         # Parameters
         param = {
             "dim":        dim,
             "values":     special_values,
-            "labels":     data.VARS,
+            "labels":     data.ids,
             "algorithm":  args['imputation_param']['algorithm'],
             "fill_value": args['imputation_param']['fill_value'],
             "knn_k":      args['imputation_param']['knn_k']
@@ -244,9 +244,9 @@ def splitfactor(data, args):
     data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
     data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
     data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.VARS    = k_vars
+    data_kin.ids     = k_vars
 
-    data_tensor = {}
+    data_tensor      = None
 
     if args['image_on']:
 
@@ -257,7 +257,7 @@ def splitfactor(data, args):
         data_image.trn.x = data.trn.x[:, j_ind]
         data_image.val.x = data.val.x[:, j_ind]
         data_image.tst.x = data.tst.x[:, j_ind]
-        data_image.VARS  = j_vars 
+        data_image.ids  = j_vars 
 
         # Use single channel tensors
         if   args['image_param']['channels'] == 1:
@@ -275,9 +275,9 @@ def splitfactor(data, args):
 
         # Pick tensor data out
         cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
-        data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, VARS=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+        data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+        data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+        data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
     
 
     ### Pick active scalar variables out
@@ -286,8 +286,8 @@ def splitfactor(data, args):
     data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
     data.val.x    = data.val.x[:, s_ind].astype(np.float)
     data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.VARS     = s_vars
-
+    data.ids      = s_vars
+    
     return data, data_tensor, data_kin
 
 
@@ -306,10 +306,10 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     print('\n\n\n\n\n')
     print(inputs)
 
-    # root_path, VARS=None, entrystart=0, entrystop=None, output_graph=True, output_tensor=False, args=None
+    # root_path, ids=None, entrystart=0, entrystop=None, output_graph=True, output_tensor=False, args=None
 
     root_path  = inputs['root_path']
-    VARS       = inputs['VARS']
+    ids       = inputs['ids']
     entrystart = inputs['entrystart']
     entrystop  = inputs['entrystop']
     graph_on   = inputs['graph_on']
@@ -324,7 +324,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     
     Returns:
         X,Y       : input, output matrices
-        VARS      : variable names
+        ids      : variable names
     """
 
     # -----------------------------------------------
@@ -360,9 +360,9 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
 
     ### All variables
-    if VARS is None:
-        #VARS = events.keys()
-        VARS = [x.decode() for x in events.keys()]# if b'image_' not in x]
+    if ids is None:
+        #ids = events.keys()
+        ids = [x.decode() for x in events.keys()]# if b'image_' not in x]
 
     # Check is it MC (based on the first event)
     # X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
@@ -383,11 +383,11 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
 
     # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(VARS)), dtype=object) 
+    X = np.empty((N, len(ids)), dtype=object) 
 
-    for j in tqdm(range(len(VARS))):
-        #x = events.arrays(VARS[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
-        x = events.array(VARS[j], entrystart=entrystart, entrystop=entrystop)
+    for j in tqdm(range(len(ids))):
+        #x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        x = events.array(ids[j], entrystart=entrystart, entrystop=entrystop)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
     Y = None
@@ -412,13 +412,13 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, names=labels1, entrystart=entrystart, entrystop=entrystop)
+        aux.count_targets(events=events, ids=labels1, entrystart=entrystart, entrystop=entrystop)
 
         prints.printbar()
 
         # @@ MC filtering done here @@
         cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
-        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
+        indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
 
         cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
         cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
@@ -432,7 +432,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     # -----------------------------------------------------------------
     # @@ Observable cut selections done here @@
     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
+    cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
     # -----------------------------------------------------------------
     
     N_before = X.shape[0]
@@ -457,17 +457,17 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     X_graph  = None
 
     if image_on:
-        X_tensor = graphio.parse_tensor_data(X=X, VARS=VARS, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+        X_tensor = graphio.parse_tensor_data(X=X, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
 
     if graph_on:
-        X_graph  = graphio.parse_graph_data_np(X=X, Y=Y, VARS=VARS, features=globals()[args['imputation_param']['var']])
+        X_graph  = graphio.parse_graph_data_np(X=X, Y=Y, ids=ids, features=globals()[args['imputation_param']['var']])
 
     io.showmem()
 
-    return_dict[procnumber] = {'X': X, 'Y': Y, 'VARS': VARS, "X_tensor": X_tensor, "X_graph": X_graph, 'N': X.shape[0]}
+    return_dict[procnumber] = {'X': X, 'Y': Y, 'ids': ids, "X_tensor": X_tensor, "X_graph": X_graph, 'N': X.shape[0]}
 
 
-def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class_id = [], args=None):
+def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
     """ Loads the root file.
     
     Args:
@@ -476,7 +476,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     
     Returns:
         X,Y       : input, output matrices
-        VARS      : variable names
+        ids      : variable names
     """
 
     # -----------------------------------------------
@@ -511,10 +511,10 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
 
     ### All variables
-    if VARS is None:
-        VARS = events.keys() #[x for x in events.keys()]
+    if ids is None:
+        ids = events.keys() #[x for x in events.keys()]
     #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
-    #print(VARS)
+    #print(ids)
 
     # Check is it MC (based on the first event)
     X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
@@ -530,10 +530,10 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
 
     # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(VARS)), dtype=object) 
+    X = np.empty((N, len(ids)), dtype=object) 
 
-    for j in tqdm(range(len(VARS))):
-        x = events.arrays(VARS[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+    for j in tqdm(range(len(ids))):
+        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
     Y = None
@@ -558,13 +558,13 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, names=labels1, entrystart=entrystart, entrystop=entrystop, new=True)
-
+        aux.count_targets(events=events, ids=labels1, entrystart=entrystart, entrystop=entrystop, new=True)
+        
         prints.printbar()
 
         # @@ MC filtering done here @@
         cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
-        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
+        indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
 
         cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
         cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
@@ -578,7 +578,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     # -----------------------------------------------------------------
     # @@ Observable cut selections done here @@
     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
+    cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
     # -----------------------------------------------------------------
     
     N_before = X.shape[0]
@@ -598,4 +598,4 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     # ** REMEMBER TO CLOSE **
     file.close()
 
-    return X, Y, VARS
+    return X, Y, ids

@@ -9,7 +9,7 @@ import torch
 import xgboost
 from termcolor import colored
 
-from . import aux
+from icenet.tools import aux
 
 
 def printbar(marker='-', marks = 75):
@@ -65,14 +65,14 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, VARS, active_dim = []):
+def print_variables(X : np.array, ids, active_dim = []):
     """ Print in a format (# samples x # dimensions)
     """
     print('\n')
     print(__name__ + f'.print_variables:')
 
     if active_dim == []:
-        active_dim = np.arange(0,len(VARS))
+        active_dim = np.arange(0,len(ids))
 
     print(f'active_dim: {active_dim} \n')
 
@@ -91,6 +91,6 @@ def print_variables(X : np.array, VARS, active_dim = []):
         isnan  = np.any(np.isnan(x))
 
         print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] \t {: >10.2E} +- {: >10.2E}   [[{}, {}]]'
-            .format(j, VARS[j], minval, med, maxval, mean, std, isinf, isnan))
+            .format(j, ids[j], minval, med, maxval, mean, std, isinf, isnan))
     print('\n')
 

@@ -1,8 +1,6 @@
 # Generic model evaluation wrapper functions
 #
-# Mikael Mieskolainen, 2020
-# m.mieskolainen@imperial.ac.uk
-
+# m.mieskolainen@imperial.ac.uk, 2021
 
 import math
 import numpy as np
@@ -31,7 +29,9 @@ from sklearn.metrics import accuracy_score
 
 # icenet
 from icenet.tools import io
+from icenet.tools import stx
 from icenet.tools import aux
+from icenet.tools import aux_torch
 from icenet.tools import plots
 
 from icenet.algo  import flr
@@ -46,6 +46,38 @@ from configs.eid.mvavars import *
 from iceid import common
 from iceid import graphio
 
+
+def pred_cut(args, param):
+
+    label = param['label']
+    print(f'\nEvaluate {label} cut classifier ...')
+
+    # Get feature name variables
+    index = args['features'].index(param['variable'])
+
+    def func_predict(x):
+        return float(param['sign']) * x[...,index]
+    
+    return func_predict
+
+
+def pred_cutset(args, param):
+
+    label = param['label']
+    print(f'\nEvaluate {label} fixed cutset classifier ...')
+
+    cutstring = param['cutstring']
+    print(f'cutstring: "{cutstring}"')
+
+    # Get feature name variables
+    ids = args['features']
+
+    def func_predict(x):
+        # Cut based two-class classifier
+        y = stx.eval_boolean_syntax(expr=cutstring, X=x, ids=ids)
+        return y
+    
+    return func_predict
 
 
 def pred_graph_xgb(args, param):
@@ -81,7 +113,7 @@ def pred_torch_graph(args, param, signalclass = 1):
 
     print(f'\nEvaluate {label} classifier ...')
     
-    model         = aux.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
     model.eval() # Turn on eval mode!
 
@@ -106,7 +138,7 @@ def pred_torch(args, param, signalclass = 1):
 
     print(f'\nEvaluate {label} classifier ...')
     
-    model         = aux.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
     model.eval() # Turn on eval mode!
 

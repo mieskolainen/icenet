@@ -1,3 +1,327 @@
+# Electron HLT trigger tune0.yml
 #
-#
-#
+
+MAXEVENTS: 1000000               # Maximum total number of events (per root file) to process
+
+# ----------------------------------------------------
+# ** Activate models here **
+# Give all models some unique identifier and label
+active_models:
+
+  - xgb10
+  - xgb1
+
+  - cutset0
+  
+  - cut0
+  - cut1
+  - cut2
+  - cut3
+  - cut4
+  - cut5
+  - cut6
+#  - lgr0
+# ----------------------------------------------------
+
+# ----------------------
+mcfile:    'efftest.root'
+datafile:  'out_data_4gev_22_retry.root'
+# ----------------------
+
+rngseed: 123456                  # Fixed seed for training data mixing
+inputvar: 'MVA_ID'               # Input variables, implemented under mvavars.py
+
+
+#targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
+filterfunc: 'filter_standard'    # Training filtering, implemented under mcfilter.py
+cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
+
+
+xcorr_flow: True                 # Full N-point correlations computed between cuts
+
+frac: 0.8                        # Train/validate/test split fraction
+varnorm: 'zscore'                # Variable normalization: 'zscore', 'madscore', 'none'
+#varnorm_tensor: 'zscore'        # Tensor variable normalization
+#varnorm_graph: 'none'           # Not implemented yet
+
+
+## Reweighting setup in the training phase
+reweight_param:
+
+  var_pt:  'e1_hlt_pt'
+  var_eta: 'e1_hlt_eta'
+
+  maxevents: 1000000            # Maximum number of events for the PDF construction
+
+  reference_class: 0            # Reference class: -1 = (turned off), 0 = (background), 1 = (signal), 
+  # Note about asymmetry: Keep the reference class as 0 == background, because signal
+  # MC has much longer tail over pt. Thus, it is not possible to re-weight background
+  # to signal very easily, but it is possible to re-weight signal to background.
+  # This is seen by inspecting the re-weighted distributions with small and large statistics.
+
+  equal_frac: true              # Equalize integrated class fractions
+
+  bins_pt:  [0.0, 50.0, 200]    # Make sure the bounds cover the phase space
+  binmode_pt:  'linear'         # 'log10' or 'linear' binning
+  
+  bins_eta: [-3.1, 3.1, 100]    #
+  binmode_eta: 'linear'
+  
+  # ! Variable, and binning min/max boundaries are both transformed !
+  transform_pt: 'log10'         # 'log10', 'sqrt', 'square', 'null'
+  transform_eta: null
+
+  max_reg: 1000.0               # Maximum weight cut-off regularization
+
+
+# Imputation
+imputation_param:
+  active: true                 # True / False
+  var: 'MVA_ID'                # Array of variables to be imputated
+  algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+  fill_value: 0                # For constant imputation
+  knn_k: 8                     # Number of nearest neighbours considered
+  values: [-999, -666, -10]    # Special values which indicate the need for imputation
+
+
+## Outlier protection in the training phase
+outlier_param:
+  algo: 'truncate'   # algorithm: 'truncate', 'none'
+  qmin: 0.01         # in [0,100] 
+  qmax: 99.9         # in [0,100]
+
+
+## Pure plotting setup
+plot_param:
+  basic_on:    false
+  contours_on: false
+  
+  var_pt:  'e1_hlt_pt'
+  var_eta: 'e1_hlt_eta'
+  
+  # (eta,pt)-binned plots
+  pt_edges:  [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]
+  eta_edges: [-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5]
+
+
+# ========================================================================
+## Classifier setup
+# ========================================================================
+
+cutset0_param:
+  train:   'cutset'
+  predict: 'cutset'
+
+  label:   'fixed-cutset'
+  raytune:  null
+  
+  # Using yaml multiline syntax with > character
+  cutstring: >
+    e1_hlt_pms2 < 10000 AND 
+    e1_hlt_invEInvP < 0.2 AND 
+    e1_hlt_trkDEtaSeed < 0.01 AND 
+    e1_hlt_trkDPhi < 0.2 AND 
+    e1_hlt_trkChi2 < 40 AND 
+    e1_hlt_trkValidHits >= 5 AND 
+    e1_hlt_trkNrLayerIT >= 2
+
+
+cut0_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_pms2 x (-1)'
+  variable: 'e1_hlt_pms2'
+  sign: -1
+
+cut1_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_invEInvP x (-1)'
+  variable: 'e1_hlt_invEInvP'
+  sign: -1
+
+cut2_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkDEtaSeed x (-1)'
+  variable: 'e1_hlt_trkDEtaSeed'
+  sign: -1
+
+cut3_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkDPhi x (-1)'
+  variable: 'e1_hlt_trkDPhi'
+  sign: -1
+
+cut4_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkChi2 x (-1)'
+  variable: 'e1_hlt_trkChi2'
+  sign: -1
+
+cut5_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkValidHits'
+  variable: 'e1_hlt_trkValidHits'
+  sign: 1
+
+cut6_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkNrLayerIT'
+  variable: 'e1_hlt_trkNrLayerIT'
+  sign: 1
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb1_param:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_1'
+  raytune:  null
+
+  # general parameters
+  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+  num_boost_round: 1      # number of epochs (equal to the number of trees!)
+  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+  # booster parameters
+  learning_rate: 0.15
+  
+  # Tree parameters
+  max_depth: 10
+  min_child_weight: 1.0
+  gamma: 0.0
+  max_delta_step: 0
+  subsample: 1.0
+
+  colsample_bytree:  1
+  colsample_bylevel: 1
+  colsample_bynode:  1
+  
+  reg_lambda: 2.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
+  scale_pos_weight: 1
+
+  # learning task parameters
+  objective: 'binary:logistic'     #
+  eval_metric: ['auc', 'logloss']  # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb10_param:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_10'
+  raytune:  null
+
+  # general parameters
+  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+  num_boost_round: 10     # number of epochs (equal to the number of trees!)
+  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+  
+  # booster parameters
+  learning_rate: 0.15
+  
+  # Tree parameters
+  max_depth: 10
+  min_child_weight: 1.0
+  gamma: 0.0
+  max_delta_step: 0
+  subsample: 1.0
+
+  colsample_bytree:  1
+  colsample_bylevel: 1
+  colsample_bynode:  1
+  
+  reg_lambda: 2.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
+  scale_pos_weight: 1
+
+  # learning task parameters
+  objective: 'binary:logistic'     #
+  eval_metric: ['auc', 'logloss']  # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb100_param:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_100'
+  raytune:  null
+
+  # general parameters
+  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+  num_boost_round: 100    # number of epochs (equal to the number of trees!)
+  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+  
+  # booster parameters
+  learning_rate: 0.15
+  
+  # Tree parameters
+  max_depth: 10
+  min_child_weight: 1.0
+  gamma: 0.0
+  max_delta_step: 0
+  subsample: 1.0
+
+  colsample_bytree:  1
+  colsample_bylevel: 1
+  colsample_bynode:  1
+  
+  reg_lambda: 2.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
+  scale_pos_weight: 1
+
+  # learning task parameters
+  objective: 'binary:logistic'     #
+  eval_metric: ['auc', 'logloss']  # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+
+# Logistic Regression (convex model = global optimum guarantee)
+lgr0_param:
+  train:   'lgr'
+  predict: 'torch_generic'
+  label:   'LGR'
+  raytune:  null
+
+  opt_param:
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    gamma: 2                  # focal_entropy exponent
+    optimizer: 'AdamW'
+    noise_reg: 0.0            # Noise regularization
+
+    epochs: 50
+    batch_size: 196
+    learning_rate: 0.003
+    weight_decay: 0.00001       # L2-regularization
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+

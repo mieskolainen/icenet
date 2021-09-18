@@ -6,19 +6,20 @@
 import numpy as np
 import numba
 
-import icenet.tools.aux as aux
+from icenet.tools import stx
 
-def cut_nocut(X, VARS, xcorr_flow=False):
+
+def cut_nocut(X, ids, xcorr_flow=False):
     """ No cuts """
     return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
 
 
-def cut_standard(X, VARS, xcorr_flow=False):
+def cut_standard(X, ids, xcorr_flow=False):
     """ Function implements basic selections (cuts)
 
     Args:
         X    : Data matrix (N events x D dimensions)
-        VARS : Variable name list (D)
+        ids : Variable name list (D)
     Returns:
         ind  : Passing indices list
     """
@@ -34,8 +35,8 @@ def cut_standard(X, VARS, xcorr_flow=False):
                f'ABS__trk_eta < {MAXETA}']
     
     # Construct and apply
-    cuts, names = aux.construct_columnar_cuts(X=X, VARS=VARS, cutlist=cutlist)
-    ind = aux.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
     return ind
 

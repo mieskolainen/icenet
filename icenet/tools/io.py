@@ -1,6 +1,6 @@
 # Input data containers and memory management
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -24,7 +24,7 @@ from sklearn.impute import IterativeImputer
 
 
 def showmem(color='red'):
-    cprint(__name__ + f""".load_root_file: Process RAM usage: {process_memory_use():0.2f} GB 
+    cprint(__name__ + f""".showmem: Process RAM usage: {process_memory_use():0.2f} GB 
         [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
 
 
@@ -121,15 +121,21 @@ class DATASET:
     """
     def __init__(self, func_loader, files, frac, rngseed, class_id = []):
 
-        if (class_id == []) :
+        if (class_id == []):
             class_id = [0,1] # By default two classes [0,1]
         
+        if (files == []):
+            cprint(__name__ + f'.DATASET.__init__: files = [], relying on func_loader()', 'red')
+            files = ['dummy.root'] # Will be defined in func_loader
+        else:
+            cprint(__name__ + f'.DATASET.__init__: files = {files}', 'green')
+
         self.trn = Data()
         self.val = Data()
         self.tst = Data()
         
         for f in files :
-            X, Y, self.VARS = func_loader(root_path=f, class_id=class_id)
+            X, Y, self.ids = func_loader(root_path=f, class_id=class_id)
             trn, val, tst   = split_data(X=X, Y=Y, frac=frac, rngseed=rngseed, class_id=class_id)
 
             self.trn += trn
@@ -137,16 +143,16 @@ class DATASET:
             self.tst += tst
 
         self.n_dims  = self.trn.x.shape[1]
-        print(__name__ + '.__init__: n_dims = %d' % self.n_dims)
+        print(__name__ + f'.__init__: n_dims = {self.n_dims}')
 
 
 class Data:
     """
     Args:
-        x : data                [# vectors x # dimensions]
-        y : target output data  [# vectors]
+        x : data                [N vectors x D dimensions]
+        y : target output data  [N vectors]
     """
-
+    
     # constructor
     def __init__(self, x = np.array([]), y = np.array([])):
         self.N = x.shape[0]
@@ -446,10 +452,10 @@ def pick_vars(data : DATASET, set_of_variables):
     """ Choose the active set of input variables.
     """
 
-    newind  = np.where(np.isin(data.VARS, set_of_variables))
+    newind  = np.where(np.isin(data.ids, set_of_variables))
     newind  = np.array(newind).flatten()
     newvars = []
     for i in newind :
-        newvars.append(data.VARS[i])
+        newvars.append(data.ids[i])
 
     return newind, newvars

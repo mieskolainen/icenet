@@ -1,6 +1,6 @@
 # Electron ID [DEEP TRAINING] steering code
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -34,6 +34,7 @@ from sklearn.metrics import accuracy_score
 # icenet
 from icenet.tools import io
 from icenet.tools import aux
+from icenet.tools import reweight
 from icenet.tools import plots
 from icenet.tools import prints
 
@@ -132,7 +133,7 @@ def compute_reweight(root_files, N_events, args, N_class=2):
     ### Compute 2D-pdfs for each class
     pdf     = {}
     for c in range(N_class):
-        pdf[c] = aux.pdf_2D_hist(X_A=PT[Y==c], X_B=ETA[Y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
+        pdf[c] = reweight.pdf_2D_hist(X_A=PT[Y==c], X_B=ETA[Y==c], binedges_A=pt_binedges, binedges_B=eta_binedges)
 
     pdf['binedges_A'] = pt_binedges
     pdf['binedges_B'] = eta_binedges
@@ -239,7 +240,7 @@ def main():
                     # Compute event-by-event weights
                     if args['reweight_param']['reference_class'] != -1:
                             
-                        trn_weights = aux.reweightcoeff2D(
+                        trn_weights = reweight.reweightcoeff2D(
                             X_A = PT, X_B = ETA, pdf = pdf, y = trn.y, N_class=N_class,
                             equal_frac       = args['reweight_param']['equal_frac'],
                             reference_class  = args['reweight_param']['reference_class'],

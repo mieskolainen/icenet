@@ -4,11 +4,26 @@
 # m.mieskolainen@imperial.ac.uk
 
 
+import numpy as np
+import uproot
+from tqdm import tqdm
+import psutil
+import copy
+
+from termcolor import colored, cprint
+
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
 from icenet.tools import prints
 from icenet.tools import process
+
+
+# GLOBALS
+from configs.trg.mvavars import *
+from configs.trg.cuts import *
+from configs.trg.filter import *
+
 
 
 def init(MAXEVENTS=None):
@@ -35,7 +50,7 @@ def init(MAXEVENTS=None):
     
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
-    print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
+    #print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
     # --------------------------------------------------------------------
 
     ### Load data
@@ -44,6 +59,7 @@ def init(MAXEVENTS=None):
     class_id = [0,1]
     data     = io.DATASET(func_loader=load_root_file_new, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
+
     # @@ Imputation @@
     if args['imputation_param']['active']:
 
@@ -51,13 +67,13 @@ def init(MAXEVENTS=None):
         print(__name__ + f': Imputing data for special values {special_values} for variables in <{args["imputation_param"]["var"]}>')
 
         # Choose active dimensions
-        dim = np.array([i for i in range(len(data.VARS)) if data.VARS[i] in features], dtype=int)
+        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
 
         # Parameters
         param = {
             "dim":        dim,
             "values":     special_values,
-            "labels":     data.VARS,
+            "labels":     data.ids,
             "algorithm":  args['imputation_param']['algorithm'],
             "fill_value": args['imputation_param']['fill_value'],
             "knn_k":      args['imputation_param']['knn_k']
@@ -80,8 +96,13 @@ def init(MAXEVENTS=None):
     return data, args, features
 
 
-def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class_id = [], args=None):
-    """ Loads the root file.
+def showmem():
+    cprint(__name__ + f""".load_root_file: Process RAM usage: {io.process_memory_use():0.2f} GB 
+        [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
+
+
+def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
+    """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
         root_path : paths to root files
@@ -89,7 +110,7 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     
     Returns:
         X,Y       : input, output matrices
-        VARS      : variable names
+        ids      : variable names
     """
 
     # -----------------------------------------------
@@ -98,111 +119,131 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     if args is None:
         args = ARGS
 
-    CUTFUNC    = globals()[args['cutfunc']]
-    TARFUNC    = globals()[args['targetfunc']]
-    FILTERFUNC = globals()[args['filterfunc']]
-
     if entrystop is None:
         entrystop = args['MAXEVENTS']
+
     # -----------------------------------------------
 
-    def showmem():
-        cprint(__name__ + f""".load_root_file: Process RAM usage: {io.process_memory_use():0.2f} GB 
-            [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
     
+    # =================================================================
+    # *** MC ***
+
+    X_MC, VARS_MC     = process_MC(root_path, ids, entrystart, entrystop, class_id, args)
+
+    ind = []
+    for name in NEW_VARS:
+        ind.append(VARS_MC.index(name))
+
+    X_MC = X_MC[:, ind]
+    Y_MC = np.ones(X_MC.shape[0])
+
+
+    # =================================================================
+    # *** DATA ***
+
+    X_DATA, VARS_DATA = process_DATA(root_path, ids, entrystart, entrystop, class_id, args)
+
+    ind = []
+    for name in NEW_VARS:
+        new_name = name.replace("e1_", "") # Data tree with different variables
+        ind.append(VARS_DATA.index(new_name))
+    
+    X_DATA = X_DATA[:, ind]
+    Y_DATA = np.zeros(X_DATA.shape[0])
+
+
+    # =================================================================
+    # Finally combine
+
+    X = np.concatenate((X_MC, X_DATA), axis=0)
+    Y = np.concatenate((Y_MC, Y_DATA), axis=0)
+
+
+    return X, Y, NEW_VARS
+
+
+def process_DATA(root_path, ids, entrystart, entrystop, class_id, args):
+
+    CUTFUNC    = globals()[args['cutfunc']]
+    FILTERFUNC = globals()[args['filterfunc']]
+    
+
+    rootfile = f'{root_path}/{args["datafile"]}'
+
+
     ### From root trees
     print('\n')
-    cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
-    cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
-
-    file   = uproot.open(root_path)
-    events = file["ntuplizer"]["tree"]
+    cprint( __name__ + f'.process_DATA: Loading with uproot from file "{rootfile}"', 'yellow')
+    cprint( __name__ + f'.process_DATA: entrystart = {entrystart}, entrystop = {entrystop}')
+    
+    file   = uproot.open(rootfile)
+    events = file["tree"]
+    
+    
+    ### All variables
+    if ids is None:
+        ids = events.keys() #[x for x in events.keys()]
+    print(ids)
 
     print(events)
     print(events.name)
     print(events.title)
     #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
 
-    ### All variables
-    if VARS is None:
-        VARS = events.keys() #[x for x in events.keys()]
-    #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
-    #print(VARS)
-
-    # Check is it MC (based on the first event)
-    X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
     
-    isMC   = bool(X_test[0]['is_mc'])
+    # Check length
+    X_test = events.arrays(ids[0], entry_start=entrystart, entry_stop=entrystop)
     N      = len(X_test)
-    print(__name__ + f'.load_root_file: isMC: {isMC}')
     
     # Now read the data
-    print(__name__ + '.load_root_file: Loading root file variables ...')
+    print(__name__ + '.process_DATA: Loading root file variables ...')
 
     # --------------------------------------------------------------
-    # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
+    # Important to take variables one-by-one (because one single np.assarray call takes too much RAM)
 
-    # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(VARS)), dtype=object) 
+    # Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !
+    X = np.empty((N, len(ids)), dtype=object) 
 
-    for j in tqdm(range(len(VARS))):
-        x = events.arrays(VARS[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+    for j in tqdm(range(len(ids))):
+        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
-    Y = None
-
+    #Y = np.random.randint(2, size=N)
+    #Y = np.ones((N,1)) # Signal
 
     print(__name__ + f'common: X.shape = {X.shape}')
     showmem()
 
     prints.printbar()
 
-    # =================================================================
-    # *** MC ONLY ***
+    # ----------------------------------
+    # @@ MC filtering done here @@
+    cprint(__name__ + f'.process_DATA: Computing DATA <filterfunc> ...', 'yellow')
+    ind = FILTERFUNC(X=X, ids=ids, isMC=False, xcorr_flow=args['xcorr_flow'])
 
-    if isMC:
+    cprint(__name__ + f'.process_DATA: Prior DATA <filterfunc>: {len(X)} events', 'green')
+    cprint(__name__ + f'.process_DATA: After DATA <filterfunc>: {sum(ind)} events ', 'green')
+    prints.printbar()
 
-        # @@ MC target definition here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(events, entrystart=entrystart, entrystop=entrystop, new=True)
-        Y = np.asarray(Y).T
-
-        print(__name__ + f'common: Y.shape = {Y.shape}')
-
-        # For info
-        labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, names=labels1, entrystart=entrystart, entrystop=entrystop, new=True)
-
-        prints.printbar()
-
-        # @@ MC filtering done here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
-        indmc = FILTERFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
-
-        cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
-        cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
-        prints.printbar()
-        
-        
-        X = X[indmc]
-        Y = Y[indmc].squeeze() # Remove useless dimension
-    # =================================================================
+    X = X[ind]
     
-    # -----------------------------------------------------------------
+    # ----------------------------------
+    # @@ DATA cuts done here @@
+
     # @@ Observable cut selections done here @@
-    cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, VARS=VARS, xcorr_flow=args['xcorr_flow'])
+    cprint(colored(__name__ + f'.process_DATA: Computing <cutfunc> ...'), 'yellow')
+    cind = CUTFUNC(X=X, ids=ids, isMC=False, xcorr_flow=args['xcorr_flow'])
     # -----------------------------------------------------------------
     
     N_before = X.shape[0]
 
     ### Select events
     X = X[cind]
-    if isMC: Y = Y[cind]
+    #Y = Y[cind]
 
     N_after = X.shape[0]
-    cprint(__name__ + f".load_root_file: Prior <cutfunc> selections: {N_before} events ", 'green')
-    cprint(__name__ + f".load_root_file: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
+    cprint(__name__ + f".process_DATA: Prior <cutfunc> selections: {N_before} events ", 'green')
+    cprint(__name__ + f".process_DATA: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
     print('')
 
     showmem()
@@ -211,5 +252,130 @@ def load_root_file_new(root_path, VARS=None, entrystart=0, entrystop=None, class
     # ** REMEMBER TO CLOSE **
     file.close()
 
-    return X, Y, VARS
+    return X, ids
 
+
+def process_MC(root_path, ids, entrystart, entrystop, class_id, args):
+
+
+    CUTFUNC    = globals()[args['cutfunc']]
+    FILTERFUNC = globals()[args['filterfunc']]
+
+
+    rootfile = f'{root_path}/{args["mcfile"]}'
+    
+    ### From root trees
+    print('\n')
+    cprint( __name__ + f'.process_MC: Loading with uproot from file "{rootfile}"', 'yellow')
+    cprint( __name__ + f'.process_MC: entrystart = {entrystart}, entrystop = {entrystop}')
+    
+    file   = uproot.open(rootfile)
+    events = file["tree"]
+    
+    
+    ### All variables
+    if ids is None:
+        ids = events.keys() #[x for x in events.keys()]
+    print(ids)
+
+    print(events)
+    print(events.name)
+    print(events.title)
+    #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
+
+    
+    # Check length
+    X_test = events.arrays(ids[0], entry_start=entrystart, entry_stop=entrystop)
+    N      = len(X_test)
+    
+    # Now read the data
+    print(__name__ + '.process_MC: Loading root file variables ...')
+
+    # --------------------------------------------------------------
+    # Important to take variables one-by-one (because one single np.assarray call takes too much RAM)
+
+    # Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !
+    X = np.empty((N, len(ids)), dtype=object) 
+
+    for j in tqdm(range(len(ids))):
+        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        X[:,j] = np.asarray(x)
+    # --------------------------------------------------------------
+    #Y = np.random.randint(2, size=N)
+    #Y = np.ones((N,1)) # Signal
+
+    print(__name__ + f'common: X.shape = {X.shape}')
+    showmem()
+
+    prints.printbar()
+
+    # ----------------------------------
+    # @@ MC filtering done here @@
+    cprint(__name__ + f'.process_MC: Computing MC <filterfunc> ...', 'yellow')
+    ind = FILTERFUNC(X=X, ids=ids, isMC=True, xcorr_flow=args['xcorr_flow'])
+
+    cprint(__name__ + f'.process_MC: Prior MC <filterfunc>: {len(X)} events', 'green')
+    cprint(__name__ + f'.process_MC: After MC <filterfunc>: {sum(ind)} events ', 'green')
+    prints.printbar()
+
+    X = X[ind]
+    
+    # ----------------------------------
+    # @@ MC cuts done here @@
+
+    # @@ Observable cut selections done here @@
+    cprint(colored(__name__ + f'.process_MC: Computing <cutfunc> ...'), 'yellow')
+    cind = CUTFUNC(X=X, ids=ids, isMC=True, xcorr_flow=args['xcorr_flow'])
+    # -----------------------------------------------------------------
+    
+    N_before = X.shape[0]
+
+    ### Select events
+    X = X[cind]
+    #Y = Y[cind]
+
+    N_after = X.shape[0]
+    cprint(__name__ + f".process_MC: Prior <cutfunc> selections: {N_before} events ", 'green')
+    cprint(__name__ + f".process_MC: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
+    print('')
+
+    showmem()
+    prints.printbar()
+
+    # ** REMEMBER TO CLOSE **
+    file.close()
+
+    return X, ids
+
+
+def splitfactor(data, args):
+    """
+    Split electron ID data into different datatypes.
+    
+    Args:
+        data:  jagged arrays
+        args:  arguments dictionary
+    
+    Returns:
+        scalar (vector) data
+        kinematic data
+    """
+    
+    ### Pick kinematic variables out
+    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
+    
+    data_kin         = copy.deepcopy(data)
+    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
+    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
+    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
+    data_kin.ids    = k_vars
+
+    ### Pick active scalar variables out
+    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    
+    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
+    data.val.x    = data.val.x[:, s_ind].astype(np.float)
+    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
+    data.ids     = s_vars
+
+    return data, data_kin

@@ -38,7 +38,6 @@ CMSSW_MVA_ID = [
   'eid_trk_p',
 ]
 
-
 CMSSW_MVA_ID_IMAGE = [
  'image_gsf_ref_eta',
  'image_gsf_ref_phi',
@@ -77,7 +76,6 @@ CMSSW_MVA_ID_IMAGE = [
  'image_pf_matched',
  'image_pf_lost'
 ]
-
 
 CMSSW_MVA_ID_ORIG = [
   'gsf_bdtout1',

@@ -6,6 +6,72 @@ import pyparsing as pp
 import numpy as np
 
 
+from icenet.tools import aux
+
+
+def construct_columnar_cuts(X, ids, cutlist):
+    """
+    Construct cuts and corresponding names.
+
+    Args:
+        X       : Input columnar data matrix
+        ids     : Variable names for each column of X
+        cutlist : Selection cuts as strings, such as ['ABS__eta < 0.5', 'trgbit == True']
+    
+    Returns:
+        cuts, names
+    """
+    cuts  = []
+    names = []
+
+    for expr in cutlist:
+
+        treelist = parse_boolean_exptree(expr)
+        treeobj  = construct_exptree(treelist)
+        output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
+
+        cuts.append(output)
+        names.append(expr)
+
+    return cuts,names
+
+def apply_cutflow(cut, names, xcorr_flow=True):
+    """ Apply cutflow
+
+    Args:
+        cut        : list of pre-calculated cuts, each list element is a boolean array
+        names      : list of names (description of each cut, for printout only)
+        xcorr_flow : compute full N-point correlations
+    
+    Returns:
+        ind        : list of indices, 1 = pass, 0 = fail
+    """
+    print(__name__ + '.apply_cutflow: \n')
+
+    # Print out "serial flow"
+    N   = len(cut[0])
+    ind = np.ones(N, dtype=np.uint8)
+    for i in range(len(cut)):
+        ind = np.logical_and(ind, cut[i])
+        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
+    
+    # Print out "parallel flow"
+    if xcorr_flow:
+        print('\n')
+        print(__name__ + '.apply_cutflow: Computing N-point correlations <xcorr_flow = True>')
+        vec = np.zeros((len(cut[0]), len(cut)))
+        for j in range(vec.shape[1]):
+            vec[:,j] = np.array(cut[j])
+
+        intmat = aux.binaryvec2int(vec)
+        BMAT   = aux.generatebinary(vec.shape[1])
+        print(f'Boolean combinations for {names}: \n')
+        for i in range(BMAT.shape[0]):
+            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
+        print('\n')
+    
+    return ind
+
 def parse_boolean_exptree(instring):
     """
     A boolean expression tree parser.
@@ -37,7 +103,6 @@ def parse_boolean_exptree(instring):
     # Remove excess []
     return output[0] if len(output) == 1 else output
 
-
 class tree_node:
     """
     Class to represent the nodes of an expression tree.
@@ -49,7 +114,6 @@ class tree_node:
 
     def __str__(self):
         return f'{{left: {self.left}, data: {self.data}, right: {self.right}}}'
-
 
 def construct_exptree(root):
     """
@@ -78,7 +142,6 @@ def construct_exptree(root):
 
     return prev_root
 
-
 def print_exptree(root):
     """
     Print out an expression tree object via recursion.
@@ -100,15 +163,14 @@ def print_exptree(root):
 
     print(f'inter | L: {root.left}, D: {root.data}, R: {root.right}')
 
-
-def eval_boolean_exptree(root, X, VARS):
+def eval_boolean_exptree(root, X, ids):
     """
     Evaluation of a (boolean) expression tree via recursion.
     
     Args:
         root : expression tree object
         X    : data matrix (N events x D dimensions)
-        VARS : variable names for each D dimension
+        ids : variable names for each D dimension
     
     Returns:
         boolean selection list of size N
@@ -130,7 +192,7 @@ def eval_boolean_exptree(root, X, VARS):
     # Leaf node
     if root.left is None and root.right is None:
 
-        if is_in(root.data, VARS):
+        if is_in(root.data, ids):
             return root.data
         else:
             if   isinstance(root.data, str) and root.data in ['True', 'true']:
@@ -138,11 +200,15 @@ def eval_boolean_exptree(root, X, VARS):
             elif isinstance(root.data, str) and root.data in ['False', 'false']:
                 return False
             else:
-                return float(root.data)
+                try:
+                    out = float(root.data)
+                    return out
+                except:
+                    raise Exception(f'{root.data} variable is not a leaf or found in {ids}')
     
     # Evaluate left and right trees
-    left_sum  = eval_boolean_exptree(root=root.left,  X=X, VARS=VARS)
-    right_sum = eval_boolean_exptree(root=root.right, X=X, VARS=VARS)
+    left_sum  = eval_boolean_exptree(root=root.left,  X=X, ids=ids)
+    right_sum = eval_boolean_exptree(root=root.right, X=X, ids=ids)
 
     # Apply the binary operator
     if root.data == 'AND':
@@ -154,7 +220,7 @@ def eval_boolean_exptree(root, X, VARS):
     # We have ended up with numerical comparison
     operator = root.data
 
-    if isinstance(left_sum, str) and is_in(left_sum, VARS):
+    if isinstance(left_sum, str) and is_in(left_sum, ids):
 
         lhs = left_sum
         rhs = right_sum
@@ -169,7 +235,7 @@ def eval_boolean_exptree(root, X, VARS):
 
     # Vector index
     split = lhs.split('__')
-    ind   = VARS.index(split[-1])
+    ind   = ids.index(split[-1])
     
     # -------------------------------------------------
     # Construct possible function operator
@@ -189,6 +255,8 @@ def eval_boolean_exptree(root, X, VARS):
             f = lambda x : 1.0/x
         else:
             raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
+
+        print(f'eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
     # -------------------------------------------------
 
     # Middle binary operators g(x,y)
@@ -210,26 +278,24 @@ def eval_boolean_exptree(root, X, VARS):
     # Evaluate
     return g(f(X[:, ind]), rhs)
 
-
-def eval_boolean_syntax(expr, X, VARS):
+def eval_boolean_syntax(expr, X, ids):
     """
     A complete wrapper to evaluate boolean syntax.
 
     Args:
         expr : boolean expression string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
         X    : input data (N x dimensions)
-        VARS : variable names as a list
-
+        ids  : variable names as a list
+    
     Returns:
         boolean list of size N
     """
 
     treelist = parse_boolean_exptree(expr)
     treeobj  = construct_exptree(treelist)
-    output   = eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
+    output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
     return output
-
 
 def test_syntax_tree_simple():
     """
@@ -240,23 +306,22 @@ def test_syntax_tree_simple():
     for i in range(100):
 
         X        = np.random.rand(20,3) * 50
-        VARS     = ['x', 'y', 'z']
+        ids      = ['x', 'y', 'z']
 
         ### TEST 1
         expr     = 'x >= 0.0 AND POW2__z < 2500'
 
         treelist = parse_boolean_exptree(expr)
         treeobj  = construct_exptree(treelist)
-        output   = eval_boolean_exptree(root=treeobj, X=X, VARS=VARS)
+        output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
         assert np.all(output)
 
         # One-Liner
-        output2  = eval_boolean_syntax(expr=expr, X=X, VARS=VARS)
+        output2  = eval_boolean_syntax(expr=expr, X=X, ids=ids)
         assert np.all(output2)
 
         assert np.all(output == output2)
         
-
 def test_syntax_tree_flip():
     """
     Unit tests
@@ -266,7 +331,7 @@ def test_syntax_tree_flip():
     for i in range(100):
 
         X            = np.random.rand(20,3) * 50
-        VARS         = ['x', 'y', 'z']
+        ids          = ['x', 'y', 'z']
 
         ### TEST
         expr_strings = ['ABS__x > 3.8 OR (x > 7 AND (y >= 2 OR z <= 4))', '((y >= 2 OR z <= 4) AND 7 < x) OR 3.8 < ABS__x']
@@ -279,6 +344,6 @@ def test_syntax_tree_flip():
             print(treelist)
 
             treeobj  = construct_exptree(treelist)
-            output.append(eval_boolean_exptree(root=treeobj, X=X, VARS=VARS))
+            output.append(eval_boolean_exptree(root=treeobj, X=X, ids=ids))
 
         assert np.all(output[0] == output[1])

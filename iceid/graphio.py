@@ -44,22 +44,22 @@ def graph2torch(X):
     return Y
 
 
-def parse_tensor_data(X, VARS, image_vars, args):
+def parse_tensor_data(X, ids, image_vars, args):
     """
     Args:
         X     :  Jagged array of variables
-        VARS  :  Variable names as an array of strings
+        ids  :  Variable names as an array of strings
         args  :  Arguments
     
     Returns:
         Tensor of pytorch-geometric Data objects
     """
 
-    newind  = np.where(np.isin(VARS, image_vars))
+    newind  = np.where(np.isin(ids, image_vars))
     newind  = np.array(newind).flatten()
     newvars = []
     for i in newind :
-        newvars.append(VARS[i])
+        newvars.append(ids[i])
 
     # Pick image data
     X_image = X[:, newind]
@@ -80,17 +80,17 @@ def parse_tensor_data(X, VARS, image_vars, args):
 
     # Pick tensor data out
     cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
-    tensor = aux.jagged2tensor(X=X_image, VARS=newvars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    tensor = aux.jagged2tensor(X=X_image, ids=newvars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
 
     return tensor
 
 
-def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim'):
+def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord='ptetaphim'):
 
     """
     Args:
         X         :  Jagged array of variables
-        VARS      :  Variable names as an array of strings
+        ids      :  Variable names as an array of strings
         features  :  Array of active scalar feature strings
         Y         :  Target class  array (if any, typically MC only)
         W         :  (Re-)weighting array (if any, typically MC only)
@@ -115,17 +115,17 @@ def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord
     # Collect feature indices
     feature_ind = np.zeros(len(features), dtype=np.int32)
     for i in range(len(features)):
-        feature_ind[i] = VARS.index(features[i])
+        feature_ind[i] = ids.index(features[i])
 
 
     # Collect indices
-    ind__trk_pt        = VARS.index('trk_pt')
-    ind__trk_eta       = VARS.index('trk_eta')
-    ind__trk_phi       = VARS.index('trk_phi')
+    ind__trk_pt        = ids.index('trk_pt')
+    ind__trk_eta       = ids.index('trk_eta')
+    ind__trk_phi       = ids.index('trk_phi')
 
-    ind__image_clu_e   = VARS.index('image_clu_e')
-    ind__image_clu_eta = VARS.index('image_clu_eta')
-    ind__image_clu_phi = VARS.index('image_clu_phi')
+    ind__image_clu_e   = ids.index('image_clu_e')
+    ind__image_clu_eta = ids.index('image_clu_eta')
+    ind__image_clu_phi = ids.index('image_clu_phi')
 
 
     # Loop over events
@@ -161,7 +161,7 @@ def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord
         ###u = torch.tensor(u, dtype=torch.float)
         
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         ###x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
@@ -184,13 +184,13 @@ def parse_graph_data_np(X, VARS, features, Y=None, W=None, global_on=True, coord
     return dataset
 
 
-def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
+def parse_graph_data(X, ids, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
     Args:
         X         :  Jagged array of variables
-        VARS      :  Variable names as an array of strings
+        ids       :  Variable names as an array of strings
         features  :  Array of active scalar feature strings
         Y         :  Target class  array (if any, typically MC only)
         W         :  (Re-)weighting array (if any, typically MC only)
@@ -200,7 +200,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
     Returns:
         Array of pytorch-geometric Data objects
     """
-
+    
     num_node_features = 6
     num_edge_features = 4
     num_classes       = 2
@@ -214,17 +214,17 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
     # Collect feature indices
     feature_ind = np.zeros(len(features), dtype=np.int32)
     for i in range(len(features)):
-        feature_ind[i] = VARS.index(features[i])
+        feature_ind[i] = ids.index(features[i])
 
 
     # Collect indices
-    ind__trk_pt        = VARS.index('trk_pt')
-    ind__trk_eta       = VARS.index('trk_eta')
-    ind__trk_phi       = VARS.index('trk_phi')
+    ind__trk_pt        = ids.index('trk_pt')
+    ind__trk_eta       = ids.index('trk_eta')
+    ind__trk_phi       = ids.index('trk_phi')
 
-    ind__image_clu_e   = VARS.index('image_clu_e')
-    ind__image_clu_eta = VARS.index('image_clu_eta')
-    ind__image_clu_phi = VARS.index('image_clu_phi')
+    ind__image_clu_e   = ids.index('image_clu_e')
+    ind__image_clu_eta = ids.index('image_clu_eta')
+    ind__image_clu_phi = ids.index('image_clu_phi')
 
 
     # Loop over events
@@ -239,10 +239,10 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
         # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
         p4vec = []
-        NC = len(X[i, ind__image_clu_e])
-
-        if NC > 0:
-            for k in range(NC): 
+        N_c = len(X[i, ind__image_clu_e])
+        
+        if N_c > 0:
+            for k in range(N_c): 
                 
                 pt    = X[i, ind__image_clu_e][k] / np.cosh(X[i, ind__image_clu_eta][k]) # Massless approx.
                 eta   = X[i, ind__image_clu_eta][k]
@@ -253,10 +253,9 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
                 p4vec.append( v )
         else:
-            print(__name__ + f'parse_graph_data: Empty ECAL cluster event {i}')
-            continue # Skip empty ECAL cluster events
-
-
+            print(__name__ + f'parse_graph_data: Empty ECAL cluster event {i} (using only global data u)')
+            # However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed
+        
         # ====================================================================
         # CONSTRUCT TENSORS
 
@@ -277,7 +276,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
         u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[i], VARS=VARS, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
@@ -299,7 +298,7 @@ def parse_graph_data(X, VARS, features, Y=None, W=None, global_on=True, coord='p
 
 
 
-def get_node_features(p4vec, p4track, X, VARS, num_nodes, num_node_features, coord):
+def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coord):
 
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features))
@@ -322,7 +321,7 @@ def get_node_features(p4vec, p4track, X, VARS, num_nodes, num_node_features, coo
                 raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
             
             # other features
-            x[i,4] = X[VARS.index('image_clu_nhit')][i-1]
+            x[i,4] = X[ids.index('image_clu_nhit')][i-1]
             x[i,5] = p4track.deltaR(p4vec[i-1])
 
     return x
