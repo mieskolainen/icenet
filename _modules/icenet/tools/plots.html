@@ -429,11 +429,19 @@
             <span class="n">fpr</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
             <span class="n">tpr</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
 
-            <span class="c1"># Autodetect a ROC point (instead of a curve)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fpr</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># Autodetect a ROC point triangle (instead of a curve)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fpr</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Remove first and last</span>
+                <span class="n">fpr</span> <span class="o">=</span> <span class="n">fpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Remove first and last</span>
+                
                 <span class="n">linestyle</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
                 <span class="n">marker</span>    <span class="o">=</span> <span class="s1">&#39;o&#39;</span>
             
+            <span class="c1"># A ROC-curve</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fpr</span> <span class="o">=</span> <span class="n">fpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># Remove always the first element for log-plot reasons</span>
+                <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> \
                 <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: AUC = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
