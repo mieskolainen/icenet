@@ -4,7 +4,7 @@
 #
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
-
+rootname: 'eid'
 
 MAXEVENTS: 100000               # Maximum total number of events (per root file) to process
 
@@ -114,8 +114,8 @@ image_param:
 ## Reweighting setup in the training phase
 reweight_param:
 
-  var_pt:   'trk_pt'
-  var_eta:  'trk_eta'
+  var_A:  'trk_pt'
+  var_B:  'trk_eta'
 
   maxevents: 1000000           # Maximum number of events for the PDF construction
 
@@ -127,17 +127,17 @@ reweight_param:
 
   equal_frac: true             # Equalize integrated class fractions
 
-  bins_pt:  [0.0, 50.0, 200]   # Make sure the bounds cover the phase space
-  binmode_pt:  'linear'        # 'log10' or 'linear' binning
+  bins_A:  [0.0, 50.0, 200]    # Make sure the bounds cover the phase space
+  binmode_A:  'linear'         # 'log10' or 'linear' binning
   
-  bins_eta: [-3.1, 3.1, 100]   #
-  binmode_eta: 'linear'
+  bins_B: [-3.1, 3.1, 100]     #
+  binmode_B: 'linear'
   
   # ! Variable, and binning min/max boundaries are both transformed !
-  transform_pt: 'log10'        # 'log10', 'sqrt', 'square', 'null'
-  transform_eta: null
-
-  max_reg: 1000.0               # Maximum weight cut-off regularization
+  transform_A: 'log10'         # 'log10', 'sqrt', 'square', 'null'
+  transform_B: null
+  
+  max_reg: 1000.0              # Maximum weight cut-off regularization
 
 
 # Imputation

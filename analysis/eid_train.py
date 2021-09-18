@@ -12,7 +12,6 @@ import torch
 import os
 import pickle
 import sys
-
 from termcolor import cprint
 
 # matplotlib
@@ -39,16 +38,16 @@ def main() :
 
     ### Get input
     data, args, features = common.init()
-    reweight_var = {'eta': args['reweight_param']['var_eta'], 'pt': args['reweight_param']['var_pt']}
     
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)
-    
+
     ### Compute reweighting weights
-    trn_weights = reweight.compute_eta_pt_reweights(data=data, args=args, ids=reweight_var)
+    trn_weights = reweight.compute_ND_reweights(data=data, args=args)
+    
     
     ### Plot some kinematic variables
-    targetdir = f'./figs/eid/{args["config"]}/reweight/1D_kinematic/'
+    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)
     for k in ['trk_pt', 'trk_eta', 'trk_phi', 'trk_p']:
         plots.plotvar(x = data.trn.x[:, data.ids.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
@@ -56,37 +55,36 @@ def main() :
 
     # --------------------------------------------------------------------
     ### Parse data into graphs
-
+    
     graph = {}
     if args['graph_on']:
         graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-
+        
         graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, ids=data.ids,
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-    
 
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
         print(__name__ + f': plotting basic histograms ...')
-        targetdir = f'./figs/eid/{args["config"]}/train/1D_all/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/'; os.makedirs(targetdir, exist_ok = True)
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, ids = data.ids,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
-
 
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
     
     ### Print scalar variables
     fig,ax = plots.plot_correlations(data.trn.x, data.ids)
-    targetdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(fname = targetdir + 'correlations.pdf', pad_inches = 0.2, bbox_inches='tight')
     
+
     print(__name__ + ': Active variables:')
     prints.print_variables(X=data.trn.x, ids=data.ids)
     
     # Add args['modeldir']
-    args["modeldir"] = f'./checkpoint/eid/{args["config"]}/'
+    args["modeldir"] = f'./checkpoint/{args["rootname"]}/{args["config"]}/'
     os.makedirs(args["modeldir"], exist_ok = True)
     
     ### Execute training

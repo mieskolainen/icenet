@@ -9,24 +9,37 @@ import matplotlib.pyplot as plt
 from icenet.tools import aux
 
 
-def compute_eta_pt_reweights(data, args, ids={'pt': 'trk_pt', 'eta': 'trk_eta'}, N_class=2, EPS=1e-12):
+def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     """
-    Compute (eta,pt) reweighting coefficients.
+    Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
     Args:
-        data    : training data object
-        args    : arguments object
+        data   : training data object
+        args   : arguments object
+        ids    : dimension names
+
     Returns:
-        weights : array of re-weights
+        weights: array of re-weights
     """
+
+    ### Construct parameter names
+    ids = {}
+    for var in ['A', 'B']: # Currently only 2 variables, A, B, supported
+        try:
+            varname  = args['reweight_param']['var_' + var]
+            ids[var] = varname
+        except:
+            break
+    print(__name__ + f'.compute_ND_reweights: Using the following variables {ids}')
+
 
     ### Re-weighting variables
     RV = {}
-    RV['pt']  = data.trn.x[:,data.ids.index(ids['pt'])].astype(np.float)
-    RV['eta'] = data.trn.x[:,data.ids.index(ids['eta'])].astype(np.float)
+    for varname in ids.keys():
+        RV[varname] = data.trn.x[:, data.ids.index(ids[varname])].astype(np.float)
 
     ### Pre-transform
-    for var in ['pt', 'eta']:
+    for var in ids.keys():
         mode = args['reweight_param'][f'transform_{var}']
 
         if   mode == 'log10':
@@ -53,11 +66,11 @@ def compute_eta_pt_reweights(data, args, ids={'pt': 'trk_pt', 'eta': 'trk_eta'},
         elif mode == None:
             True
         else:
-            raise Except(__name__ + '.compute_reweights: Unknown pre-transform')
+            raise Except(__name__ + '.compute_ND_reweights: Unknown pre-transform')
 
     # Binning setup
     binedges = {}
-    for var in ['pt', 'eta']:
+    for var in ids.keys():
         if   args['reweight_param'][f'binmode_{var}'] == 'linear':
             binedges[var] = np.linspace(
                                  args['reweight_param'][f'bins_{var}'][0],
@@ -72,27 +85,44 @@ def compute_eta_pt_reweights(data, args, ids={'pt': 'trk_pt', 'eta': 'trk_eta'},
         else:
             raise Except(__name__ + ': Unknown re-weight binning mode')
     
-    print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
-
-
-    ### Compute 2D-PDFs for each class
-    pdf     = {}
-    for c in range(N_class):
-        pdf[c] = pdf_2D_hist(X_A=RV['pt'][data.trn.y==c], X_B=RV['eta'][data.trn.y==c],
-                                    binedges_A=binedges['pt'], binedges_B=binedges['eta'])
-
-    pdf['binedges_A'] = binedges['pt']
-    pdf['binedges_B'] = binedges['eta']
-
+    print(__name__ + f".compute_ND_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
 
     # Compute event-by-event weights
     if args['reweight_param']['reference_class'] != -1:
         
-        trn_weights = reweightcoeff2D(
-            X_A = RV['pt'], X_B = RV['eta'], pdf = pdf, y = data.trn.y, N_class=N_class,
-            equal_frac       = args['reweight_param']['equal_frac'],
-            reference_class  = args['reweight_param']['reference_class'],
-            max_reg          = args['reweight_param']['max_reg'])
+        rwparam = {
+            'y':               data.trn.y,
+            'N_class':         N_class,
+            'equal_frac':      args['reweight_param']['equal_frac'],
+            'reference_class': args['reweight_param']['reference_class'],
+            'max_reg':         args['reweight_param']['max_reg']
+        }
+
+        if len(ids) == 2:
+        
+            ### Compute 2D-PDFs for each class
+            pdf = {}
+            for c in range(N_class):
+                pdf[c] = pdf_2D_hist(X_A=RV['A'][data.trn.y==c], X_B=RV['B'][data.trn.y==c], \
+                    binedges_A=binedges['A'], binedges_B=binedges['B'])
+
+            pdf['binedges_A'] = binedges['A']
+            pdf['binedges_B'] = binedges['B']
+
+            trn_weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            
+        elif len(ids) == 1:
+
+            ### Compute 1D-PDFs for each class
+            pdf = {}
+            for c in range(N_class):
+                pdf[c] = pdf_1D_hist(X=RV['A'][data.trn.y==c], binedges=binedges['A'])
+
+            pdf['binedges'] = binedges['A']
+            trn_weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
+        else:
+            raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality {len(ids)}')
+
     else:
         # No re-weighting
         weights_doublet = np.zeros((data.trn.x.shape[0], N_class))
@@ -107,9 +137,9 @@ def compute_eta_pt_reweights(data, args, ids={'pt': 'trk_pt', 'eta': 'trk_eta'},
         frac[c] = np.sum(data.trn.y == c)
         sums[c] = np.sum(trn_weights[data.trn.y == c])
     
-    print(__name__ + f'.compute_reweights: sum[trn.y==c]: {frac}')
-    print(__name__ + f'.compute_reweights: sum[trn_weights[trn.y==c]]: {sums}')
-    print(__name__ + f'.compute_reweights: [done] \n')
+    print(__name__ + f'.compute_ND_reweights: sum[trn.y==c]: {frac}')
+    print(__name__ + f'.compute_ND_reweights: sum[trn_weights[trn.y==c]]: {sums}')
+    print(__name__ + f'.compute_ND_reweights: [done] \n')
     
     return trn_weights
 

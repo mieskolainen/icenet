@@ -276,8 +276,21 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
         xx = np.logspace(-5, 0, 100)
         plt.plot(xx, xx, linestyle='--', color='black', linewidth=1) # ROC diagonal
 
-        for i in range(len(metrics)) :
-            plt.plot(metrics[i].fpr, metrics[i].tpr, label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
+        for i in range(len(metrics)):
+
+            linestyle = '-'
+            marker    = 'None'
+
+            fpr = metrics[i].fpr
+            tpr = metrics[i].tpr
+
+            # Autodetect a ROC point (instead of a curve)
+            if len(np.unique(fpr)) <= 3:
+                linestyle = "None"
+                marker    = 'o'
+            
+            plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, \
+                label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
 
         plt.legend(fontsize=legend_fontsize)
         ax.set_xlabel('False Positive (background) rate $\\alpha$')

@@ -327,7 +327,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     val_aucs = results['eval']['auc']
 
     # Plot evolution
-    plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
     fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
 
@@ -352,7 +352,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     bars = plt.barh(xx, yy, align='center', height=0.5)
     plt.xlabel('f-score (gain)')
 
-    targetdir = f'./figs/eid/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
 
 
@@ -362,7 +362,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
@@ -378,14 +378,14 @@ def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
 
 
     # Plot evolution
-    plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
     fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
     
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
@@ -405,7 +405,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     ### Plot contours (TOO SLOW!)
     """
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : func_predict(x),
             X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
@@ -433,7 +433,7 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
         Y_trn = Y_trn, X1_val = X_val_2D, X2_val = X_val, Y_val = Y_val, trn_weights = trn_weights, param = param)
     
     # Plot evolution
-    plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+    plotdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
     
@@ -444,7 +444,7 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
 
     ### Plot contours
     #if args['plot_param']['contours_on']:
-    #    targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+    #    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
     #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
     #        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
@@ -480,14 +480,14 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
                     trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
 
     # Plot evolution
-    plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+    plotdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
 
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
@@ -502,14 +502,14 @@ def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
         trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
 
     # Plot evolution
-    plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+    plotdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
     
 
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
@@ -525,14 +525,14 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
     
 
     # Plot evolution
-    plotdir = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
+    plotdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
     
 
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
@@ -571,7 +571,7 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
     val_aucs = results['eval']['auc']
 
     # Plot evolution
-    plotdir  = f'./figs/eid/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
     fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
@@ -595,7 +595,7 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
     plt.xlabel('f-score (gain)')
 
 
-    targetdir = f'./figs/eid/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
 
     ## Plot decision tree
@@ -604,7 +604,7 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
     
     ### Plot contours
     if args['plot_param']['contours_on']:
-        targetdir = f'./figs/eid/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 

@@ -1,5 +1,6 @@
 # Electron HLT trigger tune0.yml
 #
+rootname: 'trg'
 
 MAXEVENTS: 1000000               # Maximum total number of events (per root file) to process
 
@@ -7,11 +8,8 @@ MAXEVENTS: 1000000               # Maximum total number of events (per root file
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
-
+  
   - xgb10
-  - xgb1
-
-  - cutset0
   
   - cut0
   - cut1
@@ -20,6 +18,8 @@ active_models:
   - cut4
   - cut5
   - cut6
+
+  - cutset0
 #  - lgr0
 # ----------------------------------------------------
 
@@ -39,7 +39,7 @@ cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
 
 xcorr_flow: True                 # Full N-point correlations computed between cuts
 
-frac: 0.8                        # Train/validate/test split fraction
+frac: 0.7                        # Train/validate/test split fraction
 varnorm: 'zscore'                # Variable normalization: 'zscore', 'madscore', 'none'
 #varnorm_tensor: 'zscore'        # Tensor variable normalization
 #varnorm_graph: 'none'           # Not implemented yet
@@ -48,8 +48,8 @@ varnorm: 'zscore'                # Variable normalization: 'zscore', 'madscore',
 ## Reweighting setup in the training phase
 reweight_param:
 
-  var_pt:  'e1_hlt_pt'
-  var_eta: 'e1_hlt_eta'
+  var_A: 'e1_hlt_pt'
+  var_B: 'e1_hlt_eta'
 
   maxevents: 1000000            # Maximum number of events for the PDF construction
 
@@ -61,27 +61,27 @@ reweight_param:
 
   equal_frac: true              # Equalize integrated class fractions
 
-  bins_pt:  [0.0, 50.0, 200]    # Make sure the bounds cover the phase space
-  binmode_pt:  'linear'         # 'log10' or 'linear' binning
+  bins_A:  [0.0, 50.0, 200]    # Make sure the bounds cover the phase space
+  binmode_A:  'linear'         # 'log10' or 'linear' binning
   
-  bins_eta: [-3.1, 3.1, 100]    #
-  binmode_eta: 'linear'
+  bins_B: [-3.1, 3.1, 100]    #
+  binmode_B: 'linear'
   
   # ! Variable, and binning min/max boundaries are both transformed !
-  transform_pt: 'log10'         # 'log10', 'sqrt', 'square', 'null'
-  transform_eta: null
+  transform_A: 'log10'         # 'log10', 'sqrt', 'square', 'null'
+  transform_B: null
 
   max_reg: 1000.0               # Maximum weight cut-off regularization
 
 
 # Imputation
 imputation_param:
-  active: true                 # True / False
-  var: 'MVA_ID'                # Array of variables to be imputated
-  algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: 0                # For constant imputation
-  knn_k: 8                     # Number of nearest neighbours considered
-  values: [-999, -666, -10]    # Special values which indicate the need for imputation
+  active: true               # True / False
+  var: 'MVA_ID'              # Array of variables to be imputated
+  algorithm: 'constant'      # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+  fill_value: 0              # For constant imputation
+  knn_k: 8                   # Number of nearest neighbours considered
+  values: [-999, -10, -1]    # Special values which indicate the need for imputation
 
 
 ## Outlier protection in the training phase
@@ -174,47 +174,6 @@ cut6_param:
   label:    'hlt_trkNrLayerIT'
   variable: 'e1_hlt_trkNrLayerIT'
   sign: 1
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb1_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB_1'
-  raytune:  null
-
-  # general parameters
-  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 1      # number of epochs (equal to the number of trees!)
-  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
-  # booster parameters
-  learning_rate: 0.15
-  
-  # Tree parameters
-  max_depth: 10
-  min_child_weight: 1.0
-  gamma: 0.0
-  max_delta_step: 0
-  subsample: 1.0
-
-  colsample_bytree:  1
-  colsample_bylevel: 1
-  colsample_bynode:  1
-  
-  reg_lambda: 2.0       # L2 regularization
-  reg_alpha: 0.0        # L1 regularization
-  
-  scale_pos_weight: 1
-
-  # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
 
 # XGBoost

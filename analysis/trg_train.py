@@ -9,25 +9,13 @@ import _icepaths_
 import math
 import numpy as np
 import torch
-import argparse
-import pprint
 import os
-import datetime
-import json
 import pickle
 import sys
-import yaml
-import copy
-#import graphviz
-import torch_geometric
 from termcolor import cprint
 
 # matplotlib
 from matplotlib import pyplot as plt
-
-# scikit
-from sklearn         import metrics
-from sklearn.metrics import accuracy_score
 
 # icenet
 from icenet.tools import io
@@ -49,15 +37,14 @@ def main() :
 
     ### Get input
     data, args, features = common.init()
-    reweight_var = {'eta': args['reweight_param']['var_eta'], 'pt': args['reweight_param']['var_pt']}
 
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)
     
     ### Compute reweighting weights
-    trn_weights = reweight.compute_eta_pt_reweights(data=data, args=args, ids=reweight_var)
-    
-    
+    trn_weights = reweight.compute_ND_reweights(data=data, args=args)
+
+
     ### Plot some kinematic variables
     targetdir = f'./figs/trg/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)
@@ -72,8 +59,8 @@ def main() :
         targetdir = f'./figs/trg/{args["config"]}/train/1D_all/'; os.makedirs(targetdir, exist_ok = True)
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, ids = data.ids,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
-
-
+    
+    
     ### Split and factor data
     data, data_kin = common.splitfactor(data=data, args=args)
     
@@ -89,10 +76,10 @@ def main() :
     # Add args['modeldir']
     args["modeldir"] = f'./checkpoint/trg/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
     
-
+    
     ### Execute training
     process.train_models(data = data, data_kin = data_kin, trn_weights = trn_weights, args = args)
-    
+        
     print(__name__ + ' [done]')
 
 

@@ -37,7 +37,7 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     Returns:
     	ind  : Passing indices list
     """
-
+    
     # Fiducial cuts for the tag-side muon trigger object
     MINPT   = 5.0
     MAXETA  = 2.5
