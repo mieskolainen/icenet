@@ -284,11 +284,19 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
             fpr = metrics[i].fpr
             tpr = metrics[i].tpr
 
-            # Autodetect a ROC point (instead of a curve)
-            if len(np.unique(fpr)) <= 3:
+            # Autodetect a ROC point triangle (instead of a curve)
+            if len(np.unique(fpr)) == 3:
+                tpr = tpr[1:-1] # Remove first and last
+                fpr = fpr[1:-1] # Remove first and last
+                
                 linestyle = "None"
                 marker    = 'o'
             
+            # A ROC-curve
+            else:
+                fpr = fpr[1:] # Remove always the first element for log-plot reasons
+                tpr = tpr[1:]
+
             plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, \
                 label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
 
