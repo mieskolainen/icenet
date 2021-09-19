@@ -68,7 +68,7 @@ def pred_cutset(args, param):
 
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
-
+    
     # Get feature name variables
     ids = args['features']
 

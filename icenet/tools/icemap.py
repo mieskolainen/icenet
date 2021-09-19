@@ -40,11 +40,11 @@ class icemap:
     def __getitem__(self, key):
         """ Advanced indexing """
 
-        if key in self.ids:       # direct access
+        if key in self.ids:        # direct access
             return self.x[..., self.ids.index(key)]
 
         elif isinstance(key, str): # might be a cut string, try that
-
+            
             ind = stx.eval_boolean_syntax(expr=key, X=self.x, ids=self.ids)
             return self.x[ind, ...]
 

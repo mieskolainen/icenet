@@ -5,9 +5,7 @@
 import pyparsing as pp
 import numpy as np
 
-
 from icenet.tools import aux
-
 
 def construct_columnar_cuts(X, ids, cutlist):
     """
@@ -72,6 +70,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
     
     return ind
 
+
 def parse_boolean_exptree(instring):
     """
     A boolean expression tree parser.
@@ -87,15 +86,47 @@ def parse_boolean_exptree(instring):
              parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
     """
 
+    def makeLRlike(numterms):
+        """
+        parse action -maker
+
+        See: https://stackoverflow.com/questions/4571441/recursive-expressions-with-pyparsing/4589920#4589920
+        """
+
+        if numterms is None:
+            # None operator can only by binary op
+            initlen = 2
+            incr = 1
+        else:
+            initlen = {0:1,1:2,2:3,3:5}[numterms]
+            incr = {0:1,1:1,2:2,3:4}[numterms]
+
+        # Define parse action for this number of terms,
+        # to convert flat list of tokens into nested list
+        def pa(s,l,t):
+            t = t[0]
+            if len(t) > initlen:
+                ret = pp.ParseResults(t[:initlen])
+                i = initlen
+                while i < len(t):
+                    ret = pp.ParseResults([ret] + t[i:i+incr])
+                    i += incr
+                return pp.ParseResults([ret])
+        return pa
+
+    # -------------------------
+
     operator        = pp.Regex(">=|<=|!=|>|<|==").setName("operator")
     number          = pp.Regex(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
     identifier      = pp.Word(pp.alphas, pp.alphanums + "_")
     comparison_term = identifier | number
     condition       = pp.Group(comparison_term + operator + comparison_term)
 
+    # OR before AND precedence convention
+    # makeLRLike guarantees recursive binary tree structure
     expr            = pp.operatorPrecedence(condition,[
-                                ("AND", 2, pp.opAssoc.LEFT, ),
-                                ("OR",  2, pp.opAssoc.LEFT, ),
+                                ("OR",  2, pp.opAssoc.LEFT, makeLRlike(2)),
+                                ("AND", 2, pp.opAssoc.LEFT, makeLRlike(2)),
                                 ])
 
     output = expr.parseString(instring)
@@ -162,6 +193,7 @@ def print_exptree(root):
     right_eval = print_exptree(root.right)
 
     print(f'inter | L: {root.left}, D: {root.data}, R: {root.right}')
+
 
 def eval_boolean_exptree(root, X, ids):
     """
@@ -261,17 +293,17 @@ def eval_boolean_exptree(root, X, ids):
 
     # Middle binary operators g(x,y)
     if   operator == '<':
-        g = lambda x,y : x < float(y)
+        g = lambda x,y : x  < float(y)
     elif operator == '>':
-        g = lambda x,y : x > float(y)
-    elif operator == '!=':
-        g = lambda x,y : x != int(y)
-    elif operator == '==':
-        g = lambda x,y : x == int(y)
+        g = lambda x,y : x  > float(y)
     elif operator == '<=':
         g = lambda x,y : x <= float(y)
     elif operator == '>=':
         g = lambda x,y : x >= float(y)
+    elif operator == '!=':
+        g = lambda x,y : x != int(y)
+    elif operator == '==':
+        g = lambda x,y : x == int(y)
     else:
         raise Exception(__name__ + f'.eval_boolean_exptree: Unknown binary operator "{operator}"')
 
@@ -292,10 +324,30 @@ def eval_boolean_syntax(expr, X, ids):
     """
 
     treelist = parse_boolean_exptree(expr)
+    print(treelist)
+
     treeobj  = construct_exptree(treelist)
     output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
     return output
+
+
+def test_syntax_tree_parsing():
+    """
+    Unit tests
+    """
+    expr_A     = 'x < 0.2 AND y < 2 AND z >= 4'
+    expr_B     = 'x < 0.2 AND (y < 2 AND z >= 4)'
+    expr_C     = 'x < 0.2 AND y < 2 OR z >= 4'
+    
+    treelist_A = parse_boolean_exptree(expr_A)
+    treelist_B = parse_boolean_exptree(expr_B)
+    treelist_C = parse_boolean_exptree(expr_C)
+
+    assert(f'{treelist_A}' == "[[['x', '<', '0.2'], 'AND', ['y', '<', '2']], 'AND', ['z', '>=', '4']]")
+    assert(f'{treelist_B}' == "[['x', '<', '0.2'], 'AND', [['y', '<', '2'], 'AND', ['z', '>=', '4']]]")
+    assert(f'{treelist_C}' == "[['x', '<', '0.2'], 'AND', [['y', '<', '2'], 'OR', ['z', '>=', '4']]]")
+
 
 def test_syntax_tree_simple():
     """
