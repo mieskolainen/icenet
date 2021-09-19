@@ -90,9 +90,10 @@ def parse_boolean_exptree(instring):
         """
         parse action -maker
 
-        See: https://stackoverflow.com/questions/4571441/recursive-expressions-with-pyparsing/4589920#4589920
+        See: https://stackoverflow.com/questions/4571441/
+             recursive-expressions-with-pyparsing/4589920#4589920
         """
-
+        
         if numterms is None:
             # None operator can only by binary op
             initlen = 2
