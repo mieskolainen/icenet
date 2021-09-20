@@ -32,7 +32,7 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
             break
     print(__name__ + f'.compute_ND_reweights: Using the following variables {ids}')
 
-
+    
     ### Re-weighting variables
     RV = {}
     for var in ids.keys():
@@ -48,14 +48,14 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
                 ind = (RV[var] <= 0)
                 cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
 
-            RV[var] = np.log10(np.maximum(RV[var], 0.0) + EPS)
+            RV[var] = np.log10(np.maximum(RV[var], EPS))
 
             # Bins
             args['reweight_param'][f'bins_{var}'][0] = np.log10(args['reweight_param'][f'bins_{var}'][0] + EPS)
             args['reweight_param'][f'bins_{var}'][1] = np.log10(args['reweight_param'][f'bins_{var}'][1])
 
         elif mode == 'sqrt':
-            RV[var] = np.sqrt(RV[var])
+            RV[var] = np.sqrt(np.maximum(RV[var], EPS))
 
             # Bins
             args['reweight_param'][f'bins_{var}'][0] = np.sqrt(args['reweight_param'][f'bins_{var}'][0])

@@ -289,8 +289,8 @@ def impute_data(X, imputer=None, dim=[], values=[-999], labels=[], algorithm='it
     for j in dim:
         nan_ind = np.isnan(np.array(X[:,j], dtype=np.float))
         if np.sum(nan_ind) > 0:
-            print(__name__ + f'.impute_data: Column {j} Number of {nan_ind} NaN found [{labels[j]}]')
-
+            cprint(__name__ + f'.impute_data: Column {j} Number of {nan_ind} NaN found [{labels[j]}]', 'red')
+    
     # Loop over dimensions
     for j in dim:
 
@@ -317,8 +317,7 @@ def impute_data(X, imputer=None, dim=[], values=[-999], labels=[], algorithm='it
         inf_ind = np.isinf(np.array(X[:,j], dtype=np.float))
         X[inf_ind, j] = np.nan
         if np.sum(inf_ind) > 0:
-            print(__name__ + f'.impute_data: Column {j} Number of {np.sum(inf_ind)} Inf found [{labels[j]}]')
-    
+            cprint(__name__ + f'.impute_data: Column {j} Number of {np.sum(inf_ind)} Inf found [{labels[j]}]', 'red')
     
     if imputer == None:
 

@@ -3,6 +3,9 @@ import icenet.deep
 import icenet.optim
 import icenet.tools
 
+from datetime import datetime
+import socket
+
 __version__    = '0.03'
 __release__    = 'alpha'
 __date__       = '20/09/2021'
@@ -18,6 +21,8 @@ __asciiart__   = \
 """
 
 print(__asciiart__)
+print(f'{datetime.now()} | hostname: {socket.gethostname()}')
+print('')
 print(f'MIT license')
 print(f' version:    {__version__}')
 print(f' release:    {__release__}')

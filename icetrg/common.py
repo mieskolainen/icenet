@@ -169,6 +169,12 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     X    = X[rind, ...].squeeze() # Squeeze removes additional [] dimension
     Y    = Y[rind].squeeze()
     
+    # =================================================================
+    # Custom transform specific variables
+
+    #ind      = NEW_VARS.index('x_hlt_pms2')
+    #X[:,ind] = np.log10(np.maximum(np.asarray(X[:,ind], dtype=np.float), 1e-12))
+    
     return X, Y, NEW_VARS
 
 
