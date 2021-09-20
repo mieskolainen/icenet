@@ -56,6 +56,10 @@ def init_multiprocess(MAXEVENTS=None):
     args, cli = process.read_config(config_path='./configs/eid')
     features  = globals()[args['imputation_param']['var']]
     
+    ### SET random seed
+    print(__name__ + f'.init: Setting random seed {args["rngseed"]}')
+    np.random.seed(args['rngseed'])
+
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
     global ARGS
@@ -167,6 +171,10 @@ def init(MAXEVENTS=None):
     
     args, cli = process.read_config(config_path='./configs/eid')
     features  = globals()[args['imputation_param']['var']]
+    
+    ### SET random seed
+    print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
+    np.random.seed(args['rngseed'])
     
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)

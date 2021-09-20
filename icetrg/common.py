@@ -41,6 +41,10 @@ def init(MAXEVENTS=None):
     features  = globals()[args['imputation_param']['var']]
     
     
+    ### SET random seed
+    print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
+    np.random.seed(args['rngseed'])
+
     # --------------------------------------------------------------------
     ### SET GLOBALS (used only in this file)
     global ARGS
@@ -174,7 +178,7 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
 
     #ind      = NEW_VARS.index('x_hlt_pms2')
     #X[:,ind] = np.log10(np.maximum(np.asarray(X[:,ind], dtype=np.float), 1e-12))
-    
+
     return X, Y, NEW_VARS
 
 

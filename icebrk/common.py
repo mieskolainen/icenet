@@ -56,6 +56,10 @@ def init():
     print(args)
     print(torch.__version__)
     
+    ### SET random seed
+    print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
+    np.random.seed(args['rngseed'])
+
     ### Load data
     paths = []
     for i in cli.datasets:
