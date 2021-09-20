@@ -15,8 +15,8 @@ def cut_nocut(X, ids, isMC, xcorr_flow=False):
     return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
 
 def cut_fiducial(X, ids, isMC, xcorr_flow=False):
-    """ Function implements basic selections (cuts).
-
+    """ Basic fiducial (kinematic) selections.
+    
     Args:
         X    : Number of events N x Number of variables D
         ids  : Variable name array (D)
@@ -27,10 +27,10 @@ def cut_fiducial(X, ids, isMC, xcorr_flow=False):
     """
     
     if isMC:
-        cutlist = ['e1_l1_pt >= 6',
-                   'e2_l1_pt >= 6']
+        cutlist = ['e1_l1_pt >= 5',
+                   'e2_l1_pt >= 5']
     else:
-        cutlist = ['l1_doubleE6 == 1']
+        cutlist = ['l1_doubleE5 == 1']
 
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

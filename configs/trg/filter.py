@@ -12,10 +12,9 @@ from icenet.tools import stx
 
 
 def filter_nofilter(X, ids, isMC, xcorr_flow=False):
-    """
-    All pass
-    """
+    """ All pass """
     return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
+
 
 def filter_standard(X, ids, isMC, xcorr_flow=False):
     """ Basic filters.
@@ -37,8 +36,9 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
     elif isMC == 'mode_e2':
         cutlist = ['gen_e1_l1_dr  < 0.2',
                    'gen_e2_l1_dr  < 0.2',
+                   'gen_e1_hlt_dr < 0.2',
                    'gen_e2_hlt_dr < 0.2']
-
+    
     elif isMC == False:
         cutlist = ['isgjson == 1']
 

@@ -132,19 +132,19 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     rootfile      = f'{root_path}/{args["mcfile"]}'
 
     # e1
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree;1', isMC='mode_e1', **param)
+    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e1', **param)
 
     X_MC_e1 = X_MC[:, [VARS_MC.index(name.replace("x_", "e1_")) for name in NEW_VARS]]
     Y_MC_e1 = np.ones(X_MC_e1.shape[0])
 
 
     # e2
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree;2', isMC='mode_e2', **param)
+    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e2', **param)
 
     X_MC_e2 = X_MC[:, [VARS_MC.index(name.replace("x_", "e2_")) for name in NEW_VARS]]
     Y_MC_e2 = np.ones(X_MC_e2.shape[0])
-
-
+    
+    
     # =================================================================
     # *** DATA ***
 
@@ -153,8 +153,8 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
 
     X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
     Y_DATA = np.zeros(X_DATA.shape[0])
-
-
+    
+    
     # =================================================================
     # Finally combine
 

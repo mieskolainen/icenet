@@ -5,6 +5,7 @@
 *.hd5
 *.pkl
 *.zip
+*.txt
 dataset/
 tensorboard/
 data/
