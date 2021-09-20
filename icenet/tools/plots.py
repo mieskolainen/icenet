@@ -132,8 +132,8 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, labe
     # Evaluate total performance
     met = aux.Metric(y_true = y, y_soft = y_pred)
     fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
-    ax.set_title(f'{label}: Integrated AUC = {met.auc:.3f}', fontsize=10)
-
+    ax.set_title(f'{label}: AUC = {met.auc:.3f} (integrated)', fontsize=10)
+    
     return fig,ax,met
 
 
