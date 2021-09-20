@@ -206,7 +206,7 @@ xgb00_param:
   learning_rate: 0.15
   
   # Tree parameters
-  max_depth: 6
+  max_depth: 15
   min_child_weight: 1.0
   gamma: 0.0
   max_delta_step: 0
