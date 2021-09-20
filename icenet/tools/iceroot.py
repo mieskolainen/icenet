@@ -4,9 +4,11 @@
 
 import numpy as np
 import uproot
+from tqdm import tqdm
+from termcolor import colored, cprint
+
 from icenet.tools.icemap import icemap
 
-from tqdm import tqdm
 
 def load_tree_stats(rootfile, tree):
 
@@ -22,6 +24,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None):
     
     events = uproot.open(rootfile)[tree]
     
+    cprint(__name__ + f'.load_tree: Opening rootfile <{rootfile}> with key <{tree}>', 'yellow')
+
     ### All variables
     if ids is None:
         ids = events.keys() #[x for x in events.keys()]
@@ -38,5 +42,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None):
         X[:,j] = np.asarray(x)
 
     Y = icemap(x=X, ids=ids)
+
+    # Close the file
+    events.close()
 
     return Y

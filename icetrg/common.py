@@ -17,6 +17,7 @@ from icenet.tools import aux
 from icenet.tools import plots
 from icenet.tools import prints
 from icenet.tools import process
+from icenet.tools import iceroot
 
 
 # GLOBALS
@@ -96,11 +97,6 @@ def init(MAXEVENTS=None):
     return data, args, features
 
 
-def showmem():
-    cprint(__name__ + f""".load_root_file: Process RAM usage: {io.process_memory_use():0.2f} GB 
-        [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
-
-
 def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
@@ -124,226 +120,82 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
 
     # -----------------------------------------------
 
-    
+    param = {
+        "entry_start": entrystart,
+        "entry_stop":  entrystop,
+        "args": args
+    }
+
     # =================================================================
     # *** MC ***
 
-    X_MC, VARS_MC     = process_MC(root_path, ids, entrystart, entrystop, class_id, args)
+    rootfile      = f'{root_path}/{args["mcfile"]}'
 
-    ind = []
-    for name in NEW_VARS:
-        ind.append(VARS_MC.index(name))
+    # e1
+    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree;1', isMC='mode_e1', **param)
 
-    X_MC = X_MC[:, ind]
-    Y_MC = np.ones(X_MC.shape[0])
+    X_MC_e1 = X_MC[:, [VARS_MC.index(name.replace("x_", "e1_")) for name in NEW_VARS]]
+    Y_MC_e1 = np.ones(X_MC_e1.shape[0])
+
+
+    # e2
+    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree;2', isMC='mode_e2', **param)
+
+    X_MC_e2 = X_MC[:, [VARS_MC.index(name.replace("x_", "e2_")) for name in NEW_VARS]]
+    Y_MC_e2 = np.ones(X_MC_e2.shape[0])
 
 
     # =================================================================
     # *** DATA ***
 
-    X_DATA, VARS_DATA = process_DATA(root_path, ids, entrystart, entrystop, class_id, args)
+    rootfile          = f'{root_path}/{args["datafile"]}'
+    X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC=False, **param)
 
-    ind = []
-    for name in NEW_VARS:
-        new_name = name.replace("e1_", "") # Data tree with different variables
-        ind.append(VARS_DATA.index(new_name))
-    
-    X_DATA = X_DATA[:, ind]
+    X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
     Y_DATA = np.zeros(X_DATA.shape[0])
 
 
     # =================================================================
     # Finally combine
 
-    X = np.concatenate((X_MC, X_DATA), axis=0)
-    Y = np.concatenate((Y_MC, Y_DATA), axis=0)
+    X = np.concatenate((X_MC_e1, X_MC_e2, X_DATA), axis=0)
+    Y = np.concatenate((Y_MC_e1, Y_MC_e2, Y_DATA), axis=0)
 
 
+    # ** Crucial -- randomize order to avoid problems with other functions **
+    arr  = np.arange(X.shape[0])
+    rind = np.random.shuffle(arr)
+
+    X    = X[rind, ...].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rind].squeeze()
+    
     return X, Y, NEW_VARS
 
 
-def process_DATA(root_path, ids, entrystart, entrystop, class_id, args):
-
-    CUTFUNC    = globals()[args['cutfunc']]
-    FILTERFUNC = globals()[args['filterfunc']]
-    
-
-    rootfile = f'{root_path}/{args["datafile"]}'
-
-
-    ### From root trees
-    print('\n')
-    cprint( __name__ + f'.process_DATA: Loading with uproot from file "{rootfile}"', 'yellow')
-    cprint( __name__ + f'.process_DATA: entrystart = {entrystart}, entrystop = {entrystop}')
-    
-    file   = uproot.open(rootfile)
-    events = file["tree"]
-    
-    
-    ### All variables
-    if ids is None:
-        ids = events.keys() #[x for x in events.keys()]
-    print(ids)
-
-    print(events)
-    print(events.name)
-    print(events.title)
-    #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
-
-    
-    # Check length
-    X_test = events.arrays(ids[0], entry_start=entrystart, entry_stop=entrystop)
-    N      = len(X_test)
-    
-    # Now read the data
-    print(__name__ + '.process_DATA: Loading root file variables ...')
-
-    # --------------------------------------------------------------
-    # Important to take variables one-by-one (because one single np.assarray call takes too much RAM)
-
-    # Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(ids)), dtype=object) 
-
-    for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
-        X[:,j] = np.asarray(x)
-    # --------------------------------------------------------------
-    #Y = np.random.randint(2, size=N)
-    #Y = np.ones((N,1)) # Signal
-
-    print(__name__ + f'common: X.shape = {X.shape}')
-    showmem()
-
-    prints.printbar()
-
-    # ----------------------------------
-    # @@ MC filtering done here @@
-    cprint(__name__ + f'.process_DATA: Computing DATA <filterfunc> ...', 'yellow')
-    ind = FILTERFUNC(X=X, ids=ids, isMC=False, xcorr_flow=args['xcorr_flow'])
-
-    cprint(__name__ + f'.process_DATA: Prior DATA <filterfunc>: {len(X)} events', 'green')
-    cprint(__name__ + f'.process_DATA: After DATA <filterfunc>: {sum(ind)} events ', 'green')
-    prints.printbar()
-
-    X = X[ind]
-    
-    # ----------------------------------
-    # @@ DATA cuts done here @@
-
-    # @@ Observable cut selections done here @@
-    cprint(colored(__name__ + f'.process_DATA: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, ids=ids, isMC=False, xcorr_flow=args['xcorr_flow'])
-    # -----------------------------------------------------------------
-    
-    N_before = X.shape[0]
-
-    ### Select events
-    X = X[cind]
-    #Y = Y[cind]
-
-    N_after = X.shape[0]
-    cprint(__name__ + f".process_DATA: Prior <cutfunc> selections: {N_before} events ", 'green')
-    cprint(__name__ + f".process_DATA: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
-    print('')
-
-    showmem()
-    prints.printbar()
-
-    # ** REMEMBER TO CLOSE **
-    file.close()
-
-    return X, ids
-
-
-def process_MC(root_path, ids, entrystart, entrystop, class_id, args):
-
+def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
+    X   = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop)
+    ids = X.ids
+    X   = X.x
 
-    rootfile = f'{root_path}/{args["mcfile"]}'
+    # @@ Filtering done here @@
+    ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
     
-    ### From root trees
-    print('\n')
-    cprint( __name__ + f'.process_MC: Loading with uproot from file "{rootfile}"', 'yellow')
-    cprint( __name__ + f'.process_MC: entrystart = {entrystart}, entrystop = {entrystop}')
-    
-    file   = uproot.open(rootfile)
-    events = file["tree"]
-    
-    
-    ### All variables
-    if ids is None:
-        ids = events.keys() #[x for x in events.keys()]
-    print(ids)
-
-    print(events)
-    print(events.name)
-    print(events.title)
-    #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
-
-    
-    # Check length
-    X_test = events.arrays(ids[0], entry_start=entrystart, entry_stop=entrystop)
-    N      = len(X_test)
-    
-    # Now read the data
-    print(__name__ + '.process_MC: Loading root file variables ...')
-
-    # --------------------------------------------------------------
-    # Important to take variables one-by-one (because one single np.assarray call takes too much RAM)
-
-    # Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(ids)), dtype=object) 
-
-    for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
-        X[:,j] = np.asarray(x)
-    # --------------------------------------------------------------
-    #Y = np.random.randint(2, size=N)
-    #Y = np.ones((N,1)) # Signal
-
-    print(__name__ + f'common: X.shape = {X.shape}')
-    showmem()
-
+    X   = X[ind]
     prints.printbar()
 
-    # ----------------------------------
-    # @@ MC filtering done here @@
-    cprint(__name__ + f'.process_MC: Computing MC <filterfunc> ...', 'yellow')
-    ind = FILTERFUNC(X=X, ids=ids, isMC=True, xcorr_flow=args['xcorr_flow'])
-
-    cprint(__name__ + f'.process_MC: Prior MC <filterfunc>: {len(X)} events', 'green')
-    cprint(__name__ + f'.process_MC: After MC <filterfunc>: {sum(ind)} events ', 'green')
-    prints.printbar()
-
-    X = X[ind]
-    
-    # ----------------------------------
-    # @@ MC cuts done here @@
 
     # @@ Observable cut selections done here @@
-    cprint(colored(__name__ + f'.process_MC: Computing <cutfunc> ...'), 'yellow')
-    cind = CUTFUNC(X=X, ids=ids, isMC=True, xcorr_flow=args['xcorr_flow'])
-    # -----------------------------------------------------------------
-    
-    N_before = X.shape[0]
+    ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
 
-    ### Select events
-    X = X[cind]
-    #Y = Y[cind]
-
-    N_after = X.shape[0]
-    cprint(__name__ + f".process_MC: Prior <cutfunc> selections: {N_before} events ", 'green')
-    cprint(__name__ + f".process_MC: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
-    print('')
-
-    showmem()
+    X   = X[ind]
+    io.showmem()
     prints.printbar()
-
-    # ** REMEMBER TO CLOSE **
-    file.close()
 
     return X, ids
 

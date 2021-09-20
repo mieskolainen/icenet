@@ -49,11 +49,11 @@ def main() :
     ### Plot some kinematic variables
     targetdir = f'./figs/trg/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)
-    for k in ['e1_hlt_pt', 'e1_hlt_eta']:
+    for k in ['x_hlt_pt', 'x_hlt_eta']:
         plots.plotvar(x = data.trn.x[:, data.ids.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
             targetdir = targetdir, title = f"training re-weight reference_class: {args['reweight_param']['reference_class']}")
-
-
+    
+    
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
         print(__name__ + f': plotting basic histograms ...')

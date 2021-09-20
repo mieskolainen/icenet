@@ -22,20 +22,28 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
     
     Args:
     	X    : Number of vectors N x Number of variables D
-    	ids : Variable name array D
+    	ids  : Variable name array D
         isMC : MC or not
     
     Returns:
     	ind  : Passing indices
     """
-
-    if isMC:
+    
+    if   isMC == 'mode_e1':
         cutlist = ['gen_e1_l1_dr  < 0.2',
                    'gen_e2_l1_dr  < 0.2',
                    'gen_e1_hlt_dr < 0.2']
 
-    else:
+    elif isMC == 'mode_e2':
+        cutlist = ['gen_e1_l1_dr  < 0.2',
+                   'gen_e2_l1_dr  < 0.2',
+                   'gen_e2_hlt_dr < 0.2']
+
+    elif isMC == False:
         cutlist = ['isgjson == 1']
+
+    else:
+        raise Exception(__name__ + '.filter_standard: Uknown isMC mode')
 
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

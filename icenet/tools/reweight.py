@@ -5,6 +5,7 @@
 import numpy as np
 import numba
 import matplotlib.pyplot as plt
+from termcolor import colored, cprint
 
 from icenet.tools import aux
 
@@ -16,8 +17,7 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     Args:
         data   : training data object
         args   : arguments object
-        ids    : dimension names
-
+    
     Returns:
         weights: array of re-weights
     """
@@ -35,15 +35,20 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
 
     ### Re-weighting variables
     RV = {}
-    for varname in ids.keys():
-        RV[varname] = data.trn.x[:, data.ids.index(ids[varname])].astype(np.float)
+    for var in ids.keys():
+        RV[var] = data.trn.x[:, data.ids.index(ids[var])].astype(np.float)
 
     ### Pre-transform
     for var in ids.keys():
         mode = args['reweight_param'][f'transform_{var}']
 
         if   mode == 'log10':
-            RV[var] = np.log10(RV[var] + EPS)
+
+            if np.any(RV[var] <= 0):
+                ind = (RV[var] <= 0)
+                cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
+
+            RV[var] = np.log10(np.maximum(RV[var], 0.0) + EPS)
 
             # Bins
             args['reweight_param'][f'bins_{var}'][0] = np.log10(args['reweight_param'][f'bins_{var}'][0] + EPS)

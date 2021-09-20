@@ -5,7 +5,7 @@ import icenet.tools
 
 __version__  = '0.03'
 __release__  = 'alpha'
-__date__     = '18/09/2021'
+__date__     = '20/09/2021'
 __author__   = 'm.mieskolainen@imperial.ac.uk'
 __asciiart__ = \
 """

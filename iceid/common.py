@@ -493,10 +493,6 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
         entrystop = args['MAXEVENTS']
     # -----------------------------------------------
 
-    def showmem():
-        cprint(__name__ + f""".load_root_file: Process RAM usage: {io.process_memory_use():0.2f} GB 
-            [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
-    
     ### From root trees
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
@@ -504,7 +500,7 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
 
     file   = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
-
+    
     print(events)
     print(events.name)
     print(events.title)
@@ -522,9 +518,6 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     isMC   = bool(X_test[0]['is_mc'])
     N      = len(X_test)
     print(__name__ + f'.load_root_file: isMC: {isMC}')
-    
-    # Now read the data
-    print(__name__ + '.load_root_file: Loading root file variables ...')
 
     # --------------------------------------------------------------
     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
@@ -538,10 +531,8 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     # --------------------------------------------------------------
     Y = None
 
-
     print(__name__ + f'common: X.shape = {X.shape}')
-    showmem()
-
+    io.showmem()
     prints.printbar()
 
     # =================================================================
@@ -553,49 +544,33 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
         Y = TARFUNC(events, entrystart=entrystart, entrystop=entrystop, new=True)
         Y = np.asarray(Y).T
-
         print(__name__ + f'common: Y.shape = {Y.shape}')
 
         # For info
         labels1 = ['is_e', 'is_egamma']
         aux.count_targets(events=events, ids=labels1, entrystart=entrystart, entrystop=entrystop, new=True)
-        
         prints.printbar()
 
         # @@ MC filtering done here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
         indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-
-        cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
-        cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
+        cprint(__name__ + f'.load_root_file: <filterfunc> | before: {len(X)}, after: {sum(indmc)} events', 'green')
         prints.printbar()
-        
         
         X = X[indmc]
         Y = Y[indmc].squeeze() # Remove useless dimension
-    # =================================================================
     
-    # -----------------------------------------------------------------
+    # =================================================================
+
     # @@ Observable cut selections done here @@
     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
     cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-    # -----------------------------------------------------------------
-    
-    N_before = X.shape[0]
+    cprint(__name__ + f".load_root_file: <cutfunc> | before: {len(X)}, after: {np.sum(cind)} events \n", 'green')
 
-    ### Select events
     X = X[cind]
     if isMC: Y = Y[cind]
 
-    N_after = X.shape[0]
-    cprint(__name__ + f".load_root_file: Prior <cutfunc> selections: {N_before} events ", 'green')
-    cprint(__name__ + f".load_root_file: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
-    print('')
-
-    showmem()
+    io.showmem()
     prints.printbar()
-
-    # ** REMEMBER TO CLOSE **
     file.close()
 
     return X, Y, ids
