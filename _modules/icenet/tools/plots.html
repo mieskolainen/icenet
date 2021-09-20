@@ -155,6 +155,7 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">process</span>
 
 
 <div class="viewcode-block" id="plot_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_matrix</span><span class="p">(</span><span class="n">XY</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">grid_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -211,7 +212,7 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="binned_2D_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_2D_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_2D_AUC</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;var_pt&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;var_eta&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">}):</span>
+<div class="viewcode-block" id="binned_2D_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_2D_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_2D_AUC</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges_A</span><span class="p">,</span> <span class="n">edges_B</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate AUC per 2D-bin.</span>
 <span class="sd">    </span>
@@ -219,140 +220,115 @@
 <span class="sd">        func_predict:  Function handle of the classifier</span>
 <span class="sd">        X           :  Input data</span>
 <span class="sd">        y           :  Output (truth level target) data</span>
-<span class="sd">        X_kin       :  Kinematic (pt,eta) data</span>
+<span class="sd">        X_kin       :  Kinematic (A,B) data</span>
 <span class="sd">        VARS_kin    :  Kinematic variables (strings)</span>
-<span class="sd">        pt_edges    :  Edges of the pt-space cells</span>
-<span class="sd">        eta_edges   :  Edges of the eta-space cells</span>
+<span class="sd">        edges_A     :  Edges of the A-space cells</span>
+<span class="sd">        edges_B     :  Edges of the B-space cells</span>
 <span class="sd">        label       :  Label of the classifier (string)</span>
 <span class="sd">        ids         :  Variable identifiers</span>
-<span class="sd">        </span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        fig,ax      :  Figure handle and axis</span>
 <span class="sd">        met         :  Metrics object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">AUC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eta_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-
-
-    <span class="c1"># ** Compute predictions **</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># Evaluate one by one</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_AUC: one by one evaluation required&#39;</span><span class="p">)</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)):</span>
-            <span class="n">y_pred</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
+    <span class="n">AUC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">edges_A</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_B</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">compute_predictions</span><span class="p">(</span><span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_AUC: len(y_pred) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="s1"> != len(y) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_2D_AUC: len(y_pred) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="s1"> != len(y) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># Loop over bins</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eta_edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges_A</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges_B</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
-            <span class="n">pt_range</span>  <span class="o">=</span> <span class="p">[</span> <span class="n">pt_edges</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>  <span class="n">pt_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
-            <span class="n">eta_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">eta_edges</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">eta_edges</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">range_A</span> <span class="o">=</span> <span class="p">[</span><span class="n">edges_A</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">edges_A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">range_B</span> <span class="o">=</span> <span class="p">[</span><span class="n">edges_B</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">edges_B</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
 
             <span class="c1"># Indices</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="s1">&#39;var_pt&#39;</span><span class="p">])],</span>   <span class="n">pt_range</span><span class="p">),</span>
-                                 <span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="s1">&#39;var_eta&#39;</span><span class="p">])],</span> <span class="n">eta_range</span><span class="p">))</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span> <span class="n">range_A</span><span class="p">),</span>
+                                 <span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span> <span class="n">range_B</span><span class="p">))</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Evaluate classifier &lt;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&gt; ...&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*** pT = [</span><span class="si">{</span><span class="n">pt_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">pt_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">], eta = [</span><span class="si">{</span><span class="n">eta_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">eta_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">] ***&#39;</span><span class="p">)</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> = [</span><span class="si">{</span><span class="n">range_A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">range_A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">], </span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> = [</span><span class="si">{</span><span class="n">range_B</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">range_B</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">]&#39;</span>
             
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Do we have any events in this cell</span>
                 
                 <span class="c1"># Evaluate metric</span>
-                <span class="n">met</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_soft</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;AUC = </span><span class="si">{:.5f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
+                <span class="n">met</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_soft</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s1"> | AUC = </span><span class="si">{</span><span class="n">met</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">AUC</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">auc</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No events found in this (eta,pt) cell!&#39;</span><span class="p">)</span>
-    
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s1"> | No events found in this cell!&#39;</span><span class="p">)</span>
+
+
     <span class="c1"># Evaluate total performance</span>
-    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_soft</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">)</span>
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_auc_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">: AUC = </span><span class="si">{</span><span class="n">met</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> (integrated)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span><span class="p">,</span><span class="n">met</span></div>
+    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="c1"># Finally plot it</span>
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_AUC_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="o">=</span><span class="n">AUC</span><span class="p">,</span> <span class="n">edges_A</span><span class="o">=</span><span class="n">edges_A</span><span class="p">,</span> <span class="n">edges_B</span><span class="o">=</span><span class="n">edges_B</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">: AUC = </span><span class="si">{</span><span class="n">met</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> (integrated)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">met</span></div>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, label, ids={&#39;var_pt&#39;: &#39;trk_pt&#39;}):</span>
-<span class="sd">    </span>
-<span class="sd">    Evaluate AUC per 1D-bin.</span>
+<div class="viewcode-block" id="binned_1D_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_1D_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_1D_AUC</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate AUC &amp; ROC per 1D-bin.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        func_predict:  Function handle of the classifier</span>
 <span class="sd">        X           :  Input data</span>
 <span class="sd">        y           :  Output (truth level target) data</span>
-<span class="sd">        X_kin       :  Kinematic (pt,eta) data</span>
+<span class="sd">        X_kin       :  Kinematic (A,B) data</span>
 <span class="sd">        VARS_kin    :  Kinematic variables (strings)</span>
-<span class="sd">        pt_edges    :  Edges of the pt-space cells</span>
+<span class="sd">        edges       :  Edges of the space cells</span>
 <span class="sd">        label       :  Label of the classifier (string)</span>
-<span class="sd">        ids         :  Variable identifiers</span>
+<span class="sd">        ids         :  Variable identifier</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        fig,ax      :  Figure handle and axis</span>
 <span class="sd">        met         :  Metrics object</span>
-<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">    AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))</span>
+    <span class="n">AUC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">compute_predictions</span><span class="p">(</span><span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
 
-<span class="sd">    # ** Compute predictions **</span>
-<span class="sd">    if type(X) is list:  # Evaluate one by one</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_1D_AUC: len(y_pred) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span><span class="si">}</span><span class="s1"> != len(y) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<span class="sd">        print(__name__ + f&#39;.binned_AUC: one by one evaluation required&#39;)</span>
-<span class="sd">        y_pred = np.zeros(len(X))</span>
+    <span class="n">METS</span>   <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">LABELS</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="sd">        for k in range(len(y_pred)):</span>
-<span class="sd">            y_pred[k] = func_predict(X[k])</span>
-<span class="sd">    else:</span>
-<span class="sd">        y_pred = func_predict(X)</span>
+    <span class="c1"># Loop over bins</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
-<span class="sd">    if len(y_pred) != len(y):</span>
-<span class="sd">        raise Exception(__name__ + f&#39;.binned_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}&#39;)</span>
+            <span class="n">range_</span> <span class="o">=</span> <span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
 
-<span class="sd">    # Loop over bins</span>
-<span class="sd">    for i in range(len(pt_edges) - 1):</span>
-<span class="sd">        for j in range(len(eta_edges) - 1):</span>
+            <span class="c1"># Indices</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">pick_ind</span><span class="p">(</span><span class="n">X_kin</span><span class="p">[:,</span> <span class="n">VARS_kin</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ids</span><span class="p">)],</span> <span class="n">range_</span><span class="p">)</span>
+            
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1"> = [</span><span class="si">{</span><span class="n">range_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">5.3f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">range_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">5.3f</span><span class="si">}</span><span class="s1">]&#39;</span>
+            
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Do we have any events in this cell</span>
+                
+                <span class="c1"># Evaluate metric</span>
+                <span class="n">met</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_soft</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                <span class="n">AUC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">auc</span>
+                <span class="n">METS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s1"> | AUC = </span><span class="si">{</span><span class="n">AUC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">METS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s1"> | No events found in this cell!&#39;</span><span class="p">)</span>
 
-<span class="sd">            pt_range  = [ pt_edges[i],  pt_edges[i+1]]</span>
-<span class="sd">            eta_range = [eta_edges[j], eta_edges[j+1]]</span>
+            <span class="n">LABELS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1"> = [</span><span class="si">{</span><span class="n">range_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">range_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 
-<span class="sd">            # Indices</span>
-<span class="sd">            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids[&#39;var_pt&#39;])],   pt_range),</span>
-<span class="sd">                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids[&#39;var_eta&#39;])], eta_range))</span>
-
-<span class="sd">            print(f&#39;\nEvaluate classifier &lt;{label}&gt; ...&#39;)</span>
-<span class="sd">            print(f&#39;*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***&#39;)</span>
-<span class="sd">            </span>
-<span class="sd">            if np.sum(ind) &gt; 0: # Do we have any events in this cell</span>
-<span class="sd">                </span>
-<span class="sd">                # Evaluate metric</span>
-<span class="sd">                met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])</span>
-<span class="sd">                print(&#39;AUC = {:.5f}&#39;.format(met.auc))</span>
-<span class="sd">                AUC[i,j] = met.auc</span>
-
-<span class="sd">            else:</span>
-<span class="sd">                print(&#39;No events found in this (eta,pt) cell!&#39;)</span>
-<span class="sd">    </span>
-<span class="sd">    # Evaluate total performance</span>
-<span class="sd">    met = aux.Metric(y_true = y, y_soft = y_pred)</span>
-<span class="sd">    fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)</span>
-<span class="sd">    ax.set_title(&#39;{}: Integrated AUC = {:.3f}&#39;.format(label, met.auc))</span>
-
-<span class="sd">    return fig,ax,met</span>
-<span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">METS</span><span class="p">,</span> <span class="n">LABELS</span></div>
 
 
-<div class="viewcode-block" id="density_MVA_output"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_MVA_output">[docs]</a><span class="k">def</span> <span class="nf">density_MVA_output</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span>
-    <span class="n">ids</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;var_pt&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;var_eta&#39;</span><span class="p">:</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">},</span> <span class="n">hist_edges</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
+<div class="viewcode-block" id="density_MVA_output"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_MVA_output">[docs]</a><span class="k">def</span> <span class="nf">density_MVA_output</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate MVA output density per class.</span>
 <span class="sd">    </span>
@@ -360,26 +336,15 @@
 <span class="sd">        func_predict:  Function handle of the classifier</span>
 <span class="sd">        X           :  Input data</span>
 <span class="sd">        y           :  Output (truth level target) data</span>
-<span class="sd">        X_kin       :  Kinematic (pt,eta) data</span>
-<span class="sd">        VARS_kin    :  Kinematic variables (strings)</span>
 <span class="sd">        label       :  Label of the classifier (string)</span>
-<span class="sd">        ids         :  Variable identifiers</span>
-
+<span class="sd">        hist_edges  :  Histogram edges list (or number of bins, as an alternative)</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        fig,ax      :  Figure handle and axis</span>
 <span class="sd">        met         :  Metrics object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># ** Compute predictions **</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># Evaluate one by one</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.binned_AUC: one by one evaluation of X required&#39;</span><span class="p">)</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)):</span>
-            <span class="n">y_pred</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">y_pred</span>    <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">compute_predictions</span><span class="p">(</span><span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
 
     <span class="c1"># --------------------------------------------------------------------</span>
 
@@ -428,34 +393,28 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="plot_auc_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_auc_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_auc_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">pt_edges</span><span class="p">,</span> <span class="n">eta_edges</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_AUC_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_AUC_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_AUC_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">edges_A</span><span class="p">,</span> <span class="n">edges_B</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Plot AUC matrix.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        AUC:       auc matrix</span>
-<span class="sd">        pt_edges:  transverse momentum histogram edges</span>
-<span class="sd">        eta_edges: pseudorapidity histogram edges</span>
+<span class="sd">        AUC:      AUC-ROC matrix</span>
+<span class="sd">        edges_A:  histogram edges of variable A</span>
+<span class="sd">        edges_B:  histogram edges of variable B</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        fig:       figure handle</span>
-<span class="sd">        ax:        figure axis</span>
+<span class="sd">        fig:      figure handle</span>
+<span class="sd">        ax:       figure axis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
-    <span class="n">xlabels</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eta_edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">xlabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eta_edges</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">eta_edges</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">ylabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pt_edges</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">pt_edges</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">xlabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">edges_A</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">edges_A</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges_A</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">edges_B</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">edges_B</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges_B</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">origin</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">eta$&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$p_t$ (GeV)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">AUC</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">origin</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;AUC x 100&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
     
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">annotate_heatmap</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">AUC</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span><span class="p">,</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">annotate_heatmap</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">AUC</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span><span class="p">,</span>
         <span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
