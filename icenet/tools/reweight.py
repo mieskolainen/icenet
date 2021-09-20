@@ -90,7 +90,7 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
         else:
             raise Except(__name__ + ': Unknown re-weight binning mode')
     
-    print(__name__ + f".compute_ND_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
+    print(__name__ + f".compute_ND_reweights: reference class: <{args['reweight_param']['reference_class']}>")
 
     # Compute event-by-event weights
     if args['reweight_param']['reference_class'] != -1:

@@ -52,8 +52,8 @@ def main() :
     os.makedirs(targetdir, exist_ok = True)
     for k in ['trk_pt', 'trk_eta', 'trk_phi', 'trk_p']:
         plots.plotvar(x = data.trn.x[:, data.ids.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
-            targetdir = targetdir, title = f"training re-weight reference_class: {args['reweight_param']['reference_class']}")
-
+            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+    
     # --------------------------------------------------------------------
     ### Parse data into graphs
     
