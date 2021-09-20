@@ -9,7 +9,7 @@ MAXEVENTS: 1000000               # Maximum total number of events (per root file
 # Give all models some unique identifier and label
 active_models:
   
-  - xgb10
+  - xgb30
   
   - cut0
   - cut1
@@ -191,22 +191,22 @@ cut6_param:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb10_param:
+xgb30_param:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB_10'
+  label:   'XGB_30'
   raytune:  null
 
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 10     # number of epochs (equal to the number of trees!)
+  num_boost_round: 30     # number of epochs (equal to the number of trees!)
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
   
   # booster parameters
   learning_rate: 0.15
   
   # Tree parameters
-  max_depth: 10
+  max_depth: 15
   min_child_weight: 1.0
   gamma: 0.0
   max_delta_step: 0
