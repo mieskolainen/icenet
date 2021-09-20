@@ -33,18 +33,10 @@ from glob import glob
 from braceexpand import braceexpand
 
 
-# -----------------------------
-# ** GLOBALS **
-
-# ROC
+# ******** GLOBALS *********
 roc_mstats    = []
 roc_labels    = []
-
-mva_mstats    = []
-mva_mstats    = []
-
-targetdir     = None
-# -----------------------------
+# **************************
 
 
 def read_config(config_path='./configs/xyz'):
@@ -118,43 +110,6 @@ def read_config(config_path='./configs/xyz'):
     print("")
 
     return args, cli
-
-
-def save_roc(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids):
-    """
-    ROC curve plotter wrapper function.
-    """
-    fig, ax, met = plots.binned_2D_AUC(func_predict = func_predict, X = X, y = y, X_kin = X_kin, \
-        VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label, ids=ids)
-    
-    # Full ROC curve
-    global roc_mstats
-    global roc_labels
-    roc_mstats.append(met)
-    roc_labels.append(label)
-
-    global targetdir
-    filename = targetdir + '/' + label + '_AUC_2D.pdf'
-    plt.savefig(filename, bbox_inches='tight')
-
-
-def save_mva(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids, hist_edges):
-    """
-    MVA classifier output density plotter wrapper function.
-    """
-    fig, ax = plots.density_MVA_output(func_predict = func_predict, X = X, y = y, X_kin = X_kin, \
-        VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label, ids=ids, hist_edges=hist_edges)
-    """
-    # Full ROC curve
-    global mva_mstats
-    global mva_labels
-    mva_mstats.append(met)
-    mva_labels.append(label)
-    """
-
-    global targetdir
-    filename = targetdir + '/' + label + '_MVA_output.pdf'
-    plt.savefig(filename, bbox_inches='tight')
 
 
 def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_weights=None, args=None) :
@@ -273,10 +228,24 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     """
     Evaluate ML/AI models.
     """
+
+    # -----------------------------
+    # ** GLOBALS **
+
+    # ROC
+    global roc_mstats
+    global roc_labels
+
+    mva_mstats    = []
+    mva_mstats    = []
+
+    targetdir     = None
+    # -----------------------------
+
+
     outputname = args['rootname']
 
-    global targetdir
-    targetdir = f'./figs/{outputname}/{args["config"]}/eval/'
+    targetdir  = f'./figs/{outputname}/{args["config"]}/eval/'
     os.makedirs(targetdir, exist_ok = True)
     
     args["modeldir"] = f'./checkpoint/{outputname}/{args["config"]}/'
@@ -299,10 +268,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     VARS_kin = data_kin.ids
     # --------------------------------------------------------------------
 
-    print(__name__ + ": Input with {} events and {} dimensions ".format(X.shape[0], X.shape[1]))
-
-    pt_edges  = args['plot_param']['pt_edges']
-    eta_edges = args['plot_param']['eta_edges']     
+    print(__name__ + ": Input with {} events and {} dimensions ".format(X.shape[0], X.shape[1]))  
 
     try:
         ### Tensor variable normalization
@@ -335,16 +301,54 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
 
-    param_set = {
-        'y' : y,
-        'X_kin':     X_kin,
-        'VARS_kin':  VARS_kin,
-        'pt_edges':  pt_edges,
-        'eta_edges': eta_edges,
-        'ids':       args['plot_param']
-    }
 
-    # Loop over active models
+    # ====================================================================
+
+    def plot_AUC_wrap(func_predict, X, label):
+        """ AUC-plot wrapper function.
+        """
+        for i in range(100):
+            try:
+                var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
+                edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
+            except:
+                return # No more plots 
+
+            if   len(var) == 1:
+                met_1D, label_1D = plots.binned_1D_AUC(func_predict=func_predict, X=X, y=y, X_kin=X_kin, \
+                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
+
+                plots.ROC_plot(met_1D, label_1D, \
+                    title = f'<{label}> | training re-weight reference: class ' + str(args['reweight_param']['reference_class']),
+                    filename=targetdir + '/' + label + f'__ROC_binned__{i}')
+
+            elif len(var) == 2:
+
+                fig, ax, met = plots.binned_2D_AUC(func_predict=func_predict, X=X, y=y, X_kin=X_kin, \
+                    VARS_kin=VARS_kin, edges_A=edges[0], edges_B=edges[1], label=label, ids=var)
+
+                plt.savefig(targetdir + '/' + label + f'__ROC_binned__{i}.pdf', bbox_inches='tight')
+
+                roc_mstats.append(met)
+                roc_labels.append(label)
+
+            else:
+                print(var)
+                raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
+
+    # ====================================================================
+
+    def plot_MVA_wrap(func_predict, X, label, hist_edges):
+        """ MVA classifier output density plotter wrapper function.
+        """
+        fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, label=label, hist_edges=hist_edges)
+        plt.savefig( targetdir + '/' + label + '_MVA_output.pdf', bbox_inches='tight')
+    
+    # ====================================================================
+    #
+    # **  Loop over active models **
+    #
+
     for i in range(len(args['active_models'])):
 
         ID = args['active_models'][i]
@@ -353,33 +357,33 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X_graph, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_graph, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+            plot_AUC_wrap(func_predict=func_predict, X=X_graph, label=param['label'])
+            plot_MVA_wrap(func_predict=func_predict, X=X_graph, label=param['label'], hist_edges=np.linspace(0,1,80))
 
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X_graph, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_graph, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+            plot_AUC_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_graph, label = param['label'], hist_edges=np.linspace(0,1,80))
 
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X, label = param['label'], **param_set, hist_edges=80)
+            plot_AUC_wrap(func_predict = func_predict, X = X, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges=80)
 
         elif param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+            plot_AUC_wrap(func_predict = func_predict, X = X, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges=np.linspace(0,1,80))
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch(args=args, param=param)
 
             X_ = {}
-            X_['x'] = X_2D_ptr # image tensors
-            X_['u'] = X_ptr    # global features
+            X_tensor['x'] = X_2D_ptr # image tensors
+            X_tensor['u'] = X_ptr    # global features
             
-            save_roc(func_predict = func_predict, X = X_, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+            plot_AUC_wrap(func_predict = func_predict, X = X_tensor, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_tensor, label = param['label'], hist_edges=np.linspace(0,1,80))
 
         #elif param['predict'] == 'xtx':
         # ...   
@@ -387,30 +391,30 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         
         elif param['predict'] == 'torch_generic':
             func_predict = predict.pred_torch(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+            plot_AUC_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges=np.linspace(0,1,80))
         
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-            save_roc(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set, hist_edges=80)
+            plot_AUC_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges=80)
         
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set, hist_edges=80)
+            plot_AUC_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges=80)
         
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
-            save_roc(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set)
-            save_mva(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set, hist_edges=80)
+            plot_AUC_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges=80)
 
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
     ### Plot all ROC curves
     plots.ROC_plot(roc_mstats, roc_labels, \
-        title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
+        title = 'training re-weight reference: class ' + str(args['reweight_param']['reference_class']),
         filename = targetdir + 'ROC')
 
     ### Plot all MVA outputs
@@ -421,3 +425,20 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     """
 
     return
+
+
+def compute_predictions(func_predict, X):
+    """
+    Compute predictions
+    """
+    if type(X) is list:  # Evaluate one by one
+
+        print(__name__ + f'.compute_predictions: one by one evaluation required')
+        y_pred = np.zeros(len(X))
+
+        for k in range(len(y_pred)):
+            y_pred[k] = func_predict(X[k])
+    else:
+        y_pred = func_predict(X)
+
+    return y_pred

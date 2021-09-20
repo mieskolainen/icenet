@@ -96,13 +96,17 @@ outlier_param:
 plot_param:
   basic_on:    false
   contours_on: false
+
+  ## Binned ROC plots can be 1D or 2D;
+  # use a running number __0, __1, ... as an identifier for new plots
+  plot_ROC_binned__0:
+    var:   ['e1_hlt_pt']
+    edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
   
-  var_pt:  'e1_hlt_pt'
-  var_eta: 'e1_hlt_eta'
-  
-  # (eta,pt)-binned plots
-  pt_edges:  [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]
-  eta_edges: [-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5]
+  plot_ROC_binned__1:
+    var:   ['e1_hlt_eta', 'e1_hlt_pt']
+    edges: [[-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5],
+            [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
 
 
 # ========================================================================

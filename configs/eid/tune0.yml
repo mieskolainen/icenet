@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 100000               # Maximum total number of events (per root file) to process
+MAXEVENTS: 1000000               # Maximum total number of events (per root file) to process
 
 
 # ---------------------------------------------------------
@@ -157,17 +157,22 @@ outlier_param:
   qmax: 99.9         # in [0,100]
 
 
+
 ## Pure plotting setup
 plot_param:
   basic_on:    false
   contours_on: false
-  
-  var_pt:  'trk_pt'
-  var_eta: 'trk_eta'
 
-  # (eta,pt)-binned plots
-  pt_edges:  [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
-  eta_edges: [-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5]
+  ## Binned ROC plots can be 1D or 2D;
+  # use a running number __0, __1, ... as an identifier for new plots
+  plot_ROC_binned__0:
+    var:   ['trk_pt']
+    edges: [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
+
+  plot_ROC_binned__1:
+    var:   ['trk_eta', 'trk_pt']
+    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
+            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
 
 
 # ========================================================================

@@ -10,6 +10,7 @@ import xgboost
 from tqdm import tqdm
 
 from icenet.tools import aux
+from icenet.tools import process
 
 
 def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3), grid_on=False):
@@ -66,7 +67,7 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}):
+def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, ids=['trk_pt', 'trk_eta']):
     """
     Evaluate AUC per 2D-bin.
     
@@ -74,140 +75,115 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, labe
         func_predict:  Function handle of the classifier
         X           :  Input data
         y           :  Output (truth level target) data
-        X_kin       :  Kinematic (pt,eta) data
+        X_kin       :  Kinematic (A,B) data
         VARS_kin    :  Kinematic variables (strings)
-        pt_edges    :  Edges of the pt-space cells
-        eta_edges   :  Edges of the eta-space cells
+        edges_A     :  Edges of the A-space cells
+        edges_B     :  Edges of the B-space cells
         label       :  Label of the classifier (string)
         ids         :  Variable identifiers
-        
+    
     Returns:
         fig,ax      :  Figure handle and axis
         met         :  Metrics object
     """
 
-    AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
-
-
-    # ** Compute predictions **
-    if type(X) is list:  # Evaluate one by one
-
-        print(__name__ + f'.binned_AUC: one by one evaluation required')
-        y_pred = np.zeros(len(X))
-
-        for k in range(len(y_pred)):
-            y_pred[k] = func_predict(X[k])
-    else:
-        y_pred = func_predict(X)
-
+    AUC = np.zeros((len(edges_A)-1, len(edges_B)-1))
+    y_pred = process.compute_predictions(func_predict=func_predict, X=X)
 
     if len(y_pred) != len(y):
-        raise Exception(__name__ + f'.binned_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
-
+        raise Exception(__name__ + f'.binned_2D_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
 
     # Loop over bins
-    for i in range(len(pt_edges) - 1):
-        for j in range(len(eta_edges) - 1):
+    for i in range(len(edges_A)-1):
+        for j in range(len(edges_B)-1):
 
-            pt_range  = [ pt_edges[i],  pt_edges[i+1]]
-            eta_range = [eta_edges[j], eta_edges[j+1]]
+            range_A = [edges_A[i], edges_A[i+1]]
+            range_B = [edges_B[j], edges_B[j+1]]
 
             # Indices
-            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_pt'])],   pt_range),
-                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_eta'])], eta_range))
+            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids[0])], range_A),
+                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids[1])], range_B))
 
-            print(f'\nEvaluate classifier <{label}> ...')
-            print(f'*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
+            string = f'{ids[0]} = [{range_A[0]:.3f},{range_A[1]:.3f}], {ids[1]} = [{range_B[0]:.3f},{range_B[1]:.3f}]'
             
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
                 # Evaluate metric
-                met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])
-                print('AUC = {:.5f}'.format(met.auc))
+                met      = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                print(f'{string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
             else:
-                print('No events found in this (eta,pt) cell!')
-    
+                print(f'{string} | No events found in this cell!')
+
+
     # Evaluate total performance
-    met = aux.Metric(y_true = y, y_soft = y_pred)
-    fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
-    ax.set_title(f'{label}: AUC = {met.auc:.3f} (integrated)', fontsize=10)
-    
-    return fig,ax,met
+    met = aux.Metric(y_true=y, y_soft=y_pred)
+
+    # Finally plot it
+    fig,ax = plot_AUC_matrix(AUC=AUC, edges_A=edges_A, edges_B=edges_B)
+    ax.set_title(f'{label}: AUC = {met.auc:.3f} (integrated)', fontsize=9)
+    ax.set_xlabel(f"{ids[0]}")
+    ax.set_ylabel(f"{ids[1]}")
+
+    return fig, ax, met
 
 
-"""
-def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, label, ids={'var_pt': 'trk_pt'}):
-    
-    Evaluate AUC per 1D-bin.
+def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt'):
+    """
+    Evaluate AUC & ROC per 1D-bin.
     
     Args:
         func_predict:  Function handle of the classifier
         X           :  Input data
         y           :  Output (truth level target) data
-        X_kin       :  Kinematic (pt,eta) data
+        X_kin       :  Kinematic (A,B) data
         VARS_kin    :  Kinematic variables (strings)
-        pt_edges    :  Edges of the pt-space cells
+        edges       :  Edges of the space cells
         label       :  Label of the classifier (string)
-        ids         :  Variable identifiers
+        ids         :  Variable identifier
     
     Returns:
         fig,ax      :  Figure handle and axis
         met         :  Metrics object
-    
+    """
 
-    AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
-
-    # ** Compute predictions **
-    if type(X) is list:  # Evaluate one by one
-
-        print(__name__ + f'.binned_AUC: one by one evaluation required')
-        y_pred = np.zeros(len(X))
-
-        for k in range(len(y_pred)):
-            y_pred[k] = func_predict(X[k])
-    else:
-        y_pred = func_predict(X)
+    AUC = np.zeros((len(edges)-1, 1))
+    y_pred = process.compute_predictions(func_predict=func_predict, X=X)
 
     if len(y_pred) != len(y):
-        raise Exception(__name__ + f'.binned_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
+        raise Exception(__name__ + f'.binned_1D_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
+
+    METS   = []
+    LABELS = []
 
     # Loop over bins
-    for i in range(len(pt_edges) - 1):
-        for j in range(len(eta_edges) - 1):
+    for i in range(len(edges)-1):
 
-            pt_range  = [ pt_edges[i],  pt_edges[i+1]]
-            eta_range = [eta_edges[j], eta_edges[j+1]]
+            range_ = [edges[i], edges[i+1]]
 
             # Indices
-            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_pt'])],   pt_range),
-                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_eta'])], eta_range))
-
-            print(f'\nEvaluate classifier <{label}> ...')
-            print(f'*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
+            ind = aux.pick_ind(X_kin[:, VARS_kin.index(ids)], range_)
+            
+            string = f'{ids} = [{range_[0]:5.3f},{range_[1]:5.3f}]'
             
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
                 # Evaluate metric
-                met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])
-                print('AUC = {:.5f}'.format(met.auc))
-                AUC[i,j] = met.auc
-
+                met    = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                AUC[i] = met.auc
+                METS.append(met)
+                print(f'{string} | AUC = {AUC[i]}')
             else:
-                print('No events found in this (eta,pt) cell!')
-    
-    # Evaluate total performance
-    met = aux.Metric(y_true = y, y_soft = y_pred)
-    fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
-    ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
+                METS.append(None)
+                print(f'{string} | No events found in this cell!')
 
-    return fig,ax,met
-"""
+            LABELS.append(f'{ids} = [{range_[0]:.1f},{range_[1]:.1f}]')
+
+    return METS, LABELS
 
 
-def density_MVA_output(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label,
-    ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}, hist_edges=80):
+def density_MVA_output(func_predict, X, y, label, hist_edges=80):
     """
     Evaluate MVA output density per class.
     
@@ -215,26 +191,15 @@ def density_MVA_output(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges,
         func_predict:  Function handle of the classifier
         X           :  Input data
         y           :  Output (truth level target) data
-        X_kin       :  Kinematic (pt,eta) data
-        VARS_kin    :  Kinematic variables (strings)
         label       :  Label of the classifier (string)
-        ids         :  Variable identifiers
-
+        hist_edges  :  Histogram edges list (or number of bins, as an alternative)
+    
     Returns:
         fig,ax      :  Figure handle and axis
         met         :  Metrics object
     """
 
-    # ** Compute predictions **
-    if type(X) is list:  # Evaluate one by one
-
-        print(__name__ + f'.binned_AUC: one by one evaluation of X required')
-        y_pred = np.zeros(len(X))
-
-        for k in range(len(y_pred)):
-            y_pred[k] = func_predict(X[k])
-    else:
-        y_pred = func_predict(X)
+    y_pred    = process.compute_predictions(func_predict=func_predict, X=X)
 
     # --------------------------------------------------------------------
 
@@ -283,34 +248,28 @@ def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 
     return ax
 
 
-def plot_auc_matrix(AUC, pt_edges, eta_edges):
+def plot_AUC_matrix(AUC, edges_A, edges_B):
     """ Plot AUC matrix.
 
     Args:
-        AUC:       auc matrix
-        pt_edges:  transverse momentum histogram edges
-        eta_edges: pseudorapidity histogram edges
+        AUC:      AUC-ROC matrix
+        edges_A:  histogram edges of variable A
+        edges_B:  histogram edges of variable B
     
     Returns:
-        fig:       figure handle
-        ax:        figure axis
+        fig:      figure handle
+        ax:       figure axis
     """
 
     fig, ax = plt.subplots()
 
-    xlabels = []
-    for k in range(len(eta_edges) - 1):
-        xlabels.append('[{},{}]'.format(eta_edges[k], eta_edges[k+1]))
-    ylabels = []
-    for k in range(len(pt_edges) - 1):
-        ylabels.append('[{},{}]'.format(pt_edges[k], pt_edges[k+1]))
+    xlabels = [f'[{edges_A[k]},{edges_A[k+1]}]' for k in range(len(edges_A) - 1)]
+    ylabels = [f'[{edges_B[k]},{edges_B[k+1]}]' for k in range(len(edges_B) - 1)]
 
-    ax.imshow(AUC, origin = 'lower')
-    ax.set_xlabel('$\\eta$')
-    ax.set_ylabel('$p_t$ (GeV)')
+    ax.imshow(AUC.transpose(), origin = 'lower')
     ax.set_title('AUC x 100', fontsize=10)
     
-    ax = annotate_heatmap(X = AUC * 100, ax = ax, xlabels = xlabels,
+    ax = annotate_heatmap(X = AUC.transpose() * 100, ax = ax, xlabels = xlabels,
         ylabels = ylabels, decimals = 0, x_rot = 0, y_rot = 0, color = "w")
 
     return fig, ax
