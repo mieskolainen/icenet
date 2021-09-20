@@ -201,6 +201,10 @@
     <span class="n">args</span><span class="p">,</span> <span class="n">cli</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/eid&#39;</span><span class="p">)</span>
     <span class="n">features</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
     
+    <span class="c1">### SET random seed</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### SET GLOBALS (used only in this file)</span>
     <span class="k">global</span> <span class="n">ARGS</span>
@@ -312,6 +316,10 @@
     
     <span class="n">args</span><span class="p">,</span> <span class="n">cli</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/eid&#39;</span><span class="p">)</span>
     <span class="n">features</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
+    
+    <span class="c1">### SET random seed</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### SET GLOBALS (used only in this file)</span>

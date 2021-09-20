@@ -201,6 +201,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
     
+    <span class="c1">### SET random seed</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+
     <span class="c1">### Load data</span>
     <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
