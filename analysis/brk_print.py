@@ -4,7 +4,8 @@
 # m.mieskolainen@imperial.ac.uk
 
 # icenet system paths
-import _icepaths_
+import sys
+sys.path.append(".")
 
 import h5py
 import uproot

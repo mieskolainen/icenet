@@ -4,7 +4,8 @@
 
 
 # icenet system paths
-import _icepaths_
+import sys
+sys.path.append(".")
 
 import numpy as np
 
@@ -59,8 +60,7 @@ def main() :
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
 
     ## Evaluate classifiers
-    process.evaluate_models(outputname='eid', \
-        data=data, data_tensor=data_tensor, data_kin=data_kin, data_graph=data_graph, args=args)
+    process.evaluate_models(data=data, data_tensor=data_tensor, data_kin=data_kin, data_graph=data_graph, args=args)
     
     print(__name__ + ' [Done]')
 

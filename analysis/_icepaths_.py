@@ -3,7 +3,6 @@
 import sys
 import os
 
-
 paths = ['',
 		 '/iceplot/',
 		 '/icenet/',

@@ -3,7 +3,8 @@
 # m.mieskolainen@imperial.ac.uk, 2021
 
 # icenet system paths
-import _icepaths_
+import sys
+sys.path.append(".")
 
 # icenet
 from icenet.tools import process
@@ -24,7 +25,7 @@ def main() :
     data, data_kin = common.splitfactor(data=data, args=args)
     
     # Evaluate classifiers
-    process.evaluate_models(outputname='trg', data=data, data_kin=data_kin, args=args)
+    process.evaluate_models(data=data, data_kin=data_kin, args=args)
     
     print(__name__ + ' [Done]')
 

@@ -4,7 +4,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 """
-
 # icenet system paths
 import _icepaths_
 

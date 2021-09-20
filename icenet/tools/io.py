@@ -261,11 +261,11 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     return trn, val, tst
 
 
-def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iterative', fill_value=0, knn_k=6):
+def impute_data(X, imputer=None, dim=[], values=[-999], labels=[], algorithm='iterative', fill_value=0, knn_k=6):
     """ Data imputation (treatment of missing values, Nan and Inf).
     
     Args:
-        X         : Input data matrix [# vectors x # dimensions]
+        X         : Input data matrix [N vectors x D dimensions]
         imputer   : Pre-trained imputator, default None
         dim       : Array of active dimensions to impute
         values    : List of special integer values indicating the need for imputation
@@ -276,7 +276,7 @@ def impute_data(X, imputer=None, dim=[], values=[-1], labels=[], algorithm='iter
     Returns:
         X       : Imputed output data
     """
-
+    
     if dim == []:
         dim = np.arange(X.shape[1])
 

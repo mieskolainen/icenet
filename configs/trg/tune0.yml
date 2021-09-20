@@ -81,7 +81,8 @@ imputation_param:
   algorithm: 'constant'      # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
   fill_value: 0              # For constant imputation
   knn_k: 8                   # Number of nearest neighbours considered
-  values: [-999, -10, -1]    # Special values which indicate the need for imputation
+  values: []                 # Special values which indicate the need for imputation
+                             # if set empty [], only inf/nan are imputed
 
 
 ## Outlier protection in the training phase
@@ -112,7 +113,7 @@ cutset0_param:
   train:   'cutset'
   predict: 'cutset'
 
-  label:   'fixed-cutset'
+  label:   'cutset'
   raytune:  null
   
   # Using yaml multiline syntax with > character
@@ -132,6 +133,7 @@ cut0_param:
   label:    'hlt_pms2 x (-1)'
   variable: 'e1_hlt_pms2'
   sign: -1
+  transform: null
 
 cut1_param:
   train:    'cut'
@@ -139,6 +141,7 @@ cut1_param:
   label:    'hlt_invEInvP x (-1)'
   variable: 'e1_hlt_invEInvP'
   sign: -1
+  transform: 'tanh'
 
 cut2_param:
   train:    'cut'
@@ -146,6 +149,7 @@ cut2_param:
   label:    'hlt_trkDEtaSeed x (-1)'
   variable: 'e1_hlt_trkDEtaSeed'
   sign: -1
+  transform: 'tanh'
 
 cut3_param:
   train:    'cut'
@@ -153,6 +157,7 @@ cut3_param:
   label:    'hlt_trkDPhi x (-1)'
   variable: 'e1_hlt_trkDPhi'
   sign: -1
+  transform: 'tanh'
 
 cut4_param:
   train:    'cut'
@@ -160,6 +165,7 @@ cut4_param:
   label:    'hlt_trkChi2 x (-1)'
   variable: 'e1_hlt_trkChi2'
   sign: -1
+  transform: 'tanh'
 
 cut5_param:
   train:    'cut'
@@ -167,6 +173,7 @@ cut5_param:
   label:    'hlt_trkValidHits'
   variable: 'e1_hlt_trkValidHits'
   sign: 1
+  transform: null
 
 cut6_param:
   train:    'cut'
@@ -174,6 +181,7 @@ cut6_param:
   label:    'hlt_trkNrLayerIT'
   variable: 'e1_hlt_trkNrLayerIT'
   sign: 1
+  transform: null
 
 
 # XGBoost

@@ -56,7 +56,11 @@ def pred_cut(args, param):
     index = args['features'].index(param['variable'])
 
     def func_predict(x):
-        return float(param['sign']) * x[...,index]
+        # Squeeze the values via tanh() from R -> [-1,1]
+        if param['transform'] == 'tanh':
+            return np.tanh(param['sign'] * x[...,index])
+        else:
+            return param['sign'] * x[...,index]
     
     return func_predict
 
@@ -75,7 +79,7 @@ def pred_cutset(args, param):
     def func_predict(x):
         # Cut based two-class classifier
         y = stx.eval_boolean_syntax(expr=cutstring, X=x, ids=ids)
-        return y
+        return y.astype(float)
     
     return func_predict
 
@@ -254,5 +258,6 @@ def pred_flr(args, param):
     b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
-    
+        
     return func_predict
+

@@ -35,9 +35,15 @@ from braceexpand import braceexpand
 
 # -----------------------------
 # ** GLOBALS **
-roc_mstats = []
-roc_labels = []
-targetdir  = None
+
+# ROC
+roc_mstats    = []
+roc_labels    = []
+
+mva_mstats    = []
+mva_mstats    = []
+
+targetdir     = None
 # -----------------------------
 
 
@@ -52,7 +58,7 @@ def read_config(config_path='./configs/xyz'):
     parser.add_argument("--datasets", type = str, default="*")
 
     cli = parser.parse_args()
-    
+
     # -------------------------------------------------------------------
     ## Read configuration
     args = {}
@@ -118,16 +124,36 @@ def save_roc(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, id
     """
     ROC curve plotter wrapper function.
     """
-    fig, ax, met = plots.binned_AUC(func_predict = func_predict, X = X, y = y, X_kin = X_kin, \
+    fig, ax, met = plots.binned_2D_AUC(func_predict = func_predict, X = X, y = y, X_kin = X_kin, \
         VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label, ids=ids)
     
+    # Full ROC curve
     global roc_mstats
     global roc_labels
     roc_mstats.append(met)
     roc_labels.append(label)
 
     global targetdir
-    filename = targetdir + '/' + label + '_AUC.pdf'
+    filename = targetdir + '/' + label + '_AUC_2D.pdf'
+    plt.savefig(filename, bbox_inches='tight')
+
+
+def save_mva(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids, hist_edges):
+    """
+    MVA classifier output density plotter wrapper function.
+    """
+    fig, ax = plots.density_MVA_output(func_predict = func_predict, X = X, y = y, X_kin = X_kin, \
+        VARS_kin = VARS_kin, pt_edges = pt_edges, eta_edges = eta_edges, label = label, ids=ids, hist_edges=hist_edges)
+    """
+    # Full ROC curve
+    global mva_mstats
+    global mva_labels
+    mva_mstats.append(met)
+    mva_labels.append(label)
+    """
+
+    global targetdir
+    filename = targetdir + '/' + label + '_MVA_output.pdf'
     plt.savefig(filename, bbox_inches='tight')
 
 
@@ -206,7 +232,6 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
             else:
                 train.train_graph(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)
 
-
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
         
@@ -244,10 +269,11 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
     return
 
 
-def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=None, data_graph=None, args=None):
+def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None, args=None):
     """
     Evaluate ML/AI models.
     """
+    outputname = args['rootname']
 
     global targetdir
     targetdir = f'./figs/{outputname}/{args["config"]}/eval/'
@@ -255,7 +281,6 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
     
     args["modeldir"] = f'./checkpoint/{outputname}/{args["config"]}/'
     os.makedirs(args["modeldir"], exist_ok = True)
-
 
     # --------------------------------------------------------------------
     ### Collect data
@@ -274,14 +299,12 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
     VARS_kin = data_kin.ids
     # --------------------------------------------------------------------
 
-
     print(__name__ + ": Input with {} events and {} dimensions ".format(X.shape[0], X.shape[1]))
 
     pt_edges  = args['plot_param']['pt_edges']
     eta_edges = args['plot_param']['eta_edges']     
 
     try:
-
         ### Tensor variable normalization
         if data_tensor is not None and (args['varnorm_tensor'] == 'zscore'):
 
@@ -311,7 +334,6 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
     if data_tensor is not None:
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
-    
 
     param_set = {
         'y' : y,
@@ -321,7 +343,6 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
         'eta_edges': eta_edges,
         'ids':       args['plot_param']
     }
-
 
     # Loop over active models
     for i in range(len(args['active_models'])):
@@ -333,18 +354,22 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
             save_roc(func_predict = func_predict, X = X_graph, label = param['label'], **param_set)
-        
+            save_mva(func_predict = func_predict, X = X_graph, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
             save_roc(func_predict = func_predict, X = X_graph, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X_graph, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
 
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
             save_roc(func_predict = func_predict, X = X, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X, label = param['label'], **param_set, hist_edges=80)
 
         elif param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
             save_roc(func_predict = func_predict, X = X, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch(args=args, param=param)
@@ -354,6 +379,7 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
             X_['u'] = X_ptr    # global features
             
             save_roc(func_predict = func_predict, X = X_, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X_, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
 
         #elif param['predict'] == 'xtx':
         # ...   
@@ -362,18 +388,22 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
         elif param['predict'] == 'torch_generic':
             func_predict = predict.pred_torch(args=args, param=param)
             save_roc(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set)
-
+            save_mva(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set, hist_edges=np.linspace(0,1,80))
+        
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
             save_roc(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X_ptr, label = param['label'], **param_set, hist_edges=80)
         
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
             save_roc(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set, hist_edges=80)
         
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             save_roc(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set)
+            save_mva(func_predict = func_predict, X = X_RAW, label = param['label'], **param_set, hist_edges=80)
 
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
@@ -382,5 +412,12 @@ def evaluate_models(outputname='temp', data=None, data_tensor=None, data_kin=Non
     plots.ROC_plot(roc_mstats, roc_labels, \
         title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
         filename = targetdir + 'ROC')
+
+    ### Plot all MVA outputs
+    """
+    plots.MVA_plot(mva_mstats, mva_labels, \
+        title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
+        filename = targetdir + 'MVA')    
+    """
 
     return

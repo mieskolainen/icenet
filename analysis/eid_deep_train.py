@@ -5,7 +5,8 @@
 
 
 # icenet system paths
-import _icepaths_
+import sys
+sys.path.append(".")
 
 import uproot
 import math

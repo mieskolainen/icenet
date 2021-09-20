@@ -5,11 +5,12 @@
 # (otherwise no image tensor input is processed)
 #
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 # icenet system paths
-import _icepaths_
+import sys
+sys.path.append(".")
 
 import math
 import numpy as np

@@ -47,7 +47,7 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     ax[0].plot(losses)
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('train loss')
-    ax[0].set_title(label)
+    ax[0].set_title(label, fontsize=10)
 
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
@@ -66,9 +66,9 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}):
+def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}):
     """
-    Evaluate AUC per (pt,eta) bin.
+    Evaluate AUC per 2D-bin.
     
     Args:
         func_predict:  Function handle of the classifier
@@ -132,9 +132,132 @@ def binned_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label, 
     # Evaluate total performance
     met = aux.Metric(y_true = y, y_soft = y_pred)
     fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
+    ax.set_title(f'{label}: Integrated AUC = {met.auc:.3f}', fontsize=10)
+
+    return fig,ax,met
+
+
+"""
+def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, pt_edges, label, ids={'var_pt': 'trk_pt'}):
+    
+    Evaluate AUC per 1D-bin.
+    
+    Args:
+        func_predict:  Function handle of the classifier
+        X           :  Input data
+        y           :  Output (truth level target) data
+        X_kin       :  Kinematic (pt,eta) data
+        VARS_kin    :  Kinematic variables (strings)
+        pt_edges    :  Edges of the pt-space cells
+        label       :  Label of the classifier (string)
+        ids         :  Variable identifiers
+    
+    Returns:
+        fig,ax      :  Figure handle and axis
+        met         :  Metrics object
+    
+
+    AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
+
+    # ** Compute predictions **
+    if type(X) is list:  # Evaluate one by one
+
+        print(__name__ + f'.binned_AUC: one by one evaluation required')
+        y_pred = np.zeros(len(X))
+
+        for k in range(len(y_pred)):
+            y_pred[k] = func_predict(X[k])
+    else:
+        y_pred = func_predict(X)
+
+    if len(y_pred) != len(y):
+        raise Exception(__name__ + f'.binned_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
+
+    # Loop over bins
+    for i in range(len(pt_edges) - 1):
+        for j in range(len(eta_edges) - 1):
+
+            pt_range  = [ pt_edges[i],  pt_edges[i+1]]
+            eta_range = [eta_edges[j], eta_edges[j+1]]
+
+            # Indices
+            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_pt'])],   pt_range),
+                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids['var_eta'])], eta_range))
+
+            print(f'\nEvaluate classifier <{label}> ...')
+            print(f'*** pT = [{pt_range[0]:.3f},{pt_range[1]:.3f}], eta = [{eta_range[0]:.3f},{eta_range[1]:.3f}] ***')
+            
+            if np.sum(ind) > 0: # Do we have any events in this cell
+                
+                # Evaluate metric
+                met      = aux.Metric(y_true = y[ind], y_soft = y_pred[ind])
+                print('AUC = {:.5f}'.format(met.auc))
+                AUC[i,j] = met.auc
+
+            else:
+                print('No events found in this (eta,pt) cell!')
+    
+    # Evaluate total performance
+    met = aux.Metric(y_true = y, y_soft = y_pred)
+    fig,ax = plot_auc_matrix(AUC, pt_edges, eta_edges)
     ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
 
     return fig,ax,met
+"""
+
+
+def density_MVA_output(func_predict, X, y, X_kin, VARS_kin, pt_edges, eta_edges, label,
+    ids={'var_pt': 'trk_pt', 'var_eta': 'trk_eta'}, hist_edges=80):
+    """
+    Evaluate MVA output density per class.
+    
+    Args:
+        func_predict:  Function handle of the classifier
+        X           :  Input data
+        y           :  Output (truth level target) data
+        X_kin       :  Kinematic (pt,eta) data
+        VARS_kin    :  Kinematic variables (strings)
+        label       :  Label of the classifier (string)
+        ids         :  Variable identifiers
+
+    Returns:
+        fig,ax      :  Figure handle and axis
+        met         :  Metrics object
+    """
+
+    # ** Compute predictions **
+    if type(X) is list:  # Evaluate one by one
+
+        print(__name__ + f'.binned_AUC: one by one evaluation of X required')
+        y_pred = np.zeros(len(X))
+
+        for k in range(len(y_pred)):
+            y_pred[k] = func_predict(X[k])
+    else:
+        y_pred = func_predict(X)
+
+    # --------------------------------------------------------------------
+
+    # Number of classes
+    C         = int(np.max(y) - np.min(y) + 1)
+
+    classlegs = [f'class {k}, $N={np.sum(y == k)}$' for k in range(C)]
+    fig,ax    = plt.subplots()
+
+    # Over classes
+    for k in range(C):
+        ind = (y == k)
+        hI, bins, patches = plt.hist(y_pred[ind], hist_edges,
+            density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
+    
+    plt.legend(classlegs)
+    plt.xlabel('MVA output $f(\\mathbf{{x}})$')
+    plt.ylabel('density')
+    plt.title(label, fontsize=10)
+    
+    ax.set_yscale('log')
+    
+    return fig, ax
 
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
@@ -144,8 +267,8 @@ def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 
     ax.set_xticks(np.arange(0, len(xlabels), 1));
     ax.set_yticks(np.arange(0, len(ylabels), 1));
 
-    ax.set_xticklabels(labels = xlabels, rotation = x_rot, fontsize = 'xx-small')
-    ax.set_yticklabels(labels = ylabels, rotation = y_rot, fontsize = 'xx-small')
+    ax.set_xticklabels(labels=xlabels, rotation=x_rot, fontsize='xx-small')
+    ax.set_yticklabels(labels=ylabels, rotation=y_rot, fontsize='xx-small')
 
     # Loop over data dimensions and create text annotations.
     for i in range(len(ylabels)):
@@ -185,7 +308,7 @@ def plot_auc_matrix(AUC, pt_edges, eta_edges):
     ax.imshow(AUC, origin = 'lower')
     ax.set_xlabel('$\\eta$')
     ax.set_ylabel('$p_t$ (GeV)')
-    ax.set_title('AUC x 100')
+    ax.set_title('AUC x 100', fontsize=10)
     
     ax = annotate_heatmap(X = AUC * 100, ax = ax, xlabels = xlabels,
         ylabels = ylabels, decimals = 0, x_rot = 0, y_rot = 0, color = "w")
@@ -236,8 +359,8 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
 
-    ax1.set_title(title)
-    ax1.legend(['background','signal', 'background (w)','signal (w)'])
+    ax1.set_title(title, fontsize=10)
+    ax1.legend(['class 0','class 1', 'class 0 (w)','class 1 (w)'])
     ax2.set_yscale('log')
     plt.tight_layout()
 
@@ -256,7 +379,7 @@ def plot_correlations(X, netvars, colorbar = False):
     ax.imshow(C)
     ax = annotate_heatmap(X = C, ax = ax, xlabels = netvars,
         ylabels = netvars, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
-    ax.set_title('linear correlation $\\in$ [-100,100]')
+    ax.set_title('linear correlation $\\in$ [-100,100]', fontsize=10)
     
     if colorbar:
         cb = plt.colorbar()
@@ -303,7 +426,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
         plt.legend(fontsize=legend_fontsize)
         ax.set_xlabel('False Positive (background) rate $\\alpha$')
         ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
-        ax.set_title(title)
+        ax.set_title(title, fontsize=10)
 
         if k == 0:
             plt.ylim(0.0, 1.0)
@@ -350,7 +473,7 @@ def plothist1d(X, y, labels) :
         plt.legend(classlegs)
         plt.xlabel('x')
         plt.ylabel('density')
-        plt.title(labels[j])
+        plt.title(labels[j], fontsize=10)
 
         plt.gca().set_yscale('log')
 
