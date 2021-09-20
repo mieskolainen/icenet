@@ -1923,12 +1923,12 @@ and values the memory used by the GPU.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.impute_data">
-<span class="sig-name descname"><span class="pre">impute_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iterative'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knn_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#impute_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.impute_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">impute_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-</span> <span class="pre">999]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iterative'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knn_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#impute_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.impute_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data imputation (treatment of missing values, Nan and Inf).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> – Input data matrix [# vectors x # dimensions]</p></li>
+<li><p><strong>X</strong> – Input data matrix [N vectors x D dimensions]</p></li>
 <li><p><strong>imputer</strong> – Pre-trained imputator, default None</p></li>
 <li><p><strong>dim</strong> – Array of active dimensions to impute</p></li>
 <li><p><strong>values</strong> – List of special integer values indicating the need for imputation</p></li>
@@ -1991,9 +1991,9 @@ and values the memory used by the GPU.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.plots.binned_AUC">
-<span class="sig-name descname"><span class="pre">binned_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'var_eta':</span> <span class="pre">'trk_eta',</span> <span class="pre">'var_pt':</span> <span class="pre">'trk_pt'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_AUC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate AUC per (pt,eta) bin.</p>
+<dt class="sig sig-object py" id="icenet.tools.plots.binned_2D_AUC">
+<span class="sig-name descname"><span class="pre">binned_2D_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'var_eta':</span> <span class="pre">'trk_eta',</span> <span class="pre">'var_pt':</span> <span class="pre">'trk_pt'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_2D_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_2D_AUC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate AUC per 2D-bin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2004,6 +2004,32 @@ and values the memory used by the GPU.</p>
 <li><p><strong>VARS_kin</strong> – Kinematic variables (strings)</p></li>
 <li><p><strong>pt_edges</strong> – Edges of the pt-space cells</p></li>
 <li><p><strong>eta_edges</strong> – Edges of the eta-space cells</p></li>
+<li><p><strong>label</strong> – Label of the classifier (string)</p></li>
+<li><p><strong>ids</strong> – Variable identifiers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Figure handle and axis
+met         :  Metrics object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>fig,ax</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.plots.density_MVA_output">
+<span class="sig-name descname"><span class="pre">density_MVA_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'var_eta':</span> <span class="pre">'trk_eta',</span> <span class="pre">'var_pt':</span> <span class="pre">'trk_pt'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_MVA_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_MVA_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate MVA output density per class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
+<li><p><strong>X</strong> – Input data</p></li>
+<li><p><strong>y</strong> – Output (truth level target) data</p></li>
+<li><p><strong>X_kin</strong> – Kinematic (pt,eta) data</p></li>
+<li><p><strong>VARS_kin</strong> – Kinematic variables (strings)</p></li>
 <li><p><strong>label</strong> – Label of the classifier (string)</p></li>
 <li><p><strong>ids</strong> – Variable identifiers</p></li>
 </ul>
