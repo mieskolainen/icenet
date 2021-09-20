@@ -104,7 +104,7 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
             ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids[0])], range_A),
                                  aux.pick_ind(X_kin[:, VARS_kin.index(ids[1])], range_B))
 
-            string = f'{ids[0]} = [{range_A[0]:.3f},{range_A[1]:.3f}], {ids[1]} = [{range_B[0]:.3f},{range_B[1]:.3f}]'
+            string = f'{ids[0]} = [{range_A[0]:.3f},{range_A[1]:.3f}), {ids[1]} = [{range_B[0]:.3f},{range_B[1]:.3f})'
             
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
@@ -166,7 +166,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt
             ind = aux.pick_ind(X_kin[:, VARS_kin.index(ids)], range_)
             
             string = f'{ids} = [{range_[0]:5.3f},{range_[1]:5.3f}]'
-            
+
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
                 # Evaluate metric
@@ -178,7 +178,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt
                 METS.append(None)
                 print(f'{string} | No events found in this cell!')
 
-            LABELS.append(f'{ids} = [{range_[0]:.1f},{range_[1]:.1f}]')
+            LABELS.append(f'{ids} = [{range_[0]:.1f},{range_[1]:.1f})')
 
     return METS, LABELS
 
@@ -215,7 +215,7 @@ def density_MVA_output(func_predict, X, y, label, hist_edges=80):
         hI, bins, patches = plt.hist(y_pred[ind], hist_edges,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
     
-    plt.legend(classlegs)
+    plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
     plt.title(label, fontsize=10)
@@ -263,8 +263,8 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
 
     fig, ax = plt.subplots()
 
-    xlabels = [f'[{edges_A[k]},{edges_A[k+1]}]' for k in range(len(edges_A) - 1)]
-    ylabels = [f'[{edges_B[k]},{edges_B[k+1]}]' for k in range(len(edges_B) - 1)]
+    xlabels = [f'[{edges_A[k]},{edges_A[k+1]})' for k in range(len(edges_A) - 1)]
+    ylabels = [f'[{edges_B[k]},{edges_B[k+1]})' for k in range(len(edges_B) - 1)]
 
     ax.imshow(AUC.transpose(), origin = 'lower')
     ax.set_title('AUC x 100', fontsize=10)

@@ -341,9 +341,9 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     def plot_MVA_wrap(func_predict, X, label, hist_edges):
         """ MVA classifier output density plotter wrapper function.
         """
-        fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, label=label, hist_edges=hist_edges)
+        fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, label=f'<{label}>', hist_edges=hist_edges)
         plt.savefig( targetdir + '/' + label + '_MVA_output.pdf', bbox_inches='tight')
-    
+
     # ====================================================================
     #
     # **  Loop over active models **

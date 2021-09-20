@@ -404,7 +404,7 @@ def create_model_filename(path, label, epoch, filetype):
 
 
 def pick_ind(x, minmax):
-    """ Return indices between minmax[0] and minmax[1].
+    """ Return indices between minmax[0] <= x < minmax[1], i.e. [a,b)
     
     Args:
         x :      Input vector
@@ -412,7 +412,7 @@ def pick_ind(x, minmax):
     Returns:
         indices
     """
-    return (x >= minmax[0]) & (x <= minmax[1])
+    return (minmax[0] <= x) & (x < minmax[1])
 
 
 def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
