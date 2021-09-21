@@ -1,7 +1,6 @@
 # Basic selection cuts, use only variables available in real data.
 #
-# Mikael Mieskolainen, 2021
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
 import numba

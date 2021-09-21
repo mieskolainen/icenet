@@ -2,8 +2,7 @@
 #
 # Note! Real observable cuts are defined in cuts.py, not here.
 #
-# Mikael Mieskolainen, 2021
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
 import numba

@@ -2,8 +2,7 @@
 #
 # Note! Physics observable (fiducial / kinematic) cuts are defined in cuts.py, not here.
 #
-# Mikael Mieskolainen, 2021
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2021
 
 import numpy as np
 import numba
@@ -27,7 +26,7 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
     Returns:
     	ind  : Passing indices
     """
-    
+
     if   isMC == 'mode_e1':
         cutlist = ['gen_e1_l1_dr  < 0.2',
                    'gen_e2_l1_dr  < 0.2',
@@ -38,7 +37,7 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
                    'gen_e2_l1_dr  < 0.2',
                    'gen_e1_hlt_dr < 0.2',
                    'gen_e2_hlt_dr < 0.2']
-    
+
     elif isMC == False:
         cutlist = ['isgjson == 1']
 
