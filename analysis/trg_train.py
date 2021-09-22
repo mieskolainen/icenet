@@ -43,8 +43,8 @@ def main() :
     #prints.print_variables(X=data.trn.x, ids=data.ids)
     
     ### Compute reweighting weights
-    trn_weights = reweight.compute_ND_reweights(data=data, args=args)
-
+    trn_weights = reweight.compute_ND_reweights(data=data, args=args['reweight_param'])
+    
 
     ### Plot some kinematic variables
     targetdir = f'./figs/trg/{args["config"]}/reweight/1D_kinematic/'

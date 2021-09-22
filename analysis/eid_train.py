@@ -36,7 +36,7 @@ from iceid import graphio
 # Main function
 #
 def main() :
-
+    
     ### Get input
     data, args, features = common.init()
     
@@ -44,7 +44,7 @@ def main() :
     #prints.print_variables(X=data.trn.x, ids=data.ids)
 
     ### Compute reweighting weights
-    trn_weights = reweight.compute_ND_reweights(data=data, args=args)
+    trn_weights = reweight.compute_ND_reweights(data=data, args=args['reweight_param'])
     
     
     ### Plot some kinematic variables

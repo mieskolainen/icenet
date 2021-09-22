@@ -26,12 +26,12 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     ids = {}
     for var in ['A', 'B']: # Currently only 2 variables, A, B, supported
         try:
-            varname  = args['reweight_param']['var_' + var]
+            varname  = args['var_' + var]
             ids[var] = varname
         except:
             break
     print(__name__ + f'.compute_ND_reweights: Using the following variables {ids}')
-
+    
     
     ### Re-weighting variables
     RV = {}
@@ -40,7 +40,7 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
 
     ### Pre-transform
     for var in ids.keys():
-        mode = args['reweight_param'][f'transform_{var}']
+        mode = args[f'transform_{var}']
 
         if   mode == 'log10':
 
@@ -51,22 +51,22 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
             RV[var] = np.log10(np.maximum(RV[var], EPS))
 
             # Bins
-            args['reweight_param'][f'bins_{var}'][0] = np.log10(args['reweight_param'][f'bins_{var}'][0] + EPS)
-            args['reweight_param'][f'bins_{var}'][1] = np.log10(args['reweight_param'][f'bins_{var}'][1])
+            args[f'bins_{var}'][0] = np.log10(args[f'bins_{var}'][0] + EPS)
+            args[f'bins_{var}'][1] = np.log10(args[f'bins_{var}'][1])
 
         elif mode == 'sqrt':
             RV[var] = np.sqrt(np.maximum(RV[var], EPS))
 
             # Bins
-            args['reweight_param'][f'bins_{var}'][0] = np.sqrt(args['reweight_param'][f'bins_{var}'][0])
-            args['reweight_param'][f'bins_{var}'][1] = np.sqrt(args['reweight_param'][f'bins_{var}'][1])
+            args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0])
+            args[f'bins_{var}'][1] = np.sqrt(args[f'bins_{var}'][1])
 
         elif mode == 'square':
             RV[var] = RV[var]**2
 
             # Bins
-            args['reweight_param'][f'bins_{var}'][0] = (args['reweight_param'][f'bins_{var}'][0])**2
-            args['reweight_param'][f'bins_{var}'][1] = (args['reweight_param'][f'bins_{var}'][1])**2
+            args[f'bins_{var}'][0] = (args[f'bins_{var}'][0])**2
+            args[f'bins_{var}'][1] = (args[f'bins_{var}'][1])**2
 
         elif mode == None:
             True
@@ -76,31 +76,31 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     # Binning setup
     binedges = {}
     for var in ids.keys():
-        if   args['reweight_param'][f'binmode_{var}'] == 'linear':
+        if   args[f'binmode_{var}'] == 'linear':
             binedges[var] = np.linspace(
-                                 args['reweight_param'][f'bins_{var}'][0],
-                                 args['reweight_param'][f'bins_{var}'][1],
-                                 args['reweight_param'][f'bins_{var}'][2])
+                                 args[f'bins_{var}'][0],
+                                 args[f'bins_{var}'][1],
+                                 args[f'bins_{var}'][2])
 
-        elif args['reweight_param'][f'binmode_{var}'] == 'log':
+        elif args[f'binmode_{var}'] == 'log':
             binedges[var] = np.logspace(
-                                 np.log10(np.max([args['reweight_param'][f'bins_{var}'][0], EPS])),
-                                 np.log10(args['reweight_param'][f'bins_{var}'][1]),
-                                 args['reweight_param'][f'bins_{var}'][2], base=10)
+                                 np.log10(np.max([args[f'bins_{var}'][0], EPS])),
+                                 np.log10(args[f'bins_{var}'][1]),
+                                 args[f'bins_{var}'][2], base=10)
         else:
             raise Except(__name__ + ': Unknown re-weight binning mode')
     
-    print(__name__ + f".compute_ND_reweights: reference class: <{args['reweight_param']['reference_class']}>")
+    print(__name__ + f".compute_ND_reweights: reference class: <{args['reference_class']}>")
 
     # Compute event-by-event weights
-    if args['reweight_param']['reference_class'] != -1:
+    if args['differential_reweight']:
         
         rwparam = {
             'y':               data.trn.y,
             'N_class':         N_class,
-            'equal_frac':      args['reweight_param']['equal_frac'],
-            'reference_class': args['reweight_param']['reference_class'],
-            'max_reg':         args['reweight_param']['max_reg']
+            'equal_frac':      args['equal_frac'],
+            'reference_class': args['reference_class'],
+            'max_reg':         args['max_reg']
         }
 
         if len(ids) == 2:
@@ -133,8 +133,15 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
         weights_doublet = np.zeros((data.trn.x.shape[0], N_class))
         for c in range(N_class):    
             weights_doublet[data.trn.y == c, c] = 1
+
+        # Apply class balance equalizing weight
+        if (args['equal_frac'] == True):
+            cprint(__name__ + f'.Compute_ND_reweights: Computing only equal class balance weights (no differential re-weighting).', 'green')
+            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=0, y=data.trn.y)
+        
         trn_weights = np.sum(weights_doublet, axis=1)
-    
+
+
     # Compute the sum of weights per class for the output print
     frac = np.zeros(N_class)
     sums = np.zeros(N_class)
