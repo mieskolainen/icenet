@@ -73,17 +73,17 @@ reweight_param:
 
   equal_frac: true             # Equalize integrated class fractions
 
-  bins_A:  [0.0, 50.0, 200]   # Make sure the bounds cover the phase space
-  binmode_A:  'linear'        # 'log10' or 'linear' binning
+  bins_A:  [0.0, 50.0, 200]    # Make sure the bounds cover the phase space
+  binmode_A:  'linear'         # 'log10' or 'linear' binning
   
-  bins_B: [-3.1, 3.1, 100]   #
+  bins_B: [-3.1, 3.1, 100]     #
   binmode_B: 'linear'
   
   # ! Variable, and binning min/max boundaries are both transformed !
-  transform_A: 'log10'        # 'log10', 'sqrt', 'square', 'null'
+  transform_A: 'log10'         # 'log10', 'sqrt', 'square', null
   transform_B: null
 
-  max_reg: 1000.0               # Maximum weight cut-off regularization
+  max_reg: 1000.0              # Maximum weight cut-off regularization
 
 
 # Imputation

@@ -80,7 +80,7 @@ reweight_param:
   binmode_B: 'linear'
   
   # ! Variable, and binning min/max boundaries are both transformed !
-  transform_A: 'log10'        # 'log10', 'sqrt', 'square', 'null'
+  transform_A: 'log10'        # 'log10', 'sqrt', 'square', null
   transform_B: null
 
   max_reg: 1000.0               # Maximum weight cut-off regularization

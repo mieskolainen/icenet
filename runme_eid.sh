@@ -1,7 +1,7 @@
 #!/bin/sh
-#
+# 
 # Execute training and evaluation for the electron ID
-#
+# 
 # Run with: source runme.sh
 
 CONFIG="tune0"

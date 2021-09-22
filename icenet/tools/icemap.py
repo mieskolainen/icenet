@@ -41,14 +41,22 @@ class icemap:
         """ Advanced indexing """
 
         if key in self.ids:        # direct access
+            """
+            Return numpy object
+            """
             return self.x[..., self.ids.index(key)]
 
         elif isinstance(key, str): # might be a cut string, try that
-            
+            """
+            Return icemap object
+            """            
             ind = stx.eval_boolean_syntax(expr=key, X=self.x, ids=self.ids)
-            return self.x[ind, ...]
+            return icemap(self.x[ind, ...], self.ids)
 
         else:                      # [:,] numpy type indexing
+            """
+            Return numpy object
+            """
             return self.x[key]
 
 

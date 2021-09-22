@@ -62,7 +62,7 @@ def init(MAXEVENTS=None):
 
     # Background (0) and signal (1)
     class_id = [0,1]
-    data     = io.DATASET(func_loader=load_root_file_new, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+    data     = io.DATASET(func_loader=load_root_file, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
 
     # @@ Imputation @@
@@ -101,7 +101,7 @@ def init(MAXEVENTS=None):
     return data, args, features
 
 
-def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
+def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
@@ -110,9 +110,9 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     
     Returns:
         X,Y       : input, output matrices
-        ids      : variable names
+        ids       : variable names
     """
-
+    
     # -----------------------------------------------
     # ** GLOBALS **
 
@@ -174,10 +174,10 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     Y    = Y[rind].squeeze()
     
     # =================================================================
-    # Custom transform specific variables
+    # Custom treat specific variables
 
-    #ind      = NEW_VARS.index('x_hlt_pms2')
-    #X[:,ind] = np.log10(np.maximum(np.asarray(X[:,ind], dtype=np.float), 1e-12))
+    ind      = NEW_VARS.index('x_hlt_pms2')
+    X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
 
     return X, Y, NEW_VARS
 
