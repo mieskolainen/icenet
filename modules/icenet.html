@@ -2119,6 +2119,25 @@ so we see that also integrated class fractions are equalized (or not)!</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.plots.plot_selection">
+<span class="sig-name descname"><span class="pre">plot_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot selection before / after type histograms against all chosen variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – data array (N events x D dimensions)</p></li>
+<li><p><strong>ind</strong> – boolean selection indices (N)</p></li>
+<li><p><strong>ids</strong> – variable string array (D)</p></li>
+<li><p><strong>args</strong> – plotting arguments</p></li>
+<li><p><strong>label</strong> – a string label</p></li>
+<li><p><strong>varlist</strong> – a list of variables to be plotted (from ids)</p></li>
+<li><p><strong>density</strong> – normalize all histograms to unit density</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.plot_train_evolution">
 <span class="sig-name descname"><span class="pre">plot_train_evolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_aucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_aucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_train_evolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_train_evolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Training evolution plots.</p>
