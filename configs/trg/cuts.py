@@ -25,12 +25,14 @@ def cut_fiducial(X, ids, isMC, xcorr_flow=False):
         ind:   Passing indices (N)
     """
     
-    if isMC == 'mode_e1' or isMC == 'mode_e2':
+    if   isMC == 'mode_e1' or isMC == 'mode_e2':
         cutlist = ['e1_l1_pt >= 5',
                    'e2_l1_pt >= 5']
-    else:
+    elif isMC == 'data':
         cutlist = ['l1_doubleE5 == 1']
-
+    else:
+        raise Exception(__name__ + '.cut_fiducial: Unknown isMC mode')
+    
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
     ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)

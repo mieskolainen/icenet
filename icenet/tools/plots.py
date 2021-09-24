@@ -7,10 +7,74 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import xgboost
+import os
+
 from tqdm import tqdm
+
+
+from iceplot import iceplot
 
 from icenet.tools import aux
 from icenet.tools import process
+
+
+def plot_selection(X, ind, ids, args, label, varlist, density=True):
+    """
+    Plot selection before / after type histograms against all chosen variables
+
+    Args:
+        X      : data array (N events x D dimensions)
+        ind    : boolean selection indices (N)
+        ids    : variable string array (D)
+        args   : plotting arguments
+        label  : a string label
+        varlist: a list of variables to be plotted (from ids)
+        density: normalize all histograms to unit density
+    """
+    
+    for var in tqdm(varlist):
+
+        if var not in ids:
+            continue
+
+        # Histogram (autobinning)
+        counts1, errs1, bins, cbins = iceplot.hist(np.asarray(X[:, ids.index(var)]),   bins=100,  density=density)
+        counts2, errs2, bins, cbins = iceplot.hist(np.asarray(X[ind, ids.index(var)]), bins=bins, density=density)
+        
+        # Plot
+        obs_x = {
+            'xlim'      : (np.min(bins), np.max(bins)),
+            'ylim'      : None,
+            'ylim_ratio': (0.7, 1.3),
+            
+            'xlabel'    : var,
+            'ylabel'    : r'Counts',
+            'units'     : {'x': None, 'y' : r'counts'},
+            'density'   : density,
+            'figsize'   : (4, 3.75)
+        }
+        fig, ax = iceplot.create_axes(**obs_x, ratio_plot=True)
+
+        label1  = f'before cuts'
+        label2  = f'after cuts'
+
+        ax[0].hist(x=cbins, bins=bins, weights=counts1, color=(0,0,0), label=label1,            **iceplot.hist_style_step)
+        ax[0].hist(x=cbins, bins=bins, weights=counts2, color=(1,0,0), alpha=0.5, label=label2, **iceplot.hist_style_step)
+        
+        iceplot.ordered_legend(ax=ax[0], order=[label1, label2])
+        iceplot.plot_horizontal_line(ax[1])
+
+        ax[1].hist(x=cbins, bins=bins, weights=counts2 / (counts1 + 1E-30), color=(1,0,0), alpha=0.5, label='ratio', **iceplot.hist_style_step)
+
+        # Save it
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/cuts/{label}'
+
+        os.makedirs(targetdir, exist_ok = True)
+        fig.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
+
+        ax[0].set_yscale('log')
+        fig.savefig(f'{targetdir}/{var}__log.pdf', bbox_inches='tight')
+        plt.close()
 
 
 def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3), grid_on=False):

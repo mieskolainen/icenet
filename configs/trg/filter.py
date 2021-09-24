@@ -38,11 +38,11 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
                    'gen_e1_hlt_dr < 0.2',
                    'gen_e2_hlt_dr < 0.2']
 
-    elif isMC == False:
+    elif isMC == 'data':
         cutlist = ['isgjson == 1']
 
     else:
-        raise Exception(__name__ + '.filter_standard: Uknown isMC mode')
+        raise Exception(__name__ + '.filter_standard: Unknown isMC mode')
 
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

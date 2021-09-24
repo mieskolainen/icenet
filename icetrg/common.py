@@ -9,8 +9,10 @@ import uproot
 from tqdm import tqdm
 import psutil
 import copy
+import os
 
 from termcolor import colored, cprint
+
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -153,7 +155,7 @@ def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id =
     # *** DATA ***
 
     rootfile          = f'{root_path}/{args["datafile"]}'
-    X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC=False, **param)
+    X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
 
     X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
     Y_DATA = np.zeros(X_DATA.shape[0])
@@ -187,12 +189,16 @@ def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
+    VARLIST    = ['gen_e1_pt', 'gen_e1_eta', 'gen_e2_pt', 'gen_e2_eta', 'gen_pt', 'gen_eta']
+
+
     X   = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop)
     ids = X.ids
     X   = X.x
-
+    
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=VARLIST)
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
     
     X   = X[ind]
@@ -201,6 +207,7 @@ def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
 
     # @@ Observable cut selections done here @@
     ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=VARLIST)
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
 
     X   = X[ind]

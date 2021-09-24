@@ -136,7 +136,8 @@ def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9):
 def tick_calc(lim, step, N=6):
     """ Tick spacing calculator.
     """
-    return [np.round(lim[0] + i*step, N) for i in range(1+math.floor((lim[1]-lim[0])/step))]
+    return [np.round(lim[0] + i*step, N) for i in range(1 + math.floor((lim[1] - lim[0])/step))]
+
 
 def set_axis_ticks(ax, ticks, dim='x'):
     """ Set ticks of the axis.
@@ -147,6 +148,7 @@ def set_axis_ticks(ax, ticks, dim='x'):
     elif (dim == 'y'):
         ax.set_yticks(ticks)
         ax.set_yticklabels(list(map(str, ticks)))
+
 
 def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.7, 1.3),
         ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.15, labelsize=9,
@@ -197,7 +199,9 @@ def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
     ax = [ax] if (N == 1) else ax
 
     # Axes limits
-    for a in ax: a.set_xlim(*xlim)
+    for a in ax:
+        if xlim is not None:
+            a.set_xlim(*xlim)
 
     if ylim is not None:
         ax[0].set_ylim(*ylim)
@@ -287,7 +291,7 @@ def hist_to_density_fullspace(counts, errs, bins, totalweight):
 def hist(x, bins=30, density=False, weights=None):
     """ Calculate a histogram.
     """
-    x = np.array(x)
+    x = np.asarray(x, dtype=np.float64)
 
     # Calculate histogram
     if weights is None:
