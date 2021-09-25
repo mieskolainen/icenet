@@ -89,14 +89,12 @@ def pred_graph_xgb(args, param):
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
     
-
-    graph_model = aux.load_torch_checkpoint(path=args['modeldir'], \
-        label=param['graph']['label'], epoch=param['readmode']).to('cpu')
+    graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
+        label=param['graph']['label'], epoch=param['graph']['readmode']).to('cpu')
     graph_model.eval() # Turn eval mode one!
     
-
-    xgb_model   = pickle.load(open(create_model_filename(path=args['modeldir'], \
-        label=param['graph']['label'], epoch=param['readmode'], filetype='.dat'), 'rb'))
+    xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
+        label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
 
 
     def func_predict(data):
@@ -106,8 +104,8 @@ def pred_graph_xgb(args, param):
         # Concatenate convolution features and global features
         x_tot = np.c_[conv_x, [data.u.numpy()]]
 
-        return xgb_model.predict(xgboost.DMatrix(data = x_tot))
-
+        return xgb_model.predict(xgboost.DMatrix(data=x_tot))
+    
     return func_predict
 
 

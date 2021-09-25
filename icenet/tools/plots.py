@@ -31,7 +31,7 @@ def plot_selection(X, ind, ids, args, label, varlist, density=True):
         varlist: a list of variables to be plotted (from ids)
         density: normalize all histograms to unit density
     """
-    
+
     for var in tqdm(varlist):
 
         if var not in ids:
@@ -439,10 +439,10 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
                 marker    = 'o'
             
             # A ROC-curve
-            else:
+            elif not (isinstance(fpr, int) or isinstance(fpr, float)):
                 fpr = fpr[1:] # Remove always the first element for log-plot reasons
                 tpr = tpr[1:]
-
+            
             plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, \
                 label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
 
