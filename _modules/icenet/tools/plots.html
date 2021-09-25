@@ -176,7 +176,7 @@
 <span class="sd">        varlist: a list of variables to be plotted (from ids)</span>
 <span class="sd">        density: normalize all histograms to unit density</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">varlist</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
@@ -584,10 +584,10 @@
                 <span class="n">marker</span>    <span class="o">=</span> <span class="s1">&#39;o&#39;</span>
             
             <span class="c1"># A ROC-curve</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
                 <span class="n">fpr</span> <span class="o">=</span> <span class="n">fpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># Remove always the first element for log-plot reasons</span>
                 <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
+            
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> \
                 <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: AUC = </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
