@@ -448,7 +448,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
                     # 2-class problems
                     if model.C == 2:
                         metric = aux.Metric(y_true = batch_y.detach().cpu().numpy(), \
-                            y_soft = phat.detach().cpu().numpy()[:, SIGNAL_ID], valrange=[0,1])
+                            y_soft  = phat.detach().cpu().numpy()[:, SIGNAL_ID], \
+                            weights = batch_weights.detach().cpu().numpy(), valrange=[0,1])
                         if metric.auc > 0:
                             auc += metric.auc
                             k += 1
@@ -456,7 +457,9 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
                     # N-class problems
                     else:
                         auc += sklearn.metrics.roc_auc_score(y_true = batch_y.detach().cpu().numpy(), \
-                            y_score = phat.detach().cpu().numpy(), average="weighted", multi_class='ovo', labels=class_labels)
+                            y_score = phat.detach().cpu().numpy(), \
+                            weights = batch_weights.detach().cpu().numpy(), \
+                            average="weighted", multi_class='ovo', labels=class_labels)
                         k += 1
 
                 # Add AUC

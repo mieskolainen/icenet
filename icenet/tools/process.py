@@ -224,24 +224,26 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
     return
 
 
-def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None, args=None):
+def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None, weights=None, args=None):
     """
     Evaluate ML/AI models.
     """
-
+    print(__name__ + ".evaluate_models: Evaluating models")
+    if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
+    print('')
+    
     # -----------------------------
     # ** GLOBALS **
 
-    # ROC
     global roc_mstats
     global roc_labels
 
-    mva_mstats    = []
-    mva_mstats    = []
+    mva_mstats = []
+    mva_mstats = []
+    targetdir  = None
 
-    targetdir     = None
     # -----------------------------
-
+    # Prepare output folders
 
     outputname = args['rootname']
 
@@ -252,7 +254,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     os.makedirs(args["modeldir"], exist_ok = True)
 
     # --------------------------------------------------------------------
-    ### Collect data
+    # Collect data
+
     X_RAW    = data.tst.x
     X        = copy.deepcopy(data.tst.x)
 
@@ -303,7 +306,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
 
     # ====================================================================
-
+    
     def plot_AUC_wrap(func_predict, X, label):
         """ AUC-plot wrapper function.
         """
@@ -315,7 +318,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 return # No more plots 
 
             if   len(var) == 1:
-                met_1D, label_1D = plots.binned_1D_AUC(func_predict=func_predict, X=X, y=y, X_kin=X_kin, \
+                met_1D, label_1D = plots.binned_1D_AUC(func_predict=func_predict, X=X, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
 
                 plots.ROC_plot(met_1D, label_1D, \
@@ -324,7 +327,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
             elif len(var) == 2:
 
-                fig, ax, met = plots.binned_2D_AUC(func_predict=func_predict, X=X, y=y, X_kin=X_kin, \
+                fig, ax, met = plots.binned_2D_AUC(func_predict=func_predict, X=X, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges_A=edges[0], edges_B=edges[1], label=label, ids=var)
 
                 plt.savefig(targetdir + '/' + label + f'__ROC_binned__{i}.pdf', bbox_inches='tight')
@@ -341,7 +344,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     def plot_MVA_wrap(func_predict, X, label, hist_edges):
         """ MVA classifier output density plotter wrapper function.
         """
-        fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, label=f'<{label}>', hist_edges=hist_edges)
+        fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, weights=weights, \
+            label=f'<{label}>', hist_edges=hist_edges)
         plt.savefig( targetdir + '/' + label + '_MVA_output.pdf', bbox_inches='tight')
 
     # ====================================================================

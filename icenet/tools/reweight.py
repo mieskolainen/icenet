@@ -10,12 +10,14 @@ from termcolor import colored, cprint
 from icenet.tools import aux
 
 
-def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
+def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
     """
     Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
     Args:
-        data   : training data object
+        x      : training data input
+        y      : training data labels
+        ids    : variable names of columns of x
         args   : arguments object
     
     Returns:
@@ -23,27 +25,27 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     """
 
     ### Construct parameter names
-    ids = {}
+    paramdict = {}
     for var in ['A', 'B']: # Currently only 2 variables, A, B, supported
         try:
             varname  = args['var_' + var]
-            ids[var] = varname
+            paramdict[var] = varname
         except:
             break
-    print(__name__ + f'.compute_ND_reweights: Using the following variables {ids}')
+    print(__name__ + f'.compute_ND_reweights: Using the following variables {paramdict}')
     
+    print(ids)
     
     ### Re-weighting variables
     RV = {}
-    for var in ids.keys():
-        RV[var] = data.trn.x[:, data.ids.index(ids[var])].astype(np.float)
+    for var in paramdict.keys():
+        RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
 
     ### Pre-transform
-    for var in ids.keys():
+    for var in paramdict.keys():
         mode = args[f'transform_{var}']
 
         if   mode == 'log10':
-
             if np.any(RV[var] <= 0):
                 ind = (RV[var] <= 0)
                 cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
@@ -75,7 +77,7 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
 
     # Binning setup
     binedges = {}
-    for var in ids.keys():
+    for var in paramdict.keys():
         if   args[f'binmode_{var}'] == 'linear':
             binedges[var] = np.linspace(
                                  args[f'bins_{var}'][0],
@@ -96,64 +98,64 @@ def compute_ND_reweights(data, args, N_class=2, EPS=1e-12):
     if args['differential_reweight']:
         
         rwparam = {
-            'y':               data.trn.y,
+            'y':               y,
             'N_class':         N_class,
             'equal_frac':      args['equal_frac'],
             'reference_class': args['reference_class'],
             'max_reg':         args['max_reg']
         }
 
-        if len(ids) == 2:
+        if len(paramdict) == 2:
         
             ### Compute 2D-PDFs for each class
             pdf = {}
             for c in range(N_class):
-                pdf[c] = pdf_2D_hist(X_A=RV['A'][data.trn.y==c], X_B=RV['B'][data.trn.y==c], \
+                pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], \
                     binedges_A=binedges['A'], binedges_B=binedges['B'])
 
             pdf['binedges_A'] = binedges['A']
             pdf['binedges_B'] = binedges['B']
 
-            trn_weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
             
-        elif len(ids) == 1:
+        elif len(paramdict) == 1:
 
             ### Compute 1D-PDFs for each class
             pdf = {}
             for c in range(N_class):
-                pdf[c] = pdf_1D_hist(X=RV['A'][data.trn.y==c], binedges=binedges['A'])
+                pdf[c] = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
 
             pdf['binedges'] = binedges['A']
-            trn_weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
+            weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
         else:
-            raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality {len(ids)}')
+            raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality {len(paramdict)}')
 
     else:
         # No re-weighting
-        weights_doublet = np.zeros((data.trn.x.shape[0], N_class))
+        weights_doublet = np.zeros((x.shape[0], N_class))
         for c in range(N_class):    
-            weights_doublet[data.trn.y == c, c] = 1
+            weights_doublet[y == c, c] = 1
 
         # Apply class balance equalizing weight
         if (args['equal_frac'] == True):
             cprint(__name__ + f'.Compute_ND_reweights: Computing only equal class balance weights (no differential re-weighting).', 'green')
-            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=0, y=data.trn.y)
+            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=0, y=y)
         
-        trn_weights = np.sum(weights_doublet, axis=1)
+        weights = np.sum(weights_doublet, axis=1)
 
 
     # Compute the sum of weights per class for the output print
     frac = np.zeros(N_class)
     sums = np.zeros(N_class)
     for c in range(N_class):
-        frac[c] = np.sum(data.trn.y == c)
-        sums[c] = np.sum(trn_weights[data.trn.y == c])
+        frac[c] = np.sum(y == c)
+        sums[c] = np.sum(weights[y == c])
     
-    print(__name__ + f'.compute_ND_reweights: sum[trn.y==c]: {frac}')
-    print(__name__ + f'.compute_ND_reweights: sum[trn_weights[trn.y==c]]: {sums}')
+    print(__name__ + f'.compute_ND_reweights: sum[y == c]: {frac}')
+    print(__name__ + f'.compute_ND_reweights: sum[weights[y == c]]: {sums}')
     print(__name__ + f'.compute_ND_reweights: [done] \n')
     
-    return trn_weights
+    return weights
 
 
 def reweight_1D(X, pdf, y, N_class=2, reference_class = 0, max_reg = 1E3, EPS=1E-12) :

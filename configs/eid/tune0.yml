@@ -8,6 +8,8 @@ rootname: 'eid'
 
 MAXEVENTS: 1000000               # Maximum total number of events (per root file) to process
 
+eval_reweight: False             # Event-by-event re-weighting used in the evaluation phase
+
 
 # ---------------------------------------------------------
 # ** Activate models here **
@@ -118,7 +120,7 @@ reweight_param:
   equal_frac: true              # Equalize integrated class fractions
   # ---------------------
   
-  differential_reweight: true
+  differential_reweight: false
   reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
   # Note about asymmetry: Keep the reference class as 0 == background, because signal
   # MC has much longer tail over pt. Thus, it is not possible to re-weight background

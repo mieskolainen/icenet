@@ -515,12 +515,13 @@ def hardclass(y_soft, valrange = [0,1]):
     return y_out
 
 
-def multiclass_roc_auc_score(y_true, y_soft, average="macro"):
+def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
     """ Multiclass AUC (area under the curve).
 
     Args:
         y_true : True classifications
         y_soft : Soft probabilities
+        weights: Sample weights 
         average: Averaging strategy
     Returns:
         auc    : Area under the curve via averaging
@@ -531,26 +532,31 @@ def multiclass_roc_auc_score(y_true, y_soft, average="macro"):
     y_true = lb.transform(y_true)
     y_soft = lb.transform(y_soft)
     
-    auc = sklearn.metrics.roc_auc_score(y_true, y_soft, average=average)
+    auc = sklearn.metrics.roc_auc_score(y_true, y_soft, weights=weights, average=average)
     return auc
 
 
 class Metric:
     """ Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, valrange = [0,1]) :
+    def __init__(self, y_true, y_soft, weights=None, valrange = [0,1]) :
         """
         Args:
             y_true   : true classifications
             y_soft   : probabilities for two classes
+            weights  : 
             valrange : range of probabilities / soft scores
         """
         ok = np.isfinite(y_true) & np.isfinite(y_soft)
         
+        # Make sure the weights array is 1-dimensional (not events N) x (num class K)
+        if (weights is not None) and len(weights.shape) > 1:
+            weights = np.sum(weights, axis=1)
+
         lhs = len(y_true) 
         rhs = (ok == True).sum()
         if (lhs != rhs) :
-            print('Metric: input length = {} with not-finite values = {}'.format(lhs, lhs-rhs))
+            print(f'Metric: input length = {lhs} with non-finite values = {lhs - rhs}')
             print(y_soft)
 
         # invalid input
@@ -562,9 +568,12 @@ class Metric:
             self.auc = -1
             self.acc = -1
             return
-
-        self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true = y_true[ok], y_score = y_soft[ok])
-        self.auc = metrics.roc_auc_score(y_true  = y_true[ok], y_score = y_soft[ok])
-        self.acc = metrics.accuracy_score(y_true = y_true[ok], y_pred = hardclass(y_soft = y_soft[ok], valrange = valrange))
+        
+        if weights is not None:
+            weights = weights[ok]
+        
+        self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
+        self.auc = metrics.roc_auc_score(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
+        self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=hardclass(y_soft=y_soft[ok], valrange=valrange), sample_weight=weights)
 
 

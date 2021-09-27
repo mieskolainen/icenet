@@ -131,7 +131,7 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, ids=['trk_pt', 'trk_eta']):
+def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, weights=None, ids=['trk_pt', 'trk_eta']):
     """
     Evaluate AUC per 2D-bin.
     
@@ -144,6 +144,7 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
         edges_A     :  Edges of the A-space cells
         edges_B     :  Edges of the B-space cells
         label       :  Label of the classifier (string)
+        weights     :  Sample weights
         ids         :  Variable identifiers
     
     Returns:
@@ -168,12 +169,16 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
             ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids[0])], range_A),
                                  aux.pick_ind(X_kin[:, VARS_kin.index(ids[1])], range_B))
 
-            string = f'{ids[0]} = [{range_A[0]:.3f},{range_A[1]:.3f}), {ids[1]} = [{range_B[0]:.3f},{range_B[1]:.3f})'
+            string = f'{ids[0]} = [{range_A[0]:10.3f},{range_A[1]:10.3f}), {ids[1]} = [{range_B[0]:10.3f},{range_B[1]:10.3f})'
             
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
                 # Evaluate metric
-                met      = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                if weights is not None:
+                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind], weights=weights[ind])
+                else:
+                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+
                 print(f'{string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
@@ -182,7 +187,7 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
 
 
     # Evaluate total performance
-    met = aux.Metric(y_true=y, y_soft=y_pred)
+    met = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
 
     # Finally plot it
     fig,ax = plot_AUC_matrix(AUC=AUC, edges_A=edges_A, edges_B=edges_B)
@@ -193,7 +198,7 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
     return fig, ax, met
 
 
-def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt'):
+def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt'):
     """
     Evaluate AUC & ROC per 1D-bin.
     
@@ -205,6 +210,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt
         VARS_kin    :  Kinematic variables (strings)
         edges       :  Edges of the space cells
         label       :  Label of the classifier (string)
+        weights     :  Sample weights
         ids         :  Variable identifier
     
     Returns:
@@ -229,12 +235,16 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt
             # Indices
             ind = aux.pick_ind(X_kin[:, VARS_kin.index(ids)], range_)
             
-            string = f'{ids} = [{range_[0]:5.3f},{range_[1]:5.3f}]'
+            string = f'{ids} = [{range_[0]:10.3f},{range_[1]:10.3f}]'
 
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
                 # Evaluate metric
-                met    = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                if weights is not None:
+                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind], weights=weights[ind])
+                else:
+                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+
                 AUC[i] = met.auc
                 METS.append(met)
                 print(f'{string} | AUC = {AUC[i]}')
@@ -247,7 +257,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, ids='trk_pt
     return METS, LABELS
 
 
-def density_MVA_output(func_predict, X, y, label, hist_edges=80):
+def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
     """
     Evaluate MVA output density per class.
     
@@ -255,7 +265,8 @@ def density_MVA_output(func_predict, X, y, label, hist_edges=80):
         func_predict:  Function handle of the classifier
         X           :  Input data
         y           :  Output (truth level target) data
-        label       :  Label of the classifier (string)
+        label       :  Label of the MVA model (string)
+        weights     :  Sample weights
         hist_edges  :  Histogram edges list (or number of bins, as an alternative)
     
     Returns:
@@ -270,13 +281,27 @@ def density_MVA_output(func_predict, X, y, label, hist_edges=80):
     # Number of classes
     C         = int(np.max(y) - np.min(y) + 1)
 
-    classlegs = [f'class {k}, $N={np.sum(y == k)}$' for k in range(C)]
-    fig,ax    = plt.subplots()
+    # Make sure it is 1-dim array of length N (not N x num classes)
+    if (weights is not None) and len(weights.shape) > 1:
+        weights = np.sum(weights, axis=1)
+
+    if weights is not None:
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+    else:
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (unit weights)' for k in range(C)]
 
     # Over classes
+    fig,ax    = plt.subplots()
+    
     for k in range(C):
         ind = (y == k)
-        hI, bins, patches = plt.hist(y_pred[ind], hist_edges,
+
+        if weights is not None:
+            w = weights[ind]
+        else:
+            w = None
+
+        hI, bins, patches = plt.hist(y_pred[ind], hist_edges, weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
     
     plt.legend(classlegs, loc='upper center')
@@ -481,9 +506,8 @@ def plothist1d(X, y, labels) :
     # Over observables
     for j in range(X.shape[1]) :
 
-        fig,ax = plt.subplots()
-        
         # Over classes
+        fig,ax = plt.subplots()
         for k in range(C):
 
             ind = (y == k)
@@ -552,3 +576,5 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
             
             plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf", bbox_inches='tight')
             plt.close()
+
+

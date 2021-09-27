@@ -161,8 +161,9 @@ def test(model, loader, optimizer, device):
             
             y_true  = data.y.to('cpu').numpy()
             y_soft  = phat[:, signal_class].to('cpu').numpy()
-
-            metrics = aux.Metric(y_true = y_true, y_soft = y_soft)
+            weights = data.w.to('cpu').numpy()
+            
+            metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights)
             aucsum += metrics.auc
 
         correct += pred.eq(data.y).sum().item()
