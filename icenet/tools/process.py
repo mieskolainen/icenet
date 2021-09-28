@@ -239,16 +239,25 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     global roc_labels
 
     mva_mstats = []
-    mva_mstats = []
     targetdir  = None
+
+    #MVA_binned_mstats = []
+    #MVA_binned_mlabel = []
+
+    ROC_binned_mstats = [list()] * len(args['active_models'])
+    ROC_binned_mlabel = [list()] * len(args['active_models'])
+
 
     # -----------------------------
     # Prepare output folders
 
     outputname = args['rootname']
 
-    targetdir  = f'./figs/{outputname}/{args["config"]}/eval/'
-    os.makedirs(targetdir, exist_ok = True)
+    targetdir  = f'./figs/{outputname}/{args["config"]}/eval'
+
+    subdirs = ['', 'ROC', 'MVA', 'CORR']
+    for sd in subdirs:
+        os.makedirs(targetdir + '/' + sd, exist_ok = True)
     
     args["modeldir"] = f'./checkpoint/{outputname}/{args["config"]}/'
     os.makedirs(args["modeldir"], exist_ok = True)
@@ -306,7 +315,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
 
     # ====================================================================
-    
+    # ** Plots for individual model inspection **
+
     def plot_AUC_wrap(func_predict, X, label):
         """ AUC-plot wrapper function.
         """
@@ -321,16 +331,19 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 met_1D, label_1D = plots.binned_1D_AUC(func_predict=func_predict, X=X, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
 
-                plots.ROC_plot(met_1D, label_1D, \
-                    title = f'<{label}> | training re-weight reference: class ' + str(args['reweight_param']['reference_class']),
-                    filename=targetdir + '/' + label + f'__ROC_binned__{i}')
+                # Save for multiple comparison
+                ROC_binned_mstats[i].append(met_1D)
+                ROC_binned_mlabel[i].append(label_1D)
+
+                # Plot this one
+                plots.ROC_plot(met_1D, label_1D, title = f'<{label}>', filename=targetdir + '/ROC/' + f'ROC_binned__{i}_<{label}>')
 
             elif len(var) == 2:
 
                 fig, ax, met = plots.binned_2D_AUC(func_predict=func_predict, X=X, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges_A=edges[0], edges_B=edges[1], label=label, ids=var)
 
-                plt.savefig(targetdir + '/' + label + f'__ROC_binned__{i}.pdf', bbox_inches='tight')
+                plt.savefig(targetdir + '/ROC/' + f'ROC_binned__{i}_<{label}>.pdf', bbox_inches='tight')
 
                 roc_mstats.append(met)
                 roc_labels.append(label)
@@ -339,18 +352,20 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 print(var)
                 raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
 
-    # ====================================================================
 
     def plot_MVA_wrap(func_predict, X, label, hist_edges):
         """ MVA classifier output density plotter wrapper function.
         """
         fig, ax = plots.density_MVA_output(func_predict=func_predict, X=X, y=y, weights=weights, \
             label=f'<{label}>', hist_edges=hist_edges)
-        plt.savefig( targetdir + '/' + label + '_MVA_output.pdf', bbox_inches='tight')
+        plt.savefig( targetdir + '/MVA/' + f'MVA_output_<{label}>.pdf', bbox_inches='tight')
 
     # ====================================================================
-    #
-    # **  Loop over active models **
+
+
+
+    # ====================================================================
+    # **  MAIN LOOP OVER MODELS **
     #
 
     for i in range(len(args['active_models'])):
@@ -416,17 +431,48 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
+    # ===================================================================
+    # ** Plots for multiple model comparison **
+
     ### Plot all ROC curves
     plots.ROC_plot(roc_mstats, roc_labels, \
-        title = 'training re-weight reference: class ' + str(args['reweight_param']['reference_class']),
-        filename = targetdir + 'ROC')
+        title = '',
+        filename = targetdir + '/ROC/' + 'ROC_<ALL>')
 
     ### Plot all MVA outputs
     """
     plots.MVA_plot(mva_mstats, mva_labels, \
         title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
-        filename = targetdir + 'MVA')    
+        filename = targetdir + '/MVA/' + 'MVA_<ALL>')    
     """
+
+    ### Plot all binned ROC curves
+    for i in range(100):
+        try:
+            var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
+            edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
+        except:
+            return # No more plots 
+
+        if len(var) == 1:
+
+            # Over different bins
+            for b in range(len(edges)-1):
+
+                # Over different models
+                xy,legs = [],[]
+                for k in range(len(ROC_binned_mstats[i])):
+                    xy.append(ROC_binned_mstats[i][k][b])
+
+                    # Take label for the legend
+                    ID    = args['active_models'][k]
+                    label = args[f'{ID}_param']['label']
+                    legs.append(label)
+
+                title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
+                plots.ROC_plot(xy, legs, title=title, filename=targetdir + '/ROC/' + f'ROC_binned__{i}_bin_{b}_<ALL>')
+    
+    # ===================================================================
 
     return
 

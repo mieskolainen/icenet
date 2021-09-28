@@ -252,8 +252,8 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
                 METS.append(None)
                 print(f'{string} | No events found in this cell!')
 
-            LABELS.append(f'{ids} = [{range_[0]:.1f},{range_[1]:.1f})')
-
+            LABELS.append(f'{ids}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
+    
     return METS, LABELS
 
 
