@@ -508,7 +508,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
                 if counts != []:
                     plt.sca(ax[c])
                     plt.hist(x=cbins, bins=bins, weights=counts, histtype='step',\
-                        density=density, label=f'{labels[i]}')
+                        density=density, label=f'{labels[i]}', linewidth=2.0)
 
         for c in range(N_class):
             plt.sca(ax[c])
@@ -522,7 +522,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             #plt.xlim(0.0, 1.0)
             #ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-
+        
         if k == 1:
             #plt.ylim(0.0, 1.0)
             #plt.xlim(1e-4, 1.0)
