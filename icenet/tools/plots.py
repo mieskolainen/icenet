@@ -235,7 +235,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
             # Indices
             ind = aux.pick_ind(X_kin[:, VARS_kin.index(ids)], range_)
             
-            string = f'{ids} = [{range_[0]:10.3f},{range_[1]:10.3f}]'
+            string = f'{ids} = [{range_[0]:10.3f},{range_[1]:10.3f})'
 
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
@@ -253,7 +253,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
                 print(f'{string} | No events found in this cell!')
 
             LABELS.append(f'{ids}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
-    
+
     return METS, LABELS
 
 
@@ -296,11 +296,7 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
     for k in range(C):
         ind = (y == k)
 
-        if weights is not None:
-            w = weights[ind]
-        else:
-            w = None
-
+        w = weights[ind] if weights is not None else None
         hI, bins, patches = plt.hist(y_pred[ind], hist_edges, weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
     
@@ -444,7 +440,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
     for k in [0,1]: # linear & log
         
         fig,ax = plt.subplots()
-        xx = np.logspace(-5, 0, 100)
+        xx     = np.logspace(-5, 0, 100)
         plt.plot(xx, xx, linestyle='--', color='black', linewidth=1) # ROC diagonal
 
         for i in range(len(metrics)):
@@ -468,8 +464,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
                 fpr = fpr[1:] # Remove always the first element for log-plot reasons
                 tpr = tpr[1:]
             
-            plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, \
-                label = '{}: AUC = {:.3f}'.format(labels[i], metrics[i].auc))
+            plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
 
         plt.legend(fontsize=legend_fontsize)
         ax.set_xlabel('False Positive (background) rate $\\alpha$')
@@ -487,7 +482,55 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
             plt.xlim(1e-4, 1.0)
             plt.gca().set_xscale('log')
             ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
-            plt.savefig(filename + '_log.pdf', bbox_inches='tight')
+            plt.savefig(filename + '__log.pdf', bbox_inches='tight')
+
+        plt.close()
+
+
+def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fontsize=7) :
+    """
+    MVA output plots
+    """
+    N_class = metrics[0].N_class
+
+    for k in [0,1]: # linear & log
+        
+        fig,ax = plt.subplots(1, N_class, figsize=(6*N_class, 5))
+
+        for i in range(len(metrics)):
+            bins  = metrics[i].mva_bins
+            if len(bins) == 0: continue
+            cbins = (bins[0:-1] + bins[1:]) / 2
+
+            # Loop over classes
+            for c in range(len(metrics[i].mva_hist)):
+                counts = metrics[i].mva_hist[c]
+                if counts != []:
+                    plt.sca(ax[c])
+                    plt.hist(x=cbins, bins=bins, weights=counts, histtype='step',\
+                        density=density, label=f'{labels[i]}')
+
+        for c in range(N_class):
+            plt.sca(ax[c])
+            plt.legend(fontsize=legend_fontsize, loc=3)
+            ax[c].set_xlabel('MVA output $f(\\mathbf{x})$')
+            ax[c].set_ylabel('counts' if not density else 'density')
+            ax[c].set_title(f'{title}, class = {c}', fontsize=10)
+        
+        if k == 0:
+            #plt.ylim(0.0, 1.0)
+            #plt.xlim(0.0, 1.0)
+            #ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
+            plt.savefig(filename + '.pdf', bbox_inches='tight')
+
+        if k == 1:
+            #plt.ylim(0.0, 1.0)
+            #plt.xlim(1e-4, 1.0)
+            for c in range(N_class):
+                plt.sca(ax[c])
+                plt.gca().set_yscale('log')
+                #ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
+            plt.savefig(filename + '__log.pdf', bbox_inches='tight')
 
         plt.close()
 

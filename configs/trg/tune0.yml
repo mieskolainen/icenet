@@ -2,7 +2,7 @@
 #
 rootname: 'trg'
 
-MAXEVENTS: 10000000               # Maximum total number of events (per root file) to process
+MAXEVENTS: 1000000               # Maximum total number of events (per root file) to process
 
 eval_reweight: False              # Event-by-event re-weighting used in the evaluation phase
 

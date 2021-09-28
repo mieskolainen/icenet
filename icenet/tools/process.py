@@ -337,7 +337,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
                 # Plot this one
                 plots.ROC_plot(met_1D, label_1D, title = f'<{label}>', filename=targetdir + '/ROC/' + f'ROC_binned__{i}_<{label}>')
-
+                plots.MVA_plot(met_1D, label_1D, title = f'<{label}>', filename=targetdir + '/MVA/' + f'MVA_binned__{i}_<{label}>')
+                
             elif len(var) == 2:
 
                 fig, ax, met = plots.binned_2D_AUC(func_predict=func_predict, X=X, y=y, weights=weights, X_kin=X_kin, \
@@ -469,9 +470,15 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                     label = args[f'{ID}_param']['label']
                     legs.append(label)
 
+                ### ROC
                 title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                 plots.ROC_plot(xy, legs, title=title, filename=targetdir + '/ROC/' + f'ROC_binned__{i}_bin_{b}_<ALL>')
-    
+
+                ### MVA output
+                #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
+                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + '/MVA/' + f'MVA_binned__{i}_bin_{b}_<ALL>')
+
+
     # ===================================================================
 
     return

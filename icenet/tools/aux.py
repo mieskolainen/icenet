@@ -539,7 +539,7 @@ def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
 class Metric:
     """ Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, weights=None, valrange = [0,1]) :
+    def __init__(self, y_true, y_soft, weights=None, valrange = [0,1], N_class = 2, N_mva_bins=40):
         """
         Args:
             y_true   : true classifications
@@ -547,6 +547,9 @@ class Metric:
             weights  : 
             valrange : range of probabilities / soft scores
         """
+
+        self.N_class = N_class
+
         ok = np.isfinite(y_true) & np.isfinite(y_soft)
         
         # Make sure the weights array is 1-dimensional (not events N) x (num class K)
@@ -567,13 +570,29 @@ class Metric:
             self.thresholds = -1
             self.auc = -1
             self.acc = -1
+
+            self.mva_bins = []
+            self.mva_hist = []
+
             return
         
         if weights is not None:
             weights = weights[ok]
-        
+
+        # Bin the prediction values over different classes
+        self.mva_bins = np.linspace(valrange[0], valrange[1], N_mva_bins)
+        self.mva_hist = []
+
+        for c in range(N_class):
+            ind    = (y_true == c)
+            counts = []
+
+            if np.sum(ind) != 0:
+                w  = weights[ind] if weights is not None else None
+                counts, edges = np.histogram(y_soft[ind], weights=w, bins=self.mva_bins)
+            self.mva_hist.append(counts)
+
+        # Metrics    
         self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
         self.auc = metrics.roc_auc_score(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
         self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=hardclass(y_soft=y_soft[ok], valrange=valrange), sample_weight=weights)
-
-
