@@ -495,27 +495,36 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
 
     for k in [0,1]: # linear & log
         
-        fig,ax = plt.subplots(1, N_class, figsize=(6*N_class, 5))
+        fig,ax = plt.subplots(1, N_class, figsize=(7*N_class, 5))
 
-        for i in range(len(metrics)):
-            bins  = metrics[i].mva_bins
-            if len(bins) == 0: continue
-            cbins = (bins[0:-1] + bins[1:]) / 2
-
-            # Loop over classes
-            for c in range(len(metrics[i].mva_hist)):
-                counts = metrics[i].mva_hist[c]
-                if counts != []:
-                    plt.sca(ax[c])
-                    plt.hist(x=cbins, bins=bins, weights=counts, histtype='step',\
-                        density=density, label=f'{labels[i]}', linewidth=2.0)
-
+        # Loop over classes
         for c in range(N_class):
+
+            # Loop over cells
+            N      = len(metrics[0].mva_hist[c]) # Number of cells
+            counts = np.zeros((N, len(metrics)))
+            cbins  = np.zeros((N, len(metrics)))
+            
+            for i in range(len(metrics)):
+
+                if len(metrics[i].mva_bins) == 0: continue
+
+                bins       = metrics[i].mva_bins
+                cbins[:,i] = (bins[0:-1] + bins[1:]) / 2
+
+                if metrics[i].mva_hist[c] != []:
+                    counts[:,i] = metrics[i].mva_hist[c]
+
             plt.sca(ax[c])
-            plt.legend(fontsize=legend_fontsize, loc=3)
+            plt.hist(x=cbins, bins=bins, weights=counts, histtype='bar', stacked=True, \
+                density=density, label=labels, linewidth=2.0)
+
+            # Adjust
+            plt.sca(ax[c])
+            plt.legend(fontsize=legend_fontsize, loc='upper center')
             ax[c].set_xlabel('MVA output $f(\\mathbf{x})$')
             ax[c].set_ylabel('counts' if not density else 'density')
-            ax[c].set_title(f'{title}, class = {c}', fontsize=10)
+            ax[c].set_title(f'{title} | class = {c}', fontsize=10)
         
         if k == 0:
             #plt.ylim(0.0, 1.0)

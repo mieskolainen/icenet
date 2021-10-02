@@ -13,6 +13,7 @@ eval_reweight: False              # Event-by-event re-weighting used in the eval
 active_models:
   
   - xgb0
+  - xgb1
   
   - cut0
   - cut1
@@ -43,7 +44,7 @@ cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
 xcorr_flow: True                 # Full N-point correlations computed between cuts
 
 frac: 0.8                        # Train/validate/test split fraction
-varnorm: 'none'                  # Variable normalization: 'zscore', 'madscore', 'none'
+varnorm: 'madscore'              # Variable normalization: 'zscore', 'madscore', 'none'
 #varnorm_tensor: 'zscore'        # Tensor variable normalization
 #varnorm_graph: 'none'           # Not implemented yet
 
@@ -52,7 +53,7 @@ varnorm: 'none'                  # Variable normalization: 'zscore', 'madscore',
 reweight_param:
   
   equal_frac: true              # Equalize integrated class fractions
-
+  
   # ---------------------
   
   differential_reweight: false
@@ -263,7 +264,47 @@ xgb0_param:
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  num_boost_round: 50     # number of epochs (equal to the number of trees!)
+  num_boost_round: 30     # number of epochs (equal to the number of trees!)
+  
+  # booster parameters
+  learning_rate: 0.05
+  
+  # Tree parameters
+  max_depth: 6
+  min_child_weight: 1.0
+  gamma: 0.0
+  max_delta_step: 0
+  subsample: 0.5
+
+  colsample_bytree:  1
+  colsample_bylevel: 1
+  colsample_bynode:  1
+  
+  reg_lambda: 1.0       # L2 regularization
+  reg_alpha: 0.0        # L1 regularization
+  
+  scale_pos_weight: 1
+
+  # learning task parameters
+  objective: 'binary:logistic'     #
+  eval_metric: ['auc', 'logloss']  # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb1_param:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_T1_D6'
+  raytune:  xgb_trial_0
+
+  # general parameters
+  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+  num_boost_round: 1      # number of epochs (equal to the number of trees!)
   
   # booster parameters
   learning_rate: 0.05
