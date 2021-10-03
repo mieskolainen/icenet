@@ -53,7 +53,7 @@ varnorm: 'madscore'              # Variable normalization: 'zscore', 'madscore',
 reweight_param:
   
   equal_frac: true              # Equalize integrated class fractions
-  
+
   # ---------------------
   
   differential_reweight: false
@@ -267,14 +267,12 @@ xgb0_param:
   num_boost_round: 30     # number of epochs (equal to the number of trees!)
   
   # booster parameters
-  learning_rate: 0.05
-  
-  # Tree parameters
+  learning_rate: 0.3
+  gamma: 0.0
   max_depth: 6
   min_child_weight: 1.0
-  gamma: 0.0
-  max_delta_step: 0
-  subsample: 0.5
+  max_delta_step: 1
+  subsample: 1
 
   colsample_bytree:  1
   colsample_bylevel: 1
@@ -307,14 +305,12 @@ xgb1_param:
   num_boost_round: 1      # number of epochs (equal to the number of trees!)
   
   # booster parameters
-  learning_rate: 0.05
-  
-  # Tree parameters
+  learning_rate: 0.3
+  gamma: 0.0
   max_depth: 6
   min_child_weight: 1.0
-  gamma: 0.0
-  max_delta_step: 0
-  subsample: 0.5
+  max_delta_step: 1
+  subsample: 1
 
   colsample_bytree:  1
   colsample_bylevel: 1

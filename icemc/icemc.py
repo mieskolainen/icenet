@@ -7,11 +7,17 @@ import numba
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+# icenet system paths
+import sys
+sys.path.append(".")
+
 from icenet.tools import icevec
 
 
+# ----------------------------------------------
 c_const    = 3E8             # Speed of light (m/sec)
 hbar_const = 6.582119514E-25 # [GeV x sec]
+# ----------------------------------------------
 
 
 @numba.njit
@@ -95,130 +101,164 @@ def tau2Gamma(tau):
     return hbar_const / tau
 
 
-def sim_loop(M, ctau, pt2, rap, N=1000):
+def resonance_generator(M, ctau, pt2, rap, N=1000):
+    """
+    Simulation massive resonance with (M, ctau) parameters,
+    having production kinematics (pt2, rapidity, phi ~ flat)
+    
+    Returns:
+        p4 : Array of 4-momentum (resonance 4-momentum)
+        x4 : Array of 4-position (resonance decay 4-position)
+    """
+    tau    = ctau / c_const # Rest frame mean lifetime
 
-    tau = ctau / c_const
-
-    t_values = np.zeros(N)
-    d_values = np.zeros(N)
-    beta_gamma_values = np.zeros(N)
+    p4_arr = []
+    x4_arr = []
 
     for i in range(N):
+        
+        ### Production kinematics
 
         pt2_value = pt2()
         rap_value = rap()
         phi_value = U(0, 2*np.pi)[0]
 
-        p   = icevec.vec4()
+        p  = icevec.vec4()
         p.setPt2RapPhiM2(pt2=pt2_value, rap=rap_value, phi=phi_value, m2=M**2)        
         
-        # Sample lifetime in the rest frame (sec)
-        t   = randexp(tau)[0]
+        ### Flight kinematics
 
-        # Compute decay distance (meter) in the lab
+        # Sample lifetime in the rest frame (sec)
+        t  = randexp(tau)[0]
+
+        # Compute decay length distance (meter) in the lab
         # beta = |p|/E, gamma = E/m
         t_lab = p.gamma * t
         d_lab = p.beta * p.gamma * c_const * t
 
+        # Create 4-position vector of the decay vertex in the lab frame
+        p3 = p.p3
+        x3 = (p3 / p.p3mod) * d_lab
+        x  = icevec.vec4(x=x3[0], y=x3[1], z=x3[2], t=t_lab)
 
-        t_values[i] = t_lab
-        d_values[i] = d_lab
-        beta_gamma_values[i] = p.gamma * p.beta
+        ### Save them
+        p4_arr.append(p)
+        x4_arr.append(x)
+
+    return p4_arr, x4_arr
 
 
-    return d_values
+def outer_sim_loop(M_values, ctau_values, pt2, rap, acc_func, N):
+    """
+    Simulation helper (wrapper) loop
 
-
-def outer_sim_loop(M_values, ctau_values, pt2, rap, ax, acceptance_func, N=100):
-
-    z = np.zeros((len(ctau_values), len(M_values)))
-    d = np.zeros((len(ctau_values), len(M_values)))
+    Returns:
+        Z: Acceptance probability matrix
+    """
+    Z = np.zeros((len(ctau_values), len(M_values)))
 
     for i in range(len(ctau_values)):
         for j in range(len(M_values)):
 
-            ctau      = ctau_values[i]
-            M         = M_values[j]
-            decay3pos = sim_loop(M=M, ctau=ctau, pt2=pt2, rap=rap, N=N)
+            ctau           = ctau_values[i]
+            M              = M_values[j]
+            p4_arr, x4_arr = resonance_generator(M=M, ctau=ctau, pt2=pt2, rap=rap, N=N)
 
             # Evaluate fiducial acceptance function
-            z[i,j] = np.max([np.sum(acceptance_func(decay3pos)) / N, 1/N])
+            Z[i,j] = np.max([np.sum(acc_func(p4=p4_arr, x4=x4_arr)) / N, 1/N])
 
-    # --------------------------------------------------------------------
-    # Plot it
-    from matplotlib.colors import LogNorm
-    x,y    = np.meshgrid(M_values, ctau_values)
-
-    # Turn into millimeters
-    y *= 1000
-
-    z_min, z_max = np.min(z), np.max(z)
-    
-    c = ax.pcolormesh(x, y, z, cmap='RdBu', norm=LogNorm(vmin=z.min(), vmax=z.max()), shading='auto')
-    ax.axis([x.min(), x.max(), y.min(), y.max()])
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-
-    return ax,c
+    return Z
 
 
-def outer_sim_loop_2(M, ctau, pt2_values, rap_values, ax, acceptance_func, N=100):
+def outer_sim_loop_2(M, ctau, pt2_values, rap_values, acc_func, N):
+    """
+    Simulation helper (wrapper) loop
 
-    z = np.zeros((len(pt2_values), len(rap_values)))
-    d = np.zeros((len(pt2_values), len(rap_values)))
+    Returns:
+        Z: Acceptance probability matrix
+    """
+    Z = np.zeros((len(pt2_values), len(rap_values)))
 
     for i in range(len(pt2_values)):
         for j in range(len(rap_values)):
 
-            pt2       = lambda : pt2_values[i]
-            rap       = lambda : rap_values[j]
-            decay3pos = sim_loop(M=M, ctau=ctau, pt2=pt2, rap=rap, N=N)
+            pt2            = lambda : pt2_values[i]
+            rap            = lambda : rap_values[j]
+            p4_arr, x4_arr = resonance_generator(M=M, ctau=ctau, pt2=pt2, rap=rap, N=N)
 
             # Evaluate fiducial acceptance function
-            z[i,j] = np.max([np.sum(acceptance_func(decay3pos)) / N, 1/N])
+            Z[i,j] = np.max([np.sum(acc_func(p4=p4_arr, x4=x4_arr)) / N, 1/N])
 
-    # --------------------------------------------------------------------
-    # Plot it
-    from matplotlib.colors import LogNorm
-
-    x,y    = np.meshgrid(rap_values, np.sqrt(pt2_values))
-    z_min, z_max = np.min(z), np.max(z)
-
-    c = ax.pcolormesh(x, y, z, cmap='RdBu', norm=LogNorm(vmin=z.min(), vmax=z.max()), shading='auto')
-    ax.axis([x.min(), x.max(), y.min(), y.max()])
-    #ax.set_xscale('log')
-    #ax.set_yscale('log')
-
-    return ax,c
+    return Z
 
 
-def test_acceptance_sim():
+def spherical_acceptance(p4, x4):
+    """
+    Spherical (geometric) acceptance function.
+    
+    Args:
+        p4: Array of 4-momentum
+        x4: Array of 4-position
+
+    Params:
+        R : Spherical detector radius (extend to more complex) [global]
+    
+    Returns:
+        Array of True/False for each event (accepted or not)
+    """
+    global R
+    d = np.array([x4[i].p3mod for i in range(len(x4))])
+
+    return d < R
+
+def set_aspect_true_equal(ax):
+    """
+    Set plot square sized.
+    """
+    ax = ax.set_aspect(np.diff(ax.get_xlim())/np.diff(ax.get_ylim()))
+    return ax
+
+def annotate_heatmap(x, y, Z, ax):
+    """
+    Annotate heatmap with text (broken function, fix TBD).
+    """
+    plt.sca(ax) # Activate axes
+    
+    for i in range(len(y)-1):
+        for j in range(len(x)-1):
+
+            yy = (y[i+1] + y[i])/2
+            xx = (x[j+1] + x[j])/2
+
+            plt.text(xx, yy, f'{Z[i,j]:0.1E}',
+                     horizontalalignment = 'center',
+                     verticalalignment   = 'center')
+    return ax
+
+
+def produce_acceptance_sim(N=1000):
     """
     Simulate fiducial (geometric) acceptance
+    by looping over (M,ctau) or (Pt,Rap) pairs, others being fixed.
     """
+    print('produce_acceptance_sim: Simulating LLP geometric acceptance maps ...')
 
-    # Number of events
-    N = 10000
+    global R
 
-    # --------------------------------------------------------------------
-    # (M,ctau) plots
+    ### (M,ctau) plots
 
     pt2_values  = np.array([2, 10, 50]) ** 2
     rap_values  = np.array([0, 2.5, 5])
     
-    ctau_values = np.logspace(-3,  2, 12)
-    M_values    = np.logspace(0.1, 2, 10)
+    ctau_values = np.logspace(-3,  2, 8)
+    M_values    = np.logspace(0.1, 2, 6)
 
     for R in [1,10]:
 
-        # Fiducial (geometric) acceptance function definition
-        def acceptance_func(decay3pos, daughter4mom=None):
-            return decay3pos < R
-        
         fig,ax = plt.subplots(len(pt2_values), len(rap_values), figsize=(12,12))
 
         for i in range(len(pt2_values)):
-            for j in range(len(rap_values)):
+            for j in tqdm(range(len(rap_values))):
 
                 # Define pt2 and rapidity distributions here!!
 
@@ -232,11 +272,22 @@ def test_acceptance_sim():
                 rap = lambda : U(0,4)
                 """
 
-                ax[i,j], c = outer_sim_loop(M_values=M_values, ctau_values=ctau_values, \
-                    pt2=pt2, rap=rap, N=N, acceptance_func=acceptance_func, ax=ax[i,j])
+                Z = outer_sim_loop(M_values=M_values, ctau_values=ctau_values, \
+                    pt2=pt2, rap=rap, N=N, acc_func=spherical_acceptance)
 
                 # ---------------------------
+                ### Plot it
+                from matplotlib.colors import LogNorm
+                x,y = np.meshgrid(M_values, ctau_values)
 
+                # Turn into millimeters
+                y *= 1000
+
+                c = ax[i,j].pcolor(x, y, Z, cmap='RdBu', norm=LogNorm(vmin=Z.min(), vmax=Z.max()), shading='auto')
+
+                ax[i,j].axis([x.min(), x.max(), y.min(), y.max()])
+                ax[i,j].set_xscale('log')
+                ax[i,j].set_yscale('log')
                 ax[i,j].set_title(f'[$P_t = {np.sqrt(pt2())}$ GeV, $Y = {rap()}$] | decay length $d \\leq {R:0.1f}$ m', fontsize=7)
 
                 if j == 0:
@@ -244,41 +295,48 @@ def test_acceptance_sim():
                 if i == len(pt2_values)-1:
                     ax[i,j].set_xlabel('$M$ (GeV)')
 
-                #if i == len(pt2_values)-1 and j == len(rap_values)-1:
-                #    fig.colorbar(c, ax=ax[i,j])
+                #ax[i,j] = annotate_heatmap(x=M_values, y=ctau_values, Z=Z, ax=ax[i,j])
+                
+                if j == len(rap_values)-1:
+                    fig.colorbar(c, ax=ax[i,j])
+                
+                #ax[i,j] = set_aspect_true_equal(ax=ax[i,j])
+                # ---------------------------
 
-        plt.savefig(f'LLP_geometric_acc_M_ctau_R={R:0.0f}.pdf', bbox_inches='tight')
+        plt.savefig(f'./figs/LLP_geometric_acc_M_ctau_R={R:0.0f}.pdf', bbox_inches='tight')
         plt.close()
 
-    # --------------------------------------------------------------------
-    # (rap, pt) plots
-
+    ### (Rap, Pt) plots
     M_values    = np.array([2, 10, 20])
     ctau_values = np.array([1E-1, 1e0, 1e1])
     
-    pt2_values  = np.linspace(0.1, 50, 12) ** 2
-    rap_values  = np.linspace(0, 5, 10)
+    pt2_values  = np.linspace(0.1, 50, 8) ** 2
+    rap_values  = np.linspace(0, 5, 6)
 
     for R in [1,10]:
-
-        # Fiducial (geometric) acceptance function definition
-        def acceptance_func(decay3pos, daughter4mom=None):
-            return decay3pos < R
-            #return (10 <= d) & (d <= 20) # "Shell-detector"
 
         fig,ax = plt.subplots(len(M_values), len(ctau_values), figsize=(12,12))
 
         for i in range(len(M_values)):
-            for j in range(len(ctau_values)):
+            for j in tqdm(range(len(ctau_values))):
 
                 M          = M_values[i]
                 ctau       = ctau_values[j]
 
-                ax[i,j], c = outer_sim_loop_2(M=M, ctau=ctau, \
-                    pt2_values=pt2_values, rap_values=rap_values, N=N, acceptance_func=acceptance_func, ax=ax[i,j])
+                Z = outer_sim_loop_2(M=M, ctau=ctau, \
+                    pt2_values=pt2_values, rap_values=rap_values, N=N, acc_func=spherical_acceptance)
 
                 # ---------------------------
+                ### Plot it
+                from matplotlib.colors import LogNorm
 
+                x,y = np.meshgrid(rap_values, np.sqrt(pt2_values))
+
+                c = ax[i,j].pcolor(x, y, Z, cmap='RdBu', norm=LogNorm(vmin=Z.min(), vmax=Z.max()), shading='auto')
+
+                ax[i,j].axis([x.min(), x.max(), y.min(), y.max()])
+                #ax[i,j].set_xscale('log')
+                #ax[i,j].set_yscale('log')
                 ax[i,j].set_title(f'[$M = {M}$ GeV, $c\\tau_0 = {ctau*1000}$ mm] | decay length $d \\leq {R:0.1f}$ m', fontsize=7)
 
                 if j == 0:
@@ -286,8 +344,15 @@ def test_acceptance_sim():
                 if i == len(M_values)-1:
                     ax[i,j].set_xlabel('rapidity $Y$')
 
-                #if i == len(pt2_values)-1 and j == len(rap_values)-1:
-                #    fig.colorbar(c, ax=ax[i,j])
+                #ax[i,j] = annotate_heatmap(x=rap_values, y=np.sqrt(pt2_values), Z=Z, ax=ax[i,j])
 
-        plt.savefig(f'LLP_geometric_acc_Rap_Pt_R={R:0.0f}.pdf', bbox_inches='tight')
+                if j == len(ctau_values)-1:
+                    fig.colorbar(c, ax=ax[i,j])
+
+                #ax[i,j] = set_aspect_true_equal(ax=ax[i,j])
+                # ---------------------------
+
+        plt.savefig(f'./figs/LLP_geometric_acc_Rap_Pt_R={R:0.0f}.pdf', bbox_inches='tight')
         plt.close()
+
+#produce_acceptance_sim()
