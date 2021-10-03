@@ -356,3 +356,26 @@ def produce_acceptance_sim(N=1000):
         plt.close()
 
 #produce_acceptance_sim()
+
+def test_toy_pt_spectrum():
+
+    pt2 = randpow(a=10**2, b=13000**2, g=-0.7, size=10000)
+    pt  = np.sqrt(pt2)
+    
+    print(f'<pt> = {np.mean(pt)}')
+
+    fig,ax = plt.subplots(2, 1)
+    
+    bins = np.linspace(1, 220,100)
+    ax[0].hist(pt, bins)
+    ax[0].set_xlabel('$p_T$ (GeV)')
+    
+    
+    bins = np.logspace(np.log10(1), np.log10(220), 100)
+    ax[1].hist(pt, bins)
+    ax[1].set_yscale('log')
+    ax[1].set_xscale('log')
+    ax[1].set_xlabel('$p_T$ (GeV)')
+
+    plt.show()
+
