@@ -11,9 +11,9 @@ Preliminaries: Conda installation
 ----------------------------------
 .. code-block:: none
 
-	wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
+	wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
 
-Then add rights (chmod +x) and execute with './filename.sh'
+Then execute with 'bash filename.sh'
 
 
 Pre-installed CUDA paths (optional)
