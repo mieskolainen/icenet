@@ -21,5 +21,5 @@ docs/source/notes/installation.rst
 </br>
 </br>
 
-Mikael Mieskolainen, 2021\
+Mikael Mieskolainen, 2021 \
 m.mieskolainen@imperial.ac.uk
