@@ -5,7 +5,8 @@
 # Run with: source runme.sh
 
 CONFIG="tune0"
-DATAPATH="/home/user/cernbox/HLT_electrons"
+
+DATAPATH="./travis-stash/input/icetrg"
 
 # Use * or other glob wildcards for filenames
 mkdir ./figs/trg/$CONFIG -p # for output ascii dump

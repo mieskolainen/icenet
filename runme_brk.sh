@@ -6,8 +6,8 @@
 
 CONFIG="tune0"
 
-#DATAPATH="/home/user/imperial_trees/georges_trees"
-DATAPATH="/home/user/imperial_trees/bparking_April"
+DATAPATH="./travis-stash/input/icebrk"
+
 
 # Training
 python ./analysis/brk_train.py --config $CONFIG --datapath $DATAPATH --datasets 0

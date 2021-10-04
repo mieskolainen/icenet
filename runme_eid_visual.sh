@@ -6,11 +6,7 @@
 
 CONFIG="tune0"
 
-#DATAPATH="/home/user/vols/cms/icenet/2020Oct16/"
-DATAPATH="/home/user/imperial_new_trees"
-#DATAPATH="/home/user/imperial_old_trees"
-#DATAPATH="/vols/cms/icenet/data/2020Oct16/"
-
+DATAPATH="./travis-stash/input/iceid"
 
 # Use * or other glob wildcards for filenames
 

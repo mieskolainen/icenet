@@ -4,11 +4,7 @@
 #
 # Run with: source runme.sh
 
-DATAPATH="/home/user/imperial_trees/2019sep13"
-#DATAPATH="/home/user/imperial_new_trees"
-#DATAPATH="/home/user/imperial_old_trees"
-#DATAPATH="/vols/cms/icenet/data/2020Oct16/"
-
+DATAPATH="./travis-stash/input/iceid"
 
 # Use * or other glob wildcards for filenames
 #CONFIG="unit_rw_none"
