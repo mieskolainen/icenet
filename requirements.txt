@@ -1,3 +1,7 @@
+# XGBOOST
+https://s3-us-west-2.amazonaws.com/xgboost-nightly-builds/release_1.5.0/xgboost-1.5.0rc1%2Bc4aff733bbba2dfee15fbba182875c0a13d714d2-py3-none-manylinux2014_x86_64.whl
+
+# OTHERS
 ray
 tabulate
 hyperopt

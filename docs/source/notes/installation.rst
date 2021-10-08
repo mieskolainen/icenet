@@ -98,17 +98,14 @@ Show Tensorflow and Pytorch GPU support in Python
 	print(torch.cuda.get_device_name(0))
 
 
-Conda virtual environment setup
+Conda virtual environment commands
 --------------------------------
 .. code-block:: none
 
 	conda create -y --name icenet python==3.8.5
 	conda activate icenet
-	conda install -c conda-forge --file requirements.txt
-	
-	* xgboost, pytorch, torch-geometric ... setup now inside the environment *
 
-	...[do your work]...
+	...[install dependencies with pip, do your work]...
 	
 	conda deactivate
 
@@ -117,43 +114,3 @@ Conda virtual environment setup
 	
 	# Remove environment completely
 	conda env remove --name icenet
-
-
-XGBoost setup
---------------
-.. code-block:: none
-
-	# Pick CPU or GPU version
-
-	conda install -c conda-forge py-xgboost
-	conda install -c nvidia -c rapidsai py-xgboost
-
-
-Pytorch and torchvision setup
-------------------------------
-
-.. code-block:: none
-
-	# Pick CPU or GPU version below
-	# Check maximum CUDA version supported by your drivers with nvidia-smi
-	
-	conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
-	conda install pytorch==1.7.1 torchvision==0.8.2 -c pytorch
-
-Pytorch-geometric setup
---------------------------
-
-.. code-block:: none
-	
-	# Pick CPU or GPU version below
-	
-	export CUDA=cpu
-	export CUDA=cu110 # (or cu92, cu101, cu110)
-	
-	pip install torch-scatter==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
-	pip install torch-sparse==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
-	pip install torch-cluster==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
-	pip install torch-spline-conv==latest+$CUDA -f https://pytorch-geometric.com/whl/torch-1.7.0.html
-	pip install torch-geometric
-
-
