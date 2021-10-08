@@ -32,7 +32,7 @@ Fully automated setup
 	git clone https://github.com/mieskolainen/icenet && cd icenet
 	
 	# Create environment
-	conda create -y --name icenet python==3.8.5
+	conda create -y --name icenet python==3.9.6
 	conda activate icenet
 	
 	# Install cudatoolkit and cudnn (make sure no other installations overlap)
@@ -102,7 +102,7 @@ Conda virtual environment commands
 --------------------------------
 .. code-block:: none
 
-	conda create -y --name icenet python==3.8.5
+	conda create -y --name icenet python==3.9.6
 	conda activate icenet
 
 	...[install dependencies with pip, do your work]...
