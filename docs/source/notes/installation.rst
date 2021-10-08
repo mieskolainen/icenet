@@ -25,7 +25,7 @@ Pre-installed CUDA paths (optional)
 This can be used with IC machines, however, is not needed with conda driven setup.
 
 
-Fully automated setup
+Automated setup
 ----------------------------------
 .. code-block:: none
 
