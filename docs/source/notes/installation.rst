@@ -52,6 +52,13 @@ Note: If you experience ´No space left on device´ problem with pip, set the te
 	export TMPDIR=$HOME/tmp
 
 
+Note: If you experience ´OSError: libcusparse.so.11´ with torch-geometric, set the system path
+
+.. code-block:: none
+
+	export LD_LIBRARY_PATH="$HOME/anaconda3/envs/icenet/lib:$LD_LIBRARY_PATH"
+
+
 Note: If you experience ´Could not load dynamic library libcusolver.so.10´ with tensorflow, make a symbolic link
 
 .. code-block:: none

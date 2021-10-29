@@ -63,7 +63,7 @@ class SuperEdgeConv(MessagePassing):
         return '{}(nn={})'.format(self.__class__.__name__, self.nn)
 
 
-def MLP(channels, batch_norm=True):
+def MLP(channels, activation='relu', batch_norm=True):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     
@@ -74,11 +74,16 @@ def MLP(channels, batch_norm=True):
         nn.sequential object
     
     """
+    if activation == 'relu':
+        print(f'MLP: Using relu activation')
+    else:
+        print(f'MLP: Using tanh activation')
+
     if batch_norm:
         return nn.Sequential(*[
             nn.Sequential(
                 nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU(),
+                nn.ReLU() if activation == 'relu' else nn.Tanh(),
                 nn.BatchNorm1d(channels[i])
             )
             for i in range(1,len(channels))
@@ -87,7 +92,7 @@ def MLP(channels, batch_norm=True):
         return nn.Sequential(*[
             nn.Sequential(
                 nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU()
+                nn.ReLU() if activation == 'relu' else nn.Tanh()
             )
             for i in range(1,len(channels))
         ])

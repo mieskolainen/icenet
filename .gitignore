@@ -4,6 +4,7 @@
 *.profile
 *.hd5
 *.pkl
+*.pt
 *.zip
 *.txt
 travis-stash/
@@ -12,6 +13,11 @@ tensorboard/
 data/
 trash/
 dev/
+
+# torch-geometric test data
+tests/Planetoid
+
+# 
 .ipynb_checkpoints
 style_output/
 debug_output/
