@@ -119,6 +119,10 @@
 <span class="sd">             parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Functions use internally AND and OR</span>
+    <span class="n">instring</span> <span class="o">=</span> <span class="n">instring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;AND&quot;</span><span class="p">)</span>
+    <span class="n">instring</span> <span class="o">=</span> <span class="n">instring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;||&quot;</span><span class="p">,</span> <span class="s2">&quot;OR&quot;</span><span class="p">)</span>    
+
     <span class="k">def</span> <span class="nf">makeLRlike</span><span class="p">(</span><span class="n">numterms</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        parse action -maker</span>
@@ -371,8 +375,8 @@
 <span class="sd">    Unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">expr_A</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 AND z &gt;= 4&#39;</span>
-    <span class="n">expr_B</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND (y &lt; 2 AND z &gt;= 4)&#39;</span>
-    <span class="n">expr_C</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 OR z &gt;= 4&#39;</span>
+    <span class="n">expr_B</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND (y &lt; 2 &amp;&amp; z &gt;= 4)&#39;</span>
+    <span class="n">expr_C</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 &amp;&amp; y &lt; 2 || z &gt;= 4&#39;</span>
     
     <span class="n">treelist_A</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_A</span><span class="p">)</span>
     <span class="n">treelist_B</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_B</span><span class="p">)</span>
