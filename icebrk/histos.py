@@ -24,7 +24,7 @@ obs_M = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0.0, 10.0, 0.1),
+'bins'    : np.arange(0.0, 10.0 + 0.1, 0.1),
 'density' : False,
 
 # Function to calculate
@@ -46,7 +46,7 @@ obs_Pt = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0, 25.0, 1.0),
+'bins'    : np.arange(0.0, 25.0 + 1.0, 1.0),
 'density' : False,
  
 # Function to calculate
@@ -68,7 +68,7 @@ obs_q2 = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0, 12, 0.4),
+'bins'    : np.arange(0, 12 + 0.4, 0.4),
 'density' : False,
  
 # Function to calculate
@@ -90,7 +90,7 @@ obs_pt_l1 = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0, 12, 0.5),
+'bins'    : np.arange(0, 12 + 0.5, 0.5),
 'density' : False,
  
 # Function to calculate
@@ -112,7 +112,7 @@ obs_pt_l2 = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0, 12, 0.5),
+'bins'    : np.arange(0, 12 + 0.5, 0.5),
 'density' : False,
  
 # Function to calculate
@@ -134,7 +134,7 @@ obs_pt_k = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0, 12, 0.5),
+'bins'    : np.arange(0, 12 + 0.5, 0.5),
 'density' : False,
  
 # Function to calculate
@@ -157,7 +157,7 @@ obs_first_t3i = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(-1, 20, 1),
+'bins'    : np.arange(-1, 20 + 1, 1),
 'density' : False,
  
 # Function to calculate
@@ -179,7 +179,7 @@ obs_last_t3i = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(-1, 20, 0.5),
+'bins'    : np.arange(-1, 20 + 0.5, 0.5),
 'density' : False,
  
 # Function to calculate
@@ -201,7 +201,7 @@ obs_N_signal_t3 = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(-1, 20, 0.5),
+'bins'    : np.arange(-1, 20 + 0.5, 0.5),
 'density' : False,
  
 # Function to calculate

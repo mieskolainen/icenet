@@ -8,7 +8,6 @@
 
 
 import uproot
-import uproot_methods
 import numpy as np
 import networkx 
 import itertools

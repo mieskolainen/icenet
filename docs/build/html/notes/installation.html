@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Introduction" href="introduction.html" />
+    <link rel="prev" title="icenet Documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="markup.html">Markup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmssw.html">CMSSW setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cmssw.html#preliminaries-ssh-public-key-to-github">Preliminaries: SSH public key to github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmssw.html#preliminaries-cmssw-release-setup">Preliminaries: CMSSW release setup</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icefit.html#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The framework installation goes as follows.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#preliminaries-conda-installation" id="id1">Preliminaries: Conda installation</a></p></li>
+<li><p><a class="reference internal" href="#pre-installed-cuda-paths-optional" id="id2">Pre-installed CUDA paths (optional)</a></p></li>
+<li><p><a class="reference internal" href="#automated-setup" id="id3">Automated setup</a></p></li>
+<li><p><a class="reference internal" href="#gpu-support-commands" id="id4">GPU-support commands</a></p></li>
+<li><p><a class="reference internal" href="#conda-virtual-environment-commands" id="id5">Conda virtual environment commands</a></p></li>
+</ul>
+</div>
+<section id="preliminaries-conda-installation">
+<h2><a class="toc-backref" href="#id1">Preliminaries: Conda installation</a><a class="headerlink" href="#preliminaries-conda-installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+</pre></div>
+</div>
+<p>Then execute with ‘bash filename.sh’</p>
+</section>
+<section id="pre-installed-cuda-paths-optional">
+<h2><a class="toc-backref" href="#id2">Pre-installed CUDA paths (optional)</a><a class="headerlink" href="#pre-installed-cuda-paths-optional" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>source /vols/software/cuda/setup.sh 11.2.0
+</pre></div>
+</div>
+<p>This can be used with IC machines, however, is not needed with conda driven setup.</p>
+</section>
+<section id="automated-setup">
+<h2><a class="toc-backref" href="#id3">Automated setup</a><a class="headerlink" href="#automated-setup" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/mieskolainen/icenet &amp;&amp; cd icenet
+
+# Create environment
+conda create -y --name icenet python==3.9.6
+conda activate icenet
+
+# Install cudatoolkit and cudnn (make sure no other installations overlap)
+conda install -c nvidia cudatoolkit==11.1.74 cudnn==8.0.4
+conda install -c conda-forge cudatoolkit-dev
+
+# Pick GPU or CPU version (GPU version works for CPU too)
+pip install -r requirements-gpu-linux.txt
+pip install -r requirements-cpu-linux.txt
+</pre></div>
+</div>
+<p>Note: If you experience ´No space left on device´ problem with pip, set the temporary path</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir $HOME/tmp
+export TMPDIR=$HOME/tmp
+</pre></div>
+</div>
+<p>Note: If you experience ´OSError: libcusparse.so.11´ with torch-geometric, set the system path</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export LD_LIBRARY_PATH=&quot;$HOME/anaconda3/envs/icenet/lib:$LD_LIBRARY_PATH&quot;
+</pre></div>
+</div>
+<p>Note: If you experience ´Could not load dynamic library libcusolver.so.10´ with tensorflow, make a symbolic link</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ln -s ~/anaconda3/envs/icenet/lib/libcusolver.so.11 ~/anaconda3/envs/icenet/lib/libcusolver.so.10
+</pre></div>
+</div>
+<p>Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
+removing e.g. ´tensorflow´ from requirements.txt, and install it separately with</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install tensorflow
+</pre></div>
+</div>
+<p>Then if something else fails, study the instructions step-by-step below.</p>
+</section>
+<section id="gpu-support-commands">
+<h2><a class="toc-backref" href="#id4">GPU-support commands</a><a class="headerlink" href="#gpu-support-commands" title="Permalink to this headline">¶</a></h2>
+<p>Show the graphics card status</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>nvidia-smi
+</pre></div>
+</div>
+<p>Show CUDA-compiler tools status</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>nvcc --version
+</pre></div>
+</div>
+<p>Show Tensorflow and Pytorch GPU support in Python</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>import tensorflow
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+
+import torch
+torch.cuda.is_available()
+print(torch.cuda.get_device_name(0))
+</pre></div>
+</div>
+</section>
+<section id="conda-virtual-environment-commands">
+<h2><a class="toc-backref" href="#id5">Conda virtual environment commands</a><a class="headerlink" href="#conda-virtual-environment-commands" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.9.6
+conda activate icenet
+
+...[install dependencies with pip, do your work]...
+
+conda deactivate
+
+conda info --envs
+conda list --name icenet
+
+# Remove environment completely
+conda env remove --name icenet
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="icenet Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

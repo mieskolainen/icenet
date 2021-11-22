@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icefit.jacobian &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/markup.html">Markup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/cmssw.html">CMSSW setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/cmssw.html#preliminaries-ssh-public-key-to-github">Preliminaries: SSH public key to github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/cmssw.html#preliminaries-cmssw-release-setup">Preliminaries: CMSSW release setup</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-aux-torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>icefit.jacobian</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icefit.jacobian</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Torch autograd Jacobians, Hessians and related</span>
+<span class="c1"># </span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torch.autograd</span> <span class="kn">import</span> <span class="n">Variable</span>
+<span class="kn">from</span> <span class="nn">torch.autograd.functional</span> <span class="kn">import</span> <span class="n">jacobian</span>
+
+
+<div class="viewcode-block" id="get_gradient"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_gradient">[docs]</a><span class="k">def</span> <span class="nf">get_gradient</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return derivative df(x)/dx or gradient vectors</span>
+<span class="sd">    for f: R^n -&gt; R</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># We start to track gradients from here</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># Higher dimensional output</span>
+        <span class="k">return</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">z</span><span class="p">)],</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span></div>
+
+
+<div class="viewcode-block" id="get_jacobian"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_jacobian">[docs]</a><span class="k">def</span> <span class="nf">get_jacobian</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return Jacobian matrix of size m x n</span>
+<span class="sd">    of a function f: R^n -&gt; R^m</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+    <span class="n">n</span>    <span class="o">=</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Input dim</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">size</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dim_input</span> <span class="o">=</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dim_input</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">test</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Output dim</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dim_output</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dim_output</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">dim_output</span><span class="p">,</span> <span class="n">dim_input</span><span class="p">))</span>
+
+    <span class="c1"># Loop over all batch samples</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">dim_output</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dim_output</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">z</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dim_output</span><span class="p">))</span>
+
+        <span class="n">J</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">J</span></div>
+
+
+<div class="viewcode-block" id="get_full_hessian"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_full_hessian">[docs]</a><span class="k">def</span> <span class="nf">get_full_hessian</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the full Hessian matrix of a neural net (can be very slow)</span>
+<span class="sd">    </span>
+<span class="sd">    https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/readings/L02_Taylor_approximations.pdf</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        loss: neural net loss function</span>
+<span class="sd">        param: neural net parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+    
+    <span class="n">loss_grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqmd</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
+        <span class="n">grad2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_grad</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">param</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">H</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">grad2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">H</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def get_hessian(inputs, func, **kwargs):</span>
+<span class="sd">    </span>
+<span class="sd">    The Hessian matrix of a function of is the Jacobian matrix of the gradient of the function f.</span>
+<span class="sd">    </span>
+<span class="sd">    H(f(x)) = J(grad(f(x))</span>
+<span class="sd">    </span>
+<span class="sd">    Note that sometimes Hessian is approximated using a product of Jacobians as JJ^T</span>
+
+<span class="sd">    TBD: Do we assume derivatives commute here (c.f. Grasmann variables) ?</span>
+<span class="sd">&quot;&quot;&quot;</span> 
+
+
+<div class="viewcode-block" id="observed_fisher_info"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.observed_fisher_info">[docs]</a><span class="k">def</span> <span class="nf">observed_fisher_info</span><span class="p">(</span><span class="n">logL</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Observed Fisher information -- the negative of the second derivative</span>
+<span class="sd">    (Hessian matrix) of the log-likelihood function.</span>
+
+<span class="sd">    The observed information is typically evaluated at the maximum-likelihood estimate of theta.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;Fisher information represents the curvature of the relative entropy&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        logL:   The log-likelihood function l(theta|X1,...X_n) = sum_{i=1}^n log f(X_i|theta),</span>
+<span class="sd">                with X_i being the independent random observations</span>
+<span class="sd">        inputs: log-likelihood function input</span>
+<span class="sd">    </span>
+<span class="sd">    References:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Observed_information</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Optimal_design</span>
+
+<span class="sd">        Efron, B.; Hinkley, D.V. (1978).</span>
+<span class="sd">        &quot;Assessing the accuracy of the maximum likelihood estimator:</span>
+<span class="sd">         Observed versus expected Fisher Information&quot;. Biometrika. 65 (3): 457–487.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">logL</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">I</span></div>
+
+
+<div class="viewcode-block" id="test_hessians"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_hessians">[docs]</a><span class="k">def</span> <span class="nf">test_hessians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test Hessian matrix computations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">func_f1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># R^3 -&gt; R</span>
+        <span class="c1">#</span>
+        <span class="c1"># Input dim: n_batches x 3</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">H_1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Hessian for func_f1</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
+
+    <span class="k">def</span> <span class="nf">func_f2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># R^3 -&gt; R</span>
+        <span class="c1">#</span>
+        <span class="c1"># Input dim: n_batches x 3</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">H_2</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="c1"># Hessian for func_f2</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">sin</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span>
+        <span class="n">cos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)],</span>
+                          <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)],</span>
+                          <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">),</span> <span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">)]])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+
+        <span class="c1">### TEST CASE 1</span>
+        <span class="n">x</span>          <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+        <span class="n">H_auto</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f1</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">H_analytic</span> <span class="o">=</span> <span class="n">H_1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">H_auto</span> <span class="o">-</span> <span class="n">H_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+
+
+        <span class="c1">### TEST CASE 2</span>
+        <span class="n">x</span>          <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+        <span class="n">H_auto</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f2</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">H_analytic</span> <span class="o">=</span> <span class="n">H_2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">H_auto</span> <span class="o">-</span> <span class="n">H_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span></div>
+
+
+<div class="viewcode-block" id="test_dimension_interfaces"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_dimension_interfaces">[docs]</a><span class="k">def</span> <span class="nf">test_dimension_interfaces</span><span class="p">():</span>
+    <span class="c1"># Test different dimensional input-output.</span>
+    
+    <span class="kn">import</span> <span class="nn">pytest</span>
+
+    <span class="k">def</span> <span class="nf">fx_R_R</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R -&gt; R</span>
+        
+        <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">;</span>
+
+    <span class="k">def</span> <span class="nf">fx_R3_R</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R^3 -&gt; R</span>
+        
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fx_R_R3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R -&gt; R^3</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">fx_R3_R3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R^3 -&gt; R^3</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">fx_R3_R4</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R^3 -&gt; R^4</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">fx_R4_R3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Function f: R^4 -&gt; R^3</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="c1"># Number of samples</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1"># Dimensions</span>
+    <span class="n">dim_domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">dim_range</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">d_in</span> <span class="ow">in</span> <span class="n">dim_domain</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d_out</span> <span class="ow">in</span> <span class="n">dim_range</span><span class="p">:</span>
+
+            <span class="c1"># Test input vector with arbitrary 1,2,3,4... elements</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d_in</span><span class="p">)</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="k">if</span>   <span class="n">d_in</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R_R</span><span class="p">;</span>
+            <span class="k">elif</span> <span class="n">d_in</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R_R3</span><span class="p">;</span>
+            <span class="k">elif</span> <span class="n">d_in</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R3_R</span><span class="p">;</span>
+            <span class="k">elif</span> <span class="n">d_in</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R3_R3</span><span class="p">;</span>
+            <span class="k">elif</span> <span class="n">d_in</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R3_R4</span><span class="p">;</span>
+            <span class="k">elif</span> <span class="n">d_in</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">d_out</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">fx_R4_R3</span><span class="p">;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span> <span class="c1"># Did not found test case</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;----------------------------------------------------------&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;f: R^</span><span class="si">{</span><span class="n">d_in</span><span class="si">}</span><span class="s1"> -&gt; R^</span><span class="si">{</span><span class="n">d_out</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;x        = </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;f(x)     = </span><span class="si">{</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;df(x)/dx = </span><span class="si">{</span><span class="n">get_gradient</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1"> (get_gradient)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;df(x)/dx = </span><span class="si">{</span><span class="n">get_jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1"> (get_jacobian)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;df(x)/dx = </span><span class="si">{</span><span class="n">jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1"> (jacobian)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_jacobians"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_jacobians">[docs]</a><span class="k">def</span> <span class="nf">test_jacobians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+    
+    <span class="c1">#Test Jacobians from:</span>
+    <span class="c1">#https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant</span>
+    
+    <span class="kn">import</span> <span class="nn">pytest</span>
+
+    <span class="k">def</span> <span class="nf">func_f1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># R^2 -&gt; R^2</span>
+        <span class="c1">#</span>
+        <span class="c1"># n_batches x 2</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="mi">5</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">def</span> <span class="nf">J_f1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># This will accept only one sample (batch size = 1)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])]])</span>
+        <span class="k">return</span> <span class="n">J</span>
+
+    <span class="k">def</span> <span class="nf">func_f2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Polar-Cartesian</span>
+        <span class="c1"># R_+ x [0, 2\pi) -&gt; R^2</span>
+        <span class="c1"># </span>
+        <span class="c1"># n_batches x 2</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">def</span> <span class="nf">J_f2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># This will accept only one sample (batch size = 1)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])]])</span>
+        <span class="k">return</span> <span class="n">J</span>
+
+    <span class="k">def</span> <span class="nf">func_f3</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Polar-Cartesian</span>
+        <span class="c1"># R_+ x [0, 2\pi) x [0, 2\pi) -&gt; R^3</span>
+        <span class="c1"># </span>
+        <span class="c1"># n_batches x 2</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]),</span> 
+                             <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]),</span>
+                             <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">def</span> <span class="nf">J_f3</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># This will accept only one sample (batch size = 1)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span> 
+                          <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>  <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                          <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>  <span class="mi">0</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">J</span>
+    
+    <span class="k">def</span> <span class="nf">func_f4</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># R^3 -&gt; R^4</span>
+        <span class="c1"># </span>
+        <span class="c1"># n_batches x 2</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">5</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">def</span> <span class="nf">J_f4</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># This will accept only one sample (batch size = 1)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">],</span> 
+                          <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span> <span class="p">],</span>
+                          <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+                          <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])]])</span>
+        <span class="k">return</span> <span class="n">J</span>
+
+
+    <span class="c1"># Test with random input</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        
+        <span class="c1">### TEST CASE 1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+
+        <span class="n">J_auto</span>     <span class="o">=</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f1</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">J_analytic</span> <span class="o">=</span> <span class="n">J_f1</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">J_auto</span> <span class="o">-</span> <span class="n">J_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+
+
+        <span class="c1">### TEST CASE 2</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>    <span class="o">*=</span> <span class="mi">1000</span>
+        <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>    <span class="o">*=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="n">J_auto</span>     <span class="o">=</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f2</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">J_analytic</span> <span class="o">=</span> <span class="n">J_f2</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">J_auto</span> <span class="o">-</span> <span class="n">J_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+
+
+        <span class="c1">### TEST CASE 3</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+        <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>    <span class="o">*=</span> <span class="mi">1000</span>
+        <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>    <span class="o">*=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>    <span class="o">*=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="n">J_auto</span>     <span class="o">=</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f3</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">J_analytic</span> <span class="o">=</span> <span class="n">J_f3</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
+        
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">J_auto</span> <span class="o">-</span> <span class="n">J_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+
+
+        <span class="c1">### TEST CASE 4</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+
+        <span class="n">J_auto</span>     <span class="o">=</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func_f4</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">J_analytic</span> <span class="o">=</span> <span class="n">J_f4</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">J_auto</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">J_analytic</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">J_auto</span> <span class="o">-</span> <span class="n">J_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

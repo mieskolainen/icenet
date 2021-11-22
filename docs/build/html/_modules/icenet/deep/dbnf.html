@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icenet.deep.dbnf &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>icenet.deep.dbnf</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icenet.deep.dbnf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Block Neural Autoregressive Flow (BNAF)</span>
+<span class="c1"># Generative (Neural Likelihood) Functions</span>
+<span class="c1">#</span>
+<span class="c1"># https://arxiv.org/abs/1904.04676</span>
+<span class="c1"># https://github.com/nicola-decao/BNAF (MIT license)</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">torch.utils</span> <span class="kn">import</span> <span class="n">data</span>
+
+
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dopt</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="n">bnaf</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="n">tools</span> <span class="kn">import</span> <span class="nn">aux</span>
+
+
+<div class="viewcode-block" id="compute_log_p_x"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.compute_log_p_x">[docs]</a><span class="k">def</span> <span class="nf">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Model log-likelihood: log [ prod_{j=1}^N pdf(x_j)], where x ~ (iid) pdf(x)</span>
+<span class="sd">    </span>
+<span class="sd">    log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        model : model object</span>
+<span class="sd">        x     : N minibatch vectors</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        log-likelihood value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Evaluate the non-diagonal and the diagonal part</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">log_diag</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># Sum of log-likelihoods (log product)</span>
+    <span class="n">log_p_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">log_p_y</span> <span class="o">+</span> <span class="n">log_diag</span></div>
+
+
+<div class="viewcode-block" id="get_pdf"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.get_pdf">[docs]</a><span class="k">def</span> <span class="nf">get_pdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Evaluate learned density (pdf) at point x</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        model :  model object</span>
+<span class="sd">        x     :  input vector(s)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pdf value</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt; x = torch.tensor([[1.0, 2.0]])</span>
+<span class="sd">        &gt; l = get_pdf(model,x)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="predict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.predict">[docs]</a><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        param    : input parameters</span>
+<span class="sd">        X        : pytorch tensor of vectors</span>
+<span class="sd">        models   : list of model objects</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        LLR      : log-likelihood ratio</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Likelihood (density) ratio pdf(x,S)/pdf(x,B) for N = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> events ...&#39;</span><span class="p">)</span>
+
+    <span class="n">sgn_likelihood</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    <span class="n">bgk_likelihood</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    
+    <span class="n">LLR</span> <span class="o">=</span> <span class="n">sgn_likelihood</span> <span class="o">/</span> <span class="p">(</span><span class="n">bgk_likelihood</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">LLR</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">LLR</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">return</span> <span class="n">LLR</span></div>
+
+
+<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialization &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">W</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generates one sample of data &quot;&quot;&quot;</span>
+        <span class="c1"># Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">trn_x</span><span class="p">,</span> <span class="n">val_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Train the model density.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model       : initialized model object</span>
+<span class="sd">        optimizer   : optimizer object</span>
+<span class="sd">        scheduler   : optimization scheduler</span>
+<span class="sd">        trn_x       : training vectors</span>
+<span class="sd">        val_x       : validation vectors</span>
+<span class="sd">        trn_weights : training weights</span>
+<span class="sd">        param       : parameters</span>
+<span class="sd">        modeldir    : directory to save the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
+
+    <span class="c1"># TensorboardX</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;modelname&#39;</span><span class="p">]))</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;shuffle&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;num_workers&#39;</span> <span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;pin_memory&#39;</span>  <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+    <span class="c1"># Training generator</span>
+    <span class="n">training_set</span>         <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">trn_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">)</span>
+    <span class="n">training_generator</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    
+    <span class="c1"># Validation generator</span>
+    <span class="n">validation_set</span>       <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">TensorDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">val_x</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">validation_generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Training loop</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">88</span><span class="p">):</span>
+
+        <span class="n">train_loss</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">permutation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">((</span><span class="n">trn_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">training_generator</span><span class="p">:</span>
+
+            <span class="c1"># Transfer to GPU</span>
+            <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="c1"># Noise regularization</span>
+            <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">noise</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">batch_x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                    <span class="n">std</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">batch_x</span> <span class="o">=</span> <span class="n">batch_x</span> <span class="o">+</span> <span class="n">noise</span>
+
+
+            <span class="c1"># Per sample weights</span>
+            <span class="n">log_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">batch_weights</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+            
+            <span class="c1"># Weighted negative log-likelihood loss</span>
+            <span class="n">lossvec</span> <span class="o">=</span> <span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch_x</span><span class="p">)</span>
+            <span class="n">loss</span>    <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">+</span> <span class="n">log_weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            
+            
+            <span class="c1"># Zero gradients, calculate loss, calculate gradients and update parameters</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">max_norm</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;clip_norm&#39;</span><span class="p">])</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="n">train_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+        <span class="n">train_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+
+        <span class="c1"># Compute validation loss (without weighting)</span>
+        <span class="n">validation_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch_x</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                                        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="ow">in</span> <span class="n">validation_generator</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+        
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">{:3}</span><span class="s1">/</span><span class="si">{:3}</span><span class="s1"> -- train_loss: </span><span class="si">{:4.3f}</span><span class="s1"> -- validation_loss: </span><span class="si">{:4.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()))</span>
+
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">,</span>
+            <span class="n">callback_best</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">),</span>
+            <span class="n">callback_reduce</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lr&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="k">break</span>
+    
+    <span class="c1"># Re-load the model        </span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> \
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)()</span>
+
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+    <span class="n">validation_loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x_mb</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                                     <span class="k">for</span> <span class="n">x_mb</span><span class="p">,</span> <span class="ow">in</span> <span class="n">validation_generator</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;###### Stop training after </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> epochs!&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Validation loss: </span><span class="si">{</span><span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">4.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_model"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.create_model">[docs]</a><span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rngseed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Construct the network object.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        param : parameters</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        model : model object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># For random permutations</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rngseed</span><span class="p">)</span>
+    
+    <span class="n">flows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]):</span>
+
+        <span class="c1"># Layers of the flow block</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]):</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span>
+                                       <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]))</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tanh</span><span class="p">())</span>
+        
+        <span class="c1"># Add this flow block</span>
+        <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">BNAF</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]),</span> <span class="n">Tanh</span><span class="p">()]</span> <span class="o">+</span> \
+                   <span class="n">layers</span> <span class="o">+</span> \
+                   <span class="p">[</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">])]),</span>\
+                 <span class="n">res</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;residual&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Flow permutations</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Permutation</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;perm&#39;</span><span class="p">]))</span>
+
+    <span class="c1"># Create the model</span>
+    <span class="n">model</span>  <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">flows</span><span class="p">)</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="c1"># Print model information    </span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameters=</span><span class="si">{}</span><span class="s1">, n_dims=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="load_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.load_models">[docs]</a><span class="k">def</span> <span class="nf">load_models</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">modelnames</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load models from files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">modelnames</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_models: Loading model[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] from </span><span class="si">{</span><span class="n">modelnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">model</span>      <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">filename</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">modelnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> \
+            <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">],</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
+        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        
+        <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
+
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">models</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

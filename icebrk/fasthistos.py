@@ -24,7 +24,7 @@ obs_template = {
 'figsize' : (4,4),
 
 # Histogramming
-'bins'    : iceplot.stepspace(0.0, 10.0, 0.1),
+'bins'    : np.arange(0.0, 10.0 + 0.1, 0.1),
 'density' : False,
 
 # Function to calculate

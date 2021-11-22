@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icenet.tools.aux &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>icenet.tools.aux</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icenet.tools.aux</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Auxialary functions</span>
+<span class="c1"># </span>
+<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
+
+<span class="kn">import</span> <span class="nn">icenet.tools.prints</span> <span class="k">as</span> <span class="nn">prints</span>
+<span class="kn">import</span> <span class="nn">icenet.tools.stx</span> <span class="k">as</span> <span class="nn">stx</span>
+
+
+<div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generator which returns approx equally sized chunks.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        a : Total number</span>
+<span class="sd">        n : Number of chunks</span>
+<span class="sd">    Example:</span>
+<span class="sd">        list(split(10, 3))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">):(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns approx equally sized chunks.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        a : Total number</span>
+<span class="sd">        n : Number of chunks</span>
+<span class="sd">    Example:</span>
+<span class="sd">        list(split(10, 3))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)):</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Targets statistics printout</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        events :     uproot object</span>
+<span class="sd">        ids    :     list of branch identifiers</span>
+<span class="sd">        entrystart:  uproot starting point</span>
+<span class="sd">        entrystop :  uproot ending point</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Printout on stdout</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">K</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new</span><span class="p">:</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="n">entrystart</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entrystop</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: vec.shape = </span><span class="si">{</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="longvec2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.longvec2matrix">[docs]</a><span class="k">def</span> <span class="nf">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A matrix representation / dimension converter function.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        X:     Input matrix</span>
+<span class="sd">        M:     Number of set elements</span>
+<span class="sd">        D:     Feature dimension</span>
+<span class="sd">        order: Reshape direction</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Y:     Output matrix</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        X = [# number of samples N ] x [# M x D long feature vectors]</span>
+<span class="sd">        --&gt;</span>
+<span class="sd">        Y = [# number of samples N ] x [# number of set elements M] x [# vector dimension D]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">order</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="number_of_set_bits"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.number_of_set_bits">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">number_of_set_bits</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return how many bits are active of an integer in a standard binary representation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="p">((</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x55555555</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mh">0x33333333</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x33333333</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(((</span><span class="n">i</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF0F0F0F</span><span class="p">)</span> <span class="o">*</span> <span class="mh">0x1010101</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span></div>
+
+
+<div class="viewcode-block" id="binvec_are_equal"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binvec_are_equal">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">binvec_are_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compare equality of two binary vectors a and b.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a,b : binary vectors</span>
+<span class="sd">    Returns</span>
+<span class="sd">        true or false</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="binvec2powersetindex"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binvec2powersetindex">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">binvec2powersetindex</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Binary vector to powerset index.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X : matrix of binary vectors [# number of vectors x dimension]</span>
+<span class="sd">        B : the powerset matrix</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        y : array of powerset indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Over all vectors</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+        <span class="c1"># Find corresponding powerset index</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">binvec_are_equal</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">,:]):</span>
+                <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+                <span class="k">break</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="to_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.to_graph">[docs]</a><span class="k">def</span> <span class="nf">to_graph</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Turn the list into a graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+        <span class="c1"># Each sublist is a set of nodes</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="c1"># It also gives the number of edges</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">to_edges</span><span class="p">(</span><span class="n">part</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+<div class="viewcode-block" id="to_edges"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.to_edges">[docs]</a><span class="k">def</span> <span class="nf">to_edges</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; treat `l` as a Graph and returns it&#39;s edges </span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        to_edges([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]) -&gt; [(a,b), (b,c),(c,d)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">current</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">last</span><span class="p">,</span> <span class="n">current</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">current</span>    </div>
+
+
+<div class="viewcode-block" id="merge_connected"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.merge_connected">[docs]</a><span class="k">def</span> <span class="nf">merge_connected</span><span class="p">(</span><span class="n">lists</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Merge sets with common elements (find connected graphs problem).</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        Input:  [{0, 1}, {0, 1}, {2, 3}, {2, 3}, {4, 5}, {4, 5}, {6, 7}, {6, 7}, {8, 9}, {8, 9}, {10}, {11}]</span>
+<span class="sd">        Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span> <span class="k">if</span> <span class="n">lst</span><span class="p">]</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">merged</span><span class="p">:</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="n">sets</span><span class="p">:</span>
+            <span class="n">common</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sets</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">:</span>
+
+                <span class="c1"># Two sets are said to be disjoint sets if they have no common elements</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">common</span><span class="p">):</span>
+                    <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">merged</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">common</span> <span class="o">|=</span> <span class="n">x</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">common</span><span class="p">)</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="n">results</span>
+    <span class="k">return</span> <span class="n">sets</span></div>
+
+
+<div class="viewcode-block" id="los2lol"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.los2lol">[docs]</a><span class="k">def</span> <span class="nf">los2lol</span><span class="p">(</span><span class="n">listOsets</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a list of sets [{},{},..,{}] to a list of of lists [[], [], ..., []].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lists</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">listOsets</span><span class="p">:</span>
+        <span class="n">lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">lists</span></div>
+
+
+<div class="viewcode-block" id="bin_array"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.bin_array">[docs]</a><span class="k">def</span> <span class="nf">bin_array</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a positive integer num into an N-bit bit vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">binary_repr</span><span class="p">(</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="binomial"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binomial">[docs]</a><span class="k">def</span> <span class="nf">binomial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Binomial coefficient C(n,k).  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">k</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="generatebinary_fixed"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.generatebinary_fixed">[docs]</a><span class="k">def</span> <span class="nf">generatebinary_fixed</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate all combinations of n bits with fixed k ones.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">k</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">binomial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">),</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">c</span>
+
+    <span class="n">z</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+        <span class="c1"># Find the right-most [0,1] AND keep count of ones</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="n">ones</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ones</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Change the 01 to 10 and reset the suffix to the smallest</span>
+        <span class="c1"># lexicographic string with the right number of ones and zeros</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="n">ones</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ones</span>
+        
+        <span class="c1"># Save it</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">z</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">z</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">X</span></div>
+
+
+<div class="viewcode-block" id="generatebinary"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.generatebinary">[docs]</a><span class="k">def</span> <span class="nf">generatebinary</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Function to generate all 2**N binary vectors (as boolean matrix rows)</span>
+<span class="sd">        with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">M</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">N</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">M</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">M</span> <span class="o">&gt;</span> <span class="n">N</span><span class="p">):</span> 
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;generatebinary: M = </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s1"> cannot be less than 1 or greater than N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Count the number of vectors (rows) needed using binomial coefficients</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">K</span> <span class="o">+=</span> <span class="n">binomial</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.generatebinary: Binary matrix dimension </span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">K</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">ivals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+
+    <span class="c1"># Generate up to each m separately here, then sort</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">generatebinary_fixed</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">z</span><span class="p">,:]</span>
+            <span class="n">ivals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin2int</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Sort them to lexicographic order</span>
+    <span class="n">lexind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">ivals</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="n">lexind</span><span class="p">,:]</span></div>
+
+
+<div class="viewcode-block" id="bin2int"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.bin2int">[docs]</a><span class="k">def</span> <span class="nf">bin2int</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Binary vector to integer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">63</span><span class="p">:</span> <span class="c1"># Doubles for large number of bits</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">b</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">base</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="binom_coeff_all"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binom_coeff_all">[docs]</a><span class="k">def</span> <span class="nf">binom_coeff_all</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">MAX</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Sum all all binomial coefficients up to MAX.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">MAX</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="binaryvec2int"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binaryvec2int">[docs]</a><span class="k">def</span> <span class="nf">binaryvec2int</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Turn a matrix of binary vectors row-by-row into integer reps.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">63</span><span class="p">:</span>
+        <span class="c1"># double because we may have over 63 bits</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)):</span>
+        <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin2int</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+    <span class="k">return</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="weight2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.weight2onehot">[docs]</a><span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Weights into one-hot encoding.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        weights   : array of weights</span>
+<span class="sd">        Y         : targets</span>
+<span class="sd">        N_classes : number of classes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">one_hot_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_classes</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">one_hot_weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;weight2onehot: Failed with class = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (zero samples)&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">one_hot_weights</span></div>
+
+
+<div class="viewcode-block" id="int2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.int2onehot">[docs]</a><span class="k">def</span> <span class="nf">int2onehot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Integer class vector to class &quot;one-hot encoding&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Y:         Class indices (# samples)</span>
+<span class="sd">        N_classes: Number of classes</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        onehot:    Onehot representation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">onehot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">onehot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">onehot</span></div>
+
+
+<div class="viewcode-block" id="deltaphi"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.deltaphi">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">deltaphi</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Deltaphi measure. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">phi1</span> <span class="o">-</span> <span class="n">phi2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
+
+
+<div class="viewcode-block" id="deltar"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.deltar">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">deltar</span><span class="p">(</span><span class="n">eta1</span><span class="p">,</span><span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; DeltaR measure. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">eta1</span> <span class="o">-</span> <span class="n">eta2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaphi</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_model_filename"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.create_model_filename">[docs]</a><span class="k">def</span> <span class="nf">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">filetype</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">createfilename</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">filetype</span>
+
+    <span class="c1"># Loop over epochs</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">last_found</span>  <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">last_found</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">last_found</span> <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">epoch</span>
+    <span class="k">return</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="pick_ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.pick_ind">[docs]</a><span class="k">def</span> <span class="nf">pick_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">minmax</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return indices between minmax[0] &lt;= x &lt; minmax[1], i.e. [a,b)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x :      Input vector</span>
+<span class="sd">        minmax : Minimum and maximum values</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        </span>
+<span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
+<span class="sd">        ids        : all variable names</span>
+<span class="sd">        xyz        : array of (x,y,z) channel triplet strings such as [[&#39;image_clu_eta&#39;, &#39;image_clu_phi&#39;, &#39;image_clu_e&#39;]]</span>
+<span class="sd">        x_binedges</span>
+<span class="sd">        y_binedges : arrays of bin edges</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        T : tensor of size (samples x channels x rows x columns)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Samples x Channels x Rows x Columns</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+    <span class="c1"># Choose targets</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+
+        <span class="c1"># Loop over all events</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">z_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> 
+                <span class="n">x_binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2tensor: Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Array representation summed to matrix.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x_arr :      array of [x values]</span>
+<span class="sd">        y_arr :      array of [y values]</span>
+<span class="sd">        z_arr :      array of [z values]</span>
+<span class="sd">        x_binedges : array of binedges</span>
+<span class="sd">        y_binedges : array of binedges</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Matrix output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">)</span>
+    <span class="n">y_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
+
+    <span class="c1"># Loop and sum</span>
+    <span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_ind</span><span class="p">)):</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">x_ind</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.arrays2matrix: not valid input&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">A</span></div>
+
+<div class="viewcode-block" id="x2ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.x2ind">[docs]</a><span class="k">def</span> <span class="nf">x2ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Return histogram bin indices for data in x, which needs to be an array [].</span>
+<span class="sd">    Args:</span>
+<span class="sd">        x:        data to be classified between bin edges</span>
+<span class="sd">        binedges: histogram bin edges</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        inds:     histogram bin indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NBINS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">NBINS</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">NBINS</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">inds</span></div>
+
+
+<div class="viewcode-block" id="hardclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.hardclass">[docs]</a><span class="k">def</span> <span class="nf">hardclass</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot; Soft decision to hard decision at point (valrange[1] - valrange[0]) / 2</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        y_soft : probabilities for two classes</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        y_out  : classification results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y_out</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
+
+    <span class="n">boundary</span> <span class="o">=</span> <span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">y_out</span><span class="p">[</span><span class="n">y_out</span>  <span class="o">&gt;</span> <span class="n">boundary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">y_out</span><span class="p">[</span><span class="n">y_out</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">y_out</span></div>
+
+
+<div class="viewcode-block" id="multiclass_roc_auc_score"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.multiclass_roc_auc_score">[docs]</a><span class="k">def</span> <span class="nf">multiclass_roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Multiclass AUC (area under the curve).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_true : True classifications</span>
+<span class="sd">        y_soft : Soft probabilities</span>
+<span class="sd">        weights: Sample weights </span>
+<span class="sd">        average: Averaging strategy</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        auc    : Area under the curve via averaging</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lb</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">LabelBinarizer</span><span class="p">()</span>
+    <span class="n">lb</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">y_soft</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
+    
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">auc</span></div>
+
+
+<div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Classifier performance evaluation metrics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_class</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            y_true   : true classifications</span>
+<span class="sd">            y_soft   : probabilities for two classes</span>
+<span class="sd">            weights  : </span>
+<span class="sd">            valrange : range of probabilities / soft scores</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">N_class</span> <span class="o">=</span> <span class="n">N_class</span>
+
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
+        
+        <span class="c1"># Make sure the weights array is 1-dimensional (not events N) x (num class K)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">lhs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span> 
+        <span class="n">rhs</span> <span class="o">=</span> <span class="p">(</span><span class="n">ok</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">lhs</span> <span class="o">!=</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Metric: input length = </span><span class="si">{</span><span class="n">lhs</span><span class="si">}</span><span class="s1"> with non-finite values = </span><span class="si">{</span><span class="n">lhs</span> <span class="o">-</span> <span class="n">rhs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
+
+        <span class="c1"># invalid input</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span>
+
+        <span class="c1"># Bin the prediction values over different classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_mva_bins</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
+            <span class="n">ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">w</span>  <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">counts</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+
+        <span class="c1"># Metrics    </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_curve</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">hardclass</span><span class="p">(</span><span class="n">y_soft</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">valrange</span><span class="o">=</span><span class="n">valrange</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

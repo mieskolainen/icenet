@@ -7,7 +7,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 import uproot
-import uproot_methods
 import numpy as np
 
 

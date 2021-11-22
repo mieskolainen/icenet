@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icenet.tools.stx &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/cmssw.html">CMSSW setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/cmssw.html#preliminaries-ssh-public-key-to-github">Preliminaries: SSH public key to github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/cmssw.html#preliminaries-cmssw-release-setup">Preliminaries: CMSSW release setup</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-aux-torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>icenet.tools.stx</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icenet.tools.stx</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Functions to evaluate (a boolean) expression tree for vector (component) data</span>
+<span class="c1">#</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+
+<span class="kn">import</span> <span class="nn">pyparsing</span> <span class="k">as</span> <span class="nn">pp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+
+<div class="viewcode-block" id="construct_columnar_cuts"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_columnar_cuts">[docs]</a><span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct cuts and corresponding names.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X       : Input columnar data matrix</span>
+<span class="sd">        ids     : Variable names for each column of X</span>
+<span class="sd">        cutlist : Selection cuts as strings, such as [&#39;ABS__eta &lt; 0.5&#39;, &#39;trgbit == True&#39;]</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        cuts, names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cuts</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">cutlist</span><span class="p">:</span>
+
+        <span class="n">treelist</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+        <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="n">cuts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cuts</span><span class="p">,</span><span class="n">names</span></div>
+
+<div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Apply cutflow</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cut        : list of pre-calculated cuts, each list element is a boolean array</span>
+<span class="sd">        names      : list of names (description of each cut, for printout only)</span>
+<span class="sd">        xcorr_flow : compute full N-point correlations</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ind        : list of indices, 1 = pass, 0 = fail</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Print out &quot;serial flow&quot;</span>
+    <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cut[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">&gt;25</span><span class="si">}</span><span class="s1">]: pass </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="n">N</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Print out &quot;parallel flow&quot;</span>
+    <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point correlations &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="n">intmat</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">ind</span></div>
+
+
+<div class="viewcode-block" id="parse_boolean_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.parse_boolean_exptree">[docs]</a><span class="k">def</span> <span class="nf">parse_boolean_exptree</span><span class="p">(</span><span class="n">instring</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A boolean expression tree parser.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        instring : input string, e.g. &quot;pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A syntax tree as a list of lists</span>
+<span class="sd">    </span>
+<span class="sd">    Information:</span>
+<span class="sd">        See: https://stackoverflow.com/questions/11133339/</span>
+<span class="sd">             parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">makeLRlike</span><span class="p">(</span><span class="n">numterms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        parse action -maker</span>
+
+<span class="sd">        See: https://stackoverflow.com/questions/4571441/</span>
+<span class="sd">             recursive-expressions-with-pyparsing/4589920#4589920</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">numterms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># None operator can only by binary op</span>
+            <span class="n">initlen</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">incr</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initlen</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">}[</span><span class="n">numterms</span><span class="p">]</span>
+            <span class="n">incr</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">:</span><span class="mi">4</span><span class="p">}[</span><span class="n">numterms</span><span class="p">]</span>
+
+        <span class="c1"># Define parse action for this number of terms,</span>
+        <span class="c1"># to convert flat list of tokens into nested list</span>
+        <span class="k">def</span> <span class="nf">pa</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">initlen</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">ParseResults</span><span class="p">(</span><span class="n">t</span><span class="p">[:</span><span class="n">initlen</span><span class="p">])</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">initlen</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">ParseResults</span><span class="p">([</span><span class="n">ret</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">incr</span><span class="p">])</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="n">incr</span>
+                <span class="k">return</span> <span class="n">pp</span><span class="o">.</span><span class="n">ParseResults</span><span class="p">([</span><span class="n">ret</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pa</span>
+
+    <span class="c1"># -------------------------</span>
+
+    <span class="n">operator</span>        <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;&gt;=|&lt;=|!=|&gt;|&lt;|==&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="s2">&quot;operator&quot;</span><span class="p">)</span>
+    <span class="n">number</span>          <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?&quot;</span><span class="p">)</span>
+    <span class="n">identifier</span>      <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Word</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">alphas</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="n">comparison_term</span> <span class="o">=</span> <span class="n">identifier</span> <span class="o">|</span> <span class="n">number</span>
+    <span class="n">condition</span>       <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">comparison_term</span> <span class="o">+</span> <span class="n">operator</span> <span class="o">+</span> <span class="n">comparison_term</span><span class="p">)</span>
+
+    <span class="c1"># OR before AND precedence convention</span>
+    <span class="c1"># makeLRLike guarantees recursive binary tree structure</span>
+    <span class="n">expr</span>            <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">operatorPrecedence</span><span class="p">(</span><span class="n">condition</span><span class="p">,[</span>
+                                <span class="p">(</span><span class="s2">&quot;OR&quot;</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="n">makeLRlike</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s2">&quot;AND&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="n">makeLRlike</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+                                <span class="p">])</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">instring</span><span class="p">)</span>
+
+    <span class="c1"># Remove excess []</span>
+    <span class="k">return</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="tree_node"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.tree_node">[docs]</a><span class="k">class</span> <span class="nc">tree_node</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to represent the nodes of an expression tree.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span>  <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s1">, data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="se">}}</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="construct_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_exptree">[docs]</a><span class="k">def</span> <span class="nf">construct_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct an expression (syntax) tree via recursion.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        root : List of lists, for example</span>
+<span class="sd">               [[&#39;10&#39;, &#39;&gt;&#39;, &#39;7&#39;], &#39;AND&#39;, [[&#39;4&#39;, &#39;&gt;=&#39;, &#39;2&#39;], &#39;AND&#39;, [&#39;2&#39;, &#39;&lt;=&#39;, &#39;4&#39;]]]</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        an expression tree object with &#39;tree_node&#39; objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Empty tree</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Leaf node</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tree_node</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="n">prev_root</span>       <span class="o">=</span> <span class="n">tree_node</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Evaluate left and right trees</span>
+    <span class="n">prev_root</span><span class="o">.</span><span class="n">left</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">prev_root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">prev_root</span></div>
+
+<div class="viewcode-block" id="print_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_exptree">[docs]</a><span class="k">def</span> <span class="nf">print_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print out an expression tree object via recursion.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        root: expression tree (object type)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Empty tree</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Leaf node</span>
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;-- leaf: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Print left and right trees</span>
+    <span class="n">left_eval</span>  <span class="o">=</span> <span class="n">print_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+    <span class="n">right_eval</span> <span class="o">=</span> <span class="n">print_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;inter | L: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s1">, D: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, R: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="eval_boolean_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_exptree">[docs]</a><span class="k">def</span> <span class="nf">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluation of a (boolean) expression tree via recursion.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        root : expression tree object</span>
+<span class="sd">        X    : data matrix (N events x D dimensions)</span>
+<span class="sd">        ids : variable names for each D dimension</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean selection list of size N</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_in</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Helper function &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            
+            <span class="c1"># Split &#39;__&#39; because of function operators (see below)</span>
+            <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Empty tree</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Leaf node</span>
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">is_in</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">out</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1"> variable is not a leaf or found in </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Evaluate left and right trees</span>
+    <span class="n">left_sum</span>  <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">,</span>  <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">right_sum</span> <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+    <span class="c1"># Apply the binary operator</span>
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s1">&#39;AND&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">left_sum</span><span class="p">,</span> <span class="n">right_sum</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s1">&#39;OR&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">left_sum</span><span class="p">,</span>  <span class="n">right_sum</span><span class="p">)</span>
+
+    <span class="c1"># We have ended up with numerical comparison</span>
+    <span class="n">operator</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_sum</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_in</span><span class="p">(</span><span class="n">left_sum</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+
+        <span class="n">lhs</span> <span class="o">=</span> <span class="n">left_sum</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">right_sum</span>
+
+    <span class="c1"># Flip the direction</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lhs</span> <span class="o">=</span> <span class="n">right_sum</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">left_sum</span>
+
+        <span class="n">flips</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span><span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span><span class="s1">&#39;!=&#39;</span><span class="p">}</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">flips</span><span class="p">[</span><span class="n">operator</span><span class="p">]</span>
+
+    <span class="c1"># Vector index</span>
+    <span class="n">split</span> <span class="o">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)</span>
+    <span class="n">ind</span>   <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="c1"># -------------------------------------------------</span>
+    <span class="c1"># Construct possible function operator</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># We have &#39;OPERATOR__x&#39; type input</span>
+        
+        <span class="n">func_name</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span>   <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;ABS&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;POW2&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;SQRT&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;INV&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Unknown function </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eval_boolean_exptree: Operator f=</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">() chosen for &quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    <span class="c1"># -------------------------------------------------</span>
+
+    <span class="c1"># Middle binary operators g(x,y)</span>
+    <span class="k">if</span>   <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Unknown binary operator &quot;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Evaluate</span>
+    <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]),</span> <span class="n">rhs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eval_boolean_syntax"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_syntax">[docs]</a><span class="k">def</span> <span class="nf">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A complete wrapper to evaluate boolean syntax.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expr : boolean expression string, e.g. &quot;pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)&quot;</span>
+<span class="sd">        X    : input data (N x dimensions)</span>
+<span class="sd">        ids  : variable names as a list</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean list of size N</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">treelist</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+
+    <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+    <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="test_syntax_tree_parsing"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_parsing">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_parsing</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unit tests</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">expr_A</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 AND z &gt;= 4&#39;</span>
+    <span class="n">expr_B</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND (y &lt; 2 AND z &gt;= 4)&#39;</span>
+    <span class="n">expr_C</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 OR z &gt;= 4&#39;</span>
+    
+    <span class="n">treelist_A</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_A</span><span class="p">)</span>
+    <span class="n">treelist_B</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_B</span><span class="p">)</span>
+    <span class="n">treelist_C</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_C</span><span class="p">)</span>
+
+    <span class="k">assert</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">treelist_A</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">==</span> <span class="s2">&quot;[[[&#39;x&#39;, &#39;&lt;&#39;, &#39;0.2&#39;], &#39;AND&#39;, [&#39;y&#39;, &#39;&lt;&#39;, &#39;2&#39;]], &#39;AND&#39;, [&#39;z&#39;, &#39;&gt;=&#39;, &#39;4&#39;]]&quot;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">treelist_B</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">==</span> <span class="s2">&quot;[[&#39;x&#39;, &#39;&lt;&#39;, &#39;0.2&#39;], &#39;AND&#39;, [[&#39;y&#39;, &#39;&lt;&#39;, &#39;2&#39;], &#39;AND&#39;, [&#39;z&#39;, &#39;&gt;=&#39;, &#39;4&#39;]]]&quot;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">treelist_C</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">==</span> <span class="s2">&quot;[[&#39;x&#39;, &#39;&lt;&#39;, &#39;0.2&#39;], &#39;AND&#39;, [[&#39;y&#39;, &#39;&lt;&#39;, &#39;2&#39;], &#39;OR&#39;, [&#39;z&#39;, &#39;&gt;=&#39;, &#39;4&#39;]]]&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_syntax_tree_simple"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_simple">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_simple</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Units tests</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create random input and repeat tests</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+
+        <span class="n">X</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span>
+        <span class="n">ids</span>      <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span>
+
+        <span class="c1">### TEST 1</span>
+        <span class="n">expr</span>     <span class="o">=</span> <span class="s1">&#39;x &gt;= 0.0 AND POW2__z &lt; 2500&#39;</span>
+
+        <span class="n">treelist</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+        <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="c1"># One-Liner</span>
+        <span class="n">output2</span>  <span class="o">=</span> <span class="n">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output2</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="n">output2</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="test_syntax_tree_flip"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_flip">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_flip</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unit tests</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create random input and repeat tests</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+
+        <span class="n">X</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span>
+        <span class="n">ids</span>          <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span>
+
+        <span class="c1">### TEST</span>
+        <span class="n">expr_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ABS__x &gt; 3.8 OR (x &gt; 7 AND (y &gt;= 2 OR z &lt;= 4))&#39;</span><span class="p">,</span> <span class="s1">&#39;((y &gt;= 2 OR z &lt;= 4) AND 7 &lt; x) OR 3.8 &lt; ABS__x&#39;</span><span class="p">]</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Test both syntax strings</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expr_strings</span><span class="p">)):</span>
+            <span class="n">treelist</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_strings</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+
+            <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

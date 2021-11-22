@@ -6,7 +6,6 @@
 
 
 import uproot
-import uproot_methods
 import h5py
 import copy
 

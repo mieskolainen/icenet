@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icefit &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="iceid" href="iceid.html" />
+    <link rel="prev" title="icebrk" href="icebrk.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/cmssw.html">CMSSW setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/cmssw.html#preliminaries-ssh-public-key-to-github">Preliminaries: SSH public key to github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/cmssw.html#preliminaries-cmssw-release-setup">Preliminaries: CMSSW release setup</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>icefit</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/icefit.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="icefit">
+<h1>icefit<a class="headerlink" href="#icefit" title="Permalink to this headline">¶</a></h1>
+<p>Binned and unbinned fitting functions, neural methods and statistical tools.</p>
+<section id="module-icefit.abcd">
+<span id="icefit-abcd"></span><h2>icefit.abcd<a class="headerlink" href="#module-icefit.abcd" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.abcd.ABCD_2NLL">
+<span class="sig-name descname"><span class="pre">ABCD_2NLL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/abcd.html#ABCD_2NLL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.abcd.ABCD_2NLL" title="Permalink to this definition">¶</a></dt>
+<dd><p>ABCD estimators negative log-likelihood function</p>
+<p>DEFINITION: A = B x C / D</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>B</strong> – Measured event counts</p></li>
+<li><p><strong>C</strong> – Measured event counts</p></li>
+<li><p><strong>D</strong> – Measured event counts</p></li>
+<li><p><strong>mu</strong> – Free parameters of the likelihood function</p></li>
+<li><p><strong>mu_B</strong> – Free parameters of the likelihood function</p></li>
+<li><p><strong>mu_D</strong> – Free parameters of the likelihood function</p></li>
+<li><p><strong>parameters</strong><strong>)</strong> (<em>(</em><em>N.B. here number of measurements == number of free</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Model relation:</dt><dd><dl class="simple">
+<dt>Ntot = mu*mu_B + mu_B + mu*mu_D + mu_D</dt><dd><p>= (A) + (B) + (C) + (D)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>See e.g. <a class="reference external" href="https://twiki.cern.ch/twiki/pub/Main/ABCDMethod/ABCDGuide_draft18Oct18.pdf">https://twiki.cern.ch/twiki/pub/Main/ABCDMethod/ABCDGuide_draft18Oct18.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>-2logL</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.abcd.ABCD_eq">
+<span class="sig-name descname"><span class="pre">ABCD_eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/abcd.html#ABCD_eq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.abcd.ABCD_eq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic estimator formula for count in ‘A’ (signal domain)</p>
+<p>DEFINITION: A = B x C / D</p>
+<p>^
+<a href="#id1"><span class="problematic" id="id2">|</span></a>C | A
+<a href="#id3"><span class="problematic" id="id4">|</span></a>—–
+<a href="#id5"><span class="problematic" id="id6">|</span></a>D | B
+0——&gt;</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.abcd.ABCD_err">
+<span class="sig-name descname"><span class="pre">ABCD_err</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'errorprop'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/abcd.html#ABCD_err"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.abcd.ABCD_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>ABCD uncertainty (confidence interval) methods</p>
+<p>DEFINITION: A = B x C / D</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> – input value</p></li>
+<li><p><strong>c</strong> – input value</p></li>
+<li><p><strong>d</strong> – input value</p></li>
+<li><p><strong>method</strong> – ‘errorprop’, ‘poisson’, ‘bootstrap’, ‘likelihood’</p></li>
+<li><p><strong>N</strong> – number of random samples for sampling based methods</p></li>
+<li><p><strong>alpha</strong> – confidence level (‘errorprop’ fixed at CL68)</p></li>
+<li><p><strong>lrange</strong> – likelihood scan range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>confidence interval array (lower,upper)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.abcd.test_abcd">
+<span class="sig-name descname"><span class="pre">test_abcd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/abcd.html#test_abcd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.abcd.test_abcd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-icefit.cortools">
+<span id="icefit-cortools"></span><h2>icefit.cortools<a class="headerlink" href="#module-icefit.cortools" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.H_score">
+<span class="sig-name descname"><span class="pre">H_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#H_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.H_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shannon Entropy (log_e ~ nats units)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p</strong> – probability vector</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>entropy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.I_score">
+<span class="sig-name descname"><span class="pre">I_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#I_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.I_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutual information score (log_e ~ nats units)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>C</strong> – (X,Y) 2D-histogram array with positive definite event counts</p></li>
+<li><p><strong>normalized</strong> – return normalized version (None, ‘additive’, ‘multiplicative’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mutual information score</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.bw2bins">
+<span class="sig-name descname"><span class="pre">bw2bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#bw2bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.bw2bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a histogram binwidth to number of bins</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data array</p></li>
+<li><p><strong>bw</strong> – binwidth</p></li>
+<li><p><strong>alpha</strong> – outlier percentile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>number of bins, if something fails return 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.freedman_diaconis_bin">
+<span class="sig-name descname"><span class="pre">freedman_diaconis_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#freedman_diaconis_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.freedman_diaconis_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Freedman-Diaconis rule for a 1D-histogram bin width</p>
+<p>D. Freedman &amp; P. Diaconis (1981)
+“On the histogram as a density estimator: L2 theory”.</p>
+<p>~ N**(-1/3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – array of 1D data</p></li>
+<li><p><strong>mode</strong> – return ‘width’ or ‘nbins’</p></li>
+<li><p><strong>alpha</strong> – outlier percentile</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.gaussian_mutual_information">
+<span class="sig-name descname"><span class="pre">gaussian_mutual_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#gaussian_mutual_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.gaussian_mutual_information" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analytical 2D-Gaussian mutual information
+using a correlation coefficient rho.</p>
+<p>I(X1,X2) = H(X1) + H(X2) - H(X1,X2)
+:param rho: correlation coefficient between (-1,1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>mutual information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.hacine_entropy_bin">
+<span class="sig-name descname"><span class="pre">hacine_entropy_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#hacine_entropy_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.hacine_entropy_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hacine-Gharbi et al.
+“Low Bias Histogram-Based Estimation of Mutual Information for Feature Selection.”
+Pattern Recognition Letters, 2012.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.hacine_joint_entropy_bin">
+<span class="sig-name descname"><span class="pre">hacine_joint_entropy_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#hacine_joint_entropy_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.hacine_joint_entropy_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hacine-Gharbi, Ravier. “A Binning Formula of Bi-histogram
+for Joint Entropy Estimation Using Mean Square Error Minimization.”
+Pattern Recognition Letters, 2018.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.mutual_information">
+<span class="sig-name descname"><span class="pre">mutual_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">automethod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Scott2D'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#mutual_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.mutual_information" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutual information entropy (non-linear measure of dependency)
+between x and y variables
+:param x: array of values
+:param y: array of values
+:param w: weights (default None)
+:param bins_x: x binning array  If None, then automatic.
+:param bins_y: y binning array.
+:param normalized: normalize the mutual information (see I_score() function)</p>
+<dl class="simple">
+<dt>Autobinning args:</dt><dd><p>automethod : ‘Hacine2D’, ‘Scott2D’
+minbins    : minimum number of bins per dimension
+alpha      : outlier protection percentile
+gamma      : FD ad-hoc scale parameter</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>mutual information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.optbins">
+<span class="sig-name descname"><span class="pre">optbins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#optbins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.optbins" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOTE: Weak performance, study the method !!</p>
+<p>Optimal 1D-histogram binning via Bayesian Brute Force search algorithm.</p>
+<p>K.H Knuth, 2012, Entropy.
+<a class="reference external" href="https://arxiv.org/abs/physics/0605197">https://arxiv.org/abs/physics/0605197</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data points</p></li>
+<li><p><strong>maxM</strong> – maximum number of bins</p></li>
+<li><p><strong>mode</strong> – “nbins” or “width”</p></li>
+<li><p><strong>alpha</strong> – outlier protection percentile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>optimal number of bins</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.optbins2d">
+<span class="sig-name descname"><span class="pre">optbins2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(40,</span> <span class="pre">40)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#optbins2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.optbins2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOTE: Weak performance, study the method !!</p>
+<p>Optimal 2D-histogram binning via Bayesian Brute Force search algorithm.</p>
+<p>K.H Knuth, 2012, Entropy.
+<a class="reference external" href="https://arxiv.org/abs/physics/0605197">https://arxiv.org/abs/physics/0605197</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data points</p></li>
+<li><p><strong>maxM</strong> – maximum number of bins per dimension</p></li>
+<li><p><strong>mode</strong> – “nbins” or “width”</p></li>
+<li><p><strong>alpha</strong> – outlier protection percentile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>optimal number of bins</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.pearson_corr">
+<span class="sig-name descname"><span class="pre">pearson_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#pearson_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.pearson_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pearson Correlation Coefficient
+<a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – arrays of values</p></li>
+<li><p><strong>y</strong> – arrays of values</p></li>
+<li><p><strong>weights</strong> – possible event weights</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>correlation coefficient [-1,1], p-value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.scott_bin">
+<span class="sig-name descname"><span class="pre">scott_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbins'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#scott_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.scott_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scott rule for a 2D-histogram bin widths</p>
+<p>Scott, D.W. (1992),
+Multivariate Density Estimation: Theory, Practice, and Visualization – 2D-Gaussian case</p>
+<p>~ N**(-1/4)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – array of 1D data (one dimension of the bivariate distribution)</p></li>
+<li><p><strong>rho</strong> – Linear correlation coefficient</p></li>
+<li><p><strong>mode</strong> – return ‘width’ or ‘nbins’</p></li>
+<li><p><strong>alpha</strong> – outlier percentile</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.test_constant">
+<span class="sig-name descname"><span class="pre">test_constant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#test_constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.test_constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant input unit test of the estimators.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.cortools.test_gaussian">
+<span class="sig-name descname"><span class="pre">test_gaussian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/cortools.html#test_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.cortools.test_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>#Gaussian unit test of the estimators.</p>
+</dd></dl>
+
+</section>
+<section id="module-icefit.em">
+<span id="icefit-em"></span><h2>icefit.em<a class="headerlink" href="#module-icefit.em" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.em.EM_frac">
+<span class="sig-name descname"><span class="pre">EM_frac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#EM_frac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.EM_frac" title="Permalink to this definition">¶</a></dt>
+<dd><p>EM-algorithm for unknown integrated class fractions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdf</strong> – (n x K) density (pdf) values for n measurements, K classes</p></li>
+<li><p><strong>iter</strong> – Number of iterations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Integrated class fractions</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>frac</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.em.gausspdf">
+<span class="sig-name descname"><span class="pre">gausspdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#gausspdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.gausspdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaussian pdf</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.em.mixture_nll">
+<span class="sig-name descname"><span class="pre">mixture_nll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#mixture_nll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.mixture_nll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixture model negative Log-Likelihood</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdf</strong> – (n x K) density (pdf) values for n measurements, K classes</p></li>
+<li><p><strong>frac</strong> – <ol class="upperalpha simple" start="11">
+<li><p>class fractions with sum 1</p></li>
+</ol>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Negative Log-Likelihood</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>nll</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.em.test_EM">
+<span class="sig-name descname"><span class="pre">test_EM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#test_EM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.test_EM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test function to test EM iteration</p>
+</dd></dl>
+
+</section>
+<section id="module-icefit.jacobian">
+<span id="icefit-jacobian"></span><h2>icefit.jacobian<a class="headerlink" href="#module-icefit.jacobian" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.get_full_hessian">
+<span class="sig-name descname"><span class="pre">get_full_hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#get_full_hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.get_full_hessian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the full Hessian matrix of a neural net (can be very slow)</p>
+<p><a class="reference external" href="https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/readings/L02_Taylor_approximations.pdf">https://www.cs.toronto.edu/~rgrosse/courses/csc2541_2021/readings/L02_Taylor_approximations.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loss</strong> – neural net loss function</p></li>
+<li><p><strong>param</strong> – neural net parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.get_gradient">
+<span class="sig-name descname"><span class="pre">get_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#get_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.get_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return derivative df(x)/dx or gradient vectors
+for f: R^n -&gt; R</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.get_jacobian">
+<span class="sig-name descname"><span class="pre">get_jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#get_jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.get_jacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Jacobian matrix of size m x n
+of a function f: R^n -&gt; R^m</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.observed_fisher_info">
+<span class="sig-name descname"><span class="pre">observed_fisher_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#observed_fisher_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.observed_fisher_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Observed Fisher information – the negative of the second derivative
+(Hessian matrix) of the log-likelihood function.</p>
+<p>The observed information is typically evaluated at the maximum-likelihood estimate of theta.</p>
+<p>“Fisher information represents the curvature of the relative entropy”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logL</strong> – The log-likelihood function l(theta|X1,…X_n) = sum_{i=1}^n log f(X_i|theta),
+with X_i being the independent random observations</p></li>
+<li><p><strong>inputs</strong> – log-likelihood function input</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Observed_information">https://en.wikipedia.org/wiki/Observed_information</a>
+<a class="reference external" href="https://en.wikipedia.org/wiki/Optimal_design">https://en.wikipedia.org/wiki/Optimal_design</a></p>
+<p>Efron, B.; Hinkley, D.V. (1978).
+“Assessing the accuracy of the maximum likelihood estimator:</p>
+<blockquote>
+<div><p>Observed versus expected Fisher Information”. Biometrika. 65 (3): 457–487.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.test_dimension_interfaces">
+<span class="sig-name descname"><span class="pre">test_dimension_interfaces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#test_dimension_interfaces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.test_dimension_interfaces" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.test_hessians">
+<span class="sig-name descname"><span class="pre">test_hessians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#test_hessians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.test_hessians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test Hessian matrix computations</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.jacobian.test_jacobians">
+<span class="sig-name descname"><span class="pre">test_jacobians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/jacobian.html#test_jacobians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.jacobian.test_jacobians" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-icefit.lognormal">
+<span id="icefit-lognormal"></span><h2>icefit.lognormal<a class="headerlink" href="#module-icefit.lognormal" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.lognormal_param">
+<span class="sig-name descname"><span class="pre">lognormal_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#lognormal_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.lognormal_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute log-normal distribution mu and sigma parameters from
+the target mean (or median) m and variance v</p>
+<p>mu and sigma follow the Wikipedia convention:
+<a class="reference external" href="https://en.wikipedia.org/wiki/Log-normal_distribution">https://en.wikipedia.org/wiki/Log-normal_distribution</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – mean (or median or mode) value of the target log-normal pdf</p></li>
+<li><p><strong>v</strong> – variance value of the target log-normal pdf</p></li>
+<li><p><strong>inmode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.rand_lognormal">
+<span class="sig-name descname"><span class="pre">rand_lognormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_lognormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_lognormal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate random numbers from log-normal density with
+the distribution target mean (or median) m and variance v</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – mean (or median or mode) value of the target log-normal pdf</p></li>
+<li><p><strong>v</strong> – variance value of the target log-normal pdf</p></li>
+<li><p><strong>N</strong> – number of samples</p></li>
+<li><p><strong>inmode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.rand_powexp">
+<span class="sig-name descname"><span class="pre">rand_powexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_powexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_powexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Power+exp type parametrization (positive definite)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigma</strong> – standard deviation</p></li>
+<li><p><strong>N</strong> – number of samples</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.test_accuracy">
+<span class="sig-name descname"><span class="pre">test_accuracy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#test_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.test_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test accuracy made in the power-exp approximation with median = 1</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.test_lognormal">
+<span class="sig-name descname"><span class="pre">test_lognormal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#test_lognormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.test_lognormal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-icefit.mine">
+<span id="icefit-mine"></span><h2>icefit.mine<a class="headerlink" href="#module-icefit.mine" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="icefit.mine.MINENet">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MINENet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#MINENet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.MINENet" title="Permalink to this definition">¶</a></dt>
+<dd><p>MINE network object</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="icefit.mine.MINENet.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#MINENet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.MINENet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="icefit.mine.MINENet.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icefit.mine.MINENet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mine.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">96</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MINE_EMA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_cuda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.estimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accurate Mutual Information Estimate via Neural Network</p>
+<dl class="simple">
+<dt>Info:</dt><dd><p>Input data X,Z can be random vectors (with different dimensions)
+or just scalar variables.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – input data variable 1 (N x dim1)</p></li>
+<li><p><strong>Z</strong> – input data variable 2 (N x dim2)</p></li>
+<li><p><strong>weights</strong> – input data weights (N) (set None if no weights)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Params:</dt><dd><p>batch_size : optimization loop batch size
+num_iter   : number of iterations
+lr         : learning rate
+hidden_dim : network hidden dimension
+loss       : estimator loss ‘MINE_EMA’ (default, unbiased), ‘MINE’
+alpha      : exponentially moving average parameter
+window     : iterations (tail) window size for the final estimate</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>mutual information estimate, its uncertainty</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mine.sample_batch">
+<span class="sig-name descname"><span class="pre">sample_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#sample_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.sample_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample batches of data, either from the joint or marginals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – input data (N x dim)</p></li>
+<li><p><strong>Z</strong> – input data (N x dim)</p></li>
+<li><p><strong>weights</strong> – input weights (N)</p></li>
+<li><p><strong>batch_size</strong> – batch size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>joint, marginal batches with size (N x [dim[X] + dim[Z]])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mine.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train the network estimator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>estimate</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mutual information estimates per iteration</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mine.train_mine">
+<span class="sig-name descname"><span class="pre">train_mine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ma_eT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MINE_EMA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#train_mine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.train_mine" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint</strong> – input data</p></li>
+<li><p><strong>marginal</strong> – input data</p></li>
+<li><p><strong>w</strong> – input data weights</p></li>
+<li><p><strong>net</strong> – network object</p></li>
+<li><p><strong>opt</strong> – optimizer object</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note that bias corrected loss is used only for the gradient descent,
+MI value is calculated without it.</p>
+<p>MINE:</p>
+<dl class="simple">
+<dt>MI_lb<span class="classifier">mutual information lower bound (“neural information measure”)</span></dt><dd><p>sup E_{P_{XZ}} [<a href="#id7"><span class="problematic" id="id8">T_</span></a>       heta] - log(E_{P_X otimes P_Z}[exp(<a href="#id9"><span class="problematic" id="id10">T_</span></a>theta)])</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-icefit.statstools">
+<span id="icefit-statstools"></span><h2>icefit.statstools<a class="headerlink" href="#module-icefit.statstools" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.analytical_extreme_npdf">
+<span class="sig-name descname"><span class="pre">analytical_extreme_npdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#analytical_extreme_npdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.analytical_extreme_npdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analytical expectation (mean) value approximation
+for a normal pdf max (extreme) values with a sample size of N.</p>
+<p class="rubric">References</p>
+<p>Youtube talk:
+“From one extreme to another: the statistics of extreme events, Jon Keating, Oxford”</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Extreme_value_theory">https://en.wikipedia.org/wiki/Extreme_value_theory</a>
+<a class="reference external" href="https://en.wikipedia.org/wiki/Gumbel_distribution">https://en.wikipedia.org/wiki/Gumbel_distribution</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.clopper_pearson_err">
+<span class="sig-name descname"><span class="pre">clopper_pearson_err</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.025,</span> <span class="pre">0.975]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#clopper_pearson_err"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.clopper_pearson_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clopper-Pearson binomial proportion confidence interval.
+Below, beta.ppf (percent point functions) returns inverse CDF for quantiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> – observed success counts</p></li>
+<li><p><strong>n</strong> – number of trials</p></li>
+<li><p><strong>CL</strong> – confidence levels [lower, upper]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>confidence interval [lower, upper]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.cormat2covmat">
+<span class="sig-name descname"><span class="pre">cormat2covmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#cormat2covmat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.cormat2covmat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a correlation matrix to a covariance matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> – correlation matrix (NxN)</p></li>
+<li><p><strong>s</strong> – vector of standard deviations (N)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>covariance matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.mc_extreme_multivariate_npdf">
+<span class="sig-name descname"><span class="pre">mc_extreme_multivariate_npdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#mc_extreme_multivariate_npdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.mc_extreme_multivariate_npdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extreme value distribution for a multivariate normal pdf via Monte Carlo,
+e.g. for “correlated measurements or bins” – casted as a univariate problem
+such that maximum of components is taken (not a “vector maximum”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – scalar value to evaluate the extreme value pdf upper tail integral</p></li>
+<li><p><strong>mu</strong> – mean vector (N)</p></li>
+<li><p><strong>cov</strong> – covariance matrix (NxN)</p></li>
+<li><p><strong>trials</strong> – number of Monte Carlo samples, as large as possible CPU wise</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>probability for the value x or more extreme
+maxvals : full MC distribution of extreme values obtained</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>p_value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.mc_extreme_npdf">
+<span class="sig-name descname"><span class="pre">mc_extreme_npdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#mc_extreme_npdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.mc_extreme_npdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extreme value distribution for normal pdf via Monte Carlo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – value to evaluate the extreme value pdf upper tail integral</p></li>
+<li><p><strong>mu</strong> – mean of normal pdf</p></li>
+<li><p><strong>sigma</strong> – std of normal pdf</p></li>
+<li><p><strong>N</strong> – sample size</p></li>
+<li><p><strong>trials</strong> – number of Monte Carlo samples, as large as possible CPU wise</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>probability for the value x or more extreme
+maxvals : full MC distribution of extreme values obtained</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>p_value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.p2zscore">
+<span class="sig-name descname"><span class="pre">p2zscore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#p2zscore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.p2zscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>p-value to z-score (standard normal sigmas)</p>
+<p class="rubric">Example</p>
+<p>p-value is divided by two such that
+p = 0.05 gives z_{1-alpha/2} = z_{1-0.025} = 1.96</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.poisson_ratio">
+<span class="sig-name descname"><span class="pre">poisson_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.025,</span> <span class="pre">0.975])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#poisson_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.poisson_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Poisson ratio uncertainty via conditional ratio
+theta = lambda1 / (lambda1 + lambda2)</p>
+<p>See e.g. “Confidence limits on the ratio of two Poisson variables, 1974”</p>
+<p>E[k1] = lambda1 (Poisson mean)
+E[k2] = lambda2 (Poisson mean)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k1</strong> – observations k1</p></li>
+<li><p><strong>k2</strong> – observations k2</p></li>
+<li><p><strong>CL</strong> – 2-array of lower and upper quantiles</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ratio confidence interval endpoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.poisson_tail">
+<span class="sig-name descname"><span class="pre">poisson_tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#poisson_tail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.poisson_tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Single Poisson CDF tail integral. Counts 2 works as the reference.
+:param k1: poisson counts 1
+:param k2: poisson counts 2 (reference sample)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>p value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.prodratio_eprop">
+<span class="sig-name descname"><span class="pre">prodratio_eprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaAB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ratio'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#prodratio_eprop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.prodratio_eprop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error propagation (Taylor expansion) of product A*B or ratio A/B</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – Value A</p></li>
+<li><p><strong>B</strong> – Value B</p></li>
+<li><p><strong>sigmaA</strong> – 1 sigma uncertainty on A</p></li>
+<li><p><strong>sigmaB</strong> – 1 sigma uncertainty on B</p></li>
+<li><p><strong>sigmaAB</strong> – Covariance of A,B</p></li>
+<li><p><strong>mode</strong> – ‘prod’ or ‘ratio’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Uncertainty on A/B</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.test_extreme_npdf">
+<span class="sig-name descname"><span class="pre">test_extreme_npdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#test_extreme_npdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.test_extreme_npdf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.test_ratios">
+<span class="sig-name descname"><span class="pre">test_ratios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#test_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.test_ratios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.welch_ttest">
+<span class="sig-name descname"><span class="pre">welch_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#welch_ttest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.welch_ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Welch’s two sample t-test for normally distributed variables.
+<a class="reference external" href="https://en.wikipedia.org/wiki/Welch%27s_t-test">https://en.wikipedia.org/wiki/Welch%27s_t-test</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X1</strong> – Mean of sample 1</p></li>
+<li><p><strong>X2</strong> – Mean of sample 2</p></li>
+<li><p><strong>s1</strong> – Standard deviation of sample 1</p></li>
+<li><p><strong>s2</strong> – Standard deviation of sample 2</p></li>
+<li><p><strong>n1</strong> – Counts in sample 1</p></li>
+<li><p><strong>n2</strong> – Counts in sample 2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>test statistic
+p : p-value from t-distribution</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>t</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="icebrk.html" class="btn btn-neutral float-left" title="icebrk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="iceid.html" class="btn btn-neutral float-right" title="iceid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

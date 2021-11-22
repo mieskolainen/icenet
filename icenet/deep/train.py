@@ -412,8 +412,10 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
 
 
 def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
-
-    '''
+    
+    """
+    NOT WORKING CURRENTLY [update code]
+    
     label = args['cdmx_param']['label']
 
     print(f'\nTraining {label} classifier ...')
@@ -440,7 +442,7 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
     ## Save
     checkpoint = {'model': model, 'state_dict': model.state_dict()}
     torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
-    '''
+    """
 
     ### Plot contours
     #if args['plot_param']['contours_on']:
