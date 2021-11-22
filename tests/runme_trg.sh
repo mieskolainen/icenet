@@ -8,7 +8,7 @@ CONFIG="tune0"
 
 DATAPATH="./travis-stash/input/icetrg"
 DATAPATH="/vols/cms/mmieskol/HLT_electron_data/22112021"
-DATAPATH="/home/user/HLT_electron_data/22112021"
+#DATAPATH="/home/user/HLT_electron_data/22112021"
 
 
 # Use * or other glob wildcards for filenames
