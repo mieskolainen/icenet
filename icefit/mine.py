@@ -62,9 +62,9 @@ def train_mine(joint, marginal, w, net, opt, ma_eT, alpha=0.01, loss='MINE_EMA')
     MINE:
 
     MI_lb    : mutual information lower bound ("neural information measure")
-               sup E_{P_{XZ}} [T_\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])
+               sup E_{P_{XZ}} [T_\\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])
     """
-
+    
     T, eT = net(joint), torch.exp(net(marginal))
 
     # Apply event weights

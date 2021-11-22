@@ -104,23 +104,22 @@ def observed_fisher_info(logL, inputs, **kwargs):
     """
     Observed Fisher information -- the negative of the second derivative
     (Hessian matrix) of the log-likelihood function.
-
+    
     The observed information is typically evaluated at the maximum-likelihood estimate of theta.
     
-    "Fisher information represents the curvature of the relative entropy"
-    
+    'Fisher information represents the curvature of the relative entropy'
+
     Args:
         logL:   The log-likelihood function l(theta|X1,...X_n) = sum_{i=1}^n log f(X_i|theta),
                 with X_i being the independent random observations
         inputs: log-likelihood function input
-    
+
     References:
         https://en.wikipedia.org/wiki/Observed_information
         https://en.wikipedia.org/wiki/Optimal_design
 
-        Efron, B.; Hinkley, D.V. (1978).
-        "Assessing the accuracy of the maximum likelihood estimator:
-         Observed versus expected Fisher Information". Biometrika. 65 (3): 457–487.
+        Efron, B.; Hinkley, D.V. (1978). Assessing the accuracy of the maximum likelihood estimator:
+        Observed versus expected Fisher Information". Biometrika. 65 (3): 457–487.
     """
     I = - torch.autograd.functional.hessian(func=logL, inputs=inputs).squeeze()
 
