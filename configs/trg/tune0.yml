@@ -2,9 +2,9 @@
 #
 rootname: 'trg'
 
-MAXEVENTS: 10000000               # Maximum total number of events (per root file) to process
+MAXEVENTS: 10000000      # Maximum total number of events (per root file) to process
 
-eval_reweight: False              # Event-by-event re-weighting used in the evaluation phase
+eval_reweight: false     # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
 
 
 # ----------------------------------------------------
@@ -14,7 +14,7 @@ active_models:
   
   - xgb0
   - xgb1
-  
+
   - cut0
   - cut1
   - cut2
@@ -56,7 +56,7 @@ reweight_param:
 
   # ---------------------
   
-  differential_reweight: true
+  differential_reweight: false
   reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
   # Note about asymmetry: Keep the reference class as 0 == background, because signal
   # MC has much longer tail over pt. Thus, it is not possible to re-weight background
@@ -257,7 +257,7 @@ cut6_param:
 xgb0_param:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB_T30_D6'
+  label:   'XGB_raytune'
   raytune:  xgb_trial_0
 
   # general parameters
@@ -289,6 +289,7 @@ xgb0_param:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
+
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
