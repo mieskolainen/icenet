@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icebrk.loop &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.03
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#electron-id-classifier">Electron ID classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#b-r-k-analyzer">B/R(K) analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#algorithms-packages-included">Algorithms/packages included</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/markup.html">Markup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/cmssw.html">CMSSW setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/cmssw.html#preliminaries-ssh-public-key-to-github">Preliminaries: SSH public key to github</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/cmssw.html#preliminaries-cmssw-release-setup">Preliminaries: CMSSW release setup</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dopt">icenet.deep.dopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>icebrk.loop</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icebrk.loop</h1><div class="highlight"><pre>
+<span></span><span class="c1"># B/RK analyzer main event loop</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+
+
+<span class="kn">import</span> <span class="nn">uproot</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">import</span> <span class="nn">iceplot</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.io</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
+
+<span class="kn">import</span> <span class="nn">icebrk.features</span> <span class="k">as</span> <span class="nn">features</span>
+<span class="kn">import</span> <span class="nn">icebrk.tools</span> <span class="k">as</span> <span class="nn">tools</span>
+<span class="kn">import</span> <span class="nn">icebrk.histos</span> <span class="k">as</span> <span class="nn">histos</span>
+<span class="kn">import</span> <span class="nn">icebrk.cutstats</span> <span class="k">as</span> <span class="nn">cutstats</span>
+<span class="kn">import</span> <span class="nn">icebrk.fasthistos</span> <span class="k">as</span> <span class="nn">fasthistos</span>
+
+
+<div class="viewcode-block" id="hdf5_write_handles"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_write_handles">[docs]</a><span class="k">def</span> <span class="nf">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">N_weights</span><span class="p">,</span> <span class="n">rwmode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create HDF5 file handles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename:</span>
+<span class="sd">        N_weights:</span>
+<span class="sd">        rwmode</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        f:</span>
+<span class="sd">        datasets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rwmode</span><span class="p">)</span>
+
+    <span class="c1"># Keys: Observables</span>
+    <span class="n">datasets</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">init_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">init_shape</span><span class="p">,</span> <span class="n">maxshape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">compression_opts</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+    <span class="c1"># Keys: Weights</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_weights</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;W&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">init_shape</span><span class="p">,</span> <span class="n">maxshape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">compression_opts</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">datasets</span></div>
+
+
+<div class="viewcode-block" id="hdf5_append"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_append">[docs]</a><span class="k">def</span> <span class="nf">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Append chunk of data to HDF5 file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        datasets:</span>
+<span class="sd">        key:</span>
+<span class="sd">        chunk:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        f:</span>
+<span class="sd">        datasets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">row_count</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Resize the dataset to accommodate the next chunk of rows</span>
+    <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">row_count</span> <span class="o">+</span> <span class="n">chunk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+
+    <span class="c1"># Write the next chunk</span>
+    <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">row_count</span><span class="p">:]</span> <span class="o">=</span> <span class="n">chunk</span>
+    
+    <span class="c1"># Increment the row count</span>
+    <span class="n">row_count</span> <span class="o">+=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">row_count</span></div>
+
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">--------------------------------------------------------------------------</span>
+
+<span class="sd">y_tru = [1, 0, 0, 0, 0]</span>
+<span class="sd">y_est = [0.9, 0.05, 0.0001, 0.00001, 0.05]</span>
+
+<span class="sd">Scheme 1: MAXN = 1</span>
+
+<span class="sd">BMAT =</span>
+<span class="sd">[0 0 0 0] = class 0 (no signal)</span>
+<span class="sd">[0 0 0 1] = class 1 (signal in last slot)</span>
+<span class="sd">[0 0 1 0] = class 2  ...</span>
+<span class="sd">[0 1 0 0] = class 3  ...</span>
+<span class="sd">[1 0 0 0] = class 4 (signal in first slot)</span>
+
+
+<span class="sd">--------------------------------------------------------------------------</span>
+<span class="sd">Scheme 2: MAXN &lt;= MAXT3</span>
+
+<span class="sd">BMAT =</span>
+<span class="sd">[0 0 0 0] = class 0 (no signal)</span>
+<span class="sd">[0 0 0 1] = class 1 (signal in last slot)</span>
+<span class="sd">[0 0 1 0] = class 2 (signal in second last slot)</span>
+<span class="sd">[0 0 1 1] = class 3 (signal objects in two slots)</span>
+<span class="sd">...</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="poweranalysis"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.poweranalysis">[docs]</a><span class="k">def</span> <span class="nf">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">reco</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Powerset analysis of the event</span>
+<span class="sd">    N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        evt_index:</span>
+<span class="sd">        batch_obs:</span>
+<span class="sd">        obs:</span>
+<span class="sd">        func_predict:</span>
+<span class="sd">        x:</span>
+<span class="sd">        y:</span>
+<span class="sd">        qsets:</span>
+<span class="sd">        MAXT3:</span>
+<span class="sd">        MAXN:</span>
+<span class="sd">        isMC:</span>
+<span class="sd">        reco:</span>
+<span class="sd">        BMAT:</span>
+<span class="sd">        WNORM:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        w:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create weights</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+        <span class="n">w</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">w</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">aux</span><span class="o">.</span><span class="n">binvec_are_equal</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">[</span><span class="n">c</span><span class="p">,:])</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span>
+            <span class="n">w</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">func_predict</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">])))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="c1"># Get indices we use for the kinematic reconstruction [UPDATE HERE **** !!!]</span>
+    <span class="n">set_ind</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">get_first_indices</span><span class="p">(</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">)</span>
+
+
+    <span class="c1"># Over all powerset combinations (one object, two objects, ... )</span>
+    <span class="c1"># with the total number being dependent on number of rows in BMAT</span>
+    <span class="n">wnorm</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+        <span class="c1"># Event (object) normalization strategy</span>
+        <span class="k">if</span>   <span class="n">WNORM</span> <span class="o">==</span> <span class="s1">&#39;event&#39;</span><span class="p">:</span>
+            <span class="n">wnorm</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">BMAT</span><span class="p">[</span><span class="n">c</span><span class="p">,:]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># Number of signal objects</span>
+            <span class="n">wnorm</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">BMAT</span><span class="p">[</span><span class="n">c</span><span class="p">,:]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Number of background objects</span>
+            
+        <span class="k">elif</span> <span class="n">WNORM</span> <span class="o">==</span> <span class="s1">&#39;unit&#39;</span><span class="p">:</span>
+            <span class="n">wnorm</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wnorm</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.poweranalysis: unknown WNORM parameter&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Sweep over all triplets of this combination</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">BMAT</span><span class="p">[</span><span class="n">c</span><span class="p">,:])):</span>
+
+            <span class="c1"># SIGNAL / BACKGROUND COMPONENT ACTIVE (= POWERSET DEFINITION)</span>
+            <span class="n">ID</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">BMAT</span><span class="p">[</span><span class="n">c</span><span class="p">,</span><span class="n">j</span><span class="p">])</span> <span class="k">else</span> <span class="s1">&#39;B&#39;</span>
+
+            <span class="c1"># Computed observables</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="k">if</span>   <span class="n">key</span> <span class="ow">in</span> <span class="n">batch_obs</span><span class="p">:</span> 
+                    <span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">batch_obs</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">evt_index</span><span class="p">][</span><span class="n">set_ind</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">obs</span><span class="p">:</span>
+                    <span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+            <span class="c1"># Weights</span>
+            <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+                <span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="s1">&#39;0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">/</span> <span class="n">wnorm</span><span class="p">[</span><span class="n">ID</span><span class="p">])</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">algo</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">/</span> <span class="n">wnorm</span><span class="p">[</span><span class="n">ID</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">w</span></div>
+
+
+<div class="viewcode-block" id="hist_flush"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hist_flush">[docs]</a><span class="k">def</span> <span class="nf">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span><span class="p">,</span> <span class="n">h5datasets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Histogram observables with accumulation of previous histograms, and flush buffer arrays</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        reco:</span>
+<span class="sd">        hobj:</span>
+<span class="sd">        h5datasets:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        w:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ====================================================================</span>
+    <span class="c1">### Accumulate histograms</span>
+
+    <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> <span class="c1"># Histogram only non-empty buffer</span>
+
+            <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">hobj</span><span class="p">[</span><span class="n">algo</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span> <span class="o">+=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+                    <span class="n">weights</span><span class="o">=</span><span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="s1">&#39;bins&#39;</span><span class="p">],</span> <span class="n">density</span><span class="o">=</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">])</span>
+
+    <span class="c1"># ====================================================================</span>
+    <span class="c1">### Dump data to HDF5 files</span>
+
+    <span class="k">if</span> <span class="n">h5datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="s1">&#39;pickle&#39;</span><span class="p">]:</span>
+                <span class="n">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">h5datasets</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">h5datasets</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;W&#39;</span><span class="o">+</span><span class="n">algo</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># ====================================================================</span>
+    <span class="c1">### Flush buffers</span>
+
+    <span class="c1"># Observables</span>
+    <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="c1"># Weight</span>
+    <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+    
+    <span class="c1"># ====================================================================</span>
+
+
+<div class="viewcode-block" id="initarrays"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.initarrays">[docs]</a><span class="k">def</span> <span class="nf">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Init histogramming arrays and objects</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        BUFFER:</span>
+<span class="sd">        func_predict:</span>
+<span class="sd">        isMC:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        reco:</span>
+<span class="sd">        hobj:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">reco_EMPTY</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;x&#39;</span> <span class="p">:</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="s1">&#39;w&#39;</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">reco_EMPTY</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">obs</span><span class="p">]</span> <span class="o">=</span> <span class="n">fastarray1</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+        <span class="n">reco_EMPTY</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="s1">&#39;0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fastarray1</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span>
+            <span class="n">reco_EMPTY</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fastarray1</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">)</span>
+
+
+    <span class="c1">## Final state event buffers</span>
+    <span class="n">reco</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reco_EMPTY</span><span class="p">)</span>
+    <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reco_EMPTY</span><span class="p">)</span>
+
+
+    <span class="c1">## Final state histogram objects</span>
+    <span class="n">hobj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()}</span>
+
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+        <span class="n">hobj</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">][</span><span class="s1">&#39;0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hobj</span><span class="p">())</span>
+        <span class="n">hobj</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="s1">&#39;0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hobj</span><span class="p">())</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">hobj</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hobj</span><span class="p">())</span>
+            <span class="n">hobj</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">histos</span><span class="o">.</span><span class="n">obs_all</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hobj</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span></div>
+
+
+<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">MAXEVENTS</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
+    <span class="n">EVTGROUPSIZE</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">CHUNKBUFFER</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BMAT</span><span class="o">=</span><span class="p">[],</span> <span class="n">WNORM</span><span class="o">=</span><span class="p">[],</span> <span class="n">SUPERSETS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">hd5dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputXY</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">outputP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Main event processing loop</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check critical inputs</span>
+
+    <span class="k">if</span> <span class="n">isMC</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="p">(</span><span class="n">func_predict</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">func_predict</span> <span class="ow">is</span> <span class="p">[]):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.process: input &#39;&#39;func_predict&#39;&#39; should not be empty&#39;</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ Basic variables @</span>
+
+    <span class="n">NCLASS</span> <span class="o">=</span> <span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="c1"># Number of classes</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">getdimension</span><span class="p">()</span>  <span class="c1"># Numbef of dimensions per triplet</span>
+    <span class="n">DTOT</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">MAXT3</span>             <span class="c1"># Total number of dimensions</span>
+
+    <span class="n">SORTKEY</span> <span class="o">=</span> <span class="s1">&#39;BToKEE_fit_cos2D&#39;</span> <span class="c1"># Triplet ranking variable</span>
+
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ HDF5 dump @</span>
+
+    <span class="n">h5file</span>     <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">h5datasets</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">hd5dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+            <span class="n">h5file</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">],</span> <span class="n">h5datasets</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">hd5dir</span> <span class="o">+</span> <span class="s1">&#39;/MC_S.hd5&#39;</span><span class="p">,</span> <span class="n">N_weights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">h5file</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">h5datasets</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">hd5dir</span> <span class="o">+</span> <span class="s1">&#39;/MC_B.hd5&#39;</span><span class="p">,</span> <span class="n">N_weights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h5file</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">],</span> <span class="n">h5datasets</span><span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">hd5dir</span> <span class="o">+</span> <span class="s1">&#39;/DA_S.hd5&#39;</span><span class="p">,</span> <span class="n">N_weights</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">))</span>
+            <span class="n">h5file</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">h5datasets</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">hd5dir</span> <span class="o">+</span> <span class="s1">&#39;/DA_B.hd5&#39;</span><span class="p">,</span> <span class="n">N_weights</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">))</span>
+
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ MC AI/ML-training arrays @</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">outputXY</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">DTOT</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">outputP</span><span class="p">:</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span> <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">NCLASS</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">))</span>
+
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ CUTS AND INFOFLOW @</span>
+
+    <span class="n">cutflow</span><span class="p">,</span> <span class="n">infostats_BC</span><span class="p">,</span> <span class="n">mcinfostats_BC</span> <span class="o">=</span> <span class="n">cutstats</span><span class="o">.</span><span class="n">init_stat_objects</span><span class="p">()</span>
+    <span class="n">infostats_AC</span>   <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">infostats_BC</span><span class="p">)</span>
+    <span class="n">mcinfostats_AC</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">mcinfostats_BC</span><span class="p">)</span>
+
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ WEIGHTED OBSERVABLE CONTAINERS @</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">CHUNKBUFFER</span> <span class="o">*</span> <span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span> <span class="o">=</span> <span class="n">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">)</span>
+
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ FAST HISTOGRAMS @</span>
+
+    <span class="c1">#hobjraw_MC = fasthistos.initialize()</span>
+        
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># @ LOOP VARIABLES @</span>
+
+    <span class="n">passcount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">evtcount</span>  <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">l1_p4</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">l2_p4</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">k_p4</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+
+    <span class="c1"># ==================================================================== ROOT file loop &gt;&gt;</span>
+
+    <span class="k">def</span> <span class="nf">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: Input: </span><span class="si">{</span><span class="n">paths</span><span class="p">[</span><span class="n">z</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">numentries</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: D          = </span><span class="si">{</span><span class="n">features</span><span class="o">.</span><span class="n">getdimension</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: DTOT       = </span><span class="si">{</span><span class="n">DTOT</span><span class="si">}</span><span class="s1"> (D x MAXT3)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: NCLASS     = </span><span class="si">{</span><span class="n">NCLASS</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: MAXT3      = </span><span class="si">{</span><span class="n">MAXT3</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: MAXN       = </span><span class="si">{</span><span class="n">MAXN</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: WNORM      = </span><span class="si">{</span><span class="n">WNORM</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: SUPERSETS  = </span><span class="si">{</span><span class="n">SUPERSETS</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: MAXEVENTS  = </span><span class="si">{</span><span class="n">MAXEVENTS</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+    
+    <span class="c1"># Loop over different files</span>
+    <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)):</span>
+
+        <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">z</span><span class="p">])[</span><span class="s1">&#39;Events&#39;</span><span class="p">]</span>
+        <span class="n">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">events</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="n">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+        <span class="c1">## Loop over this file</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">evtgroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">entrysteps</span> <span class="o">=</span> <span class="n">EVTGROUPSIZE</span><span class="p">,</span> <span class="n">namedecode</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)):</span>
+                        
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;evtgroup = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> [EVTGROUPSIZE = </span><span class="si">{</span><span class="n">EVTGROUPSIZE</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">evtgroup</span><span class="p">)</span>
+
+            <span class="c1"># --------------------------------------------------------------------</span>
+            <span class="c1"># *** FULLY VECTORIZED KINEMATICS CONSTRUCTION (JAGGED/COLUMNAR) ***</span>
+
+            <span class="c1">## Construct new branches</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">construct_new_branches</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+            <span class="c1">## Construct kinematics (4-vectors)</span>
+            <span class="n">tools</span><span class="o">.</span><span class="n">construct_kinematics</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">)</span>
+
+            <span class="c1">## Construct final state observables</span>
+            <span class="n">batch_obs</span> <span class="o">=</span> <span class="n">histos</span><span class="o">.</span><span class="n">calc_batch_observables</span><span class="p">(</span><span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+                <span class="n">tools</span><span class="o">.</span><span class="n">construct_MC_tree</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">tools</span><span class="o">.</span><span class="n">construct_MC_truth</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">batch_MC_obs</span> <span class="o">=</span> <span class="n">histos</span><span class="o">.</span><span class="n">calc_batch_MC_observables</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">)</span>
+
+            <span class="c1"># --------------------------------------------------------------------</span>
+            <span class="c1"># Loop over events of this group</span>
+            <span class="n">N_EVENTS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">])</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_EVENTS</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">evt_index</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">evtcount</span> <span class="o">==</span> <span class="n">MAXEVENTS</span><span class="p">):</span> 
+                    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Maximum event count </span><span class="si">{</span><span class="n">MAXEVENTS</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">))</span>
+                    <span class="n">iterator</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># So we don&#39;t get ghost messages</span>
+                    <span class="k">break</span> <span class="c1"># this event group</span>
+                    
+                <span class="c1"># ====================================================================</span>
+                <span class="c1">## EVENT SELECTION AND COMBINATORICS</span>
+                <span class="c1"># ====================================================================</span>
+                <span class="n">evtcount</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+                <span class="c1">## Find triplets merged together</span>
+                <span class="k">if</span> <span class="n">SUPERSETS</span><span class="p">:</span>
+                    <span class="n">qsets</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">los2lol</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">find_connected_triplets</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">))</span>
+
+                <span class="c1"># All individually, no fusion</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">qsets</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span> <span class="n">l1_p4</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">][</span><span class="n">evt_index</span><span class="p">])):</span>
+                        <span class="n">qsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="p">)</span>
+                
+
+                <span class="c1"># Sort the triplets</span>
+                <span class="k">def</span> <span class="nf">svprob_rank</span><span class="p">(</span><span class="n">tripletset</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">tripletset</span><span class="p">:</span>
+                        <span class="c1"># Return first of the (possible) superset</span>
+                        <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">SORTKEY</span><span class="p">][</span><span class="n">evt_index</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span>
+
+                <span class="n">qsets</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">svprob_rank</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Reverse gives the biggest values first!</span>
+
+
+                <span class="c1"># ====================================================================</span>
+                <span class="c1"># FILL FAST HISTOGRAMS</span>
+
+                <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                # Get indices we use for the kinematic reconstruction [UPDATE HERE **** !!!]</span>
+<span class="sd">                set_ind = tools.get_first_indices(qsets, MAXT3=MAXT3)</span>
+
+<span class="sd">                for obs in fasthistos[&#39;S&#39;].keys():</span>
+<span class="sd">                    for set_ind</span>
+<span class="sd">                &#39;&#39;&#39;</span>
+
+                <span class="c1"># ====================================================================</span>
+                <span class="c1">## Construct input (and output) vectors</span>
+
+                <span class="n">x</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">construct_input_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="o">=</span><span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="o">=</span><span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="o">=</span><span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="o">=</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">outputXY</span><span class="p">:</span>
+                    <span class="n">X</span><span class="p">[</span><span class="n">passcount</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">construct_output_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="o">=</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">outputXY</span><span class="p">:</span>
+                        <span class="n">Y</span><span class="p">[</span><span class="n">passcount</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+
+                <span class="c1"># ====================================================================</span>
+                <span class="c1">## CUTS</span>
+                <span class="c1"># ====================================================================</span>
+                <span class="n">cutstats</span><span class="o">.</span><span class="n">collect_info_stats</span><span class="p">(</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span> <span class="o">=</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span> <span class="o">=</span> <span class="n">infostats_BC</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">cutstats</span><span class="o">.</span><span class="n">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="o">=</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                    <span class="n">qsets</span><span class="o">=</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="o">=</span><span class="n">mcinfostats_BC</span><span class="p">)</span>
+                
+                <span class="c1"># --------------------------------------------------------------------</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">cutstats</span><span class="o">.</span><span class="n">apply_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="c1"># --------------------------------------------------------------------</span>
+                <span class="n">cutstats</span><span class="o">.</span><span class="n">collect_info_stats</span><span class="p">(</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span> <span class="o">=</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span> <span class="o">=</span> <span class="n">infostats_AC</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">cutstats</span><span class="o">.</span><span class="n">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="o">=</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                    <span class="n">qsets</span><span class="o">=</span><span class="n">qsets</span><span class="p">,</span><span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="o">=</span><span class="n">mcinfostats_AC</span><span class="p">)</span>
+                    
+
+                <span class="c1"># ====================================================================</span>
+                <span class="c1"># Event-by-event (non-vectorizable) observables</span>
+
+                <span class="n">obs</span>        <span class="o">=</span> <span class="n">histos</span><span class="o">.</span><span class="n">calc_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+                    <span class="n">MC_obs</span> <span class="o">=</span> <span class="n">histos</span><span class="o">.</span><span class="n">calc_MC_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+                    <span class="n">tools</span><span class="o">.</span><span class="n">print_MC_event</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">)</span>
+
+
+                <span class="c1"># ====================================================================</span>
+                <span class="c1">## ANALYSIS</span>
+                <span class="c1"># ====================================================================</span>
+                <span class="k">if</span> <span class="n">func_predict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                    <span class="c1">## Analyze</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="o">=</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="o">=</span><span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="o">=</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="n">MAXN</span><span class="p">,</span> <span class="n">reco</span><span class="o">=</span><span class="n">reco</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">BMAT</span><span class="o">=</span><span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="o">=</span><span class="n">WNORM</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">outputP</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span> <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)][</span><span class="n">passcount</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+
+                    <span class="c1"># Fill histograms &amp; flush buffers</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">passcount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">passcount</span> <span class="o">%</span> <span class="p">(</span><span class="n">CHUNKBUFFER</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)):</span>
+                        <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">reco</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="o">=</span><span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">],</span> <span class="n">hobj</span><span class="o">=</span><span class="n">hobj</span><span class="p">[</span><span class="n">ID</span><span class="p">],</span> <span class="n">h5datasets</span><span class="o">=</span><span class="n">h5datasets</span><span class="p">[</span><span class="n">ID</span><span class="p">])</span>
+
+                <span class="c1">## Update counts</span>
+                <span class="n">passcount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Last fill histograms &amp; flush buffers</span>
+        <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">reco</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="o">=</span><span class="n">reco</span><span class="p">[</span><span class="n">ID</span><span class="p">],</span> <span class="n">hobj</span><span class="o">=</span><span class="n">hobj</span><span class="p">[</span><span class="n">ID</span><span class="p">],</span> <span class="n">h5datasets</span><span class="o">=</span><span class="n">h5datasets</span><span class="p">[</span><span class="n">ID</span><span class="p">])</span>
+
+    <span class="c1"># ==================================================================== &lt;&lt; ROOT file loop</span>
+
+    <span class="c1"># Close HDF5 files</span>
+    <span class="k">if</span> <span class="n">hd5dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">reco</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">h5file</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1">## Remove buffer space</span>
+    <span class="k">if</span> <span class="n">outputXY</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">passcount</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+        <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">passcount</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+
+    <span class="k">if</span> <span class="n">outputP</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span>
+            <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)][</span><span class="mi">0</span><span class="p">:</span><span class="n">passcount</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+
+
+    <span class="c1">## Update total event counts</span>
+    <span class="n">cutflow</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">evtcount</span>
+    <span class="n">infostats_BC</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evtcount</span>
+    <span class="n">infostats_AC</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evtcount</span>
+
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+        <span class="n">mcinfostats_BC</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evtcount</span>
+        <span class="n">mcinfostats_AC</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evtcount</span>
+
+    <span class="c1">## Print flows</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt; INFOSTATS [BC] &gt;&gt;&#39;</span><span class="p">);</span> <span class="n">prints</span><span class="o">.</span><span class="n">print_flow</span><span class="p">(</span><span class="n">infostats_BC</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt; MC-ONLY-INFOSTATS [BC] &gt;&gt;&#39;</span><span class="p">);</span> <span class="n">prints</span><span class="o">.</span><span class="n">print_flow</span><span class="p">(</span><span class="n">mcinfostats_BC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt; CUTFLOW &gt;&gt;&#39;</span><span class="p">);</span> <span class="n">prints</span><span class="o">.</span><span class="n">print_flow</span><span class="p">(</span><span class="n">cutflow</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt; INFOSTATS [AC] &gt;&gt;&#39;</span><span class="p">);</span> <span class="n">prints</span><span class="o">.</span><span class="n">print_flow</span><span class="p">(</span><span class="n">infostats_AC</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt; MC-ONLY-INFOSTATS [AC] &gt;&gt;&#39;</span><span class="p">);</span> <span class="n">prints</span><span class="o">.</span><span class="n">print_flow</span><span class="p">(</span><span class="n">mcinfostats_AC</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;X&#39;</span>    <span class="p">:</span> <span class="n">X</span><span class="p">,</span>
+        <span class="s1">&#39;Y&#39;</span>    <span class="p">:</span> <span class="n">Y</span><span class="p">,</span>
+        <span class="s1">&#39;P&#39;</span>    <span class="p">:</span> <span class="n">P</span><span class="p">,</span>
+        <span class="s1">&#39;hobj&#39;</span> <span class="p">:</span> <span class="n">hobj</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">output</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
