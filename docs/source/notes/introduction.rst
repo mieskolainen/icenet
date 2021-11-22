@@ -17,31 +17,14 @@ Folder structure
 	-docs         Documentation
 	-figs         Output figures
 	-icebrk       B/R(K) functions
-	-icefit       Fitting functions
+	-icefit       Fitting and statistics functions
 	-iceid        Electron ID functions
 	-icenet       Deep learning classes & functions
+	-icetrg       HLT trigger classifiers
 	-iceplot      Plotting tools
-	-tests        Test functions
+	-tests        Test and steering scripts
 	-output       HDF5, pickle outputs
 	-dev          Development code
-
-
-Electron ID classifier
------------------------
-.. code-block:: none
-
-	python ./analysis/eid_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
-	python ./analysis/eid_eval.py  --config tune0 --datapath <some path> --datasets <0,1,2,...>
-
-
-B/R(K) analyzer
------------------------
-.. code-block:: none
-
-	python ./analysis/brk_train.py --config tune0 --datapath <some path> --datasets <0,1,2,...>
-	python ./analysis/brk_calc.py  --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
-	python ./analysis/brk_print.py --config tune0 --datapath <some path> --datasets <0,1,2,...> --tag <xyz>
-	python ./analysis/brk_fit.py   --config tune0 --tag <xyz>
 
 
 Algorithms/packages included
@@ -56,5 +39,6 @@ Algorithms/packages included
 	6. Permutation Equivariant Networks [pytorch]
 	7. CNN Networks [pytorch]
 	8. Graph Neural Nets [pytorch-geometric]
-	...
+	9. ...
+
 
