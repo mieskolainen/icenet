@@ -14,7 +14,6 @@ Under development!
    notes/installation
    notes/introduction
    notes/markup
-   notes/cmssw
 
 .. toctree::
    :glob:
