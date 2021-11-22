@@ -55,19 +55,21 @@ release = icenet.__release__
 doctest_default_flags = doctest.NORMALIZE_WHITESPACE
 intersphinx_mapping = {'python': ('https://docs.python.org/', None)}
 
-html_theme      = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_theme_options = {
-    'collapse_navigation': False,
-    'display_version': True,
-    'logo_only': True,
-    'navigation_depth': 3,
-}
+html_theme       = 'alabaster'
+#html_theme      = 'sphinx_rtd_theme'
+#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+#html_theme_options = {
+#    'collapse_navigation': False,
+#    'display_version': True,
+#    'logo_only': True,
+#    'navigation_depth': 3,
+#}
 
 #html_logo = '_static/img/logo.svg'
-#html_static_path = ['_static']
-html_static_path = ['']
-html_context = {'css_files': ['_static/css/custom.css']}
+html_static_path = ['_static']
+#html_static_path = []
+
+#html_context = {'css_files': ['_static/css/custom.css']}
 
 
 def setup(app):
