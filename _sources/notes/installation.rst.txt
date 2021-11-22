@@ -17,7 +17,7 @@ Then execute with 'bash filename.sh'
 
 
 Pre-installed CUDA paths (optional)
----------------------------
+------------------------------------
 .. code-block:: none
 
 	source /vols/software/cuda/setup.sh 11.2.0
@@ -106,7 +106,7 @@ Show Tensorflow and Pytorch GPU support in Python
 
 
 Conda virtual environment commands
---------------------------------
+-----------------------------------
 .. code-block:: none
 
 	conda create -y --name icenet python==3.9.6

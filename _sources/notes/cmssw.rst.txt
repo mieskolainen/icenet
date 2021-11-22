@@ -8,7 +8,7 @@ The framework installation goes as follows.
 
 
 Preliminaries: SSH public key to github
-----------------------------------
+----------------------------------------
 .. code-block:: none
 
 	cat ~/.ssh/id_rsa.pub
@@ -17,7 +17,7 @@ Copy the public key to [github.com / SETTINGS / ssh keys]
 
 
 Preliminaries: CMSSW release setup
-----------------------------------
+-----------------------------------
 .. code-block:: none
 
 	cd ~
