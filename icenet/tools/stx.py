@@ -86,6 +86,10 @@ def parse_boolean_exptree(instring):
              parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
     """
 
+    # Functions use internally AND and OR
+    instring = instring.replace("&&", "AND")
+    instring = instring.replace("||", "OR")    
+
     def makeLRlike(numterms):
         """
         parse action -maker
@@ -338,8 +342,8 @@ def test_syntax_tree_parsing():
     Unit tests
     """
     expr_A     = 'x < 0.2 AND y < 2 AND z >= 4'
-    expr_B     = 'x < 0.2 AND (y < 2 AND z >= 4)'
-    expr_C     = 'x < 0.2 AND y < 2 OR z >= 4'
+    expr_B     = 'x < 0.2 AND (y < 2 && z >= 4)'
+    expr_C     = 'x < 0.2 && y < 2 || z >= 4'
     
     treelist_A = parse_boolean_exptree(expr_A)
     treelist_B = parse_boolean_exptree(expr_B)
