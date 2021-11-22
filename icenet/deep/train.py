@@ -68,10 +68,13 @@ from ray.tune.schedulers import ASHAScheduler
 from functools import partial
 
 
-def raytune_main(data_trn, data_val, args, param, gpus_per_trial=1):
+def raytune_main(inputs, gpus_per_trial=1, train_func=None):
     """
     Raytune mainloop
     """
+    args  = inputs['args']
+    param = inputs['param']
+
 
     ### General raytune parameters
     num_samples    = args['raytune_param']['num_samples']
@@ -83,24 +86,33 @@ def raytune_main(data_trn, data_val, args, param, gpus_per_trial=1):
     config = {}
 
     for key in args['raytune_setup'][steer]['param']:
+
+        rtp   = args['raytune_setup'][steer]['param'][key]['type']
         value = args['raytune_setup'][steer]['param'][key]['value']
 
+        # Random integer
+        if   rtp == 'tune.randint':
+            config[key] = tune.randint(value[0], value[1])
+
         # Fixed array
-        if args['raytune_setup'][steer]['param'][key]['type'] == 'tune.choice':
+        elif rtp == 'tune.choice':
             config[key] = tune.choice(value)
 
         # Log-uniform sampling
-        if args['raytune_setup'][steer]['param'][key]['type'] == 'tune.loguniform':
+        elif rtp == 'tune.loguniform':
             config[key] = tune.loguniform(value[0], value[1])
 
         # Uniform sampling
-        if args['raytune_setup'][steer]['param'][key]['type'] == 'tune.uniform':
+        elif rtp == 'tune.uniform':
             config[key] = tune.uniform(value[0], value[1])
+
+        else:
+            raise Exception(__name__ + f'.raytune_main: Unknown raytune parameter type = {rtp}')
 
     # --------------------------------------------------------------------
 
     # Raytune basic metrics
-    reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
+    reporter   = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
 
     # Raytune search algorithm
     metric     = args['raytune_setup'][steer]['search_metric']['metric']
@@ -120,7 +132,7 @@ def raytune_main(data_trn, data_val, args, param, gpus_per_trial=1):
 
     # Raytune main setup
     analysis = tune.run(
-        partial(train_graph, data_trn=data_trn, data_val=data_val, args=args, param=param),
+        partial(train_func, **inputs),
         search_alg          = search_alg,
         resources_per_trial = {"cpu": 8, "gpu": gpus_per_trial},
         config              = config,
@@ -135,26 +147,49 @@ def raytune_main(data_trn, data_val, args, param, gpus_per_trial=1):
     cprint(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
     cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}', 'green')
 
-    
-    ### Load the best model from raytune folder
-    bestparam, conv_type = getgraphparam(config=best_trial.config, data_trn=data_trn, data_val=data_val, args=args, param=param)
-    best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
 
-    device = "cpu"
-    if torch.cuda.is_available():
-        device = "cuda:0"
-        if gpus_per_trial > 1:
-            best_trained_model = nn.DataParallel(best_trained_model)
-    best_trained_model.to(device)
+    # GRAPH NETWORKS
+    if train_func == train_graph:
 
-    best_checkpoint_dir          = best_trial.checkpoint.value
-    model_state, optimizer_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
-    best_trained_model.load_state_dict(model_state)
+        ### Load the best model from raytune folder
+        bestparam, conv_type = getgraphparam(config=best_trial.config, **inputs)
+        best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
 
+        device = "cpu"
+        if torch.cuda.is_available():
+            device = "cuda:0"
+            if gpus_per_trial > 1:
+                best_trained_model = nn.DataParallel(best_trained_model)
+        best_trained_model.to(device)
 
-    ### Finally save it under model folder
-    checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
+        best_checkpoint_dir          = best_trial.checkpoint.value
+        model_state, optimizer_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
+        best_trained_model.load_state_dict(model_state)
+
+        ### Finally save it under model folder
+        checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
+        torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
+
+    elif train_func == train_xgb:
+
+        # Get the best config
+        config = best_trial.config
+
+        # Load the optimal values for the given hyperparameters
+        optimal_param = {}
+        for key in param.keys():
+            optimal_param[key] = config[key] if key in config.keys() else param[key]
+        
+        print('Best parameters:')
+        print(optimal_param)
+        
+        # ** Final train **
+        inputs['param'] = optimal_param
+        inputs['args']['raytune_param']['active'] = False
+        train_xgb(**inputs)
+
+    else:
+        raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
 
 
 def getgraphmodel(conv_type, netparam):
@@ -312,19 +347,18 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
     dtest     = xgboost.DMatrix(data = x_val, label = y_val)
 
-
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
     model     = xgboost.train(params = param['xgb'], dtrain = dtrain,
         num_boost_round = param['xgb']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
-    
+
     ## Save
     pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_" + str(0) + '.dat', 'wb'))
-
 
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
     val_aucs = results['eval']['auc']
+
 
     # Plot evolution
     plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
@@ -524,13 +558,11 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
     model = mlgr.MLGR(D = X_trn.shape[1], C = num_classes)
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
         trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
-    
 
     # Plot evolution
     plotdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok=True)
     fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-    
 
     ### Plot contours
     if args['plot_param']['contours_on']:
@@ -539,33 +571,53 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
 
-def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
+def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plot_importance=True):
 
     label = param['label']
 
     if param['tree_method'] == 'auto':
-        param.update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+        param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
     print(f'\nTraining {label} classifier ...')
 
-    print(f'before extension: {data.trn.x.shape}')
+    ### ** Hyperparameter optimization **
+    if config is not {}:
+        for key in param.keys():
+            param[key] = config[key] if key in config.keys() else param[key]
+
+    ### *********************************
 
     # Extended data
-    x_trn_    = data.trn.x #np.c_[data.trn.x, data_tensor['trn'][:,0,:,:].reshape(len(data.trn.x), -1)]
-    x_val_    = data.val.x #np.c_[data.val.x, data_tensor['val'][:,0,:,:].reshape(len(data.val.x), -1)]
-    
-    print(f'after extension: {x_trn_.shape}')
+    x_trn_    = data.trn.x
+    x_val_    = data.val.x
+
 
     dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y, weight = trn_weights)
     dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
 
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
+
+    print(param)
+
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
     
-    ## Save
-    pickle.dump(model, open(args['modeldir'] + f'/{label}_' + str(0) + '.dat', 'wb'))
+
+    # Raytune on
+    if args['raytune_param']['active']:
+
+        epoch = 0 # FIXED
+        
+        with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            path = os.path.join(checkpoint_dir, "checkpoint")
+            pickle.dump(model, open(path, 'wb'))
+
+        tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
+
+    else:
+        ## Save
+        pickle.dump(model, open(args['modeldir'] + f'/{label}_' + str(0) + '.dat', 'wb'))
     
     
     losses   = results['train']['logloss']
@@ -579,26 +631,28 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None):
 
 
     ## Plot feature importance (xgb does Not return it for all of them)
-    fscores  = model.get_score(importance_type='gain')
-    print(fscores)
+    if plot_importance:
 
-    D  = data.trn.x.shape[1]
-    xx = np.arange(D)
-    yy = np.zeros(D)
-    
-    for i in range(D):
-        try:
-            yy[i] = fscores['f' + str(i)]
-        except:
-            yy[i] = 0.0
+        fscores  = model.get_score(importance_type='gain')
+        print(fscores)
 
-    fig  = plt.figure(figsize=(12,8))
-    bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
-    plt.xlabel('f-score (gain)')
+        D  = data.trn.x.shape[1]
+        xx = np.arange(D)
+        yy = np.zeros(D)
+        
+        for i in range(D):
+            try:
+                yy[i] = fscores['f' + str(i)]
+            except:
+                yy[i] = 0.0
 
+        fig  = plt.figure(figsize=(12,8))
+        bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
+        plt.xlabel('f-score (gain)')
 
-    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
-    plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+        plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+
 
     ## Plot decision tree
     #xgboost.plot_tree(xgb_model, num_trees=2)

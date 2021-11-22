@@ -16,4 +16,6 @@ mkdir ./figs/trg/$CONFIG -p # for output ascii dump
 
 # tee redirect output to both a file and to screen
 python ./analysis/trg_train.py --config $CONFIG --datapath $DATAPATH --datasets "none" | tee "./figs/trg/$CONFIG/train_output.txt"
-python ./analysis/trg_eval.py  --config $CONFIG --datapath $DATAPATH --datasets "none" | tee "./figs/trg/$CONFIG/eval_output.txt"
+#python ./analysis/trg_eval.py  --config $CONFIG --datapath $DATAPATH --datasets "none" | tee "./figs/trg/$CONFIG/eval_output.txt"
+
+

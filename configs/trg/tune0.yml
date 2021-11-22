@@ -2,7 +2,7 @@
 #
 rootname: 'trg'
 
-MAXEVENTS: 1000000                # Maximum total number of events (per root file) to process
+MAXEVENTS: 10000000               # Maximum total number of events (per root file) to process
 
 eval_reweight: False              # Event-by-event re-weighting used in the evaluation phase
 
@@ -24,7 +24,7 @@ active_models:
   - cut6
 
   - cutset0
-  - lgr0
+#  - lgr0
 # ----------------------------------------------------
 
 # ----------------------
@@ -106,7 +106,6 @@ plot_param:
   contours_on: false
 
 
-
   ## Binned ROC plots can be 1D or 2D;
   # use a running number __0, __1, ... as an identifier for new plots
   plot_ROC_binned__0:
@@ -125,8 +124,8 @@ plot_param:
 
 raytune_param:
   active:         True
-  num_samples:    10
-  max_num_epochs: 10
+  num_samples:    100
+  max_num_epochs: 50
 
 
 raytune_setup:
@@ -297,7 +296,7 @@ xgb1_param:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB_T1_D6'
-  raytune:  xgb_trial_0
+  raytune:  null
 
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
