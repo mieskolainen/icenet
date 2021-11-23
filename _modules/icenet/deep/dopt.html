@@ -512,16 +512,19 @@
 
         <span class="c1"># Just print the loss</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> 
-
-
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
     <span class="c1"># -------------------------------------------------------</span>
     <span class="c1"># Temperature scaling post-processing</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if param[&#39;post_process&#39;][&#39;temperature_scale&#39;]:</span>
 
-    <span class="n">scaled_model</span> <span class="o">=</span> <span class="n">ModelWithTemperature</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-    <span class="n">scaled_model</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">valid_loader</span><span class="o">=</span><span class="n">validation_generator</span><span class="p">)</span>
+<span class="sd">        scaled_model = ModelWithTemperature(model, device=device)</span>
+<span class="sd">        scaled_model.set_temperature(valid_loader=validation_generator)</span>
+
+<span class="sd">        model = scaled_model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># -------------------------------------------------------</span>
-    
     
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span></div>
 </pre></div>
