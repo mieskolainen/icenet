@@ -340,17 +340,20 @@ lgr0_param:
   raytune:  null
 
   opt_param:
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-    gamma: 2                  # focal_entropy exponent
+    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy
+    gamma: 2                    # focal_entropy exponent
     optimizer: 'AdamW'
-    noise_reg: 0.0            # Noise regularization
-
+    noise_reg: 0.0              # Noise regularization
+    
     epochs: 50
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
 
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  post_process:
+    temperature_scale: true
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs

@@ -479,15 +479,18 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
 
         # Just print the loss
         else:
-            print(f'Epoch = {epoch} : train loss = {avgloss:.3f}') 
-
-
+            print(f'Epoch = {epoch} : train loss = {avgloss:.3f}')
+    
     # -------------------------------------------------------
     # Temperature scaling post-processing
+    """
+    if param['post_process']['temperature_scale']:
 
-    scaled_model = ModelWithTemperature(model, device=device)
-    scaled_model.set_temperature(valid_loader=validation_generator)
+        scaled_model = ModelWithTemperature(model, device=device)
+        scaled_model.set_temperature(valid_loader=validation_generator)
+
+        model = scaled_model
+    """
     # -------------------------------------------------------
-    
     
     return model, losses, trn_aucs, val_aucs
