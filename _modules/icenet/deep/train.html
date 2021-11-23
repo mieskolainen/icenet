@@ -31,11 +31,10 @@
           <div class="body" role="main">
             
   <h1>Source code for icenet.deep.train</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Generic model training wrapper functions</span>
+<span></span><span class="c1"># Generic model training wrapper functions [TBD; unify and simplify data structures]</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2020</span>
+<span class="c1"># Mikael Mieskolainen, 2021</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
-
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -107,7 +106,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">args</span>  <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span>
-
 
     <span class="c1">### General raytune parameters</span>
     <span class="n">num_samples</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_samples&#39;</span><span class="p">]</span>
@@ -281,7 +279,17 @@
 
 <div class="viewcode-block" id="train_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph">[docs]</a><span class="k">def</span> <span class="nf">train_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Train graph networks</span>
+<span class="sd">    Train graph neural networks</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        config:   raytune parameter dict</span>
+<span class="sd">        data_trn: training data</span>
+<span class="sd">        data_val: validation data</span>
+<span class="sd">        args:     arg parameters dict</span>
+<span class="sd">        param:    model parameters dict</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">### ** Optimization hyperparameters **</span>
@@ -326,7 +334,7 @@
         <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
         <span class="c1"># Raytune on</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
@@ -341,6 +349,15 @@
 
 
 <div class="viewcode-block" id="train_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train graph model + xgb hybrid model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
@@ -435,6 +452,15 @@
 
 
 <div class="viewcode-block" id="train_dmax"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_dmax">[docs]</a><span class="k">def</span> <span class="nf">train_dmax</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train dmax neural model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     
@@ -458,6 +484,15 @@
 
 
 <div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train factorized likelihood model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
@@ -479,7 +514,16 @@
 
 
 <div class="viewcode-block" id="train_cdmx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cdmx">[docs]</a><span class="k">def</span> <span class="nf">train_cdmx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train cdmx neural model</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NOT WORKING CURRENTLY [update code]</span>
 <span class="sd">    </span>
@@ -519,6 +563,15 @@
 
 
 <div class="viewcode-block" id="train_cnn"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cnn">[docs]</a><span class="k">def</span> <span class="nf">train_cnn</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train CNN neural model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
@@ -562,6 +615,15 @@
 
 
 <div class="viewcode-block" id="train_dmlp"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_dmlp">[docs]</a><span class="k">def</span> <span class="nf">train_dmlp</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train dmlp neural model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     
@@ -584,6 +646,15 @@
 
 
 <div class="viewcode-block" id="train_lgr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_lgr">[docs]</a><span class="k">def</span> <span class="nf">train_lgr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train lgr neural model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     
@@ -605,6 +676,15 @@
 
 
 <div class="viewcode-block" id="train_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train XGBoost model</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
@@ -635,13 +715,12 @@
 
     <span class="n">model</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">dtrain</span> <span class="o">=</span> <span class="n">dtrain</span><span class="p">,</span>
         <span class="n">num_boost_round</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">],</span> <span class="n">evals</span> <span class="o">=</span> <span class="n">evallist</span><span class="p">,</span> <span class="n">evals_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span> <span class="n">verbose_eval</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-    
 
     <span class="c1"># Raytune on</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
 
         <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># FIXED</span>
-        
+
         <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
@@ -699,7 +778,16 @@
 
 
 <div class="viewcode-block" id="train_xtx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xtx">[docs]</a><span class="k">def</span> <span class="nf">train_xtx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train xtx neural model</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">label</span>     <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     <span class="n">pt_edges</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;pt_edges&#39;</span><span class="p">]</span>
     <span class="n">eta_edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;eta_edges&#39;</span><span class="p">]</span> 
@@ -756,6 +844,15 @@
 
 
 <div class="viewcode-block" id="train_flow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flow">[docs]</a><span class="k">def</span> <span class="nf">train_flow</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train normalizing flow (BNAF) neural model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
