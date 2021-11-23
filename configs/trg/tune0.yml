@@ -24,7 +24,7 @@ active_models:
   - cut6
 
   - cutset0
-#  - lgr0
+  - lgr0
 # ----------------------------------------------------
 
 
@@ -125,9 +125,9 @@ plot_param:
 # ========================================================================
 
 raytune_param:
-  active:         True
-  num_samples:    1000
-  max_num_epochs: 50
+  active:         [null]
+  num_samples:    [1000]
+  max_num_epochs: [50]
 
 
 raytune_setup:

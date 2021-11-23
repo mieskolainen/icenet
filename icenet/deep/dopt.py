@@ -1,6 +1,6 @@
 # Deep Learning optimization functions
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -20,6 +20,9 @@ from   torch.autograd import Variable
 import torch.autograd as autograd
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+from icenet.deep.tempscale import ModelWithTemperature
 
 from icenet.tools import aux
 from icenet.tools import io
@@ -476,7 +479,15 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
 
         # Just print the loss
         else:
-            print('Epoch = {} : train loss = {:.3f}'. format(epoch, avgloss)) 
+            print(f'Epoch = {epoch} : train loss = {avgloss:.3f}') 
 
+
+    # -------------------------------------------------------
+    # Temperature scaling post-processing
+
+    scaled_model = ModelWithTemperature(model, device=device)
+    scaled_model.set_temperature(valid_loader=validation_generator)
+    # -------------------------------------------------------
+    
+    
     return model, losses, trn_aucs, val_aucs
-

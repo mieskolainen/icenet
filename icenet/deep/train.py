@@ -1,8 +1,7 @@
-# Generic model training wrapper functions
+# Generic model training wrapper functions [TBD; unify and simplify data structures]
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
-
 
 import math
 import numpy as np
@@ -74,7 +73,6 @@ def raytune_main(inputs, gpus_per_trial=1, train_func=None):
     """
     args  = inputs['args']
     param = inputs['param']
-
 
     ### General raytune parameters
     num_samples    = args['raytune_param']['num_samples']
@@ -248,7 +246,17 @@ def getgraphparam(config, data_trn, data_val, args, param, num_classes=2):
 
 def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, num_classes=2):
     """
-    Train graph networks
+    Train graph neural networks
+    
+    Args:
+        config:   raytune parameter dict
+        data_trn: training data
+        data_val: validation data
+        args:     arg parameters dict
+        param:    model parameters dict
+
+    Returns:
+        trained model
     """
 
     ### ** Optimization hyperparameters **
@@ -293,7 +301,7 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
         scheduler.step()
 
         # Raytune on
-        if args['raytune_param']['active']:
+        if len(config) != 0:
             with tune.checkpoint_dir(epoch) as checkpoint_dir:
                 path = os.path.join(checkpoint_dir, "checkpoint")
                 torch.save((model.state_dict(), optimizer.state_dict()), path)
@@ -308,6 +316,15 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
 
 
 def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train graph model + xgb hybrid model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
 
@@ -402,6 +419,15 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
 
 
 def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train dmax neural model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
     
@@ -425,6 +451,15 @@ def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
 
 
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
+    """
+    Train factorized likelihood model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
 
@@ -446,7 +481,16 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
 
 
 def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train cdmx neural model
     
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
+
     """
     NOT WORKING CURRENTLY [update code]
     
@@ -486,6 +530,15 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
 
 
 def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train CNN neural model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
 
@@ -529,6 +582,15 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
 
 
 def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train dmlp neural model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
     
@@ -551,6 +613,15 @@ def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
 
 
 def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train lgr neural model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
     
@@ -572,6 +643,15 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
 
 
 def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plot_importance=True):
+    """
+    Train XGBoost model
+    
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
 
@@ -602,13 +682,12 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plo
 
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
-    
 
     # Raytune on
-    if args['raytune_param']['active']:
+    if len(config) != 0:
 
         epoch = 0 # FIXED
-        
+
         with tune.checkpoint_dir(epoch) as checkpoint_dir:
             path = os.path.join(checkpoint_dir, "checkpoint")
             pickle.dump(model, open(path, 'wb'))
@@ -666,7 +745,16 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plo
 
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None, num_classes=2):
+    """
+    Train xtx neural model
     
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
+
     label     = param['label']
     pt_edges  = args['plot_param']['pt_edges']
     eta_edges = args['plot_param']['eta_edges'] 
@@ -723,6 +811,15 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
 
 
 def train_flow(config={}, data=None, trn_weights=None, args=None, param=None, num_classes=2):
+    """
+    Train normalizing flow (BNAF) neural model
+
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
 
     label = param['label']
 

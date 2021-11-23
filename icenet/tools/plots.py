@@ -474,16 +474,16 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
         if k == 0:
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
-            ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
+            ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-
+        
         if k == 1:
             plt.ylim(0.0, 1.0)
             plt.xlim(1e-4, 1.0)
             plt.gca().set_xscale('log')
-            ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
+            ax.set_aspect(1.0 / ax.get_data_ratio() * 0.75)
             plt.savefig(filename + '__log.pdf', bbox_inches='tight')
-
+        
         plt.close()
 
 

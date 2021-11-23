@@ -183,7 +183,7 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
         if   param['train'] == 'graph':
             
             inputs = {'data_trn': data_graph['trn'], 'data_val': data_graph['val'], 'args':args, 'param': param}
-            if args['raytune_param']['active']:
+            if ID in args['raytune_param']['active']:
                 train.raytune_main(inputs=inputs, train_func=train.train_graph)
             else:
                 train.train_graph(**inputs)
@@ -191,11 +191,11 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
         elif param['train'] == 'xgb':
 
             inputs = {'data': data, 'trn_weights': trn_weights, 'args': args, 'param': param}
-            if args['raytune_param']['active']:
+            if ID in args['raytune_param']['active']:
                 train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
                 train.train_xgb(**inputs)
-        
+            
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
         
