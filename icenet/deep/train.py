@@ -288,8 +288,8 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
     
     # Data loaders
-    train_loader = torch_geometric.data.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
-    test_loader  = torch_geometric.data.DataLoader(data_val, batch_size=512, shuffle=False)
+    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
+    test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
     
 
     for epoch in range(opt_param['epochs']):
@@ -405,8 +405,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
 
     targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
-
-
+    
     ## Plot decision tree
     #xgboost.plot_tree(xgb_model, num_trees=2)
     #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()

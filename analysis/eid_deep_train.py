@@ -278,9 +278,9 @@ def main():
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
-                    train_loader = torch_geometric.data.DataLoader(gdata['trn'], batch_size=param[ID]['batch_size'], shuffle=True)
-                    test_loader  = torch_geometric.data.DataLoader(gdata['val'], batch_size=512, shuffle=False)
-
+                    train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['batch_size'], shuffle=True)
+                    test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
+                    
                     # Local epoch loop
                     for local_epoch in range(param[ID]['epochs']):
 

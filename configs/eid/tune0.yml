@@ -30,7 +30,7 @@ active_models:
 #  - xtx0
 #  - dmx0
 #  - dbnf0
-  - gxgb0 # Keep this last (fix the bug) !
+  - gxgb0
 # ---------------------------------------------------------
 
 
@@ -211,7 +211,7 @@ raytune_setup:
 
       global_pool:
         type: "tune.choice"
-        value: ['s2s', 'max', 'add', 'mean']
+        value: ['mean', 'max', 'add', 'mean']
 
       batch_size:
         type: "tune.choice"
@@ -256,7 +256,7 @@ gxgb0_param:
     # Model
     model_param:
       conv_aggr:   'add'
-      global_pool: 's2s'
+      global_pool: 'mean'
       cdim: 96                   # Convolution output dimension
     
     # Optimization
@@ -364,7 +364,7 @@ gnet1_param:
   # Model
   model_param:
     conv_aggr:   'add'
-    global_pool: 's2s'
+    global_pool: 'mean'
     cdim: 96                   # Convolution output dimension
 
   # Optimization
@@ -400,7 +400,7 @@ gnet2_param:
   # Model
   model_param:
     conv_aggr:   'add'
-    global_pool: 's2s'
+    global_pool: 'mean'
     cdim: 96                   # Convolution output dimension
   
   # Optimization
@@ -436,7 +436,7 @@ gnet3_param:
   # Model
   model_param:
     conv_aggr:   'add'
-    global_pool: 's2s'
+    global_pool: 'mean'
     cdim: 96                   # Convolution output dimension
   
   # Optimization
@@ -472,7 +472,7 @@ gnet4_param:
   # Model
   model_param:
     conv_aggr:   'max'
-    global_pool: 's2s'
+    global_pool: 'mean'
     cdim: 64                   # Convolution output dimension
 
   # Optimization
