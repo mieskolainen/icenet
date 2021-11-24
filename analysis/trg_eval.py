@@ -30,7 +30,7 @@ def main() :
     
     ### Split and factor data
     data, data_kin = common.splitfactor(data=data, args=args)
-
+    
     # Evaluate classifiers
     process.evaluate_models(data=data, data_kin=data_kin, weights=tst_weights, args=args)
     

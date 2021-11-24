@@ -196,6 +196,8 @@ def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
     ids = X.ids
     X   = X.x
     
+    print(ids)
+
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=VARLIST)

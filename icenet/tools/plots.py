@@ -288,7 +288,7 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
     if weights is not None:
         classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
-        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (unit weights)' for k in range(C)]
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
 
     # Over classes
     fig,ax    = plt.subplots()
@@ -308,6 +308,61 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
     ax.set_yscale('log')
     
     return fig, ax
+
+
+def density_COR_output(func_predict, X, y, X_RAW, VARS_RAW, label, \
+    weights=None, hist_edges_A=80, hist_edges_B=80, path=''):
+    
+    """
+    Evaluate 2D-density of MVA output vs other variables per class.
+    
+    Args:
+        func_predict:  Function handle of the classifier
+        X           :  Input data
+        y           :  Output (truth level target) data
+        label       :  Label of the MVA model (string)
+        weights     :  Sample weights
+        hist_edges  :  Histogram edges list (or number of bins, as an alternative)
+    
+    Returns:
+        fig,ax      :  Figure handle and axis
+        met         :  Metrics object
+    """
+
+    y_pred    = process.compute_predictions(func_predict=func_predict, X=X)
+
+    # --------------------------------------------------------------------
+
+    # Number of classes
+    C         = int(np.max(y) - np.min(y) + 1)
+
+    # Make sure it is 1-dim array of length N (not N x num classes)
+    if (weights is not None) and len(weights.shape) > 1:
+        weights = np.sum(weights, axis=1)
+
+    if weights is not None:
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+    else:
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
+
+    # Over classes
+    for k in range(C):
+        fig,ax    = plt.subplots()
+        
+        # Loop over variables
+        for v in range(len(VARS_RAW)):
+
+            ind = (y == k)
+            w = weights[ind] if weights is not None else None
+
+            plt.hist2d(x=y_pred[ind], y=X_RAW[ind, v], bins=[hist_edges_A, hist_edges_B], weights=w)
+            
+            plt.legend(classlegs[k], loc='upper right')
+            plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
+            plt.ylabel(f'{VARS_RAW[v]}')
+            plt.title(label, fontsize=10)
+
+            plt.savefig(path + f'/{label}_vs_{VARS_RAW[v]}_class_{k}.pdf', bbox_inches='tight')
 
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
@@ -476,14 +531,14 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
             plt.xlim(0.0, 1.0)
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-        
+
         if k == 1:
             plt.ylim(0.0, 1.0)
             plt.xlim(1e-4, 1.0)
             plt.gca().set_xscale('log')
             ax.set_aspect(1.0 / ax.get_data_ratio() * 0.75)
             plt.savefig(filename + '__log.pdf', bbox_inches='tight')
-        
+
         plt.close()
 
 

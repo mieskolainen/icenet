@@ -344,7 +344,7 @@ lgr0_param:
     gamma: 2                    # focal_entropy exponent
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
-    
+
     epochs: 50
     batch_size: 196
     learning_rate: 0.003
@@ -357,6 +357,6 @@ lgr0_param:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
 

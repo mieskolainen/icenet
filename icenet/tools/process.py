@@ -261,7 +261,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
     targetdir  = f'./figs/{outputname}/{args["config"]}/eval'
 
-    subdirs = ['', 'ROC', 'MVA', 'CORR']
+    subdirs = ['', 'ROC', 'MVA', 'COR']
     for sd in subdirs:
         os.makedirs(targetdir + '/' + sd, exist_ok = True)
     
@@ -272,6 +272,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     # Collect data
 
     X_RAW    = data.tst.x
+    VARS_RAW = data.ids
+
     X        = copy.deepcopy(data.tst.x)
 
     y        = data.tst.y
@@ -367,6 +369,14 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             label=f'<{label}>', hist_edges=hist_edges)
         plt.savefig( targetdir + '/MVA/' + f'MVA_output_<{label}>.pdf', bbox_inches='tight')
 
+
+    def plot_COR_wrap(func_predict, X, label, hist_edges_A, hist_edges_B):
+        """ Classifier output vs kinematic observables density plotter wrapper function.
+        """
+        plots.density_COR_output(func_predict=func_predict, X=X, y=y, weights=weights, \
+            X_RAW=X_RAW, VARS_RAW=VARS_RAW, label=f'<{label}>', hist_edges_A=hist_edges_A, hist_edges_B=hist_edges_B, path = targetdir + '/COR/')
+
+
     # ====================================================================
 
 
@@ -383,23 +393,27 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
-            plot_AUC_wrap(func_predict=func_predict, X=X_graph, label=param['label'])
-            plot_MVA_wrap(func_predict=func_predict, X=X_graph, label=param['label'], hist_edges=np.linspace(0,1,80))
-
+            plot_AUC_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
+            plot_MVA_wrap(func_predict = func_predict, X = X_graph, label = param['label'], hist_edges=np.linspace(0,1,80))
+            plot_COR_wrap(func_predict = func_predict, X = X_graph, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_graph, label = param['label'], hist_edges=np.linspace(0,1,80))
-
+            plot_COR_wrap(func_predict = func_predict, X = X_graph, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges=80)
-
+            plot_COR_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges=np.linspace(0,1,80))
+            plot_COR_wrap(func_predict = func_predict, X = X, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch(args=args, param=param)
@@ -410,7 +424,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             
             plot_AUC_wrap(func_predict = func_predict, X = X_tensor, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_tensor, label = param['label'], hist_edges=np.linspace(0,1,80))
-
+            plot_COR_wrap(func_predict = func_predict, X = X_tensor, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         #elif param['predict'] == 'xtx':
         # ...   
         #
@@ -419,22 +434,26 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             func_predict = predict.pred_torch(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges=np.linspace(0,1,80))
-        
+            plot_COR_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
             plot_AUC_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges=80)
-        
+            plot_COR_wrap(func_predict = func_predict, X = X_ptr, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges=80)
-        
+            plot_COR_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             plot_AUC_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
             plot_MVA_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges=80)
-
+            plot_COR_wrap(func_predict = func_predict, X = X_RAW, label = param['label'], hist_edges_A=np.linspace(0,1,40), hist_edges_B=40)
+            
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 

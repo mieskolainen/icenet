@@ -27,9 +27,14 @@ def cut_fiducial(X, ids, isMC, xcorr_flow=False):
     
     if   isMC == 'mode_e1' or isMC == 'mode_e2':
         cutlist = ['e1_l1_pt >= 5',
-                   'e2_l1_pt >= 5']
+                   'e2_l1_pt >= 5',
+                   'e1_hlt_trkValidHits >= 1',
+                   'e2_hlt_trkValidHits >= 1']
+    
     elif isMC == 'data':
-        cutlist = ['l1_doubleE5 == 1']
+        cutlist = ['l1_doubleE5 == 1',
+                   'hlt_trkValidHits >= 1']
+
     else:
         raise Exception(__name__ + '.cut_fiducial: Unknown isMC mode')
     
