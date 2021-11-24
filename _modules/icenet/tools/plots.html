@@ -321,7 +321,7 @@
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (unit weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
 
     <span class="c1"># Over classes</span>
     <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>    <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -341,6 +341,61 @@
     <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="density_COR_output"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR_output">[docs]</a><span class="k">def</span> <span class="nf">density_COR_output</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">VARS_RAW</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> \
+    <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges_A</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">hist_edges_B</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate 2D-density of MVA output vs other variables per class.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        func_predict:  Function handle of the classifier</span>
+<span class="sd">        X           :  Input data</span>
+<span class="sd">        y           :  Output (truth level target) data</span>
+<span class="sd">        label       :  Label of the MVA model (string)</span>
+<span class="sd">        weights     :  Sample weights</span>
+<span class="sd">        hist_edges  :  Histogram edges list (or number of bins, as an alternative)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        fig,ax      :  Figure handle and axis</span>
+<span class="sd">        met         :  Metrics object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y_pred</span>    <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">compute_predictions</span><span class="p">(</span><span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------------------------------------------</span>
+
+    <span class="c1"># Number of classes</span>
+    <span class="n">C</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Make sure it is 1-dim array of length N (not N x num classes)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+
+    <span class="c1"># Over classes</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+        <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>    <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        
+        <span class="c1"># Loop over variables</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">VARS_RAW</span><span class="p">)):</span>
+
+            <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">v</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="n">hist_edges_A</span><span class="p">,</span> <span class="n">hist_edges_B</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+            
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">classlegs</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA output $f(</span><span class="se">\\</span><span class="s1">mathbf</span><span class="se">{{</span><span class="s1">x</span><span class="se">}}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">VARS_RAW</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_vs_</span><span class="si">{</span><span class="n">VARS_RAW</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="si">}</span><span class="s1">_class_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="annotate_heatmap"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.annotate_heatmap">[docs]</a><span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">):</span>
@@ -509,14 +564,14 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        
+
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
