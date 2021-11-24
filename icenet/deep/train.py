@@ -181,7 +181,7 @@ def raytune_main(inputs, gpus_per_trial=1, train_func=None):
         print('Best parameters:')
         print(optimal_param)
         
-        # ** Final train **
+        # ** Final train with the optimal parameters **
         inputs['param'] = optimal_param
         train_xgb(**inputs)
         
