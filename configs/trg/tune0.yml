@@ -126,8 +126,8 @@ plot_param:
 
 raytune_param:
   active:         ['xgb0'] #[null]
-  num_samples:    [1000]
-  max_num_epochs: [50]
+  num_samples:    100
+  max_num_epochs: 50
 
 
 raytune_setup:

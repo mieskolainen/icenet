@@ -125,8 +125,8 @@ plot_param:
 
 raytune_param:
   active:         [] # Add model identifiers here
-  num_samples:    [10]
-  max_num_epochs: [10]
+  num_samples:    10
+  max_num_epochs: 10
 
 
 # ========================================================================
