@@ -337,9 +337,25 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     graph_model = train_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
     graph_model = graph_model.to('cpu')    
 
-    xtest = graph_model.forward(data=data_trn[0], conv_only=True).detach().numpy()
-    Z = xtest.shape[1]  # Find out dimension of the convolution output
+    ### Find out the latent space dimension -------
+    Z = 0
+    for i in range(len(data_trn)):
 
+        # Use try-except while we find an event with proper graph information
+        try:
+            xtest = graph_model.forward(data=data_trn[i], conv_only=True).detach().numpy()
+            Z = xtest.shape[-1]  # Find out dimension of the convolution output
+            break
+        except:
+            continue
+    
+    if Z == 0:
+        raise Exception(__name__ + '.train_graph_xgb: Could not auto-detect latent space dimension')
+    # -------------------------
+    
+
+    ## Evaluate Graph model output
+    
     x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
     x_val = np.zeros((len(data_val), Z + len(data_val[0].u)))
 

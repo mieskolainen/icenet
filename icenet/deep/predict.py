@@ -125,9 +125,9 @@ def pred_torch_graph(args, param, signalclass = 1):
             x_in = x
         else:
             x_in = [x]
-
+        
         # Geometric type -> need to use batch loader
-        loader  = torch_geometric.data.DataLoader(x_in, batch_size=len(x), shuffle=False)
+        loader  = torch_geometric.loader.DataLoader(x_in, batch_size=len(x), shuffle=False)
         for batch in loader:
             return model.softpredict(batch.to(device))[:, signalclass].detach().cpu().numpy()
 

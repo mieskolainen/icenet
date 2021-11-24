@@ -225,7 +225,7 @@ class PANNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
         
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -324,7 +324,7 @@ class GATNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
         
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -408,7 +408,7 @@ class SUPNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
@@ -490,8 +490,8 @@ class ECNet(torch.nn.Module):
         self.mlp1  = MLP([self.Z, self.Z, self.C])
 
     def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch'):
+        
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
@@ -574,7 +574,7 @@ class DECNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -661,7 +661,7 @@ class NNNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -737,7 +737,7 @@ class SplineNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
@@ -816,7 +816,7 @@ class SAGENet(torch.nn.Module):
         
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -895,7 +895,7 @@ class SGNet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
@@ -981,7 +981,7 @@ class GINENet(torch.nn.Module):
 
     def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch'):
+        if not hasattr(data,'batch') or data.batch is None:
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
 
