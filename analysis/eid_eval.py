@@ -28,8 +28,8 @@ def ele_mva_classifier(data, data_tensor=None, data_kin=None, data_graph=None, w
 
     print(f'\nEvaluate <{varname}> classifier ...')
     try:
-        y    = np.array(data.tst.y, dtype=np.float)
-        yhat = np.array(data.tst.x[:, data.ids.index(varname)], dtype=np.float)
+        y    = np.array(data.tst.y, dtype=float)
+        yhat = np.array(data.tst.x[:, data.ids.index(varname)], dtype=float)
 
         return aux.Metric(y_true=y, y_soft=yhat, weights=weights)
     except:

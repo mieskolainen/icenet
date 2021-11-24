@@ -321,9 +321,14 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
                 raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
             
             # other features
-            x[i,4] = X[ids.index('image_clu_nhit')][i-1]
-            x[i,5] = p4track.deltaR(p4vec[i-1])
+            x[i,4] = p4track.deltaR(p4vec[i-1])
 
+            try:
+                x[i,5] = X[ids.index('image_clu_nhit')][i-1]
+            except:
+                continue
+                # Not able to read it (empty cluster data)
+            
     return x
 
 

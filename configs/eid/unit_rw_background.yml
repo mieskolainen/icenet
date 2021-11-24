@@ -121,6 +121,15 @@ plot_param:
             [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
 
 
+
+## Hyperparameter tuning
+
+raytune_param:
+  active:         [] # Add model identifiers here
+  num_samples:    [10]
+  max_num_epochs: [10]
+
+
 # ========================================================================
 ## Classifier setup
 # ========================================================================
