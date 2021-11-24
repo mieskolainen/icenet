@@ -183,9 +183,8 @@ def raytune_main(inputs, gpus_per_trial=1, train_func=None):
         
         # ** Final train **
         inputs['param'] = optimal_param
-        inputs['args']['raytune_param']['active'] = False
         train_xgb(**inputs)
-
+        
     else:
         raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
 
