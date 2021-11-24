@@ -311,7 +311,7 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
 
 
 def density_COR_output(func_predict, X, y, X_RAW, VARS_RAW, label, \
-    weights=None, hist_edges_A=80, hist_edges_B=80, path=''):
+    weights=None, hist_edges_A=80, hist_edges_B=80, path='', cmap='Oranges'):
     
     """
     Evaluate 2D-density of MVA output vs other variables per class.
@@ -347,22 +347,25 @@ def density_COR_output(func_predict, X, y, X_RAW, VARS_RAW, label, \
 
     # Over classes
     for k in range(C):
-        fig,ax    = plt.subplots()
         
+        ind = (y == k)
+        w = weights[ind] if weights is not None else None
+
         # Loop over variables
         for v in range(len(VARS_RAW)):
 
-            ind = (y == k)
-            w = weights[ind] if weights is not None else None
+            fig,ax = plt.subplots()
 
-            plt.hist2d(x=y_pred[ind], y=X_RAW[ind, v], bins=[hist_edges_A, hist_edges_B], weights=w)
+            h2,xedges,yedges,im = plt.hist2d(x=y_pred[ind], y=X_RAW[ind, v], bins=[hist_edges_A, hist_edges_B], weights=w, cmap=plt.get_cmap(cmap))
             
-            plt.legend(classlegs[k], loc='upper right')
+            fig.colorbar(im)
+
             plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
             plt.ylabel(f'{VARS_RAW[v]}')
             plt.title(label, fontsize=10)
-
-            plt.savefig(path + f'/{label}_vs_{VARS_RAW[v]}_class_{k}.pdf', bbox_inches='tight')
+            
+            os.makedirs(f'{path}/{label}', exist_ok = True)
+            plt.savefig(f'{path}/{label}/{VARS_RAW[v]}_class_{k}.pdf', bbox_inches='tight')
 
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
@@ -489,7 +492,8 @@ def plot_correlations(X, netvars, colorbar = False):
 
 
 def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
-    """ Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
+    """
+    Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
     """
 
     for k in [0,1]: # linear & log
@@ -502,6 +506,10 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
 
             linestyle = '-'
             marker    = 'None'
+
+            if metrics[i] is None:
+                print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
+                continue
 
             fpr = metrics[i].fpr
             tpr = metrics[i].tpr
@@ -562,7 +570,13 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             
             for i in range(len(metrics)):
 
-                if len(metrics[i].mva_bins) == 0: continue
+                if metrics[i] is None:
+                    print(__name__ + f'.MVA_plot: metrics[{i}] is None, continue without')
+                    continue
+
+                if len(metrics[i].mva_bins) == 0:
+                    print(__name__ + f'.MVA_plot: len(metrics[{i}].mva_bins) == 0, continue without')
+                    continue
 
                 bins       = metrics[i].mva_bins
                 cbins[:,i] = (bins[0:-1] + bins[1:]) / 2
