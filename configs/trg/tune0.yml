@@ -120,7 +120,7 @@ plot_param:
   ## MVA output density (1D)
   plot_MVA_output:
     edges: 80
-
+  
   ## MVA (output, external variable) density (2D)
   plot_COR__0:
     var:   ['']
@@ -313,7 +313,7 @@ xgb1_param:
   predict: 'xgb'
   label:   'XGB_T10_D6'
   raytune:  null
-  
+
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)

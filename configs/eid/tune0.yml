@@ -186,13 +186,13 @@ plot_param:
   ## MVA output density (1D)
   plot_MVA_output:
     edges: 80
-
-  ## MVA output vs other variable density (2D)
+  
+  ## MVA (output, external variable) density (2D)
   plot_COR__0:
     var:   ['']
-    edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
-            {'nbin': 30, 'q': [0.0, 0.9],      'space': 'log10'}]
-
+    edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
+            {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
+  
   #plot_COR__1:
   #  var:   ['.?hlt_pms2.?']
   #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},

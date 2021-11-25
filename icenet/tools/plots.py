@@ -332,13 +332,15 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
         classlegs = [f'class {k}, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
 
     # Over classes
-    fig,ax    = plt.subplots()
+    fig,ax = plt.subplots()
     
     for k in range(C):
         ind = (y == k)
 
         w = weights[ind] if weights is not None else None
-        hI, bins, patches = plt.hist(y_pred[ind], hist_edges, weights=w,
+        x = y_pred[ind]
+
+        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=hist_edges, x=x), weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
         
     plt.legend(classlegs, loc='upper center')
