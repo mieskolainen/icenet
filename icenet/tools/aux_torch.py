@@ -19,10 +19,11 @@ def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
     """
     
     filename = aux.create_model_filename(path=path, label=label, epoch=epoch, filetype='.pth')
-    print(__name__ + f'.load_torch_checkpoint: Loading checkpoint {filename}')
+    
+    # Load the model (always first to CPU memory)
+    print(__name__ + f'.load_torch_checkpoint: Loading model {filename} to CPU memory ...')
 
-    # Load the model
-    checkpoint = torch.load(filename)
+    checkpoint = torch.load(filename, map_location ='cpu')
     model      = checkpoint['model']
     model.load_state_dict(checkpoint['state_dict'])
     for parameter in model.parameters():
@@ -49,8 +50,8 @@ def load_torch_model(model, optimizer, filename, load_start_epoch = False):
     """ PyTorch model loader
     """
     def f():
-        print('Loading model..')
-        checkpoint = torch.load(filename)
+        print(__name__ + '.load_torch_model: Loading model to CPU memory ...')
+        checkpoint = torch.load(filename, map_location = 'cpu')
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         

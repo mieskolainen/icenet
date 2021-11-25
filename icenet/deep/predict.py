@@ -143,7 +143,7 @@ def pred_torch(args, param, signalclass = 1):
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
     model.eval() # Turn on eval mode!
-
+    
     def func_predict(x):
 
         if not isinstance(x, dict):

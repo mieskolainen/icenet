@@ -18,6 +18,55 @@ from icenet.tools import aux
 from icenet.tools import process
 
 
+
+def binengine(bindef, x):
+    """
+    Binning processor function
+    
+    Args:
+        bindef:  binning definition
+                 Examples: 50                                                    (number of bins, integer)
+                           [1.0, 40.0, 50.0]                                     (list of explicit edges)
+                           {'nbin': 30, 'q': [0.0, 0.95], 'space': 'linear'}     (automatic with quantiles)
+                           {'nbin': 30, 'minmax': [2.0, 50.0], 'space': 'log10'} (automatic with boundaries)
+
+        x:       data input array
+    Returns:
+        edges:   binning edges
+    """
+
+    def mylinspace(minval, maxval, nbin):
+
+        if 'space' in bindef and bindef['space'] == 'log10':
+            if minval <= 0:
+                raise Exception(__name__ + f'.bin_processor: Trying log10 binning with minimum = {minval} <= 0')
+            return np.logspace(np.log10(minval), np.log10(maxval), nbin + 1)
+        else:
+            return np.linspace(minval, maxval, nbin + 1)
+
+    # Integer
+    if   type(bindef) is int or type(bindef) is float:
+        return np.linspace(np.min(x), np.max(x), int(bindef) + 1)
+
+    # Bin edges given directly
+    elif type(bindef) is list:
+        return np.array(bindef)
+
+    elif type(bindef) is np.ndarray:
+        return bindef
+
+    # Automatic with quantiles
+    elif type(bindef) is dict and 'q' in bindef:
+        return mylinspace(minval=np.percentile(x, 100*bindef['q'][0]), maxval=np.percentile(x, 100*bindef['q'][1]), nbin=bindef['nbin'] + 1)
+
+    # Automatic with boundaries
+    elif type(bindef) is dict and 'minmax' in bindef:
+        return mylinspace(minval=bindef['minmax'][0], maxval=bindef['minmax'][1], nbin=bindef['nbin'] + 1)
+
+    else:
+        raise Exception(__name__ + f'.bin_processor: Unknown binning description in {bindef}')
+
+
 def plot_selection(X, ind, ids, args, label, varlist, density=True):
     """
     Plot selection before / after type histograms against all chosen variables
@@ -131,18 +180,16 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     return fig,ax
 
 
-def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, weights=None, ids=['trk_pt', 'trk_eta']):
+def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['trk_pt', 'trk_eta']):
     """
     Evaluate AUC per 2D-bin.
     
     Args:
-        func_predict:  Function handle of the classifier
-        X           :  Input data
+        y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
         X_kin       :  Kinematic (A,B) data
         VARS_kin    :  Kinematic variables (strings)
-        edges_A     :  Edges of the A-space cells
-        edges_B     :  Edges of the B-space cells
+        edges       :  Edges of the A,B-space cells (2D array)
         label       :  Label of the classifier (string)
         weights     :  Sample weights
         ids         :  Variable identifiers
@@ -152,8 +199,10 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
         met         :  Metrics object
     """
 
+    edges_A = edges[0]
+    edges_B = edges[1]
+
     AUC = np.zeros((len(edges_A)-1, len(edges_B)-1))
-    y_pred = process.compute_predictions(func_predict=func_predict, X=X)
 
     if len(y_pred) != len(y):
         raise Exception(__name__ + f'.binned_2D_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
@@ -198,13 +247,12 @@ def binned_2D_AUC(func_predict, X, y, X_kin, VARS_kin, edges_A, edges_B, label, 
     return fig, ax, met
 
 
-def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt'):
+def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt'):
     """
     Evaluate AUC & ROC per 1D-bin.
     
     Args:
-        func_predict:  Function handle of the classifier
-        X           :  Input data
+        y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
         X_kin       :  Kinematic (A,B) data
         VARS_kin    :  Kinematic variables (strings)
@@ -219,7 +267,6 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
     """
 
     AUC = np.zeros((len(edges)-1, 1))
-    y_pred = process.compute_predictions(func_predict=func_predict, X=X)
 
     if len(y_pred) != len(y):
         raise Exception(__name__ + f'.binned_1D_AUC: len(y_pred) = {len(y_pred)} != len(y) = {len(y)}')
@@ -238,7 +285,7 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
             string = f'{ids} = [{range_[0]:10.3f},{range_[1]:10.3f})'
 
             if np.sum(ind) > 0: # Do we have any events in this cell
-                
+                    
                 # Evaluate metric
                 if weights is not None:
                     met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind], weights=weights[ind])
@@ -257,26 +304,20 @@ def binned_1D_AUC(func_predict, X, y, X_kin, VARS_kin, edges, label, weights=Non
     return METS, LABELS
 
 
-def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
+def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     """
-    Evaluate MVA output density per class.
+    Evaluate MVA output (1D) density per class.
     
     Args:
-        func_predict:  Function handle of the classifier
-        X           :  Input data
-        y           :  Output (truth level target) data
-        label       :  Label of the MVA model (string)
-        weights     :  Sample weights
-        hist_edges  :  Histogram edges list (or number of bins, as an alternative)
+        y_pred     :  MVA algorithm output
+        y          :  Output (truth level target) data
+        label      :  Label of the MVA model (string)
+        weights    :  Sample weights
+        hist_edges :  Histogram edges list (or number of bins, as an alternative)
     
     Returns:
-        fig,ax      :  Figure handle and axis
-        met         :  Metrics object
+        Plot pdf saved directly
     """
-
-    y_pred    = process.compute_predictions(func_predict=func_predict, X=X)
-
-    # --------------------------------------------------------------------
 
     # Number of classes
     C         = int(np.max(y) - np.min(y) + 1)
@@ -284,7 +325,7 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
-
+    
     if weights is not None:
         classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
@@ -299,39 +340,39 @@ def density_MVA_output(func_predict, X, y, label, weights=None, hist_edges=80):
         w = weights[ind] if weights is not None else None
         hI, bins, patches = plt.hist(y_pred[ind], hist_edges, weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-    
+        
     plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
     plt.title(label, fontsize=10)
     
     ax.set_yscale('log')
-    
-    return fig, ax
+
+    savepath = path + '/' + f'MVA_output_<{label}>.pdf'
+    plt.savefig(savepath, bbox_inches='tight')
+    print(__name__ + f'.density_MVA_wclass: Saving figure: {savepath}')
 
 
-def density_COR_output(func_predict, X, y, X_RAW, VARS_RAW, label, \
-    weights=None, hist_edges_A=80, hist_edges_B=80, path='', cmap='Oranges'):
+def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
+    weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
     
     """
-    Evaluate 2D-density of MVA output vs other variables per class.
+    Evaluate the 2D-density of the MVA algorithm output vs other variables per class.
     
     Args:
-        func_predict:  Function handle of the classifier
-        X           :  Input data
+        y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
+        X_RAW       :  Variables to be plotted
+        ids_RAW     :  Identifiers of the variables in X_RAW
         label       :  Label of the MVA model (string)
         weights     :  Sample weights
-        hist_edges  :  Histogram edges list (or number of bins, as an alternative)
+        hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
+        path        :  Save path
+        cmap        :  Color map
     
     Returns:
-        fig,ax      :  Figure handle and axis
-        met         :  Metrics object
+        Plot pdf saved directly
     """
-
-    y_pred    = process.compute_predictions(func_predict=func_predict, X=X)
-
-    # --------------------------------------------------------------------
 
     # Number of classes
     C         = int(np.max(y) - np.min(y) + 1)
@@ -352,20 +393,75 @@ def density_COR_output(func_predict, X, y, X_RAW, VARS_RAW, label, \
         w = weights[ind] if weights is not None else None
 
         # Loop over variables
-        for v in range(len(VARS_RAW)):
+        for v in ids_RAW:
 
             fig,ax = plt.subplots()
 
-            h2,xedges,yedges,im = plt.hist2d(x=y_pred[ind], y=X_RAW[ind, v], bins=[hist_edges_A, hist_edges_B], weights=w, cmap=plt.get_cmap(cmap))
+            # Plot 2D
+            xx   = y_pred[ind]
+            yy   = X_RAW[ind, ids_RAW.index(v)]
+            
+            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
+            h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
             
             fig.colorbar(im)
-
             plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
-            plt.ylabel(f'{VARS_RAW[v]}')
-            plt.title(label, fontsize=10)
-            
+            plt.ylabel(f'{v}')
+            plt.title(f'{label} | class = {k}', fontsize=10)
+
+            # -----
+
             os.makedirs(f'{path}/{label}', exist_ok = True)
-            plt.savefig(f'{path}/{label}/{VARS_RAW[v]}_class_{k}.pdf', bbox_inches='tight')
+            savepath = f'{path}/{label}/{v}_class_{k}.pdf'
+            plt.savefig(savepath, bbox_inches='tight')
+            print(__name__ + f'.density_COR_wclass: Saving figure: {savepath}')
+
+
+def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+    """
+    Evaluate the 2D-density of the MVA algorithm output vs other variables.
+    
+    Args:
+        y_pred      :  MVA algorithm output
+        X_RAW       :  Variables to be plotted
+        ids_RAW     :  Identifiers of the variables in X_RAW
+        label       :  Label of the MVA model (string)
+        weights     :  Sample weights
+        hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
+        path        :  Save path
+        cmap        :  Color map
+    
+    Returns:
+        Plot pdf saved directly
+    """
+
+    # Make sure it is 1-dim array of length N (not N x num classes)
+    if (weights is not None) and len(weights.shape) > 1:
+        weights = np.sum(weights, axis=1)
+
+    # Loop over variables
+    for v in ids_RAW:
+
+        fig,ax = plt.subplots()
+
+        # Plot 2D
+        xx   = y_pred
+        yy   = X_RAW[:, ids_RAW.index(v)]
+        
+        bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
+        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=weights, cmap=plt.get_cmap(cmap))
+        
+        fig.colorbar(im)
+        plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
+        plt.ylabel(f'{v}')
+        plt.title(f'{label}', fontsize=10)
+        
+        # -----
+
+        os.makedirs(f'{path}/{label}', exist_ok = True)
+        savepath = f'{path}/{label}/{v}.pdf'
+        plt.savefig(savepath, bbox_inches='tight')
+        print(__name__ + f'.density_COR: Saving figure: {savepath}')
 
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
@@ -383,11 +479,11 @@ def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 
         for j in range(len(xlabels)):
             
             if (decimals == 0):
-                text = ax.text(j, i, '{:.0f}'.format(X[i,j]), ha="center", va="center", color=color)
+                text = ax.text(j, i, f'{X[i,j]:.0f}', ha="center", va="center", color=color)
             if (decimals == 1):
-                text = ax.text(j, i, '{:.1f}'.format(X[i,j]), ha="center", va="center", color=color)
+                text = ax.text(j, i, f'{X[i,j]:.1f}', ha="center", va="center", color=color)
             if (decimals == 2):
-                text = ax.text(j, i, '{:.2f}'.format(X[i,j]), ha="center", va="center", color=color)
+                text = ax.text(j, i, f'{X[i,j]:.2f}', ha="center", va="center", color=color)
     return ax
 
 
@@ -396,8 +492,8 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
 
     Args:
         AUC:      AUC-ROC matrix
-        edges_A:  histogram edges of variable A
-        edges_B:  histogram edges of variable B
+        edges_A:  Histogram edges of variable A
+        edges_B:  Histogram edges of variable B
     
     Returns:
         fig:      figure handle

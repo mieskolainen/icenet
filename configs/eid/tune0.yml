@@ -182,6 +182,21 @@ plot_param:
     var:   ['trk_eta', 'trk_pt']
     edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
             [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
+  
+  ## MVA output density (1D)
+  plot_MVA_output:
+    edges: 80
+
+  ## MVA output vs other variable density (2D)
+  plot_COR__0:
+    var:   ['']
+    edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
+            {'nbin': 30, 'q': [0.0, 0.9],      'space': 'log10'}]
+
+  #plot_COR__1:
+  #  var:   ['.?hlt_pms2.?']
+  #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
+  #          {'nbin': 30, 'q': [0.0, 0.95],     'space': 'log10'}]
 
 
 # ========================================================================
