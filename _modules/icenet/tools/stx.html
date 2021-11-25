@@ -78,7 +78,7 @@
 <span class="sd">        ind        : list of indices, 1 = pass, 0 = fail</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    
     <span class="c1"># Print out &quot;serial flow&quot;</span>
     <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
@@ -89,7 +89,7 @@
     <span class="c1"># Print out &quot;parallel flow&quot;</span>
     <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point correlations &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
             <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>

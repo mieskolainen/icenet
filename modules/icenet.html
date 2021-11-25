@@ -2675,7 +2675,7 @@ and values the memory used by the GPU.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.ROC_plot">
-<span class="sig-name descname"><span class="pre">ROC_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ROC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#ROC_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.ROC_plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROC_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ROC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#ROC_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.ROC_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</p>
 </dd></dl>
 
@@ -2686,14 +2686,40 @@ and values the memory used by the GPU.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.plots.binengine">
+<span class="sig-name descname"><span class="pre">binengine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bindef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binengine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binengine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binning processor function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bindef</strong> – <p>binning definition
+Examples: 50                                                    (number of bins, integer)</p>
+<blockquote>
+<div><p>[1.0, 40.0, 50.0]                                     (list of explicit edges)
+{‘nbin’: 30, ‘q’: [0.0, 0.95], ‘space’: ‘linear’}     (automatic with quantiles)
+{‘nbin’: 30, ‘minmax’: [2.0, 50.0], ‘space’: ‘log10’} (automatic with boundaries)</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>x</strong> – data input array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>binning edges</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>edges</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.binned_1D_AUC">
-<span class="sig-name descname"><span class="pre">binned_1D_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trk_pt'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_1D_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_1D_AUC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">binned_1D_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trk_pt'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_1D_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_1D_AUC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate AUC &amp; ROC per 1D-bin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
-<li><p><strong>X</strong> – Input data</p></li>
+<li><p><strong>y_pred</strong> – MVA algorithm output</p></li>
 <li><p><strong>y</strong> – Output (truth level target) data</p></li>
 <li><p><strong>X_kin</strong> – Kinematic (A,B) data</p></li>
 <li><p><strong>VARS_kin</strong> – Kinematic variables (strings)</p></li>
@@ -2715,18 +2741,16 @@ met         :  Metrics object</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.binned_2D_AUC">
-<span class="sig-name descname"><span class="pre">binned_2D_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['trk_pt',</span> <span class="pre">'trk_eta']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_2D_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_2D_AUC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">binned_2D_AUC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['trk_pt',</span> <span class="pre">'trk_eta']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#binned_2D_AUC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.binned_2D_AUC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate AUC per 2D-bin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
-<li><p><strong>X</strong> – Input data</p></li>
+<li><p><strong>y_pred</strong> – MVA algorithm output</p></li>
 <li><p><strong>y</strong> – Output (truth level target) data</p></li>
 <li><p><strong>X_kin</strong> – Kinematic (A,B) data</p></li>
 <li><p><strong>VARS_kin</strong> – Kinematic variables (strings)</p></li>
-<li><p><strong>edges_A</strong> – Edges of the A-space cells</p></li>
-<li><p><strong>edges_B</strong> – Edges of the B-space cells</p></li>
+<li><p><strong>edges</strong> – Edges of the A,B-space cells (2D array)</p></li>
 <li><p><strong>label</strong> – Label of the classifier (string)</p></li>
 <li><p><strong>weights</strong> – Sample weights</p></li>
 <li><p><strong>ids</strong> – Variable identifiers</p></li>
@@ -2743,39 +2767,60 @@ met         :  Metrics object</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.plots.density_COR_output">
-<span class="sig-name descname"><span class="pre">density_COR_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges_B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_COR_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_COR_output" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate 2D-density of MVA output vs other variables per class.</p>
+<dt class="sig sig-object py" id="icenet.tools.plots.density_COR">
+<span class="sig-name descname"><span class="pre">density_COR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[50],</span> <span class="pre">[50]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Oranges'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_COR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_COR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the 2D-density of the MVA algorithm output vs other variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
-<li><p><strong>X</strong> – Input data</p></li>
-<li><p><strong>y</strong> – Output (truth level target) data</p></li>
+<li><p><strong>y_pred</strong> – MVA algorithm output</p></li>
+<li><p><strong>X_RAW</strong> – Variables to be plotted</p></li>
+<li><p><strong>ids_RAW</strong> – Identifiers of the variables in X_RAW</p></li>
 <li><p><strong>label</strong> – Label of the MVA model (string)</p></li>
 <li><p><strong>weights</strong> – Sample weights</p></li>
-<li><p><strong>hist_edges</strong> – Histogram edges list (or number of bins, as an alternative)</p></li>
+<li><p><strong>hist_edges</strong> – Histogram edges list (or number of bins, as an alternative) (2D)</p></li>
+<li><p><strong>path</strong> – Save path</p></li>
+<li><p><strong>cmap</strong> – Color map</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Figure handle and axis
-met         :  Metrics object</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>fig,ax</p>
+<dd class="field-even"><p>Plot pdf saved directly</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.plots.density_MVA_output">
-<span class="sig-name descname"><span class="pre">density_MVA_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_MVA_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_MVA_output" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate MVA output density per class.</p>
+<dt class="sig sig-object py" id="icenet.tools.plots.density_COR_wclass">
+<span class="sig-name descname"><span class="pre">density_COR_wclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[50],</span> <span class="pre">[50]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Oranges'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_COR_wclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_COR_wclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the 2D-density of the MVA algorithm output vs other variables per class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>func_predict</strong> – Function handle of the classifier</p></li>
-<li><p><strong>X</strong> – Input data</p></li>
+<li><p><strong>y_pred</strong> – MVA algorithm output</p></li>
+<li><p><strong>y</strong> – Output (truth level target) data</p></li>
+<li><p><strong>X_RAW</strong> – Variables to be plotted</p></li>
+<li><p><strong>ids_RAW</strong> – Identifiers of the variables in X_RAW</p></li>
+<li><p><strong>label</strong> – Label of the MVA model (string)</p></li>
+<li><p><strong>weights</strong> – Sample weights</p></li>
+<li><p><strong>hist_edges</strong> – Histogram edges list (or number of bins, as an alternative) (2D)</p></li>
+<li><p><strong>path</strong> – Save path</p></li>
+<li><p><strong>cmap</strong> – Color map</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Plot pdf saved directly</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.plots.density_MVA_wclass">
+<span class="sig-name descname"><span class="pre">density_MVA_wclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#density_MVA_wclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.density_MVA_wclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate MVA output (1D) density per class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_pred</strong> – MVA algorithm output</p></li>
 <li><p><strong>y</strong> – Output (truth level target) data</p></li>
 <li><p><strong>label</strong> – Label of the MVA model (string)</p></li>
 <li><p><strong>weights</strong> – Sample weights</p></li>
@@ -2783,11 +2828,7 @@ met         :  Metrics object</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Figure handle and axis
-met         :  Metrics object</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>fig,ax</p>
+<dd class="field-even"><p>Plot pdf saved directly</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2800,8 +2841,8 @@ met         :  Metrics object</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>AUC</strong> – AUC-ROC matrix</p></li>
-<li><p><strong>edges_A</strong> – histogram edges of variable A</p></li>
-<li><p><strong>edges_B</strong> – histogram edges of variable B</p></li>
+<li><p><strong>edges_A</strong> – Histogram edges of variable A</p></li>
+<li><p><strong>edges_B</strong> – Histogram edges of variable B</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

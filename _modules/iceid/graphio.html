@@ -354,9 +354,14 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;parse_graph_data: Unknown coordinate representation&#39;</span><span class="p">)</span>
             
             <span class="c1"># other features</span>
-            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_nhit&#39;</span><span class="p">)][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4track</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4track</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_nhit&#39;</span><span class="p">)][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+                <span class="c1"># Not able to read it (empty cluster data)</span>
+            
     <span class="k">return</span> <span class="n">x</span></div>
 
 
