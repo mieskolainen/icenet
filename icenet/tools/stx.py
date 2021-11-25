@@ -45,7 +45,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
         ind        : list of indices, 1 = pass, 0 = fail
     """
     print(__name__ + '.apply_cutflow: \n')
-
+    
     # Print out "serial flow"
     N   = len(cut[0])
     ind = np.ones(N, dtype=np.uint8)
@@ -56,7 +56,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
     # Print out "parallel flow"
     if xcorr_flow:
         print('\n')
-        print(__name__ + '.apply_cutflow: Computing N-point correlations <xcorr_flow = True>')
+        print(__name__ + '.apply_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
         vec = np.zeros((len(cut[0]), len(cut)))
         for j in range(vec.shape[1]):
             vec[:,j] = np.array(cut[j])

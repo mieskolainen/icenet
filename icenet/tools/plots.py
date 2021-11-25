@@ -240,10 +240,10 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
 
     # Finally plot it
     fig,ax = plot_AUC_matrix(AUC=AUC, edges_A=edges_A, edges_B=edges_B)
-    ax.set_title(f'{label}: AUC = {met.auc:.3f} (integrated)', fontsize=9)
+    ax.set_title(f'{label} | AUC = {met.auc:.3f} (integrated)', fontsize=9)
     ax.set_xlabel(f"{ids[0]}")
     ax.set_ylabel(f"{ids[1]}")
-
+    
     return fig, ax, met
 
 
@@ -348,7 +348,8 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     
     ax.set_yscale('log')
 
-    savepath = path + '/' + f'MVA_output_<{label}>.pdf'
+    os.makedirs(f'{path}/{label}', exist_ok = True)
+    savepath = f'{path}/{label}/MVA_output.pdf'
     plt.savefig(savepath, bbox_inches='tight')
     print(__name__ + f'.density_MVA_wclass: Saving figure: {savepath}')
 
@@ -587,7 +588,7 @@ def plot_correlations(X, netvars, colorbar = False):
     return fig,ax
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
+def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1e-4) :
     """
     Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
     """
@@ -630,15 +631,21 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7) :
         ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
         ax.set_title(title, fontsize=10)
 
-        if k == 0:
+        if k == 0: # Linear-Linear
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
+            plt.locator_params(axis="x", nbins=11)
+            plt.locator_params(axis="y", nbins=11)
+
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
 
-        if k == 1:
+        if k == 1: # x-axis logarithmic
             plt.ylim(0.0, 1.0)
-            plt.xlim(1e-4, 1.0)
+            plt.xlim(xmin, 1.0)
+            plt.locator_params(axis="x", nbins=int(-np.log10(xmin) + 1))
+            plt.locator_params(axis="y", nbins=11)
+
             plt.gca().set_xscale('log')
             ax.set_aspect(1.0 / ax.get_data_ratio() * 0.75)
             plt.savefig(filename + '__log.pdf', bbox_inches='tight')

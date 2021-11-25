@@ -19,6 +19,7 @@ active_models:
     
   - xgb0
   - xgb1
+  - lgr0
 
   - cut0
   - cut1
@@ -29,7 +30,6 @@ active_models:
   - cut6
 
   - cutset0
-  - lgr0
 # ----------------------------------------------------
 
 
@@ -311,13 +311,13 @@ xgb0_param:
 xgb1_param:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB_T3_D6'
+  label:   'XGB_T10_D6'
   raytune:  null
-
+  
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  num_boost_round: 3      # number of epochs (equal to the number of trees!)
+  num_boost_round: 10     # number of epochs (equal to the number of trees!)
   
   # booster parameters
   learning_rate: 0.3

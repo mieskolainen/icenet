@@ -258,7 +258,6 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     # Prepare output folders
 
     outputname = args['rootname']
-
     targetdir  = f'./figs/{outputname}/{args["config"]}/eval'
 
     subdirs = ['', 'ROC', 'MVA', 'COR']
@@ -351,15 +350,24 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 ROC_binned_mlabel[i].append(label_1D)
 
                 # Plot this one
-                plots.ROC_plot(met_1D, label_1D, title = f'<{label}>', filename=targetdir + '/ROC/' + f'ROC_binned__{i}_<{label}>')
-                plots.MVA_plot(met_1D, label_1D, title = f'<{label}>', filename=targetdir + '/MVA/' + f'MVA_binned__{i}_<{label}>')
+                ROC_path = f'{targetdir}/ROC/{label}'
+                MVA_path = f'{targetdir}/MVA/{label}'
                 
+                os.makedirs(ROC_path, exist_ok=True)
+                os.makedirs(MVA_path, exist_ok=True)
+
+                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=ROC_path + f'/ROC_binned__{i}')
+                plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=MVA_path + f'/MVA_binned__{i}')
+                
+
             elif len(var) == 2:
 
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
 
-                plt.savefig(targetdir + '/ROC/' + f'ROC_binned__{i}_<{label}>.pdf', bbox_inches='tight')
+                path = f'{targetdir}/ROC/{label}'
+                os.makedirs(path, exist_ok=True)
+                plt.savefig(path + f'/ROC_binned__{i}.pdf', bbox_inches='tight')
 
                 roc_mstats.append(met)
                 roc_labels.append(label)
@@ -373,7 +381,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         hist_edges = args['plot_param'][f'plot_MVA_output']['edges']
 
         inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
-            'label': f'<{label}>', 'path': targetdir + '/MVA/'}
+            'label': f'{label}', 'path': targetdir + '/MVA/'}
 
         plots.density_MVA_wclass(**inputs)
 
@@ -389,7 +397,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 break # No more this type of plots 
 
             inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
-                'label': f'<{label}>', 'hist_edges': edges, 'path': targetdir + '/COR/'}
+                'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
 
             plots.density_COR_wclass(y=y, **inputs)
             #plots.density_COR(**inputs) 
@@ -460,15 +468,20 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     # ===================================================================
     # ** Plots for multiple model comparison **
 
+
     ### Plot all ROC curves
-    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename = targetdir + '/ROC/' + 'ROC_<ALL>')
+    os.makedirs(targetdir + '/ROC/__ALL__/', exist_ok = True)
+    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename = targetdir + '/ROC/__ALL__/ROC')
+
 
     ### Plot all MVA outputs
     """
+    os.makedirs(targetdir + '/MVA/_ALL_/', exist_ok = True)
     plots.MVA_plot(mva_mstats, mva_labels, \
         title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
-        filename = targetdir + '/MVA/' + 'MVA_<ALL>')    
+        filename = targetdir + '/MVA/_ALL_/')    
     """
+
 
     ### Plot all binned ROC curves
     for i in range(100):
@@ -495,11 +508,11 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
                 ### ROC
                 title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                plots.ROC_plot(xy, legs, title=title, filename=targetdir + '/ROC/' + f'ROC_binned__{i}_bin_{b}_<ALL>')
+                plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned__{i}_bin_{b}')
 
-                ### MVA output
+                ### MVA
                 #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + '/MVA/' + f'MVA_binned__{i}_bin_{b}_<ALL>')
+                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned__{i}_bin_{b}')
 
 
     # ===================================================================
