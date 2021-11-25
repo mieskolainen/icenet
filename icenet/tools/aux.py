@@ -589,7 +589,7 @@ class Metric:
         for c in range(N_class):
             ind    = (y_true == c)
             counts = []
-
+            
             if np.sum(ind) != 0:
                 w  = weights[ind] if weights is not None else None
                 counts, edges = np.histogram(y_soft[ind], weights=w, bins=self.mva_bins)
