@@ -539,12 +539,12 @@ def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
 class Metric:
     """ Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, weights=None, valrange = [0,1], N_class = 2, N_mva_bins=40):
+    def __init__(self, y_true, y_soft, weights=None, valrange='auto', N_class = 2, N_mva_bins=30):
         """
         Args:
             y_true   : true classifications
             y_soft   : probabilities for two classes
-            weights  : 
+            weights  : event weights
             valrange : range of probabilities / soft scores
         """
 
@@ -580,9 +580,12 @@ class Metric:
             weights = weights[ok]
 
         # Bin the prediction values over different classes
+        if valrange == 'auto':
+            valrange = [np.percentile(y_soft, 1), np.percentile(y_soft, 99)]
+        
         self.mva_bins = np.linspace(valrange[0], valrange[1], N_mva_bins)
         self.mva_hist = []
-
+        
         for c in range(N_class):
             ind    = (y_true == c)
             counts = []

@@ -766,7 +766,7 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
         for dim2 in range(D) :
             if dim2 <= dim1 :
                 continue
-
+            
             # (x,y)-plane limits
             y_min, y_max = X[:, dim2].min() - pad, X[:, dim2].max() + pad
 
