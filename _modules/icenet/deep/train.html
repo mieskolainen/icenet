@@ -100,12 +100,13 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 
-<div class="viewcode-block" id="raytune_main"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.raytune_main">[docs]</a><span class="k">def</span> <span class="nf">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">gpus_per_trial</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="raytune_main"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.raytune_main">[docs]</a><span class="k">def</span> <span class="nf">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raytune mainloop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">args</span>  <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span>
+
 
     <span class="c1">### General raytune parameters</span>
     <span class="n">num_samples</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_samples&#39;</span><span class="p">]</span>
@@ -165,20 +166,20 @@
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
         <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
-        <span class="n">resources_per_trial</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="n">gpus_per_trial</span><span class="p">},</span>
+        <span class="n">resources_per_trial</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">},</span>
         <span class="n">config</span>              <span class="o">=</span> <span class="n">config</span><span class="p">,</span>
         <span class="n">num_samples</span>         <span class="o">=</span> <span class="n">num_samples</span><span class="p">,</span>
         <span class="n">scheduler</span>           <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
         <span class="n">progress_reporter</span>   <span class="o">=</span> <span class="n">reporter</span><span class="p">)</span>
-
+    
     <span class="c1"># Get the best config</span>
     <span class="n">best_trial</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get_best_trial</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
 
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial config:                </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation loss: </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation AUC:  </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;AUC&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-
+    
+    
     <span class="c1"># GRAPH NETWORKS</span>
     <span class="k">if</span> <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_graph</span><span class="p">:</span>
 
