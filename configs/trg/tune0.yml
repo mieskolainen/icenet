@@ -173,7 +173,7 @@ raytune_setup:
       
       num_boost_round:
         type: "tune.randint"
-        value: [1, 100]
+        value: [20, 120]
 
       learning_rate:
         type: "tune.uniform"
