@@ -7,6 +7,9 @@
 *.pt
 *.zip
 *.txt
+*.text
+*.json
+
 travis-stash/
 dataset/
 tensorboard/
