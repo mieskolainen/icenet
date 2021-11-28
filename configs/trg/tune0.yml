@@ -154,10 +154,10 @@ plot_param:
 # ========================================================================
 
 raytune_param:
-  active:         ['xgb1']
+  active:         ['xgb0', 'xgb1']
   #active:  [null]
   num_samples:    1000
-  max_num_epochs: 50
+  max_num_epochs: 50 # has no impact on xgboost
 
 
 raytune_setup:
@@ -171,37 +171,56 @@ raytune_setup:
 
     param:
       
-      ## Booster parameters
       num_boost_round:
         type: "tune.randint"
         value: [1, 100]
 
       learning_rate:
         type: "tune.uniform"
-        value: [0.01, 0.5]
+        value: [0.01, 0.6]
       
       ## Tree parameters
       max_depth:
         type:  "tune.choice"
-        value: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
 
       ## Regularization
-      reg_lambda:
+      reg_lambda: # Smoothness
         type: "tune.uniform"
         value: [0.0, 5.0]
 
-      reg_alpha:
+      reg_alpha: # Sparsity
         type: "tune.uniform"
-        value: [0.0, 5.0]
+        value: [0.0, 0.5]
+
+      ## Tree splitting
+      #min_child_weight:
+      #  type: "tune.uniform"
+      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
       
-      #min_child_weight: 1.0
-      #gamma: 0.0
-      #max_delta_step: 0
-      #subsample: 0.5
+      gamma:
+        type: "tune.uniform"
+        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
+      
+      #max_delta_step:
+      #  type: "tune.uniform"
+      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
 
-      #colsample_bytree:  1
-      #colsample_bylevel: 1
-      #colsample_bynode:  1
+      #subsample:
+      #  type: "tune.uniform"
+      #  value: [0.5, 1]    # Between [0, 1] # Default 1
+
+      colsample_bytree:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
+
+      colsample_bylevel:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
+
+      colsample_bynode:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
 
   xgb_trial_1:
     search_algo: 'HyperOpt'
@@ -214,17 +233,19 @@ raytune_setup:
       
       ## Booster parameters
       num_boost_round:
-        type: "tune.randint"
-        value: [1, 3]
+      #  type: "tune.randint"
+      #  value: [1, 3]
+        type: "tune.choice"
+        value: [1]
 
       learning_rate:
         type: "tune.uniform"
-        value: [0.01, 0.5]
+        value: [0.01, 0.6]
       
       ## Tree parameters
       max_depth:
         type:  "tune.choice"
-        value: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
 
       ## Regularization
       reg_lambda: # Smoothness
@@ -351,7 +372,7 @@ cut6_param:
 xgb0_param:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB_raytune'
+  label:   'XGB_big'
   raytune:  xgb_trial_0
 
   # general parameters
@@ -361,7 +382,7 @@ xgb0_param:
   
   # booster parameters
   learning_rate: 0.3
-  gamma: 0.0
+  gamma: 1.0
   max_depth: 6
   min_child_weight: 1.0
   max_delta_step: 1
@@ -390,7 +411,7 @@ xgb0_param:
 xgb1_param:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB_T1_D6'
+  label:   'XGB_tiny'
   raytune: 'xgb_trial_1'
 
   # general parameters
@@ -399,19 +420,19 @@ xgb1_param:
   num_boost_round: 1      # number of epochs (equal to the number of trees!)
   
   # booster parameters
-  learning_rate: 0.2
-  gamma: 0.0
-  max_depth: 6
+  learning_rate: 0.45
+  gamma: 0.63
+  max_depth: 10
   min_child_weight: 1.0
   max_delta_step: 1
   subsample: 1
 
-  colsample_bytree:  1
-  colsample_bylevel: 1
-  colsample_bynode:  1
+  colsample_bytree:  0.8
+  colsample_bylevel: 0.9
+  colsample_bynode:  0.95
   
-  reg_lambda: 1.0       # L2 regularization
-  reg_alpha: 0.0        # L1 regularization
+  reg_lambda: 1.37       # L2 regularization
+  reg_alpha: 0.35        # L1 regularization
   
   scale_pos_weight: 1
 
