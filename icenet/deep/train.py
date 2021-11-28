@@ -67,12 +67,13 @@ from ray.tune.schedulers import ASHAScheduler
 from functools import partial
 
 
-def raytune_main(inputs, gpus_per_trial=1, train_func=None):
+def raytune_main(inputs, train_func=None):
     """
     Raytune mainloop
     """
     args  = inputs['args']
     param = inputs['param']
+
 
     ### General raytune parameters
     num_samples    = args['raytune_param']['num_samples']
@@ -132,20 +133,20 @@ def raytune_main(inputs, gpus_per_trial=1, train_func=None):
     analysis = tune.run(
         partial(train_func, **inputs),
         search_alg          = search_alg,
-        resources_per_trial = {"cpu": 8, "gpu": gpus_per_trial},
+        resources_per_trial = {"cpu": 24, "gpu": 1 if torch.cuda.is_available() else 0},
         config              = config,
         num_samples         = num_samples,
         scheduler           = scheduler,
         progress_reporter   = reporter)
-
+    
     # Get the best config
     best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="last")
 
     cprint(f'raytune: Best trial config:                {best_trial.config}', 'green')
     cprint(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
     cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}', 'green')
-
-
+    
+    
     # GRAPH NETWORKS
     if train_func == train_graph:
 
