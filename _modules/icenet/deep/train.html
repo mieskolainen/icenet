@@ -51,6 +51,7 @@
 <span class="c1">#import graphviz</span>
 <span class="kn">import</span> <span class="nn">torch_geometric</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 
 <span class="c1"># xgboost</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
@@ -166,7 +167,7 @@
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
         <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
-        <span class="n">resources_per_trial</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="n">resources_per_trial</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">},</span>
         <span class="n">config</span>              <span class="o">=</span> <span class="n">config</span><span class="p">,</span>
         <span class="n">num_samples</span>         <span class="o">=</span> <span class="n">num_samples</span><span class="p">,</span>
         <span class="n">scheduler</span>           <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
@@ -222,7 +223,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;raytune_main: Unknown train_func = </span><span class="si">{</span><span class="n">train_func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">best_trained_model</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">best_trained_model</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="getgraphmodel"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgraphmodel">[docs]</a><span class="k">def</span> <span class="nf">getgraphmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="p">):</span>
@@ -347,7 +348,119 @@
             <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="train_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train XGBoost model</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tree_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="s1">&#39;gpu_hist&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;hist&#39;</span><span class="p">})</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Training </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>
+
+    <span class="c1">### ** Hyperparameter optimization **</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">{}:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c1">### *********************************</span>
+
+    <span class="c1"># Extended data</span>
+    <span class="n">x_trn_</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">x_val_</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>
+
+
+    <span class="n">dtrain</span>    <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_trn_</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">)</span>
+    <span class="n">dtest</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_val_</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+
+    <span class="n">evallist</span>  <span class="o">=</span> <span class="p">[(</span><span class="n">dtrain</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">dtest</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)]</span>
+    <span class="n">results</span>   <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="n">model</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">dtrain</span> <span class="o">=</span> <span class="n">dtrain</span><span class="p">,</span>
+        <span class="n">num_boost_round</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">],</span> <span class="n">evals</span> <span class="o">=</span> <span class="n">evallist</span><span class="p">,</span> <span class="n">evals_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span> <span class="n">verbose_eval</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Raytune on</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># FIXED</span>
+
+        <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+
+        <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;logloss&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;eval&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+    
+        <span class="c1">## Save</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+        
+        <span class="c1"># Save in JSON format</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">dump_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.text&#39;</span><span class="p">,</span> <span class="n">dump_format</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+    
+    <span class="n">losses</span>   <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;logloss&#39;</span><span class="p">]</span>
+    <span class="n">trn_aucs</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">]</span>
+    <span class="n">val_aucs</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;eval&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Plot evolution</span>
+    <span class="n">plotdir</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">plotdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>   <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plotdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_evolution.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+    <span class="c1">## Plot feature importance (xgb does Not return it for all of them)</span>
+    <span class="k">if</span> <span class="n">plot_importance</span><span class="p">:</span>
+
+        <span class="n">fscores</span>  <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_score</span><span class="p">(</span><span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fscores</span><span class="p">)</span>
+
+        <span class="n">D</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+        <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fscores</span><span class="p">[</span><span class="s1">&#39;f&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">fig</span>  <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+        <span class="n">bars</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">tick_label</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;f-score (gain)&#39;</span><span class="p">)</span>
+
+        <span class="n">targetdir</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_importance.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+    <span class="c1">## Plot decision tree</span>
+    <span class="c1">#xgboost.plot_tree(xgb_model, num_trees=2)</span>
+    <span class="c1">#plt.savefig(&#39;{}/xgb_tree.pdf&#39;.format(targetdir), bbox_inches=&#39;tight&#39;); plt.close()        </span>
+    
+    <span class="c1">### Plot contours</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours_on&#39;</span><span class="p">]:</span>
+        <span class="n">targetdir</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="train_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -467,7 +580,9 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
 
 
 <div class="viewcode-block" id="train_dmax"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_dmax">[docs]</a><span class="k">def</span> <span class="nf">train_dmax</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -500,7 +615,9 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
 
 
 <div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -582,7 +699,9 @@
     <span class="c1">#    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),</span>
     <span class="c1">#        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = &#39;torch&#39;)</span>
 
-    <span class="c1"># return model</span>
+    <span class="c1">#if len(config) == 0:</span>
+    <span class="c1">#    return model</span>
+
 
 
 <div class="viewcode-block" id="train_cnn"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cnn">[docs]</a><span class="k">def</span> <span class="nf">train_cnn</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -636,7 +755,9 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
 
 
 <div class="viewcode-block" id="train_dmlp"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_dmlp">[docs]</a><span class="k">def</span> <span class="nf">train_dmlp</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -669,7 +790,9 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
 
 
 <div class="viewcode-block" id="train_lgr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_lgr">[docs]</a><span class="k">def</span> <span class="nf">train_lgr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -701,117 +824,8 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
-
-
-<div class="viewcode-block" id="train_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Train XGBoost model</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        See other train_*</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        trained model</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tree_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
-        <span class="n">param</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="s1">&#39;gpu_hist&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;hist&#39;</span><span class="p">})</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Training </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>
-
-    <span class="c1">### ** Hyperparameter optimization **</span>
-    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">{}:</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-
-    <span class="c1">### *********************************</span>
-
-    <span class="c1"># Extended data</span>
-    <span class="n">x_trn_</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>
-    <span class="n">x_val_</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>
-
-
-    <span class="n">dtrain</span>    <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_trn_</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">)</span>
-    <span class="n">dtest</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_val_</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-
-
-    <span class="n">evallist</span>  <span class="o">=</span> <span class="p">[(</span><span class="n">dtrain</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">dtest</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)]</span>
-    <span class="n">results</span>   <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
-
-    <span class="n">model</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">dtrain</span> <span class="o">=</span> <span class="n">dtrain</span><span class="p">,</span>
-        <span class="n">num_boost_round</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">],</span> <span class="n">evals</span> <span class="o">=</span> <span class="n">evallist</span><span class="p">,</span> <span class="n">evals_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span> <span class="n">verbose_eval</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Raytune on</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-
-        <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># FIXED</span>
-
-        <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-
-        <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;logloss&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;eval&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">else</span><span class="p">:</span>
-    
-        <span class="c1">## Save</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-        
-        <span class="c1"># Save in JSON format</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">dump_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.text&#39;</span><span class="p">,</span> <span class="n">dump_format</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
-    
-    <span class="n">losses</span>   <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;logloss&#39;</span><span class="p">]</span>
-    <span class="n">trn_aucs</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">]</span>
-    <span class="n">val_aucs</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;eval&#39;</span><span class="p">][</span><span class="s1">&#39;auc&#39;</span><span class="p">]</span>
-
-    <span class="c1"># Plot evolution</span>
-    <span class="n">plotdir</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">plotdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>   <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plotdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_evolution.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-
-    <span class="c1">## Plot feature importance (xgb does Not return it for all of them)</span>
-    <span class="k">if</span> <span class="n">plot_importance</span><span class="p">:</span>
-
-        <span class="n">fscores</span>  <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_score</span><span class="p">(</span><span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">fscores</span><span class="p">)</span>
-
-        <span class="n">D</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
-        <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
-        
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fscores</span><span class="p">[</span><span class="s1">&#39;f&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-        <span class="n">fig</span>  <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
-        <span class="n">bars</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">tick_label</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;f-score (gain)&#39;</span><span class="p">)</span>
-
-        <span class="n">targetdir</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_importance.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-
-    <span class="c1">## Plot decision tree</span>
-    <span class="c1">#xgboost.plot_tree(xgb_model, num_trees=2)</span>
-    <span class="c1">#plt.savefig(&#39;{}/xgb_tree.pdf&#39;.format(targetdir), bbox_inches=&#39;tight&#39;); plt.close()        </span>
-    
-    <span class="c1">### Plot contours</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours_on&#39;</span><span class="p">]:</span>
-        <span class="n">targetdir</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="train_xtx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xtx">[docs]</a><span class="k">def</span> <span class="nf">train_xtx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
