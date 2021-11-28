@@ -153,6 +153,21 @@ active_models:
 #  - gxgb0 # Keep this last (fix the bug) !
 
 
+# Distillation training
+# -- the order must compatible with the causal order in active_models
+distillation:
+
+  # Big, sophisticated model
+  source:
+    #xgb0
+    null
+
+  # Simple, compressed models
+  drains:
+    # - xgb1
+    # - add more here
+
+
 # Dual graph + XGB network
 gxgb0_param:
 

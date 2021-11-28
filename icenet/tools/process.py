@@ -12,7 +12,7 @@ import copy
 import sys
 import pickle
 import torch
-
+import xgboost
 
 import icenet.deep.train as train
 import icenet.deep.predict as predict
@@ -180,21 +180,33 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
         param = args[f'{ID}_param']
         print(f'Training <{ID}> | {param} \n')
 
+
+        ## Different model
         if   param['train'] == 'graph':
             
             inputs = {'data_trn': data_graph['trn'], 'data_val': data_graph['val'], 'args':args, 'param': param}
+            
+           #### Add distillation, if turned on
+            if ID in args['distillation']['drains']: inputs['y_soft'] = y_soft
+            ###
+
             if ID in args['raytune_param']['active']:
-                train.raytune_main(inputs=inputs, train_func=train.train_graph)
+                model = train.raytune_main(inputs=inputs, train_func=train.train_graph)
             else:
-                train.train_graph(**inputs)
+                model = train.train_graph(**inputs)
             
         elif param['train'] == 'xgb':
 
             inputs = {'data': data, 'trn_weights': trn_weights, 'args': args, 'param': param}
+
+            ### Add distillation, if turned on
+            if ID in args['distillation']['drains']: inputs['y_soft'] = y_soft
+            ###
+
             if ID in args['raytune_param']['active']:
-                train.raytune_main(inputs=inputs, train_func=train.train_xgb)
+                model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
-                train.train_xgb(**inputs)
+                model = train.train_xgb(**inputs)
             
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
@@ -226,6 +238,16 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
             None
         else:
             raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
+
+
+        # --------------------------------------------------------
+        # If distillation
+        if ID == args['distillation']['source']:
+            print(__name__ + '.train.models: Computing distillation soft targets ...')
+            
+            if param['train'] == 'xgb':
+                y_soft = model.predict(xgboost.DMatrix(data = data.trn.x))
+        # --------------------------------------------------------
 
     return
 

@@ -183,10 +183,12 @@ def raytune_main(inputs, gpus_per_trial=1, train_func=None):
         
         # ** Final train with the optimal parameters **
         inputs['param'] = optimal_param
-        train_xgb(**inputs)
+        best_trained_model = train_xgb(**inputs)
         
     else:
         raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
+
+    return best_trained_model
 
 
 def getgraphmodel(conv_type, netparam):
@@ -431,6 +433,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
+    return model
+
 
 def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
     """
@@ -456,12 +460,13 @@ def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
     fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
     plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
-    
     ### Plot contours
     if args['plot_param']['contours_on']:
         targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
+
+    return model
 
 
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
@@ -492,6 +497,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
         plots.plot_decision_contour(lambda x : func_predict(x),
             X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
+    return (b_pdfs, s_pdfs)
 
 
 def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -541,6 +547,8 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
     #    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok=True)
     #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
     #        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
+
+    # return model
 
 
 def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -594,6 +602,8 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
+    return model
+
 
 def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
     """
@@ -625,6 +635,8 @@ def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
+    return model
+
 
 def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
     """
@@ -655,8 +667,10 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
+    return model
 
-def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plot_importance=True):
+
+def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, param=None, plot_importance=True):
     """
     Train XGBoost model
     
@@ -686,8 +700,9 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plo
     x_val_    = data.val.x
 
 
-    dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y, weight = trn_weights)
+    dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y if y_soft is None else y_soft, weight = trn_weights)
     dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
+
 
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
@@ -709,9 +724,14 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plo
         tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
 
     else:
-        ## Save
-        pickle.dump(model, open(args['modeldir'] + f'/{label}_' + str(0) + '.dat', 'wb'))
     
+        ## Save
+        filename = args['modeldir'] + f'/{label}_' + str(0)
+        pickle.dump(model, open(filename + '.dat', 'wb'))
+        
+        # Save in JSON format
+        model.save_model(filename + '.json')
+        model.dump_model(filename + '.text', dump_format='text')
     
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
@@ -756,6 +776,8 @@ def train_xgb(config={}, data=None, trn_weights=None, args=None, param=None, plo
         targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
+
+    return model
 
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None, num_classes=2):
@@ -823,6 +845,8 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
                 print('Problem with training *** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.
                     format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
 
+    return True
+
 
 def train_flow(config={}, data=None, trn_weights=None, args=None, param=None, num_classes=2):
     """
@@ -876,3 +900,4 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None, nu
         print(f'Training density for class = {classid} ...')
         dbnf.train(model, optimizer, sched, trn.x, val.x, weights, param, args['modeldir'])
 
+    return True

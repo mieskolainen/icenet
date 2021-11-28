@@ -34,6 +34,21 @@ active_models:
 # ---------------------------------------------------------
 
 
+# Distillation training
+# -- the order must compatible with the causal order in active_models
+distillation:
+
+  # Big, sophisticated model
+  source:
+    #xgb0
+    null
+
+  # Simple, compressed models
+  drains:
+    # - xgb1
+    # - add more here
+
+
 # Batched "deep" training
 batch_train_param:
   blocksize: 1000000            # Maximum number of events simultaneously in RAM

@@ -2,6 +2,7 @@
 xgboost
 
 # OTHERS
+transpyle[all]
 ray
 tabulate
 hyperopt

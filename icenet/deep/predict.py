@@ -112,7 +112,7 @@ def pred_graph_xgb(args, param):
 def pred_torch_graph(args, param, signalclass = 1):
 
     label = param['label']
-
+    
     print(f'\nEvaluate {label} classifier ...')
     
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
