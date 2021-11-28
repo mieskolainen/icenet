@@ -194,7 +194,7 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                 model = train.raytune_main(inputs=inputs, train_func=train.train_graph)
             else:
                 model = train.train_graph(**inputs)
-            
+        
         elif param['train'] == 'xgb':
 
             inputs = {'data': data, 'trn_weights': trn_weights, 'args': args, 'param': param}

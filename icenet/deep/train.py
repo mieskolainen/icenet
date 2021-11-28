@@ -18,6 +18,7 @@ import copy
 #import graphviz
 import torch_geometric
 from termcolor import cprint
+import multiprocessing
 
 # xgboost
 import xgboost
@@ -133,7 +134,7 @@ def raytune_main(inputs, train_func=None):
     analysis = tune.run(
         partial(train_func, **inputs),
         search_alg          = search_alg,
-        resources_per_trial = {"cpu": 24, "gpu": 1 if torch.cuda.is_available() else 0},
+        resources_per_trial = {"cpu": multiprocessing.cpu_count(), "gpu": 1 if torch.cuda.is_available() else 0},
         config              = config,
         num_samples         = num_samples,
         scheduler           = scheduler,
@@ -189,7 +190,7 @@ def raytune_main(inputs, train_func=None):
     else:
         raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
 
-    return best_trained_model
+    return {'model': best_trained_model}
 
 
 def getgraphmodel(conv_type, netparam):
@@ -314,7 +315,119 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
 
-    return model
+    if len(config) == 0:
+        return model
+
+
+def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, param=None, plot_importance=True):
+    """
+    Train XGBoost model
+    
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
+
+    label = param['label']
+
+    if param['tree_method'] == 'auto':
+        param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+
+    print(f'\nTraining {label} classifier ...')
+
+    ### ** Hyperparameter optimization **
+    if config is not {}:
+        for key in param.keys():
+            param[key] = config[key] if key in config.keys() else param[key]
+
+    ### *********************************
+
+    # Extended data
+    x_trn_    = data.trn.x
+    x_val_    = data.val.x
+
+
+    dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y if y_soft is None else y_soft, weight = trn_weights)
+    dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
+
+
+    evallist  = [(dtrain, 'train'), (dtest, 'eval')]
+    results   = dict()
+
+    print(param)
+
+    model     = xgboost.train(params = param, dtrain = dtrain,
+        num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
+
+    # Raytune on
+    if len(config) != 0:
+
+        epoch = 0 # FIXED
+
+        with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            path = os.path.join(checkpoint_dir, "checkpoint")
+            pickle.dump(model, open(path, 'wb'))
+
+        tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
+
+    else:
+    
+        ## Save
+        filename = args['modeldir'] + f'/{label}_' + str(0)
+        pickle.dump(model, open(filename + '.dat', 'wb'))
+        
+        # Save in JSON format
+        model.save_model(filename + '.json')
+        model.dump_model(filename + '.text', dump_format='text')
+    
+    losses   = results['train']['logloss']
+    trn_aucs = results['train']['auc']
+    val_aucs = results['eval']['auc']
+
+    # Plot evolution
+    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
+    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+
+
+    ## Plot feature importance (xgb does Not return it for all of them)
+    if plot_importance:
+
+        fscores  = model.get_score(importance_type='gain')
+        print(fscores)
+
+        D  = data.trn.x.shape[1]
+        xx = np.arange(D)
+        yy = np.zeros(D)
+        
+        for i in range(D):
+            try:
+                yy[i] = fscores['f' + str(i)]
+            except:
+                yy[i] = 0.0
+
+        fig  = plt.figure(figsize=(12,8))
+        bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
+        plt.xlabel('f-score (gain)')
+
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
+        plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+
+
+    ## Plot decision tree
+    #xgboost.plot_tree(xgb_model, num_trees=2)
+    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
+    
+    ### Plot contours
+    if args['plot_param']['contours_on']:
+        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
+        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
+
+    if len(config) == 0:
+        return model
 
 
 def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -434,7 +547,9 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
-    return model
+    if len(config) == 0:
+        return model
+
 
 
 def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -467,7 +582,9 @@ def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
-    return model
+    if len(config) == 0:
+        return model
+
 
 
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
@@ -549,7 +666,9 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
     #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
     #        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
-    # return model
+    #if len(config) == 0:
+    #    return model
+
 
 
 def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -603,7 +722,9 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
-    return model
+    if len(config) == 0:
+        return model
+
 
 
 def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -636,7 +757,9 @@ def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_we
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
-    return model
+    if len(config) == 0:
+        return model
+
 
 
 def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
@@ -668,117 +791,8 @@ def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_wei
         plots.plot_decision_contour(lambda x : model.softpredict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
 
-    return model
-
-
-def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, param=None, plot_importance=True):
-    """
-    Train XGBoost model
-    
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    label = param['label']
-
-    if param['tree_method'] == 'auto':
-        param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
-
-    print(f'\nTraining {label} classifier ...')
-
-    ### ** Hyperparameter optimization **
-    if config is not {}:
-        for key in param.keys():
-            param[key] = config[key] if key in config.keys() else param[key]
-
-    ### *********************************
-
-    # Extended data
-    x_trn_    = data.trn.x
-    x_val_    = data.val.x
-
-
-    dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y if y_soft is None else y_soft, weight = trn_weights)
-    dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
-
-
-    evallist  = [(dtrain, 'train'), (dtest, 'eval')]
-    results   = dict()
-
-    print(param)
-
-    model     = xgboost.train(params = param, dtrain = dtrain,
-        num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
-
-    # Raytune on
-    if len(config) != 0:
-
-        epoch = 0 # FIXED
-
-        with tune.checkpoint_dir(epoch) as checkpoint_dir:
-            path = os.path.join(checkpoint_dir, "checkpoint")
-            pickle.dump(model, open(path, 'wb'))
-
-        tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
-
-    else:
-    
-        ## Save
-        filename = args['modeldir'] + f'/{label}_' + str(0)
-        pickle.dump(model, open(filename + '.dat', 'wb'))
-        
-        # Save in JSON format
-        model.save_model(filename + '.json')
-        model.dump_model(filename + '.text', dump_format='text')
-    
-    losses   = results['train']['logloss']
-    trn_aucs = results['train']['auc']
-    val_aucs = results['eval']['auc']
-
-    # Plot evolution
-    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir, exist_ok = True)
-    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
-
-    ## Plot feature importance (xgb does Not return it for all of them)
-    if plot_importance:
-
-        fscores  = model.get_score(importance_type='gain')
-        print(fscores)
-
-        D  = data.trn.x.shape[1]
-        xx = np.arange(D)
-        yy = np.zeros(D)
-        
-        for i in range(D):
-            try:
-                yy[i] = fscores['f' + str(i)]
-            except:
-                yy[i] = 0.0
-
-        fig  = plt.figure(figsize=(12,8))
-        bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
-        plt.xlabel('f-score (gain)')
-
-        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train'; os.makedirs(targetdir, exist_ok = True)
-        plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
-
-
-    ## Plot decision tree
-    #xgboost.plot_tree(xgb_model, num_trees=2)
-    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
-    
-    ### Plot contours
-    if args['plot_param']['contours_on']:
-        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/'; os.makedirs(targetdir, exist_ok = True)
-        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
-
-    return model
+    if len(config) == 0:
+        return model
 
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None, num_classes=2):
