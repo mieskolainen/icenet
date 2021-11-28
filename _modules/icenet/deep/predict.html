@@ -145,7 +145,7 @@
 <div class="viewcode-block" id="pred_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">pred_torch_graph</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">signalclass</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Evaluate </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>
     
     <span class="n">model</span>         <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
@@ -361,7 +361,7 @@
       &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

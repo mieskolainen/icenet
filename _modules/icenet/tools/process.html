@@ -45,7 +45,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-
+<span class="kn">import</span> <span class="nn">xgboost</span>
 
 <span class="kn">import</span> <span class="nn">icenet.deep.train</span> <span class="k">as</span> <span class="nn">train</span>
 <span class="kn">import</span> <span class="nn">icenet.deep.predict</span> <span class="k">as</span> <span class="nn">predict</span>
@@ -213,21 +213,33 @@
         <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
+
+        <span class="c1">## Different model</span>
         <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
             
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data_trn&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="s1">&#39;data_val&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
+            
+           <span class="c1">#### Add distillation, if turned on</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
+            <span class="c1">###</span>
+
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-                <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_graph</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_graph</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">train</span><span class="o">.</span><span class="n">train_graph</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_graph</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb&#39;</span><span class="p">:</span>
 
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;trn_weights&#39;</span><span class="p">:</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
+
+            <span class="c1">### Add distillation, if turned on</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
+            <span class="c1">###</span>
+
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-                <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;graph_xgb&#39;</span><span class="p">:</span>
             <span class="n">train</span><span class="o">.</span><span class="n">train_graph_xgb</span><span class="p">(</span><span class="n">data_trn</span><span class="o">=</span><span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">data_val</span><span class="o">=</span><span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">trn_weights</span><span class="o">=</span><span class="n">trn_weights</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>  
@@ -259,6 +271,16 @@
             <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Unknown param[&quot;train&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> for ID = </span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+        <span class="c1"># --------------------------------------------------------</span>
+        <span class="c1"># If distillation</span>
+        <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;source&#39;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.train.models: Computing distillation soft targets ...&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb&#39;</span><span class="p">:</span>
+                <span class="n">y_soft</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+        <span class="c1"># --------------------------------------------------------</span>
 
     <span class="k">return</span></div>
 
@@ -637,7 +659,7 @@
       &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
