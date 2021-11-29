@@ -106,6 +106,15 @@ Show Tensorflow and Pytorch GPU support in Python
 	print(torch.cuda.get_device_name(0))
 
 
+Grid engine GPU job submission
+-------------------------------
+
+Use the following command with IC machines
+
+-- code-block:: none
+    qsub -q gpu.q@lxcgpu*
+
+
 Conda virtual environment commands
 -----------------------------------
 .. code-block:: none
@@ -122,3 +131,4 @@ Conda virtual environment commands
 	
 	# Remove environment completely
 	conda env remove --name icenet
+
