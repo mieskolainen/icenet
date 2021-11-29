@@ -42,7 +42,8 @@
 <li><p><a class="reference internal" href="#pre-installed-cuda-paths-optional" id="id2">Pre-installed CUDA paths (optional)</a></p></li>
 <li><p><a class="reference internal" href="#automated-setup" id="id3">Automated setup</a></p></li>
 <li><p><a class="reference internal" href="#gpu-support-commands" id="id4">GPU-support commands</a></p></li>
-<li><p><a class="reference internal" href="#conda-virtual-environment-commands" id="id5">Conda virtual environment commands</a></p></li>
+<li><p><a class="reference internal" href="#grid-engine-gpu-job-submission" id="id5">Grid engine GPU job submission</a></p></li>
+<li><p><a class="reference internal" href="#conda-virtual-environment-commands" id="id6">Conda virtual environment commands</a></p></li>
 </ul>
 </div>
 <section id="preliminaries-conda-installation">
@@ -118,8 +119,16 @@ print(torch.cuda.get_device_name(0))
 </pre></div>
 </div>
 </section>
+<section id="grid-engine-gpu-job-submission">
+<h2><a class="toc-backref" href="#id5">Grid engine GPU job submission</a><a class="headerlink" href="#grid-engine-gpu-job-submission" title="Permalink to this headline">¶</a></h2>
+<p>Use the following command with IC machines</p>
+<dl class="simple">
+<dt>– code-block:: none</dt><dd><p>qsub -q <a class="reference external" href="mailto:gpu&#46;q&#37;&#52;&#48;lxcgpu*">gpu<span>&#46;</span>q<span>&#64;</span>lxcgpu*</a></p>
+</dd>
+</dl>
+</section>
 <section id="conda-virtual-environment-commands">
-<h2><a class="toc-backref" href="#id5">Conda virtual environment commands</a><a class="headerlink" href="#conda-virtual-environment-commands" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id6">Conda virtual environment commands</a><a class="headerlink" href="#conda-virtual-environment-commands" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.9.6
 conda activate icenet
 
