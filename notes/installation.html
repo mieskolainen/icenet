@@ -81,14 +81,15 @@ pip install -r requirements-cpu-linux.txt
 export TMPDIR=$HOME/tmp
 </pre></div>
 </div>
-<p>Note: If you experience ´OSError: libcusparse.so.11´ with torch-geometric, set the system path</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export LD_LIBRARY_PATH=&quot;$HOME/anaconda3/envs/icenet/lib:$LD_LIBRARY_PATH&quot;
+<p>Note: If you experience ´OSError: libcusparse.so.11´ (or similar) with torch-geometric, set the system path</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export LD_LIBRARY_PATH=&quot;$CONDA_PREFIX/lib:$LD_LIBRARY_PATH&quot;
 </pre></div>
 </div>
 <p>Note: If you experience ´Could not load dynamic library libcusolver.so.10´ with tensorflow, make a symbolic link</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ln -s ~/anaconda3/envs/icenet/lib/libcusolver.so.11 ~/anaconda3/envs/icenet/lib/libcusolver.so.10
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ln -s $CONDA_PREFIX/lib/libcusolver.so.11 $CONDA_PREFIX/lib/libcusolver.so.10
 </pre></div>
 </div>
+<p>Note: $CONDA_PREFIX will be found after ‘conda activate icenet’</p>
 <p>Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
 removing e.g. ´tensorflow´ from requirements.txt, and install it separately with</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install tensorflow
