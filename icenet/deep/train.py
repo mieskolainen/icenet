@@ -190,7 +190,7 @@ def raytune_main(inputs, train_func=None):
     else:
         raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
 
-    return {'model': best_trained_model}
+    return best_trained_model
 
 
 def getgraphmodel(conv_type, netparam):
