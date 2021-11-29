@@ -112,6 +112,7 @@ Grid engine GPU job submission
 Use the following command with IC machines
 
 .. code-block:: none
+
 	qsub -q gpu.q@lxcgpu* <other commands>
 
 
