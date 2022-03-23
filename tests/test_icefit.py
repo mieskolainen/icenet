@@ -47,7 +47,7 @@ obs_M = {
 'ylim'    : None,
 'xlabel'  : r'$M$',
 'ylabel'  : r'Counts',
-'units'   : r'GeV',
+'units'   : {'x': r'GeV', 'y': ''},
 'label'   : r'Invariant mass',
 'figsize' : (5,4),
 

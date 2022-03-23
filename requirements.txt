@@ -2,6 +2,9 @@
 xgboost
 
 # OTHERS
+jax
+jaxlib
+iminuit
 transpyle[all]
 ray
 tabulate
