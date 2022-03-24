@@ -471,10 +471,18 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
 
 	# ====================================================================
-	# Fit parameter setup
+	# Fit parametrization setup
 
+	# Parameter indices for signal and background functions
 	sgn_pind = np.array([2,3,4,5,6,7])
 	bgk_pind = np.array([8])
+
+	### Fit functions
+	sigfunc = CB_RBW_conv_pdf
+	bgkfunc = exp_pdf
+
+	def fitfunc(x, par):
+		return par[0]*sigfunc(x, par[sgn_pind]) + par[1]*bgkfunc(x, par[bgk_pind])
 
 	# Parameter start values
 	start_values = (10,
@@ -521,18 +529,11 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 	# Fit range limits
 	fitrange = np.array([2.9, 3.3])
 
-	# Collect all
+	# Finally collect all
 	param  = {'start_values': start_values,
 			  'limits': 	  limits,
 			  'name': 		  name,
 			  'fitrange': 	  fitrange}
-
-	### Fit functions
-	sigfunc = CB_RBW_conv_pdf
-	bgkfunc = exp_pdf
-
-	def fitfunc(x, par):
-		return par[0]*sigfunc(x, par[sgn_pind]) + par[1]*bgkfunc(x, par[bgk_pind])
 
 	# ====================================================================
 
@@ -592,7 +593,7 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 			print(f'Reading fit results from: {filename} (pickle)')			
 			outdict  = pickle.load(open(filename, "rb"))
 			#pprint(outdict)
-			
+
 			# Read out signal peak fit event count yield and its uncertainty
 			N[PASS]     = outdict['N']['S']
 			N_err[PASS] = outdict['N_err']['S']
