@@ -828,6 +828,27 @@ E[k2] = lambda2 (Poisson mean)</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.tpratio_taylor">
+<span class="sig-name descname"><span class="pre">tpratio_taylor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#tpratio_taylor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.tpratio_taylor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error propagation on a ratio</p>
+<p>r = x/(x+y), with x and y uncorrelated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – values</p></li>
+<li><p><strong>y</strong> – values</p></li>
+<li><p><strong>x_err</strong> – uncertainties</p></li>
+<li><p><strong>y_err</strong> – uncertainties</p></li>
+<li><p><strong>xy_err</strong> – covariance (err_x * err_y * rho_xy)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Error propagated ratio error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.statstools.welch_ttest">
 <span class="sig-name descname"><span class="pre">welch_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#welch_ttest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.welch_ttest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Welch’s two sample t-test for normally distributed variables.

@@ -41,6 +41,30 @@
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
 
 
+
+<div class="viewcode-block" id="tpratio_taylor"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.tpratio_taylor">[docs]</a><span class="k">def</span> <span class="nf">tpratio_taylor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span><span class="n">y_err</span><span class="p">,</span> <span class="n">xy_err</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Error propagation on a ratio</span>
+
+<span class="sd">	r = x/(x+y), with x and y uncorrelated</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		x,y         : values</span>
+<span class="sd">		x_err,y_err : uncertainties</span>
+<span class="sd">		xy_err      : covariance (err_x * err_y * rho_xy)</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		Error propagated ratio error</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">dx</span> <span class="o">=</span>  <span class="n">y</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+	<span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+	
+	<span class="n">r2</span> <span class="o">=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">x_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">dx</span><span class="o">*</span><span class="n">dy</span><span class="o">*</span><span class="n">xy_err</span>
+
+	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="prodratio_eprop"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.prodratio_eprop">[docs]</a><span class="k">def</span> <span class="nf">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigmaA</span><span class="p">,</span> <span class="n">sigmaB</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Error propagation (Taylor expansion) of product A*B or ratio A/B</span>
