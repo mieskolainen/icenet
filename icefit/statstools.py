@@ -8,6 +8,30 @@ import copy
 import scipy.stats as stats
 
 
+
+def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
+	"""
+	Error propagation on a ratio
+
+	r = x/(x+y), with x and y uncorrelated
+	
+	Args:
+		x,y         : values
+		x_err,y_err : uncertainties
+		xy_err      : covariance (err_x * err_y * rho_xy)
+	
+	Returns:
+		Error propagated ratio error
+	"""
+	dx =  y/(x + y)**2
+	dy = -x/(x + y)**2
+	
+	r2 = dx**2*x_err**2 + dy**2*y_err**2 + 2*dx*dy*xy_err
+
+	return np.sqrt(r2)
+
+
+
 def prodratio_eprop(A, B, sigmaA, sigmaB, sigmaAB=0, mode='ratio'):
 	"""
 	Error propagation (Taylor expansion) of product A*B or ratio A/B

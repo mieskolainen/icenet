@@ -30,6 +30,7 @@ import sys
 sys.path.append(".")
 
 from iceplot import iceplot
+import statstools
 
 # numpy
 import numpy as onp # original numpy
@@ -574,13 +575,10 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
 def test_jpsi_tagprobe(savepath='./output/peakfit'):
 	"""
-	Tag & Probe efficency (& scale factors) test
-	
-	Before running this, run: python icefit/peakfit.py
+	Tag & Probe efficiency (& scale factors) test
 	"""
 
 	import pytest
-	
 	
 	def tagprobe(BIN1, BIN2, total_savepath):
 
@@ -590,46 +588,52 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 		for PASS in ['Pass', 'Fail']:
 
 			tree     = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}_{PASS}'
-
-			# Read the fit numerical data
 			filename = f"{total_savepath}/{tree}.pkl"
-			print(f'Reading fit results from: {filename} (pickle)')
-			
+			print(f'Reading fit results from: {filename} (pickle)')			
 			outdict  = pickle.load(open(filename, "rb"))
 			#pprint(outdict)
-			#print('')
-
-			# Read out signal peak event count and its uncertainty
+			
+			# Read out signal peak fit event count yield and its uncertainty
 			N[PASS]     = outdict['N']['S']
 			N_err[PASS] = outdict['N_err']['S']
 
 		return N, N_err
 
-
 	### Loop over datasets
 	for YEAR     in [2016]:
+
+		data_tag = f'Run{YEAR}'
+		mc_tag   = 'JPsi_pythia8'
 
 		for BIN1 in [1,2,3]:
 			for BIN2 in [1,2,3]:
 
-				print('------------------')
+				print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
 
-				for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']:
+				eff     = {}
+				eff_err = {}
 
-					total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
-					N,N_err = tagprobe(BIN1=BIN1, BIN2=BIN2, total_savepath=total_savepath)
-
-					print(TYPE)
+				for TYPE in [data_tag, mc_tag]:
 
 					### Compute Tag & Probe efficiency
-					eff = N['Pass'] / (N['Pass'] + N['Fail'])
+					N,N_err       = tagprobe(BIN1=BIN1, BIN2=BIN2, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+					eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
+					eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
-					print(f'N_pass = {N["Pass"]:0.1f} +- ')
-					print(f'N_fail = {N["Fail"]:0.1f} +- ')
-					
-					print(f'Efficiency: {eff:0.3f} +- \n')
+					### Print out
+					print(f'[{TYPE}]')
+					print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
+					print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
+					print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
+
+				### Compute scale factor Data / MC
+				scale     = eff[data_tag] / eff[mc_tag]
+				scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
+							sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
+
+				print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
 
 
 if __name__ == "__main__":
-    test_jpsi_fitpeak()
+    #test_jpsi_fitpeak()
     test_jpsi_tagprobe()
