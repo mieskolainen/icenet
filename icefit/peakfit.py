@@ -153,7 +153,7 @@ def RBW_pdf(x, par):
 
 def asym_RBW_pdf(x, par):
 	"""
-	Relativistic Breit-Wigner pdf
+	Asymmetric Relativistic Breit-Wigner pdf
 	https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
 	"""
 	M0, W0, a = par
@@ -241,13 +241,8 @@ def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=1000
 	# Limit the fit range
 	fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
 
-	# Compute volume
-	maxval = np.max(counts[fit_range_ind])
-	volume = np.max(counts[fit_range_ind]) * (param['fitrange'][1] - param['fitrange'][0])
-	print(volume)
 
 	### Chi2 loss function definition
-
 	#@jit
 	def chi2_loss(par) :
 		yhat = fitfunc(cbins[fit_range_ind], par)
@@ -269,7 +264,7 @@ def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=1000
 		# ------------------------------------------------------------
 		from scipy.optimize import minimize
 
-		# Nelder-Mead search
+		# Nelder-Mead search (from scipy)
 		res = minimize(chi2_loss, param['start_values'], method='nelder-mead', options={'xatol': 1e-8, 'disp': True})
 		print(res)
 		param['start_values'] = res.x
@@ -408,14 +403,15 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	'func'    : None
 	}
 
-	fig, ax = iceplot.create_axes(**obs_M, ratio_plot=False)
+	fig, ax = iceplot.create_axes(**obs_M, ratio_plot=True)
 	
-	## Plot data
+	## UPPER PLOT
 	ax[0].errorbar(x=cbins, y=counts, yerr=errs, color=(0,0,0), label=f'Data, $N = {np.sum(counts):0.1f}$', **iceplot.errorbar_style)
 	ax[0].legend(frameon=False)
 	ax[0].set_ylabel('Counts / bin')
 
 	## Plot fits
+	plt.sca(ax[0])
 	plt.plot(x, fitfunc(x, par), label="total fit: $Sf_S + Bf_B$", color=(0.5,0.5,0.5))
 	plt.plot(x, y_S, label=f"sig: $N_S = {N['S']:.1f} \\pm {N_err['S']:.1f}$", color=(0.85,0.85,0.85), linestyle='-')
 	plt.plot(x, y_B, label=f"bkg: $N_B = {N['B']:.1f} \\pm {N_err['B']:.1f}$", color=(0.7,0,0), linestyle='--')
@@ -425,6 +421,16 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	# chi2 / ndf
 	title = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}$"
 	plt.title(title)
+
+	## LOWER PLOT
+	plt.sca(ax[1])
+	iceplot.plot_horizontal_line(ax[1], ypos=1.0)
+
+	ax[1].errorbar(x=cbins, y=counts/counts,                yerr=errs / counts,        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
+	ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / counts, yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **iceplot.errorbar_line_style)
+	
+	ax[1].set_ylabel('Ratio')
+	#ax[1].set_ylim([-3,3])
 
 	return fig,ax,N,N_err
 
@@ -499,8 +505,8 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 		            0.5)
 	
 	# Parameter (min,max) constraints
-	limits = ((0.1, 1e6),
-		      (0.1, 1e6),
+	limits = ((0.1, 1e8),
+		      (0.1, 1e8),
 
 		      (3.07, 3.13),
 		      (1e-3, 0.3),
@@ -581,14 +587,14 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
 	import pytest
 	
-	def tagprobe(BIN1, BIN2, total_savepath):
+	def tagprobe(treename, total_savepath):
 
 		N      = {}
 		N_err  = {}
 
 		for PASS in ['Pass', 'Fail']:
 
-			tree     = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}_{PASS}'
+			tree     = f'{treename}_{PASS}'
 			filename = f"{total_savepath}/{tree}.pkl"
 			print(f'Reading fit results from: {filename} (pickle)')			
 			outdict  = pickle.load(open(filename, "rb"))
@@ -600,12 +606,18 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
 		return N, N_err
 
+
 	### Loop over datasets
 	for YEAR     in [2016]:
 
 		data_tag = f'Run{YEAR}'
 		mc_tag   = 'JPsi_pythia8'
 
+		# Create savepath
+		total_savepath = f'{savepath}/Run{YEAR}/Efficiency'
+		if not os.path.exists(total_savepath):
+			os.makedirs(total_savepath)
+		
 		for BIN1 in [1,2,3]:
 			for BIN2 in [1,2,3]:
 
@@ -614,10 +626,12 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 				eff     = {}
 				eff_err = {}
 
+				treename = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}'
+
 				for TYPE in [data_tag, mc_tag]:
 
 					### Compute Tag & Probe efficiency
-					N,N_err       = tagprobe(BIN1=BIN1, BIN2=BIN2, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+					N,N_err       = tagprobe(treename=treename, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
 					eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
 					eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
@@ -634,7 +648,13 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
 				print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
 
+				### Save results
+				outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
+				filename = f"{total_savepath}/{treename}.pkl"
+				pickle.dump(outdict, open(filename, "wb"))
+				print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
+
 
 if __name__ == "__main__":
-    #test_jpsi_fitpeak()
+    test_jpsi_fitpeak()
     test_jpsi_tagprobe()

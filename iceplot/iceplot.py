@@ -63,7 +63,9 @@ zorder : approximate plotting order
 lw     : linewidth
 ls     : linestyle
 """
-errorbar_style  = {'zorder': 3, 'ls': ' ', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
+errorbar_style      = {'zorder': 3, 'ls': ' ', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
+errorbar_line_style = {'zorder': 3, 'ls': '-', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
+
 plot_style      = {'zorder': 2, 'ls': '-', 'lw': 1}
 hist_style_step = {'zorder': 0, 'ls': '-', 'lw': 1, 'histtype': 'step'}
 hist_style_fill = {'zorder': 0, 'ls': '-', 'lw': 1, 'histtype': 'stepfilled'}
@@ -126,11 +128,11 @@ def stepspace(start, stop, step):
     return np.arange(start, stop + step, step)
 
 
-def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9):
+def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9, ypos=1.0):
     """ For the ratio plot
     """
     xlim = ax.get_xlim()
-    ax.plot(np.linspace(xlim[0], xlim[1], 2), np.array([1,1]), color=color, linewidth=linewidth)
+    ax.plot(np.linspace(xlim[0], xlim[1], 2), np.array([ypos, ypos]), color=color, linewidth=linewidth)
 
 
 def tick_calc(lim, step, N=6):
