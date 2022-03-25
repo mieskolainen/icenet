@@ -428,7 +428,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 
 	ax[1].errorbar(x=cbins, y=counts/counts,                yerr=errs / counts,        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
 	ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / counts, yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **iceplot.errorbar_line_style)
-	
+
 	ax[1].set_ylabel('Ratio')
 	#ax[1].set_ylim([-3,3])
 
@@ -550,7 +550,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 		for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
 
 			for BIN1 in [1,2,3]:
-				for BIN2 in [1,2,3]:
+				for BIN2 in [1,2,3,4]:
 					for PASS in ['Pass', 'Fail']:
 
 						### Uproot input
@@ -619,7 +619,7 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 			os.makedirs(total_savepath)
 		
 		for BIN1 in [1,2,3]:
-			for BIN2 in [1,2,3]:
+			for BIN2 in [1,2,3,4]:
 
 				print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
 
