@@ -1,4 +1,4 @@
-# Binned chi2 histogram fit with iminuit (minuit from python)
+# Binned histogram chi2/likelihood fits with iminuit (minuit from python)
 # 
 # pytest icefit/peakfit.py -rP
 # 
@@ -248,7 +248,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, n
 		posdef = (errs > 0) # Check do we have non-zero bins
 		if np.sum(posdef) == 0:
 			return 1e9
-		
+
 		yhat   = fitfunc(cbins[fit_range_ind & posdef], par)
 		xx     = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
 		
