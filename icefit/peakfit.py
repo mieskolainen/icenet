@@ -85,7 +85,7 @@ def CB_pdf(x, par):
 	"""
 
 	mu, sigma, n, alpha = par
-	abs_a = np.abs(alpha)
+	abs_a = np.abs(alpha) # Protect floats
 
 	A = (n / abs_a)**n * np.exp(-0.5 * abs_a**2)
 	B =  n / abs_a - abs_a
@@ -244,11 +244,14 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, n
 	### Chi2 loss function definition
 	#@jit
 	def chi2_loss(par):
-		yhat = fitfunc(cbins[fit_range_ind], par)
 
-		xx = (yhat - counts[fit_range_ind])**2 / (errs[fit_range_ind])**2
-		xx = xx[np.isfinite(xx)]
-
+		posdef = (errs > 0) # Check do we have non-zero bins
+		if np.sum(posdef) == 0:
+			return 1e9
+		
+		yhat   = fitfunc(cbins[fit_range_ind & posdef], par)
+		xx     = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
+		
 		return onp.sum(xx)
 
 	### Poissonian negative log-likelihood loss function definition
@@ -315,7 +318,11 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, n
 		print(m1.fmin)
 
 		# Finalize with error analysis [migrad << hesse << minos (best)]
-		m1.minos()
+		m1.hesse()
+		try:
+			m1.minos()
+		except:
+			print(f'binned_1D_fit: Error occured with MINOS uncertainty estimation')
 
 		### Output
 		par     = m1.values
@@ -449,11 +456,11 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	plt.sca(ax[1])
 	iceplot.plot_horizontal_line(ax[1], ypos=1.0)
 
-	ax[1].errorbar(x=cbins, y=counts/counts,                yerr=errs / counts,        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
-	ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / counts, yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **iceplot.errorbar_line_style)
+	ax[1].errorbar(x=cbins, y=np.ones(len(cbins)),                            yerr=errs / np.maximum(1e-9, counts),        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
+	ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / np.maximum(1e-9, counts), yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **iceplot.errorbar_line_style)
 
 	ax[1].set_ylabel('Ratio')
-	#ax[1].set_ylim([-3,3])
+	ax[1].set_ylim([0.7, 1.3])
 
 	return fig,ax,N,N_err
 
@@ -646,7 +653,7 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 		
 		for BIN1 in [1,2,3]:
 			for BIN2 in [1,2,3,4,5]:
-				
+
 				print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
 
 				eff     = {}
