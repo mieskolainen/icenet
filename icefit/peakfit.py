@@ -216,7 +216,7 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 	return y
 
 
-def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=10000, ncall_brute=10000, max_trials=10, max_chi2=100):
+def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, ncall_simplex=10000, ncall_brute=10000, max_trials=10, max_chi2=100):
 	"""
 	Main fitting function
 
@@ -241,16 +241,35 @@ def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=1000
 	# Limit the fit range
 	fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
 
-
 	### Chi2 loss function definition
 	#@jit
-	def chi2_loss(par) :
+	def chi2_loss(par):
 		yhat = fitfunc(cbins[fit_range_ind], par)
 
 		xx = (yhat - counts[fit_range_ind])**2 / (errs[fit_range_ind])**2
 		xx = xx[np.isfinite(xx)]
 
 		return onp.sum(xx)
+
+	### Poissonian negative log-likelihood loss function definition
+	#@jit
+	def poiss_nll_loss(par):
+		yhat  = fitfunc(cbins[fit_range_ind], par)
+
+		T1 = counts[fit_range_ind] * np.log(yhat)
+		T2 = yhat
+
+		return (-1)*(np.sum(T1[np.isfinite(T1)]) - np.sum(T2[np.isfinite(T2)]))
+
+
+	# --------------------------------------------------------------------
+	if   losstype == 'chi2':
+		loss = chi2_loss
+	elif losstype == 'nll':
+		loss = poiss_nll_loss
+	else:
+		raise Exception(f'Unknown losstype chosen <{losstype}>')
+	# --------------------------------------------------------------------
 
 	trials = 1
 
@@ -265,14 +284,19 @@ def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=1000
 		from scipy.optimize import minimize
 
 		# Nelder-Mead search (from scipy)
-		res = minimize(chi2_loss, param['start_values'], method='nelder-mead', options={'xatol': 1e-8, 'disp': True})
+		res = minimize(loss, param['start_values'], method='nelder-mead', options={'xatol': 1e-8, 'disp': True})
 		print(res)
 		param['start_values'] = res.x
 		# --------------------------------------------------------------------
 
 		## Initialize Minuit
-		m1 = iminuit.Minuit(chi2_loss, start_values, name=param['name'])
-		m1.errordef = iminuit.Minuit.LEAST_SQUARES
+		m1 = iminuit.Minuit(loss, start_values, name=param['name'])
+
+		if   losstype == 'chi2':
+			m1.errordef = iminuit.Minuit.LEAST_SQUARES
+		elif losstype == 'nll':
+			m1.errordef = iminuit.Minuit.LIKELIHOOD
+
 
 		m1.limits   = param['limits']
 		m1.strategy = 0
@@ -290,14 +314,14 @@ def binned_1D_fit(hist, fitfunc, param, ncall_gradient=10000, ncall_simplex=1000
 		m1.migrad(ncall=ncall_gradient)
 		print(m1.fmin)
 
-		# Finalize
-		m1.hesse()
+		# Finalize with error analysis [migrad << hesse << minos (best)]
+		m1.minos()
 
 		### Output
 		par     = m1.values
 		cov     = m1.covariance
 		var2pos = m1.var2pos
-		chi2    = m1.fval
+		chi2    = chi2_loss(par)
 		ndof    = len(counts[fit_range_ind]) - len(par) - 1
 
 		if (chi2 / ndof < max_chi2):
@@ -349,9 +373,8 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	fitind = (param['fitrange'][0] <= cbins) & (cbins <= param['fitrange'][1])
 
 	x   = np.linspace(param['fitrange'][0], param['fitrange'][1], int(1e3))
-	y_S = par[0] * sigfunc(x, par[sgn_pind])
-	y_B = par[1] * bgkfunc(x, par[bgk_pind])
-
+	y_S = par[var2pos['S']] * sigfunc(x, par[sgn_pind])
+	y_B = par[var2pos['B']] * bgkfunc(x, par[bgk_pind])
 
 	print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
 	print(f'Input bin count sum: {np.sum(counts[fitind]):0.1f} (fit range)')	
@@ -373,8 +396,8 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	# [neglect the functional shape uncertanties affecting the integral]
 	
 	for key in ['S', 'B']:
-		S_ind      = var2pos[key]
-		N_err[key] = N[key] * np.sqrt(cov[S_ind][S_ind]) / par[S_ind]
+		ind        = var2pos[key]
+		N_err[key] = N[key] * np.sqrt(cov[ind][ind]) / par[ind]
 
 
 	# --------------------------------------------------------------------
@@ -412,7 +435,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 
 	## Plot fits
 	plt.sca(ax[0])
-	plt.plot(x, fitfunc(x, par), label="total fit: $Sf_S + Bf_B$", color=(0.5,0.5,0.5))
+	plt.plot(x, fitfunc(x, par), label="total fit: $Sf_S + Bf_B$", color=(0.5,0.5,0.5), lw=2)
 	plt.plot(x, y_S, label=f"sig: $N_S = {N['S']:.1f} \\pm {N_err['S']:.1f}$", color=(0.85,0.85,0.85), linestyle='-')
 	plt.plot(x, y_B, label=f"bkg: $N_B = {N['B']:.1f} \\pm {N_err['B']:.1f}$", color=(0.7,0,0), linestyle='--')
 	plt.ylim(bottom=0)
@@ -541,16 +564,19 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 			  'name': 		  name,
 			  'fitrange': 	  fitrange}
 
+	# 'chi2' or 'nll'
+	losstype = 'chi2'
+
 	# ====================================================================
 
 
 	### Loop over datasets
 
-	for YEAR     in [2016]:
+	for YEAR     in [2016, 2017, 2018]:
 		for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
 
 			for BIN1 in [1,2,3]:
-				for BIN2 in [1,2,3,4]:
+				for BIN2 in [1,2,3,4,5]:
 					for PASS in ['Pass', 'Fail']:
 
 						### Uproot input
@@ -559,7 +585,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 						hist     = uproot.open(rootfile)[tree]
 
 						# Fit and analyze
-						par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, fitfunc=fitfunc, param=param)
+						par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, fitfunc=fitfunc, param=param, losstype=losstype)
 						fig,ax,N,N_err            = analyze_1D_fit(hist=hist, fitfunc=fitfunc, sigfunc=sigfunc, bgkfunc=bgkfunc, \
 																par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof, param=param)
 
@@ -608,7 +634,7 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
 
 	### Loop over datasets
-	for YEAR     in [2016]:
+	for YEAR     in [2016, 2017, 2018]:
 
 		data_tag = f'Run{YEAR}'
 		mc_tag   = 'JPsi_pythia8'
@@ -619,8 +645,8 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 			os.makedirs(total_savepath)
 		
 		for BIN1 in [1,2,3]:
-			for BIN2 in [1,2,3,4]:
-
+			for BIN2 in [1,2,3,4,5]:
+				
 				print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
 
 				eff     = {}
