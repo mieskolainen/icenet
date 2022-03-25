@@ -9,12 +9,14 @@
 # !pip install iminuit jax jaxlib
 
 # JAX for autograd
+
 #import jax
 #from jax.config import config
 #config.update("jax_enable_x64", True) # enable float64 precision
 #from jax import numpy as np           # jax replacement for normal numpy
 #from jax.scipy.special import erf,erfc
 #from jax import jit, grad
+
 import numpy as np
 
 import os
@@ -63,7 +65,7 @@ def TH1_to_numpy(hist):
 
 def gauss_pdf(x, par):
 	"""
-	Normal density
+	Normal (Gaussian) density
 	
 	Args:
 		par: parameters
@@ -212,7 +214,7 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 	# Normalize to density over the range of x
 	if norm:
 		y = y / integrate.simpson(y=y, x=x)
-	
+
 	return y
 
 
@@ -249,17 +251,22 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, n
 		if np.sum(posdef) == 0:
 			return 1e9
 
-		yhat   = fitfunc(cbins[fit_range_ind & posdef], par)
-		xx     = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
+		yhat = fitfunc(cbins[fit_range_ind & posdef], par)
+		xx   = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
 		
 		return onp.sum(xx)
 
 	### Poissonian negative log-likelihood loss function definition
 	#@jit
 	def poiss_nll_loss(par):
-		yhat  = fitfunc(cbins[fit_range_ind], par)
 
-		T1 = counts[fit_range_ind] * np.log(yhat)
+		posdef = (errs > 0) # Check do we have non-zero bins
+		if np.sum(posdef) == 0:
+			return 1e9
+
+		yhat  = fitfunc(cbins[fit_range_ind & posdef], par)
+
+		T1 = counts[fit_range_ind & posdef] * np.log(yhat)
 		T2 = yhat
 
 		return (-1)*(np.sum(T1[np.isfinite(T1)]) - np.sum(T2[np.isfinite(T2)]))
@@ -460,7 +467,6 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / np.maximum(1e-9, counts), yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **iceplot.errorbar_line_style)
 
 	ax[1].set_ylabel('Ratio')
-	ax[1].set_ylim([0.7, 1.3])
 
 	return fig,ax,N,N_err
 
@@ -571,10 +577,12 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 			  'name': 		  name,
 			  'fitrange': 	  fitrange}
 
-	# 'chi2' or 'nll'
+	### Loss function type
 	losstype = 'chi2'
+	#losstype = 'nll'
 
 	# ====================================================================
+	#np.seterr(all='print') # Numpy floating point error treatment
 
 
 	### Loop over datasets
@@ -610,7 +618,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 						outdict  = {'par': par_dict, 'cov': cov_arr, 'var2pos': var2pos, 'chi2': chi2, 'ndof': ndof, 'N': N, 'N_err': N_err}
 						filename = f"{total_savepath}/{tree}.pkl"
 						pickle.dump(outdict, open(filename, "wb"))
-						print(f'Fit results saved to: {filename} (pickle)')
+						print(f'Fit results saved to: {filename} (pickle) \n\n')
 
 
 def test_jpsi_tagprobe(savepath='./output/peakfit'):
