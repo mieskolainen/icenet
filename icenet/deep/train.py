@@ -302,7 +302,7 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
         
         print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
         scheduler.step()
-
+        
         # Raytune on
         if len(config) != 0:
             with tune.checkpoint_dir(epoch) as checkpoint_dir:
