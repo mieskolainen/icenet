@@ -663,8 +663,8 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
     # Parameter (min,max) constraints
     limits = [(0.1, 1e8),
               (0.1, 1e8),
-
-              (3.07, 3.13),
+              
+              (3.085, 3.105),
               (1e-3, 0.3),
               (1.0001, 10.0),
               (0.1, 3.0),
