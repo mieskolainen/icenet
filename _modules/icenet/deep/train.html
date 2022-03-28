@@ -335,7 +335,7 @@
         
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">, train loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | validate: </span><span class="si">{</span><span class="n">validate_acc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (acc), </span><span class="si">{</span><span class="n">validate_AUC</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (AUC)&#39;</span><span class="p">)</span>
         <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
+        
         <span class="c1"># Raytune on</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
