@@ -323,7 +323,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         param:    Parameters dict
         losstype: 'chi2' or 'nll'
     """
-
+    
     global sgn_pind
     global bgk_pind
 
@@ -338,6 +338,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
 
     # Limit the fit range
     fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
+
 
     ### Chi2 loss function definition
     #@jit
@@ -519,6 +520,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
     # Normalize integral measures to event counts
     # [normalization given by the data histogram binning because we fitted against it]
     deltaX     = np.mean(cbins[fitind][1:] - cbins[fitind][:-1])
+
     N['S']     = integrate.simpson(y_S, x) / deltaX
     N['B']     = integrate.simpson(y_B, x) / deltaX
 
@@ -588,7 +590,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 
     ax[1].set_ylabel('Ratio')
 
-    return fig,ax,N,N_err
+    return fig,ax,h,N,N_err
 
 
 def iminuit2python(par, cov, var2pos):
@@ -721,7 +723,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
                         # Fit and analyze
                         par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, fitfunc=fitfunc, param=param, losstype=losstype)
-                        fig,ax,N,N_err            = analyze_1D_fit(hist=hist, fitfunc=fitfunc, sigfunc=sigfunc, bgkfunc=bgkfunc, \
+                        fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, fitfunc=fitfunc, sigfunc=sigfunc, bgkfunc=bgkfunc, \
                                                                 par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof, param=param)
 
                         # Create savepath
@@ -735,7 +737,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
                         # Save the fit numerical data
                         par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
-                        outdict  = {'par': par_dict, 'cov': cov_arr, 'var2pos': var2pos, 'chi2': chi2, 'ndof': ndof, 'N': N, 'N_err': N_err}
+                        outdict  = {'par': par_dict, 'cov': cov_arr, 'var2pos': var2pos, 'chi2': chi2, 'ndof': ndof, 'N': N, 'N_err': N_err, 'h': h}
                         filename = f"{total_savepath}/{tree}.pkl"
                         pickle.dump(outdict, open(filename, "wb"))
                         print(f'Fit results saved to: {filename} (pickle) \n\n')
