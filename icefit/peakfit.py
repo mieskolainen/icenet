@@ -313,7 +313,7 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 
 
 def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
-    ncall_simplex=20000, ncall_gradient=10000, max_trials=3, max_chi2=100):
+    ncall_simplex=20000, ncall_gradient=1000, max_trials=3, max_chi2=100):
     """
     Main fitting function
     
@@ -663,7 +663,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
     # Parameter (min,max) constraints
     limits = [(0.1, 1e8),
               (0.1, 1e8),
-              
+
               (3.085, 3.105),
               (1e-3, 0.3),
               (1.0001, 10.0),
