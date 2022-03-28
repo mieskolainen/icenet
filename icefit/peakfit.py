@@ -484,7 +484,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {max_chi2} ==> fit not succesful')
         par = np.zeros(len(par))
         cov = -1 * np.ones((len(par), len(par)))
-    
+
     print(f"chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}")
 
     return par, cov, var2pos, chi2, ndof
@@ -683,18 +683,18 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
                     0.5]
     
     # Parameter (min,max) constraints
-    limits = [(0.1, 1e8),
-              (0.1, 1e8),
+    limits = [(0.1, 1e8),       # ~ event yield
+              (0.1, 1e8),       # ~ event yield
 
-              (3.085, 3.105),
-              (1e-3, 0.3),
-              (1.0001, 10.0),
-              (0.1, 3.0),
-
-              (1e-9, 1e-1),
-              (-8.0, 0.0),
+              (3.085, 3.105),   # ~ pole (peak) mass
+              (1e-3, 0.3),      # ~ detector resolution
+              (1.0001, 20.0),   # ~ crystal-ball param
+              (0.1, 3.0),       # ~ crystal-ball param
               
-              (0.01, 2.5)]
+              (1e-9, 1e-1),     # ~ fundamental width
+              (-8.0, 0.0),      # ~ asymmetry
+              
+              (0.01, 5.0)]      # ~ background exp-slope
     
     # Parameter names
     name   = ['S',
@@ -720,8 +720,8 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
               'fitrange':     fitrange}
 
     ### Loss function type
-    losstype = 'chi2'
-    #losstype = 'nll'
+    #losstype = 'chi2'
+    losstype = 'nll'
 
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
