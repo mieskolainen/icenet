@@ -313,17 +313,22 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 
 
 def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
-    ncall_simplex=20000, ncall_gradient=1000, max_trials=3, max_chi2=100):
+    ncall_simplex=20000, ncall_gradient=1000, max_trials=1, max_chi2=1000, min_count=2):
     """
     Main fitting function
     
     Args:
-        hist:     TH1 histogram object (from uproot)
-        fitfunc:  Fitting function
-        param:    Parameters dict
-        losstype: 'chi2' or 'nll'
+        hist:           TH1 histogram object (from uproot)
+        fitfunc:        Fitting function
+        param:          Parameters dict
+        losstype:      'chi2' or 'nll'
+        ncall_simplex:  Number of calls
+        ncall_gradient: Number of calls
+        max_trials:     Maximum number of restarts
+        max_chi2:       Maximum chi2/ndf threshold for restarts
+        min_count:      Minimum number of histogram counts
     """
-    
+
     global sgn_pind
     global bgk_pind
 
@@ -379,22 +384,21 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
 
     # ====================================================================
 
-    trials = 1
+    trials = 0
 
     while True:
 
-        if trials == 1:
+        if trials == 0:
             start_values = param['start_values']
         else:
             start_values = np.random.rand(len(param['start_values']))
 
         # ------------------------------------------------------------
+        # Nelder-Mead search
         from scipy.optimize import minimize
-
-        # Nelder-Mead search (from scipy)
         options = {'maxiter': ncall_simplex, 'xatol': 1e-8, 'disp': True}
 
-        res = minimize(loss, x0=param['start_values'], method='nelder-mead', bounds=param['limits'], options=options)
+        res = minimize(loss, x0=start_values, method='nelder-mead', bounds=param['limits'], options=options)
         print(res)
         start_values = res.x
 
@@ -442,6 +446,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
 
         # Finalize with error analysis [migrad << hesse << minos (best)]
         m1.hesse()
+
         try:
             m1.minos()
         except:
@@ -455,20 +460,31 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         chi2    = chi2_loss(par)
         ndof    = len(counts[fit_range_ind]) - len(par) - 1
 
+        trials += 1
+
         if (chi2 / ndof < max_chi2):
             break
-        elif trials > max_trials:
+        elif trials == max_trials:
             break
-        else:
-            trials += 1
+        
 
     print(f'Parameters: {par}')
     print(f'Covariance: {cov}')
 
     if cov is None:
-        print('** Uncertainty estimation failed! **')
+        print('binned_1D_fit: Uncertainty estimation failed!')
         cov = -1 * np.ones((len(par), len(par)))
 
+    if np.sum(counts[fit_range_ind]) < min_count:
+        print(f'binned_1D_fit: Input histogram count < min_count = {min_count} ==> fit not realistic')
+        par = np.zeros(len(par))
+        cov = -1 * np.ones((len(par), len(par)))
+
+    if (chi2 / ndof) > max_chi2:
+        print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {max_chi2} ==> fit not succesful')
+        par = np.zeros(len(par))
+        cov = -1 * np.ones((len(par), len(par)))
+    
     print(f"chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}")
 
     return par, cov, var2pos, chi2, ndof
@@ -528,9 +544,13 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
     # [neglect the functional shape uncertanties affecting the integral]
     
     for key in ['S', 'B']:
-        ind        = var2pos[key]
-        N_err[key] = N[key] * np.sqrt(cov[ind][ind]) / par[ind]
-
+        ind = var2pos[key]
+        
+        if cov[ind][ind] > 0:
+            N_err[key] = N[key] * np.sqrt(cov[ind][ind]) / par[ind]
+        else:
+            print('analyze_1D_fit: Non-positive definite covariance, using Poisson error')
+            N_err[key] = np.sqrt(np.maximum(1e-9, N[key]))
 
     # --------------------------------------------------------------------
     # Print out
