@@ -1,14 +1,14 @@
 # Binned histogram chi2/likelihood fits with iminuit (minuit from python)
 # 
 # pytest icefit/peakfit.py -rP
-# 
+#
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
-# !pip install iminuit jax jaxlib
-
+# --------------------------------------
 # JAX for autograd
+# !pip install jax jaxlib
 
 #import jax
 #from jax.config import config
@@ -16,6 +16,7 @@
 #from jax import numpy as np           # jax replacement for normal numpy
 #from jax.scipy.special import erf,erfc
 #from jax import jit, grad
+# --------------------------------------
 
 import numpy as np
 
@@ -218,14 +219,16 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 	return y
 
 
-def binned_1D_fit(hist, fitfunc, param, losstype='chi2', ncall_gradient=10000, ncall_simplex=10000, ncall_brute=10000, max_trials=10, max_chi2=100):
+def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
+	ncall_gradient=10000, ncall_simplex=10000, ncall_brute=10000, max_trials=10, max_chi2=100):
 	"""
 	Main fitting function
-
+	
 	Args:
 		hist:     TH1 histogram object (from uproot)
 		fitfunc:  Fitting function
-		fitrange: Fitting range
+		param:    Parameters dict
+		losstype: 'chi2' or 'nll'
 	"""
 
 	global sgn_pind
@@ -363,11 +366,11 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 	
 	Args:
 		hist:    TH1 histogram object (from uproot)
-		fitfunc: Fitfunction
+		fitfunc, sigfunc, bgkfunc: Fitfunctions
 		par:     Parameters obtained from the fit
 		cov:     Covariance matrix obtained from the fit
-		chi2:    Chi2 value of the fit
 		var2pos: Variable name to position index
+		chi2:    Chi2 value of the fit
 		ndof:    Number of dof
 		param:   Input parameters of the fit
 	
@@ -473,7 +476,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 
 def iminuit2python(par, cov, var2pos):
 	"""
-	Transform iminuit objects into standard python
+	Convert iminuit objects into standard python
 
 	Args:
 		par     : Parameter values object
@@ -553,7 +556,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 		      (-8.0, 0.0),
 		  	  
 		      (0.01, 2.5))
-
+	
 	# Parameter names
 	name   = ('S',
 		      'B',
@@ -623,7 +626,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
 def test_jpsi_tagprobe(savepath='./output/peakfit'):
 	"""
-	Tag & Probe efficiency (& scale factors) test
+	Tag & Probe efficiency (& scale factors)
 	"""
 
 	import pytest
