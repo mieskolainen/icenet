@@ -688,13 +688,13 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
               (3.085, 3.105),   # ~ pole (peak) mass
               (1e-3, 0.3),      # ~ detector resolution
-              (1.0001, 20.0),   # ~ crystal-ball param
+              (1.0001, 15.0),   # ~ crystal-ball param
               (0.1, 3.0),       # ~ crystal-ball param
 
               (1e-9, 1e-1),     # ~ fundamental width
               (-8.0, 0.0),      # ~ asymmetry
               
-              (0.01, 5.0)]      # ~ background exp-slope
+              (0.01, 2.5)]      # ~ background exp-slope
     
     # Parameter names
     name   = ['S',
@@ -722,7 +722,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
     ### Loss function type
     losstype = 'chi2'
     #losstype = 'nll'
-    
+
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
 
