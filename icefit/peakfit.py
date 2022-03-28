@@ -357,7 +357,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         xx   = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
         
         return onp.sum(xx)
-
+    
     ### Poissonian negative log-likelihood loss function definition
     #@jit
     def poiss_nll_loss(par):
@@ -391,8 +391,8 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         if trials == 0:
             start_values = param['start_values']
         else:
-            start_values = np.random.rand(len(param['start_values']))
-
+            start_values = param['start_values'] + np.random.randn(len(param['start_values']))
+        
         # ------------------------------------------------------------
         # Nelder-Mead search
         from scipy.optimize import minimize
@@ -401,7 +401,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         res = minimize(loss, x0=start_values, method='nelder-mead', bounds=param['limits'], options=options)
         print(res)
         start_values = res.x
-
+        
         # --------------------------------------------------------------------
 
         ## Initialize Minuit
@@ -672,15 +672,15 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
     start_values = [10,
                     1,
 
-                    3.1,
+                    3.09,
                     0.05,
                     1.001,
                     0.5,
 
                     9.32e-05,
-                    0.0,
+                    -0.01,
 
-                    0.5]
+                    1.0]
     
     # Parameter (min,max) constraints
     limits = [(0.1, 1e8),       # ~ event yield
@@ -688,7 +688,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
               (3.085, 3.105),   # ~ pole (peak) mass
               (1e-3, 0.3),      # ~ detector resolution
-              (1.0001, 15.0),   # ~ crystal-ball param
+              (1.0001, 10.0),   # ~ crystal-ball param
               (0.1, 3.0),       # ~ crystal-ball param
 
               (1e-9, 1e-1),     # ~ fundamental width
