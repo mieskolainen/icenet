@@ -312,8 +312,8 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     return y
 
 
-def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
-    ncall_simplex=20000, ncall_gradient=1000, max_trials=1, max_chi2=1000, min_count=2):
+def binned_1D_fit(hist, fitfunc, param, losstype='chi2', HESSE=True, MINOS=False, \
+    ncall_simplex=20000, ncall_gradient=10000, max_trials=1, max_chi2=1000, min_count=2):
     """
     Main fitting function
     
@@ -357,7 +357,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         xx   = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
         
         return onp.sum(xx)
-    
+
     ### Poissonian negative log-likelihood loss function definition
     #@jit
     def poiss_nll_loss(par):
@@ -392,7 +392,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
             start_values = param['start_values']
         else:
             start_values = param['start_values'] + np.random.randn(len(param['start_values']))
-        
+
         # ------------------------------------------------------------
         # Nelder-Mead search
         from scipy.optimize import minimize
@@ -401,7 +401,7 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         res = minimize(loss, x0=start_values, method='nelder-mead', bounds=param['limits'], options=options)
         print(res)
         start_values = res.x
-        
+
         # --------------------------------------------------------------------
 
         ## Initialize Minuit
@@ -445,13 +445,15 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', \
         print(m1.fmin)
 
         # Finalize with error analysis [migrad << hesse << minos (best)]
-        m1.hesse()
-
-        try:
-            m1.minos()
-        except:
+        if HESSE:
             m1.hesse()
-            print(f'binned_1D_fit: Error occured with MINOS uncertainty estimation')
+
+        if MINOS:
+            try:
+                m1.minos()
+            except:
+                print(f'binned_1D_fit: Error occured with MINOS uncertainty estimation, trying HESSE')
+                m1.hesse()
 
         ### Output
         par     = m1.values
@@ -549,7 +551,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
         if cov[ind][ind] > 0:
             N_err[key] = N[key] * np.sqrt(cov[ind][ind]) / par[ind]
         else:
-            print('analyze_1D_fit: Non-positive definite covariance, using Poisson error')
+            print('analyze_1D_fit: Non-positive definite covariance, using Poisson error as a proxy')
             N_err[key] = np.sqrt(np.maximum(1e-9, N[key]))
 
     # --------------------------------------------------------------------
@@ -683,6 +685,8 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
                     1.0]
     
     # Parameter (min,max) constraints
+    # Note that parameter uncertainty estimation may fail if parameters
+    # are at their bounded limit.
     limits = [(0.1, 1e8),       # ~ event yield
               (0.1, 1e8),       # ~ event yield
 
@@ -690,7 +694,7 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
               (1e-3, 0.3),      # ~ detector resolution
               (1.0001, 10.0),   # ~ crystal-ball param
               (0.1, 3.0),       # ~ crystal-ball param
-
+              
               (1e-9, 1e-1),     # ~ fundamental width
               (-8.0, 0.0),      # ~ asymmetry
               
