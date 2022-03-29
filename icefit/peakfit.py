@@ -670,6 +670,17 @@ def read_yaml_input(inputfile):
     with open(inputfile) as file:
         steer = yaml.full_load(file)
         print(steer)
+    
+    # Function handles
+    fmaps = {'exp_pdf':         exp_pdf,
+             'asym_BW_pdf':     asym_BW_pdf,
+             'asym_RBW_pdf':    asym_RBW_pdf,
+             'RBW_pdf':         RBW_pdf,
+             'cauchy_pdf':      cauchy_pdf,
+             'CB_G_conv_pdf':   CB_G_conv_pdf,
+             'CB_RBW_conv_pdf': CB_RBW_conv_pdf,
+             'CB_pdf':          CB_pdf,
+             'gauss_pdf':       gauss_pdf}
 
     name         = []
     start_values = []
@@ -679,15 +690,13 @@ def read_yaml_input(inputfile):
     w_pind = {}
     p_pind = {}
 
+    # Parse all fit functions, combine them into linear arrays and dictionaries
     i = 0
     for key in steer['fit'].keys():
         f = steer['fit'][key]['func']
         N = len(steer['fit'][key]['p_name'])
 
-        if   f == 'CB_RBW_conv_pdf':
-            cfunc[key] = CB_RBW_conv_pdf
-        elif f == 'exp_pdf':
-            cfunc[key] = exp_pdf
+        cfunc[key] = fmaps[f]
 
         name.append(f'w__{key}')
         w_pind[key] = i
@@ -706,6 +715,7 @@ def read_yaml_input(inputfile):
             start_values.append(steer['fit'][key]['p_start'][k])
             limits.append(steer['fit'][key]['p_limit'][k])
 
+    # Total fit function as a linear (incoherent) superposition
     def fitfunc(x, par):
         y = 0
         for key in w_pind.keys():
