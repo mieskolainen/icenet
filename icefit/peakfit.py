@@ -199,28 +199,6 @@ def CB_pdf(x, par):
     return y
 
 
-def CB_G_conv_pdf(x, par, norm=True):
-    """
-    Crystall Ball (*) Gaussian, with the same center value as CB,
-    where (*) is a convolution product.
-    
-    Args:
-        par: CB parameters (4), Gaussian width (1)
-    """
-    mu     = par[0]
-    reso   = par[-1]
-
-    CB_y   = CB_pdf_(x=x, par=par[:-1])
-    kernel = gauss_pdf(x=x, par=np.array([mu, reso]))
-
-    y = np.convolve(a=CB_y, v=kernel, mode='same')
-
-    # Normalize to density over the range of x
-    y = y / integrate.simpson(y=y, x=x)
-
-    return y
-
-
 def cauchy_pdf(x, par):
     """
     Cauchy pdf (non-relativistic fixed width Breit-Wigner)
@@ -286,13 +264,35 @@ def exp_pdf(x, par):
     return mu * np.exp(-mu * x)
 
 
-def CB_RBW_conv_pdf(x, par, norm=True):
+def CB_G_conv_pdf(x, par, norm=True):
     """
-    Crystall Ball (*) Relativistic Breit-Wigner, with the same center values,
+    Crystall Ball (*) Gaussian, with the same center value as CB,
     where (*) is a convolution product.
     
     Args:
-        par: RBW parameters (4), Breit-Wigner width and asymmetry
+        par: CB parameters (4), Gaussian width (1)
+    """
+    mu     = par[0]
+    reso   = par[-1]
+
+    CB_y   = CB_pdf_(x=x, par=par[:-1])
+    kernel = gauss_pdf(x=x, par=np.array([mu, reso]))
+
+    y = np.convolve(a=CB_y, v=kernel, mode='same')
+
+    # Normalize to density over the range of x
+    y = y / integrate.simpson(y=y, x=x)
+
+    return y
+
+
+def CB_asym_RBW_conv_pdf(x, par, norm=True):
+    """
+    Crystall Ball (*) Asymmetric Relativistic Breit-Wigner, with the same center values,
+    where (*) is a convolution product.
+    
+    Args:
+        par: CB and asym RBW parameters as below
     """
 
     CB_param   = par[0],par[1],par[2],par[3]
@@ -309,8 +309,30 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     return y
 
 
-def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
-    ncall_simplex=20000, ncall_gradient=10000, max_trials=1, max_chi2=1000, min_count=2):
+def CB_RBW_conv_pdf(x, par, norm=True):
+    """
+    Crystall Ball (*) Relativistic Breit-Wigner, with the same center values,
+    where (*) is a convolution product.
+    
+    Args:
+        par: CB and RBW parameters as below
+    """
+
+    CB_param  = par[0],par[1],par[2],par[3]
+    RBW_param = par[0],par[4]
+
+    f1 = CB_pdf(x=x, par=CB_param)
+    f2 = RBW_pdf(x=x, par=RBW_param)
+    y  = np.convolve(a=f1, v=f2, mode='same')
+
+    # Normalize to density over the range of x
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
+
+
+def binned_1D_fit(hist, param, fitfunc, techno):
     """
     Main fitting function
     
@@ -319,11 +341,17 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
         param:          Fitting parametrization dictionary
         fitfunc:        Fit function
         
-        ncall_simplex:  Number of calls
-        ncall_gradient: Number of calls
-        max_trials:     Maximum number of restarts
-        max_chi2:       Maximum chi2/ndf threshold for restarts
-        min_count:      Minimum number of histogram counts
+        techno:
+            losstype:       Loss function type
+            ncall_simplex:  Number of calls
+            ncall_gradient: Number of calls
+            use_limits:     Use parameter limits
+            max_trials:     Maximum number of restarts
+            max_chi2:       Maximum chi2/ndf threshold for restarts
+            min_count:      Minimum number of histogram counts
+            
+            hesse:          Hesse uncertainties
+            minos:          Minos uncertainties
     """
 
     # -------------------------------------------------------------------------------
@@ -339,7 +367,7 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
     fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
 
     # Extract out
-    losstype = param['losstype']
+    losstype = techno['losstype']
 
     ### Chi2 loss function definition
     #@jit
@@ -392,9 +420,10 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
         # ------------------------------------------------------------
         # Nelder-Mead search
         from scipy.optimize import minimize
-        options = {'maxiter': ncall_simplex, 'xatol': 1e-8, 'disp': True}
+        options = {'maxiter': techno['ncall_simplex'], 'xatol': 1e-8, 'disp': True}
 
-        res = minimize(loss, x0=start_values, method='nelder-mead', bounds=param['limits'], options=options)
+        res = minimize(loss, x0=start_values, method='nelder-mead', \
+            bounds=param['limits'] if techno['use_limits'] else None, options=options)
         print(res)
         start_values = res.x
 
@@ -403,15 +432,17 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
         ## Initialize Minuit
         m1 = iminuit.Minuit(loss, start_values, name=param['name'])
 
-        if   losstype == 'chi2':
+        if   techno['losstype'] == 'chi2':
             m1.errordef = iminuit.Minuit.LEAST_SQUARES
-        elif losstype == 'nll':
+        elif techno['losstype'] == 'nll':
             m1.errordef = iminuit.Minuit.LIKELIHOOD
 
 
-        m1.limits   = param['limits']
-        m1.strategy = 0
-        m1.tol      = 1e-8
+        if techno['use_limits']:
+            m1.limits   = param['limits']
+
+        m1.strategy = techno['strategy']
+        m1.tol      = techno['tol']
 
         """
         # Brute force 1D-scan per dimension
@@ -437,14 +468,14 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
         # --------------------------------------------------------------------
 
         # Gradient search
-        m1.migrad(ncall=ncall_gradient)
+        m1.migrad(ncall=techno['ncall_gradient'])
         print(m1.fmin)
 
         # Finalize with error analysis [migrad << hesse << minos (best)]
-        if HESSE:
+        if techno['hesse']:
             m1.hesse()
 
-        if MINOS:
+        if techno['minos']:
             try:
                 m1.minos()
             except:
@@ -460,9 +491,9 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
 
         trials += 1
 
-        if (chi2 / ndof < max_chi2):
+        if (chi2 / ndof < techno['max_chi2']):
             break
-        elif trials == max_trials:
+        elif trials == techno['max_trials']:
             break
         
 
@@ -473,13 +504,13 @@ def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
         print('binned_1D_fit: Uncertainty estimation failed!')
         cov = -1 * np.ones((len(par), len(par)))
 
-    if np.sum(counts[fit_range_ind]) < min_count:
-        print(f'binned_1D_fit: Input histogram count < min_count = {min_count} ==> fit not realistic')
+    if np.sum(counts[fit_range_ind]) < techno['min_count']:
+        print(f'binned_1D_fit: Input histogram count < min_count = {techno["min_count"]} ==> fit not realistic')
         par = np.zeros(len(par))
         cov = -1 * np.ones((len(par), len(par)))
 
-    if (chi2 / ndof) > max_chi2:
-        print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {max_chi2} ==> fit not succesful')
+    if (chi2 / ndof) > techno['max_chi2']:
+        print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesful')
         par = np.zeros(len(par))
         cov = -1 * np.ones((len(par), len(par)))
 
@@ -569,12 +600,12 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     obs_M = {
 
     # Axis limits
-    'xlim'    : (2.75, 3.50),
+    'xlim'    : (cbins[0]*0.98, cbins[-1]*1.02),
     'ylim'    : None,
     'xlabel'  : r'$M$',
     'ylabel'  : r'Counts',
     'units'   : {'x': 'GeV', 'y': '1'},
-    'label'   : r'Invariant mass',
+    'label'   : r'Observable',
     'figsize' : (5,4),
     'density' : False,
 
@@ -670,17 +701,18 @@ def read_yaml_input(inputfile):
     with open(inputfile) as file:
         steer = yaml.full_load(file)
         print(steer)
-    
+
     # Function handles
-    fmaps = {'exp_pdf':         exp_pdf,
-             'asym_BW_pdf':     asym_BW_pdf,
-             'asym_RBW_pdf':    asym_RBW_pdf,
-             'RBW_pdf':         RBW_pdf,
-             'cauchy_pdf':      cauchy_pdf,
-             'CB_G_conv_pdf':   CB_G_conv_pdf,
-             'CB_RBW_conv_pdf': CB_RBW_conv_pdf,
-             'CB_pdf':          CB_pdf,
-             'gauss_pdf':       gauss_pdf}
+    fmaps = {'exp_pdf':              exp_pdf,
+             'asym_BW_pdf':          asym_BW_pdf,
+             'asym_RBW_pdf':         asym_RBW_pdf,
+             'RBW_pdf':              RBW_pdf,
+             'cauchy_pdf':           cauchy_pdf,
+             'CB_G_conv_pdf':        CB_G_conv_pdf,
+             'CB_RBW_conv_pdf':      CB_RBW_conv_pdf,
+             'CB_asym_RBW_conv_pdf': CB_asym_RBW_conv_pdf,
+             'CB_pdf':               CB_pdf,
+             'gauss_pdf':            gauss_pdf}
 
     name         = []
     start_values = []
@@ -729,12 +761,11 @@ def read_yaml_input(inputfile):
               'name':         name,
               'fitrange':     steer['fitrange'],
               'w_pind':       w_pind,
-              'p_pind':       p_pind,
-              'losstype':     steer['losstype']}
+              'p_pind':       p_pind}
 
     print(param)
 
-    return param, fitfunc, cfunc
+    return param, fitfunc, cfunc, steer['techno']
 
 
 
@@ -754,7 +785,7 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
     # ====================================================================
     # Fit parametrization setup
 
-    param, fitfunc, cfunc = read_yaml_input(inputfile=inputfile)
+    param, fitfunc, cfunc, techno = read_yaml_input(inputfile=inputfile)
 
 
     # ====================================================================
@@ -775,7 +806,7 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
                         hist     = uproot.open(rootfile)[tree]
 
                         # Fit and analyze
-                        par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc)
+                        par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
                         fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
                                                                    par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
