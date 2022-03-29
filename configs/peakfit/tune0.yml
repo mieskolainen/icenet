@@ -13,7 +13,7 @@ fit:
   S:
     func:    'CB_asym_RBW_conv_pdf'
     w_start:  1
-    w_limit:  [0.01, 1.0e+8]
+    w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
 
     p_name:   ['M0', 'sigma', 'n', 'alpha', 'width', 'asym']
@@ -24,7 +24,7 @@ fit:
   B:
     func:    'exp_pdf'
     w_start:  1
-    w_limit:  [0.01, 1.0e+8]
+    w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
 
     p_name:   ['lambda']
