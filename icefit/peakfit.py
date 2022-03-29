@@ -52,9 +52,6 @@ import statstools
 import numpy as onp # original numpy
 from numpy.random import default_rng
 
-sgn_pind = None
-bgk_pind = None
-
 
 """
 def raytune_main(param, loss_func=None, inputs={}, num_samples=20, max_num_epochs=20):
@@ -312,25 +309,22 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     return y
 
 
-def binned_1D_fit(hist, fitfunc, param, losstype='chi2', HESSE=True, MINOS=False, \
+def binned_1D_fit(hist, param, fitfunc, HESSE=True, MINOS=False, \
     ncall_simplex=20000, ncall_gradient=10000, max_trials=1, max_chi2=1000, min_count=2):
     """
     Main fitting function
     
     Args:
         hist:           TH1 histogram object (from uproot)
-        fitfunc:        Fitting function
-        param:          Parameters dict
-        losstype:      'chi2' or 'nll'
+        param:          Fitting parametrization dictionary
+        fitfunc:        Fit function
+        
         ncall_simplex:  Number of calls
         ncall_gradient: Number of calls
         max_trials:     Maximum number of restarts
         max_chi2:       Maximum chi2/ndf threshold for restarts
         min_count:      Minimum number of histogram counts
     """
-
-    global sgn_pind
-    global bgk_pind
 
     # -------------------------------------------------------------------------------
     # Histogram data
@@ -344,6 +338,8 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', HESSE=True, MINOS=False
     # Limit the fit range
     fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
 
+    # Extract out
+    losstype = param['losstype']
 
     ### Chi2 loss function definition
     #@jit
@@ -492,19 +488,21 @@ def binned_1D_fit(hist, fitfunc, param, losstype='chi2', HESSE=True, MINOS=False
     return par, cov, var2pos, chi2, ndof
 
 
-def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndof, param):
+def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     """
     Analyze and visualize fit results
     
     Args:
         hist:    TH1 histogram object (from uproot)
-        fitfunc, sigfunc, bgkfunc: Fitfunctions
+        param:   Input parameters of the fit
+        fitfunc: Total fit function
+        cfunc:   Component functions
+        
         par:     Parameters obtained from the fit
         cov:     Covariance matrix obtained from the fit
         var2pos: Variable name to position index
         chi2:    Chi2 value of the fit
         ndof:    Number of dof
-        param:   Input parameters of the fit
     
     Returns:
         fig, ax
@@ -522,8 +520,11 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
     fitind = (param['fitrange'][0] <= cbins) & (cbins <= param['fitrange'][1])
 
     x   = np.linspace(param['fitrange'][0], param['fitrange'][1], int(1e3))
-    y_S = par[var2pos['S']] * sigfunc(x, par[sgn_pind])
-    y_B = par[var2pos['B']] * bgkfunc(x, par[bgk_pind])
+
+    # Function by function
+    y   = {}
+    for key in cfunc.keys():
+        y[key] = par[param['w_pind'][key]] * cfunc[key](x, par[param['p_pind'][key]])
 
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
     print(f'Input bin count sum: {np.sum(counts[fitind]):0.1f} (fit range)')    
@@ -539,14 +540,15 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
     # [normalization given by the data histogram binning because we fitted against it]
     deltaX     = np.mean(cbins[fitind][1:] - cbins[fitind][:-1])
 
-    N['S']     = integrate.simpson(y_S, x) / deltaX
-    N['B']     = integrate.simpson(y_B, x) / deltaX
+    for key in y.keys():
+        N[key] = integrate.simpson(y[key], x) / deltaX
+
 
     # Use the scale error as the leading uncertainty
     # [neglect the functional shape uncertanties affecting the integral]
     
-    for key in ['S', 'B']:
-        ind = var2pos[key]
+    for key in N.keys():
+        ind = var2pos[f'w__{key}']
         
         if cov[ind][ind] > 0:
             N_err[key] = N[key] * np.sqrt(cov[ind][ind]) / par[ind]
@@ -589,9 +591,22 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
 
     ## Plot fits
     plt.sca(ax[0])
-    plt.plot(x, fitfunc(x, par), label="total fit: $Sf_S + Bf_B$", color=(0.5,0.5,0.5))
-    plt.plot(x, y_S, label=f"sig: $N_S = {N['S']:.1f} \\pm {N_err['S']:.1f}$", color=(0.7, 0.2, 0.2), linestyle='-')
-    plt.plot(x, y_B, label=f"bkg: $N_B = {N['B']:.1f} \\pm {N_err['B']:.1f}$", color=(0.2, 0.2, 0.7), linestyle='--')
+    plt.plot(x, fitfunc(x, par), label="Total fit", color=(0.5,0.5,0.5))
+    
+    colors     = [(0.7, 0.2, 0.2), (0.2, 0.2, 0.7)]
+    linestyles = ['-', '--']
+    i = 0
+    for key in y.keys():
+        if i < 2:
+            color     = colors[i]
+            linestyle = linestyles[i]
+        else:
+            color     = np.random.rand(3)
+            linestyle = '--'
+
+        plt.plot(x, y[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle)
+        i += 1
+
     plt.ylim(bottom=0)
     plt.legend(fontsize=7)
 
@@ -607,7 +622,7 @@ def analyze_1D_fit(hist, fitfunc, sigfunc, bgkfunc, par, cov, var2pos, chi2, ndo
     style['marker']     = 's'
     style['markersize'] = 1.75
 
-    ax[1].errorbar(x=cbins, y=np.ones(len(cbins)),                            yerr=errs / np.maximum(1e-9, counts),        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
+    ax[1].errorbar(x=cbins, y=np.ones(len(cbins)), yerr=errs / np.maximum(1e-9, counts),        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
     ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / np.maximum(1e-9, counts), yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **style)
 
     ax[1].set_ylabel('Ratio')
@@ -639,97 +654,101 @@ def iminuit2python(par, cov, var2pos):
     return par_dict, cov_arr
 
 
-def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPsi', savepath='./output/peakfit'):
+def read_yaml_input(inputfile):
+    """
+    Parse input YAML file for fitting
+
+    Args:
+        inputfile: yaml file path
+    
+    Returns:
+        dictionary with parsed content
+    """
+
+    import yaml
+
+    with open(inputfile) as file:
+        steer = yaml.full_load(file)
+        print(steer)
+
+    name         = []
+    start_values = []
+    limits       = []
+
+    cfunc  = {}
+    w_pind = {}
+    p_pind = {}
+
+    i = 0
+    for key in steer['fit'].keys():
+        f = steer['fit'][key]['func']
+        N = len(steer['fit'][key]['p_name'])
+
+        if   f == 'CB_RBW_conv_pdf':
+            cfunc[key] = CB_RBW_conv_pdf
+        elif f == 'exp_pdf':
+            cfunc[key] = exp_pdf
+
+        name.append(f'w__{key}')
+        w_pind[key] = i
+        start_values.append(steer['fit'][key]['w_start'])
+        limits.append(steer['fit'][key]['w_limit'])
+
+        i += 1
+        pind__ = []
+        for p in steer['fit'][key]['p_name']:
+            name.append(f'p__{p}')
+            pind__.append(i)
+            i += 1
+        p_pind[key] = pind__
+
+        for k in range(N):
+            start_values.append(steer['fit'][key]['p_start'][k])
+            limits.append(steer['fit'][key]['p_limit'][k])
+
+    def fitfunc(x, par):
+        y = 0
+        for key in w_pind.keys():
+            y += par[w_pind[key]] * cfunc[key](x, par[p_pind[key]])
+        return y
+
+    # Finally collect all
+    param  = {'path':         steer['path'],
+              'start_values': start_values,
+              'limits':       limits,
+              'name':         name,
+              'fitrange':     steer['fitrange'],
+              'w_pind':       w_pind,
+              'p_pind':       p_pind,
+              'losstype':     steer['losstype']}
+
+    print(param)
+
+    return param, fitfunc, cfunc
+
+
+
+def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/peakfit'):
     """
     J/psi peak fitting
     """
 
     import pytest
 
-    global sgn_pind
-    global bgk_pind
-
-
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 
     rng = default_rng(seed=1)
 
-
+    
     # ====================================================================
     # Fit parametrization setup
 
-    # Parameter indices for signal and background functions
-    sgn_pind = np.array([2,3,4,5,6,7])
-    bgk_pind = np.array([8])
+    param, fitfunc, cfunc = read_yaml_input(inputfile=inputfile)
 
-    ### Fit functions
-    sigfunc = CB_RBW_conv_pdf
-    bgkfunc = exp_pdf
-
-    def fitfunc(x, par):
-        return par[0]*sigfunc(x, par[sgn_pind]) + par[1]*bgkfunc(x, par[bgk_pind])
-
-    # Parameter start values
-    start_values = [10,
-                    1,
-
-                    3.09,
-                    0.05,
-                    1.001,
-                    0.5,
-
-                    9.32e-05,
-                    -0.01,
-
-                    1.0]
-    
-    # Parameter (min,max) constraints
-    # Note that parameter uncertainty estimation may fail if parameters
-    # are at their bounded limit.
-    limits = [(0.1, 1e8),       # ~ event yield
-              (0.1, 1e8),       # ~ event yield
-
-              (3.085, 3.105),   # ~ pole (peak) mass
-              (1e-3, 0.3),      # ~ detector resolution
-              (1.0001, 10.0),   # ~ crystal-ball param
-              (0.1, 3.0),       # ~ crystal-ball param
-              
-              (1e-9, 1e-1),     # ~ fundamental width
-              (-8.0, 0.0),      # ~ asymmetry
-              
-              (0.01, 2.5)]      # ~ background exp-slope
-    
-    # Parameter names
-    name   = ['S',
-              'B',
-
-              'M0',
-              'sigma',
-              'n',
-              'alpha',
-
-              'width',
-              'asym',
-
-              'lambda']
-
-    # Fit range limits
-    fitrange = np.array([2.9, 3.3])
-
-    # Finally collect all
-    param  = {'start_values': start_values,
-              'limits':       limits,
-              'name':         name,
-              'fitrange':     fitrange}
-
-    ### Loss function type
-    losstype = 'chi2'
-    #losstype = 'nll'
 
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
-
 
     ### Loop over datasets
 
@@ -741,14 +760,14 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
                     for PASS in ['Pass', 'Fail']:
 
                         ### Uproot input
-                        rootfile = f'{MAINPATH}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_absdxy_pt.root'
+                        rootfile = f'{param["path"]}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_absdxy_pt.root'
                         tree     = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}_{PASS}'
                         hist     = uproot.open(rootfile)[tree]
 
                         # Fit and analyze
-                        par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, fitfunc=fitfunc, param=param, losstype=losstype)
-                        fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, fitfunc=fitfunc, sigfunc=sigfunc, bgkfunc=bgkfunc, \
-                                                                par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof, param=param)
+                        par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc)
+                        fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
+                                                                   par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
                         # Create savepath
                         total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
@@ -761,7 +780,16 @@ def test_jpsi_fitpeak(MAINPATH = '/home/user/fitdata/flat/muon/generalTracks/JPs
 
                         # Save the fit numerical data
                         par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
-                        outdict  = {'par': par_dict, 'cov': cov_arr, 'var2pos': var2pos, 'chi2': chi2, 'ndof': ndof, 'N': N, 'N_err': N_err, 'h': h}
+                        outdict  = {'par':     par_dict,
+                                    'cov':     cov_arr,
+                                    'var2pos': var2pos,
+                                    'chi2':    chi2,
+                                    'ndof':    ndof,
+                                    'N':       N,
+                                    'N_err':   N_err,
+                                    'h':       h,
+                                    'param':   param}
+
                         filename = f"{total_savepath}/{tree}.pkl"
                         pickle.dump(outdict, open(filename, "wb"))
                         print(f'Fit results saved to: {filename} (pickle) \n\n')
