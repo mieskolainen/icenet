@@ -426,11 +426,23 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             bounds=param['limits'] if techno['use_limits'] else None, options=options)
         print(res)
         start_values = res.x
-
+        
+        
+        # --------------------------------------------------------------------
+        # Now fix
+        for k in range(len(param['fixed'])):
+            if param['fixed'][k]:
+                start_values[k] = param['start_values'][k]
         # --------------------------------------------------------------------
 
         ## Initialize Minuit
         m1 = iminuit.Minuit(loss, start_values, name=param['name'])
+
+        # Fix parameters 
+        for k in range(len(param['fixed'])):
+            m1.fixed[k] = param['fixed'][k]
+        # --------------------------------------------------------------------
+        
 
         if   techno['losstype'] == 'chi2':
             m1.errordef = iminuit.Minuit.LEAST_SQUARES
@@ -717,6 +729,7 @@ def read_yaml_input(inputfile):
     name         = []
     start_values = []
     limits       = []
+    fixed        = []
 
     cfunc  = {}
     w_pind = {}
@@ -734,6 +747,7 @@ def read_yaml_input(inputfile):
         w_pind[key] = i
         start_values.append(steer['fit'][key]['w_start'])
         limits.append(steer['fit'][key]['w_limit'])
+        fixed.append(steer['fit'][key]['w_fixed'])
 
         i += 1
         pind__ = []
@@ -746,6 +760,7 @@ def read_yaml_input(inputfile):
         for k in range(N):
             start_values.append(steer['fit'][key]['p_start'][k])
             limits.append(steer['fit'][key]['p_limit'][k])
+            fixed.append(steer['fit'][key]['p_fixed'][k])
 
     # Total fit function as a linear (incoherent) superposition
     def fitfunc(x, par):
@@ -758,6 +773,7 @@ def read_yaml_input(inputfile):
     param  = {'path':         steer['path'],
               'start_values': start_values,
               'limits':       limits,
+              'fixed':        fixed,
               'name':         name,
               'fitrange':     steer['fitrange'],
               'w_pind':       w_pind,
