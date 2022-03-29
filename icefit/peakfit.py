@@ -20,6 +20,7 @@
 
 import numpy as np
 
+import yaml
 import copy
 import os
 import pickle
@@ -426,8 +427,8 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             bounds=param['limits'] if techno['use_limits'] else None, options=options)
         print(res)
         start_values = res.x
-        
-        
+
+
         # --------------------------------------------------------------------
         # Now fix
         for k in range(len(param['fixed'])):
@@ -707,8 +708,6 @@ def read_yaml_input(inputfile):
     Returns:
         dictionary with parsed content
     """
-
-    import yaml
 
     with open(inputfile) as file:
         steer = yaml.full_load(file)
