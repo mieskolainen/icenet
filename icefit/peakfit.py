@@ -318,7 +318,7 @@ def poly_pdf(x, par, norm=True):
 def highres_x(x, factor=0.2, Nmin=256):
     """
     Extend range and sampling of x
-    
+        
     Args:
         x:       array of values
         factor:  domain extension factor
@@ -341,8 +341,8 @@ def CB_G_conv_pdf(x, par, norm=True):
 
     # High-resolution extended range convolution
     xp = highres_x(x=x, factor=0.2, Nmin=256)
-    f1 = CB_pdf_(x=xp, par=par[:-1])
-    f2 = gauss_pdf(x=xp, par=np.array([mu, reso]))
+    f1 = CB_pdf_(x=xp, par=par[:-1], norm=False)
+    f2 = gauss_pdf(x=xp, par=np.array([mu, reso]), norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
     y  = interpolate.interp1d(xp, yp)(x)
     
@@ -365,8 +365,8 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
 
     # High-resolution extended range convolution
     xp = highres_x(x=x, factor=0.2, Nmin=256)
-    f1 = CB_pdf(x=xp, par=CB_param)
-    f2 = asym_RBW_pdf(x=xp, par=aRBW_param)
+    f1 = CB_pdf(x=xp, par=CB_param, norm=False)
+    f2 = asym_RBW_pdf(x=xp, par=aRBW_param, norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
     y  = interpolate.interp1d(xp, yp)(x)
     
@@ -389,8 +389,8 @@ def CB_RBW_conv_pdf(x, par, norm=True):
 
     # High-resolution extended range convolution
     xp = highres_x(x=x, factor=0.2, Nmin=256)
-    f1 = CB_pdf(x=xp, par=CB_param)
-    f2 = RBW_pdf(x=xp, par=RBW_param)
+    f1 = CB_pdf(x=xp, par=CB_param, norm=False)
+    f2 = RBW_pdf(x=xp, par=RBW_param, norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
     y  = interpolate.interp1d(xp, yp)(x)
     
