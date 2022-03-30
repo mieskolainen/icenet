@@ -314,7 +314,7 @@ def CB_G_conv_pdf(x, par, norm=True):
     reso   = par[-1]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x)
+    xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf_(x=xp, par=par[:-1])
     f2 = gauss_pdf(x=xp, par=np.array([mu, reso]))
     y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
@@ -335,7 +335,7 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
     aRBW_param = par[0],par[4],par[5]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x)
+    xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf(x=xp, par=CB_param)
     f2 = asym_RBW_pdf(x=xp, par=aRBW_param)
     y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
@@ -356,7 +356,7 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     RBW_param = par[0],par[4]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x)
+    xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf(x=xp, par=CB_param)
     f2 = RBW_pdf(x=xp, par=RBW_param)
     y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
