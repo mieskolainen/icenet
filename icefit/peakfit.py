@@ -452,7 +452,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         # ------------------------------------------------------------
         # Nelder-Mead search
         from scipy.optimize import minimize
-        options = {'maxiter': techno['ncall_simplex_scipy'], 'xatol': 1e-8, 'disp': True}
+        options = {'maxiter': techno['ncall_simplex_scipy'], 'disp': True}
 
         res = minimize(loss, x0=start_values, method='nelder-mead', \
             bounds=param['limits'] if techno['use_limits'] else None, options=options)
@@ -485,9 +485,9 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         if techno['use_limits']:
             m1.limits   = param['limits']
 
+        # Optimizer parameters
         m1.strategy = techno['strategy']
         m1.tol      = techno['tol']
-
         
         # Brute force 1D-scan per dimension
         m1.scan(ncall=techno['ncall_scan'])
