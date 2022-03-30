@@ -155,7 +155,7 @@ def TH1_to_numpy(hist):
     return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
 
-def gauss_pdf(x, par):
+def gauss_pdf(x, par, norm=True):
     """
     Normal (Gaussian) density
     
@@ -164,10 +164,14 @@ def gauss_pdf(x, par):
     """
     mu, sigma = par
     y = 1.0 / (sigma * np.sqrt(2*np.pi)) * np.exp(- 0.5 * ((x - mu)/sigma)**2)
+    
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
     return y
 
 
-def CB_pdf(x, par):
+def CB_pdf(x, par, norm=True):
     """
     https://en.wikipedia.org/wiki/Crystal_Ball_function
 
@@ -197,19 +201,27 @@ def CB_pdf(x, par):
         else:
             y[i] = N * A*(B - (x[i] - mu)/sigma)**(-n)
 
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
     return y
 
 
-def cauchy_pdf(x, par):
+def cauchy_pdf(x, par, norm=True):
     """
     Cauchy pdf (non-relativistic fixed width Breit-Wigner)
     """
     M0, W0 = par
 
-    return 1 / (np.pi*W0) * (W0**2 / ((x - M0)**2 + W0**2))
+    y = 1 / (np.pi*W0) * (W0**2 / ((x - M0)**2 + W0**2))
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
 
 
-def RBW_pdf(x, par):
+def RBW_pdf(x, par, norm=True):
     """
     Relativistic Breit-Wigner pdf
     https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
@@ -220,10 +232,15 @@ def RBW_pdf(x, par):
     gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
     k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
 
-    return k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
+    y = k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
 
 
-def asym_RBW_pdf(x, par):
+def asym_RBW_pdf(x, par, norm=True):
     """
     Asymmetric Relativistic Breit-Wigner pdf
     https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
@@ -237,10 +254,15 @@ def asym_RBW_pdf(x, par):
     # Asymmetric running width
     W = 2*W0 / (1 + np.exp(a * (x - M0)))
 
-    return k / ((x**2 - M0**2)**2 + M0**2 * W**2)
+    y = k / ((x**2 - M0**2)**2 + M0**2 * W**2)
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
 
 
-def asym_BW_pdf(x, par):
+def asym_BW_pdf(x, par, norm=True):
     """
     Breit-Wigner with asymmetric tail shape
 
@@ -251,18 +273,46 @@ def asym_BW_pdf(x, par):
     # Asymmetric running width
     W = 2*W0 / (1 + np.exp(a * (x - M0)))
 
-    return 1 / (np.pi*W0) * (W**2 / ((x - M0)**2 + W**2))
+    y = 1 / (np.pi*W0) * (W**2 / ((x - M0)**2 + W**2))
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
 
 
-def exp_pdf(x, par):
+def exp_pdf(x, par, norm=True):
     """
     Exponential density
     
     Args:
-        par: mean parameter
+        par: rate parameter (1/mean)
     """
-    mu = par[0]
-    return mu * np.exp(-mu * x)
+    a = par[0]
+    y = np.exp(-a * x)
+    y[x < 0] = 0
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
+
+
+def poly_pdf(x, par, norm=True):
+    """
+    Polynomial density y = p0 + p1*x + p2*x**2 + ...
+    
+    Args:
+        par: polynomial function params
+    """
+    y   = np.zeros(len(x))
+    for i in range(len(par)):
+        y = y + par[i]*(x**i)
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
+    return y
 
 
 def highres_x(x, factor=0.2, Nmin=256):
@@ -746,6 +796,7 @@ def read_yaml_input(inputfile):
 
     # Function handles
     fmaps = {'exp_pdf':              exp_pdf,
+             'poly_pdf':             poly_pdf,
              'asym_BW_pdf':          asym_BW_pdf,
              'asym_RBW_pdf':         asym_RBW_pdf,
              'RBW_pdf':              RBW_pdf,
