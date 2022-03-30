@@ -1,7 +1,8 @@
 # Binned histogram chi2/likelihood fits with iminuit (minuit from python)
 # 
-# Be careful with the "floating integral normalizations",
-# i.e. input array x defines the numerical integral if norm == True.
+# ** Be careful with the "floating integral normalizations",
+#    i.e. input array x (range, discretization) defines the
+#    numerical integral if norm == True.
 # 
 # 
 # pytest icefit/peakfit.py -rP
@@ -237,7 +238,6 @@ def RBW_pdf(x, par, norm=True):
     # Normalization
     gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
     k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
-
     y = k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
 
     if norm:
@@ -259,7 +259,6 @@ def asym_RBW_pdf(x, par, norm=True):
 
     # Asymmetric running width
     W = 2*W0 / (1 + np.exp(a * (x - M0)))
-
     y = k / ((x**2 - M0**2)**2 + M0**2 * W**2)
 
     if norm:
@@ -278,7 +277,6 @@ def asym_BW_pdf(x, par, norm=True):
 
     # Asymmetric running width
     W = 2*W0 / (1 + np.exp(a * (x - M0)))
-
     y = 1 / (np.pi*W0) * (W**2 / ((x - M0)**2 + W**2))
 
     if norm:
@@ -294,8 +292,7 @@ def exp_pdf(x, par, norm=True):
     Args:
         par: rate parameter (1/mean)
     """
-    a = par[0]
-    y = np.exp(-a * x)
+    y = par[0] * np.exp(-par[0] * x)
     y[x < 0] = 0
 
     if norm:
@@ -746,22 +743,20 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     title = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}$"
     plt.title(title)
 
-    ## LOWER PLOT
+    ## LOWER PULL PLOT
     plt.sca(ax[1])
     iceplot.plot_horizontal_line(ax[1], ypos=0.0)
-
 
     # Compute fit function values
     fnew = interpolate.interp1d(x=x, y=yy)
     pull = (fnew(cbins[fitind]) - counts[fitind]) / errs[fitind]
-
+    
+    # Plot pull
+    ax[1].bar(x=cbins[fitind], height=pull, width=cbins[1]-cbins[0], color=(0.5,0.5,0.5), label=f'Fit')
+    ax[1].set_ylabel('(fit - data)/$\\sigma$')
     ticks = iceplot.tick_calc([-3,3], 1.0, N=6)
     iceplot.set_axis_ticks(ax=ax[1], ticks=ticks, dim='y')
-
-    ax[1].bar(x=cbins[fitind], height=pull, width=cbins[1]-cbins[0], color=(0.5,0.5,0.5), label=f'Fit')
-    #ax[1].errorbar(, yerr=np.zeros(errs[fitind]), color=(0.5,0.5,0.5), label=f'Fit', **style)
-    ax[1].set_ylabel('(fit - data)/$\\sigma$')
-
+    
     return fig,ax,h,N,N_err
 
 
