@@ -452,7 +452,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         # ------------------------------------------------------------
         # Nelder-Mead search
         from scipy.optimize import minimize
-        options = {'maxiter': techno['ncall_simplex'], 'xatol': 1e-8, 'disp': True}
+        options = {'maxiter': techno['ncall_simplex_scipy'], 'xatol': 1e-8, 'disp': True}
 
         res = minimize(loss, x0=start_values, method='nelder-mead', \
             bounds=param['limits'] if techno['use_limits'] else None, options=options)
@@ -461,7 +461,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
 
 
         # --------------------------------------------------------------------
-        # Now fix
+        # Now reset fixed values
         for k in range(len(param['fixed'])):
             if param['fixed'][k]:
                 start_values[k] = param['start_values'][k]
@@ -488,15 +488,15 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         m1.strategy = techno['strategy']
         m1.tol      = techno['tol']
 
-        """
+        
         # Brute force 1D-scan per dimension
-        m1.scan(ncall=10000)
+        m1.scan(ncall=techno['ncall_scan'])
         print(m1.fmin)
         
         # Simplex (Nelder-Mead search)
-        m1.simplex(ncall=ncall_simplex)
+        m1.simplex(ncall=techno['ncall_simplex'])
         print(m1.fmin)
-        """
+        
 
         # --------------------------------------------------------------------
         # Raytune
