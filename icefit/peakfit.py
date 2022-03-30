@@ -179,7 +179,6 @@ def gauss_pdf(x, par, norm=True):
     
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -215,7 +214,6 @@ def CB_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -229,7 +227,6 @@ def cauchy_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -247,7 +244,6 @@ def RBW_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -268,7 +264,6 @@ def asym_RBW_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -286,7 +281,6 @@ def asym_BW_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -302,7 +296,6 @@ def exp_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -319,7 +312,6 @@ def poly_pdf(x, par, norm=True):
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -356,7 +348,6 @@ def CB_G_conv_pdf(x, par, norm=True):
     
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
@@ -381,8 +372,6 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
     
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
-
     return y
 
 
@@ -407,7 +396,6 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     
     if norm:
         y = y / integrate.simpson(y=y, x=x)
-
     return y
 
 
