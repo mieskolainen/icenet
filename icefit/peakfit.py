@@ -656,12 +656,13 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     # Function by function
     y   = {}
     for key in cfunc.keys():
-        y[key] = par[param['w_pind'][key]] * cfunc[key](x, par[param['p_pind'][key]])
-
+        weight = par[param['w_pind'][key]]
+        y[key] = weight * cfunc[key](x=x, par=par[param['p_pind'][key]], norm=param['norm'][key])
+    
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
     print(f'Input bin count sum: {np.sum(counts[fitind]):0.1f} (fit range)')    
-
-
+    
+    
     # --------------------------------------------------------------------
     # Compute count value integrals inside fitrange
 
@@ -724,7 +725,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     ## Plot fits
     plt.sca(ax[0])
 
-    yy = fitfunc(x, par)
+    yy = fitfunc(x=x, par=par)
     plt.plot(x, yy, label="Total fit", color=(0.5,0.5,0.5))
     
     colors     = [(0.7, 0.2, 0.2), (0.2, 0.2, 0.7)]
@@ -822,6 +823,7 @@ def read_yaml_input(inputfile):
     limits       = []
     fixed        = []
 
+    norm   = {}
     cfunc  = {}
     w_pind = {}
     p_pind = {}
@@ -833,6 +835,7 @@ def read_yaml_input(inputfile):
         N = len(steer['fit'][key]['p_name'])
 
         cfunc[key] = fmaps[f]
+        norm[key]  = steer['fit'][key]['norm']
 
         name.append(f'w__{key}')
         w_pind[key] = i
@@ -857,7 +860,7 @@ def read_yaml_input(inputfile):
     def fitfunc(x, par):
         y = 0
         for key in w_pind.keys():
-            y += par[w_pind[key]] * cfunc[key](x, par[p_pind[key]])
+            y += par[w_pind[key]] * cfunc[key](x=x, par=par[p_pind[key]], norm=norm[key])
         return y
 
     # Finally collect all
@@ -867,6 +870,7 @@ def read_yaml_input(inputfile):
               'fixed':        fixed,
               'name':         name,
               'fitrange':     steer['fitrange'],
+              'norm':         norm,
               'w_pind':       w_pind,
               'p_pind':       p_pind}
 
