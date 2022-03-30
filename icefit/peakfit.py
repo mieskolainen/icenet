@@ -333,30 +333,7 @@ def highres_x(x, factor=0.2, Nmin=256):
         Nmin:    minimum number of samples
     """
     e = factor * (x[0] + x[-1])/2
-
     return np.linspace(x[0]-e, x[-1]+e, np.maximum(len(x), Nmin))
-
-
-def convprod(xp, f1, f2, x, norm=True):
-    """
-    Convolution product integral
-    
-    Args:
-        xp:   high resolution (and domain extended !) x values
-        f1:   sampled function 1 at points xp
-        f2:   sampled function 2 at points xp
-        x:    final sampling x values
-        norm: normalization to a pdf
-    """
-    yp = np.convolve(a=f1, v=f2, mode='same')
-
-    # Normalize to density
-    if norm:
-        yp = yp / integrate.simpson(y=yp, x=xp)
-
-    # Sample at points of x
-    fnew = interpolate.interp1d(xp, yp)
-    return fnew(x)
 
 
 def CB_G_conv_pdf(x, par, norm=True):
@@ -374,7 +351,11 @@ def CB_G_conv_pdf(x, par, norm=True):
     xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf_(x=xp, par=par[:-1])
     f2 = gauss_pdf(x=xp, par=np.array([mu, reso]))
-    y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
+    yp = np.convolve(a=f1, v=f2, mode='same')
+    y  = interpolate.interp1d(xp, yp)(x)
+    
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
 
     return y
 
@@ -395,7 +376,12 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
     xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf(x=xp, par=CB_param)
     f2 = asym_RBW_pdf(x=xp, par=aRBW_param)
-    y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
+    yp = np.convolve(a=f1, v=f2, mode='same')
+    y  = interpolate.interp1d(xp, yp)(x)
+    
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+
 
     return y
 
@@ -416,7 +402,11 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     xp = highres_x(x=x, factor=0.2, Nmin=256)
     f1 = CB_pdf(x=xp, par=CB_param)
     f2 = RBW_pdf(x=xp, par=RBW_param)
-    y  = convprod(xp=xp, f1=f1, f2=f2, x=x, norm=norm)
+    yp = np.convolve(a=f1, v=f2, mode='same')
+    y  = interpolate.interp1d(xp, yp)(x)
+    
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
 
     return y
 
