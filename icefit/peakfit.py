@@ -753,7 +753,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
 
     # Plot pull
     ax[1].bar(x=cbins[fitind], height=pull, width=cbins[1]-cbins[0], color=(0.7,0.7,0.7), label=f'Fit')
-    ax[1].set_ylabel('(fit - data)/$\\sigma$')
+    ax[1].set_ylabel('$(\\hat{y} - y) / \\sigma$')
     ticks = iceplot.tick_calc([-3,3], 1.0, N=6)
     iceplot.set_axis_ticks(ax=ax[1], ticks=ticks, dim='y')
     
