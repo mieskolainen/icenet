@@ -31,17 +31,7 @@ fit:
     p_start:  [1.5]
     p_limit:  [[0.01, 2.5]]
     p_fixed:  [False]
-
-    #func:    'poly_pdf'
-    #w_start:  1
-    #w_limit:  [0.001, 1.0e+8]
-    #w_fixed:  False
-
-    #p_name:   ['p0', 'p1']
-    #p_start:  [1, -1.5]
-    #p_limit:  [[0.01, 1.0e+8], [-1.0e+8, -0.0001]]
-    #p_fixed:  [False, False]
-
+    
 
   # Add here more fit components in linear superposition, by giving a unique string label
   # ...
