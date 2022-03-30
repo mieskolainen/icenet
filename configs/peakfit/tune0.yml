@@ -26,7 +26,7 @@ fit:
   B:
     func:    'exp_pdf'
     norm:     True
-
+    
     w_start:  1
     w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
