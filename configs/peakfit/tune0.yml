@@ -60,5 +60,5 @@ techno:
   min_count: 5      # Minimum number of entries in the histogram
   
   strategy: 1       # Default 1
-  tol: 0.1          # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
+  tol: 1.0e-6       # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
 
