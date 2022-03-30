@@ -44,13 +44,13 @@ techno:
   ncall_simplex: 200000  # Number of Nelder-Mead simplex search (from Scipy) calls
   ncall_gradient: 10000  # Number of Minuit gradient search calls
 
-  hesse: True      # Minuit HESSE uncertainties
-  minos: True      # Minuit MINOS uncertainties
+  hesse: True       # Minuit HESSE uncertainties
+  minos: False      # Minuit MINOS uncertainties
 
-  max_chi2: 1000   # Maximum chi2/ndf for a succesful fit
-  max_trials: 1    # Number of restarts
-  min_count: 2     # Minimum number of entries in the histogram
+  max_chi2: 1000    # Maximum chi2/ndf for a succesful fit
+  max_trials: 1     # Number of restarts
+  min_count: 2      # Minimum number of entries in the histogram
 
-  strategy: 0      # Minuit parameters
+  strategy: 0       # Minuit parameters
   tol: 1.0e-8
 
