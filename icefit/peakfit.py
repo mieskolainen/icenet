@@ -1,8 +1,13 @@
 # Binned histogram chi2/likelihood fits with iminuit (minuit from python)
 # 
-# ** Be careful with the "floating integral normalizations",
-#    i.e. input array x (range, discretization) defines the
-#    numerical integral if norm == True.
+#
+# Notes:
+#   
+#   Be careful with the "floating integral normalizations",
+#   i.e. input array x (range, discretization) defines the
+#   numerical integral if norm == True. Fitting a sum of pdf templates
+#   without proper normalization can result in wrong yield uncertainties,
+#   to remark.
 # 
 # 
 # pytest icefit/peakfit.py -rP

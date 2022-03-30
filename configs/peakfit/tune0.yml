@@ -53,8 +53,8 @@ techno:
 
   max_chi2: 1000    # Maximum chi2/ndf for a succesful fit
   max_trials: 3     # Number of restarts
-  min_count: 2      # Minimum number of entries in the histogram
-
+  min_count: 5      # Minimum number of entries in the histogram
+  
   strategy: 1       # Default 1
   tol: 1.0e-6       # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
 
