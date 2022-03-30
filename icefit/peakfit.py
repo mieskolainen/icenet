@@ -1,7 +1,11 @@
 # Binned histogram chi2/likelihood fits with iminuit (minuit from python)
 # 
+# Be careful with the "floating integral normalizations",
+# i.e. input array x defines the numerical integral if norm == True.
+# 
+# 
 # pytest icefit/peakfit.py -rP
-#
+# 
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
@@ -27,6 +31,8 @@ import pickle
 import iminuit
 import matplotlib.pyplot as plt
 import uproot
+
+from scipy import interpolate
 import scipy.special as special
 import scipy.integrate as integrate
 
@@ -347,7 +353,6 @@ def convprod(xp, f1, f2, x, norm=True):
         yp = yp / integrate.simpson(y=yp, x=xp)
 
     # Sample at points of x
-    from scipy import interpolate
     fnew = interpolate.interp1d(xp, yp)
     return fnew(x)
 
@@ -716,7 +721,9 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
 
     ## Plot fits
     plt.sca(ax[0])
-    plt.plot(x, fitfunc(x, par), label="Total fit", color=(0.5,0.5,0.5))
+
+    yy = fitfunc(x, par)
+    plt.plot(x, yy, label="Total fit", color=(0.5,0.5,0.5))
     
     colors     = [(0.7, 0.2, 0.2), (0.2, 0.2, 0.7)]
     linestyles = ['-', '--']
@@ -741,16 +748,19 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
 
     ## LOWER PLOT
     plt.sca(ax[1])
-    iceplot.plot_horizontal_line(ax[1], ypos=1.0)
+    iceplot.plot_horizontal_line(ax[1], ypos=0.0)
 
-    style = copy.deepcopy(iceplot.errorbar_line_style)
-    style['marker']     = 's'
-    style['markersize'] = 1.75
 
-    ax[1].errorbar(x=cbins, y=np.ones(len(cbins)), yerr=errs / np.maximum(1e-9, counts),        color=(0,0,0), label=f'Data', **iceplot.errorbar_style)
-    ax[1].errorbar(x=cbins, y=fitfunc(cbins, par) / np.maximum(1e-9, counts), yerr=np.zeros(len(cbins)), color=(0.5,0.5,0.5), label=f'Fit', **style)
+    # Compute fit function values
+    fnew = interpolate.interp1d(x=x, y=yy)
+    pull = (fnew(cbins[fitind]) - counts[fitind]) / errs[fitind]
 
-    ax[1].set_ylabel('Ratio')
+    ticks = iceplot.tick_calc([-3,3], 1.0, N=6)
+    iceplot.set_axis_ticks(ax=ax[1], ticks=ticks, dim='y')
+
+    ax[1].bar(x=cbins[fitind], height=pull, width=cbins[1]-cbins[0], color=(0.5,0.5,0.5), label=f'Fit')
+    #ax[1].errorbar(, yerr=np.zeros(errs[fitind]), color=(0.5,0.5,0.5), label=f'Fit', **style)
+    ax[1].set_ylabel('(fit - data)/$\\sigma$')
 
     return fig,ax,h,N,N_err
 
