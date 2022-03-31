@@ -884,7 +884,7 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
 
     for YEAR     in [2016, 2017, 2018]:
         for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
-
+            
             for BIN1 in [1,2,3]:
                 for BIN2 in [1,2,3,4,5]:
                     for PASS in ['Pass', 'Fail']:

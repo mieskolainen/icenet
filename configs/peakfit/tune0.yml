@@ -14,26 +14,26 @@ fit:
     func:    'CB_asym_RBW_conv_pdf'
     norm:     True
 
-    w_start:  1
+    w_start:  1.0
     w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
 
     p_name:   ['M0', 'sigma', 'n', 'alpha', 'width', 'asym']
     p_start:  [3.097, 0.05, 1.001, 0.5, 9.32e-05, -0.01]
-    p_limit:  [[3.085, 3.105], [0.005, 0.3], [1.0001, 10.0], [0.1, 3.0], [1.0e-7, 1.0e-1], [-8.0, 0.0]]
+    p_limit:  [[3.085, 3.105], [5.0e-3, 0.3], [1.0001, 10.0], [0.1, 3.0], [1.0e-7, 1.0e-1], [-8.0, 0.0]]
     p_fixed:  [False, False, False, False, False, False]
     
   B:
     func:    'exp_pdf'
     norm:     True
     
-    w_start:  1
+    w_start:  1.0
     w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
 
     p_name:   ['lambda']
     p_start:  [1.5]
-    p_limit:  [[0.01, 5.0]]
+    p_limit:  [[1.0e-4, 5.0]]
     p_fixed:  [False]
 
 
@@ -43,7 +43,7 @@ fit:
 
 # Fit algorithm parameters
 techno:
-  losstype: 'chi2'             # 'chi2' or 'nll'
+  losstype: 'nll'              # 'chi2' or 'nll'
   use_limits: True             # Use parameter bounds
   
   ncall_simplex_scipy: 10000   # Number of scipy search calls
