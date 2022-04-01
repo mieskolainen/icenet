@@ -44,7 +44,7 @@ Automated setup
 	pip install -r requirements-cpu-linux.txt
 
 
-Note: If you experience ´No space left on device´ problem with pip, set the temporary path
+Note: If you experience ´No space left on device´ problem with conda or pip, set the temporary path
 
 .. code-block:: none
 	
