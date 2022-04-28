@@ -6,7 +6,8 @@ python:
 #- nightly
 
 install:
-- pip install -r requirements-cpu-linux.txt
+- pip install -r requirements-travis-1
+- pip install -r requirements-travis-2
 
 script:
 #- pytest --cov
