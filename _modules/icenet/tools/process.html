@@ -219,10 +219,12 @@
             
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data_trn&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="s1">&#39;data_val&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
             
-           <span class="c1">#### Add distillation, if turned on</span>
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
+            <span class="c1">#### Add distillation, if turned on</span>
+            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
+                    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
             <span class="c1">###</span>
-
+            
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_graph</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -232,8 +234,10 @@
 
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;trn_weights&#39;</span><span class="p">:</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
 
-            <span class="c1">### Add distillation, if turned on</span>
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
+            <span class="c1">#### Add distillation, if turned on</span>
+            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
+                    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
             <span class="c1">###</span>
 
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
