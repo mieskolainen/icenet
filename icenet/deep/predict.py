@@ -84,28 +84,43 @@ def pred_cutset(args, param):
     return func_predict
 
 
-def pred_graph_xgb(args, param):
+def pred_graph_xgb(args, param, signalclass = 1, device='cpu'):
 
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
-        label=param['graph']['label'], epoch=param['graph']['readmode']).to('cpu')
+        label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
     graph_model.eval() # Turn eval mode one!
     
     xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
         label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
 
 
-    def func_predict(data):
+    def func_predict(x):
 
-        conv_x = graph_model.forward(data=data, conv_only=True).detach().numpy()
+        if isinstance(x, list):
+            x_in = x
+        else:
+            x_in = [x]
+        
+        # Geometric type -> need to use batch loader
+        loader  = torch_geometric.loader.DataLoader(x_in, batch_size=len(x), shuffle=False)
+        for batch in loader:
+            conv_x = graph_model.forward(batch.to(device), conv_only=True).detach().cpu().numpy()
 
-        # Concatenate convolution features and global features
-        x_tot = np.c_[conv_x, [data.u.numpy()]]
+        # Concatenate convolution features and global features for the BDT
+        N     = conv_x.shape[0]
+        dim1  = conv_x.shape[1]
+        dim2  = len(x_in[0].u)
+        
+        x_tot = np.zeros((N, dim1+dim2))
+        for i in range(N):                 # Over all events
+            x_tot[i,0:dim1] = conv_x[i,:]  # Convoluted features
+            x_tot[i,dim1:]  = x_in[i].u    # Global features
 
         return xgb_model.predict(xgboost.DMatrix(data=x_tot))
-    
+
     return func_predict
 
 

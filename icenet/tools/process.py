@@ -186,10 +186,12 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
             
             inputs = {'data_trn': data_graph['trn'], 'data_val': data_graph['val'], 'args':args, 'param': param}
             
-           #### Add distillation, if turned on
-            if ID in args['distillation']['drains']: inputs['y_soft'] = y_soft
+            #### Add distillation, if turned on
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    inputs['y_soft'] = y_soft
             ###
-
+            
             if ID in args['raytune_param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_graph)
             else:
@@ -199,8 +201,10 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
 
             inputs = {'data': data, 'trn_weights': trn_weights, 'args': args, 'param': param}
 
-            ### Add distillation, if turned on
-            if ID in args['distillation']['drains']: inputs['y_soft'] = y_soft
+            #### Add distillation, if turned on
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    inputs['y_soft'] = y_soft
             ###
 
             if ID in args['raytune_param']['active']:

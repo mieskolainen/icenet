@@ -16,7 +16,6 @@ from termcolor import colored, cprint
 import torch
 from   torch_geometric.data import Data
 
-#import uproot_methods
 import multiprocessing
 from   torch.utils.data import dataloader
 from   torch.multiprocessing import reductions
@@ -253,7 +252,7 @@ def parse_graph_data(X, ids, features, Y=None, W=None, global_on=True, coord='pt
 
                 p4vec.append( v )
         else:
-            print(__name__ + f'parse_graph_data: Empty ECAL cluster event {i} (using only global data u)')
+            print(__name__ + f'.parse_graph_data: Empty ECAL cluster event {i} (using only global data u)')
             # However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed
         
         # ====================================================================
