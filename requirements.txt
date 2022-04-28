@@ -2,6 +2,9 @@
 xgboost
 
 # OTHERS
+
+# Need to use version 2.4.7
+pyparsing==2.4.7
 jax
 jaxlib
 iminuit
