@@ -6,7 +6,8 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 1500000             # Maximum total number of events (per root file) to process
+MAXEVENTS: 1500000              # Maximum total number of events (per root file) to process
+rngseed: 123456                 # Fixed seed for training data mixing
 
 
 # Batched "deep" training
@@ -17,7 +18,6 @@ batch_train_param:
   num_cpu: null                 # Set null for auto, or an integer for manual.
 
 
-rngseed: 123456                 # Fixed seed for training data mixing
 inputvar: 'UNIT_TEST_ID'        # Input variables, implemented under mvavars.py
 
 targetfunc: 'target_e'          # Training target,    implemented under mctargets.py

@@ -92,7 +92,7 @@ class fastarray1:
     def update(self, row):
         for x in row:
             self.add(x)
-
+    
     # use with x.add(32)
     #
     def add(self, x):

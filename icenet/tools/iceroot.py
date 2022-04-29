@@ -18,7 +18,7 @@ def load_tree_stats(rootfile, tree):
     print(events)
     print(events.name)
     print(events.title)
-    print(events.numentries)
+    #print(events.numentries)
 
 
 def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None):

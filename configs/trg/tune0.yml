@@ -12,6 +12,9 @@ datafile:  'datadist.root'
 eval_reweight: False     # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
 
 
+rngseed: 123456          # Fixed seed for training data mixing
+
+
 # ----------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
@@ -48,7 +51,6 @@ distillation:
 
 # ----------------------------------------------------
 
-rngseed: 123456                  # Fixed seed for training data mixing
 inputvar: 'MVA_ID'               # Input variables, implemented under mvavars.py
 
 

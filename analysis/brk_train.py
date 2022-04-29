@@ -11,7 +11,6 @@ import sys
 import os
 import torch
 import uproot
-import uproot_methods
 import pandas as pd
 import numpy as np
 import pickle
@@ -46,10 +45,12 @@ from icebrk import features
 
 
 
+from iceplot import iceplot
+
 # Main function
 #
 def main() :
-
+    
     ### Get input
     paths, args, cli, iodir = common.init()
     VARS = features.generate_feature_names(args['MAXT3'])

@@ -20,7 +20,7 @@ script:
 - git clone https://github.com/mieskolainen/travis-stash.git
 - source tests/runme_trg.sh
 - source tests/runme_eid.sh
-
+- source tests/runme_brk.sh
 
 after_success:
 #- coverage run --source=httpsuite -m pytest tests/

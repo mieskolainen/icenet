@@ -19,7 +19,7 @@ obs_M = {
 'ylim'    : None,
 'xlabel'  : r'System $M$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV',
+'units'   : {'x': 'GeV', 'y': ''},
 'label'   : r'3-body system invariant mass',
 'figsize' : (4,4),
 
@@ -41,7 +41,7 @@ obs_Pt = {
 'ylim'    : None,
 'xlabel'  : r'System $P_t$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV',
+'units'   : {'x': 'GeV', 'y': ''},
 'label'   : r'System tranverse momentum',
 'figsize' : (4,4),
 
@@ -63,7 +63,7 @@ obs_q2 = {
 'ylim'    : None,
 'xlabel'  : r'Electron pair $q^2$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV$^2$',
+'units'   : {'x': r'GeV$^2$', 'y': ''},
 'label'   : r'Electron system invariant squared',
 'figsize' : (4,4),
 
@@ -85,7 +85,7 @@ obs_pt_l1 = {
 'ylim'    : None,
 'xlabel'  : r'Leading electron $p_t$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV',
+'units'   : {'x': r'GeV', 'y': ''},
 'label'   : r'Leading $e$ transverse momentum',
 'figsize' : (4,4),
 
@@ -107,7 +107,7 @@ obs_pt_l2 = {
 'ylim'    : None,
 'xlabel'  : r'Sub-leading electron $p_t$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV',
+'units'   : {'x': r'GeV', 'y': ''},
 'label'   : r'Sub-leading transverse momentum',
 'figsize' : (4,4),
 
@@ -129,7 +129,7 @@ obs_pt_k = {
 'ylim'    : None,
 'xlabel'  : r'Kaon $p_t$',
 'ylabel'  : r'Candidates',
-'units'   : r'GeV',
+'units'   : {'x': r'GeV', 'y': ''},
 'label'   : r'Kaon transverse momentum',
 'figsize' : (4,4),
 
@@ -152,7 +152,7 @@ obs_first_t3i = {
 'ylim'    : None,
 'xlabel'  : r'First signal triplet',
 'ylabel'  : r'Events',
-'units'   : r'MC index',
+'units'   : {'x': r'MC index', 'y': ''},
 'label'   : r'First signal triplet',
 'figsize' : (4,4),
 
@@ -174,7 +174,7 @@ obs_last_t3i = {
 'ylim'    : None,
 'xlabel'  : r'Last signal triplet',
 'ylabel'  : r'Events',
-'units'   : r'MC index',
+'units'   : {'x': r'MC index', 'y': ''},
 'label'   : r'Last signal triplet',
 'figsize' : (4,4),
 
@@ -196,7 +196,7 @@ obs_N_signal_t3 = {
 'ylim'    : None,
 'xlabel'  : r'Number of signal triplets',
 'ylabel'  : r'Events',
-'units'   : r'',
+'units'   : {'x': '', 'y': ''},
 'label'   : r'Number of signal triplets',
 'figsize' : (4,4),
 

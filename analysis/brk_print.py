@@ -9,7 +9,6 @@ sys.path.append(".")
 
 import h5py
 import uproot
-import uproot_methods
 import pickle
 import xgboost
 import matplotlib as plt
@@ -21,7 +20,8 @@ import numba
 from numba import jit
 
 # icenet
-import iceplot
+from iceplot import iceplot
+
 from icenet.tools import aux
 from icenet.tools import io
 from icenet.tools import prints
@@ -112,7 +112,7 @@ def main() :
     MC_template = {
         'data'   : None,
         'weights': None,
-        'legend' : 'MC (reco) truth',
+        'label'  : 'MC (reco) truth',
         'hfunc'  : 'hist',
         'style'  : iceplot.hist_style_step,
         'obs'    : None,
@@ -122,7 +122,7 @@ def main() :
     dataA_template = {
         'data'   : None,
         'weights': None,
-        'legend' : '$icenet$ v0',
+        'label'  : '$icenet$ A0',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,
@@ -132,7 +132,7 @@ def main() :
     dataB_template = {
         'data'   : None,
         'weights': None,
-        'legend' : '$icenet$ v1',
+        'label'  : '$icenet$ A1',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,
@@ -142,7 +142,7 @@ def main() :
     dataC_template = {
         'data'   : None,
         'weights': None,
-        'legend' : '$icenet$ v2',
+        'label'  : '$icenet$ A2',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,

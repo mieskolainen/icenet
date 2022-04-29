@@ -1,4 +1,4 @@
-# Tool functions for B/RK analyzer
+# Tool functions for B/RK analyzer [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
 #
 # NOTE: New branches (not originally inside nanoAOD tree) are identified with '_key'
 #
@@ -7,11 +7,15 @@
 # m.mieskolainen@imperial.ac.uk
 
 
+import copy
 import uproot
 import numpy as np
 import networkx 
 import itertools
 import numba
+
+import vector
+
 from termcolor import colored
 
 from icenet.tools import aux
@@ -30,13 +34,24 @@ def construct_kinematics(d, l1_p4, l2_p4, k_p4):
 
     Returns:
     """
-    
+
+    # Construct Awkward arrays from Awkward columns
     # Track 1
-    l1_p4['e'] = uproot_methods.TLorentzVectorArray.from_ptetaphim(d['BToKEE_fit_l1_pt'], d['BToKEE_fit_l1_eta'], d['BToKEE_fit_l1_phi'], ELECTRON_MASS)
+    l1_p4['e'] = vector.Array({'pt' : d['BToKEE_fit_l1_pt'],
+                               'eta': d['BToKEE_fit_l1_eta'],
+                               'phi': d['BToKEE_fit_l1_phi'],
+                               'm': (d['BToKEE_fit_l1_pt'] - d['BToKEE_fit_l1_pt'] + 1) * ELECTRON_MASS})
+
     # Track 2
-    l2_p4['e'] = uproot_methods.TLorentzVectorArray.from_ptetaphim(d['BToKEE_fit_l2_pt'], d['BToKEE_fit_l2_eta'], d['BToKEE_fit_l2_phi'], ELECTRON_MASS)
+    l2_p4['e'] = vector.Array({'pt' : d['BToKEE_fit_l2_pt'],
+                               'eta': d['BToKEE_fit_l2_eta'],
+                               'phi': d['BToKEE_fit_l2_phi'],
+                               'm': (d['BToKEE_fit_l2_pt'] - d['BToKEE_fit_l2_pt'] + 1) * ELECTRON_MASS})
     # Track 3
-    k_p4['k']  = uproot_methods.TLorentzVectorArray.from_ptetaphim(d['BToKEE_fit_k_pt'],  d['BToKEE_fit_k_eta'],  d['BToKEE_fit_k_phi'], K_MASS)
+    k_p4['k']  = vector.Array({'pt': d['BToKEE_fit_k_pt'],
+                               'eta': d['BToKEE_fit_k_eta'],
+                               'phi': d['BToKEE_fit_k_phi'],
+                               'm': (d['BToKEE_fit_k_pt'] - d['BToKEE_fit_k_pt'] + 1) * K_MASS})
 
 
 def construct_MC_tree(d):
@@ -189,7 +204,7 @@ def construct_input_vec(evt_index, d, l1_p4, l2_p4, k_p4, qsets, MAXT3):
 
             if (k == MAXT3): break
 
-        x[z*MAXT3 : (z+1)*MAXT3] = vec[:] # copy with [:]
+        x[z*MAXT3 : (z+1)*MAXT3] = copy.deepcopy(vec)
         z += 1
     return x
 

@@ -461,7 +461,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
                     else:
                         auc += sklearn.metrics.roc_auc_score(y_true = batch_y.detach().cpu().numpy(), \
                             y_score = phat.detach().cpu().numpy(), \
-                            weights = batch_weights.detach().cpu().numpy(), \
+                            sample_weight = None, \
                             average="weighted", multi_class='ovo', labels=class_labels)
                         k += 1
 

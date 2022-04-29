@@ -19,7 +19,7 @@ obs_template = {
 'ylim'    : None,
 'xlabel'  : r'',
 'ylabel'  : r'Counts',
-'units'   : r'',
+'units'   : {'x': '', 'y': ''},
 'label'   : r'',
 'figsize' : (4,4),
 

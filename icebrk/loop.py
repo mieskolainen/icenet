@@ -1,19 +1,20 @@
-# B/RK analyzer main event loop
+# B/RK analyzer main event loop [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
 #
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
+import copy
 import uproot
 import h5py
-import copy
+import awkward
 
 import numpy as np
 from tqdm import tqdm
 from termcolor import colored
 
-import iceplot
+from iceplot import iceplot
 from icenet.tools.io import *
 from icenet.tools import aux
 from icenet.tools import prints
@@ -175,10 +176,26 @@ def poweranalysis(evt_index, batch_obs, obs, func_predict, x, y, qsets, MAXT3, M
             # Computed observables
             for key in histos.obs_all.keys():
 
-                if   key in batch_obs: 
-                    reco[ID]['x'][key].add(batch_obs[key][evt_index][set_ind[j]])
+                if   key in batch_obs:
+
+                    """
+                    print(key)
+                    print(evt_index)
+                    print(set_ind[j])
+                    
+                    print(batch_obs[key][evt_index])
+                    print(batch_obs[key][evt_index][set_ind[j]])
+                    """
+                    xx = awkward.to_list( batch_obs[key][evt_index][set_ind[j]] )
+
+                    # ** SOMETHING IS BROKEN HERE, WE SHOULD NOT HAVE A LIST AT THIS POINT ** 
+                    if isinstance(xx, list):
+                        reco[ID]['x'][key].add( xx[0] )
+                    else:
+                        reco[ID]['x'][key].add( xx )
+                
                 elif key in obs:
-                    reco[ID]['x'][key].add(obs[key])
+                    reco[ID]['x'][key].add( obs[key] )
 
             # Weights
             if isMC:
@@ -210,7 +227,7 @@ def hist_flush(reco, hobj, h5datasets = None):
 
             for algo in reco['w'].keys():
                 hobj[algo][obs] += iceplot.hist_obj(x = reco['x'][obs].values(),
-                    weights=reco['w'][algo].values(), bins=histos.obs_all[obs]['bins'], density=histos.obs_all[obs]['density'])
+                    weights=reco['w'][algo].values(), bins=histos.obs_all[obs]['bins'])
 
     # ====================================================================
     ### Dump data to HDF5 files
@@ -385,7 +402,7 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
     def print_input(events):
         prints.printbar()
         print(__name__ + f'.process: Input: {paths[z]}')
-        print(__name__ + f'.process: {events.name} {events.title} {events.numentries}')
+        print(__name__ + f'.process: {events.name} {events.title}')
 
         print(__name__ + f'.process: D          = {features.getdimension()}')
         print(__name__ + f'.process: DTOT       = {DTOT} (D x MAXT3)')
@@ -399,18 +416,20 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
         print(__name__ + f'.process: MAXEVENTS  = {MAXEVENTS}')
         prints.printbar()
     
+
     # Loop over different files
     for z in range(len(paths)):
 
-        events = uproot.open(paths[z])['Events']
-        print_input(events)
+        file = uproot.open(paths[z])
+        print(file)
+        events = file['Events']
 
         if z == 0:
             events.show()
             print_input(events)
 
         ## Loop over this file
-        for i,evtgroup in enumerate(events.iterate(entrysteps = EVTGROUPSIZE, namedecode='utf-8')):
+        for i,evtgroup in enumerate(events.iterate(step_size = EVTGROUPSIZE)):
                         
             print(f'evtgroup = {i} [EVTGROUPSIZE = {EVTGROUPSIZE}]')
             d = copy.deepcopy(evtgroup)
@@ -427,6 +446,7 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
             ## Construct final state observables
             batch_obs = histos.calc_batch_observables(l1_p4, l2_p4, k_p4)
             
+
             if isMC:
                 tools.construct_MC_tree(d)
                 tools.construct_MC_truth(d)
@@ -456,14 +476,14 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
                 # All individually, no fusion
                 else:
                     qsets = []
-                    for kk in range(len( l1_p4['e'][evt_index])):
+                    for kk in range( len(awkward.to_list(l1_p4['e'][evt_index])) ):
                         qsets.append( [kk] )
                 
 
                 # Sort the triplets
                 def svprob_rank(tripletset):
                     for ind in tripletset:
-                        # Return first of the (possible) superset
+                        # Return first of the (possible) superset [** SOMETHING BROKEN HERE PROBABLY **]
                         return d[SORTKEY][evt_index][ind]
 
                 qsets.sort(key=svprob_rank, reverse=True) # Reverse gives the biggest values first!

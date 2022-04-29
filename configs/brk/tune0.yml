@@ -3,10 +3,12 @@
 # -----------------------------------------------------------------------------
 # General
 
-rootname: 'trg'
+rootname: 'brk'
 
 VERBOSE: false
-MAXEVENTS: 150000
+MAXEVENTS: 500
+
+rngseed: 123456                 # Fixed seed for training data mixing
 
 
 # -----------------------------------------------------------------------------
@@ -14,7 +16,7 @@ MAXEVENTS: 150000
 # -----------------------------------------------------------------------------
 
 # Maximum number of triplets as an input to the neural network
-MAXT3: 15
+MAXT3: 6
 
 # Maximum number of simultaneous "hot" objects considered with 0 < MAXN <= MAXT3
 # Note! Exponential complexity growth
