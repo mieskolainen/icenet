@@ -51,6 +51,22 @@ icefit.mine
     :undoc-members:
 
 
+icefit.peakfit
+---------------------
+
+.. automodule:: icefit.peakfit
+    :members:
+    :undoc-members:
+
+
+icefit.score
+---------------------
+
+.. automodule:: icefit.score
+    :members:
+    :undoc-members:
+
+
 icefit.statstools
 ---------------------
 

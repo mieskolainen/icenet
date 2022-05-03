@@ -882,47 +882,54 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
 
     ### Loop over datasets
 
+
+
     for YEAR     in [2016, 2017, 2018]:
         for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
             
-            for BIN1 in [1,2,3]:
-                for BIN2 in [1,2,3,4,5]:
-                    for PASS in ['Pass', 'Fail']:
+            # Observables
+            for OBS1 in ['absdxy', 'absdxy_sig']:
+                OBS2 = 'pt'
 
-                        ### Uproot input
-                        rootfile = f'{param["path"]}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_absdxy_pt.root'
-                        tree     = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}_{PASS}'
-                        hist     = uproot.open(rootfile)[tree]
+                # Binning
+                for BIN1 in [1,2,3]:
+                    for BIN2 in [1,2,3,4,5]:
+                        for PASS in ['Pass', 'Fail']:
 
-                        # Fit and analyze
-                        par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
-                        fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
-                                                                   par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
+                            ### Uproot input
+                            rootfile = f'{param["path"]}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
+                            tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+                            hist     = uproot.open(rootfile)[tree]
 
-                        # Create savepath
-                        total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
-                        if not os.path.exists(total_savepath):
-                            os.makedirs(total_savepath)
+                            # Fit and analyze
+                            par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
+                            fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
+                                                                       par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
-                        # Save the fit plot
-                        plt.savefig(f'{total_savepath}/{tree}.pdf')
-                        plt.close('all')
+                            # Create savepath
+                            total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
+                            if not os.path.exists(total_savepath):
+                                os.makedirs(total_savepath)
 
-                        # Save the fit numerical data
-                        par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
-                        outdict  = {'par':     par_dict,
-                                    'cov':     cov_arr,
-                                    'var2pos': var2pos,
-                                    'chi2':    chi2,
-                                    'ndof':    ndof,
-                                    'N':       N,
-                                    'N_err':   N_err,
-                                    'h':       h,
-                                    'param':   param}
+                            # Save the fit plot
+                            plt.savefig(f'{total_savepath}/{tree}.pdf')
+                            plt.close('all')
 
-                        filename = f"{total_savepath}/{tree}.pkl"
-                        pickle.dump(outdict, open(filename, "wb"))
-                        print(f'Fit results saved to: {filename} (pickle) \n\n')
+                            # Save the fit numerical data
+                            par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
+                            outdict  = {'par':     par_dict,
+                                        'cov':     cov_arr,
+                                        'var2pos': var2pos,
+                                        'chi2':    chi2,
+                                        'ndof':    ndof,
+                                        'N':       N,
+                                        'N_err':   N_err,
+                                        'h':       h,
+                                        'param':   param}
+
+                            filename = f"{total_savepath}/{tree}.pkl"
+                            pickle.dump(outdict, open(filename, "wb"))
+                            print(f'Fit results saved to: {filename} (pickle) \n\n')
 
 
 def test_jpsi_tagprobe(savepath='./output/peakfit'):
@@ -962,42 +969,47 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
         total_savepath = f'{savepath}/Run{YEAR}/Efficiency'
         if not os.path.exists(total_savepath):
             os.makedirs(total_savepath)
-        
-        for BIN1 in [1,2,3]:
-            for BIN2 in [1,2,3,4,5]:
 
-                print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
+        # Observables
+        for OBS1 in ['absdxy', 'absdxy_sig']:
+            OBS2 = 'pt'
+            
+            # Binning
+            for BIN1 in [1,2,3]:
+                for BIN2 in [1,2,3,4,5]:
 
-                eff     = {}
-                eff_err = {}
+                    print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
 
-                treename = f'NUM_LooseID_DEN_TrackerMuons_absdxy_{BIN1}_pt_{BIN2}'
+                    eff     = {}
+                    eff_err = {}
 
-                for TYPE in [data_tag, mc_tag]:
+                    treename = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}'
 
-                    ### Compute Tag & Probe efficiency
-                    N,N_err       = tagprobe(treename=treename, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
-                    eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
-                    eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
+                    for TYPE in [data_tag, mc_tag]:
 
-                    ### Print out
-                    print(f'[{TYPE}]')
-                    print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
-                    print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
-                    print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
+                        ### Compute Tag & Probe efficiency
+                        N,N_err       = tagprobe(treename=treename, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+                        eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
+                        eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
-                ### Compute scale factor Data / MC
-                scale     = eff[data_tag] / eff[mc_tag]
-                scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
-                            sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
+                        ### Print out
+                        print(f'[{TYPE}]')
+                        print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
+                        print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
+                        print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
 
-                print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
+                    ### Compute scale factor Data / MC
+                    scale     = eff[data_tag] / eff[mc_tag]
+                    scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
+                                sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
 
-                ### Save results
-                outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
-                filename = f"{total_savepath}/{treename}.pkl"
-                pickle.dump(outdict, open(filename, "wb"))
-                print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
+                    print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
+
+                    ### Save results
+                    outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
+                    filename = f"{total_savepath}/{treename}.pkl"
+                    pickle.dump(outdict, open(filename, "wb"))
+                    print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
 
 
 if __name__ == "__main__":
