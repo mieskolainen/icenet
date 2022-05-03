@@ -685,6 +685,45 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 </section>
+<section id="module-icenet.deep.dmlp">
+<span id="icenet-deep-dmlp"></span><h3>icenet.deep.dmlp<a class="headerlink" href="#module-icenet.deep.dmlp" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.DMLP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DMLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[128,</span> <span class="pre">64]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#DMLP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.DMLP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.DMLP.binarypredict">
+<span class="sig-name descname"><span class="pre">binarypredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#DMLP.binarypredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.DMLP.binarypredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return maximum probability class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.DMLP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#DMLP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.DMLP.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.DMLP.softpredict">
+<span class="sig-name descname"><span class="pre">softpredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#DMLP.softpredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.DMLP.softpredict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax probability</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.DMLP.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icenet.deep.dmlp.DMLP.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-icenet.deep.dopt">
 <span id="icenet-deep-dopt"></span><h3>icenet.deep.dopt<a class="headerlink" href="#module-icenet.deep.dopt" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
@@ -1504,6 +1543,54 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="icenet.deep.predict.pred_xgb">
 <span class="sig-name descname"><span class="pre">pred_xgb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/predict.html#pred_xgb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.predict.pred_xgb" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</section>
+<section id="module-icenet.deep.tempscale">
+<span id="icenet-deep-tempscale"></span><h3>icenet.deep.tempscale<a class="headerlink" href="#module-icenet.deep.tempscale" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="icenet.deep.tempscale.ModelWithTemperature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelWithTemperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/tempscale.html#ModelWithTemperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.tempscale.ModelWithTemperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Temperate calibration” wrapper class.</p>
+<p>Output of the original network needs to be in logits,
+not softmax or log softmax.</p>
+<p>Functions expects model(input) to return logits.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.tempscale.ModelWithTemperature.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/tempscale.html#ModelWithTemperature.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.tempscale.ModelWithTemperature.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.tempscale.ModelWithTemperature.set_temperature">
+<span class="sig-name descname"><span class="pre">set_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">valid_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/tempscale.html#ModelWithTemperature.set_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.tempscale.ModelWithTemperature.set_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tune the tempearature of the model with NLL loss (using the validation set)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>valid_loader</strong> – validation set loader (DataLoader)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.tempscale.ModelWithTemperature.temperature_scale">
+<span class="sig-name descname"><span class="pre">temperature_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/tempscale.html#ModelWithTemperature.temperature_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.tempscale.ModelWithTemperature.temperature_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform temperature scaling on logits</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="icenet.deep.tempscale.ModelWithTemperature.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icenet.deep.tempscale.ModelWithTemperature.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 </section>
 <section id="module-icenet.deep.train">

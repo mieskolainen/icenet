@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>icemc.icemc &#8212; icenet alpha documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for icemc.icemc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Simple Monte Carlo routines</span>
+<span class="c1">#</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="c1"># icenet system paths</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">icevec</span>
+
+
+<span class="c1"># ----------------------------------------------</span>
+<span class="n">c_const</span>    <span class="o">=</span> <span class="mf">3E8</span>             <span class="c1"># Speed of light (m/sec)</span>
+<span class="n">hbar_const</span> <span class="o">=</span> <span class="mf">6.582119514E-25</span> <span class="c1"># [GeV x sec]</span>
+<span class="c1"># ----------------------------------------------</span>
+
+
+<div class="viewcode-block" id="U"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.U">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">U</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
+    <span class="sd">&quot;&quot;&quot; Uniform random numbers from [a,b]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span></div>
+
+<span class="c1">#@numba.njit</span>
+<div class="viewcode-block" id="randpow"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randpow">[docs]</a><span class="k">def</span> <span class="nf">randpow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
+    <span class="sd">&quot;&quot;&quot; Power-law random numbers for pdf(x) ~ x^{g-1} for a &lt;= x &lt;= b</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">ag</span><span class="p">,</span> <span class="n">bg</span> <span class="o">=</span> <span class="n">a</span><span class="o">**</span><span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="o">**</span><span class="n">g</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">ag</span> <span class="o">+</span> <span class="p">(</span><span class="n">bg</span> <span class="o">-</span> <span class="n">ag</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">g</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="randexp"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randexp">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">randexp</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
+    <span class="sd">&quot;&quot;&quot; Exponential random variables pdf(x) ~ 1/u exp(-x/u) with mean u</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">u</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="twobody"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.twobody">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">twobody</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2-body isotropic decay routine according to dLIPS_2 flat phase space</span>
+
+<span class="sd">    Args:      </span>
+<span class="sd">           p : 4-momentum of the mother (in the lab frame, usually)</span>
+<span class="sd">          m1 : Daughter 1 invariant mass</span>
+<span class="sd">          m2 : Daughter 2 invariant mass</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       p1,p2 : Daughter 4-momentum</span>
+<span class="sd">               in the the same frame as the mother was defined</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Mother mass</span>
+    <span class="n">m0</span>   <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">m</span>
+
+    <span class="c1"># Energies, and momentum absolute (back to back)</span>
+    <span class="n">e1</span>   <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">m0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">m1</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">m2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">m0</span>
+    <span class="n">e2</span>   <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">m0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">m2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">m1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">m0</span>
+    <span class="n">pabs</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">m0</span> <span class="o">-</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">m0</span> <span class="o">+</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span> \
+               <span class="o">*</span> <span class="p">(</span><span class="n">m0</span> <span class="o">+</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">m0</span> <span class="o">-</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span> <span class="p">)</span> <span class="o">/</span> <span class="n">m0</span>
+
+    <span class="c1"># Isotropic angles in a spherical system</span>
+    <span class="n">costheta</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="c1"># [-1,1]</span>
+    <span class="n">sintheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">costheta</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">phi</span>      <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>  <span class="c1"># [0,2pi]</span>
+
+    <span class="c1"># To cartesian</span>
+    <span class="n">pX</span>       <span class="o">=</span> <span class="n">pabs</span> <span class="o">*</span> <span class="n">sintheta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">pY</span>       <span class="o">=</span> <span class="n">pabs</span> <span class="o">*</span> <span class="n">sintheta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">pZ</span>       <span class="o">=</span> <span class="n">pabs</span> <span class="o">*</span> <span class="n">costheta</span>
+
+    <span class="c1"># 4-momenta now defined in the mother rest frame</span>
+    <span class="n">p1</span> <span class="o">=</span>  <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span> <span class="n">pX</span><span class="p">,</span>  <span class="n">pY</span><span class="p">,</span>  <span class="n">pZ</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span>  <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="o">-</span><span class="n">pX</span><span class="p">,</span> <span class="o">-</span><span class="n">pY</span><span class="p">,</span> <span class="o">-</span><span class="n">pZ</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>
+
+    <span class="c1"># Then boost daughters into the original frame</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">boost</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">boost</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="n">sign</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span></div>
+
+
+<div class="viewcode-block" id="Gamma2tau"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.Gamma2tau">[docs]</a><span class="k">def</span> <span class="nf">Gamma2tau</span><span class="p">(</span><span class="n">Gamma</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Width to mean lifetime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">hbar_const</span> <span class="o">/</span> <span class="n">Gamma</span></div>
+
+
+<div class="viewcode-block" id="tau2Gamma"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.tau2Gamma">[docs]</a><span class="k">def</span> <span class="nf">tau2Gamma</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mean lifetime to width</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">hbar_const</span> <span class="o">/</span> <span class="n">tau</span></div>
+
+
+<div class="viewcode-block" id="resonance_generator"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.resonance_generator">[docs]</a><span class="k">def</span> <span class="nf">resonance_generator</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulation massive resonance with (M, ctau) parameters,</span>
+<span class="sd">    having production kinematics (pt2, rapidity, phi ~ flat)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        p4 : Array of 4-momentum (resonance 4-momentum)</span>
+<span class="sd">        x4 : Array of 4-position (resonance decay 4-position)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tau</span>    <span class="o">=</span> <span class="n">ctau</span> <span class="o">/</span> <span class="n">c_const</span> <span class="c1"># Rest frame mean lifetime</span>
+
+    <span class="n">p4_arr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x4_arr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        
+        <span class="c1">### Production kinematics</span>
+
+        <span class="n">pt2_value</span> <span class="o">=</span> <span class="n">pt2</span><span class="p">()</span>
+        <span class="n">rap_value</span> <span class="o">=</span> <span class="n">rap</span><span class="p">()</span>
+        <span class="n">phi_value</span> <span class="o">=</span> <span class="n">U</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">p</span>  <span class="o">=</span> <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setPt2RapPhiM2</span><span class="p">(</span><span class="n">pt2</span><span class="o">=</span><span class="n">pt2_value</span><span class="p">,</span> <span class="n">rap</span><span class="o">=</span><span class="n">rap_value</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="n">phi_value</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="n">M</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>        
+        
+        <span class="c1">### Flight kinematics</span>
+
+        <span class="c1"># Sample lifetime in the rest frame (sec)</span>
+        <span class="n">t</span>  <span class="o">=</span> <span class="n">randexp</span><span class="p">(</span><span class="n">tau</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Compute decay length distance (meter) in the lab</span>
+        <span class="c1"># beta = |p|/E, gamma = E/m</span>
+        <span class="n">t_lab</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">t</span>
+        <span class="n">d_lab</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">c_const</span> <span class="o">*</span> <span class="n">t</span>
+
+        <span class="c1"># Create 4-position vector of the decay vertex in the lab frame</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">p3</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="p">(</span><span class="n">p3</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">p3mod</span><span class="p">)</span> <span class="o">*</span> <span class="n">d_lab</span>
+        <span class="n">x</span>  <span class="o">=</span> <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x3</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">x3</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z</span><span class="o">=</span><span class="n">x3</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">t</span><span class="o">=</span><span class="n">t_lab</span><span class="p">)</span>
+
+        <span class="c1">### Save them</span>
+        <span class="n">p4_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">x4_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4_arr</span></div>
+
+
+<div class="viewcode-block" id="outer_sim_loop"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop">[docs]</a><span class="k">def</span> <span class="nf">outer_sim_loop</span><span class="p">(</span><span class="n">M_values</span><span class="p">,</span> <span class="n">ctau_values</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulation helper (wrapper) loop</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Z: Acceptance probability matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ctau_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">M_values</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ctau_values</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">M_values</span><span class="p">)):</span>
+
+            <span class="n">ctau</span>           <span class="o">=</span> <span class="n">ctau_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">M</span>              <span class="o">=</span> <span class="n">M_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4_arr</span> <span class="o">=</span> <span class="n">resonance_generator</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="o">=</span><span class="n">ctau</span><span class="p">,</span> <span class="n">pt2</span><span class="o">=</span><span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="o">=</span><span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+
+            <span class="c1"># Evaluate fiducial acceptance function</span>
+            <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">acc_func</span><span class="p">(</span><span class="n">p4</span><span class="o">=</span><span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4</span><span class="o">=</span><span class="n">x4_arr</span><span class="p">))</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">Z</span></div>
+
+
+<div class="viewcode-block" id="outer_sim_loop_2"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop_2">[docs]</a><span class="k">def</span> <span class="nf">outer_sim_loop_2</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2_values</span><span class="p">,</span> <span class="n">rap_values</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulation helper (wrapper) loop</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Z: Acceptance probability matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rap_values</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rap_values</span><span class="p">)):</span>
+
+            <span class="n">pt2</span>            <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">pt2_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">rap</span>            <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">rap_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4_arr</span> <span class="o">=</span> <span class="n">resonance_generator</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="o">=</span><span class="n">ctau</span><span class="p">,</span> <span class="n">pt2</span><span class="o">=</span><span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="o">=</span><span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+
+            <span class="c1"># Evaluate fiducial acceptance function</span>
+            <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">acc_func</span><span class="p">(</span><span class="n">p4</span><span class="o">=</span><span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4</span><span class="o">=</span><span class="n">x4_arr</span><span class="p">))</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">Z</span></div>
+
+
+<div class="viewcode-block" id="spherical_acceptance"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.spherical_acceptance">[docs]</a><span class="k">def</span> <span class="nf">spherical_acceptance</span><span class="p">(</span><span class="n">p4</span><span class="p">,</span> <span class="n">x4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Spherical (geometric) acceptance function.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        p4: Array of 4-momentum</span>
+<span class="sd">        x4: Array of 4-position</span>
+
+<span class="sd">    Params:</span>
+<span class="sd">        R : Spherical detector radius (extend to more complex) [global]</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Array of True/False for each event (accepted or not)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">R</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">p3mod</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x4</span><span class="p">))])</span>
+
+    <span class="k">return</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">R</span></div>
+
+<div class="viewcode-block" id="set_aspect_true_equal"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.set_aspect_true_equal">[docs]</a><span class="k">def</span> <span class="nf">set_aspect_true_equal</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set plot square sized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="annotate_heatmap"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.annotate_heatmap">[docs]</a><span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Annotate heatmap with text (broken function, fix TBD).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="c1"># Activate axes</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+            <span class="n">yy</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">horizontalalignment</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                     <span class="n">verticalalignment</span>   <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="produce_acceptance_sim"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.produce_acceptance_sim">[docs]</a><span class="k">def</span> <span class="nf">produce_acceptance_sim</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulate fiducial (geometric) acceptance</span>
+<span class="sd">    by looping over (M,ctau) or (Pt,Rap) pairs, others being fixed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;produce_acceptance_sim: Simulating LLP geometric acceptance maps ...&#39;</span><span class="p">)</span>
+
+    <span class="k">global</span> <span class="n">R</span>
+
+    <span class="c1">### (M,ctau) plots</span>
+
+    <span class="n">pt2_values</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">rap_values</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    
+    <span class="n">ctau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="n">M_values</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">]:</span>
+
+        <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rap_values</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rap_values</span><span class="p">))):</span>
+
+                <span class="c1"># Define pt2 and rapidity distributions here!!</span>
+
+                <span class="n">pt2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">pt2_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">rap</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">rap_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                # Distributions</span>
+<span class="sd">                </span>
+<span class="sd">                pt2 = lambda : randexp(30)**2</span>
+<span class="sd">                rap = lambda : U(0,4)</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">outer_sim_loop</span><span class="p">(</span><span class="n">M_values</span><span class="o">=</span><span class="n">M_values</span><span class="p">,</span> <span class="n">ctau_values</span><span class="o">=</span><span class="n">ctau_values</span><span class="p">,</span> \
+                    <span class="n">pt2</span><span class="o">=</span><span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="o">=</span><span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">acc_func</span><span class="o">=</span><span class="n">spherical_acceptance</span><span class="p">)</span>
+
+                <span class="c1"># ---------------------------</span>
+                <span class="c1">### Plot it</span>
+                <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
+                <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">M_values</span><span class="p">,</span> <span class="n">ctau_values</span><span class="p">)</span>
+
+                <span class="c1"># Turn into millimeters</span>
+                <span class="n">y</span> <span class="o">*=</span> <span class="mi">1000</span>
+
+                <span class="n">c</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[$P_t = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pt2</span><span class="p">())</span><span class="si">}</span><span class="s1">$ GeV, $Y = </span><span class="si">{</span><span class="n">rap</span><span class="p">()</span><span class="si">}</span><span class="s1">$] | decay length $d </span><span class="se">\\</span><span class="s1">leq </span><span class="si">{</span><span class="n">R</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$ m&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$c </span><span class="se">\\</span><span class="s1">tau_0$ (mm)&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$M$ (GeV)&#39;</span><span class="p">)</span>
+
+                <span class="c1">#ax[i,j] = annotate_heatmap(x=M_values, y=ctau_values, Z=Z, ax=ax[i,j])</span>
+                
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">rap_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+                
+                <span class="c1">#ax[i,j] = set_aspect_true_equal(ax=ax[i,j])</span>
+                <span class="c1"># ---------------------------</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/LLP_geometric_acc_M_ctau_R=</span><span class="si">{</span><span class="n">R</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1">### (Rap, Pt) plots</span>
+    <span class="n">M_values</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+    <span class="n">ctau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1E-1</span><span class="p">,</span> <span class="mf">1e0</span><span class="p">,</span> <span class="mf">1e1</span><span class="p">])</span>
+    
+    <span class="n">pt2_values</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">rap_values</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">]:</span>
+
+        <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">M_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctau_values</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">M_values</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ctau_values</span><span class="p">))):</span>
+
+                <span class="n">M</span>          <span class="o">=</span> <span class="n">M_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">ctau</span>       <span class="o">=</span> <span class="n">ctau_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">outer_sim_loop_2</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="o">=</span><span class="n">ctau</span><span class="p">,</span> \
+                    <span class="n">pt2_values</span><span class="o">=</span><span class="n">pt2_values</span><span class="p">,</span> <span class="n">rap_values</span><span class="o">=</span><span class="n">rap_values</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">acc_func</span><span class="o">=</span><span class="n">spherical_acceptance</span><span class="p">)</span>
+
+                <span class="c1"># ---------------------------</span>
+                <span class="c1">### Plot it</span>
+                <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
+
+                <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">rap_values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pt2_values</span><span class="p">))</span>
+
+                <span class="n">c</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+                <span class="c1">#ax[i,j].set_xscale(&#39;log&#39;)</span>
+                <span class="c1">#ax[i,j].set_yscale(&#39;log&#39;)</span>
+                <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[$M = </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s1">$ GeV, $c</span><span class="se">\\</span><span class="s1">tau_0 = </span><span class="si">{</span><span class="n">ctau</span><span class="o">*</span><span class="mi">1000</span><span class="si">}</span><span class="s1">$ mm] | decay length $d </span><span class="se">\\</span><span class="s1">leq </span><span class="si">{</span><span class="n">R</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$ m&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$P_t$ (GeV)&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">M_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;rapidity $Y$&#39;</span><span class="p">)</span>
+
+                <span class="c1">#ax[i,j] = annotate_heatmap(x=rap_values, y=np.sqrt(pt2_values), Z=Z, ax=ax[i,j])</span>
+
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctau_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+
+                <span class="c1">#ax[i,j] = set_aspect_true_equal(ax=ax[i,j])</span>
+                <span class="c1"># ---------------------------</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/LLP_geometric_acc_Rap_Pt_R=</span><span class="si">{</span><span class="n">R</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="c1">#produce_acceptance_sim()</span>
+
+<div class="viewcode-block" id="test_toy_pt_spectrum"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.test_toy_pt_spectrum">[docs]</a><span class="k">def</span> <span class="nf">test_toy_pt_spectrum</span><span class="p">():</span>
+
+    <span class="n">pt2</span> <span class="o">=</span> <span class="n">randpow</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">13000</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">g</span><span class="o">=-</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+    <span class="n">pt</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pt2</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;pt&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$p_T$ (GeV)&#39;</span><span class="p">)</span>
+    
+    
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">220</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$p_T$ (GeV)&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">icenet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

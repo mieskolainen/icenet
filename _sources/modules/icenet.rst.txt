@@ -69,6 +69,14 @@ icenet.deep.deps
     :undoc-members:
 
 
+icenet.deep.dmlp
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.dmlp
+    :members:
+    :undoc-members:
+
+
 icenet.deep.dopt
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -121,6 +129,14 @@ icenet.deep.predict
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.predict
+    :members:
+    :undoc-members:
+
+
+icenet.deep.tempscale
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.tempscale
     :members:
     :undoc-members:
 
