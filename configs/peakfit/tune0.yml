@@ -16,7 +16,7 @@ fit:
       norm:     True
       Nmin:     256 # minimum number of function samples for convolution integral
       xfactor:  0.2 # extra domain extension factor for convolution integral (0.2 gives 20%)
-    
+
     w_start:  10.0
     w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
@@ -36,13 +36,13 @@ fit:
       norm:     True
       #Nmin:     null # not active
     
-    w_start:  1.0
+    w_start:  10.0
     w_limit:  [0.001, 1.0e+8]
     w_fixed:  False
 
     p_name:   ['lambda']
-    p_start:  [1.5]
-    p_limit:  [[1.0e-4, 4.0]]
+    p_start:  [0.01]
+    p_limit:  [[1.0e-5, 4.0]]
     p_fixed:  [False]
 
 
@@ -59,12 +59,12 @@ techno:
   ncall_scan:     100          # Number of brute force scan calls
   ncall_simplex:  10000        # Number of Nelder-Mead simplex search calls
   ncall_gradient: 10000        # Number of Minuit gradient search calls
-
-
+  
+  
   hesse: True       # Minuit HESSE uncertainties
   minos: False      # Minuit MINOS uncertainties
 
-  max_chi2: 1000    # Maximum chi2/ndf for a succesful fit
+  max_chi2: 600     # Maximum chi2/ndf for a succesful fit
   max_trials: 2     # Number of restarts
   min_count: 5      # Minimum number of entries in the histogram
   

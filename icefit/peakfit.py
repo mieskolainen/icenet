@@ -733,8 +733,8 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
 
     # Compute fit function values
     fnew = interpolate.interp1d(x=x, y=yy)
-    pull = (fnew(cbins[fitind]) - counts[fitind]) / errs[fitind]
-
+    pull = (fnew(cbins[fitind]) - counts[fitind]) / (np.maximum(1e-12, errs[fitind]))
+    
     # Plot pull
     ax[1].bar(x=cbins[fitind], height=pull, width=cbins[1]-cbins[0], color=(0.7,0.7,0.7), label=f'Fit')
     ax[1].set_ylabel('(fit - count) / $\\sigma$')
