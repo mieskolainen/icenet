@@ -42,6 +42,17 @@ from scipy import interpolate
 import scipy.special as special
 import scipy.integrate as integrate
 
+# iceplot
+import sys
+sys.path.append(".")
+
+from iceplot import iceplot
+import statstools
+
+# numpy
+import numpy as onp # original numpy
+from numpy.random import default_rng
+
 
 """
 # Raytune
@@ -53,17 +64,6 @@ from functools import partial
 import multiprocessing
 import torch
 """
-
-# iceplot
-import sys
-sys.path.append(".")
-
-from iceplot import iceplot
-import statstools
-
-# numpy
-import numpy as onp # original numpy
-from numpy.random import default_rng
 
 
 """
@@ -315,7 +315,7 @@ def poly_pdf(x, par, norm=True):
     return y
 
 
-def highres_x(x, factor=0.2, Nmin=256):
+def highres_x(x, xfactor=0.2, Nmin=256):
     """
     Extend range and sampling of x
         
@@ -324,11 +324,11 @@ def highres_x(x, factor=0.2, Nmin=256):
         factor:  domain extension factor
         Nmin:    minimum number of samples
     """
-    e = factor * (x[0] + x[-1])/2
+    e = xfactor * (x[0] + x[-1])/2
     return np.linspace(x[0]-e, x[-1]+e, np.maximum(len(x), Nmin))
 
 
-def CB_G_conv_pdf(x, par, norm=True):
+def CB_G_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
     """
     Crystall Ball (*) Gaussian, with the same center value as CB,
     where (*) is a convolution product.
@@ -340,7 +340,7 @@ def CB_G_conv_pdf(x, par, norm=True):
     reso   = par[-1]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x, factor=0.2, Nmin=256)
+    xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
     f1 = CB_pdf_(x=xp, par=par[:-1], norm=False)
     f2 = gauss_pdf(x=xp, par=np.array([mu, reso]), norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
@@ -351,7 +351,7 @@ def CB_G_conv_pdf(x, par, norm=True):
     return y
 
 
-def CB_asym_RBW_conv_pdf(x, par, norm=True):
+def CB_asym_RBW_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
     """
     Crystall Ball (*) Asymmetric Relativistic Breit-Wigner, with the same center values,
     where (*) is a convolution product.
@@ -364,7 +364,7 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
     aRBW_param = par[0],par[4],par[5]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x, factor=0.2, Nmin=256)
+    xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
     f1 = CB_pdf(x=xp, par=CB_param, norm=False)
     f2 = asym_RBW_pdf(x=xp, par=aRBW_param, norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
@@ -375,7 +375,7 @@ def CB_asym_RBW_conv_pdf(x, par, norm=True):
     return y
 
 
-def CB_RBW_conv_pdf(x, par, norm=True):
+def CB_RBW_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
     """
     Crystall Ball (*) Relativistic Breit-Wigner, with the same center values,
     where (*) is a convolution product.
@@ -388,7 +388,7 @@ def CB_RBW_conv_pdf(x, par, norm=True):
     RBW_param = par[0],par[4]
 
     # High-resolution extended range convolution
-    xp = highres_x(x=x, factor=0.2, Nmin=256)
+    xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
     f1 = CB_pdf(x=xp, par=CB_param, norm=False)
     f2 = RBW_pdf(x=xp, par=RBW_param, norm=False)
     yp = np.convolve(a=f1, v=f2, mode='same')
@@ -635,7 +635,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     y   = {}
     for key in cfunc.keys():
         weight = par[param['w_pind'][key]]
-        y[key] = weight * cfunc[key](x=x, par=par[param['p_pind'][key]], norm=param['norm'][key])
+        y[key] = weight * cfunc[key](x=x, par=par[param['p_pind'][key]], **param['args'][key])
     
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
     print(f'Input bin count sum: {np.sum(counts[fitind]):0.1f} (fit range)')    
@@ -801,7 +801,7 @@ def read_yaml_input(inputfile):
     limits       = []
     fixed        = []
 
-    norm   = {}
+    args   = {}
     cfunc  = {}
     w_pind = {}
     p_pind = {}
@@ -813,7 +813,7 @@ def read_yaml_input(inputfile):
         N = len(steer['fit'][key]['p_name'])
 
         cfunc[key] = fmaps[f]
-        norm[key]  = steer['fit'][key]['norm']
+        args[key]  = steer['fit'][key]['args']
 
         name.append(f'w__{key}')
         w_pind[key] = i
@@ -838,7 +838,7 @@ def read_yaml_input(inputfile):
     def fitfunc(x, par):
         y = 0
         for key in w_pind.keys():
-            y += par[w_pind[key]] * cfunc[key](x=x, par=par[p_pind[key]], norm=norm[key])
+            y += par[w_pind[key]] * cfunc[key](x=x, par=par[p_pind[key]], **args[key])
         return y
 
     # Finally collect all
@@ -848,7 +848,7 @@ def read_yaml_input(inputfile):
               'fixed':        fixed,
               'name':         name,
               'fitrange':     steer['fitrange'],
-              'norm':         norm,
+              'args':         args,
               'w_pind':       w_pind,
               'p_pind':       p_pind}
 
@@ -881,14 +881,11 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
     #np.seterr(all='print') # Numpy floating point error treatment
 
     ### Loop over datasets
-
-
-
-    for YEAR     in [2016, 2017, 2018]:
+    for YEAR     in [2016, 2017]:
         for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
             
             # Observables
-            for OBS1 in ['absdxy', 'absdxy_sig']:
+            for OBS1 in ['absdxy_sig', 'absdxy']:
                 OBS2 = 'pt'
 
                 # Binning
@@ -960,7 +957,7 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
 
     ### Loop over datasets
-    for YEAR     in [2016, 2017, 2018]:
+    for YEAR     in [2016, 2017]:
 
         data_tag = f'Run{YEAR}'
         mc_tag   = 'JPsi_pythia8'
@@ -969,9 +966,9 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
         total_savepath = f'{savepath}/Run{YEAR}/Efficiency'
         if not os.path.exists(total_savepath):
             os.makedirs(total_savepath)
-
+        
         # Observables
-        for OBS1 in ['absdxy', 'absdxy_sig']:
+        for OBS1 in ['absdxy_sig', 'absdxy']:
             OBS2 = 'pt'
             
             # Binning
