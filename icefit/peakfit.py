@@ -578,7 +578,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
 
     print(f'Parameters: {par}')
     print(f'Covariance: {cov}')
-
+    
     if cov is None:
         print('binned_1D_fit: Uncertainty estimation failed!')
         cov = -1 * np.ones((len(par), len(par)))
@@ -598,21 +598,23 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     return par, cov, var2pos, chi2, ndof
 
 
-def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
+def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof, nsamples=1000):
     """
     Analyze and visualize fit results
     
     Args:
-        hist:    TH1 histogram object (from uproot)
-        param:   Input parameters of the fit
-        fitfunc: Total fit function
-        cfunc:   Component functions
+        hist:     TH1 histogram object (from uproot)
+        param:    Input parameters of the fit
+        fitfunc:  Total fit function
+        cfunc:    Component functions
         
-        par:     Parameters obtained from the fit
-        cov:     Covariance matrix obtained from the fit
-        var2pos: Variable name to position index
-        chi2:    Chi2 value of the fit
-        ndof:    Number of dof
+        par:      Parameters obtained from the fit
+        cov:      Covariance matrix obtained from the fit
+        var2pos:  Variable name to position index
+        chi2:     Chi2 value of the fit
+        ndof:     Number of dof
+
+        nsamples: Number of samples of the functions
     
     Returns:
         fig, ax
@@ -629,13 +631,18 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
 
     fitind = (param['fitrange'][0] <= cbins) & (cbins <= param['fitrange'][1])
 
-    x   = np.linspace(param['fitrange'][0], param['fitrange'][1], int(1e3))
+    x   = np.linspace(param['fitrange'][0], param['fitrange'][1], int(nsamples))
 
     # Function by function
     y   = {}
     for key in cfunc.keys():
         weight = par[param['w_pind'][key]]
         y[key] = weight * cfunc[key](x=x, par=par[param['p_pind'][key]], **param['args'][key])
+
+        # Protect for NaN/Inf
+        if np.sum(~np.isfinite(y[key])) > 0:
+            print(f'analyze_1D_fit: Evaluated function contain NaN/Inf values !')
+            y[key][~np.isfinite(y[key])] = 0.0
     
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
     print(f'Input bin count sum: {np.sum(counts[fitind]):0.1f} (fit range)')    
@@ -696,7 +703,8 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof):
     fig, ax = iceplot.create_axes(**obs_M, ratio_plot=True)
     
     ## UPPER PLOT
-    ax[0].errorbar(x=cbins, y=counts, yerr=errs, color=(0,0,0), label=f'Data, $N = {np.sum(counts):0.1f}$', **iceplot.errorbar_style)
+    ax[0].errorbar(x=cbins, y=counts, yerr=errs, color=(0,0,0), 
+                   label=f'Data, $N = {np.sum(counts):0.1f}$', **iceplot.errorbar_style)
     ax[0].legend(frameon=False)
     ax[0].set_ylabel('Counts / bin')
 

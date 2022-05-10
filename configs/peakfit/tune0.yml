@@ -31,7 +31,7 @@ fit:
     
     p_name:   ['M0', 'sigma', 'n', 'alpha', 'Gamma', 'asym']
     p_start:  [3.097, 0.02, 1.001, 1.3, 1.0e-4, -0.01]
-    p_limit:  [[3.085, 3.1], [0.01, 0.05], [1.0001, 2.0], [0.1, 2.0], [9.32e-5, 0.05], [-10.0, 10.0]]
+    p_limit:  [[3.085, 3.1], [0.01, 0.05], [1.001, 2.0], [0.1, 2.0], [9.32e-5, 0.05], [-10.0, 10.0]]
     p_fixed:  [False, False, False, False, False, False]
     
   B:
@@ -59,17 +59,17 @@ techno:
   losstype: 'nll'              # 'chi2' or 'nll'
   use_limits: True             # Use parameter bounds
   
-  ncall_simplex_scipy: 10000   # Number of scipy search calls
+  ncall_simplex_scipy: 1000    # Number of scipy search calls
   ncall_scan:     100          # Number of brute force scan calls
-  ncall_simplex:  10000        # Number of Nelder-Mead simplex search calls
+  ncall_simplex:  1000         # Number of Nelder-Mead simplex search calls
   ncall_gradient: 10000        # Number of Minuit gradient search calls
   
   
   hesse: True       # Minuit HESSE uncertainties
   minos: False      # Minuit MINOS uncertainties
 
-  max_chi2: 600     # Maximum chi2/ndf for a succesful fit
-  max_trials: 2     # Number of restarts
+  max_chi2: 1200    # Maximum chi2/ndf for a succesful fit, over this ==> set parameters to 0
+  max_trials: 3     # Number of restarts
   min_count: 5      # Minimum number of entries in the histogram
   
   strategy: 1       # Default 1
