@@ -482,7 +482,9 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         if trials == 0:
             start_values = param['start_values']
         else:
-            start_values = param['start_values'] + np.random.randn(len(param['start_values']))
+            start_values = param['start_values'] + np.random.rand(len(param['start_values']))
+
+
 
         # ------------------------------------------------------------
         # Nelder-Mead search
@@ -596,7 +598,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             print('--> Setting parameters to NaN')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
-    
+
     print(f"chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}")
 
     return par, cov, var2pos, chi2, ndof
@@ -894,7 +896,7 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
 
     ### Loop over datasets
     for YEAR     in [2016, 2017, 2018]:
-        for TYPE in [f'Run{YEAR}', 'JPsi_pythia8']: # Data or MC
+        for TYPE in ['JPsi_pythia8', f'Run{YEAR}']: # Data or MC
             
             # Observables
             for OBS1 in ['absdxy_sig', 'absdxy']:
