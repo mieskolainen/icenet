@@ -578,21 +578,25 @@ def binned_1D_fit(hist, param, fitfunc, techno):
 
     print(f'Parameters: {par}')
     print(f'Covariance: {cov}')
-    
+
     if cov is None:
         print('binned_1D_fit: Uncertainty estimation failed!')
         cov = -1 * np.ones((len(par), len(par)))
 
     if np.sum(counts[fit_range_ind]) < techno['min_count']:
         print(f'binned_1D_fit: Input histogram count < min_count = {techno["min_count"]} ==> fit not realistic')
-        par = np.zeros(len(par))
-        cov = -1 * np.ones((len(par), len(par)))
+        if techno['set_to_nan']:
+            print('--> Setting parameters to NaN')
+            par = np.nan*np.ones(len(par))
+            cov = -1 * np.ones((len(par), len(par)))
 
     if (chi2 / ndof) > techno['max_chi2']:
         print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesful')
-        par = np.zeros(len(par))
-        cov = -1 * np.ones((len(par), len(par)))
-
+        if techno['set_to_nan']:
+            print('--> Setting parameters to NaN')
+            par = np.nan*np.ones(len(par))
+            cov = -1 * np.ones((len(par), len(par)))
+    
     print(f"chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}")
 
     return par, cov, var2pos, chi2, ndof
