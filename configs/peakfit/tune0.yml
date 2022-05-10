@@ -68,11 +68,11 @@ techno:
   hesse: True       # Minuit HESSE uncertainties
   minos: False      # Minuit MINOS uncertainties
 
-  max_chi2: 1200    # Maximum chi2/ndf for a succesful fit, over this ==> set parameters to 0
-  max_trials: 3     # Number of restarts
+  max_chi2: 1200    # Maximum chi2/ndf for a succesful fit
   min_count: 5      # Minimum number of entries in the histogram
+  max_trials: 3     # Number of restarts
   
   set_to_nan: True  # Set parameters after the fit to NaN if not passing max_chi2 or min_count
-  
+
   strategy: 1       # Default 1
   tol: 0.1          # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
