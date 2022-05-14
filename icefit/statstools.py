@@ -1,12 +1,35 @@
-# Statistical tests on ratios
+# Statistical tests and tools
 #
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
 import numba
 import copy
 import scipy.stats as stats
 
+
+def geom_mean_2D(x, y, x_err, y_err, flip_vertical=False):
+  """
+  Geometric 2D mean of x and y (understood e.g. as 1D histograms) element wise
+  and its error propagation based uncertainty (x,y taken independent elem. wise)
+  
+  Math note: outer(u,v)_ij = u_i v_j, with outer(u,v) = uv^T
+  
+  Args:
+  	x, y         : values        (numpy arrays)
+  	x_err, y_err : uncertainties (numpy arrays)
+  
+  Returns:
+  	z, z_err     : 2D-matrix (with rank 1) and its uncertainty
+  """
+  z     = np.sqrt(np.outer(y, x))
+  z_err = 0.5 * np.sqrt(np.outer(y, x_err**2/x) + np.outer(y_err**2/y, x))
+  
+  if flip_vertical:
+    z     = np.flip(z,0)
+    z_err = np.flip(z_err,0)
+  
+  return z, z_err
 
 
 def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
