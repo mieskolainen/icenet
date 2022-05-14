@@ -11,7 +11,7 @@ import scipy.stats as stats
 def geom_mean_2D(x, y, x_err, y_err, flip_vertical=False):
   """
   Geometric 2D mean of x and y (understood e.g. as 1D histograms) element wise
-  and its error propagation based uncertainty (x,y taken independent elem. wise)
+  and its error propagation based uncertainty (x,y taken also independent elem. wise)
   
   Math note: outer(u,v)_ij = u_i v_j, with outer(u,v) = uv^T
   
