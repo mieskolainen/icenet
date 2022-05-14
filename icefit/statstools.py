@@ -18,6 +18,7 @@ def geom_mean_2D(x, y, x_err, y_err, flip_vertical=False):
   Args:
   	x, y         : values        (numpy arrays)
   	x_err, y_err : uncertainties (numpy arrays)
+  	flip_vertical: flip the values over the vertical (y) dimension
   
   Returns:
   	z, z_err     : 2D-matrix (with rank 1) and its uncertainty
