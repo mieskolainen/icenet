@@ -8,6 +8,30 @@ import copy
 import scipy.stats as stats
 
 
+def error_on_mu(sigma, n):
+    """ Standard error estimate on a sample mean.
+    https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf
+    
+    Args:
+        sigma : sample standard deviation
+           n  : sample size
+    """
+    return sigma / np.sqrt(n)
+
+
+def error_on_std(sigma, n):
+    """
+    Standard error estimate on a sample standard deviation.
+    https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf
+    Args:
+        sigma : sample standard deviation
+        n     : sample size
+    """
+    Kn = np.sqrt((n-1)/2) * np.exp(special.loggamma((n-1) / 2) - special.loggamma(n/2))
+    Vn = 2 * ((n-1)/2 - (special.gamma(n/2) / special.gamma((n-1)/2))**2)
+    return sigma * Kn * np.sqrt(Vn / (n-1))
+
+
 def geom_mean_2D(x, y, x_err, y_err, flip_vertical=False):
   """
   Geometric 2D mean of x and y (understood e.g. as 1D histograms) element wise
