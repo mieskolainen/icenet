@@ -18,9 +18,10 @@ jobs:
 
       ## Install:
       - name: Install pip requirements
-        run: pip install -r requirements-travis-1
-        run: pip install -r requirements-travis-2
-
+        run: |
+          pip install -r requirements-travis-1
+          pip install -r requirements-travis-2
+      
       ## Docs building
       - name: Build docs
         run: |
@@ -46,7 +47,8 @@ jobs:
 
       ## Tests
       - name: Run Deep Learning tests
-        run: git clone https://github.com/mieskolainen/travis-stash.git
-        run: source tests/runme_trg.sh
-        run: source tests/runme_eid.sh
-        run: source tests/runme_brk.sh
+        run: |
+          git clone https://github.com/mieskolainen/travis-stash.git
+          source tests/runme_trg.sh
+          source tests/runme_eid.sh
+          source tests/runme_brk.sh
