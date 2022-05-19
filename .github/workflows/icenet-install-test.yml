@@ -16,6 +16,10 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: '3.8.5'
+      
+      ## Install:
+      - run: pip install -r requirements-travis-1
+      - run: pip install -r requirements-travis-2
 
       ## Docs building
       - name: Build
@@ -28,7 +32,7 @@ jobs:
           npm i
           fi
           npm run build
-          
+
           make -C docs/ clean
           make -C docs/ html
           touch docs/build/html/.nojekyll
@@ -46,10 +50,6 @@ jobs:
       #    node-version: '14'
       #- run: npm install -g bats
       #- run: bats -v
-
-      ## Install:
-      - run: pip install -r requirements-travis-1
-      - run: pip install -r requirements-travis-2
 
       ## Tests
       #- git clone git@github.com:mieskolainen/travis-stash.git
