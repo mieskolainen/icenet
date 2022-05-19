@@ -49,6 +49,7 @@ jobs:
         uses: mieskolainen/icenet@v1
         with:
           target_branch: gh-pages
-          build_dir: build
+          #build_dir: build
+          build_dir: ./docs/build/html/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_REPO_TOKEN }}
