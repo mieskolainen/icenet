@@ -8,7 +8,7 @@
 *.zip
 *.txt
 *.text
-*.json
+#*.json
 
 travis-stash/
 dataset/
@@ -16,6 +16,8 @@ tensorboard/
 data/
 trash/
 dev/
+checkpoint/
+
 
 # torch-geometric test data
 tests/Planetoid
