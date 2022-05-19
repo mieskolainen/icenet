@@ -16,6 +16,12 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: '3.8.5'
+
+      ## Compile documentation for the webpage
+      - name: Compile web-pages
+        run: make -C docs/ clean
+        run: make -C docs/ html
+        run: touch docs/build/html/.nojekyll
       
       ## Docs building
       - name: Build
@@ -52,16 +58,3 @@ jobs:
       - run: source tests/runme_trg.sh
       - run: source tests/runme_eid.sh
       - run: source tests/runme_brk.sh
-
-      ## Documentation for the webpage
-      #- run: make -C docs/ clean
-      #- run: make -C docs/ html
-      #- run: touch docs/build/html/.nojekyll
-
-      #- name: Set-up Node
-      #  uses: actions/setup-node@v3
-      #  with:
-      #    node-version: '14'
-      #- run: npm install
-      #- run: npm run build
-      #- run: npm test
