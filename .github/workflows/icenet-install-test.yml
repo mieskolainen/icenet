@@ -20,12 +20,6 @@ jobs:
       - run: pip install -r requirements-travis-1
       - run: pip install -r requirements-travis-2
 
-      # script:
-      #- pytest --cov
-      - run: make -C docs/ clean
-      - run: make -C docs/ html
-      - run: touch docs/build/html/.nojekyll
-
       # Tests
       #- git clone git@github.com:mieskolainen/travis-stash.git
       - run: git clone https://github.com/mieskolainen/travis-stash.git
@@ -33,19 +27,11 @@ jobs:
       - run: source tests/runme_eid.sh
       - run: source tests/runme_brk.sh
 
-      #deploy:
-      #  - provider: pypi
-      #    user: "__token__"
-      #    password: $PYPI_TOKEN
-      #    skip_existing: true
-      #  - provider: pages:git
-      #    verbose: true
-      #    token: $GITHUB_TOKEN
-      #    edge: true
-      #    local_dir: ./docs/build/html/
-      #    keep_history: true
-
-      ## Docs webpage
+      ## Docs for the webpage
+      - run: make -C docs/ clean
+      - run: make -C docs/ html
+      - run: touch docs/build/html/.nojekyll
+      
       - name: Set-up Node
         uses: actions/setup-node@v3
         with:
