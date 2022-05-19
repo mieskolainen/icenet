@@ -47,13 +47,13 @@ jobs:
 
       ## Docs webpage
       - name: Set-up Node
-      - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version: '14'
       - run: npm install
       - run: npm run build
       - run: npm test
-      
+
       - name: Deploy
         uses: mieskolainen/icenet@v1
         with:
