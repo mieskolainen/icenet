@@ -16,11 +16,11 @@ jobs:
       #- run: npm install -g bats
       #- run: bats -v
 
-      # install:
+      ## Install:
       - run: pip install -r requirements-travis-1
       - run: pip install -r requirements-travis-2
 
-      # Tests
+      ## Tests
       #- git clone git@github.com:mieskolainen/travis-stash.git
       - run: git clone https://github.com/mieskolainen/travis-stash.git
       - run: source tests/runme_trg.sh
@@ -28,10 +28,10 @@ jobs:
       - run: source tests/runme_brk.sh
 
       ## Docs for the webpage
-      - run: make -C docs/ clean
-      - run: make -C docs/ html
-      - run: touch docs/build/html/.nojekyll
-      
+      #- run: make -C docs/ clean
+      #- run: make -C docs/ html
+      #- run: touch docs/build/html/.nojekyll
+
       - name: Set-up Node
         uses: actions/setup-node@v3
         with:

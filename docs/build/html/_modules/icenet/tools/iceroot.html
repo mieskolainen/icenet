@@ -39,6 +39,7 @@
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
@@ -49,32 +50,54 @@
 
     <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">numentries</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span></div>
+    <span class="c1">#print(events.numentries)</span>
 
 
 <div class="viewcode-block" id="load_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree">[docs]</a><span class="k">def</span> <span class="nf">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    
+
     <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)[</span><span class="n">tree</span><span class="p">]</span>
-    
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Opening rootfile &lt;</span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1">&gt; with key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
-    <span class="c1">### All variables</span>
-    <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#[x for x in events.keys()]</span>
+    <span class="c1"># ----------------------------------------------------------</span>
+    <span class="c1">### Select variables</span>
     
+    <span class="n">all_ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#[x for x in events.keys()]</span>
+
+    <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">load_ids</span> <span class="o">=</span> <span class="n">all_ids</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">load_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">chosen</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">))</span>
+
+        <span class="c1"># Loop over our input</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+
+            <span class="c1"># Compile regular expression</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+            <span class="c1"># Loop over all keys in the tree</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">all_ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">chosen</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">load_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">chosen</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: All variables     (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">all_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># ----------------------------------------------------------</span>
+
     <span class="c1"># Check length</span>
-    <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+    <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">load_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
     <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
     
     <span class="c1"># Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
 
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">))):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">load_ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
         <span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">load_ids</span><span class="p">)</span>
 
     <span class="c1"># Close the file</span>
     <span class="n">events</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -146,7 +169,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>

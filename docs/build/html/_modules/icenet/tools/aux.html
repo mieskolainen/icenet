@@ -572,12 +572,12 @@
 <div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Classifier performance evaluation metrics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_class</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valrange</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">N_class</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            y_true   : true classifications</span>
 <span class="sd">            y_soft   : probabilities for two classes</span>
-<span class="sd">            weights  : </span>
+<span class="sd">            weights  : event weights</span>
 <span class="sd">            valrange : range of probabilities / soft scores</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -613,13 +613,16 @@
             <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span>
 
         <span class="c1"># Bin the prediction values over different classes</span>
+        <span class="k">if</span> <span class="n">valrange</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">99</span><span class="p">)]</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_mva_bins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
-
+        
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
             <span class="n">ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
             <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
-
+            
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">w</span>  <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
                 <span class="n">counts</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span><span class="p">)</span>
@@ -695,7 +698,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>

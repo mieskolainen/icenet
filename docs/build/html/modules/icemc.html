@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>icemc &#8212; icenet alpha documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="icemc">
+<h1>icemc<a class="headerlink" href="#icemc" title="Permalink to this headline">¶</a></h1>
+<p>Simple Monte Carlo routines.</p>
+<section id="module-icemc.icemc">
+<span id="icemc-icemc"></span><h2>icemc.icemc<a class="headerlink" href="#module-icemc.icemc" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.Gamma2tau">
+<span class="sig-name descname"><span class="pre">Gamma2tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#Gamma2tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.Gamma2tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>Width to mean lifetime</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.U">
+<span class="sig-name descname"><span class="pre">U</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#U"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.U" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uniform random numbers from [a,b]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.annotate_heatmap">
+<span class="sig-name descname"><span class="pre">annotate_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#annotate_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.annotate_heatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotate heatmap with text (broken function, fix TBD).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.outer_sim_loop">
+<span class="sig-name descname"><span class="pre">outer_sim_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctau_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acc_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#outer_sim_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.outer_sim_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulation helper (wrapper) loop</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Acceptance probability matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Z</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.outer_sim_loop_2">
+<span class="sig-name descname"><span class="pre">outer_sim_loop_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rap_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acc_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#outer_sim_loop_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.outer_sim_loop_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulation helper (wrapper) loop</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Acceptance probability matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Z</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.produce_acceptance_sim">
+<span class="sig-name descname"><span class="pre">produce_acceptance_sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#produce_acceptance_sim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.produce_acceptance_sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate fiducial (geometric) acceptance
+by looping over (M,ctau) or (Pt,Rap) pairs, others being fixed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.randexp">
+<span class="sig-name descname"><span class="pre">randexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#randexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.randexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exponential random variables pdf(x) ~ 1/u exp(-x/u) with mean u</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.randpow">
+<span class="sig-name descname"><span class="pre">randpow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#randpow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.randpow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Power-law random numbers for pdf(x) ~ x^{g-1} for a &lt;= x &lt;= b</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.resonance_generator">
+<span class="sig-name descname"><span class="pre">resonance_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#resonance_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.resonance_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulation massive resonance with (M, ctau) parameters,
+having production kinematics (pt2, rapidity, phi ~ flat)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of 4-momentum (resonance 4-momentum)
+x4 : Array of 4-position (resonance decay 4-position)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>p4</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.set_aspect_true_equal">
+<span class="sig-name descname"><span class="pre">set_aspect_true_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#set_aspect_true_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.set_aspect_true_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set plot square sized.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.spherical_acceptance">
+<span class="sig-name descname"><span class="pre">spherical_acceptance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#spherical_acceptance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.spherical_acceptance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spherical (geometric) acceptance function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p4</strong> – Array of 4-momentum</p></li>
+<li><p><strong>x4</strong> – Array of 4-position</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Params:</dt><dd><p>R : Spherical detector radius (extend to more complex) [global]</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of True/False for each event (accepted or not)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.tau2Gamma">
+<span class="sig-name descname"><span class="pre">tau2Gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#tau2Gamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.tau2Gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean lifetime to width</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.test_toy_pt_spectrum">
+<span class="sig-name descname"><span class="pre">test_toy_pt_spectrum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#test_toy_pt_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.test_toy_pt_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icemc.icemc.twobody">
+<span class="sig-name descname"><span class="pre">twobody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icemc/icemc.html#twobody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icemc.icemc.twobody" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-body isotropic decay routine according to dLIPS_2 flat phase space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p</strong> – <p>4-momentum of the mother (in the lab frame, usually)</p>
+<p>m1 : Daughter 1 invariant mass
+m2 : Daughter 2 invariant mass</p>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Daughter 4-momentum</dt><dd><p>in the the same frame as the mother was defined</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>p1,p2</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">icenet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iceplot.html">iceplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icetrg.html">icetrg</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/modules/icemc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

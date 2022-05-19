@@ -652,6 +652,18 @@ MI value is calculated without it.</p>
 </dd></dl>
 
 </section>
+<section id="icefit-peakfit">
+<h2>icefit.peakfit<a class="headerlink" href="#icefit-peakfit" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-icefit.score">
+<span id="icefit-score"></span><h2>icefit.score<a class="headerlink" href="#module-icefit.score" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.score.logL">
+<span class="sig-name descname"><span class="pre">logL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/score.html#logL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.score.logL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log likelihood function logL(mu,sigma | X)</p>
+</dd></dl>
+
+</section>
 <section id="module-icefit.statstools">
 <span id="icefit-statstools"></span><h2>icefit.statstools<a class="headerlink" href="#module-icefit.statstools" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -698,6 +710,53 @@ Below, beta.ppf (percent point functions) returns inverse CDF for quantiles.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>covariance matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.error_on_mu">
+<span class="sig-name descname"><span class="pre">error_on_mu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#error_on_mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.error_on_mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard error estimate on a sample mean.
+<a class="reference external" href="https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf">https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sigma</strong> – sample standard deviation
+n  : sample size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.error_on_std">
+<span class="sig-name descname"><span class="pre">error_on_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#error_on_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.error_on_std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard error estimate on a sample standard deviation.
+<a class="reference external" href="https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf">https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf</a>
+:param sigma: sample standard deviation
+:param n: sample size</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.geom_mean_2D">
+<span class="sig-name descname"><span class="pre">geom_mean_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_vertical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#geom_mean_2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.geom_mean_2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometric 2D mean of x and y (understood e.g. as 1D histograms) element wise
+and its error propagation based uncertainty (x,y taken also independent elem. wise)</p>
+<p>Math note: outer(u,v)_ij = u_i v_j, with outer(u,v) = uv^T</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – values        (numpy arrays)</p></li>
+<li><p><strong>y</strong> – values        (numpy arrays)</p></li>
+<li><p><strong>x_err</strong> – uncertainties (numpy arrays)</p></li>
+<li><p><strong>y_err</strong> – uncertainties (numpy arrays)</p></li>
+<li><p><strong>flip_vertical</strong> – flip the values over the vertical (y) dimension</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2D-matrix (with rank 1) and its uncertainty</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>z, z_err</p>
 </dd>
 </dl>
 </dd></dl>
@@ -828,6 +887,27 @@ E[k2] = lambda2 (Poisson mean)</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.tpratio_taylor">
+<span class="sig-name descname"><span class="pre">tpratio_taylor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#tpratio_taylor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.tpratio_taylor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error propagation on a ratio</p>
+<p>r = x/(x+y)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – values</p></li>
+<li><p><strong>y</strong> – values</p></li>
+<li><p><strong>x_err</strong> – uncertainties</p></li>
+<li><p><strong>y_err</strong> – uncertainties</p></li>
+<li><p><strong>xy_err</strong> – covariance (err_x * err_y * rho_xy)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Error propagated ratio error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.statstools.welch_ttest">
 <span class="sig-name descname"><span class="pre">welch_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#welch_ttest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.welch_ttest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Welch’s two sample t-test for normally distributed variables.
@@ -921,7 +1001,7 @@ p : p-value from t-distribution</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>

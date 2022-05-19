@@ -78,7 +78,7 @@
 <span class="sd">        ind        : list of indices, 1 = pass, 0 = fail</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    
     <span class="c1"># Print out &quot;serial flow&quot;</span>
     <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
@@ -89,7 +89,7 @@
     <span class="c1"># Print out &quot;parallel flow&quot;</span>
     <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point correlations &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
             <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
@@ -118,6 +118,10 @@
 <span class="sd">        See: https://stackoverflow.com/questions/11133339/</span>
 <span class="sd">             parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Functions use internally AND and OR</span>
+    <span class="n">instring</span> <span class="o">=</span> <span class="n">instring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;AND&quot;</span><span class="p">)</span>
+    <span class="n">instring</span> <span class="o">=</span> <span class="n">instring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;||&quot;</span><span class="p">,</span> <span class="s2">&quot;OR&quot;</span><span class="p">)</span>    
 
     <span class="k">def</span> <span class="nf">makeLRlike</span><span class="p">(</span><span class="n">numterms</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -371,8 +375,8 @@
 <span class="sd">    Unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">expr_A</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 AND z &gt;= 4&#39;</span>
-    <span class="n">expr_B</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND (y &lt; 2 AND z &gt;= 4)&#39;</span>
-    <span class="n">expr_C</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND y &lt; 2 OR z &gt;= 4&#39;</span>
+    <span class="n">expr_B</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 AND (y &lt; 2 &amp;&amp; z &gt;= 4)&#39;</span>
+    <span class="n">expr_C</span>     <span class="o">=</span> <span class="s1">&#39;x &lt; 0.2 &amp;&amp; y &lt; 2 || z &gt;= 4&#39;</span>
     
     <span class="n">treelist_A</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_A</span><span class="p">)</span>
     <span class="n">treelist_B</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr_B</span><span class="p">)</span>
@@ -499,7 +503,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>

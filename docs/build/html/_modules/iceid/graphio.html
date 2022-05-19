@@ -49,7 +49,6 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
-<span class="c1">#import uproot_methods</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">from</span>   <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">dataloader</span>
 <span class="kn">from</span>   <span class="nn">torch.multiprocessing</span> <span class="kn">import</span> <span class="n">reductions</span>
@@ -286,7 +285,7 @@
 
                 <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">v</span> <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;parse_graph_data: Empty ECAL cluster event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>
             <span class="c1"># However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed</span>
         
         <span class="c1"># ====================================================================</span>
@@ -354,9 +353,14 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;parse_graph_data: Unknown coordinate representation&#39;</span><span class="p">)</span>
             
             <span class="c1"># other features</span>
-            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_nhit&#39;</span><span class="p">)][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4track</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4track</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_nhit&#39;</span><span class="p">)][</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+                <span class="c1"># Not able to read it (empty cluster data)</span>
+            
     <span class="k">return</span> <span class="n">x</span></div>
 
 
@@ -503,7 +507,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2021, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
+      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
