@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: '3.8.5'
-      
+
       #- uses: actions/setup-node@v3
       #  with:
       #    node-version: '14'
@@ -35,13 +35,13 @@ jobs:
       #- run: make -C docs/ html
       #- run: touch docs/build/html/.nojekyll
 
-      - name: Set-up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-      - run: npm install
-      - run: npm run build
-      - run: npm test
+      #- name: Set-up Node
+      #  uses: actions/setup-node@v3
+      #  with:
+      #    node-version: '14'
+      #- run: npm install
+      #- run: npm run build
+      #- run: npm test
 
       - name: Deploy
         uses: ad-m/github-push-action@v0.5.0
