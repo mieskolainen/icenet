@@ -46,7 +46,7 @@ jobs:
       - name: Deploy
         uses: ad-m/github-push-action@v0.5.0
         with:
-          target_branch: gh-pages
+          branch: gh-pages
           force: true
           #build_dir: build
           directory: ./docs/build/html/
