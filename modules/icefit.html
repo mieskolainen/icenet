@@ -537,7 +537,7 @@ the distribution target mean (or median) m and variance v</p>
 <span id="icefit-mine"></span><h2>icefit.mine<a class="headerlink" href="#module-icefit.mine" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="icefit.mine.MINENet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MINENet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#MINENet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.MINENet" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MINENet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#MINENet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.MINENet" title="Permalink to this definition">¶</a></dt>
 <dd><p>MINE network object</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="icefit.mine.MINENet.forward">
@@ -555,7 +555,7 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="icefit.mine.MINENet.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icefit.mine.MINENet.training" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icefit.mine.MINENet.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -710,6 +710,53 @@ Below, beta.ppf (percent point functions) returns inverse CDF for quantiles.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>covariance matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.error_on_mu">
+<span class="sig-name descname"><span class="pre">error_on_mu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#error_on_mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.error_on_mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard error estimate on a sample mean.
+<a class="reference external" href="https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf">https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sigma</strong> – sample standard deviation
+n  : sample size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.error_on_std">
+<span class="sig-name descname"><span class="pre">error_on_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#error_on_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.error_on_std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard error estimate on a sample standard deviation.
+<a class="reference external" href="https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf">https://web.eecs.umich.edu/~fessler/papers/files/tr/stderr.pdf</a>
+:param sigma: sample standard deviation
+:param n: sample size</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.geom_mean_2D">
+<span class="sig-name descname"><span class="pre">geom_mean_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_vertical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#geom_mean_2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.geom_mean_2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometric 2D mean of x and y (understood e.g. as 1D histograms) element wise
+and its error propagation based uncertainty (x,y taken also independent elem. wise)</p>
+<p>Math note: outer(u,v)_ij = u_i v_j, with outer(u,v) = uv^T</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – values        (numpy arrays)</p></li>
+<li><p><strong>y</strong> – values        (numpy arrays)</p></li>
+<li><p><strong>x_err</strong> – uncertainties (numpy arrays)</p></li>
+<li><p><strong>y_err</strong> – uncertainties (numpy arrays)</p></li>
+<li><p><strong>flip_vertical</strong> – flip the values over the vertical (y) dimension</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2D-matrix (with rank 1) and its uncertainty</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>z, z_err</p>
 </dd>
 </dl>
 </dd></dl>
@@ -957,7 +1004,7 @@ p : p-value from t-distribution</p>
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
