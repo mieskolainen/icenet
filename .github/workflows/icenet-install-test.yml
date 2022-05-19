@@ -17,12 +17,6 @@ jobs:
         with:
           python-version: '3.8.5'
 
-      ## Compile documentation for the webpage
-      - name: Compile web-pages
-        run: make -C docs/ clean
-        run: make -C docs/ html
-        run: touch docs/build/html/.nojekyll
-      
       ## Docs building
       - name: Build
         run: |
@@ -34,6 +28,11 @@ jobs:
           npm i
           fi
           npm run build
+        
+        run: make -C docs/ clean
+        run: make -C docs/ html
+        run: touch docs/build/html/.nojekyll
+
       - name: Release to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
