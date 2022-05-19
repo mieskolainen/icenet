@@ -55,7 +55,7 @@ jobs:
       - run: npm test
 
       - name: Deploy
-        #uses: mieskolainen/icenet@v1
+        uses: mieskolainen/icenet
         with:
           target_branch: gh-pages
           #build_dir: build
