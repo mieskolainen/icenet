@@ -9,22 +9,32 @@ jobs:
   icenet-install-test:
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v1
+
       - uses: actions/setup-python@v3
         with:
           python-version: '3.8.5'
-
-
-      - name: Install and Build # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      
+      ## Docs building
+      - name: Build
         run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
           npm ci
+          else
+          npm i
+          fi
           npm run build
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.3.3
+      - name: Release to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: ./docs/build/html/ # The folder the action should deploy.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
+
+      # ----------------------------------------------
 
       #- uses: actions/setup-node@v3
       #  with:
