@@ -55,7 +55,7 @@ jobs:
       - run: npm test
 
       - name: Deploy
-        uses: mieskolainen/github-push-action@v0.5.0
+        uses: ad-m/github-push-action@v0.5.0
         with:
           target_branch: gh-pages
           force: true
