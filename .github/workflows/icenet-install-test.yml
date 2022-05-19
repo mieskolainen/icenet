@@ -5,7 +5,7 @@ name: icenet-install-test
 on: [push]
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  GITHUB_TOKEN: ${{secrets.github_token }}
 
 jobs:
   icenet-install-test:
@@ -53,4 +53,4 @@ jobs:
           force: true
           #build_dir: build
           directory: ./docs/build/html/
-
+          github_token: ${{ secrets.github_token }}
