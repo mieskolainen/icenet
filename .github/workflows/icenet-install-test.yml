@@ -55,10 +55,11 @@ jobs:
       - run: npm test
 
       - name: Deploy
-        uses: mieskolainen/icenet@master
+        uses: mieskolainen/github-push-action@v0.5.0
         with:
           target_branch: gh-pages
+          force: true
           #build_dir: build
-          build_dir: ./docs/build/html/
+          directory: ./docs/build/html/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_REPO_TOKEN }}
