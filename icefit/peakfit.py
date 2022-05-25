@@ -886,7 +886,7 @@ def get_rootfiles_jpsi(path='/', years=[2016]):
             
             # 1D-observables
             for OBS in ['absdxy']:
-                for BIN in [1,2,3,4,5]:
+                for BIN in [1,2]:
                     for PASS in ['Pass', 'Fail']:
 
                         rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
