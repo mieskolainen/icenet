@@ -10,7 +10,7 @@
 # m.mieskolainen@imperial.ac.uk, 2022
 
 path:     '/home/user/fitdata/flat/muon/generalTracks/JPsi'
-fitrange: [2.9, 3.3] # GeV
+fitrange: [2.91, 3.29] # GeV
 
 fit:
 

@@ -710,7 +710,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof, n
     
     ## UPPER PLOT
     ax[0].errorbar(x=cbins, y=counts, yerr=errs, color=(0,0,0), 
-                   label=f'Data, $N = {np.sum(counts):0.1f}$', **iceplot.errorbar_style)
+                   label=f'Data, $N = {np.sum(counts[fitind]):0.1f}$ (in fit)', **iceplot.errorbar_style)
     ax[0].legend(frameon=False)
     ax[0].set_ylabel('Counts / bin')
 
@@ -871,7 +871,7 @@ def read_yaml_input(inputfile):
     return param, fitfunc, cfunc, steer['techno']
 
 
-def get_rootfiles_jpsi(path='/', years=[2016]):
+def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
     """
     Return rootfile names for the J/psi study.
     """
@@ -886,7 +886,7 @@ def get_rootfiles_jpsi(path='/', years=[2016]):
             
             # 1D-observables
             for OBS in ['absdxy']:
-                for BIN in [1,2]:
+                for BIN in [1,2,3]:
                     for PASS in ['Pass', 'Fail']:
 
                         rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
@@ -996,13 +996,9 @@ def test_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
         N      = {}
         N_err  = {}
 
-        treename = copy.deepcopy(tree)
-        treename = treename.replace("_Pass", "")
-        treename = treename.replace("_Fail", "")        
-
         for PASS in ['Pass', 'Fail']:
 
-            filename = f"{total_savepath}/{f'{treename}_{PASS}'}.pkl"
+            filename = f"{total_savepath}/{f'{tree}_{PASS}'}.pkl"
             print(f'Reading fit results from: {filename} (pickle)')         
             outdict  = pickle.load(open(filename, "rb"))
             #pprint(outdict)
@@ -1037,35 +1033,39 @@ def test_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
         # Loop over observables -- pick 'data_tag' (both data and mc have the same observables)
         for f in y['info'][data_tag]:
 
-            eff     = {}
-            eff_err = {}
+            # Pick Pass -- just a pick (both Pass and Fail will be used)
+            if '_Pass' in f['tree']:
 
-            # Loop over data and MC
-            for TYPE in [data_tag, mc_tag]:
+                tree    = f['tree'].replace("_Pass", "")
+                eff     = {}
+                eff_err = {}
 
-                ### Compute Tag & Probe efficiency
-                N,N_err       = tagprobe(tree=f["tree"], total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
-                eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
-                eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
+                # Loop over data and MC
+                for TYPE in [data_tag, mc_tag]:
 
-                ### Print out
-                print(f'[{TYPE}]')
-                print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
-                print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
-                print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
+                    ### Compute Tag & Probe efficiency
+                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+                    eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
+                    eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
-            ### Compute scale factor Data / MC
-            scale     = eff[data_tag] / eff[mc_tag]
-            scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
-                        sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
+                    ### Print out
+                    print(f'[{TYPE}]')
+                    print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
+                    print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
+                    print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
 
-            print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
+                ### Compute scale factor Data / MC
+                scale     = eff[data_tag] / eff[mc_tag]
+                scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
+                            sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
 
-            ### Save results
-            outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
-            filename = f"{total_savepath}/{f['tree']}.pkl"
-            pickle.dump(outdict, open(filename, "wb"))
-            print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
+                print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
+
+                ### Save results
+                outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
+                filename = f"{total_savepath}/{tree}.pkl"
+                pickle.dump(outdict, open(filename, "wb"))
+                print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
 
 
 if __name__ == "__main__":
