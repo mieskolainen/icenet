@@ -871,8 +871,53 @@ def read_yaml_input(inputfile):
     return param, fitfunc, cfunc, steer['techno']
 
 
+def get_rootfiles_jpsi(path='/', years=[2016]):
+    """
+    Return rootfile names for the J/psi study.
+    """
+    all_years = []
 
-def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/peakfit'):
+    # Loop over datasets
+    for YEAR     in years:
+        info = {}
+        
+        for TYPE in ['JPsi_pythia8', f'Run{YEAR}']: # Data or MC
+            files = []
+            
+            # 1D-observables
+            for OBS in ['absdxy']:
+                for BIN in [1,2,3,4,5]:
+                    for PASS in ['Pass', 'Fail']:
+
+                        rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
+                        tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+
+                        file = {'OBS': OBS, 'BIN': BIN, 'rootfile': rootfile, 'tree': tree}
+                        files.append(file)                
+
+            # 2D-observables
+            for OBS1 in ['absdxy_sig', 'absdxy']:
+                OBS2 = 'pt'
+
+                # Binning
+                for BIN1 in [1,2,3]:
+                    for BIN2 in [1,2,3,4,5]:
+                        for PASS in ['Pass', 'Fail']:
+
+                            rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
+                            tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+
+                            file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'rootfile': rootfile, 'tree': tree}
+                            files.append(file)
+
+            info[TYPE] = files
+
+        all_years.append({'YEAR': YEAR, 'info': info})
+
+    return all_years
+
+
+def test_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
     """
     J/psi peak fitting
     """
@@ -894,71 +939,70 @@ def test_jpsi_fitpeak(inputfile='configs/peakfit/tune0.yml', savepath='output/pe
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
 
-    ### Loop over datasets
-    for YEAR     in [2016, 2017, 2018]:
-        for TYPE in ['JPsi_pythia8', f'Run{YEAR}']: # Data or MC
-            
-            # Observables
-            for OBS1 in ['absdxy_sig', 'absdxy']:
-                OBS2 = 'pt'
+    all_years = get_rootfiles_jpsi(path=param['path'])
 
-                # Binning
-                for BIN1 in [1,2,3]:
-                    for BIN2 in [1,2,3,4,5]:
-                        for PASS in ['Pass', 'Fail']:
+    from pprint import pprint
+    pprint(all_years)
 
-                            ### Uproot input
-                            rootfile = f'{param["path"]}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
-                            tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
-                            hist     = uproot.open(rootfile)[tree]
+    for y in all_years:
+        YEAR = y['YEAR']
 
-                            # Fit and analyze
-                            par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
-                            fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
-                                                                       par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
+        for TYPE in y['info']:
+            for f in y['info'][TYPE]:
 
-                            # Create savepath
-                            total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
-                            if not os.path.exists(total_savepath):
-                                os.makedirs(total_savepath)
+                tree = f["tree"]
+                hist = uproot.open(f["rootfile"])[tree]
 
-                            # Save the fit plot
-                            plt.savefig(f'{total_savepath}/{tree}.pdf')
-                            plt.close('all')
+                # Fit and analyze
+                par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
+                fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
+                                                           par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
-                            # Save the fit numerical data
-                            par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
-                            outdict  = {'par':     par_dict,
-                                        'cov':     cov_arr,
-                                        'var2pos': var2pos,
-                                        'chi2':    chi2,
-                                        'ndof':    ndof,
-                                        'N':       N,
-                                        'N_err':   N_err,
-                                        'h':       h,
-                                        'param':   param}
+                # Create savepath
+                total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
+                if not os.path.exists(total_savepath):
+                    os.makedirs(total_savepath)
 
-                            filename = f"{total_savepath}/{tree}.pkl"
-                            pickle.dump(outdict, open(filename, "wb"))
-                            print(f'Fit results saved to: {filename} (pickle) \n\n')
+                # Save the fit plot
+                plt.savefig(f'{total_savepath}/{tree}.pdf')
+                plt.close('all')
+
+                # Save the fit numerical data
+                par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
+                outdict  = {'par':     par_dict,
+                            'cov':     cov_arr,
+                            'var2pos': var2pos,
+                            'chi2':    chi2,
+                            'ndof':    ndof,
+                            'N':       N,
+                            'N_err':   N_err,
+                            'h':       h,
+                            'param':   param}
+
+                filename = f"{total_savepath}/{tree}.pkl"
+                pickle.dump(outdict, open(filename, "wb"))
+                print(f'Fit results saved to: {filename} (pickle) \n\n')
 
 
-def test_jpsi_tagprobe(savepath='./output/peakfit'):
+def test_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
     """
     Tag & Probe efficiency (& scale factors)
     """
 
     import pytest
     
-    def tagprobe(treename, total_savepath):
+    def tagprobe(tree, total_savepath):
 
         N      = {}
         N_err  = {}
 
+        treename = copy.deepcopy(tree)
+        treename = treename.replace("_Pass", "")
+        treename = treename.replace("_Fail", "")        
+
         for PASS in ['Pass', 'Fail']:
 
-            tree     = f'{treename}_{PASS}'
-            filename = f"{total_savepath}/{tree}.pkl"
+            filename = f"{total_savepath}/{f'{treename}_{PASS}'}.pkl"
             print(f'Reading fit results from: {filename} (pickle)')         
             outdict  = pickle.load(open(filename, "rb"))
             #pprint(outdict)
@@ -969,10 +1013,19 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
 
         return N, N_err
 
+    # ====================================================================
+    # Fit parametrization setup
+
+    param, fitfunc, cfunc, techno = read_yaml_input(inputfile=inputfile)
+
+    ## Read filenames
+    all_years = get_rootfiles_jpsi(path=param['path'])
+
 
     ### Loop over datasets
-    for YEAR     in [2016, 2017, 2018]:
-
+    for y in all_years:
+        
+        YEAR     = y['YEAR']
         data_tag = f'Run{YEAR}'
         mc_tag   = 'JPsi_pythia8'
 
@@ -981,48 +1034,43 @@ def test_jpsi_tagprobe(savepath='./output/peakfit'):
         if not os.path.exists(total_savepath):
             os.makedirs(total_savepath)
         
-        # Observables
-        for OBS1 in ['absdxy_sig', 'absdxy']:
-            OBS2 = 'pt'
-            
-            # Binning
-            for BIN1 in [1,2,3]:
-                for BIN2 in [1,2,3,4,5]:
+        # Loop over observables -- pick 'data_tag' (both data and mc have the same observables)
+        for f in y['info'][data_tag]:
 
-                    print(f'------------------ YEAR = {YEAR} | BIN1 = {BIN1} | BIN2 = {BIN2} ------------------')
+            eff     = {}
+            eff_err = {}
 
-                    eff     = {}
-                    eff_err = {}
+            # Loop over data and MC
+            for TYPE in [data_tag, mc_tag]:
 
-                    treename = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}'
+                ### Compute Tag & Probe efficiency
+                N,N_err       = tagprobe(tree=f["tree"], total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+                eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
+                eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
-                    for TYPE in [data_tag, mc_tag]:
+                ### Print out
+                print(f'[{TYPE}]')
+                print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
+                print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
+                print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
 
-                        ### Compute Tag & Probe efficiency
-                        N,N_err       = tagprobe(treename=treename, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
-                        eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
-                        eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
+            ### Compute scale factor Data / MC
+            scale     = eff[data_tag] / eff[mc_tag]
+            scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
+                        sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
 
-                        ### Print out
-                        print(f'[{TYPE}]')
-                        print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
-                        print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
-                        print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
+            print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
 
-                    ### Compute scale factor Data / MC
-                    scale     = eff[data_tag] / eff[mc_tag]
-                    scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
-                                sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
-
-                    print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
-
-                    ### Save results
-                    outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
-                    filename = f"{total_savepath}/{treename}.pkl"
-                    pickle.dump(outdict, open(filename, "wb"))
-                    print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
+            ### Save results
+            outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
+            filename = f"{total_savepath}/{f['tree']}.pkl"
+            pickle.dump(outdict, open(filename, "wb"))
+            print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
 
 
 if __name__ == "__main__":
-    test_jpsi_fitpeak()
-    test_jpsi_tagprobe()
+
+    inputfile = 'configs/peakfit/tune0.yml'
+
+    test_jpsi_fitpeak(inputfile=inputfile)
+    test_jpsi_tagprobe(inputfile=inputfile)
