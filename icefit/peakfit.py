@@ -966,7 +966,7 @@ def test_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
                 # Save the fit plot
                 plt.savefig(f'{total_savepath}/{tree}.pdf')
                 plt.close('all')
-
+                
                 # Save the fit numerical data
                 par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
                 outdict  = {'par':     par_dict,
