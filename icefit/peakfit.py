@@ -401,7 +401,7 @@ def CB_RBW_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
 
 def binned_1D_fit(hist, param, fitfunc, techno):
     """
-    Main fitting function
+    Main fitting function for a binned fit
     
     Args:
         hist:           TH1 histogram object (from uproot)
@@ -440,20 +440,21 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     #@jit
     def chi2_loss(par):
 
-        posdef = (errs > 0) # Check do we have non-zero bins
+        # Check do we have non-zero bins
+        posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
         if np.sum(posdef) == 0:
             return 1e9
 
         yhat = fitfunc(cbins[fit_range_ind & posdef], par)
         xx   = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
         
-        return onp.sum(xx)
+        return onp.sum(xx), np.sum(posdef)
 
     ### Poissonian negative log-likelihood loss function definition
     #@jit
     def poiss_nll_loss(par):
 
-        posdef = (errs > 0) # Check do we have non-zero bins
+        posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
         if np.sum(posdef) == 0:
             return 1e9
 
@@ -567,8 +568,8 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         par     = m1.values
         cov     = m1.covariance
         var2pos = m1.var2pos
-        chi2    = chi2_loss(par)
-        ndof    = len(counts[fit_range_ind]) - len(par) - 1
+        chi2, posdef_bins = chi2_loss(par)
+        ndof    = posdef_bins - len(par) - 1
 
         trials += 1
 
@@ -894,7 +895,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
 
                         file = {'OBS': OBS, 'BIN': BIN, 'rootfile': rootfile, 'tree': tree}
                         files.append(file)                
-
+            
             # 2D-observables
             for OBS1 in ['absdxy_sig', 'absdxy']:
                 OBS2 = 'pt'

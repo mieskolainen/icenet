@@ -58,6 +58,7 @@ fit:
 techno:
   losstype: 'nll'              # 'chi2' or 'nll'
   use_limits: True             # Use parameter bounds
+  zerobin: 1.0e-2              # Minimum number of counts in a valid bin
   
   # Use at least 10k iterations (otherwise can get stuck in bad local minima)
   
