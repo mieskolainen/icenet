@@ -436,31 +436,33 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     # Extract out
     losstype = techno['losstype']
 
-    ### Chi2 loss function definition
-    #@jit
-    def chi2_loss(par):
+    ### Return fitbins
+    def get_fitbins():
 
-        # Check do we have non-zero bins
         posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
         if np.sum(posdef) == 0:
             return 1e9
 
-        yhat = fitfunc(cbins[fit_range_ind & posdef], par)
-        xx   = (yhat - counts[fit_range_ind & posdef])**2 / (errs[fit_range_ind & posdef])**2
+        return fit_range_ind & posdef
+
+    fitbins = get_fitbins()
+
+
+    ### Chi2 loss function definition
+    #@jit
+    def chi2_loss(par):
+
+        yhat = fitfunc(cbins[fitbins], par)
+        xx   = (yhat - counts[fitbins])**2 / (errs[fitbins])**2
         
-        return onp.sum(xx), np.sum(posdef)
+        return onp.sum(xx)
 
     ### Poissonian negative log-likelihood loss function definition
     #@jit
     def poiss_nll_loss(par):
 
-        posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
-        if np.sum(posdef) == 0:
-            return 1e9
-
-        yhat  = fitfunc(cbins[fit_range_ind & posdef], par)
-
-        T1 = counts[fit_range_ind & posdef] * np.log(yhat)
+        yhat = fitfunc(cbins[fitbins], par)
+        T1 = counts[fitbins] * np.log(yhat)
         T2 = yhat
 
         return (-1)*(np.sum(T1[np.isfinite(T1)]) - np.sum(T2[np.isfinite(T2)]))
@@ -568,9 +570,9 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         par     = m1.values
         cov     = m1.covariance
         var2pos = m1.var2pos
-        chi2, posdef_bins = chi2_loss(par)
-        ndof    = posdef_bins - len(par) - 1
-
+        chi2    = chi2_loss(par)
+        ndof    = np.sum(fitbins) - len(par) - 1
+        
         trials += 1
 
         if (chi2 / ndof < techno['max_chi2']):
