@@ -440,9 +440,6 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     def get_fitbins():
 
         posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
-        if np.sum(posdef) == 0:
-            return 1e9
-
         return fit_range_ind & posdef
 
     fitbins = get_fitbins()
@@ -451,6 +448,8 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     ### Chi2 loss function definition
     #@jit
     def chi2_loss(par):
+        if np.sum(fitbins) == 0:
+            return 1e9
 
         yhat = fitfunc(cbins[fitbins], par)
         xx   = (yhat - counts[fitbins])**2 / (errs[fitbins])**2
@@ -460,7 +459,9 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     ### Poissonian negative log-likelihood loss function definition
     #@jit
     def poiss_nll_loss(par):
-
+        if np.sum(fitbins) == 0:
+            return 1e9
+        
         yhat = fitfunc(cbins[fitbins], par)
         T1 = counts[fitbins] * np.log(yhat)
         T2 = yhat
