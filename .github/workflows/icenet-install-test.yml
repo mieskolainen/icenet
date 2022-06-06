@@ -22,7 +22,8 @@ jobs:
           
       - name: Install requirements
         run: |
-          pip install -r requirements-cpu-only.txt
+          pip install -r requirements-github-actions-1.txt
+          pip install -r requirements-github-actions-2.txt
       
       ## Docs building
       - name: Build docs
