@@ -11,7 +11,7 @@ Preliminaries: Conda installation
 ----------------------------------
 .. code-block:: none
 
-	wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+	wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 
 
 Then execute with 'bash filename.sh'
 
@@ -36,12 +36,11 @@ Automated setup
 	conda activate icenet
 	
 	# Install cudatoolkit and cudnn (make sure no other installations overlap)
-	conda install -c nvidia cudatoolkit==11.1.74 cudnn==8.0.4
+	conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
 	conda install -c conda-forge cudatoolkit-dev
 	
-	# Pick GPU or CPU version (GPU version works for CPU too)	
-	pip install -r requirements-gpu-linux.txt
-	pip install -r requirements-cpu-linux.txt
+	# Install dependencies with pip
+	pip install -r requirements.txt
 
 
 Note: If you experience ´No space left on device´ problem with conda or pip, set the temporary path
