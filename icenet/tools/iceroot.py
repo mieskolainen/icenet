@@ -22,14 +22,29 @@ def load_tree_stats(rootfile, tree):
 
 
 def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None):
+    """
+    Load ROOT files
 
-    events = uproot.open(rootfile)[tree]
+    Args:
+        rootfile
+        tree:
+        entry_start:
+        entry_stop:
+        ids:
+
+    Returns:
+
+    """
+
     cprint(__name__ + f'.load_tree: Opening rootfile <{rootfile}> with key <{tree}>', 'yellow')
 
+    files = [rootfile[i] + f':{tree}' for i in range(len(rootfile))]
+    
     # ----------------------------------------------------------
     ### Select variables
-    
-    all_ids = events.keys() #[x for x in events.keys()]
+    events = uproot.open(files[0])
+    all_ids = events.keys()
+
 
     if ids is None:
         load_ids = all_ids
@@ -53,18 +68,23 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None):
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
     # ----------------------------------------------------------
 
+    Y = uproot.concatenate(files, expressions=load_ids, library='np', entry_start=entry_start, entry_stop=entry_stop)
+    
+    #print(X)
+
     # Check length
-    X_test = events.arrays(load_ids[0], entry_start=entry_start, entry_stop=entry_stop)
-    N      = len(X_test)
+    #X_test = events.arrays(load_ids[0], entry_start=entry_start, entry_stop=entry_stop)
+    #N      = len(X_test)
     
     # Needs to be an object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(load_ids)), dtype=object) 
+    #X = np.empty((N, len(load_ids)), dtype=object) 
 
-    for j in tqdm(range(len(load_ids))):
-        x = events.arrays(load_ids[j], library="np", how=list, entry_start=entry_start, entry_stop=entry_stop)
-        X[:,j] = np.asarray(x)
+    ##for j in tqdm(range(len(load_ids))):
+    ##    x = events.arrays(load_ids[j], library="np", how=list, entry_start=entry_start, entry_stop=entry_stop)
+    ##    X[:,j] = np.asarray(x)
+    ##
 
-    Y = icemap(x=X, ids=load_ids)
+    #Y = icemap(x=X, ids=load_ids)
 
     # Close the file
     events.close()

@@ -32,71 +32,72 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             paramdict[var] = varname
         except:
             break
-    print(__name__ + f'.compute_ND_reweights: Using the following variables {paramdict}')
-    
-    print(ids)
-    
-    ### Re-weighting variables
-    RV = {}
-    for var in paramdict.keys():
-        RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
-
-    ### Pre-transform
-    for var in paramdict.keys():
-        mode = args[f'transform_{var}']
-
-        if   mode == 'log10':
-            if np.any(RV[var] <= 0):
-                ind = (RV[var] <= 0)
-                cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
-
-            RV[var] = np.log10(np.maximum(RV[var], EPS))
-
-            # Bins
-            args[f'bins_{var}'][0] = np.log10(args[f'bins_{var}'][0] + EPS)
-            args[f'bins_{var}'][1] = np.log10(args[f'bins_{var}'][1])
-
-        elif mode == 'sqrt':
-            RV[var] = np.sqrt(np.maximum(RV[var], EPS))
-
-            # Bins
-            args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0])
-            args[f'bins_{var}'][1] = np.sqrt(args[f'bins_{var}'][1])
-
-        elif mode == 'square':
-            RV[var] = RV[var]**2
-
-            # Bins
-            args[f'bins_{var}'][0] = (args[f'bins_{var}'][0])**2
-            args[f'bins_{var}'][1] = (args[f'bins_{var}'][1])**2
-
-        elif mode == None:
-            True
-        else:
-            raise Except(__name__ + '.compute_ND_reweights: Unknown pre-transform')
-
-    # Binning setup
-    binedges = {}
-    for var in paramdict.keys():
-        if   args[f'binmode_{var}'] == 'linear':
-            binedges[var] = np.linspace(
-                                 args[f'bins_{var}'][0],
-                                 args[f'bins_{var}'][1],
-                                 args[f'bins_{var}'][2])
-
-        elif args[f'binmode_{var}'] == 'log':
-            binedges[var] = np.logspace(
-                                 np.log10(np.max([args[f'bins_{var}'][0], EPS])),
-                                 np.log10(args[f'bins_{var}'][1]),
-                                 args[f'bins_{var}'][2], base=10)
-        else:
-            raise Except(__name__ + ': Unknown re-weight binning mode')
     
     print(__name__ + f".compute_ND_reweights: reference class: <{args['reference_class']}>")
 
     # Compute event-by-event weights
     if args['differential_reweight']:
+    
+        print(__name__ + f'.compute_ND_reweights: Differential re-weighting using the following variables {paramdict}')
+        print(ids)
         
+        ### Re-weighting variables
+        RV = {}
+        for var in paramdict.keys():
+            RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
+
+        ### Pre-transform
+        for var in paramdict.keys():
+            mode = args[f'transform_{var}']
+
+            if   mode == 'log10':
+                if np.any(RV[var] <= 0):
+                    ind = (RV[var] <= 0)
+                    cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
+
+                RV[var] = np.log10(np.maximum(RV[var], EPS))
+
+                # Bins
+                args[f'bins_{var}'][0] = np.log10(args[f'bins_{var}'][0] + EPS)
+                args[f'bins_{var}'][1] = np.log10(args[f'bins_{var}'][1])
+
+            elif mode == 'sqrt':
+                RV[var] = np.sqrt(np.maximum(RV[var], EPS))
+
+                # Bins
+                args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0])
+                args[f'bins_{var}'][1] = np.sqrt(args[f'bins_{var}'][1])
+
+            elif mode == 'square':
+                RV[var] = RV[var]**2
+
+                # Bins
+                args[f'bins_{var}'][0] = (args[f'bins_{var}'][0])**2
+                args[f'bins_{var}'][1] = (args[f'bins_{var}'][1])**2
+
+            elif mode == None:
+                True
+            else:
+                raise Except(__name__ + '.compute_ND_reweights: Unknown pre-transform')
+
+        # Binning setup
+        binedges = {}
+        for var in paramdict.keys():
+            if   args[f'binmode_{var}'] == 'linear':
+                binedges[var] = np.linspace(
+                                     args[f'bins_{var}'][0],
+                                     args[f'bins_{var}'][1],
+                                     args[f'bins_{var}'][2])
+
+            elif args[f'binmode_{var}'] == 'log':
+                binedges[var] = np.logspace(
+                                     np.log10(np.max([args[f'bins_{var}'][0], EPS])),
+                                     np.log10(args[f'bins_{var}'][1]),
+                                     args[f'bins_{var}'][2], base=10)
+            else:
+                raise Except(__name__ + ': Unknown re-weight binning mode')
+        
+
         rwparam = {
             'y':               y,
             'N_class':         N_class,
@@ -129,9 +130,9 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
         else:
             raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality {len(paramdict)}')
-
+    
+    # No differential re-weighting    
     else:
-        # No re-weighting
         weights_doublet = np.zeros((x.shape[0], N_class))
         for c in range(N_class):    
             weights_doublet[y == c, c] = 1

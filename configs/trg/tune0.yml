@@ -137,8 +137,8 @@ plot_param:
   ## MVA output density (1D)
   plot_MVA_output:
     edges: 80
-
-  ## MVA (output, external variable) density (2D)
+  
+  ## (MVA output x external variable) density (2D)
   plot_COR__0:
     var:   ['']
     edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},

@@ -1,6 +1,6 @@
 # Printing functions
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import matplotlib.pyplot as plt

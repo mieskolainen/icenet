@@ -40,7 +40,7 @@ def main() :
     ### Get input
     paths, args, cli, iodir = common.init()
     VARS = features.generate_feature_names(args['MAXT3'])
-    targetdir = f'./figs/brk/{cli.tag}/fit/'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = f'./figs/{args["rootname"]}/{cli.tag}/fit/'; os.makedirs(targetdir, exist_ok = True)
     
     # ====================================================================
     

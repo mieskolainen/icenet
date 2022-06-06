@@ -54,8 +54,8 @@ def main() :
     ### Get input
     paths, args, cli, iodir = common.init()
     VARS = features.generate_feature_names(args['MAXT3'])
-    modeldir = f'./checkpoint/brk/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
-    plotdir  = f'./figs/brk/{args["config"]}/train/'; os.makedirs(plotdir,  exist_ok = True)
+    modeldir = f'./checkpoint/{args["rootname"]}/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
+    plotdir  = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(plotdir,  exist_ok = True)
 
     # ========================================================================
     ### Event loop

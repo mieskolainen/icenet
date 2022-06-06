@@ -559,12 +559,12 @@ class Metric:
         lhs = len(y_true) 
         rhs = (ok == True).sum()
         if (lhs != rhs) :
-            print(f'Metric: input length = {lhs} with non-finite values = {lhs - rhs}')
+            print(__name__ + f'.Metric: input length = {lhs} with non-finite values = {lhs - rhs}')
             print(y_soft)
-
+        
         # invalid input
         if (np.sum(y_true == 0) == 0) | (np.sum(y_true == 1) == 0):
-            print('Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)')
+            print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)')
             self.fpr = -1
             self.tpr = -1
             self.thresholds = -1

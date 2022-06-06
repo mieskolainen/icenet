@@ -28,11 +28,6 @@ from icenet.tools import plots
 import matplotlib.pyplot as plt
 
 
-# Command line arguments
-from glob import glob
-from braceexpand import braceexpand
-
-
 # ******** GLOBALS *********
 roc_mstats    = []
 roc_labels    = []
@@ -82,32 +77,14 @@ def read_config(config_path='./configs/xyz'):
     cprint(__name__ + f'.read_config: image_on = {args["image_on"]}', 'yellow')    
 
     # -------------------------------------------------------------------
-    # Do brace expansion
-    datasets = list(braceexpand(cli.datasets))
 
-    # Parse input files into a list
-    args['root_files'] = list()
-    for data in datasets:
-        filepath = glob(cli.datapath + '/' + data + '.root')
-        if filepath != []:
-            for i in range(len(filepath)):
-                args['root_files'].append(filepath[i])
-
-    if args['root_files'] == []:
-        args['root_files'] = [cli.datapath]
+    args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # -------------------------------------------------------------------
     
     print(args)
     print('')
     print(" torch.__version__: " + torch.__version__)
-    print("")
-    print(" Try 'filename_*' ")
-    print(" Try 'filename_[0-99]' ")
-    print(" Try 'filename_0' ")
-    print(" Try 'filename_{0,3,4}' ")
-    print(" Google <glob wildcards> and brace expansion.")
-    print("")
 
     return args, cli
 

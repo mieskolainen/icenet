@@ -228,11 +228,11 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
                 else:
                     met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
 
-                print(f'{string} | AUC = {met.auc:.5f}')
+                print(__name__ + f'.binned_2D_AUC: {string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
             else:
-                print(f'{string} | No events found in this cell!')
+                print(__name__ + f'.binned_2D_AUC: {string} | No events found in this cell!')
 
 
     # Evaluate total performance
@@ -294,10 +294,10 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
 
                 AUC[i] = met.auc
                 METS.append(met)
-                print(f'{string} | AUC = {AUC[i]}')
+                print(__name__ + f'.binned_1D_AUC: {string} | AUC = {AUC[i]}')
             else:
                 METS.append(None)
-                print(f'{string} | No events found in this cell!')
+                print(__name__ + f'.binned_1D_AUC: {string} | No events found in this cell!')
 
             LABELS.append(f'{ids}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
 
@@ -661,6 +661,11 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
     """
     N_class = metrics[0].N_class
 
+    for i in range(len(metrics)):
+        if len(metrics[i].mva_hist) != N_class:
+            print(__name__ + f'.MVA_plot: Error: N_class != len(metrics[i].mva_hist) (check per class statistics), return -1')
+            return -1
+
     for k in [0,1]: # linear & log
         
         fig,ax = plt.subplots(1, N_class, figsize=(7*N_class, 5))
@@ -669,7 +674,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
         for c in range(N_class):
 
             # Loop over cells
-            N      = len(metrics[0].mva_hist[c]) # Number of cells
+            N      = len(metrics[0].mva_hist[c]) # Number of bins
             counts = np.zeros((N, len(metrics)))
             cbins  = np.zeros((N, len(metrics)))
             

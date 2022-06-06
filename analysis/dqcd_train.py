@@ -1,6 +1,6 @@
-# Electron HLT trigger [TRAINING] steering code
+# DQCD [TRAINING] steering code
 #
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 # icenet system paths
@@ -28,8 +28,8 @@ from icenet.tools import prints
 from icenet.tools import process
 
 
-# icetrg
-from icetrg import common
+# icedqcd
+from icedqcd import common
 
 
 # Main function
@@ -44,14 +44,16 @@ def main() :
     
     ### Compute reweighting weights
     trn_weights = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.ids, args=args['reweight_param'])
-
-
+    
+    
     ### Plot some kinematic variables
+    """
     targetdir = f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/'
     os.makedirs(targetdir, exist_ok = True)
     for k in ['x_hlt_pt', 'x_hlt_eta']:
         plots.plotvar(x = data.trn.x[:, data.ids.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
             targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+    """
 
     ### Plot variables
     if args['plot_param']['basic_on'] == True:

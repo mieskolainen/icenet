@@ -14,13 +14,14 @@ jobs:
 
       - uses: actions/setup-python@v3
         with:
-          python-version: '3.8.5'
-
+          python-version: '3.9.6'
+      
       ## Install:
-      - name: Install pip requirements
+      - name: Install requirements
         run: |
-          pip install -r requirements-travis-1
-          pip install -r requirements-travis-2
+          conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
+          conda install -c conda-forge cudatoolkit-dev
+          pip install -r requirements.txt
       
       ## Docs building
       - name: Build docs

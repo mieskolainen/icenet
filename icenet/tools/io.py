@@ -23,6 +23,47 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
 
+# Command line arguments
+from glob import glob
+from braceexpand import braceexpand
+
+
+
+def glob_expand_files(datasets, datapath):
+    """
+    Do global / brace expansion of files
+
+    Args:
+        datasets: dataset filename with glob syntax
+        datapath: path to files
+    
+    Returns:
+        files: full filenames including the path
+    """
+    print("")
+    print(" Try 'filename_*' ")
+    print(" Try 'filename_[0-99]' ")
+    print(" Try 'filename_0' ")
+    print(" Try 'filename_{0,3,4}' ")
+    print(" Google <glob wildcards> and brace expansion.")
+    print("")
+    
+    datasets = list(braceexpand(datasets))
+
+    # Parse input files into a list
+    files = list()
+    for data in datasets:
+        filepath = glob(datapath + '/' + data)
+        if filepath != []:
+            for i in range(len(filepath)):
+                files.append(filepath[i])
+
+    if files == []:
+       files = [datapath]
+
+    return files
+
+
 def showmem(color='red'):
     cprint(__name__ + f""".showmem: Process RAM usage: {process_memory_use():0.2f} GB 
         [total RAM in use {psutil.virtual_memory()[2]} %]""", color)

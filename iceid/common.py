@@ -193,7 +193,9 @@ def init(MAXEVENTS=None):
 
     # Background (0) and signal (1)
     class_id = [0,1]
-    data     = io.DATASET(func_loader=load_root_file_new, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+
+    files = io.glob_expand_files(datapath=cli.datapath, datasets=cli.datasets)
+    data  = io.DATASET(func_loader=load_root_file_new, files=files, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
     # @@ Imputation @@
     if args['imputation_param']['active']:
@@ -355,13 +357,9 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
     cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
 
-#    file = uproot4.open(root_path)
-#    events = file["ntuplizer"]["tree"]
-
     file = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
-
-
+    
     print(events)
     print(events.name)
     print(events.title)

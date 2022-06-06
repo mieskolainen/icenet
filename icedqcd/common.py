@@ -1,6 +1,6 @@
-# Common input & data reading routines for the HLT electron trigger studies
+# Common input & data reading routines for the DQCD analysis
 # 
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -23,15 +23,14 @@ from icenet.tools import iceroot
 
 
 # GLOBALS
-from configs.trg.mvavars import *
-from configs.trg.cuts import *
-from configs.trg.filter import *
-
+from configs.dqcd.mvavars import *
+from configs.dqcd.cuts import *
+from configs.dqcd.filter import *
 
 
 def init(MAXEVENTS=None):
-    """ Initialize electron HLT trigger data.
-	
+    """ Initialize the input data.
+    
     Args:
         Implicit commandline and yaml file input.
     
@@ -39,7 +38,7 @@ def init(MAXEVENTS=None):
         jagged array data, arguments
     """
     
-    args, cli = process.read_config('./configs/trg')
+    args, cli = process.read_config('./configs/dqcd')
     features  = globals()[args['imputation_param']['var']]
     
     
@@ -92,10 +91,11 @@ def init(MAXEVENTS=None):
         data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
         
     else:
+        True
         # No imputation, but fix spurious NaN / Inf
-        data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
-        data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
-        data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
+        #data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
+        #data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
+        #data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
 
     cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
@@ -131,43 +131,34 @@ def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id =
         "entry_stop":  entrystop,
         "args": args
     }
-
-    # =================================================================
-    # *** MC (signal) ***
-    
-    rootfile      = [f'{root_path}/{args["mcfile"]}']
-    
-    # e1
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e1', **param)
-    
-    X_MC_e1 = X_MC[:, [VARS_MC.index(name.replace("x_", "e1_")) for name in NEW_VARS]]
-    Y_MC_e1 = np.ones(X_MC_e1.shape[0])
-    
-    
-    # e2
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e2', **param)
-    
-    X_MC_e2 = X_MC[:, [VARS_MC.index(name.replace("x_", "e2_")) for name in NEW_VARS]]
-    Y_MC_e2 = np.ones(X_MC_e2.shape[0])
-    
     
     # =================================================================
-    # *** DATA (background) ***
+    # *** BACKGROUND MC ***
 
-    rootfile          = [f'{root_path}/{args["datafile"]}']
-    X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
+    filename = args["MC_input"]['background']
+    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
-    X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
-    Y_DATA = np.zeros(X_DATA.shape[0])
+    X_B, VARS = process_root(rootfile=rootfile, tree='Events', isMC=True, **param)
+    Y_B = np.zeros(X_B.shape[0])
+
+
+    # =================================================================
+    # *** SIGNAL MC ***
+
+    filename = args["MC_input"]['signal']
+    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
+
+    X_S, VARS = process_root(rootfile=rootfile, tree='Events', isMC=True, **param)
+    Y_S = np.ones(X_S.shape[0])
     
     
     # =================================================================
     # Finally combine
 
-    X = np.concatenate((X_MC_e1, X_MC_e2, X_DATA), axis=0)
-    Y = np.concatenate((Y_MC_e1, Y_MC_e2, Y_DATA), axis=0)
-
-
+    X = np.concatenate((X_B, X_S), axis=0)
+    Y = np.concatenate((Y_B, Y_S), axis=0)
+    
+    
     # ** Crucial -- randomize order to avoid problems with other functions **
     arr  = np.arange(X.shape[0])
     rind = np.random.shuffle(arr)
@@ -178,10 +169,12 @@ def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id =
     # =================================================================
     # Custom treat specific variables
 
+    """
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
-
-    return X, Y, NEW_VARS
+    """
+    
+    return X, Y, VARS
 
 
 def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
@@ -194,7 +187,7 @@ def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
     X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
     for i in range(len(ids)):
         X[:,i] = Y[ids[i]]
-
+    
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
@@ -230,13 +223,14 @@ def splitfactor(data, args):
     """
     
     ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.ids    = k_vars
+    if KINEMATIC_ID is not None:
+        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
+        
+        data_kin        = copy.deepcopy(data)
+        data_kin.trn.x  = data.trn.x[:, k_ind].astype(np.float)
+        data_kin.val.x  = data.val.x[:, k_ind].astype(np.float)
+        data_kin.tst.x  = data.tst.x[:, k_ind].astype(np.float)
+        data_kin.ids    = k_vars
 
     ### Pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
@@ -244,6 +238,6 @@ def splitfactor(data, args):
     data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
     data.val.x    = data.val.x[:, s_ind].astype(np.float)
     data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids     = s_vars
+    data.ids      = s_vars
 
     return data, data_kin

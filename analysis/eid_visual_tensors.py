@@ -49,7 +49,7 @@ def main() :
     data, args, features = common.init(MAXEVENTS=30000)
 
     
-    targetdir = f'./figs/eid/{args["config"]}/image/'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/image/'; os.makedirs(targetdir, exist_ok = True)
 
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
