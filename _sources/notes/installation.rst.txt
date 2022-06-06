@@ -41,6 +41,7 @@ Automated setup
 	
 	# Install dependencies with pip
 	pip install -r requirements.txt
+	(OR pip install -r requirements-cpu-only.txt)
 
 
 Note: If you experience ´No space left on device´ problem with conda or pip, set the temporary path

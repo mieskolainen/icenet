@@ -36,8 +36,66 @@
   <section id="icetrg">
 <h1>icetrg<a class="headerlink" href="#icetrg" title="Permalink to this heading">¶</a></h1>
 <p>High Level Trigger (HLT) classifiers.</p>
-<section id="icetrg-common">
-<h2>icetrg.common<a class="headerlink" href="#icetrg-common" title="Permalink to this heading">¶</a></h2>
+<section id="module-icetrg.common">
+<span id="icetrg-common"></span><h2>icetrg.common<a class="headerlink" href="#module-icetrg.common" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icetrg.common.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MAXEVENTS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icetrg/common.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icetrg.common.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize electron HLT trigger data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input.</strong> (<em>Implicit commandline and yaml file</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>jagged array data, arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icetrg.common.load_root_file">
+<span class="sig-name descname"><span class="pre">load_root_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entrystop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icetrg/common.html#load_root_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icetrg.common.load_root_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the root file with signal events from MC and background from DATA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_path</strong> – paths to root files</p></li>
+<li><p><strong>class_id</strong> – class ids</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>input, output matrices
+ids       : variable names</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>X,Y</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icetrg.common.process_root">
+<span class="sig-name descname"><span class="pre">process_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isMC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icetrg/common.html#process_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icetrg.common.process_root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icetrg.common.splitfactor">
+<span class="sig-name descname"><span class="pre">splitfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icetrg/common.html#splitfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icetrg.common.splitfactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split electron ID data into different datatypes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – jagged arrays</p></li>
+<li><p><strong>args</strong> – arguments dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar (vector) data
+kinematic data</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
