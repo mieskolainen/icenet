@@ -50,6 +50,6 @@ jobs:
       - name: Run Deep Learning tests
         run: |
           git clone https://github.com/mieskolainen/travis-stash.git
-          source tests/runme_trg.sh
-          source tests/runme_eid.sh
-          source tests/runme_brk.sh
+          source setenv.sh && source tests/runme_trg.sh
+          source setenv.sh && source tests/runme_eid.sh
+          source setenv.sh && source tests/runme_brk.sh
