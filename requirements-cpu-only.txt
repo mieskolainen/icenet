@@ -1,6 +1,6 @@
 # PYTORCH
-torch==1.11.0+cu113
-torchvision==0.12.0+cu113
+torch==1.11.0
+torchvision==0.12.0
 torchaudio==0.11.0
 -f https://download.pytorch.org/whl/torch_stable.html
 
@@ -10,6 +10,6 @@ torch-sparse
 torch-cluster
 torch-spline-conv
 torch-geometric
--f https://data.pyg.org/whl/torch-1.11.0+cu113.html
+-f https://data.pyg.org/whl/torch-1.11.0.html
 
 -r requirements-aux.txt

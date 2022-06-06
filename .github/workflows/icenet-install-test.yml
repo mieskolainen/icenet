@@ -17,11 +17,12 @@ jobs:
           python-version: '3.9.6'
       
       ## Install:
+      # conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
+      # conda install -c conda-forge cudatoolkit-dev
+          
       - name: Install requirements
         run: |
-          conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
-          conda install -c conda-forge cudatoolkit-dev
-          pip install -r requirements.txt
+          pip install -r requirements-cpu-only.txt
       
       ## Docs building
       - name: Build docs

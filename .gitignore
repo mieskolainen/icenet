@@ -6,9 +6,9 @@
 *.pkl
 *.pt
 *.zip
-*.txt
 *.text
 #*.json
+#*.txt
 
 travis-stash/
 dataset/
@@ -17,7 +17,10 @@ data/
 trash/
 dev/
 checkpoint/
-
+figs/
+output/
+testfigs/
+tbfigs/
 
 # torch-geometric test data
 tests/Planetoid
