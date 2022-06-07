@@ -44,7 +44,7 @@ from configs.eid.cuts import *
 
 
 def init_multiprocess(MAXEVENTS=None):
-    """ Initialize electron ID data.
+    """ Initialize electron ID data [UNTESTED FUNCTION]
 
     Args:
         Implicit commandline and yaml file input.
@@ -102,13 +102,13 @@ def init_multiprocess(MAXEVENTS=None):
         procs = []
         for k in range(len(block_ind)):
             inputs = {
-                'root_path'  : args['root_files'][i],
-                'ids'       : None,
-                'entrystart' : block_ind[k][0],
-                'entrystop'  : block_ind[k][1],
-                'image_on'   : args['image_on'],
-                'graph_on'   : args['graph_on'],
-                'args'       : args
+                'root_path'   : args['root_files'][i],
+                'ids'         : None,
+                'entry_start' : block_ind[k][0],
+                'entry_stop'  : block_ind[k][1],
+                'image_on'    : args['image_on'],
+                'graph_on'    : args['graph_on'],
+                'args'        : args
             }
 
             p = multiprocessing.Process(target=load_root_file_multiprocess, args=(k, inputs, return_dict))
@@ -176,14 +176,7 @@ def init(MAXEVENTS=None):
     print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
     np.random.seed(args['rngseed'])
     
-    # --------------------------------------------------------------------
-    ### SET GLOBALS (used only in this file)
-    global ARGS
-    ARGS = args
-
-    if MAXEVENTS is not None:
-        ARGS['MAXEVENTS'] = MAXEVENTS
-    
+    # --------------------------------------------------------------------    
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
     print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
@@ -195,7 +188,13 @@ def init(MAXEVENTS=None):
     class_id = [0,1]
 
     files = io.glob_expand_files(datapath=cli.datapath, datasets=cli.datasets)
-    data  = io.DATASET(func_loader=load_root_file_new, files=files, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+
+    if MAXEVENTS is None:
+        MAXEVENTS = args['MAXEVENTS']
+    load_args = {'max_num_elements': MAXEVENTS,
+                 'args': args}
+
+    data  = io.DATASET(func_loader=load_root_file, files=files, load_args=load_args, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
     # @@ Imputation @@
     if args['imputation_param']['active']:
@@ -311,20 +310,22 @@ def fast_conversion(hdfarray, shape, dtype):
     return a
 
 
-def load_root_file_multiprocess(procnumber, inputs, return_dict):
-    
+def load_root_file_multiprocess(procnumber, inputs, return_dict, library='np'):
+    """
+    [UNTESTED FUNCTION]
+    """
+
     print('\n\n\n\n\n')
     print(inputs)
 
-    # root_path, ids=None, entrystart=0, entrystop=None, output_graph=True, output_tensor=False, args=None
 
-    root_path  = inputs['root_path']
-    ids       = inputs['ids']
-    entrystart = inputs['entrystart']
-    entrystop  = inputs['entrystop']
-    graph_on   = inputs['graph_on']
-    image_on   = inputs['image_on']
-    args       = inputs['args']
+    root_path   = inputs['root_path']
+    ids         = inputs['ids']
+    entry_start = inputs['entry_start']
+    entry_stop  = inputs['entry_stop']
+    graph_on    = inputs['graph_on']
+    image_on    = inputs['image_on']
+    args        = inputs['args']
 
 
     """ Loads the root file.
@@ -347,15 +348,15 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     TARFUNC    = globals()[args['targetfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    if entrystop is None:
-        entrystop = args['MAXEVENTS']
+    if entry_stop is None:
+        entry_stop = args['MAXEVENTS']
     # -----------------------------------------------
 
     
     ### From root trees
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
-    cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
+    cprint( __name__ + f'.load_root_file: entry_start = {entry_start}, entry_stop = {entry_stop}')
 
     file = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
@@ -371,8 +372,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
         ids = [x.decode() for x in events.keys()]# if b'image_' not in x]
 
     # Check is it MC (based on the first event)
-    # X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
-    X_test = events.array('is_mc', entrystart=entrystart, entrystop=entrystop)
+    X_test = events.array('is_mc', entry_start=entry_start, entry_stop=entry_stop, library=library)
 
     print(X_test)
 
@@ -392,8 +392,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     X = np.empty((N, len(ids)), dtype=object) 
 
     for j in tqdm(range(len(ids))):
-        #x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
-        x = events.array(ids[j], entrystart=entrystart, entrystop=entrystop)
+        x = events.array(ids[j], entry_start=entry_start, entry_stop=entry_stop, library=library)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
     Y = None
@@ -411,14 +410,14 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
 
         # @@ MC target definition here @@
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(events, entrystart=entrystart, entrystop=entrystop)
+        Y = TARFUNC(events, entry_start=entry_start, entry_stop=entry_stop)
         Y = np.asarray(Y).T
 
         print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, ids=labels1, entrystart=entrystart, entrystop=entrystop)
+        aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop)
 
         prints.printbar()
 
@@ -473,7 +472,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict):
     return_dict[procnumber] = {'X': X, 'Y': Y, 'ids': ids, "X_tensor": X_tensor, "X_graph": X_graph, 'N': X.shape[0]}
 
 
-def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
+def load_root_file(root_path, ids=None, class_id = [], max_num_elements=None, args=None, library='np'):
     """ Loads the root file.
     
     Args:
@@ -486,23 +485,15 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     """
 
     # -----------------------------------------------
-    # ** GLOBALS **
-
-    if args is None:
-        args = ARGS
-
     CUTFUNC    = globals()[args['cutfunc']]
     TARFUNC    = globals()[args['targetfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
-
-    if entrystop is None:
-        entrystop = args['MAXEVENTS']
     # -----------------------------------------------
 
     ### From root trees
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
-    cprint( __name__ + f'.load_root_file: entrystart = {entrystart}, entrystop = {entrystop}')
+    cprint( __name__ + f'.load_root_file: entry_start = {0}, entry_stop = {max_num_elements}')
 
     file   = uproot.open(root_path)
     events = file["ntuplizer"]["tree"]
@@ -517,10 +508,10 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
         ids = events.keys() #[x for x in events.keys()]
     #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
     #print(ids)
-
-    # Check is it MC (based on the first event)
-    X_test = events.arrays('is_mc', entry_start=entrystart, entry_stop=entrystop)
     
+    # Check is it MC (based on the first event)
+    X_test = events.arrays('is_mc', entry_start=0, entry_stop=max_num_elements)
+
     isMC   = bool(X_test[0]['is_mc'])
     N      = len(X_test)
     print(__name__ + f'.load_root_file: isMC: {isMC}')
@@ -532,7 +523,7 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
     X = np.empty((N, len(ids)), dtype=object) 
 
     for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        x = events.arrays(ids[j], entry_start=0, entry_stop=max_num_elements, library="np", how=list)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
     Y = None
@@ -548,13 +539,13 @@ def load_root_file_new(root_path, ids=None, entrystart=0, entrystop=None, class_
 
         # @@ MC target definition here @@
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(events, entrystart=entrystart, entrystop=entrystop, new=True)
+        Y = TARFUNC(events, entry_start=0, entry_stop=max_num_elements, new=True)
         Y = np.asarray(Y).T
         print(__name__ + f'common: Y.shape = {Y.shape}')
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, ids=labels1, entrystart=entrystart, entrystop=entrystop, new=True)
+        aux.count_targets(events=events, ids=labels1, entry_start=0, entry_stop=max_num_elements, new=True)
         prints.printbar()
 
         # @@ MC filtering done here @@

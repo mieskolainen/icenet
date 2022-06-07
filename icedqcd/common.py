@@ -46,14 +46,7 @@ def init(MAXEVENTS=None):
     print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
     np.random.seed(args['rngseed'])
 
-    # --------------------------------------------------------------------
-    ### SET GLOBALS (used only in this file)
-    global ARGS
-    ARGS = args
-
-    if MAXEVENTS is not None:
-        ARGS['MAXEVENTS'] = MAXEVENTS
-    
+    # --------------------------------------------------------------------    
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
     #print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
@@ -62,10 +55,11 @@ def init(MAXEVENTS=None):
     ### Load data
 
     # Background (0) and signal (1)
-    class_id = [0,1]
-    data     = io.DATASET(func_loader=load_root_file, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
+    class_id  = [0,1]
+    load_args = {'max_num_elements': MAXEVENTS, 'args': args}
+    data      = io.DATASET(func_loader=load_root_file, load_args=load_args, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
-
+    
     # @@ Imputation @@
     if args['imputation_param']['active']:
 
@@ -103,7 +97,7 @@ def init(MAXEVENTS=None):
     return data, args, features
 
 
-def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id = [], args=None):
+def load_root_file(root_path, ids=None, max_num_elements=None, class_id = [], args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
@@ -116,19 +110,9 @@ def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id =
     """
     
     # -----------------------------------------------
-    # ** GLOBALS **
-
-    if args is None:
-        args = ARGS
-
-    if entrystop is None:
-        entrystop = args['MAXEVENTS']
-
-    # -----------------------------------------------
 
     param = {
-        "entry_start": entrystart,
-        "entry_stop":  entrystop,
+        "max_num_elements": max_num_elements,
         "args": args
     }
     
@@ -177,12 +161,12 @@ def load_root_file(root_path, ids=None, entrystart=0, entrystop=None, class_id =
     return X, Y, VARS
 
 
-def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
+def process_root(rootfile, tree, isMC, max_num_elements, args):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    Y   = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=LOAD_VARS)
+    Y   = iceroot.load_tree(rootfile=rootfile, tree=tree, max_num_elements=max_num_elements, ids=LOAD_VARS)
     ids = [i for i in Y.keys()]
     X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
     for i in range(len(ids)):

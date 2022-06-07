@@ -9,7 +9,7 @@ DATAPATH="/home/user/travis-stash/input/icedqcd"
 
 
 # Use * or other glob wildcards for filenames
-mkdir ./figs/dcqd/$CONFIG -p # for output ascii dump
+mkdir ./figs/dqcd/$CONFIG -p # for output ascii dump
 
 # tee redirect output to both a file and to screen
 python ./analysis/dqcd_train.py --config $CONFIG --datapath $DATAPATH --datasets "none" | tee "./figs/dqcd/$CONFIG/train_output.txt"

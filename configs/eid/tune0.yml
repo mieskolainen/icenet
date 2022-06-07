@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 100000               # Maximum total number of events (per root file) to process
+MAXEVENTS: 1000               # Maximum total number of events (per root file) to process
 
 eval_reweight: false            # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456                 # Fixed seed for training data mixing

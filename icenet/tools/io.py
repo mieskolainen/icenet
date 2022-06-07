@@ -160,8 +160,8 @@ class fastarray1:
 class DATASET:
     """ Main class for datasets
     """
-    def __init__(self, func_loader, files, frac, rngseed, class_id = []):
-
+    def __init__(self, func_loader, files, frac, rngseed, load_args, class_id = []):
+        
         if (class_id == []):
             class_id = [0,1] # By default two classes [0,1]
         
@@ -176,8 +176,8 @@ class DATASET:
         self.tst = Data()
         
         for f in files :
-            X, Y, self.ids = func_loader(root_path=f, class_id=class_id)
-            trn, val, tst   = split_data(X=X, Y=Y, frac=frac, rngseed=rngseed, class_id=class_id)
+            X, Y, self.ids = func_loader(root_path=f, class_id=class_id, **load_args)
+            trn, val, tst  = split_data(X=X, Y=Y, frac=frac, rngseed=rngseed, class_id=class_id)
 
             self.trn += trn
             self.val += val

@@ -1,6 +1,6 @@
-# "Pandas style" wrapper for columnar data with advanced indexing
+# "Pandas style" frame wrapper for columnar data with advanced indexing
 #
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -12,12 +12,28 @@ class icemap:
     Args:
         x   : data                [N vectors x ... x D dimensions]
         ids : variable names      [D strings]
+
+        OR
+
+        x   : data dictionary
     """
     
     # constructor
-    def __init__(self, x = np.array([]), ids = []):
-        self.x   = np.array(x)
-        self.ids = ids
+    def __init__(self, x, ids = None):
+
+        # Input is a dictionary which contains arrays
+        if ids is None:
+            self.ids = list(x.keys())
+            self.x   = np.empty((len(x[self.ids[0]]), len(self.ids)), dtype=object)
+            j = 0
+            for key in self.ids:
+                self.x[:,j] = np.asarray(x[key])
+                j+=1
+
+        # Input is arrays and keys separately
+        else:
+            self.x   = np.array(x)
+            self.ids = ids
 
     # + operator
     def __add__(self, other):
@@ -64,11 +80,12 @@ def test_icecube_concat():
     """ Unit tests
     """
 
-    X1 = np.array([[1,2,3], [4,5,6]])
-    X2 = np.array([[7,8,9], [10,11,12]])
+    X1   = np.array([[1,2,3], [4,5,6]])
+    X2   = np.array([[7,8,9], [10,11,12]])
+    ids  = ['var0', 'var1', 'var2']
 
-    new1 = icemap(x=X1)
-    new2 = icemap(x=X2)
+    new1 = icemap(x=X1, ids=ids)
+    new2 = icemap(x=X2, ids=ids)
 
     new3 = new1 + new2
 
@@ -93,5 +110,9 @@ def test_icecube_indexing():
     assert np.all(new[4,:] == [13, 14, 15])
 
     # Test boolean selection indexing
-    assert np.all(new['pt > 3 AND eta <= 5'] == [4,5,6])
+    assert np.all(new['pt > 0'].x == X)
+    assert np.all(new['pt > 3 AND eta <= 5'].x == [4,5,6])
+    assert np.all(new['pt > 3 && eta <= 5'].x == [4,5,6])
+
+
 

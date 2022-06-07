@@ -49,7 +49,7 @@ def split_start_end(a, n):
     return out
 
 
-def count_targets(events, ids, entrystart=0, entrystop=None, new=False):
+def count_targets(events, ids, entry_start=0, entry_stop=None, new=False, library='np'):
     """ Targets statistics printout
 
     Args:
@@ -63,10 +63,10 @@ def count_targets(events, ids, entrystart=0, entrystop=None, new=False):
     """
     K   = len(ids)
     if new:
-        vec = events.arrays(ids, library="np", how=list, entry_start=entrystart, entry_stop=entrystop)
+        vec = events.arrays(ids, library=library, how=list, entry_start=entry_start, entry_stop=entry_stop)
         vec = np.asarray(vec)
     else:
-        vec = np.array([events.array(name, entrystart=entrystart, entrystop=entrystop) for name in ids])
+        vec = np.array([events.array(name, entry_start=entry_start, entrystop=entry_stop) for name in ids])
     vec = vec.T
     
     print(__name__ + f'.count_targets: vec.shape = {vec.shape}')

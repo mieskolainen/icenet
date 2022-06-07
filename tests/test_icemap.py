@@ -5,7 +5,8 @@
 import sys
 sys.path.append(".")
 from icenet.tools import iceroot
-import icenet.tools.icemap as icemap
+from icenet.tools.icemap import icemap
+import numpy as np
 
 rootfile = '/home/user/cernbox/HLT_electrons/efftest.root'
 cuts     = 'gen_e1_l1_dr < 0.2 AND gen_e2_l1_dr < 0.2 AND e1_l1_pt >=6 AND e2_l1_pt >= 6 AND gen_e1_hlt_dr < 0.2'
@@ -13,9 +14,9 @@ cuts     = 'gen_e1_l1_dr < 0.2 AND gen_e2_l1_dr < 0.2 AND e1_l1_pt >=6 AND e2_l1
 for key in ['tree;1', 'tree;2']:
 	
 	print(key)
-	X = iceroot.load_tree(rootfile=rootfile, tree=key, entry_stop=None)
-	#print(X.ids)
-	
+	Y = iceroot.load_tree(rootfile=rootfile, tree=key)
+	X = icemap(Y)
+
 	y1 = X[cuts]
 	print(f'before: {X.x.shape[0]}, after: {y1.x.shape[0]}, ratio: {y1.x.shape[0] / X.x.shape[0]:0.3E}')
 	print('')
@@ -25,7 +26,8 @@ for key in ['tree;1', 'tree;2']:
 	print('')
 	
 
-X    = iceroot.load_tree(rootfile=rootfile, tree="tree", entry_stop=None)
+Y    = iceroot.load_tree(rootfile=rootfile, tree="tree")
+X    = icemap(Y) 
 x    = X[cuts]
 pms2 = x['e1_hlt_pms2']
 

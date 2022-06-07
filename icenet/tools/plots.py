@@ -659,11 +659,18 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
     """
     MVA output plots
     """
-    N_class = metrics[0].N_class
 
+    # Check input
     for i in range(len(metrics)):
+
+        if metrics[i] is None:
+            print(__name__ + f'.MVA_plot: Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
+            return -1
+        else:
+            N_class = metrics[i].N_class
+        
         if len(metrics[i].mva_hist) != N_class:
-            print(__name__ + f'.MVA_plot: Error: N_class != len(metrics[i].mva_hist) (check per class statistics), return -1')
+            print(__name__ + f'.MVA_plot: Error: N_class != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
             return -1
 
     for k in [0,1]: # linear & log
