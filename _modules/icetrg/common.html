@@ -81,14 +81,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
 
-    <span class="c1"># --------------------------------------------------------------------</span>
-    <span class="c1">### SET GLOBALS (used only in this file)</span>
-    <span class="k">global</span> <span class="n">ARGS</span>
-    <span class="n">ARGS</span> <span class="o">=</span> <span class="n">args</span>
-
-    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAXEVENTS</span>
-    
+    <span class="c1"># --------------------------------------------------------------------    </span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="c1">#print(__name__ + f&#39;.init: targetfunc =  {args[&quot;targetfunc&quot;]}&#39;)</span>
@@ -97,8 +90,14 @@
     <span class="c1">### Load data</span>
 
     <span class="c1"># Background (0) and signal (1)</span>
-    <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">data</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+    <span class="n">class_id</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">MAXEVENTS</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
+    <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_num_elements&#39;</span><span class="p">:</span> <span class="n">MAXEVENTS</span><span class="p">,</span>
+                 <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
+    
+    <span class="n">data</span>      <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="n">load_args</span><span class="o">=</span><span class="n">load_args</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
     
 
     <span class="c1"># @@ Imputation @@</span>
@@ -137,7 +136,7 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span></div>
 
 
-<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entrystart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Loads the root file with signal events from MC and background from DATA.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -148,21 +147,10 @@
 <span class="sd">        X,Y       : input, output matrices</span>
 <span class="sd">        ids       : variable names</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="c1"># -----------------------------------------------</span>
-    <span class="c1"># ** GLOBALS **</span>
-
-    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">ARGS</span>
-
-    <span class="k">if</span> <span class="n">entrystop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">entrystop</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
 
     <span class="c1"># -----------------------------------------------</span>
-
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;entry_start&quot;</span><span class="p">:</span> <span class="n">entrystart</span><span class="p">,</span>
-        <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entrystop</span><span class="p">,</span>
+        <span class="s2">&quot;max_num_elements&quot;</span><span class="p">:</span> <span class="n">max_num_elements</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span>
     <span class="p">}</span>
 
@@ -218,12 +206,12 @@
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">NEW_VARS</span></div>
 
 
-<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
 
-    <span class="n">Y</span>   <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">)</span>
+    <span class="n">Y</span>   <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">)</span>
     <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Y</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
     <span class="n">X</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
