@@ -19,6 +19,63 @@ import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
 
+#@numba.njit
+def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0)):
+    """
+    Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
+    
+    Args:
+        arr:           Awkward array type input for N events
+        scalar_vars:   Scalar variables to pick
+        jagged_vars:   Jagged (variable length vector) variables to pick
+        jagged_maxdim: Maximum dimension per jagged variable
+    
+    Returns:
+        mat:           Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
+    """
+
+    if len(jagged_vars) != len(jagged_maxdim):
+        raise Exception(__name__ + f'.jagged2matrix: Error: len(jagged_vars) != len(jagged_maxdim)')
+
+    N   = int(len(arr))
+    D   = int(len(scalar_vars) + np.sum(np.array(jagged_maxdim)))
+    
+    print(__name__ + f'.jagged2matrix: Creating a matrix with dimension [{N} x {D}]')
+
+    mat = null_value * np.ones((N,D), dtype=float)
+
+    # Loop over events
+    for i in range(N):
+
+        # First scalar vars
+        k = 0
+        for j in range(len(scalar_vars)):
+
+            x = arr[scalar_vars[j]][i]
+            if x is not []: # Check for empty
+                mat[i,k] = x
+            k += 1
+
+        # Jagged vars
+        for j in range(len(jagged_vars)):
+
+            d = jagged_maxdim[j]
+            x = arr[jagged_vars[j]][i,:]
+            d_this = len(x)
+
+            if x is not []: # Check for empty
+
+                if d_this > d: # Over the maximum allowed
+                    mat[i, k:k+d] = x[0:d]
+                else:          # Less or equal than maximum allowed
+                    mat[i, k:k+d_this] = x[0:d_this]
+
+            # Increase block counter
+            k += d
+
+    return mat
+
+
 def split(a, n):
     """
     Generator which returns approx equally sized chunks.
