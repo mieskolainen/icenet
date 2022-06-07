@@ -56,7 +56,12 @@ def init(MAXEVENTS=None):
 
     # Background (0) and signal (1)
     class_id  = [0,1]
-    load_args = {'max_num_elements': MAXEVENTS, 'args': args}
+    
+    if MAXEVENTS is None:
+        MAXEVENTS = args['MAXEVENTS']
+    load_args = {'max_num_elements': MAXEVENTS,
+                 'args': args}
+    
     data      = io.DATASET(func_loader=load_root_file, load_args=load_args, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
     

@@ -5,6 +5,7 @@
 import sys
 import pprint
 import pickle
+import uproot
 
 sys.path.append(".")
 from icenet.tools import iceroot
@@ -16,11 +17,11 @@ key      = 'Events;1'
 ids = ['sv_ptrel', 'sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_mass', 'sv_chi2']
 #ids = None
 
-library = 'ak'
-#library = 'np'
+#library = 'ak'
+library = 'np'
 
-X = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=10, ids=ids, library=library)
-#pprint.pprint(X.keys())
+X = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=3, ids=ids, library=library)
 
-print(X['sv_deta'])
+pprint.pprint(X)
+print(len(X))
 

@@ -3,7 +3,7 @@
 rootname: 'dqcd'
 
 # ----------------------------------------------------
-MAXEVENTS: 1000      # Maximum total number of events (in total) to process (FIX, NOT ACTIVE !!)
+MAXEVENTS: 10000      # Maximum total number of events (in total) to process
 
 MC_input:
 
