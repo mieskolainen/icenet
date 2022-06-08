@@ -600,35 +600,75 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="plot_correlations"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_correlations">[docs]</a><span class="k">def</span> <span class="nf">plot_correlations</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">netvars</span><span class="p">,</span> <span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Plot cross-correlations</span>
-<span class="sd">    Data in format (# samples x # dimensions)</span>
+<div class="viewcode-block" id="plot_correlations"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_correlations">[docs]</a><span class="k">def</span> <span class="nf">plot_correlations</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">netvars</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">round_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a cross-correlation matrix of vector data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X:                Data matrix (N x D)</span>
+<span class="sd">        netvars:          Variable names (list of length D)</span>
+<span class="sd">        classes:          Class label ids (list of length N)</span>
+<span class="sd">        round_threshold:  Correlation matrix |C_ij| &lt; threshold to set matrix elements to zero</span>
+<span class="sd">        targetdir:        Output plot directory</span>
+<span class="sd">        colorbar:         Colorbar on the plot</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        figs, axs:        Figures, axes (per class)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">rowvar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
-    <span class="n">C</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># round near zero to 0</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">N_class</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">N_class</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">classes</span><span class="p">))</span>
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">annotate_heatmap</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">C</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span> <span class="o">=</span> <span class="n">netvars</span><span class="p">,</span>
-        <span class="n">ylabels</span> <span class="o">=</span> <span class="n">netvars</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;linear correlation $</span><span class="se">\\</span><span class="s1">in$ [-100,100]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
-        <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">figs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">axs</span>  <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;class[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span>
+
+        <span class="c1"># Compute correlation matrix</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">classes</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rowvar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">C</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">round_threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># round near zero to 0</span>
+        
+        <span class="c1"># Compute suitable figsize</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Plot it</span>
+        <span class="n">figs</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="n">axs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="n">size</span><span class="p">))</span>
+
+        <span class="n">axs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">annotate_heatmap</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">C</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="n">xlabels</span> <span class="o">=</span> <span class="n">netvars</span><span class="p">,</span>
+            <span class="n">ylabels</span> <span class="o">=</span> <span class="n">netvars</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">: linear correlation $</span><span class="se">\\</span><span class="s1">in$ [-100,100]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">targetdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fname</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_correlation_matrix.pdf&#39;</span><span class="p">,</span> <span class="n">pad_inches</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_correlations: [done]&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span></div>
+    <span class="k">return</span> <span class="n">figs</span><span class="p">,</span> <span class="n">axs</span></div>
 
 
-<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        metrics:</span>
+<span class="sd">        labels:</span>
+<span class="sd">        title:</span>
+<span class="sd">        filename:</span>
+<span class="sd">        legend_fontsize:</span>
+<span class="sd">        xmin:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># linear &amp; log</span>
         
         <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>

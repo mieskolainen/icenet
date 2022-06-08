@@ -53,6 +53,13 @@
 <span class="kn">import</span> <span class="nn">icenet.tools.stx</span> <span class="k">as</span> <span class="nn">stx</span>
 
 
+<div class="viewcode-block" id="makedir"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.makedir">[docs]</a><span class="k">def</span> <span class="nf">makedir</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="n">exist_ok</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">targetdir</span></div>
+
 <span class="c1">#@numba.njit</span>
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_maxdim</span><span class="o">=</span><span class="p">[],</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
