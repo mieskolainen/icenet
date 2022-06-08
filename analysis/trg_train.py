@@ -56,13 +56,13 @@ def main() :
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, ids = data.ids,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
-
+    
     ### Split and factor data
     data, data_kin = common.splitfactor(data=data, args=args)
 
     ### Print scalar variables
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    figs,axs  = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
+    fig,ax    = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
     
     print(__name__ + ': Active variables:')
     prints.print_variables(X=data.trn.x, ids=data.ids)

@@ -73,10 +73,10 @@ def main() :
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
     
-    ### Print scalar variables
+    ### Plot correlations
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
     fig,ax    = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
-    
+
     print(__name__ + ': Active variables:')
     prints.print_variables(X=data.trn.x, ids=data.ids)
 

@@ -594,7 +594,7 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=N
 
     for i in range(N_class):
 
-        label = f'class[{i}]'
+        label = f'class_{i}'
 
         # Compute correlation matrix
         C = np.corrcoef(X[classes == i, :], rowvar = False) * 100
@@ -615,9 +615,9 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=N
             cb = plt.colorbar()
 
         if targetdir is not None:
-            plt.savefig(fname = targetdir + f'{label}_correlation_matrix.pdf', pad_inches = 0.2, bbox_inches='tight')
-
-    print(__name__ + f'.plot_correlations: [done]')
+            fname = targetdir + f'{label}_correlation_matrix.pdf'
+            print(__name__ + f'.plot_correlations: Saving figure to <{fname}>')
+            plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
 
     return figs, axs
 
@@ -634,7 +634,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         legend_fontsize:
         xmin:
     """
-    
+
     for k in [0,1]: # linear & log
         
         fig,ax = plt.subplots()
