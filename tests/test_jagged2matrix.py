@@ -27,8 +27,9 @@ def test_jagged2matrix():
 
 	library  = 'ak'
 	#library = 'np'
+	max_num_elements = 100
 
-	X   = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=1000, ids=ids, library=library)
+	X   = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=max_num_elements, ids=ids, library=library)
 	
 	#pprint.pprint(X.keys())
 	#print(len(X))

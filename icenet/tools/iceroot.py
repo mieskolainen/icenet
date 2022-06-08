@@ -70,10 +70,10 @@ def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
     #print(__name__ + f'.load_tree: All variables     ({len(all_ids)}): \n{all_ids} \n')
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
 
-    print(__name__ + f'.load_tree: max_num_elements: {max_num_elements}')
+    print(__name__ + f'.load_tree: max_num_elements (NOT IMPLEMENTED): {max_num_elements}')
     # ----------------------------------------------------------
-
-    Y = uproot.concatenate(files, expressions=load_ids, library=library, max_num_elements=max_num_elements)
+    
+    Y = uproot.concatenate(files, expressions=load_ids, library=library)
     return Y
 
     #for Y in uproot.iterate(files, expressions=load_ids, library=library, step_size=max_num_elements):
