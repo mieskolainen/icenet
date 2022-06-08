@@ -37,7 +37,7 @@ from icedqcd import common
 def main() :
 
     ### Get input
-    data, args, features = common.init()
+    data, args = common.init()
 
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)
@@ -64,9 +64,9 @@ def main() :
 
     ### Split and factor data
     data, data_kin = common.splitfactor(data=data, args=args)
-
-    ### Print scalar variables
-    fig,ax = plots.plot_correlations(data.trn.x, data.ids)
+    
+    ### Plot correlation matrix
+    fig,ax = plots.plot_correlations(X=data.trn.x, netvars=data.ids)
     targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
     plt.savefig(fname = targetdir + 'correlations.pdf', pad_inches = 0.2, bbox_inches='tight')
     

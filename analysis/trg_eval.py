@@ -21,7 +21,7 @@ def main() :
     ### Get input
     data, args, features = common.init()
     args['features'] = features
-
+    
     ### Compute reweighting weights for the evaluation (before split&factor !)
     if args['eval_reweight']:
         tst_weights = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.ids, args=args['reweight_param'])

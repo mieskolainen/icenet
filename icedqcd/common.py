@@ -39,7 +39,7 @@ def init(MAXEVENTS=None):
     """
     
     args, cli = process.read_config('./configs/dqcd')
-    features  = globals()[args['imputation_param']['var']]
+    #features  = globals()[args['imputation_param']['var']]
     
     
     ### SET random seed
@@ -47,7 +47,7 @@ def init(MAXEVENTS=None):
     np.random.seed(args['rngseed'])
 
     # --------------------------------------------------------------------    
-    print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
+    #print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
     #print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
     # --------------------------------------------------------------------
@@ -61,7 +61,7 @@ def init(MAXEVENTS=None):
         MAXEVENTS = args['MAXEVENTS']
     load_args = {'max_num_elements': MAXEVENTS,
                  'args': args}
-    
+
     data      = io.DATASET(func_loader=load_root_file, load_args=load_args, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
     
@@ -99,7 +99,7 @@ def init(MAXEVENTS=None):
     cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
     
-    return data, args, features
+    return data, args
 
 
 def load_root_file(root_path, ids=None, max_num_elements=None, class_id = [], args=None):
@@ -175,8 +175,8 @@ def process_root(rootfile, tree, isMC, max_num_elements, args):
     ids = [i for i in Y.keys()]
     X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
     for i in range(len(ids)):
-        X[:,i] = Y[ids[i]]
-    
+        X[:,i] = Y[ids[i]]        
+
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
@@ -222,11 +222,27 @@ def splitfactor(data, args):
         data_kin.ids    = k_vars
 
     ### Pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    scalar_ind, scalar_vars = io.pick_vars(data, globals()[args['inputvar_scalar']])
+    jagged_ind, jagged_vars = io.pick_vars(data, globals()[args['inputvar_jagged']])
     
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids      = s_vars
+
+    jagged_maxdim = 5*np.ones(len(jagged_vars), dtype=int)
+
+    arg = {
+        'scalar_vars':   scalar_ind,
+        'jagged_vars':   jagged_ind,
+        'jagged_maxdim': jagged_maxdim,
+        'library': 'np'
+    }
+
+    data.trn.x = aux.jagged2matrix(data.trn.x, **arg)
+    data.val.x = aux.jagged2matrix(data.val.x, **arg)
+    data.tst.x = aux.jagged2matrix(data.tst.x, **arg)
+    
+    # Create variable names
+    data.ids   = scalar_vars
+    for i in range(len(jagged_vars)):
+        for j in range(jagged_maxdim[i]):
+            data.ids.append( f'{jagged_vars[i]}[{j}]' )
 
     return data, data_kin

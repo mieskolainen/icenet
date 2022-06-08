@@ -1,5 +1,5 @@
 # Test jagged awkward array to a fixed dimensional matrix conversion
-# 
+#
 # m.mieskolainen@imperial.ac.uk, 2022
 
 import uproot
@@ -22,16 +22,24 @@ def test_jagged2matrix():
 	rootfile = 'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_100.root'
 	key      = 'Events;1'
 
-	ids      = ['nsv', 'nmuon', 'sv_ptrel', 'sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_mass', 'sv_chi2']
+	ids      = ['nsv', 'nMuon', 'nJet', 'sv_dxy', 'sv_dxysig', 'sv_dphi', 'sv_ptrel', 'sv_deta', 'sv_deltaR', 'sv_chi2']
 	#ids = None
 
 	library  = 'ak'
 	#library = 'np'
 
-	X = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=1000, ids=ids, library=library)
+	X   = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=1000, ids=ids, library=library)
+	
 	#pprint.pprint(X.keys())
 	#print(len(X))
 	#print(X['sv_deta'])
-	mat = jagged2matrix(X, scalar_vars=['nsv', 'nmuon'], jagged_vars=['sv_deta', 'sv_dphi', 'sv_mass'], jagged_maxdim=[5, 5, 5])
+	
 
+	scalar_vars   = ['nsv', 'nMuon', 'nJet']
+	jagged_vars   = ['sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_chi2']
+	jagged_maxdim = [3,3,3,3]
+
+	mat = jagged2matrix(X, scalar_vars=scalar_vars, jagged_vars=jagged_vars, jagged_maxdim=jagged_maxdim)
 	print(mat)
+
+test_jagged2matrix()

@@ -20,19 +20,23 @@ import icenet.tools.stx as stx
 
 
 #@numba.njit
-def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0)):
+def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0), library='ak'):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
     Args:
         arr:           Awkward array type input for N events
-        scalar_vars:   Scalar variables to pick
-        jagged_vars:   Jagged (variable length vector) variables to pick
-        jagged_maxdim: Maximum dimension per jagged variable
+        scalar_vars:   Scalar variables to pick (strings for 'ak' and indices for 'np')
+        jagged_vars:   Jagged variables to pick (as above)
+        jagged_maxdim: Maximum dimension per jagged variable (integer array)
+        library:       Input type 'ak' or 'np'
+        null_value:    Default
     
     Returns:
         mat:           Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
     """
+
+    jagged_maxdim = np.asarray(jagged_maxdim, dtype=int)
 
     if len(jagged_vars) != len(jagged_maxdim):
         raise Exception(__name__ + f'.jagged2matrix: Error: len(jagged_vars) != len(jagged_maxdim)')
@@ -51,7 +55,11 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
         k = 0
         for j in range(len(scalar_vars)):
 
-            x = arr[scalar_vars[j]][i]
+            if   library == 'ak':
+                x = arr[scalar_vars[j]][i]
+            elif library == 'np':
+                x = arr[i, scalar_vars[j]]
+
             if x is not []: # Check for empty
                 mat[i,k] = x
             k += 1
@@ -60,15 +68,19 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
         for j in range(len(jagged_vars)):
 
             d = jagged_maxdim[j]
-            x = arr[jagged_vars[j]][i,:]
-            d_this = len(x)
 
-            if x is not []: # Check for empty
+            if   library == 'ak':
+                x = arr[jagged_vars[j]][i,:]
+            elif library == 'np':
+                x = arr[i, jagged_vars[j]]
+
+            d_this = len(x)
+            if d_this > 0: # Check for empty
 
                 if d_this > d: # Over the maximum allowed
                     mat[i, k:k+d] = x[0:d]
                 else:          # Less or equal than maximum allowed
-                    mat[i, k:k+d_this] = x[0:d_this]
+                    mat[i, k:k+d_this] = x
 
             # Increase block counter
             k += d

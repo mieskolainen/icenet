@@ -31,17 +31,21 @@ KINEMATIC_ID = [
   'ChsMET_sumEt'
 ]
 
-MVA_ID = [
+MVA_SCALAR_ID = [
   'nJet',
   'nMuon',
   'nsv'
-
-  #'sv_mass',
-  #'sv_dxy',
-  #'sv_dxysig',
-  #'sv_dphi',
-  #'sv_deta'
 ]
+
+MVA_JAGGED_ID = [
+  'sv_dxy',
+  'sv_dxysig',
+  'sv_dphi',
+  'sv_deta',
+  'sv_chi2',
+  'sv_deltaR'
+]
+
 
 PLOT_VARS = [
   'nJet',
@@ -85,7 +89,9 @@ LOAD_VARS = [
 ]
 
 LOAD_VARS += KINEMATIC_ID
-LOAD_VARS += MVA_ID
+LOAD_VARS += MVA_SCALAR_ID
+LOAD_VARS += MVA_JAGGED_ID
+
 LOAD_VARS += PLOT_VARS
 LOAD_VARS += TRIGGER_VARS
 
