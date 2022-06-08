@@ -19,8 +19,7 @@ from icetrg import common
 def main() :
 
     ### Get input
-    data, args, features = common.init()
-    args['features'] = features
+    data, args = common.init()
     
     ### Compute reweighting weights for the evaluation (before split&factor !)
     if args['eval_reweight']:

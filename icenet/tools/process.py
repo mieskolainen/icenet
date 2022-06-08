@@ -241,6 +241,9 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
     print('')
     
+    ## Set feature indices for simple cut classifiers
+    args['features'] = data.ids
+    
     # -----------------------------
     # ** GLOBALS **
 
@@ -334,7 +337,15 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         # Compute predictions once and for all here
         y_pred = func_predict(X)
 
+        # --------------------------------------
+        ## Total ROC Plot
+        met = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
 
+        roc_mstats.append(met)
+        roc_labels.append(label)
+        # --------------------------------------
+
+        # --------------------------------------
         ### ROC, MVA binned plots
         for i in range(100):
             try:
@@ -353,11 +364,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 ROC_binned_mlabel[i].append(label_1D)
 
                 # Plot this one
-                ROC_path = f'{targetdir}/ROC/{label}'
-                MVA_path = f'{targetdir}/MVA/{label}'
-                
-                os.makedirs(ROC_path, exist_ok=True)
-                os.makedirs(MVA_path, exist_ok=True)
+                ROC_path = aux.makedir(f'{targetdir}/ROC/{label}')
+                MVA_path = aux.makedir(f'{targetdir}/MVA/{label}')
 
                 plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=ROC_path + f'/ROC_binned__{i}')
                 plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=MVA_path + f'/MVA_binned__{i}')
@@ -368,12 +376,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
 
-                path = f'{targetdir}/ROC/{label}'
-                os.makedirs(path, exist_ok=True)
+                path = aux.makedir(f'{targetdir}/ROC/{label}')
                 plt.savefig(path + f'/ROC_binned__{i}.pdf', bbox_inches='tight')
-
-                roc_mstats.append(met)
-                roc_labels.append(label)
 
             else:
                 print(var)

@@ -602,7 +602,7 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=N
         
         # Compute suitable figsize
         size = np.ceil(C.shape[0]/3)
-
+        
         # Plot it
         figs[label], axs[label] = plt.subplots(1,1, figsize=(size,size))
 

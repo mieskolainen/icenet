@@ -37,7 +37,7 @@ from icetrg import common
 def main() :
 
     ### Get input
-    data, args, _ = common.init()
+    data, args = common.init()
     
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)

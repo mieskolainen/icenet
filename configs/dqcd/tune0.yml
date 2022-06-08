@@ -3,14 +3,14 @@
 rootname: 'dqcd'
 
 # ----------------------------------------------------
-MAXEVENTS: 1000000      # Maximum total number of events (in total) to process per process
+MAXEVENTS: 2000      # Maximum total number of events (in total) to process per process
 
 MC_input:
   
   signal:
-      'HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+      #'HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
       #'HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
-      #'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+      'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
   
   background:
       'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -130,24 +130,26 @@ plot_param:
 
   ## Binned ROC plots can be 1D or 2D;
   # use a running number __0, __1, ... as an identifier for new plots
-  plot_ROC_binned__0:
-    var:   ['ChsMET_pt']
-    edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
+  
+  #plot_ROC_binned__0:
+  #  var:   ['ChsMET_pt']
+  #  edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
 
-  plot_ROC_binned__1:
-    var:   ['ChsMET_phi', 'ChsMET_pt']
-    edges: [[-3.14159, -2.24399286, -1.34639571, -0.44879857, 0.44879857, 1.34639571, 2.24399286, 3.14159],
-            [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
+  #plot_ROC_binned__1:
+  #  var:   ['ChsMET_phi', 'ChsMET_pt']
+  #  edges: [[-3.14159, -2.24399286, -1.34639571, -0.44879857, 0.44879857, 1.34639571, 2.24399286, 3.14159],
+  #          [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
 
   ## MVA output density (1D)
   plot_MVA_output:
     edges: 80
 
   ## (MVA output x External variable) density (2D)
-  plot_COR__0:
-    var:   ['']
-    edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
-            {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
+  
+  #plot_COR__0:
+  #  var:   ['']
+  #  edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
+  #          {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
   
   #plot_COR__1:
   #  var:   ['.?hlt_pms2.?']
@@ -322,7 +324,7 @@ cut0_param:
   label:    'nsv'
   variable: 'nsv'
   sign: 1
-  transform: tanh
+  transform: null
 
 cut1_param:
   train:    'cut'
@@ -330,7 +332,7 @@ cut1_param:
   label:    'nMuon'
   variable: 'nMuon'
   sign: 1
-  transform: tanh
+  transform: null
 
 cut2_param:
   train:    'cut'
@@ -338,7 +340,7 @@ cut2_param:
   label:    'nJet'
   variable: 'nJet'
   sign: 1
-  transform: tanh
+  transform: null
 
 
 # XGBoost
@@ -431,8 +433,8 @@ lgr0_param:
     gamma: 2                    # focal_entropy exponent
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
-
-    epochs: 300
+    
+    epochs: 15
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization

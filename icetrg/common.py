@@ -99,7 +99,7 @@ def init(MAXEVENTS=None):
     cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
     
-    return data, args, features
+    return data, args
 
 
 def load_root_file(root_path, ids=None, max_num_elements=None, class_id = [], args=None):
