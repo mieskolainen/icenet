@@ -38,12 +38,29 @@ MVA_SCALAR_ID = [
 ]
 
 MVA_JAGGED_ID = [
+  'Jet_chEmEF',
+  'Jet_chHEF',
+  'Jet_eta',
+  'Jet_neEmEF',
+  'Jet_neHEF',
+  'Jet_phi',
+  'Jet_pt',
+  'Jet_nMuons',
+
+  'Muon_eta'
+  'Muon_phi',
+  'Muon_pt',
+
   'sv_dxy',
   'sv_dxysig',
   'sv_dphi',
   'sv_deta',
+  'sv_deltaR',
   'sv_chi2',
-  'sv_deltaR'
+  'sv_d3d',
+  'sv_d3dsig',
+  'sv_ntracks',
+  'sv_ndof'
 ]
 
 

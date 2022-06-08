@@ -225,9 +225,9 @@ def splitfactor(data, args):
     scalar_ind, scalar_vars = io.pick_vars(data, globals()[args['inputvar_scalar']])
     jagged_ind, jagged_vars = io.pick_vars(data, globals()[args['inputvar_jagged']])
     
-
-    jagged_maxdim = 5*np.ones(len(jagged_vars), dtype=int)
-
+    jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
+    
+    
     arg = {
         'scalar_vars':   scalar_ind,
         'jagged_vars':   jagged_ind,
