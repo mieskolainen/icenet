@@ -2047,15 +2047,17 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.jagged2matrix">
-<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ak'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a “jagged” event container to a matrix (rows ~ event, columns ~ variables)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arr</strong> – Awkward array type input for N events</p></li>
-<li><p><strong>scalar_vars</strong> – Scalar variables to pick</p></li>
-<li><p><strong>jagged_vars</strong> – Jagged (variable length vector) variables to pick</p></li>
-<li><p><strong>jagged_maxdim</strong> – Maximum dimension per jagged variable</p></li>
+<li><p><strong>scalar_vars</strong> – Scalar variables to pick (strings for ‘ak’ and indices for ‘np’)</p></li>
+<li><p><strong>jagged_vars</strong> – Jagged variables to pick (as above)</p></li>
+<li><p><strong>jagged_maxdim</strong> – Maximum dimension per jagged variable (integer array)</p></li>
+<li><p><strong>library</strong> – Input type ‘ak’ or ‘np’</p></li>
+<li><p><strong>null_value</strong> – Default</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
