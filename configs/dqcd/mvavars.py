@@ -37,8 +37,8 @@ MVA_SCALAR_ID = [
   'nsv'
 ]
 
-MVA_JAGGED_ID = []
-"""
+#MVA_JAGGED_ID = []
+
 MVA_JAGGED_ID = [
   
   'Jet_chEmEF',
@@ -65,7 +65,6 @@ MVA_JAGGED_ID = [
   'sv_ntracks',
   'sv_ndof'
 ]
-"""
 
 
 PLOT_VARS = [
