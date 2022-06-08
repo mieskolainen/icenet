@@ -72,7 +72,7 @@ def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
 
     print(__name__ + f'.load_tree: max_num_elements (NOT IMPLEMENTED): {max_num_elements}')
     # ----------------------------------------------------------
-    
+
     Y = uproot.concatenate(files, expressions=load_ids, library=library)
     return Y
 
