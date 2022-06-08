@@ -19,6 +19,13 @@ import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
 
+def makedir(targetdir, exist_ok=True):
+    """
+    Make directory
+    """
+    os.makedirs(targetdir, exist_ok = exist_ok)
+    return targetdir
+
 #@numba.njit
 def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0), library='ak'):
     """

@@ -566,35 +566,75 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
     plt.tight_layout()
 
 
-def plot_correlations(X, netvars, colorbar = False):
-    """ Plot cross-correlations
-    Data in format (# samples x # dimensions)
+def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=None, colorbar = False):
     """
-    
-    C = np.corrcoef(X, rowvar = False) * 100
-    C[np.abs(C) < 0.5] = 0 # round near zero to 0
+    Plot a cross-correlation matrix of vector data
 
-    N = np.ceil(C.shape[0]/3)
-    fig,ax = plt.subplots(1,1,figsize=(N,N))
-
-    ax.imshow(C)
-    ax = annotate_heatmap(X = C, ax = ax, xlabels = netvars,
-        ylabels = netvars, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
-    ax.set_title('linear correlation $\\in$ [-100,100]', fontsize=10)
+    Args:
+        X:                Data matrix (N x D)
+        netvars:          Variable names (list of length D)
+        classes:          Class label ids (list of length N)
+        round_threshold:  Correlation matrix |C_ij| < threshold to set matrix elements to zero
+        targetdir:        Output plot directory
+        colorbar:         Colorbar on the plot
     
-    if colorbar:
-        cb = plt.colorbar()
+    Returns:
+        figs, axs:        Figures, axes (per class)
+    """
+    N = X.shape[0]
+
+    if classes is None:
+        classes = np.zeros(N)
+        N_class = int(1)
+    else:
+        N_class = len(np.unique(classes))
+
+    figs = {}
+    axs  = {}
+
+    for i in range(N_class):
+
+        label = f'class[{i}]'
+
+        # Compute correlation matrix
+        C = np.corrcoef(X[classes == i, :], rowvar = False) * 100
+        C[np.abs(C) < round_threshold] = 0 # round near zero to 0
+        
+        # Compute suitable figsize
+        size = np.ceil(C.shape[0]/3)
+
+        # Plot it
+        figs[label], axs[label] = plt.subplots(1,1, figsize=(size,size))
+
+        axs[label].imshow(C)
+        axs[label] = annotate_heatmap(X = C, ax = axs[label], xlabels = netvars,
+            ylabels = netvars, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
+        axs[label].set_title(f'{label}: linear correlation $\\in$ [-100,100]', fontsize=10)
+        
+        if colorbar:
+            cb = plt.colorbar()
+
+        if targetdir is not None:
+            plt.savefig(fname = targetdir + f'{label}_correlation_matrix.pdf', pad_inches = 0.2, bbox_inches='tight')
 
     print(__name__ + f'.plot_correlations: [done]')
 
-    return fig,ax
+    return figs, axs
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1e-4) :
+def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1e-5) :
     """
     Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
-    """
 
+    Args:
+        metrics:
+        labels:
+        title:
+        filename:
+        legend_fontsize:
+        xmin:
+    """
+    
     for k in [0,1]: # linear & log
         
         fig,ax = plt.subplots()

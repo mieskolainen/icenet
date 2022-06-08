@@ -40,8 +40,8 @@ def main() :
     ### Get input
     paths, args, cli, iodir = common.init()
     VARS = features.generate_feature_names(args['MAXT3'])
-    modeldir = f'./checkpoint/{args["rootname"]}/{args["config"]}/'; os.makedirs(modeldir, exist_ok = True)
-
+    modeldir = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
+    
     # ====================================================================
     print('\nLoading AI/ML models ...')
 

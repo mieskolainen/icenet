@@ -45,18 +45,15 @@ def main() :
     ### Compute reweighting weights
     trn_weights = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.ids, args=args['reweight_param'])
 
-
     ### Plot some kinematic variables
-    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/'
-    os.makedirs(targetdir, exist_ok = True)
+    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/')
     for k in ['x_hlt_pt', 'x_hlt_eta']:
         plots.plotvar(x = data.trn.x[:, data.ids.index(k)], y = data.trn.y, weights = trn_weights, var = k, NBINS = 70,
             targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
 
     ### Plot variables
     if args['plot_param']['basic_on'] == True:
-        print(__name__ + f': plotting basic histograms ...')
-        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/'; os.makedirs(targetdir, exist_ok = True)
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, ids = data.ids,
             weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
 
@@ -64,17 +61,14 @@ def main() :
     data, data_kin = common.splitfactor(data=data, args=args)
 
     ### Print scalar variables
-    fig,ax = plots.plot_correlations(data.trn.x, data.ids)
-    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/train/'; os.makedirs(targetdir, exist_ok = True)
-    plt.savefig(fname = targetdir + 'correlations.pdf', pad_inches = 0.2, bbox_inches='tight')
+    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+    figs,axs  = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
     
     print(__name__ + ': Active variables:')
     prints.print_variables(X=data.trn.x, ids=data.ids)
     
-    # Add args['modeldir']
-    args["modeldir"] = f'./checkpoint/{args["rootname"]}/{args["config"]}/'; os.makedirs(args["modeldir"], exist_ok = True)
-    
     ### Execute training
+    args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
     process.train_models(data = data, data_kin = data_kin, trn_weights = trn_weights, args = args)
         
     print(__name__ + ' [done]')

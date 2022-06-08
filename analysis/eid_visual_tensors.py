@@ -47,9 +47,8 @@ def main() :
 
     ### Get input
     data, args, features = common.init(MAXEVENTS=30000)
-
     
-    targetdir = f'./figs/{args["rootname"]}/{args["config"]}/image/'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/image/')
 
     ### Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
