@@ -56,7 +56,7 @@ distillation:
 
 inputvar_scalar: 'MVA_SCALAR_ID' # Input variables, implemented under mvavars.py
 inputvar_jagged: 'MVA_JAGGED_ID'
-jagged_maxdim:   5
+jagged_maxdim:   10
 
 
 #targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
