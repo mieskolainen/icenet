@@ -106,9 +106,13 @@ outlier_param:
 
 ## Pure plotting setup
 plot_param:
-  basic_on:    false
-  contours_on: false
-
+  basic:
+    active: true
+    nbins:  70
+  
+  contours: 
+    active: false
+  
   ## Binned ROC plots can be 1D or 2D;
   # use a running number __0, __1, ... as an identifier for new plots
   plot_ROC_binned__0:

@@ -70,9 +70,13 @@ WNORM: 'event'
 
 ## Pure plotting setup
 #plot_param:
-#  basic_on:    true
-#  contours_on: false
-
+#  basic:
+#    active: true
+#    nbins:  70
+#  
+#  contours: 
+#    active: false
+#  
 #  # (eta,pt)-binned plots
 #  pt_edges:  [0, 0.75, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
 #  eta_edges: [-10, -2.5, -1.5, -0.75, 0.0, 0.75, 1.5, 2.5, 10]

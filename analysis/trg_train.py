@@ -52,10 +52,10 @@ def main() :
             targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
 
     ### Plot variables
-    if args['plot_param']['basic_on'] == True:
+    if args['plot_param']['basic']['active']:
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
-        plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = 70, ids = data.ids,
-            weights = trn_weights, targetdir = targetdir, title = f'training reweight reference: {args["reweight_param"]["mode"]}')
+        plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = args['plot_param']['basic']['nbins'], ids = data.ids,
+            weights = trn_weights, targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
     
     ### Split and factor data
     data, data_kin = common.splitfactor(data=data, args=args)

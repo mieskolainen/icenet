@@ -125,8 +125,12 @@ outlier_param:
 
 ## Pure plotting setup
 plot_param:
-  basic_on:    false
-  contours_on: false
+  basic:
+    active: true
+    nbins:  70
+  
+  contours: 
+    active: false
 
   ## Binned ROC plots can be 1D or 2D;
   # use a running number __0, __1, ... as an identifier for new plots
@@ -433,7 +437,7 @@ lgr0_param:
     gamma: 2                    # focal_entropy exponent
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
-    
+
     epochs: 15
     batch_size: 196
     learning_rate: 0.003

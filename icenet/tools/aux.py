@@ -654,7 +654,7 @@ class Metric:
         
         if weights is not None:
             weights = weights[ok]
-
+        
         # Bin the prediction values over different classes
         if valrange == 'auto':
             valrange = [np.percentile(y_soft, 1), np.percentile(y_soft, 99)]

@@ -566,10 +566,10 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
     plt.tight_layout()
 
 
-def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=None, colorbar = False):
+def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
     """
     Plot a cross-correlation matrix of vector data
-
+    
     Args:
         X:                Data matrix (N x D)
         netvars:          Variable names (list of length D)
@@ -597,9 +597,10 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.5, targetdir=N
         label = f'class_{i}'
 
         # Compute correlation matrix
-        C = np.corrcoef(X[classes == i, :], rowvar = False) * 100
-        C[np.abs(C) < round_threshold] = 0 # round near zero to 0
-        
+        C = np.corrcoef(X[classes == i, :], rowvar = False)
+        C[np.abs(C) < round_threshold] = np.nan
+        C *= 100
+
         # Compute suitable figsize
         size = np.ceil(C.shape[0]/3)
         
