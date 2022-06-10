@@ -101,6 +101,14 @@ icenet.deep.graph
     :undoc-members:
 
 
+icenet.deep.losstools
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.losstools
+    :members:
+    :undoc-members:
+
+
 icenet.deep.maxo
 ~~~~~~~~~~~~~~~~~~~~~
 

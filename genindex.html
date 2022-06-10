@@ -580,6 +580,13 @@
 </li>
       </ul></li>
       <li>
+    icedqcd.common
+
+      <ul>
+        <li><a href="modules/icedqcd.html#module-icedqcd.common">module</a>
+</li>
+      </ul></li>
+      <li>
     icefit.abcd
 
       <ul>
@@ -721,8 +728,6 @@
         <li><a href="modules/icenet.html#module-icenet.deep.dopt">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.gcnn
 
@@ -730,11 +735,20 @@
         <li><a href="modules/icenet.html#module-icenet.deep.gcnn">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.graph
 
       <ul>
         <li><a href="modules/icenet.html#module-icenet.deep.graph">module</a>
+</li>
+      </ul></li>
+      <li>
+    icenet.deep.losstools
+
+      <ul>
+        <li><a href="modules/icenet.html#module-icenet.deep.losstools">module</a>
 </li>
       </ul></li>
       <li>
@@ -900,6 +914,8 @@
       <li><a href="modules/icebrk.html#icebrk.common.init">init() (in module icebrk.common)</a>
 
       <ul>
+        <li><a href="modules/icedqcd.html#icedqcd.common.init">(in module icedqcd.common)</a>
+</li>
         <li><a href="modules/iceid.html#iceid.common.init">(in module iceid.common)</a>
 </li>
         <li><a href="modules/icetrg.html#icetrg.common.init">(in module icetrg.common)</a>
@@ -943,9 +959,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.deep.dbnf.load_models">load_models() (in module icenet.deep.dbnf)</a>
 </li>
-      <li><a href="modules/iceid.html#iceid.common.load_root_file">load_root_file() (in module iceid.common)</a>
+      <li><a href="modules/icedqcd.html#icedqcd.common.load_root_file">load_root_file() (in module icedqcd.common)</a>
 
       <ul>
+        <li><a href="modules/iceid.html#iceid.common.load_root_file">(in module iceid.common)</a>
+</li>
         <li><a href="modules/icetrg.html#icetrg.common.load_root_file">(in module icetrg.common)</a>
 </li>
       </ul></li>
@@ -955,19 +973,27 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux_torch.load_torch_model">load_torch_model() (in module icenet.tools.aux_torch)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.iceroot.load_tree">load_tree() (in module icenet.tools.iceroot)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.iceroot.load_tree_stats">load_tree_stats() (in module icenet.tools.iceroot)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.log_softmax">log_softmax() (in module icenet.deep.losstools)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.log_sum_exp">log_sum_exp() (in module icenet.deep.losstools)</a>
 </li>
       <li><a href="modules/icefit.html#icefit.score.logL">logL() (in module icefit.score)</a>
 </li>
       <li><a href="modules/icefit.html#icefit.lognormal.lognormal_param">lognormal_param() (in module icefit.lognormal)</a>
 </li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.logsumexp">logsumexp() (in module icenet.deep.losstools)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.aux.longvec2matrix">longvec2matrix() (in module icenet.tools.aux)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.los2lol">los2lol() (in module icenet.tools.aux)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.loss_wrapper">loss_wrapper() (in module icenet.deep.losstools)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1043,6 +1069,8 @@
 </li>
         <li><a href="modules/icebrk.html#module-icebrk.tools">icebrk.tools</a>
 </li>
+        <li><a href="modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a>
+</li>
         <li><a href="modules/icefit.html#module-icefit.abcd">icefit.abcd</a>
 </li>
         <li><a href="modules/icefit.html#module-icefit.cortools">icefit.cortools</a>
@@ -1086,6 +1114,8 @@
         <li><a href="modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a>
 </li>
         <li><a href="modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a>
+</li>
+        <li><a href="modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a>
 </li>
         <li><a href="modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a>
 </li>
@@ -1135,6 +1165,16 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.icevec.vec4.mt">mt (vec4 property)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.multiclass_cross_entropy">multiclass_cross_entropy() (in module icenet.deep.losstools)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.multiclass_cross_entropy_logprob">multiclass_cross_entropy_logprob() (in module icenet.deep.losstools)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.multiclass_focal_entropy">multiclass_focal_entropy() (in module icenet.deep.losstools)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.multiclass_focal_entropy_logprob">multiclass_focal_entropy_logprob() (in module icenet.deep.losstools)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.losstools.multiclass_logit_norm_loss">multiclass_logit_norm_loss() (in module icenet.deep.losstools)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.multiclass_roc_auc_score">multiclass_roc_auc_score() (in module icenet.tools.aux)</a>
 </li>
@@ -1314,8 +1354,12 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.process_memory_use">process_memory_use() (in module icenet.tools.io)</a>
 </li>
-      <li><a href="modules/icetrg.html#icetrg.common.process_root">process_root() (in module icetrg.common)</a>
+      <li><a href="modules/icedqcd.html#icedqcd.common.process_root">process_root() (in module icedqcd.common)</a>
+
+      <ul>
+        <li><a href="modules/icetrg.html#icetrg.common.process_root">(in module icetrg.common)</a>
 </li>
+      </ul></li>
       <li><a href="modules/icefit.html#icefit.statstools.prodratio_eprop">prodratio_eprop() (in module icefit.statstools)</a>
 </li>
       <li><a href="modules/icemc.html#icemc.icemc.produce_acceptance_sim">produce_acceptance_sim() (in module icemc.icemc)</a>
@@ -1486,9 +1530,11 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.split_start_end">split_start_end() (in module icenet.tools.aux)</a>
 </li>
-      <li><a href="modules/iceid.html#iceid.common.splitfactor">splitfactor() (in module iceid.common)</a>
+      <li><a href="modules/icedqcd.html#icedqcd.common.splitfactor">splitfactor() (in module icedqcd.common)</a>
 
       <ul>
+        <li><a href="modules/iceid.html#iceid.common.splitfactor">(in module iceid.common)</a>
+</li>
         <li><a href="modules/icetrg.html#icetrg.common.splitfactor">(in module icetrg.common)</a>
 </li>
       </ul></li>

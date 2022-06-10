@@ -1197,6 +1197,76 @@ respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <sp
 </dd></dl>
 
 </section>
+<section id="module-icenet.deep.losstools">
+<span id="icenet-deep-losstools"></span><h3>icenet.deep.losstools<a class="headerlink" href="#module-icenet.deep.losstools" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.log_softmax">
+<span class="sig-name descname"><span class="pre">log_softmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#log_softmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.log_softmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of softmax</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – network output without softmax</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>logsoftmax values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.log_sum_exp">
+<span class="sig-name descname"><span class="pre">log_sum_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#log_sum_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.log_sum_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/">http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.logsumexp">
+<span class="sig-name descname"><span class="pre">logsumexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#logsumexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.logsumexp" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/LogSumExp">https://en.wikipedia.org/wiki/LogSumExp</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.loss_wrapper">
+<span class="sig-name descname"><span class="pre">loss_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#loss_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.loss_wrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper function to call loss functions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.multiclass_cross_entropy">
+<span class="sig-name descname"><span class="pre">multiclass_cross_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#multiclass_cross_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.multiclass_cross_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted cross entropy loss
+(negative log-likelihood)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.multiclass_cross_entropy_logprob">
+<span class="sig-name descname"><span class="pre">multiclass_cross_entropy_logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#multiclass_cross_entropy_logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.multiclass_cross_entropy_logprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted cross entropy loss
+(negative log-likelihood)</p>
+<p>Numerically more stable version.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.multiclass_focal_entropy">
+<span class="sig-name descname"><span class="pre">multiclass_focal_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#multiclass_focal_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.multiclass_focal_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted ‘focal entropy loss’
+<a class="reference external" href="https://arxiv.org/pdf/1708.02002.pdf">https://arxiv.org/pdf/1708.02002.pdf</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.multiclass_focal_entropy_logprob">
+<span class="sig-name descname"><span class="pre">multiclass_focal_entropy_logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_phat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#multiclass_focal_entropy_logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.multiclass_focal_entropy_logprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Per instance weighted ‘focal entropy loss’
+<a class="reference external" href="https://arxiv.org/pdf/1708.02002.pdf">https://arxiv.org/pdf/1708.02002.pdf</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.multiclass_logit_norm_loss">
+<span class="sig-name descname"><span class="pre">multiclass_logit_norm_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#multiclass_logit_norm_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.multiclass_logit_norm_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://arxiv.org/abs/2205.09310">https://arxiv.org/abs/2205.09310</a></p>
+</dd></dl>
+
+</section>
 <section id="module-icenet.deep.maxo">
 <span id="icenet-deep-maxo"></span><h3>icenet.deep.maxo<a class="headerlink" href="#module-icenet.deep.maxo" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
