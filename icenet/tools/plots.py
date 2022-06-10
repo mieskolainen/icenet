@@ -520,6 +520,7 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
 def plotvars(X, y, ids, weights, NBINS = 70, title = '', targetdir = '.'):
     """ Plot all variables.
     """
+    print(__name__ + f'.plotvars: Creating plots ...')
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
         var = ids[i]

@@ -338,7 +338,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
                 auc = 0
                 k   = 0
                 for batch_x, batch_y, batch_weights in gen:
-                                    
+                    
                     # ----------------------------------------------------------------
                     # Transfer to (GPU) device memory
                     if type(batch_x) is dict: # If multiobject type
@@ -377,29 +377,31 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
                     val_aucs.append(auc / (k + 1E-12))
                 j += 1
 
-            print(f'Epoch = {epoch} : train loss = {avgloss} [trn AUC = {trn_aucs[-1]}, val AUC = {val_aucs[-1]}]')
-            
-            # ------------------------------------------------------------------------------
-            # Raytune on
-            if raytune_on:
-                with tune.checkpoint_dir(epoch) as checkpoint_dir:
-                    path = os.path.join(checkpoint_dir, "checkpoint")
-                    torch.save((model.state_dict(), optimizer.state_dict()), path)
-
-                tune.report(loss = losses[-1], AUC = val_aucs[-1])
-            else:
-                ## Save
-                checkpoint = {'model': model, 'state_dict': model.state_dict()}
-                torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
-            # ------------------------------------------------------------------------------        
+            print(f'Epoch = {epoch} : train loss = {avgloss:0.3f} [trn AUC = {trn_aucs[-1]:0.3f}, val AUC = {val_aucs[-1]:0.3f}]')
 
             # Back to training mode!
             model.train()
 
         # Just print the loss
         else:
-            print(f'Epoch = {epoch} : train loss = {avgloss:.3f}')
-    
+            print(f'Epoch = {epoch} : train loss = {avgloss:0.3f}')
+            
+        # ------------------------------------------------------------------------------
+        # Raytune on
+        if raytune_on:
+            with tune.checkpoint_dir(epoch) as checkpoint_dir:
+                path = os.path.join(checkpoint_dir, "checkpoint")
+                torch.save((model.state_dict(), optimizer.state_dict()), path)
+
+            tune.report(loss = losses[-1], AUC = val_aucs[-1])
+
+        # No raytune
+        else:
+            ## Save
+            checkpoint = {'model': model, 'state_dict': model.state_dict()}
+            torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
+        # ------------------------------------------------------------------------------        
+
     # -------------------------------------------------------
     # Temperature scaling post-processing
     """

@@ -346,8 +346,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     if data_tensor is not None:
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
-
-
+    
     # ====================================================================
     # ** Plots for individual model inspection **
 
@@ -431,9 +430,9 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             #plots.density_COR(**inputs) 
     
     # ====================================================================
-
-
-
+    
+    
+    
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #

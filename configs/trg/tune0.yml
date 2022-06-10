@@ -9,7 +9,7 @@ mcfile:    'eff.root'
 datafile:  'datadist.root'
 # ----------------------------------------------------
 
-eval_reweight: False     # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
+eval_reweight: True      # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
 rngseed: 123456          # Fixed seed for training data mixing
 
 num_classes: 2           # Number of classes in MVA
@@ -22,7 +22,7 @@ active_models:
   - xgb0
   - xgb1
   - lgr0
-  
+
   - cut0
   - cut1
   - cut2
