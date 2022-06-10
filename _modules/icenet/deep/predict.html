@@ -183,8 +183,8 @@
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
 
-<div class="viewcode-block" id="pred_torch"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch">[docs]</a><span class="k">def</span> <span class="nf">pred_torch</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">signalclass</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-
+<div class="viewcode-block" id="pred_torch_generic"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch_generic">[docs]</a><span class="k">def</span> <span class="nf">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">signalclass</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Evaluate </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>

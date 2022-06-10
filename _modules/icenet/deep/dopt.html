@@ -63,6 +63,8 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
+<span class="kn">from</span> <span class="nn">ray</span> <span class="kn">import</span> <span class="n">tune</span>
+
 
 <span class="n">init_funcs</span> <span class="o">=</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>  <span class="c1"># bias terms</span>
@@ -186,7 +188,8 @@
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">device</span></div>
 
 
-<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">,</span> <span class="n">clip_gradients</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">,</span>
+    <span class="n">clip_gradients</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">raytune_on</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main training loop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -351,15 +354,11 @@
         <span class="n">avgloss</span> <span class="o">=</span> <span class="n">sumloss</span> <span class="o">/</span> <span class="n">nbatch</span>
         <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avgloss</span><span class="p">)</span>
 
-        <span class="c1">### SAVE MODEL</span>
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
-        
-        
+
         <span class="c1"># ================================================================</span>
         <span class="c1"># TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">save_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
 
             <span class="c1"># Evaluation mode on (crucial e.g. for batchnorm etc.)!</span>
             <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
@@ -413,7 +412,21 @@
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch = </span><span class="si">{}</span><span class="s1"> : train loss = </span><span class="si">{:.3f}</span><span class="s1"> [trn AUC = </span><span class="si">{:.3f}</span><span class="s1">, val AUC = </span><span class="si">{:.3f}</span><span class="s1">]&#39;</span><span class="o">.</span> <span class="nb">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">avgloss</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
-            
+                    
+            <span class="c1"># ------------------------------------------------------------------------------</span>
+            <span class="c1"># Raytune on</span>
+            <span class="k">if</span> <span class="n">raytune_on</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
+
+                <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">## Save</span>
+                <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
+            <span class="c1"># ------------------------------------------------------------------------------        </span>
+
             <span class="c1"># Back to training mode!</span>
             <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
