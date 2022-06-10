@@ -372,7 +372,7 @@
                 <span class="n">auc</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">k</span>   <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">:</span>
-                                    
+                    
                     <span class="c1"># ----------------------------------------------------------------</span>
                     <span class="c1"># Transfer to (GPU) device memory</span>
                     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">batch_x</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span> <span class="c1"># If multiobject type</span>
@@ -411,29 +411,31 @@
                     <span class="n">val_aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">auc</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mf">1E-12</span><span class="p">))</span>
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">}</span><span class="s1"> [trn AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">, val AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
-            
-            <span class="c1"># ------------------------------------------------------------------------------</span>
-            <span class="c1"># Raytune on</span>
-            <span class="k">if</span> <span class="n">raytune_on</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
-                    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
-
-                <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1">## Save</span>
-                <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
-            <span class="c1"># ------------------------------------------------------------------------------        </span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> [trn AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">, val AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 
             <span class="c1"># Back to training mode!</span>
             <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
         <span class="c1"># Just print the loss</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+        <span class="c1"># ------------------------------------------------------------------------------</span>
+        <span class="c1"># Raytune on</span>
+        <span class="k">if</span> <span class="n">raytune_on</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
+
+            <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># No raytune</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## Save</span>
+            <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
+        <span class="c1"># ------------------------------------------------------------------------------        </span>
+
     <span class="c1"># -------------------------------------------------------</span>
     <span class="c1"># Temperature scaling post-processing</span>
     <span class="sd">&quot;&quot;&quot;</span>
