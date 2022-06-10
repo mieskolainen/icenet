@@ -378,12 +378,12 @@ def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
     """
 
     # Number of classes
-    C         = int(np.max(y) - np.min(y) + 1)
+    C         = len(np.unique(y))
 
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
-
+    
     if weights is not None:
         classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
@@ -776,7 +776,7 @@ def plothist1d(X, y, labels) :
     """
 
     # Number of classes
-    C = int(np.max(y) - np.min(y) + 1)
+    C = len(np.unique(y))
 
     classlegs = []
     for k in range(C) :

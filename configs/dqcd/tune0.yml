@@ -29,6 +29,7 @@ active_models:
   - xgb0
   #- xgb1
   - lgr0
+  - dmlp
 
   - cut0
   - cut1
@@ -456,3 +457,37 @@ lgr0_param:
   savemode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
 
+
+# Deep MLP
+dmlp_param:
+  train:   'dmlp'
+  predict: 'torch_generic'
+  label:   'DMLP'
+  raytune:  null
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'logit_norm_cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'AdamW'
+    noise_reg: 0.0            # Noise regularization
+    
+    epochs: 50
+    batch_size: 196
+    learning_rate: 0.003
+    weight_decay: 0.00001     # L2-regularization
+  
+  # Model
+  model_param:
+    mlp_dim: [64, 64, 64]     # hidden layer dimensions
+    batch_norm: True    
+
+
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch

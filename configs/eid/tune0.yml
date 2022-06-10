@@ -21,6 +21,7 @@ active_models:
 #  - cnn0
   - gnet0
   - gnet1
+  - gnet0-logit-norm
 #  - gnet2
 #  - gnet3
 #  - gnet4
@@ -431,6 +432,45 @@ gnet1_param:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
+
+
+# Graph net
+gnet0-logit-norm_param:
+  train:    'graph'
+  predict:  'torch_graph'
+  label:    'G-NN-logit-norm'
+  raytune:  'trial0'
+
+  conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
+
+  # Model
+  model_param:
+    conv_aggr:   'max'
+    global_pool: 'mean'
+    cdim: 196                 # Convolution output dimension
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'logit_norm_cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
 
 # Graph net
