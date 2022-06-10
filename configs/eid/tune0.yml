@@ -8,7 +8,7 @@ rootname: 'eid'
 
 MAXEVENTS: 100000     # Maximum total number of events (per root file) to process
 
-eval_reweight: false  # Event-by-event re-weighting used in the evaluation phase
+eval_reweight: true   # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
 
 num_classes: 2        # Number of classes in MVA
@@ -55,7 +55,7 @@ distillation:
 # Batched "deep" training
 batch_train_param:
   blocksize: 1000000            # Maximum number of events simultaneously in RAM
-  epochs: 50                   # Number of global epochs (1 epoch = one iteration over the full input dataset)
+  epochs: 50                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
   local_epochs: 1               # Number of local epochs per algorithm. If 0, then use the custom value per model.
   num_cpu: null                 # Set null for auto, or an integer for manual.
 
