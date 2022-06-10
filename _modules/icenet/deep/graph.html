@@ -54,9 +54,10 @@
 <span class="kn">from</span> <span class="nn">torch_scatter</span> <span class="kn">import</span> <span class="n">scatter_add</span><span class="p">,</span> <span class="n">scatter_max</span><span class="p">,</span> <span class="n">scatter_mean</span>
 
 
-<span class="kn">from</span>   <span class="nn">icenet.deep.pgraph</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span>   <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">dopt</span>
-<span class="kn">from</span>   <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.deep.pgraph</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">dopt</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">losstools</span>
 
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
@@ -132,7 +133,7 @@
         <span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pytorch geometric based training routine.</span>
 <span class="sd">    </span>
@@ -141,6 +142,7 @@
 <span class="sd">        loader    : pytorch geometric dataloader</span>
 <span class="sd">        optimizer : pytorch optimizer</span>
 <span class="sd">        device    : &#39;cpu&#39; or &#39;device&#39;</span>
+<span class="sd">        param:    : optimization parameters</span>
 <span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">        trained model (return implicit via input arguments)</span>
@@ -150,17 +152,15 @@
     <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
-        
-        <span class="c1"># Change the shape</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
-        <span class="c1"># Predict probabilities</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">log_phat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
 
         <span class="c1"># Compute loss</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">loss_wrapper</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">batch</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">N_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="c1"># Propagate gradients</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
         
         <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">batch</span><span class="o">.</span><span class="n">num_graphs</span>
