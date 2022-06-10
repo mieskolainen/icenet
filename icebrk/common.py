@@ -18,6 +18,8 @@ import yaml
 
 import uproot
 
+import icenet.tools.aux as aux
+
 
 def init():
     """ Data initialization function.
@@ -66,6 +68,6 @@ def init():
         paths.append(cli.datapath + '/BParkNANO_mc_relaxed_Kee_' + str(i) + '.root')
     
     ### Input-Output directory
-    iodir = f'./output/brk/{cli.tag}/'; os.makedirs(iodir, exist_ok = True)
+    iodir = aux.makedir(f'./output/brk/{cli.tag}/')
 
     return paths,args,cli,iodir

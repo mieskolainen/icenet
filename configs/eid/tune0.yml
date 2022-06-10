@@ -6,11 +6,12 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 10000               # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000     # Maximum total number of events (per root file) to process
 
-eval_reweight: false            # Event-by-event re-weighting used in the evaluation phase
-rngseed: 123456                 # Fixed seed for training data mixing
+eval_reweight: false  # Event-by-event re-weighting used in the evaluation phase
+rngseed: 123456       # Fixed seed for training data mixing
 
+num_classes: 2        # Number of classes in MVA
 
 # ---------------------------------------------------------
 # ** Activate models here **
@@ -20,8 +21,8 @@ active_models:
 #  - dmlp
 #  - cnn0
   - gnet0
-  - gnet1
-  - gnet0-logit-norm
+#  - gnet1
+#  - gnet0-logit-norm
 #  - gnet2
 #  - gnet3
 #  - gnet4
@@ -30,7 +31,7 @@ active_models:
   - xgb0
   - lgr0
 #  - xtx0
-#  - dmx0
+  - dmx0
 #  - dbnf0
   - gxgb0
 
@@ -280,7 +281,7 @@ gxgb0_param:
 
   # ** GRAPH NETWORK **
   graph:
-    train:   'graph'
+    train:   'torch_graph'
     predict: 'torch_graph'
     label:   'GXGB-G'
     raytune:  null
@@ -357,7 +358,7 @@ gxgb0_param:
 
 # Graph net
 gnet0_param:
-  train:    'graph'
+  train:    'torch_graph'
   predict:  'torch_graph'
   label:    'G-NN'
   raytune:  'trial0'
@@ -396,7 +397,7 @@ gnet0_param:
 
 # Graph net
 gnet1_param:
-  train:   'graph'
+  train:   'torch_graph'
   predict: 'torch_graph'
   label:   'G-SUP'
   raytune:  null
@@ -436,7 +437,7 @@ gnet1_param:
 
 # Graph net
 gnet0-logit-norm_param:
-  train:    'graph'
+  train:    'torch_graph'
   predict:  'torch_graph'
   label:    'G-NN-logit-norm'
   raytune:  'trial0'
@@ -475,7 +476,7 @@ gnet0-logit-norm_param:
 
 # Graph net
 gnet2_param:
-  train:   'graph'
+  train:   'torch_graph'
   predict: 'torch_graph'
   label:   'G-EC-add'
   raytune:  null
@@ -515,7 +516,7 @@ gnet2_param:
 
 # Graph net
 gnet3_param:
-  train:   'graph'
+  train:   'torch_graph'
   predict: 'torch_graph'
   label:   'G-DEC-add'
   raytune:  'trial0'
@@ -555,7 +556,7 @@ gnet3_param:
 
 # Graph net
 gnet4_param:
-  train:   'graph'
+  train:   'torch_graph'
   predict: 'torch_graph'
   label:   'G-GAT'
   raytune:  null
@@ -647,10 +648,16 @@ xgb0_param:
 
 # Deep MLP
 dmlp_param:
-  train:   'dmlp'
+  train:   'torch_generic'
   predict: 'torch_generic'
   label:   'DMLP'
   raytune:  null
+
+  # Model
+  conv_type: 'dmlp'
+  model_param:
+    mlp_dim: [64, 64, 64]     # hidden layer dimensions
+    batch_norm: True    
 
   # Optimization
   opt_param:  
@@ -666,12 +673,6 @@ dmlp_param:
     learning_rate: 0.003
     weight_decay: 0.00001     # L2-regularization
   
-  # Model
-  model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    batch_norm: True    
-
-
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -682,10 +683,15 @@ dmlp_param:
 
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
-  train:   'lgr'
+  train:   'torch_generic'
   predict: 'torch_generic'
   label:   'LGR'
   raytune:  null
+
+  # Model param
+  conv_type: 'lgr'
+  model_param:
+    null
 
   # Optimization
   opt_param:  
@@ -711,10 +717,16 @@ lgr0_param:
 
 # Convolutional Neural Net
 cnn0_param:
-  train:   'cnn'
+  train:   'torch_image'
   predict: 'torch_image'
   label:   'CNN'
   raytune:  null
+
+  # Model
+  model_param:
+    dropout_cnn: 0.25
+    dropout_mlp: 0.5
+    mlp_dim: 64
 
   # Optimization
   opt_param:  
@@ -729,12 +741,6 @@ cnn0_param:
     batch_size: 128
     learning_rate: 0.001
     weight_decay: 0.00        # L2-regularization
-  
-  # Model
-  model_param:
-    dropout_cnn: 0.25
-    dropout_mlp: 0.5
-    mlp_dim: 64
     
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -751,6 +757,12 @@ xtx0_param:
   label:   'XTX'
   raytune:  null
 
+  # Model param
+  model_param:
+    num_units: 2
+    neurons:  20
+    dropout:  0.5
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -765,12 +777,6 @@ xtx0_param:
     learning_rate: 0.005
     weight_decay: 0.01        # L2-regularization
 
-  # Model param
-  model_param:
-    num_units: 2
-    neurons:  20
-    dropout:  0.5
-
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -781,10 +787,17 @@ xtx0_param:
 
 # Deep MAXOUT network
 dmx0_param:
-  train:   'dmax'
+  train:   'torch_generic'
   predict: 'torch_generic'
-  label:   'DMAX'
+  label:   'MAXO'
   raytune:  null
+
+  # Model parameter
+  conv_type: 'maxo'
+  model_param:
+    num_units: 8
+    neurons:  50
+    dropout:  0.4
 
   # Optimization
   opt_param:  
@@ -800,12 +813,6 @@ dmx0_param:
     learning_rate: 0.005
     weight_decay: 0.00001       # L2-regularization
 
-  # Model parameter
-  model_param:  
-    num_units: 15
-    neurons:  50
-    dropout:  0.4
-    
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 

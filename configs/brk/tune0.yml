@@ -10,6 +10,8 @@ MAXEVENTS: 500
 
 rngseed: 123456                 # Fixed seed for training data mixing
 
+num_classes: null               # Num of classes in MVA
+
 
 # -----------------------------------------------------------------------------
 # TRAINING AND ANALYSIS
@@ -132,9 +134,15 @@ xgb_param:
 
 
 # Deep MaxOut network
-dmax_param:
+maxo_param:
   active: true
-  label:  'DMAX'
+  label:  'MAXO'
+  
+  # Model parameters
+  model_param:
+    num_units: 12
+    neurons:  36
+    dropout:  0.5
 
   # Optimization
   opt_param:  
@@ -148,12 +156,6 @@ dmax_param:
     batch_size:  256
     learning_rate: 0.005
     weight_decay: 0.01            # L2-regularization
-  
-  # Model parameters
-  model_param:
-    num_units: 12
-    neurons:  36
-    dropout:  0.5
     
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -168,6 +170,10 @@ deps_param:
   active: true
   label:  'DEPS'
 
+  # Model parameters
+  model_param:  
+    z_dim: 64                   # Latent dimension
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -181,10 +187,6 @@ deps_param:
     learning_rate: 0.005
     weight_decay: 0.01            # L2-regularization
   
-  # Model parameters
-  model_param:  
-    z_dim: 64                   # Latent dimension
-
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
   

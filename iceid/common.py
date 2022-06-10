@@ -155,7 +155,7 @@ def init_multiprocess(MAXEVENTS=None):
 
         # Torch conversions
         data['X_graph']  = graphio.graph2torch(data['X_graph'])
-
+    
     return data, args, features
 
 
@@ -228,7 +228,7 @@ def init(MAXEVENTS=None):
 
     cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
         [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
-    
+
     return data, args, features
 
 

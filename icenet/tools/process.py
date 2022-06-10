@@ -159,56 +159,71 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
 
 
         ## Different model
-        if   param['train'] == 'graph':
+        if   param['train'] == 'torch_graph':
             
-            inputs = {'data_trn': data_graph['trn'], 'data_val': data_graph['val'], 'args':args, 'param': param}
+            inputs = {'data_trn': data_graph['trn'],
+                      'data_val': data_graph['val'],
+                      'args':     args,
+                      'param':    param}
             
             #### Add distillation, if turned on
             if args['distillation']['drains'] is not None:
                 if ID in args['distillation']['drains']:
                     inputs['y_soft'] = y_soft
             ###
-            
             if ID in args['raytune_param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_graph)
+                model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
             else:
-                model = train.train_graph(**inputs)
+                model = train.train_torch_graph(**inputs)
         
         elif param['train'] == 'xgb':
 
-            inputs = {'data': data, 'trn_weights': trn_weights, 'args': args, 'param': param}
+            inputs = {'data': data,
+                      'trn_weights': trn_weights,
+                      'args': args,
+                      'param': param}
 
             #### Add distillation, if turned on
             if args['distillation']['drains'] is not None:
                 if ID in args['distillation']['drains']:
                     inputs['y_soft'] = y_soft
             ###
-
             if ID in args['raytune_param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
                 model = train.train_xgb(**inputs)
+        
+        elif param['train'] == 'torch_generic':
             
+            inputs = {'X_trn': X_trn,
+                      'Y_trn': Y_trn,
+                      'X_val': X_val,
+                      'Y_val': Y_val,
+                      'trn_weights': trn_weights,
+                      'args':  args,
+                      'param': param}
+
+            #### Add distillation, if turned on
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    inputs['y_soft'] = y_soft
+            ###
+            if ID in args['raytune_param']['active']:
+                model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
+            else:
+                model = train.train_torch_generic(**inputs)
+
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
         
+        elif param['train'] == 'torch_image':
+            train.train_cnn(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
+
         elif param['train'] == 'flr':
             train.train_flr(data=data, trn_weights=trn_weights, args=args, param=param)
-        
-        elif param['train'] == 'cnn':
-            train.train_cnn(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
             
         #elif param['train'] == 'xtx':
         #    train.train_xtx(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, data_kin=data_kin, args=args, param=param)
-
-        elif param['train'] == 'dmlp':
-            train.train_dmlp(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
-        
-        elif param['train'] == 'lgr':
-            train.train_lgr(X_trn=X_trn,  Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
-                
-        elif param['train'] == 'dmax':
-            train.train_dmax(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
 
         elif param['train'] == 'flow':
             train.train_flow(data=data, trn_weights=trn_weights, args=args, param=param)
@@ -226,8 +241,14 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
         if ID == args['distillation']['source']:
             print(__name__ + '.train.models: Computing distillation soft targets ...')
             
-            if param['train'] == 'xgb':
+            if   param['train'] == 'xgb':
                 y_soft = model.predict(xgboost.DMatrix(data = data.trn.x))
+            elif param['train'] == 'torch_graph':
+                y_soft = model.softpredict(data_graph['trn'])
+            elif param['train'] == 'torch_generic':
+                y_soft = model.softpredict(X_trn)
+            else:
+                raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
         # --------------------------------------------------------
 
     return
@@ -431,6 +452,10 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             func_predict = predict.pred_graph_xgb(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
             
+        elif param['predict'] == 'torch_generic':
+            func_predict = predict.pred_torch_generic(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
+
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, X = X, label = param['label'])
@@ -442,7 +467,7 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch(args=args, param=param)
 
-            X_ = {}
+            X_tensor      = {}
             X_tensor['x'] = X_2D_ptr # image tensors
             X_tensor['u'] = X_ptr    # global features
             
@@ -452,10 +477,6 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         # ...   
         #
         
-        elif param['predict'] == 'torch_generic':
-            func_predict = predict.pred_torch(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
-            
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
             plot_XYZ_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])

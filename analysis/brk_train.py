@@ -165,18 +165,18 @@ def main() :
     # ====================================================================
     print('<< TRAINING DEEP MAXOUT >>')
     
-    if args['dmax_param']['active']:
+    if args['maxo_param']['active']:
         
-        label = args['dmax_param']['label']
+        label = args['maxo_param']['label']
         
         # Input [** NOW SAME -- UPDATE THIS **]
         X_trn = torch.from_numpy(X).type(torch.FloatTensor)
         X_val = torch.from_numpy(X).type(torch.FloatTensor)
 
         print(f'\nTraining {label} classifier ...')
-        dmax_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, **args['dmax_param']['model_param'])
-        dmax_model, losses, trn_aucs, val_aucs = dopt.train(model = dmax_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, param = args['dmax_param'], modeldir = modeldir)
+        maxo_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, **args['maxo_param']['model_param'])
+        maxo_model, losses, trn_aucs, val_aucs = dopt.train(model = maxo_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+            trn_weights = trn_weights, param = args['maxo_param'], modeldir = modeldir)
         
         # Plot evolution
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)

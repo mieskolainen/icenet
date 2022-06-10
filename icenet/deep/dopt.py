@@ -29,6 +29,8 @@ from icenet.tools import aux
 from icenet.tools import io
 from icefit import mine
 
+from ray import tune
+
 
 init_funcs = {
     1: lambda x: torch.nn.init.normal_(x, mean=0.0, std=1.0),  # bias terms
@@ -152,7 +154,8 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_gradients=True):
+def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
+    clip_gradients=True, raytune_on=False, save_period=5):
     """
     Main training loop
     """
@@ -317,15 +320,11 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
         avgloss = sumloss / nbatch
         losses.append(avgloss)
 
-        ### SAVE MODEL
-        checkpoint = {'model': model, 'state_dict': model.state_dict()}
-        torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
-        
-        
+
         # ================================================================
         # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)
 
-        if (epoch % 5 == 0) :
+        if (epoch % save_period == 0) :
 
             # Evaluation mode on (crucial e.g. for batchnorm etc.)!
             model.eval()
@@ -379,7 +378,21 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
                 j += 1
 
             print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))
-            
+                    
+            # ------------------------------------------------------------------------------
+            # Raytune on
+            if raytune_on:
+                with tune.checkpoint_dir(epoch) as checkpoint_dir:
+                    path = os.path.join(checkpoint_dir, "checkpoint")
+                    torch.save((model.state_dict(), optimizer.state_dict()), path)
+
+                tune.report(loss = losses[-1], AUC = val_aucs[-1])
+            else:
+                ## Save
+                checkpoint = {'model': model, 'state_dict': model.state_dict()}
+                torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
+            # ------------------------------------------------------------------------------        
+
             # Back to training mode!
             model.train()
 

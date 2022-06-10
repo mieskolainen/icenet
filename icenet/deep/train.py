@@ -149,7 +149,7 @@ def raytune_main(inputs, train_func=None):
     
     
     # GRAPH NETWORKS
-    if train_func == train_graph:
+    if train_func == train_torch_graph:
 
         ### Load the best model from raytune folder
         bestparam, conv_type = getgraphparam(config=best_trial.config, **inputs)
@@ -170,6 +170,7 @@ def raytune_main(inputs, train_func=None):
         checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
         torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
 
+    ## XGboost
     elif train_func == train_xgb:
 
         # Get the best config
@@ -186,11 +187,50 @@ def raytune_main(inputs, train_func=None):
         # ** Final train with the optimal parameters **
         inputs['param'] = optimal_param
         best_trained_model = train_xgb(**inputs)
-        
+
+    ## Generic Torch model
+    elif train_func == train_torch_generic:
+
+        ### Construct model
+        netparam, conv_type = getgenericparam(config=best_trial.config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
+        model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
+
+        device = "cpu"
+        if torch.cuda.is_available():
+            device = "cuda:0"
+            if gpus_per_trial > 1:
+                best_trained_model = nn.DataParallel(best_trained_model)
+        best_trained_model.to(device)
+
+        best_checkpoint_dir          = best_trial.checkpoint.value
+        model_state, optimizer_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
+        best_trained_model.load_state_dict(model_state)
+
+        ### Finally save it under model folder
+        checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
+        torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
+
     else:
         raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
 
     return best_trained_model
+
+
+def getgenericmodel(conv_type, netparam):
+    """
+    Wrapper to return different torch models
+    """
+
+    if   conv_type == 'lgr':
+        model = mlgr.MLGR(**netparam)
+    elif conv_type == 'dmlp':
+        model = dmlp.DMLP(**netparam)
+    elif conv_type == 'maxo':
+        model = maxo.MAXOUT(**netparam)
+    else:
+        raise Exception(__name__ + f'.getgenericmodel: Unknown network <conv_type> = {conv_type}')
+
+    return model
 
 
 def getgraphmodel(conv_type, netparam):
@@ -219,12 +259,29 @@ def getgraphmodel(conv_type, netparam):
     elif conv_type == 'spline':
         model = graph.SplineNet(**netparam)
     else:
-        raise Except(name__ + f'.getgraphmodel: Unknown network convolution model "conv_type" = {conv_type}')
+        raise Except(name__ + f'.getgraphmodel: Unknown network <conv_type> = {conv_type}')
     
     return model
 
 
-def getgraphparam(config, data_trn, data_val, args, param, num_classes=2):
+def getgenericparam(config, param, D, num_classes):
+    """
+    Construct generic torch network parameters
+    """
+    netparam = {
+        'C'    : int(num_classes),
+        'D'    : int(D)
+    }
+
+    # Add model hyperparameter keys
+    if param['model_param'] is not None:
+        for key in param['model_param'].keys():
+            netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
+
+    return netparam, param['conv_type']
+
+
+def getgraphparam(config, data_trn, data_val, args, param):
     """
     Construct graph network parameters
     """
@@ -233,7 +290,7 @@ def getgraphparam(config, data_trn, data_val, args, param, num_classes=2):
     num_global_features = len(data_trn[0].u)
 
     netparam = {
-        'C'    : int(num_classes),
+        'C'    : int(args['num_classes']),
         'D'    : int(num_node_features),
         'E'    : int(num_edge_features),
         'G'    : int(num_global_features),
@@ -241,13 +298,14 @@ def getgraphparam(config, data_trn, data_val, args, param, num_classes=2):
     }
 
     # Add model hyperparameter keys
-    for key in param['model_param'].keys():
-        netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
+    if param['model_param'] is not None:
+        for key in param['model_param'].keys():
+            netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
 
     return netparam, param['conv_type']
 
 
-def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, num_classes=2):
+def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None):
     """
     Train graph neural networks
     
@@ -262,6 +320,9 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
         trained model
     """
 
+    label = param['label']
+    print(f'\nTraining {label} classifier ...')
+
     ### ** Optimization hyperparameters **
     opt_param = {}
     for key in param['opt_param'].keys():
@@ -274,8 +335,8 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
 
     ## ------------------------
     ### Construct model
-    netparam, conv_type = getgraphparam(config, data_trn, data_val, args, param)
-    model               = getgraphmodel(conv_type, netparam)    
+    netparam, conv_type = getgraphparam(config=config, data_trn=data_trn, data_val=data_val, args=args, param=param)
+    model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
     # CPU or GPU
     model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
@@ -294,13 +355,23 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
     train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
     test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
     
+    losses   = []
+    trn_aucs = []
+    val_aucs = []
 
     for epoch in range(opt_param['epochs']):
 
-        loss                       = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device, param=opt_param)
-        validate_acc, validate_AUC = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
+        loss = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device, param=opt_param)
+
+        train_acc, train_auc       = graph.test( model=model, loader=train_loader, optimizer=optimizer, device=device)
+        validate_acc, validate_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
-        print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
+        # Push
+        losses.append(loss)
+        trn_aucs.append(train_auc)
+        val_aucs.append(validate_auc)
+
+        print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
         scheduler.step()
         
         # Raytune on
@@ -313,9 +384,60 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
         else:
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
-            torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-
+            torch.save(checkpoint, args['modeldir'] + f'/{label}_' + str(epoch) + '.pth')
+    
     if len(config) == 0:
+
+        # Plot evolution
+        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
+        plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
+
+        return model
+
+
+def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None,
+    trn_weights=None, args=None, param=None):
+    """
+    Train generic neural model [R^d -> softmax]
+    
+    Args:
+        See other train_*
+    
+    Returns:
+        trained model
+    """
+
+    label = param['label']
+    print(f'\nTraining {label} classifier ...')
+
+    ## ------------------------
+    ### Construct model
+    netparam, conv_type = getgenericparam(config=config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
+    model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
+
+    # Train the model
+    raytune_on = True if len(config) != 0 else False
+
+    model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+        trn_weights = trn_weights, param = param, modeldir=args['modeldir'], raytune_on=raytune_on)
+
+    # ---------------------------------------------------------------
+
+    # Raytune not active
+    if len(config) == 0:
+
+        # Plot evolution
+        plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+
+        ### Plot contours
+        if args['plot_param']['contours']['active']:
+            targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
+            plots.plot_decision_contour(lambda x : model.softpredict(x),
+                X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
+
         return model
 
 
@@ -429,7 +551,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, pa
         return model
 
 
-def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, args=None, param=None):
     """
     Train graph model + xgb hybrid model
 
@@ -448,7 +570,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     print(f'\nTraining {label} classifier ...')
 
     ### Compute graphnet convolution output
-    graph_model = train_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
+    graph_model = train_torch_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
     graph_model = graph_model.to('cpu')    
 
     ### Find out the latent space dimension -------
@@ -550,41 +672,6 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
         return model
 
 
-
-def train_dmax(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
-    """
-    Train dmax neural model
-
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    label = param['label']
-    
-    print(f'\nTraining {label} classifier ...')
-    model = maxo.MAXOUT(D = X_trn.shape[1], C=num_classes, **param['model_param'])
-    model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
-
-    # Plot evolution
-    plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
-
-    if len(config) == 0:
-        return model
-
-
-
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     """
     Train factorized likelihood model
@@ -616,7 +703,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     return (b_pdfs, s_pdfs)
 
 
-def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None):
     """
     Train cdmx neural model
     
@@ -633,7 +720,7 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
     label = args['cdmx_param']['label']
 
     print(f'\nTraining {label} classifier ...')
-    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=num_classes, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
+    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=args['num_classes'], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
         dropout_cnn = param['dropout_cnn'], neurons = param['neurons'], \
         num_units = param['num_units'], dropout = param['dropout'])
 
@@ -669,10 +756,10 @@ def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=
 
 
 
-def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
+def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None):
     """
     Train CNN neural model
-
+    
     Args:
         See other train_*
 
@@ -702,7 +789,7 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
     # -------------------------------------------------------------------------------
 
     print(f'\nTraining {label} classifier ...')
-    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=num_classes, nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], **param['model_param'])
+    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=args['num_classes'], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], **param['model_param'])
 
     model, losses, trn_aucs, val_aucs = \
         dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
@@ -723,75 +810,7 @@ def train_cnn(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, tr
         return model
 
 
-
-def train_dmlp(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
-    """
-    Train dmlp neural model
-
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    label = param['label']
-    
-    print(f'\nTraining {label} classifier ...')
-    model = dmlp.DMLP(D = X_trn.shape[1], C = num_classes, **param['model_param'])
-    model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
-
-    # Plot evolution
-    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
-
-    if len(config) == 0:
-        return model
-
-
-
-def train_lgr(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, trn_weights=None, args=None, param=None, num_classes=2):
-    """
-    Train lgr neural model
-
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    label = param['label']
-    
-    print(f'\nTraining {label} classifier ...')
-    model = mlgr.MLGR(D = X_trn.shape[1], C = num_classes)
-    model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
-
-    # Plot evolution
-    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
-
-    if len(config) == 0:
-        return model
-
-
-def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None, num_classes=2):
+def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):
     """
     Train xtx neural model
     
@@ -841,8 +860,7 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
 
 
                 # Train
-                #xtx_model = mlgr.MLGR(D = X_trn.shape[1], C = 2)
-                model = maxo.MAXOUT(D = X_trn.shape[1], C = num_classes, **param['model_param'])
+                model = maxo.MAXOUT(D=X_trn.shape[1], C=args['num_classes'], **param['model_param'])
 
                 # Set hyperbin label
                 param['label'] = f'{label}_bin_{i}_{j}'
@@ -858,7 +876,7 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
     return True
 
 
-def train_flow(config={}, data=None, trn_weights=None, args=None, param=None, num_classes=2):
+def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
     """
     Train normalizing flow (BNAF) neural model
 
@@ -876,7 +894,7 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None, nu
 
     print(f'\nTraining {label} classifier ...')
     
-    for classid in range(num_classes):
+    for classid in range(args['num_classes']):
         param['model'] = 'class_' + str(classid)
 
         # Load datasets

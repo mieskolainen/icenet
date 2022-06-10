@@ -149,8 +149,8 @@ def pred_torch_graph(args, param, signalclass = 1):
     return func_predict
 
 
-def pred_torch(args, param, signalclass = 1):
-
+def pred_torch_generic(args, param, signalclass = 1):
+    
     label = param['label']
 
     print(f'\nEvaluate {label} classifier ...')
