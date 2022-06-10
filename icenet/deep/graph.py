@@ -20,9 +20,10 @@ from   torch_geometric.nn import MessagePassing
 from torch_scatter import scatter_add, scatter_max, scatter_mean
 
 
-from   icenet.deep.pgraph import *
-from   icenet.deep import dopt
-from   icenet.tools import aux
+from icenet.deep.pgraph import *
+from icenet.deep import dopt
+from icenet.tools import aux
+from icenet.deep import losstools
 
 
 from typing import Callable, Union, Optional
@@ -98,7 +99,7 @@ def MLP(channels, activation='relu', batch_norm=True):
         ])
 
 
-def train(model, loader, optimizer, device):
+def train(model, loader, optimizer, device, param):
     """
     Pytorch geometric based training routine.
     
@@ -107,6 +108,7 @@ def train(model, loader, optimizer, device):
         loader    : pytorch geometric dataloader
         optimizer : pytorch optimizer
         device    : 'cpu' or 'device'
+        param:    : optimization parameters
     
     Returns
         trained model (return implicit via input arguments)
@@ -116,17 +118,15 @@ def train(model, loader, optimizer, device):
     total_loss = 0
     n = 0
     for batch in loader:
-        
-        # Change the shape
-        w = torch.tensor(aux.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)).to(device)
 
-        # Predict probabilities
         batch = batch.to(device)
         optimizer.zero_grad()
-        log_phat = model.softpredict(batch)
 
         # Compute loss
-        loss = dopt.multiclass_cross_entropy_logprob(log_phat=log_phat, y=batch.y, N_classes=model.C, weights=w)
+        batch_weights = torch.tensor(aux.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)).to(device)
+        loss = losstools.loss_wrapper(model=model, x=batch, y=batch.y, N_classes=model.C, weights=batch_weights, param=param)
+
+        # Propagate gradients
         loss.backward()
         
         total_loss += loss.item() * batch.num_graphs

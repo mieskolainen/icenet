@@ -295,6 +295,10 @@ gxgb0_param:
     
     # Optimization
     opt_param:  
+      lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+      gamma: 2                  # focal_entropy exponent
+      temperature: 1            # logit norm temperature
+      
       epochs: 50
       batch_size: 64
       learning_rate: 0.003
@@ -366,7 +370,11 @@ gnet0_param:
     cdim: 196                 # Convolution output dimension
 
   # Optimization
-  opt_param:
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -402,7 +410,11 @@ gnet1_param:
     cdim: 96                   # Convolution output dimension
 
   # Optimization
-  opt_param:
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -438,7 +450,11 @@ gnet2_param:
     cdim: 96                   # Convolution output dimension
   
   # Optimization
-  opt_param:
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -474,7 +490,11 @@ gnet3_param:
     cdim: 96                   # Convolution output dimension
   
   # Optimization
-  opt_param:
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -510,7 +530,11 @@ gnet4_param:
     cdim: 64                   # Convolution output dimension
 
   # Optimization
-  opt_param:
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -589,10 +613,11 @@ dmlp_param:
   raytune:  null
 
   # Optimization
-  opt_param:
-
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
     
@@ -622,9 +647,12 @@ lgr0_param:
   label:   'LGR'
   raytune:  null
 
-  opt_param:
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
 
@@ -650,8 +678,10 @@ cnn0_param:
 
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     optimizer: 'AdamW'
     noise_reg: 0.0            # Noise regularization
   
@@ -682,9 +712,11 @@ xtx0_param:
   raytune:  null
 
   # Optimization
-  opt_param:
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-    gamma: 2                  # focal_entropy exponent parameter
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     optimizer: 'AdamW'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
     
@@ -715,9 +747,11 @@ dmx0_param:
   raytune:  null
 
   # Optimization
-  opt_param:
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy
-    gamma: 2                  # focal_entropy exponent parameter
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
     optimizer: 'AdamW'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
 

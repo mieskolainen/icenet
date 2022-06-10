@@ -297,7 +297,7 @@ def train_graph(config={}, data_trn=None, data_val=None, args=None, param=None, 
 
     for epoch in range(opt_param['epochs']):
 
-        loss                       = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device)
+        loss                       = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device, param=opt_param)
         validate_acc, validate_AUC = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
         print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC)')
@@ -411,7 +411,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, pa
         fig  = plt.figure(figsize=(1.5 * (np.ceil(D/6) + 2), np.ceil(D/6) + 2))
         bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
         plt.xlabel('f-score (gain)')
-        
+
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
         plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
 

@@ -1,6 +1,6 @@
 # Deep Learning optimization functions
 # 
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -22,6 +22,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+from icenet.deep import losstools
 from icenet.deep.tempscale import ModelWithTemperature
 
 from icenet.tools import aux
@@ -73,91 +74,6 @@ def weights_init_normal(m):
         y = m.in_features
         m.weight.data.normal_(0.0, 1/np.sqrt(y))
         m.bias.data.fill_(0)
-
-
-def logsumexp(x,dim=-1):
-    # https://en.wikipedia.org/wiki/LogSumExp
-
-    xmax, idx = torch.max(x, dim=dim, keepdim=True)
-    return xmax + torch.log(torch.sum(torch.exp(x - xmax), dim=dim, keepdim=True))
-
-
-def log_softmax(x, dim=-1):
-    """
-    Log of softmax
-    
-    Args:
-        x : network output without softmax
-    
-    Returns:
-        logsoftmax values
-    """
-    log_z = logsumexp(x, dim=dim)
-    y = x - log_z
-    return y
-
-
-def multiclass_cross_entropy_logprob(log_phat, y, N_classes, weights):
-    """ Per instance weighted cross entropy loss
-    (negative log-likelihood)
-    
-    Numerically more stable version.
-    """
-    
-    y    = F.one_hot(y, N_classes)
-    loss = - y*log_phat * weights
-    loss = loss.sum() / y.shape[0]
-
-    return loss
-
-
-
-def multiclass_cross_entropy(phat, y, N_classes, weights, EPS = 1e-30) :
-    """ Per instance weighted cross entropy loss
-    (negative log-likelihood)
-    """
-    
-    y = F.one_hot(y, N_classes)
-
-    # Protection
-    loss = - y*torch.log(phat + EPS) * weights
-    loss = loss.sum() / y.shape[0]
-
-    return loss
-
-
-def multiclass_focal_entropy_logprob(log_phat, y, N_classes, weights, gamma) :
-    """ Per instance weighted 'focal entropy loss'
-    https://arxiv.org/pdf/1708.02002.pdf
-    """
-    y = F.one_hot(y, N_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
-    loss = loss.sum() / y.shape[0]
-    
-    return loss
-
-
-def multiclass_focal_entropy(phat, y, N_classes, weights, gamma, EPS = 1e-30) :
-    """ Per instance weighted 'focal entropy loss'
-    https://arxiv.org/pdf/1708.02002.pdf
-    """
-    y = F.one_hot(y, N_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
-    loss = loss.sum() / y.shape[0]
-    
-    return loss
-
-
-def log_sum_exp(x):
-    """ 
-    http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/
-    """
-
-    b, _ = torch.max(x, 1)
-    # b.size() = [N, ], unsqueeze() required
-    y = b + torch.log(torch.exp(x - b.unsqueeze(dim=1).expand_as(x)).sum(1))
-    # y.size() = [N, ], no need to squeeze()
-    return y
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -358,25 +274,15 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir, clip_
             batch_y       = batch_y.to(device, non_blocking=True)
             batch_weights = batch_weights.to(device, non_blocking=True)
             # ----------------------------------------------------------------
-
+            
             # Noise regularization (NOT ACTIVE)
             #if param['noise_reg'] > 0:
             #    noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
             #    batch_x = batch_x + noise
-            
-            # Predict probabilities
-            log_phat = model.softpredict(batch_x)
 
             # Evaluate loss
-            loss = 0
-            if   param['opt_param']['lossfunc'] == 'cross_entropy':
-                loss = multiclass_cross_entropy_logprob(log_phat, batch_y, model.C, batch_weights)
-            elif param['opt_param']['lossfunc'] == 'focal_entropy':
-                loss = multiclass_focal_entropy_logprob(log_phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
-            elif param['opt_param']['lossfunc'] == 'inverse_focal':
-                loss = multiclass_inverse_focal_logprob(log_phat, batch_y, model.C, batch_weights, param['opt_param']['gamma'])
-            else:
-                print(__name__ + '.train: Error with unknown lossfunc ')
+            loss_type = param['opt_param']['lossfunc']
+            loss = losstools.loss_wrapper(model=model, x=batch_x, y=batch_y, N_classes=model.C, weights=batch_weights, param=param['opt_param'])
 
             # ------------------------------------------------------------
             # Mutual information regularization for the output independence w.r.t the target variable

@@ -56,7 +56,7 @@ distillation:
 
 inputvar_scalar: 'MVA_SCALAR_ID' # Input variables, implemented under mvavars.py
 inputvar_jagged: 'MVA_JAGGED_ID'
-jagged_maxdim:   10
+jagged_maxdim:   6
 
 
 #targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
@@ -358,12 +358,12 @@ xgb0_param:
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
   tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  num_boost_round: 100     # number of epochs (equal to the number of trees!)
+  num_boost_round: 200     # number of epochs (equal to the number of trees!)
   
   # booster parameters
   learning_rate: 0.075
   gamma: 1.67
-  max_depth: 6
+  max_depth: 8
   min_child_weight: 1.0
   max_delta_step: 1
   subsample: 1
@@ -432,9 +432,12 @@ lgr0_param:
   label:   'LGR'
   raytune:  null
 
-  opt_param:
-    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy
-    gamma: 2                    # focal_entropy exponent
+  # Optimization
+  opt_param:  
+    lossfunc: 'logit_norm_cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
 
