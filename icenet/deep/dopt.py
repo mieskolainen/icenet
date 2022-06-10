@@ -377,8 +377,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
                     val_aucs.append(auc / (k + 1E-12))
                 j += 1
 
-            print('Epoch = {} : train loss = {:.3f} [trn AUC = {:.3f}, val AUC = {:.3f}]'. format(epoch, avgloss, trn_aucs[-1], val_aucs[-1]))
-                    
+            print(f'Epoch = {epoch} : train loss = {avgloss} [trn AUC = {trn_aucs[-1]}, val AUC = {val_aucs[-1]}]')
+            
             # ------------------------------------------------------------------------------
             # Raytune on
             if raytune_on:
