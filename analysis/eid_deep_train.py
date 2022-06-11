@@ -3,7 +3,6 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-
 # icenet system paths
 import sys
 sys.path.append(".")
@@ -12,25 +11,20 @@ import uproot
 import math
 import numpy as np
 import torch
+import torch_geometric
+from matplotlib import pyplot as plt
+
 import argparse
 import pprint
 import os
 import datetime
 import json
+import yaml
+
 import pickle
 import sys
-import yaml
 import copy
-#import graphviz
-import torch_geometric
 from termcolor import cprint
-
-# matplotlib
-from matplotlib import pyplot as plt
-
-# scikit
-from sklearn         import metrics
-from sklearn.metrics import accuracy_score
 
 # icenet
 from icenet.tools import io
@@ -150,9 +144,9 @@ def main():
     N_epochs   = args['batch_train_param']['epochs']
     block_size = args['batch_train_param']['blocksize']
 
-    ### Over each epoch
+    ### Over each global epoch
     for epoch in range(N_epochs):
-
+        
         prints.printbar('=')
         cprint(__name__ + f".epoch {epoch+1} / {N_epochs} \n", 'yellow')
 
@@ -208,7 +202,7 @@ def main():
 
                     train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
-
+                    
                     # Local epoch loop
                     for local_epoch in range(param[ID]['epochs']):
 
