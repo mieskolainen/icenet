@@ -78,7 +78,7 @@ def get_model(X, Y, ids, weights, features, args, param):
     return model, device, optimizer, scheduler
 
 
-def compute_reweight(root_files, N_events, args, N_class=2):
+def compute_reweight(root_files, N_events, args):
 
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
@@ -99,9 +99,9 @@ def compute_reweight(root_files, N_events, args, N_class=2):
 
     ### Compute 2D-pdfs for each class
     pdf = {}
-    for c in range(N_class):
+    for c in range(args['num_classes']):
         pdf[c] = reweight.pdf_2D_hist(X_A=X_A[Y==c], X_B=X_B[Y==c], binedges_A=binedges_A, binedges_B=binedges_B)
-
+    
     pdf['binedges_A'] = binedges_A
     pdf['binedges_B'] = binedges_B
 
@@ -136,7 +136,7 @@ def main():
     # =========================================================================
     # Load data for each re-weight PDFs
 
-    pdf,X,Y,ids = compute_reweight(root_files=root_files, N_events=N_events, args=args, N_class=N_class)
+    pdf,X,Y,ids = compute_reweight(root_files=root_files, N_events=N_events, args=args)
 
     # =========================================================================
     ### Initialize all models
@@ -222,7 +222,7 @@ def main():
                         for c in range(N_class):    
                             weights_doublet[trn.y == c, c] = 1
                         trn_weights = np.sum(weights_doublet, axis=1)
-
+                    
                     # Compute the sum of weights per class for the output print
                     frac = np.zeros(N_class)
                     sums = np.zeros(N_class)
@@ -233,7 +233,7 @@ def main():
                     print(__name__ + f'.compute_reweights: sum(Y==c): {frac}')
                     print(__name__ + f'.compute_reweights: sum(trn_weights[Y==c]): {sums}')
                     print(__name__ + f'.compute_reweights: [done]\n')
-                    
+
                     # =========================================================================
                     ### Parse data into graphs
 
