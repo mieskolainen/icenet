@@ -25,6 +25,7 @@ from icenet.deep import losstools
 from icenet.deep.tempscale import ModelWithTemperature
 
 from icenet.tools import aux
+from icenet.tools import aux_torch
 from icenet.tools import io
 from icefit import mine
 

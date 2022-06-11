@@ -21,9 +21,9 @@ active_models:
 
 #  - dmlp
 #  - cnn0
-  - gnet0
+#  - gnet0
 #  - gnet1
-  - gnet0-logit-norm
+#  - gnet0-logit-norm
 #  - gnet2
 #  - gnet3
 #  - gnet4
@@ -32,9 +32,9 @@ active_models:
   - xgb0
   - lgr0
 #  - xtx0
-  - dmx0
+#  - dmx0
 #  - dbnf0
-  - gxgb0
+#  - gxgb0
 
 # ---------------------------------------------------------
 
