@@ -495,7 +495,7 @@ def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=
     if len(config) == 0:
         return model
 
-def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, param=None, plot_importance=True):
+def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=None, args=None, param=None, plot_importance=True):
     """
     Train XGBoost model
     
@@ -524,16 +524,13 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, pa
     x_trn_    = data.trn.x
     x_val_    = data.val.x
 
-
     dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y if y_soft is None else y_soft, weight = trn_weights)
-    dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y)
-
+    dtest     = xgboost.DMatrix(data = x_val_, label = data.val.y, weight = val_weights)
 
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
-
     print(param)
-
+    
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
 

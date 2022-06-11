@@ -176,7 +176,6 @@ def test(model, loader, optimizer, device):
 
     return correct / len(loader.dataset), aucsum / k
 
-
 # PANConv based graph net
 # https://arxiv.org/abs/2006.16811
 #

@@ -180,9 +180,10 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
 
             inputs = {'data': data,
                       'trn_weights': trn_weights,
+                      'val_weights': val_weights,
                       'args': args,
                       'param': param}
-
+            
             #### Add distillation, if turned on
             if args['distillation']['drains'] is not None:
                 if ID in args['distillation']['drains']:
