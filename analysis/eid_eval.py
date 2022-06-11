@@ -51,8 +51,9 @@ def main() :
         tst_weights = None
     
     ## Parse graph network data
-    data_graph = {}
+    data_graph = None
     if args['graph_on']:
+        data_graph = {}
         data_graph['tst'] = graphio.parse_graph_data(X=data.tst.x, Y=data.tst.y, weights=tst_weights, ids=data.ids,
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     

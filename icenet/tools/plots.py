@@ -354,6 +354,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     savepath = f'{path}/{label}/MVA_output.pdf'
     plt.savefig(savepath, bbox_inches='tight')
     print(__name__ + f'.density_MVA_wclass: Saving figure: {savepath}')
+    plt.close()
 
 
 def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
@@ -418,6 +419,7 @@ def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
             savepath = f'{path}/{label}/{v}_class_{k}.pdf'
             plt.savefig(savepath, bbox_inches='tight')
             print(__name__ + f'.density_COR_wclass: Saving figure: {savepath}')
+            plt.close()
 
 
 def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
@@ -465,6 +467,7 @@ def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [
         savepath = f'{path}/{label}/{v}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_COR: Saving figure: {savepath}')
+        plt.close()
 
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
@@ -565,6 +568,8 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
     ax1.legend(['class 0','class 1', 'class 0 (w)','class 1 (w)'])
     ax2.set_yscale('log')
     plt.tight_layout()
+
+    return fig, (ax1,ax2)
 
 
 def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
@@ -856,5 +861,3 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
             
             plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf", bbox_inches='tight')
             plt.close()
-
-

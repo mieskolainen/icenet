@@ -57,8 +57,9 @@ def main() :
     # --------------------------------------------------------------------
     ### Parse data into graphs
     
-    graph = {}
+    graph = None
     if args['graph_on']:
+        graph = {}
         graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, weights=trn_weights, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
         
