@@ -188,7 +188,8 @@ def init(MAXEVENTS=None):
     class_id = [0,1]
 
     files = io.glob_expand_files(datapath=cli.datapath, datasets=cli.datasets)
-
+    args['root_files'] = files
+    
     if MAXEVENTS is None:
         MAXEVENTS = args['MAXEVENTS']
     load_args = {'max_num_elements': MAXEVENTS,

@@ -1,4 +1,4 @@
-# Electron ID [DEEP TRAINING] steering code
+# Electron ID [DEEP TRAINING] steering code (OBSOLETE: TO BE UPDATED)
 #
 # Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
@@ -147,7 +147,7 @@ def compute_reweight(root_files, N_events, args, N_class=2):
 def main():
 
     ### Get input
-    args, cli, features = common.read_config()
+    data, args, features = common.init()
     root_files = args['root_files']
     
     # Find number of events in each file
@@ -155,9 +155,11 @@ def main():
 
     for i in range(len(root_files)):
         file        = uproot.open(root_files[i])
-        N_events[i] = int(file["ntuplizer"]["tree"].numentries)
+
+        X = uproot.asarray(file["ntuplizer"]["tree"])
+        N_events[i] = len(X)
         file.close()
-    
+        
         # ** Apply MAXEVENTS cutoff for each file **
         N_events[i] = np.min([N_events[i], args['MAXEVENTS']])
 
@@ -191,7 +193,7 @@ def main():
         model[ID], device[ID], optimizer[ID], scheduler[ID] = \
             get_model(X=X, Y=Y, ids=VARS, weights=None, features=features, args=args, param=param[ID], N_class=N_class)
     # ----------------------------------------------------------
-    
+
     visited    = False
     N_epochs   = args['batch_train_param']['epochs']
     block_size = args['batch_train_param']['blocksize']
