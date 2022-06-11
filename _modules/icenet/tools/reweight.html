@@ -45,7 +45,7 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
 
-<div class="viewcode-block" id="compute_ND_reweights"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.compute_ND_reweights">[docs]</a><span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_ND_reweights"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.compute_ND_reweights">[docs]</a><span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute N-dim reweighting coefficients (currently 2D or 1D supported)</span>
 <span class="sd">    </span>
@@ -53,11 +53,15 @@
 <span class="sd">        x      : training data input</span>
 <span class="sd">        y      : training data labels</span>
 <span class="sd">        ids    : variable names of columns of x</span>
-<span class="sd">        args   : arguments object</span>
+<span class="sd">        pdf    : pre-computed pdfs</span>
+<span class="sd">        args   : reweighting parameters in a dictionary</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        weights: array of re-weights</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s1"> classes from y&#39;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="c1"># Make sure we make a copy, because we modify args here</span>
 
@@ -142,7 +146,6 @@
 
         <span class="n">rwparam</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;y&#39;</span><span class="p">:</span>               <span class="n">y</span><span class="p">,</span>
-            <span class="s1">&#39;N_class&#39;</span><span class="p">:</span>         <span class="n">N_class</span><span class="p">,</span>
             <span class="s1">&#39;equal_frac&#39;</span><span class="p">:</span>      <span class="n">args</span><span class="p">[</span><span class="s1">&#39;equal_frac&#39;</span><span class="p">],</span>
             <span class="s1">&#39;reference_class&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span>
             <span class="s1">&#39;max_reg&#39;</span><span class="p">:</span>         <span class="n">args</span><span class="p">[</span><span class="s1">&#39;max_reg&#39;</span><span class="p">]</span>
@@ -151,58 +154,65 @@
         <span class="c1">### Compute 2D-PDFs for each class</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
 
-            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">X_B</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> \
-                    <span class="n">binedges_A</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">binedges_B</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">X_B</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> \
+                        <span class="n">binedges_A</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">binedges_B</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">])</span>
 
-            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
-            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_classes</span>
 
-            <span class="n">weights</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
 
         <span class="c1">### Compute geometric mean factorized 1D x 1D product</span>
         <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;pseudo-2D&#39;</span><span class="p">:</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]):</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Error: &lt;pseudo-2D&gt; requires same number of bins for A and B&#39;</span><span class="p">)</span>
-            
-            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-                <span class="n">pdf_A</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span>
-                <span class="n">pdf_B</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">])</span>
-                
-                <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;geometric_mean&#39;</span><span class="p">:</span>
-                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_A</span><span class="p">,</span> <span class="n">pdf_B</span><span class="p">))</span> <span class="c1"># (A,B) order gives normal matrix indexing</span>
-                <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;product&#39;</span><span class="p">:</span>
-                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_A</span><span class="p">,</span> <span class="n">pdf_B</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unknown &lt;pseudo_type&gt;&#39;</span><span class="p">)</span>
-                
-                <span class="c1"># Normalize to discrete density</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
 
-            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
-            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+                    <span class="n">pdf_A</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span>
+                    <span class="n">pdf_B</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">])</span>
+                    
+                    <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;geometric_mean&#39;</span><span class="p">:</span>
+                        <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_A</span><span class="p">,</span> <span class="n">pdf_B</span><span class="p">))</span> <span class="c1"># (A,B) order gives normal matrix indexing</span>
+                    <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;product&#39;</span><span class="p">:</span>
+                        <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_A</span><span class="p">,</span> <span class="n">pdf_B</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unknown &lt;pseudo_type&gt;&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># Normalize to discrete density</span>
+                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_classes</span>
 
             <span class="n">weights</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
 
         <span class="c1">### Compute 1D-PDFs for each class</span>
         <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
             
-            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span>
 
-            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_classes</span>
+
             <span class="n">weights</span> <span class="o">=</span> <span class="n">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unsupported dimensionality mode &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;dimension&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
     
     <span class="c1"># No differential re-weighting    </span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N_class</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
+        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="c1"># Apply class balance equalizing weight</span>
@@ -211,12 +221,11 @@
             <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
         
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-
+    
     <span class="c1"># Compute the sum of weights per class for the output print</span>
-    <span class="n">frac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_class</span><span class="p">)</span>
-    <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_class</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span>
+    <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
         <span class="n">frac</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
         <span class="n">sums</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">])</span>
     
@@ -224,54 +233,34 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: sum[weights[y == c]]: </span><span class="si">{</span><span class="n">sums</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: [done] </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="k">return</span> <span class="n">weights</span></div>
+    <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">pdf</span></div>
 
 
-<div class="viewcode-block" id="reweight_1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweight_1D">[docs]</a><span class="k">def</span> <span class="nf">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N_class</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1E3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        X   :             Input data (# samples)</span>
-<span class="sd">        pdf :             Dictionary of pdfs for each class</span>
-<span class="sd">        y   :             Class target data (# samples)</span>
-<span class="sd">        N_class :         Number of classes</span>
-<span class="sd">        reference_class : Target class of re-weighting</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        weights for each event</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Re-weighting weights</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N_class</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
-
-    <span class="c1"># Weight each class against the reference class</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-        <span class="n">inds</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Reference class stays intact</span>
-
-    <span class="c1"># Maximum weight cut-off regularization</span>
-    <span class="n">weights_doublet</span><span class="p">[</span><span class="n">weights_doublet</span> <span class="o">&gt;</span> <span class="n">max_reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reg</span>
-
-    <span class="k">return</span> <span class="n">weights_doublet</span></div>
-
-
-<div class="viewcode-block" id="reweightcoeff1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff1D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">N_class</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">equal_frac</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="reweightcoeff1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff1D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">equal_frac</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X  :   Observable of interest (N x 1)</span>
 <span class="sd">        y  :   Class labels (0,1,...) (N x 1)</span>
 <span class="sd">        pdf:   PDF for each class</span>
-<span class="sd">        N_class : Number of classes</span>
 <span class="sd">        equal_frac:  equalize class fractions</span>
 <span class="sd">        reference_class : e.g. 0 (background) or 1 (signal)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        weights for each event</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweight_1D</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="n">N_class</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span><span class="o">=</span><span class="n">max_reg</span><span class="p">)</span>
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Re-weighting weights</span>
+    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
+
+    <span class="c1"># Weight each class against the reference class</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds</span><span class="p">]</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># Reference class stays intact</span>
 
     <span class="c1"># Maximum weight cut-off regularization</span>
     <span class="n">weights_doublet</span><span class="p">[</span><span class="n">weights_doublet</span> <span class="o">&gt;</span> <span class="n">max_reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reg</span>
@@ -286,17 +275,16 @@
     <span class="k">return</span> <span class="n">weights</span></div>
 
 
-<div class="viewcode-block" id="reweightcoeff2D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff2D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">N_class</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reference_class</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">equal_frac</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<div class="viewcode-block" id="reweightcoeff2D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff2D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">equal_frac</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
 <span class="sd">    </span>
-<span class="sd">    Operates in full 2D without factorization.</span>
-
+<span class="sd">    Operates in full 2D without any factorization.</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        X_A : Observable A of interest (N x 1)</span>
-<span class="sd">        X_B : Observable B of interest (N x 1)</span>
-<span class="sd">        y   : Signal (1) and background (0) labels (N x 1)</span>
-<span class="sd">        pdf : Density histograms for each class</span>
-<span class="sd">        N_class :         Number of classes</span>
+<span class="sd">        X_A :             Observable A of interest (N x 1)</span>
+<span class="sd">        X_B :             Observable B of interest (N x 1)</span>
+<span class="sd">        y   :             Signal (1) and background (0) labels (N x 1)</span>
+<span class="sd">        pdf :             Density histograms for each class</span>
 <span class="sd">        reference_class : e.g. Background (0) or signal (1)</span>
 <span class="sd">        equal_frac :      Equalize class fractions</span>
 <span class="sd">        max_reg :         Regularize the maximum reweight coefficient</span>
@@ -304,18 +292,19 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        weights for each event</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span>
+
     <span class="c1"># Re-weighting weights</span>
-    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N_class</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
+    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">))</span> <span class="c1"># Init with zeros!!</span>
 
     <span class="c1"># Weight each class against the reference class</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
         <span class="n">inds_A</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_A</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_A&#39;</span><span class="p">])</span>
         <span class="n">inds_B</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_B</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_B&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds_A</span><span class="p">,</span> <span class="n">inds_B</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds_A</span><span class="p">,</span> <span class="n">inds_B</span><span class="p">]</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Reference class stays intact</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># Reference class stays intact</span>
 
     <span class="c1"># Maximum weight cut-off regularization</span>
     <span class="n">weights_doublet</span><span class="p">[</span><span class="n">weights_doublet</span> <span class="o">&gt;</span> <span class="n">max_reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reg</span>

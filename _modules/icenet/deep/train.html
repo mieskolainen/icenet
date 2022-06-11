@@ -67,6 +67,8 @@
 <span class="c1"># icenet</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
+
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
 
@@ -376,7 +378,7 @@
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
 
     <span class="c1"># Count the number of parameters</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.graph_train: Number of free model parameters = </span><span class="si">{</span><span class="n">auc_torch</span><span class="o">.</span><span class="n">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.graph_train: Number of free model parameters = </span><span class="si">{</span><span class="n">aux_torch</span><span class="o">.</span><span class="n">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># Create optimizer</span>
     <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
