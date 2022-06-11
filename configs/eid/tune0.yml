@@ -6,9 +6,9 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 100000      # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000     # Maximum total number of events (per root file) to process
 
-eval_reweight: true   # Event-by-event re-weighting used in the evaluation phase
+eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
 
 num_classes: 2        # Number of classes in MVA
@@ -135,7 +135,7 @@ image_param:
 reweight_param:
 
   maxevents: 1000000            # Maximum number of events for the PDF construction
-  equal_frac: true              # Equalize integrated class fractions
+  equal_frac: True              # Equalize integrated class fractions
   # ---------------------
   
   reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
@@ -147,7 +147,7 @@ reweight_param:
   differential_reweight: True
   dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
   pseudo_type: 'geometric_mean'  # 'product', 'geometric_mean'
-  
+
   var_A:  'trk_pt'
   var_B:  'trk_pt'
 
