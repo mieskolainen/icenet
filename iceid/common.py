@@ -189,7 +189,7 @@ def init(MAXEVENTS=None):
 
     files = io.glob_expand_files(datapath=cli.datapath, datasets=cli.datasets)
     args['root_files'] = files
-    
+
     if MAXEVENTS is None:
         MAXEVENTS = args['MAXEVENTS']
     load_args = {'max_num_elements': MAXEVENTS,
@@ -473,7 +473,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict, library='np'):
     return_dict[procnumber] = {'X': X, 'Y': Y, 'ids': ids, "X_tensor": X_tensor, "X_graph": X_graph, 'N': X.shape[0]}
 
 
-def load_root_file(root_path, ids=None, class_id = [], max_num_elements=None, args=None, library='np'):
+def load_root_file(root_path, ids=None, class_id = [], entry_start=0, max_num_elements=None, args=None, library='np'):
     """ Loads the root file.
     
     Args:
@@ -511,7 +511,7 @@ def load_root_file(root_path, ids=None, class_id = [], max_num_elements=None, ar
     #print(ids)
     
     # Check is it MC (based on the first event)
-    X_test = events.arrays('is_mc', entry_start=0, entry_stop=max_num_elements)
+    X_test = events.arrays('is_mc', entry_start=entry_start, entry_stop=max_num_elements)
 
     isMC   = bool(X_test[0]['is_mc'])
     N      = len(X_test)
@@ -524,7 +524,7 @@ def load_root_file(root_path, ids=None, class_id = [], max_num_elements=None, ar
     X = np.empty((N, len(ids)), dtype=object) 
 
     for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], entry_start=0, entry_stop=max_num_elements, library="np", how=list)
+        x = events.arrays(ids[j], entry_start=entry_start, entry_stop=max_num_elements, library="np", how=list)
         X[:,j] = np.asarray(x)
     # --------------------------------------------------------------
     Y = None
@@ -546,7 +546,7 @@ def load_root_file(root_path, ids=None, class_id = [], max_num_elements=None, ar
 
         # For info
         labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, ids=labels1, entry_start=0, entry_stop=max_num_elements, new=True)
+        aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=max_num_elements, new=True)
         prints.printbar()
 
         # @@ MC filtering done here @@

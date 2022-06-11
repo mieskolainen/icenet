@@ -179,7 +179,7 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
         # Pure dictionary
         dataset.append({'x':x, 'edge_index':edge_index, 'edge_attr':edge_attr, 'y':y, 'w':w, 'u':u})
         #dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
-    
+
     return dataset
 
 
@@ -226,6 +226,8 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     ind__image_clu_phi = ids.index('image_clu_phi')
 
 
+    num_empty_ECAL = 0
+
     # Loop over events
     for i in tqdm(range(N_events)):
 
@@ -251,8 +253,10 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
                 v.setPtEtaPhiM(pt, eta, phi, 0)
 
                 p4vec.append( v )
+        
+        # Empty ECAL cluster information
         else:
-            print(__name__ + f'.parse_graph_data: Empty ECAL cluster event {i} (using only global data u)')
+            num_empty_ECAL += 1
             # However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed
         
         # ====================================================================
@@ -291,7 +295,9 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
             u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
 
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
-
+    
+    print(__name__ + f'.parse_graph_data: Empty ECAL cluster events: {num_empty_ECAL} / {N_events} = {num_empty_ECAL/N_events:0.5f} (using only global data u)')        
+    
     return dataset
 
 

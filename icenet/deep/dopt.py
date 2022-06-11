@@ -182,10 +182,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
 
     # Prints the weights and biases
     print(model)
-    
-    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-    params = sum([np.prod(p.size()) for p in model_parameters])
-    cprint(__name__ + f'.train: Number of free parameters = {params} (requires_grad)', 'yellow')
+    cprint(__name__ + f'.train: Number of free model parameters = {aux_torch.count_parameters_torch(model)} (requires_grad)', 'yellow')
     
     # --------------------------------------------------------------------
     ### Weight initialization
@@ -385,7 +382,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
         else:
             trn_aucs.append(trn_aucs[-1]) # Take previous
             val_aucs.append(val_aucs[-1])
-            
+
             print(f'Epoch = {epoch} : train loss = {avgloss:0.3f}')
             
         # ------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Execute "deep" training and evaluation for electron ID
+# Execute "deep batched" training and evaluation for electron ID
 #
 # Run with: source runme.sh
 

@@ -152,7 +152,7 @@ def raytune_main(inputs, train_func=None):
     if train_func == train_torch_graph:
 
         ### Load the best model from raytune folder
-        bestparam, conv_type = getgraphparam(config=best_trial.config, **inputs)
+        bestparam, conv_type = getgraphparam(config=best_trial.config, data_trn=inputs['data_trn'], num_classes=inputs['args']['num_classes'], param=inputs['param'])
         best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
 
         device = "cpu"
@@ -281,7 +281,7 @@ def getgenericparam(config, param, D, num_classes):
     return netparam, param['conv_type']
 
 
-def getgraphparam(config, data_trn, data_val, args, param):
+def getgraphparam(data_trn, num_classes, param, config={}):
     """
     Construct graph network parameters
     """
@@ -290,7 +290,7 @@ def getgraphparam(config, data_trn, data_val, args, param):
     num_global_features = len(data_trn[0].u)
 
     netparam = {
-        'C'    : int(args['num_classes']),
+        'C'    : int(num_classes),
         'D'    : int(num_node_features),
         'E'    : int(num_edge_features),
         'G'    : int(num_global_features),
@@ -335,18 +335,15 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
 
     ## ------------------------
     ### Construct model
-    netparam, conv_type = getgraphparam(config=config, data_trn=data_trn, data_val=data_val, args=args, param=param)
+    netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
     # CPU or GPU
     model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
 
     # Count the number of parameters
-    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-    params = sum([np.prod(p.size()) for p in model_parameters])
-    cprint(__name__ + f'.graph_train: Number of free parameters = {params}', 'yellow')
+    cprint(__name__ + f'.graph_train: Number of free model parameters = {auc_torch.count_parameters_torch(model)}', 'yellow')
     
-
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
@@ -530,7 +527,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
     print(param)
-    
+
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
 

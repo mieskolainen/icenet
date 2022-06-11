@@ -3,8 +3,18 @@
 # m.mieskolainen@imperial.ac.uk, 2021
 
 import torch
+import numpy as np
 
 from icenet.tools import aux
+
+
+def count_parameters_torch(model):
+    """
+    Count the number of trainable pytorch model parameters
+    """
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    return sum([np.prod(p.size()) for p in model_parameters])
+
 
 def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
     """ Load pytorch checkpoint
