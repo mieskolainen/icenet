@@ -97,7 +97,7 @@ def main():
     # Create save path
     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
     
-    
+
     # Find number of events in each file
     N_events = np.zeros(len(root_files), dtype=int)
 
@@ -158,8 +158,8 @@ def main():
         for f in range(len(root_files)):
 
             prints.printbar('=')
-            cprint(__name__ + f'.file {f+1} / {len(root_files)} \n', 'yellow')
-
+            cprint(__name__ + f'.file {f+1} / {len(root_files)} (size = {N_events[f]}) \n', 'yellow')
+            
             # ------------------------------------------------------------
             N_blocks   = int(np.ceil(N_events[f] / args['batch_train_param']['blocksize']))
             block_ind  = aux.split_start_end(range(N_events[f]), N_blocks)
@@ -172,7 +172,7 @@ def main():
                 entry_stop  = block_ind[block][-1]
 
                 prints.printbar('=')
-                cprint(__name__ + f'.block {block+1} / {N_blocks} \n', 'yellow')
+                cprint(__name__ + f'.block {block+1} / {N_blocks} (size = {entry_stop - entry_start} \n', 'yellow')
 
                 # =========================================================================
                 # LOAD DATA
