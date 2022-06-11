@@ -89,10 +89,14 @@ def compute_reweight(root_files, N_events, args):
 # Main function
 #
 def main():
-
+    
     ### Get input
     data, args, features = common.init()
     root_files = args['root_files']
+    
+    # Create save path
+    args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
+    
     
     # Find number of events in each file
     N_events = np.zeros(len(root_files), dtype=int)
@@ -146,7 +150,7 @@ def main():
 
     ### Over each global epoch
     for epoch in range(N_epochs):
-        
+
         prints.printbar('=')
         cprint(__name__ + f".epoch {epoch+1} / {N_epochs} \n", 'yellow')
 
@@ -202,7 +206,7 @@ def main():
 
                     train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
-                    
+
                     # Local epoch loop
                     for local_epoch in range(param[ID]['epochs']):
 
@@ -216,10 +220,10 @@ def main():
                         print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}, local epoch: {local_epoch+1:03d}/{param[ID]['epochs']:03d}] "
                             f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
                     
-                    ## Save
-                    args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
-                    checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
-                    torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_checkpoint' + '.pth')
+        ## Save each model per global epoch
+        for ID in model.keys():
+            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
+            torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_{epoch}' + '.pth')
 
     print(__name__ + f' [Done!]')
 
