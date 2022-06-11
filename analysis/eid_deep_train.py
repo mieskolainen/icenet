@@ -190,7 +190,7 @@ def main():
 
                     trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, ids=ids, args=args['reweight_param'])
                     val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, ids=ids, args=args['reweight_param'])
-                    
+
                     # =========================================================================
                     ### Parse data into graphs
 
@@ -212,13 +212,16 @@ def main():
                     # Local epoch loop
                     for local_epoch in range(param[ID]['epochs']):
 
-                        loss                       = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
-                        validate_acc, validate_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                        loss             = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
+                        
+                        trn_acc, trn_AUC = deep.graph.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
+                        val_acc, val_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                        
                         scheduler[ID].step()
                         
                         print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}, local epoch: {local_epoch+1:03d}/{param[ID]['epochs']:03d}] "
-                            f"train loss: {loss:.4f} | validate: {validate_acc:.4f} (acc), {validate_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
-                        
+                            f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
+                    
                     ## Save
                     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
                     checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
