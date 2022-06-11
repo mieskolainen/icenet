@@ -213,7 +213,7 @@
         <span class="c1"># Pure dictionary</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;edge_index&#39;</span><span class="p">:</span><span class="n">edge_index</span><span class="p">,</span> <span class="s1">&#39;edge_attr&#39;</span><span class="p">:</span><span class="n">edge_attr</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="n">w</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span><span class="n">u</span><span class="p">})</span>
         <span class="c1">#dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))</span>
-    
+
     <span class="k">return</span> <span class="n">dataset</span></div>
 
 
@@ -260,6 +260,8 @@
     <span class="n">ind__image_clu_phi</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_phi&#39;</span><span class="p">)</span>
 
 
+    <span class="n">num_empty_ECAL</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="c1"># Loop over events</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_events</span><span class="p">)):</span>
 
@@ -285,8 +287,10 @@
                 <span class="n">v</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">v</span> <span class="p">)</span>
+        
+        <span class="c1"># Empty ECAL cluster information</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>
+            <span class="n">num_empty_ECAL</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="c1"># However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed</span>
         
         <span class="c1"># ====================================================================</span>
@@ -325,7 +329,9 @@
             <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
-
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">N_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">N_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
+    
     <span class="k">return</span> <span class="n">dataset</span></div>
 
 

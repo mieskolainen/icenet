@@ -216,10 +216,7 @@
 
     <span class="c1"># Prints the weights and biases</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    
-    <span class="n">model_parameters</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="p">])</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train: Number of free parameters = </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s1"> (requires_grad)&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train: Number of free model parameters = </span><span class="si">{</span><span class="n">aux_torch</span><span class="o">.</span><span class="n">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="si">}</span><span class="s1"> (requires_grad)&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### Weight initialization</span>
@@ -419,7 +416,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">trn_aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Take previous</span>
             <span class="n">val_aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            
+
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> : train loss = </span><span class="si">{</span><span class="n">avgloss</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             
         <span class="c1"># ------------------------------------------------------------------------------</span>
