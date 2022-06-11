@@ -20,7 +20,7 @@ num_classes: 2        # Number of classes in MVA
 active_models:
 
 #  - dmlp
-  - cnn0
+#  - cnn0 # NOT WORKING CURRENTLY --> FIX!
   - gnet0
 #  - gnet1
   - gnet0-logit-norm
