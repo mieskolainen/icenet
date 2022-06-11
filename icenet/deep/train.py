@@ -1,6 +1,6 @@
 # Generic model training wrapper functions [TBD; unify and simplify data structures]
 #
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import math
@@ -305,7 +305,7 @@ def getgraphparam(config, data_trn, data_val, args, param):
     return netparam, param['conv_type']
 
 
-def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None):
+def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None, save_period=5):
     """
     Train graph neural networks
     
@@ -363,8 +363,9 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
 
         loss = graph.train(model=model, loader=train_loader, optimizer=optimizer, device=device, param=opt_param)
 
-        train_acc, train_auc       = graph.test( model=model, loader=train_loader, optimizer=optimizer, device=device)
-        validate_acc, validate_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
+        if (epoch % save_period) == 0:
+            train_acc, train_auc       = graph.test( model=model, loader=train_loader, optimizer=optimizer, device=device)
+            validate_acc, validate_auc = graph.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
         # Push
         losses.append(loss)
@@ -385,7 +386,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{label}_' + str(epoch) + '.pth')
-    
+
     if len(config) == 0:
 
         # Plot evolution
@@ -397,7 +398,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
 
 
 def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None,
-    trn_weights=None, args=None, param=None):
+    trn_weights=None, val_weights=None, args=None, param=None):
     """
     Train generic neural model [R^d -> softmax]
     
@@ -420,7 +421,7 @@ def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=Non
     raytune_on = True if len(config) != 0 else False
 
     model, losses, trn_aucs, val_aucs = dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-        trn_weights = trn_weights, param = param, modeldir=args['modeldir'], raytune_on=raytune_on)
+        trn_weights = trn_weights, val_weights=val_weights, param = param, modeldir=args['modeldir'], raytune_on=raytune_on)
 
     # ---------------------------------------------------------------
 
@@ -440,6 +441,59 @@ def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=Non
 
         return model
 
+def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None,
+    trn_weights=None, val_weights=None, args=None, param=None):
+    """
+    Train CNN neural model
+    
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
+
+    label = param['label']
+
+    # -------------------------------------------------------------------------------
+    # Into torch format
+
+    X_trn_2D = torch.tensor(data_tensor['trn'], dtype=torch.float)
+    X_val_2D = torch.tensor(data_tensor['val'], dtype=torch.float)
+    DIM      = X_trn_2D.shape
+    
+    # Train
+    X_trn = {}
+    X_trn['x'] = X_trn_2D
+    X_trn['u'] = data.trn.x
+
+    # Validation
+    X_val = {}
+    X_val['x'] = X_val_2D
+    X_val['u'] = data.val.x
+
+    # -------------------------------------------------------------------------------
+
+    print(f'\nTraining {label} classifier ...')
+    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=args['num_classes'], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], **param['model_param'])
+
+    model, losses, trn_aucs, val_aucs = \
+        dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
+                    trn_weights = trn_weights, val_weights=val_weights, param = param, modeldir=args['modeldir'])
+
+    # Plot evolution
+    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+
+    ### Plot contours
+    if args['plot_param']['contours']['active']:
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
+        plots.plot_decision_contour(lambda x : model.softpredict(x),
+            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
+
+    if len(config) == 0:
+        return model
 
 def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, args=None, param=None, plot_importance=True):
     """
@@ -701,113 +755,6 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
             X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
     return (b_pdfs, s_pdfs)
-
-
-def train_cdmx(config={}, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None):
-    """
-    Train cdmx neural model
-    
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    """
-    NOT WORKING CURRENTLY [update code]
-    
-    label = args['cdmx_param']['label']
-
-    print(f'\nTraining {label} classifier ...')
-    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=args['num_classes'], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \
-        dropout_cnn = param['dropout_cnn'], neurons = param['neurons'], \
-        num_units = param['num_units'], dropout = param['dropout'])
-
-    # -------------------------------------------------------------------------------
-    # Into torch format
-
-    X_trn_2D = torch.tensor(data_tensor['trn'], dtype=torch.float)
-    X_val_2D = torch.tensor(data_tensor['val'], dtype=torch.float)
-    DIM      = X_trn_2D.shape
-    # -------------------------------------------------------------------------------
-
-    cmdx_model, losses, trn_aucs, val_aucs = dopt.dualtrain(model = cmdx_model, X1_trn = X_trn_2D, X2_trn = X_trn, \
-        Y_trn = Y_trn, X1_val = X_val_2D, X2_val = X_val, Y_val = Y_val, trn_weights = trn_weights, param = param)
-    
-    # Plot evolution
-    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-    
-    ## Save
-    checkpoint = {'model': model, 'state_dict': model.state_dict()}
-    torch.save(checkpoint, args['modeldir'] + f'/{label}_checkpoint' + '.pth')
-    """
-
-    ### Plot contours
-    #if args['plot_param']['contours']['active']:
-    #    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
-    #    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),
-    #        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
-
-    #if len(config) == 0:
-    #    return model
-
-
-
-def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None, trn_weights=None, args=None, param=None):
-    """
-    Train CNN neural model
-    
-    Args:
-        See other train_*
-
-    Returns:
-        trained model
-    """
-
-    label = param['label']
-
-    # -------------------------------------------------------------------------------
-    # Into torch format
-
-    X_trn_2D = torch.tensor(data_tensor['trn'], dtype=torch.float)
-    X_val_2D = torch.tensor(data_tensor['val'], dtype=torch.float)
-    DIM      = X_trn_2D.shape
-    
-    # Train
-    X_trn = {}
-    X_trn['x'] = X_trn_2D
-    X_trn['u'] = data.trn.x
-
-    # Validation
-    X_val = {}
-    X_val['x'] = X_val_2D
-    X_val['u'] = data.val.x
-
-    # -------------------------------------------------------------------------------
-
-    print(f'\nTraining {label} classifier ...')
-    model = cnn.CNN_DMAX(D=data.trn.x.shape[1], C=args['num_classes'], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], **param['model_param'])
-
-    model, losses, trn_aucs, val_aucs = \
-        dopt.train(model = model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-                    trn_weights = trn_weights, param = param, modeldir=args['modeldir'])
-
-    # Plot evolution
-    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : model.softpredict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'torch')
-
-    if len(config) == 0:
-        return model
 
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):

@@ -44,7 +44,8 @@ def main() :
     
     ### Compute reweighting weights
     trn_weights = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.ids, args=args['reweight_param'])
-
+    val_weights = reweight.compute_ND_reweights(x=data.val.x, y=data.val.y, ids=data.ids, args=args['reweight_param'])
+    
     ### Plot some kinematic variables
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/')
     for k in ['x_hlt_pt', 'x_hlt_eta']:
@@ -69,7 +70,7 @@ def main() :
     
     ### Execute training
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
-    process.train_models(data = data, data_kin = data_kin, trn_weights = trn_weights, args = args)
+    process.train_models(data = data, data_kin = data_kin, trn_weights = trn_weights, val_weights=val_weights, args = args)
         
     print(__name__ + ' [done]')
 

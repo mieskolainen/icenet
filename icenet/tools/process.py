@@ -89,7 +89,7 @@ def read_config(config_path='./configs/xyz'):
     return args, cli
 
 
-def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_weights=None, args=None) :
+def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_weights=None, val_weights=None, args=None) :
     """
     Train ML/AI models.
     """
@@ -200,6 +200,7 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                       'X_val': X_val,
                       'Y_val': Y_val,
                       'trn_weights': trn_weights,
+                      'val_weights': val_weights,
                       'args':  args,
                       'param': param}
 
@@ -212,16 +213,17 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)
-
-        elif param['train'] == 'graph_xgb':
-            train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], trn_weights=trn_weights, args=args, param=param)  
         
         elif param['train'] == 'torch_image':
-            train.train_cnn(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, trn_weights=trn_weights, args=args, param=param)
+            train.train_image(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, 
+                trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)
 
+        elif param['train'] == 'graph_xgb':
+            train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)  
+        
         elif param['train'] == 'flr':
             train.train_flr(data=data, trn_weights=trn_weights, args=args, param=param)
-            
+        
         #elif param['train'] == 'xtx':
         #    train.train_xtx(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, data_kin=data_kin, args=args, param=param)
 
@@ -346,16 +348,16 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     if data_tensor is not None:
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
     # --------------------------------------------------------------------
-    
+
     # ====================================================================
     # ** Plots for individual model inspection **
 
-    def plot_XYZ_wrap(func_predict, X, label):
+    def plot_XYZ_wrap(func_predict, x_input, label):
         """ XYZ-plot wrapper function.
         """
 
         # Compute predictions once and for all here
-        y_pred = func_predict(X)
+        y_pred = func_predict(x_input)
 
         # --------------------------------------
         ## Total ROC Plot
@@ -430,9 +432,9 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             #plots.density_COR(**inputs) 
     
     # ====================================================================
-    
-    
-    
+
+
+
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
@@ -445,48 +447,48 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, label = param['label'])
             
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_graph, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, label = param['label'])
             
         elif param['predict'] == 'torch_generic':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
-
-        elif param['predict'] == 'flr':
-            func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X, label = param['label'])
-            
-        elif param['predict'] == 'xgb':
-            func_predict = predict.pred_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, label = param['label'])
 
         elif param['predict'] == 'torch_image':
-            func_predict = predict.pred_torch(args=args, param=param)
+            func_predict = predict.pred_torch_image(args=args, param=param)
 
             X_tensor      = {}
             X_tensor['x'] = X_2D_ptr # image tensors
             X_tensor['u'] = X_ptr    # global features
             
-            plot_XYZ_wrap(func_predict = func_predict, X = X_tensor, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_tensor, label = param['label'])
+        
+        elif param['predict'] == 'flr':
+            func_predict = predict.pred_flr(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X, label = param['label'])
             
+        elif param['predict'] == 'xgb':
+            func_predict = predict.pred_xgb(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X, label = param['label'])
+
         #elif param['predict'] == 'xtx':
         # ...   
         #
         
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-            plot_XYZ_wrap(func_predict = func_predict, X = X_ptr, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, label = param['label'])
             
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, label = param['label'])
             
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, X = X_RAW, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, label = param['label'])
             
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')

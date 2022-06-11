@@ -154,7 +154,7 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
+def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, modeldir,
     clip_gradients=True, raytune_on=False, save_period=5):
     """
     Main training loop
@@ -196,17 +196,16 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
     print('')
     
     # Class fractions
-    YY = Y_trn.cpu().numpy()
     frac = []
     for i in range(model.C):
-        frac.append( sum(YY == i) / YY.size )
+        frac.append( sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size )
 
     print(__name__ + '.train: Class fractions in the training sample: ')
 
     ## Classes
     for i in range(len(frac)):
-        print(f' {i:4d} : {frac[i]:5.6f} ({sum(YY == i)} counts)')
-    print(__name__ + f'.train: Found {len(np.unique(YY))} / {model.C} classes in the training sample')
+        print(f' {i:4d} : {frac[i]:5.6f} ({sum(Y_trn.cpu().numpy() == i)} counts)')
+    print(__name__ + f'.train: Found {len(np.unique(Y_trn.cpu().numpy()))} / {model.C} classes in the training sample')
     
 
     # Define the optimizer
@@ -230,19 +229,19 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
     
     print(__name__ + '.train: Training loop ...')
 
-    # Change the shape
-    trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
-    for i in range(model.C):
-        trn_one_hot_weights[YY == i, i] = trn_weights[YY == i]
-
     params = {'batch_size': param['opt_param']['batch_size'],
             'shuffle'     : True,
             'num_workers' : param['num_workers'],
             'pin_memory'  : True}
 
-    val_one_hot_weights  = np.ones((len(Y_val), model.C))
+    # Change the shape
+    trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
+    val_one_hot_weights = np.zeros((len(val_weights), model.C))
 
-
+    for i in range(model.C):
+        trn_one_hot_weights[Y_trn.cpu().numpy() == i, i] = trn_weights[Y_trn.cpu().numpy() == i]
+        val_one_hot_weights[Y_val.cpu().numpy() == i, i] = val_weights[Y_val.cpu().numpy() == i]
+    
     ### Generators
     if type(X_trn) is dict:
         training_set   = DualDataset(X_trn, Y_trn, trn_one_hot_weights)
@@ -384,6 +383,9 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, param, modeldir,
 
         # Just print the loss
         else:
+            trn_aucs.append(trn_aucs[-1]) # Take previous
+            val_aucs.append(val_aucs[-1])
+            
             print(f'Epoch = {epoch} : train loss = {avgloss:0.3f}')
             
         # ------------------------------------------------------------------------------

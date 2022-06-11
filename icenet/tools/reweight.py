@@ -6,6 +6,7 @@ import numpy as np
 import numba
 import matplotlib.pyplot as plt
 from termcolor import colored, cprint
+import copy
 
 from icenet.tools import aux
 
@@ -23,6 +24,8 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
     Returns:
         weights: array of re-weights
     """
+
+    args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
     ### Construct parameter names
     paramdict = {}
@@ -55,20 +58,25 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
                     ind = (RV[var] <= 0)
                     cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
 
+                # Transform values
                 RV[var] = np.log10(np.maximum(RV[var], EPS))
 
-                # Bins
+                # Transform bins
                 args[f'bins_{var}'][0] = np.log10(args[f'bins_{var}'][0] + EPS)
                 args[f'bins_{var}'][1] = np.log10(args[f'bins_{var}'][1])
 
             elif mode == 'sqrt':
+
+                # Values
                 RV[var] = np.sqrt(np.maximum(RV[var], EPS))
 
                 # Bins
-                args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0])
+                args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0] + EPS)
                 args[f'bins_{var}'][1] = np.sqrt(args[f'bins_{var}'][1])
 
             elif mode == 'square':
+
+                # Values
                 RV[var] = RV[var]**2
 
                 # Bins
@@ -89,7 +97,7 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
                                      args[f'bins_{var}'][1],
                                      args[f'bins_{var}'][2])
 
-            elif args[f'binmode_{var}'] == 'log':
+            elif args[f'binmode_{var}'] == 'log10':
                 binedges[var] = np.logspace(
                                      np.log10(np.max([args[f'bins_{var}'][0], EPS])),
                                      np.log10(args[f'bins_{var}'][1]),
@@ -106,9 +114,9 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             'max_reg':         args['max_reg']
         }
 
-        if len(paramdict) == 2:
-        
-            ### Compute 2D-PDFs for each class
+        ### Compute 2D-PDFs for each class
+        if args['dimension'] == '2D':
+
             pdf = {}
             for c in range(N_class):
                 pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], \
@@ -118,10 +126,36 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             pdf['binedges_B'] = binedges['B']
 
             weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
-            
-        elif len(paramdict) == 1:
 
-            ### Compute 1D-PDFs for each class
+        ### Compute geometric mean factorized 1D x 1D product
+        elif args['dimension'] == 'pseudo-2D':
+
+            if len(binedges['A']) != len(binedges['B']):
+                raise Exception(__name__ + f'.compute_ND_reweights: Error: <pseudo-2D> requires same number of bins for A and B')
+            
+            pdf = {}
+            for c in range(N_class):
+                pdf_A  = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
+                pdf_B  = pdf_1D_hist(X=RV['B'][y==c], binedges=binedges['B'])
+                
+                if   args['pseudo_type'] == 'geometric_mean':
+                    pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
+                elif args['pseudo_type'] == 'product':
+                    pdf[c] = np.outer(pdf_A, pdf_B)
+                else:
+                    raise Exception(__name__ + f'.compute_ND_reweights: Unknown <pseudo_type>')
+                
+                # Normalize to discrete density
+                pdf[c] /= np.sum(pdf[c].flatten())
+
+            pdf['binedges_A'] = binedges['A']
+            pdf['binedges_B'] = binedges['B']
+
+            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+
+        ### Compute 1D-PDFs for each class
+        elif args['dimension'] == '1D':
+            
             pdf = {}
             for c in range(N_class):
                 pdf[c] = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
@@ -129,18 +163,18 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             pdf['binedges'] = binedges['A']
             weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
         else:
-            raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality {len(paramdict)}')
+            raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality mode <{args["dimension"]}>')
     
     # No differential re-weighting    
     else:
         weights_doublet = np.zeros((x.shape[0], N_class))
-        for c in range(N_class):    
+        for c in range(N_class):
             weights_doublet[y == c, c] = 1
 
         # Apply class balance equalizing weight
         if (args['equal_frac'] == True):
             cprint(__name__ + f'.Compute_ND_reweights: Computing only equal class balance weights (no differential re-weighting).', 'green')
-            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=0, y=y)
+            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
         
         weights = np.sum(weights_doublet, axis=1)
 
@@ -159,7 +193,7 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
     return weights
 
 
-def reweight_1D(X, pdf, y, N_class=2, reference_class = 0, max_reg = 1E3, EPS=1E-12) :
+def reweight_1D(X, pdf, y, N_class, reference_class, max_reg = 1E3, EPS=1E-12) :
     """ Compute N-class density reweighting coefficients.
     Args:
         X   :             Input data (# samples)
@@ -186,14 +220,10 @@ def reweight_1D(X, pdf, y, N_class=2, reference_class = 0, max_reg = 1E3, EPS=1E
     # Maximum weight cut-off regularization
     weights_doublet[weights_doublet > max_reg] = max_reg
 
-    # Save weights
-    weights_doublet[y == 0, 0] = C0
-    weights_doublet[y == 1, 1] = C1
-
     return weights_doublet
 
 
-def reweightcoeff1D(X, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3) :
+def reweightcoeff1D(X, y, pdf, N_class, reference_class, equal_frac, max_reg = 1e3) :
     """ Compute N-class density reweighting coefficients.
     
     Args:
@@ -209,42 +239,8 @@ def reweightcoeff1D(X, y, pdf, N_class=2, reference_class = 0, equal_frac = True
     """
     weights_doublet = reweight_1D(X=X, pdf=pdf, y=y, N_class=N_class, reference_class=reference_class, max_reg=max_reg)
 
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-
-    return weights
-
-
-def reweightcoeff2DFP(X_A, X_B, y, pdf_A, pdf_B, N_class=2, reference_class = 0,
-    equal_frac = True, max_reg = 1e3) :
-    """ Compute N-class density reweighting coefficients.
-    
-    Operates in 2D with FACTORIZED PRODUCT marginal 1D distributions.
-    
-    Args:
-        X_A   :  Observable of interest (N x 1)
-        X_B   :  Observable of interest (N x 1)
-        y     :  Signal (1) and background (0) targets
-        pdf_A :  Density of observable A
-        pdf_B :  Density of observable B
-        N_class: Number of classes
-        reference_class: e.g. 0 (background) or 1 (signal)
-        equal_frac:      Equalize integrated class fractions
-        max_reg:         Maximum weight regularization
-    
-    Returns:
-        weights for each event
-    """
-
-    weights_doublet_A = reweight_1D(X=X_A, pdf=pdf_A, N_class=N_class, y=y, reference_class=reference_class, max_reg=max_reg)
-    weights_doublet_B = reweight_1D(X=X_B, pdf=pdf_B, N_class=N_class, y=y, reference_class=reference_class, max_reg=max_reg)
-
-    # Factorized product
-    weights_doublet   = weights_doublet_A * weights_doublet_B
+    # Maximum weight cut-off regularization
+    weights_doublet[weights_doublet > max_reg] = max_reg
 
     # Apply class balance equalizing weight
     if (equal_frac == True):
@@ -256,7 +252,7 @@ def reweightcoeff2DFP(X_A, X_B, y, pdf_A, pdf_B, N_class=2, reference_class = 0,
     return weights
 
 
-def reweightcoeff2D(X_A, X_B, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3, EPS=1E-12) :
+def reweightcoeff2D(X_A, X_B, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3, EPS=1E-12):
     """ Compute N-class density reweighting coefficients.
     
     Operates in full 2D without factorization.
