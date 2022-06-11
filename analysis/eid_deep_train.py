@@ -48,13 +48,13 @@ from iceid import common
 from iceid import graphio
 
 
-def get_model(X, Y, VARS, features, args, param, N_class=2):
+def get_model(X, Y, ids, weights, features, args, param, N_class=2):
     
     # ---------------------------------------------------------------
     # Read test graph data to get dimensions
 
     gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X[0:1], Y=Y[0:1], VARS=VARS, 
+    gdata['trn'] = graphio.parse_graph_data(X=X[0:1], Y=Y[0:1], ids=ids, weights=weights, 
         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # =========================================================================
@@ -117,7 +117,7 @@ def compute_reweight(root_files, N_events, args, N_class=2):
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
     entrystop    = np.min([args['reweight_param']['maxevents'], N_events[index]])
-    X,Y,VARS     = common.load_root_file_new(root_files[index], entrystart=0, entrystop=entrystop, args=args)
+    X,Y,VARS     = common.load_root_file(root_files[index], entrystart=0, entrystop=entrystop, args=args)
 
 
     ### Compute differential re-weighting 2D-PDFs
@@ -189,9 +189,9 @@ def main():
             param[ID]['epochs'] = int(args['batch_train_param']['local_epochs'])
 
         model[ID], device[ID], optimizer[ID], scheduler[ID] = \
-            get_model(X=X,Y=Y,VARS=VARS,features=features,args=args,param=param[ID],N_class=N_class)
+            get_model(X=X, Y=Y, ids=VARS, weights=None, features=features, args=args, param=param[ID], N_class=N_class)
     # ----------------------------------------------------------
-
+    
     visited    = False
     N_epochs   = args['batch_train_param']['epochs']
     block_size = args['batch_train_param']['blocksize']
@@ -228,7 +228,7 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,VARS      = common.load_root_file_new(root_files[f], entrystart=entrystart, entrystop=entrystop, args=args)
+                    X,Y,VARS      = common.load_root_file(root_files[f], entrystart=entrystart, entrystop=entrystop, args=args)
                     trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
 
                     # =========================================================================
@@ -268,9 +268,9 @@ def main():
                     ### Parse data into graphs
 
                     gdata = {}
-                    gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, VARS=VARS, 
+                    gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, ids=VARS, weights=trn_weights,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-                    gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, VARS=VARS,
+                    gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=VARS, weights=None,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
                 
                 # =========================================================================
