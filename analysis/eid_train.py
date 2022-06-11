@@ -59,10 +59,10 @@ def main() :
     
     graph = {}
     if args['graph_on']:
-        graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, ids=data.ids, 
+        graph['trn'] = graphio.parse_graph_data(X=data.trn.x, Y=data.trn.y, weights=trn_weights, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
         
-        graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, ids=data.ids,
+        graph['val'] = graphio.parse_graph_data(X=data.val.x, Y=data.val.y, weights=val_weights, ids=data.ids,
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     ### Split and factor data

@@ -179,11 +179,11 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
         # Pure dictionary
         dataset.append({'x':x, 'edge_index':edge_index, 'edge_attr':edge_attr, 'y':y, 'w':w, 'u':u})
         #dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
-
+    
     return dataset
 
 
-def parse_graph_data(X, ids, features, Y=None, W=None, global_on=True, coord='ptetaphim', EPS=1e-12):
+def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -192,7 +192,7 @@ def parse_graph_data(X, ids, features, Y=None, W=None, global_on=True, coord='pt
         ids       :  Variable names as an array of strings
         features  :  Array of active scalar feature strings
         Y         :  Target class  array (if any, typically MC only)
-        W         :  (Re-)weighting array (if any, typically MC only)
+        weights   :  (Re-)weighting array (if any, typically MC only)
         global_on :  Global features on / off
         coord     :  Coordinates used for nodes ('ptetaphim', 'pxpypze')
         
@@ -265,11 +265,10 @@ def parse_graph_data(X, ids, features, Y=None, W=None, global_on=True, coord='pt
             y = torch.tensor([0],    dtype=torch.long)
 
         # Training weights, note [] is important to have for right dimensions
-        if W is not None:
-            w = torch.tensor([W[i]], dtype=torch.float)
+        if weights is not None:
+            w = torch.tensor([weights[i]], dtype=torch.float)
         else:
             w = torch.tensor([1.0],  dtype=torch.float)
-
 
         ## Construct global feature vector
         u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
