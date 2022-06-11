@@ -3,7 +3,6 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-
 import torch
 import uproot
 import numpy as np
@@ -173,12 +172,10 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
         raise Exception(__name__ + '.train: Number of classes in ''Y_val'' <= 1')
 
     # --------------------------------------------------------------------
-
     if type(X_trn) is dict:
         print(__name__ + f".train: Training samples = {X_trn['x'].shape[0]}, Validation samples = {X_val['x'].shape[0]}")
     else:
         print(__name__ + f'.train: Training samples = {X_trn.shape[0]}, Validation samples = {X_val.shape[0]}')
-
 
     # Prints the weights and biases
     print(model)
@@ -315,7 +312,6 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
 
         avgloss = sumloss / nbatch
         losses.append(avgloss)
-
 
         # ================================================================
         # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)

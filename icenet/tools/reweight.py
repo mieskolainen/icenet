@@ -11,7 +11,7 @@ import copy
 from icenet.tools import aux
 
 
-def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
+def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
     """
     Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
@@ -19,11 +19,15 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
         x      : training data input
         y      : training data labels
         ids    : variable names of columns of x
-        args   : arguments object
+        pdf    : pre-computed pdfs
+        args   : reweighting parameters in a dictionary
     
     Returns:
         weights: array of re-weights
     """
+
+    num_classes = len(np.unique(y))
+    print(__name__ + f'.compute_ND_reweights: Found {num_classes} classes from y')
 
     args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
@@ -108,7 +112,6 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
 
         rwparam = {
             'y':               y,
-            'N_class':         N_class,
             'equal_frac':      args['equal_frac'],
             'reference_class': args['reference_class'],
             'max_reg':         args['max_reg']
@@ -117,58 +120,65 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
         ### Compute 2D-PDFs for each class
         if args['dimension'] == '2D':
 
-            pdf = {}
-            for c in range(N_class):
-                pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], \
-                    binedges_A=binedges['A'], binedges_B=binedges['B'])
+            if pdf is None: # Not given by user
+                pdf = {}
+                for c in range(num_classes):
+                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], \
+                        binedges_A=binedges['A'], binedges_B=binedges['B'])
 
-            pdf['binedges_A'] = binedges['A']
-            pdf['binedges_B'] = binedges['B']
+                pdf['binedges_A']  = binedges['A']
+                pdf['binedges_B']  = binedges['B']
+                pdf['num_classes'] = num_classes
 
-            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, binedges=binedges, **rwparam)
 
         ### Compute geometric mean factorized 1D x 1D product
         elif args['dimension'] == 'pseudo-2D':
 
             if len(binedges['A']) != len(binedges['B']):
                 raise Exception(__name__ + f'.compute_ND_reweights: Error: <pseudo-2D> requires same number of bins for A and B')
-            
-            pdf = {}
-            for c in range(N_class):
-                pdf_A  = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
-                pdf_B  = pdf_1D_hist(X=RV['B'][y==c], binedges=binedges['B'])
-                
-                if   args['pseudo_type'] == 'geometric_mean':
-                    pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
-                elif args['pseudo_type'] == 'product':
-                    pdf[c] = np.outer(pdf_A, pdf_B)
-                else:
-                    raise Exception(__name__ + f'.compute_ND_reweights: Unknown <pseudo_type>')
-                
-                # Normalize to discrete density
-                pdf[c] /= np.sum(pdf[c].flatten())
 
-            pdf['binedges_A'] = binedges['A']
-            pdf['binedges_B'] = binedges['B']
+            if pdf is None: # Not given by user
+                pdf = {}
+                for c in range(num_classes):
+                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
+                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], binedges=binedges['B'])
+                    
+                    if   args['pseudo_type'] == 'geometric_mean':
+                        pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
+                    elif args['pseudo_type'] == 'product':
+                        pdf[c] = np.outer(pdf_A, pdf_B)
+                    else:
+                        raise Exception(__name__ + f'.compute_ND_reweights: Unknown <pseudo_type>')
+
+                    # Normalize to discrete density
+                    pdf[c] /= np.sum(pdf[c].flatten())
+
+                pdf['binedges_A']  = binedges['A']
+                pdf['binedges_B']  = binedges['B']
+                pdf['num_classes'] = num_classes
 
             weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
 
         ### Compute 1D-PDFs for each class
         elif args['dimension'] == '1D':
             
-            pdf = {}
-            for c in range(N_class):
-                pdf[c] = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
+            if pdf is None: # Not given by user
+                pdf = {}
+                for c in range(num_classes):
+                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
 
-            pdf['binedges'] = binedges['A']
+                pdf['binedges']    = binedges['A']
+                pdf['num_classes'] = num_classes
+
             weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
         else:
             raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality mode <{args["dimension"]}>')
     
     # No differential re-weighting    
     else:
-        weights_doublet = np.zeros((x.shape[0], N_class))
-        for c in range(N_class):
+        weights_doublet = np.zeros((x.shape[0], num_classes))
+        for c in range(num_classes):
             weights_doublet[y == c, c] = 1
 
         # Apply class balance equalizing weight
@@ -177,12 +187,11 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
             weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
         
         weights = np.sum(weights_doublet, axis=1)
-
-
+    
     # Compute the sum of weights per class for the output print
-    frac = np.zeros(N_class)
-    sums = np.zeros(N_class)
-    for c in range(N_class):
+    frac = np.zeros(num_classes)
+    sums = np.zeros(num_classes)
+    for c in range(num_classes):
         frac[c] = np.sum(y == c)
         sums[c] = np.sum(weights[y == c])
     
@@ -190,54 +199,34 @@ def compute_ND_reweights(x, y, ids, args, N_class=2, EPS=1e-12):
     print(__name__ + f'.compute_ND_reweights: sum[weights[y == c]]: {sums}')
     print(__name__ + f'.compute_ND_reweights: [done] \n')
     
-    return weights
+    return weights, pdf
 
 
-def reweight_1D(X, pdf, y, N_class, reference_class, max_reg = 1E3, EPS=1E-12) :
-    """ Compute N-class density reweighting coefficients.
-    Args:
-        X   :             Input data (# samples)
-        pdf :             Dictionary of pdfs for each class
-        y   :             Class target data (# samples)
-        N_class :         Number of classes
-        reference_class : Target class of re-weighting
-    
-    Returns:
-        weights for each event
-    """
-
-    # Re-weighting weights
-    weights_doublet = np.zeros((X.shape[0], N_class)) # Init with zeros!!
-
-    # Weight each class against the reference class
-    for c in range(N_class):
-        inds = aux.x2ind(X[y == c], pdf['binedges'])
-        if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds] / (pdf[c][inds] + EPS)
-        else:
-            weights_doublet[y == c, c] = 1 # Reference class stays intact
-
-    # Maximum weight cut-off regularization
-    weights_doublet[weights_doublet > max_reg] = max_reg
-
-    return weights_doublet
-
-
-def reweightcoeff1D(X, y, pdf, N_class, reference_class, equal_frac, max_reg = 1e3) :
+def reweightcoeff1D(X, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1e-12) :
     """ Compute N-class density reweighting coefficients.
     
     Args:
         X  :   Observable of interest (N x 1)
         y  :   Class labels (0,1,...) (N x 1)
         pdf:   PDF for each class
-        N_class : Number of classes
         equal_frac:  equalize class fractions
         reference_class : e.g. 0 (background) or 1 (signal)
     
     Returns:
         weights for each event
     """
-    weights_doublet = reweight_1D(X=X, pdf=pdf, y=y, N_class=N_class, reference_class=reference_class, max_reg=max_reg)
+    num_classes = pdf['num_classes']
+
+    # Re-weighting weights
+    weights_doublet = np.zeros((X.shape[0], num_classes)) # Init with zeros!!
+
+    # Weight each class against the reference class
+    for c in range(num_classes):
+        inds = aux.x2ind(X[y == c], pdf['binedges'])
+        if c is not reference_class:
+            weights_doublet[y == c, c] = pdf[reference_class][inds] / (pdf[c][inds] + EPS)
+        else:
+            weights_doublet[y == c, c] = 1.0 # Reference class stays intact
 
     # Maximum weight cut-off regularization
     weights_doublet[weights_doublet > max_reg] = max_reg
@@ -252,17 +241,16 @@ def reweightcoeff1D(X, y, pdf, N_class, reference_class, equal_frac, max_reg = 1
     return weights
 
 
-def reweightcoeff2D(X_A, X_B, y, pdf, N_class=2, reference_class = 0, equal_frac = True, max_reg = 1e3, EPS=1E-12):
+def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1E-12):
     """ Compute N-class density reweighting coefficients.
     
-    Operates in full 2D without factorization.
-
+    Operates in full 2D without any factorization.
+    
     Args:
-        X_A : Observable A of interest (N x 1)
-        X_B : Observable B of interest (N x 1)
-        y   : Signal (1) and background (0) labels (N x 1)
-        pdf : Density histograms for each class
-        N_class :         Number of classes
+        X_A :             Observable A of interest (N x 1)
+        X_B :             Observable B of interest (N x 1)
+        y   :             Signal (1) and background (0) labels (N x 1)
+        pdf :             Density histograms for each class
         reference_class : e.g. Background (0) or signal (1)
         equal_frac :      Equalize class fractions
         max_reg :         Regularize the maximum reweight coefficient
@@ -270,18 +258,19 @@ def reweightcoeff2D(X_A, X_B, y, pdf, N_class=2, reference_class = 0, equal_frac
     Returns:
         weights for each event
     """
-    
+    num_classes = pdf['num_classes']
+
     # Re-weighting weights
-    weights_doublet = np.zeros((X_A.shape[0], N_class)) # Init with zeros!!
+    weights_doublet = np.zeros((X_A.shape[0], num_classes)) # Init with zeros!!
 
     # Weight each class against the reference class
-    for c in range(N_class):
+    for c in range(num_classes):
         inds_A = aux.x2ind(X_A[y == c], pdf['binedges_A'])
         inds_B = aux.x2ind(X_B[y == c], pdf['binedges_B'])
         if c is not reference_class:
             weights_doublet[y == c, c] = pdf[reference_class][inds_A, inds_B] / (pdf[c][inds_A, inds_B] + EPS)
         else:
-            weights_doublet[y == c, c] = 1 # Reference class stays intact
+            weights_doublet[y == c, c] = 1.0 # Reference class stays intact
 
     # Maximum weight cut-off regularization
     weights_doublet[weights_doublet > max_reg] = max_reg

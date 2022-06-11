@@ -33,6 +33,8 @@ from sklearn.metrics import accuracy_score
 # icenet
 from icenet.tools import io
 from icenet.tools import aux
+from icenet.tools import aux_torch
+
 from icenet.tools import plots
 from icenet.tools import prints
 
@@ -342,7 +344,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
 
     # Count the number of parameters
-    cprint(__name__ + f'.graph_train: Number of free model parameters = {auc_torch.count_parameters_torch(model)}', 'yellow')
+    cprint(__name__ + f'.graph_train: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])

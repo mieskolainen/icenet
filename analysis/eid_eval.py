@@ -1,6 +1,7 @@
 # Electron ID [EVALUATION] code
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# Mikael Mieskolainen, 2022
+# m.mieskolainen@imperial.ac.uk
 
 
 # icenet system paths
@@ -45,7 +46,7 @@ def main() :
     
     ### Compute reweighting weights for the evaluation (before split&factor !)
     if args['eval_reweight']:
-        tst_weights = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.ids, args=args['reweight_param'])
+        tst_weights,_ = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.ids, args=args['reweight_param'])
     else:
         tst_weights = None
     

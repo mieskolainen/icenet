@@ -86,24 +86,8 @@ def compute_reweight(root_files, N_events, args):
     entrystop    = np.min([args['reweight_param']['maxevents'], N_events[index]])
     X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id = [0,1], max_num_elements=entrystop, args=args, library='np')
 
-    ### Compute differential re-weighting 2D-PDFs
-    X_A          = X[:, ids.index(args['reweight_param']['var_A'])]
-    X_B          = X[:, ids.index(args['reweight_param']['var_B'])]
-
-    bins_A       = args['reweight_param']['bins_A']
-    bins_B       = args['reweight_param']['bins_B']
-    binedges_A   = np.linspace(bins_A[0], bins_A[1], bins_A[2])
-    binedges_B   = np.linspace(bins_B[0], bins_B[1], bins_B[2])
-    
-    print(__name__ + f".compute_reweights: reference_class: <{args['reweight_param']['reference_class']}>")
-
-    ### Compute 2D-pdfs for each class
-    pdf = {}
-    for c in range(args['num_classes']):
-        pdf[c] = reweight.pdf_2D_hist(X_A=X_A[Y==c], X_B=X_B[Y==c], binedges_A=binedges_A, binedges_B=binedges_B)
-    
-    pdf['binedges_A'] = binedges_A
-    pdf['binedges_B'] = binedges_B
+    # Compute re-weights
+    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, ids=ids, args=args['reweight_param'])
 
     return pdf, X, Y, ids
 
@@ -203,37 +187,10 @@ def main():
 
                     # =========================================================================
                     # COMPUTE RE-WEIGHTS
-                    # Re-weighting variables
 
-                    PT  = trn.x[:, ids.index('trk_pt')]
-                    ETA = trn.x[:, ids.index('trk_eta')]
-
-                    # Compute event-by-event weights
-                    if args['reweight_param']['reference_class'] != -1:
-                            
-                        trn_weights = reweight.reweightcoeff2D(
-                            X_A = PT, X_B = ETA, pdf = pdf, y = trn.y, N_class=N_class,
-                            equal_frac       = args['reweight_param']['equal_frac'],
-                            reference_class  = args['reweight_param']['reference_class'],
-                            max_reg          = args['reweight_param']['max_reg'])
-                    else:
-                        # No re-weighting
-                        weights_doublet = np.zeros((trn.x.shape[0], N_class))
-                        for c in range(N_class):    
-                            weights_doublet[trn.y == c, c] = 1
-                        trn_weights = np.sum(weights_doublet, axis=1)
+                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, ids=ids, args=args['reweight_param'])
+                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, ids=ids, args=args['reweight_param'])
                     
-                    # Compute the sum of weights per class for the output print
-                    frac = np.zeros(N_class)
-                    sums = np.zeros(N_class)
-                    for c in range(N_class):
-                        frac[c] = np.sum(trn.y == c)
-                        sums[c] = np.sum(trn_weights[trn.y == c])
-                    
-                    print(__name__ + f'.compute_reweights: sum(Y==c): {frac}')
-                    print(__name__ + f'.compute_reweights: sum(trn_weights[Y==c]): {sums}')
-                    print(__name__ + f'.compute_reweights: [done]\n')
-
                     # =========================================================================
                     ### Parse data into graphs
 
@@ -241,7 +198,7 @@ def main():
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, ids=ids, weights=trn_weights,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
 
-                    gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=ids, weights=None,
+                    gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=ids, weights=val_weights,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
                 
                 # =========================================================================
@@ -269,6 +226,5 @@ def main():
 
     print(__name__ + f' [Done!]')
 
-        
 if __name__ == '__main__' :
     main()
