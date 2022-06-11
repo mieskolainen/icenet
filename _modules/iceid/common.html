@@ -222,7 +222,8 @@
     <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">files</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span>
-
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
+    
     <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">MAXEVENTS</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
     <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_num_elements&#39;</span><span class="p">:</span> <span class="n">MAXEVENTS</span><span class="p">,</span>
