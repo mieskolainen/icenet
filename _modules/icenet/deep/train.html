@@ -34,7 +34,7 @@
   <h1>Source code for icenet.deep.train</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Generic model training wrapper functions [TBD; unify and simplify data structures]</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
@@ -339,7 +339,7 @@
     <span class="k">return</span> <span class="n">netparam</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;conv_type&#39;</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="train_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="train_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train graph neural networks</span>
 <span class="sd">    </span>
@@ -397,8 +397,9 @@
 
         <span class="n">loss</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">opt_param</span><span class="p">)</span>
 
-        <span class="n">train_acc</span><span class="p">,</span> <span class="n">train_auc</span>       <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">test</span><span class="p">(</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">validate_acc</span><span class="p">,</span> <span class="n">validate_auc</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">test</span><span class="p">(</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">,</span>  <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">save_period</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">train_acc</span><span class="p">,</span> <span class="n">train_auc</span>       <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">test</span><span class="p">(</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">validate_acc</span><span class="p">,</span> <span class="n">validate_auc</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">test</span><span class="p">(</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">,</span>  <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         
         <span class="c1"># Push</span>
         <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
@@ -419,7 +420,7 @@
             <span class="c1">## Save</span>
             <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 
         <span class="c1"># Plot evolution</span>
@@ -431,7 +432,7 @@
 
 
 <div class="viewcode-block" id="train_torch_generic"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_generic">[docs]</a><span class="k">def</span> <span class="nf">train_torch_generic</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train generic neural model [R^d -&gt; softmax]</span>
 <span class="sd">    </span>
@@ -454,7 +455,7 @@
     <span class="n">raytune_on</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">False</span>
 
     <span class="n">model</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span> <span class="o">=</span> <span class="n">Y_val</span><span class="p">,</span>
-        <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">raytune_on</span><span class="o">=</span><span class="n">raytune_on</span><span class="p">)</span>
+        <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">raytune_on</span><span class="o">=</span><span class="n">raytune_on</span><span class="p">)</span>
 
     <span class="c1"># ---------------------------------------------------------------</span>
 
@@ -474,6 +475,59 @@
 
         <span class="k">return</span> <span class="n">model</span></div>
 
+<div class="viewcode-block" id="train_torch_image"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_image">[docs]</a><span class="k">def</span> <span class="nf">train_torch_image</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train CNN neural model</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+    <span class="c1"># Into torch format</span>
+
+    <span class="n">X_trn_2D</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">X_val_2D</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">DIM</span>      <span class="o">=</span> <span class="n">X_trn_2D</span><span class="o">.</span><span class="n">shape</span>
+    
+    <span class="c1"># Train</span>
+    <span class="n">X_trn</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">X_trn</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_trn_2D</span>
+    <span class="n">X_trn</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="c1"># Validation</span>
+    <span class="n">X_val</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">X_val</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_val_2D</span>
+    <span class="n">X_val</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Training </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">cnn</span><span class="o">.</span><span class="n">CNN_DMAX</span><span class="p">(</span><span class="n">D</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">C</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">],</span> <span class="n">nchannels</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nrows</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">**</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">])</span>
+
+    <span class="n">model</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span> <span class="o">=</span> \
+        <span class="n">dopt</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span> <span class="o">=</span> <span class="n">Y_val</span><span class="p">,</span>
+                    <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Plot evolution</span>
+    <span class="n">plotdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>  <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plotdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_evolution.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1">### Plot contours</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+        <span class="n">targetdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
+        <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span></div>
 
 <div class="viewcode-block" id="train_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -735,113 +789,6 @@
 <span class="sd">            X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = &#39;numpy&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="train_cdmx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cdmx">[docs]</a><span class="k">def</span> <span class="nf">train_cdmx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Train cdmx neural model</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        See other train_*</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        trained model</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NOT WORKING CURRENTLY [update code]</span>
-<span class="sd">    </span>
-<span class="sd">    label = args[&#39;cdmx_param&#39;][&#39;label&#39;]</span>
-
-<span class="sd">    print(f&#39;\nTraining {label} classifier ...&#39;)</span>
-<span class="sd">    cmdx_model = cnn.CNN_DMAX(D = X_trn.shape[1], C=args[&#39;num_classes&#39;], nchannels=DIM[1], nrows=DIM[2], ncols=DIM[3], \</span>
-<span class="sd">        dropout_cnn = param[&#39;dropout_cnn&#39;], neurons = param[&#39;neurons&#39;], \</span>
-<span class="sd">        num_units = param[&#39;num_units&#39;], dropout = param[&#39;dropout&#39;])</span>
-
-<span class="sd">    # -------------------------------------------------------------------------------</span>
-<span class="sd">    # Into torch format</span>
-
-<span class="sd">    X_trn_2D = torch.tensor(data_tensor[&#39;trn&#39;], dtype=torch.float)</span>
-<span class="sd">    X_val_2D = torch.tensor(data_tensor[&#39;val&#39;], dtype=torch.float)</span>
-<span class="sd">    DIM      = X_trn_2D.shape</span>
-<span class="sd">    # -------------------------------------------------------------------------------</span>
-
-<span class="sd">    cmdx_model, losses, trn_aucs, val_aucs = dopt.dualtrain(model = cmdx_model, X1_trn = X_trn_2D, X2_trn = X_trn, \</span>
-<span class="sd">        Y_trn = Y_trn, X1_val = X_val_2D, X2_val = X_val, Y_val = Y_val, trn_weights = trn_weights, param = param)</span>
-<span class="sd">    </span>
-<span class="sd">    # Plot evolution</span>
-<span class="sd">    plotdir = aux.makedir(f&#39;./figs/{args[&quot;rootname&quot;]}/{args[&quot;config&quot;]}/train/&#39;)</span>
-<span class="sd">    fig,ax  = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)</span>
-<span class="sd">    plt.savefig(f&#39;{plotdir}/{label}_evolution.pdf&#39;, bbox_inches=&#39;tight&#39;); plt.close()</span>
-<span class="sd">    </span>
-<span class="sd">    ## Save</span>
-<span class="sd">    checkpoint = {&#39;model&#39;: model, &#39;state_dict&#39;: model.state_dict()}</span>
-<span class="sd">    torch.save(checkpoint, args[&#39;modeldir&#39;] + f&#39;/{label}_checkpoint&#39; + &#39;.pth&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-
-    <span class="c1">### Plot contours</span>
-    <span class="c1">#if args[&#39;plot_param&#39;][&#39;contours&#39;][&#39;active&#39;]:</span>
-    <span class="c1">#    targetdir = aux.makedir(f&#39;./figs/{args[&quot;rootname&quot;]}/{args[&quot;config&quot;]}/train/2D_contours/{label}/&#39;)</span>
-    <span class="c1">#    plots.plot_decision_contour(lambda x : cdmx_model.softpredict(x1,x2),</span>
-    <span class="c1">#        X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = &#39;torch&#39;)</span>
-
-    <span class="c1">#if len(config) == 0:</span>
-    <span class="c1">#    return model</span>
-
-
-
-<div class="viewcode-block" id="train_torch_image"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_image">[docs]</a><span class="k">def</span> <span class="nf">train_torch_image</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Train CNN neural model</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        See other train_*</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        trained model</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-
-    <span class="c1"># -------------------------------------------------------------------------------</span>
-    <span class="c1"># Into torch format</span>
-
-    <span class="n">X_trn_2D</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">X_val_2D</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">DIM</span>      <span class="o">=</span> <span class="n">X_trn_2D</span><span class="o">.</span><span class="n">shape</span>
-    
-    <span class="c1"># Train</span>
-    <span class="n">X_trn</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">X_trn</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_trn_2D</span>
-    <span class="n">X_trn</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>
-
-    <span class="c1"># Validation</span>
-    <span class="n">X_val</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">X_val</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_val_2D</span>
-    <span class="n">X_val</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>
-
-    <span class="c1"># -------------------------------------------------------------------------------</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Training </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> classifier ...&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">cnn</span><span class="o">.</span><span class="n">CNN_DMAX</span><span class="p">(</span><span class="n">D</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">C</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">],</span> <span class="n">nchannels</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nrows</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="n">DIM</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">**</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">])</span>
-
-    <span class="n">model</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span> <span class="o">=</span> \
-        <span class="n">dopt</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span> <span class="o">=</span> <span class="n">Y_val</span><span class="p">,</span>
-                    <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">])</span>
-
-    <span class="c1"># Plot evolution</span>
-    <span class="n">plotdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/&#39;</span><span class="p">)</span>
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>  <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plotdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_evolution.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="c1">### Plot contours</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-        <span class="n">targetdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
-        <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;torch&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="train_xtx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xtx">[docs]</a><span class="k">def</span> <span class="nf">train_xtx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
