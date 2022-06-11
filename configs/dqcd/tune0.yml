@@ -17,7 +17,7 @@ MC_input:
 
 # ----------------------------------------------------
 
-eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
+eval_reweight: True  # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
 rngseed: 123456      # Fixed seed for training data mixing
 
 num_classes: 2       # Number of classes in MVA
