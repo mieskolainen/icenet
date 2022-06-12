@@ -96,12 +96,10 @@
 
     <span class="c1">### From root trees</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading file </span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1"> | entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    
     <span class="n">file</span>   <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;tree_name&#39;</span><span class="p">]]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
     <span class="c1">### All variables</span>
     <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
