@@ -54,14 +54,5 @@ jobs:
           git clone https://github.com/mieskolainen/travis-stash.git
           source setenv.sh && source tests/runme_trg.sh
           source setenv.sh && source tests/runme_eid.sh
-          source setenv.sh && source tests/runme_eid_batch.sh
-          source setenv.sh && source tests/runme_brk.sh
-      
-      ## Unit tests
-      - name: Run Deep Learning system integration tests
-        run: |
-          git clone https://github.com/mieskolainen/travis-stash.git
-          source setenv.sh && source tests/runme_trg.sh
-          source setenv.sh && source tests/runme_eid.sh
-          source setenv.sh && source tests/runme_eid_batch.sh
+          source setenv.sh && source tests/runme_eid_deep.sh
           source setenv.sh && source tests/runme_brk.sh
