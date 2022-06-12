@@ -64,12 +64,13 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     cprint( __name__ + f'.common: Loading root file {root_path}', 'yellow')
     file   = uproot.open(root_path)
     events = file[args['tree_name']]
-    
+
     # Check is it MC (based on the first event)
     isMC   = bool(events.arrays('is_mc')[0]['is_mc'])
-    
+
     # --------------------------------------------------------------
-    X,ids = iceroot.process_tree(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
+    load_ids = iceroot.process_regexp_ids(ids=ids, all_ids=events.keys())
+    X,ids    = iceroot.process_tree(events=events, ids=load_ids, entry_start=entry_start, entry_stop=entry_stop)
     Y = None
     # --------------------------------------------------------------
 

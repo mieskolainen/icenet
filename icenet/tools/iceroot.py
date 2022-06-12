@@ -48,24 +48,23 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     return num_events
 
 
-def process_tree(events, ids=None, entry_start=0, entry_stop=None):
+def process_tree(events, ids, entry_start=0, entry_stop=None):
     """
     Process uproot tree
-
+    
     Args:
         events:      uproot tree
-        ids:         variable names
+        ids:         variable names to pick
         entry_start: first event to consider
         entry_stop:  last event to consider
     
     Returns:
         numpy array (with jagged content)
     """
-    if ids is None: ids = events.keys()
-
-    N      = len(events.arrays(ids[0]))
-    X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
-    X      = np.empty((len(X_test), len(ids)), dtype=object) 
+    
+    N        = len(events.arrays(ids[0]))
+    X_test   = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
+    X        = np.empty((len(X_test), len(ids)), dtype=object) 
     
     cprint( __name__ + f'.process_tree: Entry_start = {entry_start}, entry_stop = {entry_stop} | total = {N}', 'yellow')
     
@@ -78,12 +77,12 @@ def process_tree(events, ids=None, entry_start=0, entry_stop=None):
 
 def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
     """
-    Load ROOT files wrapper function
+    Load ROOT files using uproot 'concatenate' of files
     
     Args:
         rootfile:          Name of root file paths (string or a list of strings)
         tree:              Tree to read out
-        max_num_elements:  Max events to read
+        max_num_elements:  Max events to read (NOT IMPLEMENTED)
         ids:               Variable names to read out from the root tree
         library:           Return type 'np' (numpy dict) or 'ak' (awkward) of the array
     
@@ -104,6 +103,25 @@ def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
     all_ids = events.keys()
     events.close()
 
+    load_ids = process_regexp_ids(ids=ids, all_ids=all_ids)
+
+    print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
+
+    return uproot.concatenate(files, expressions=load_ids, library=library)
+
+
+def process_regexp_ids(all_ids, ids=None):
+    """
+    Process regular expressions for variable names
+
+    Args:
+        all_ids: all keys in a tree
+        ids:     keys to pick, if None, use all keys
+
+    Returns:
+        ids matching regular expressions
+    """
+
     if ids is None:
         load_ids = all_ids
     else:
@@ -122,14 +140,4 @@ def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
                     load_ids.append(all_ids[i])
                     chosen[i] = 1
 
-    #print(__name__ + f'.load_tree: All variables     ({len(all_ids)}): \n{all_ids} \n')
-    print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
-
-    print(__name__ + f'.load_tree: max_num_elements (NOT IMPLEMENTED): {max_num_elements}')
-    # ----------------------------------------------------------
-
-    Y = uproot.concatenate(files, expressions=load_ids, library=library)
-    return Y
-    
-    #for Y in uproot.iterate(files, expressions=load_ids, library=library, step_size=max_num_elements):
-    #    return Y
+    return load_ids
