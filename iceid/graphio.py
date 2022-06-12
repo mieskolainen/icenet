@@ -174,7 +174,7 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
     return dataset
 
 
-def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', EPS=1e-12):
+def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -195,7 +195,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     num_edge_features = 4
     num_classes       = 2
 
-    N_events = X.shape[0]
+    N_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
     dataset  = []
 
     print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')

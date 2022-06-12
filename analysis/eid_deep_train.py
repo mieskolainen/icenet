@@ -38,22 +38,17 @@ from icenet.tools import iceroot
 
 # deep learning
 from icenet.deep  import train
+from icenet.tools import process
 import icenet.deep as deep
 
 # iceid
 from iceid import common
 from iceid import graphio
+from configs.eid.mvavars import *
 
 
-def get_model(X, Y, ids, weights, features, args, param):
-    
-    # ---------------------------------------------------------------
-    # Read test graph data to get dimensions
+def get_model(gdata, args, param):
 
-    gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=weights, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-    
     # =========================================================================
     # INITIALIZE GRAPH MODEL
 
@@ -93,21 +88,27 @@ def compute_reweight(root_files, num_events, args):
 def main():
     
     ### Get input
-    data, args, features = common.init()
+    args, cli  = process.read_config(config_path='./configs/eid')
     root_files = args['root_files']
+    features   = globals()[args['inputvar']]
     
+
     # Create save path
     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
     
     # Load stats
     num_events = iceroot.load_tree_stats(rootfile=root_files, tree=args['tree_name'])
     print(f'Number of events per file: {num_events} (MAXEVENTS = {args["MAXEVENTS"]})')
-    
+
     # =========================================================================
     # Load data for each re-weight PDFs
 
     pdf,X,Y,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
 
+    gdata = {}
+    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=None, maxevents=1,
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    
     # =========================================================================
     ### Initialize all models
     model     = {}
@@ -129,7 +130,7 @@ def main():
                 param[ID]['epochs'] = int(args['batch_train_param']['local_epochs'])
 
             model[ID], device[ID], optimizer[ID], scheduler[ID] = \
-                get_model(X=X, Y=Y, ids=ids, weights=None, features=features, args=args, param=param[ID])
+                get_model(gdata, args=args, param=param[ID])
     # ----------------------------------------------------------
 
     visited    = False
@@ -146,7 +147,7 @@ def main():
         for f in range(len(root_files)):
 
             prints.printbar('=')
-            cprint(__name__ + f'.file {f+1} / {len(root_files)} (size = {num_events[f]}) \n', 'yellow')
+            cprint(__name__ + f'.file {f+1} / {len(root_files)} (events = {num_events[f]}) \n', 'yellow')
             
             # ------------------------------------------------------------
             N_blocks   = int(np.ceil(num_events[f] / args['batch_train_param']['blocksize']))
@@ -160,7 +161,7 @@ def main():
                 entry_stop  = block_ind[block][-1]
 
                 prints.printbar('=')
-                cprint(__name__ + f'.block {block+1} / {N_blocks} (size = {entry_stop - entry_start} \n', 'yellow')
+                cprint(__name__ + f'.block {block+1} / {N_blocks} (events = {entry_stop - entry_start}) \n', 'yellow')
 
                 # =========================================================================
                 # LOAD DATA

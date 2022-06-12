@@ -62,12 +62,10 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
 
     ### From root trees
     print('\n')
-    cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
-    cprint( __name__ + f'.load_root_file: entry_start = {entry_start}, entry_stop = {entry_stop}')
-
+    cprint( __name__ + f'.load_root_file: Loading file {root_path} | entry_start = {entry_start}, entry_stop = {entry_stop}', 'yellow')
+    
     file   = uproot.open(root_path)
     events = file[args['tree_name']]
-    print(events)
 
     ### All variables
     if ids is None:

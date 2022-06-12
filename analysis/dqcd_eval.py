@@ -10,6 +10,7 @@ sys.path.append(".")
 # icenet
 from icenet.tools import process
 from icenet.tools import reweight
+from icenet.tools import io
 
 # icedqcd
 from icedqcd import common

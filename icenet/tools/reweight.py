@@ -27,8 +27,6 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
     """
 
     num_classes = len(np.unique(y))
-    print(__name__ + f'.compute_ND_reweights: Found {num_classes} classes from y')
-
     args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
     ### Construct parameter names
@@ -40,13 +38,10 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
         except:
             break
     
-    print(__name__ + f".compute_ND_reweights: reference class: <{args['reference_class']}>")
-
+    print(__name__ + f".compute_ND_reweights: reference class: <{args['reference_class']}> (Found {num_classes} classes from y) | Using variables: {paramdict}")
+    
     # Compute event-by-event weights
     if args['differential_reweight']:
-    
-        print(__name__ + f'.compute_ND_reweights: Differential re-weighting using the following variables {paramdict}')
-        print(ids)
         
         ### Re-weighting variables
         RV = {}
@@ -195,9 +190,7 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
         frac[c] = np.sum(y == c)
         sums[c] = np.sum(weights[y == c])
     
-    print(__name__ + f'.compute_ND_reweights: sum[y == c]: {frac}')
-    print(__name__ + f'.compute_ND_reweights: sum[weights[y == c]]: {sums}')
-    print(__name__ + f'.compute_ND_reweights: [done] \n')
+    print(__name__ + f'.compute_ND_reweights: sum[y == c]: {frac} | sum[weights[y == c]]: {sums}')
     
     return weights, pdf
 
