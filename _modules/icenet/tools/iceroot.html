@@ -46,14 +46,40 @@
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
 
-<div class="viewcode-block" id="load_tree_stats"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree_stats">[docs]</a><span class="k">def</span> <span class="nf">load_tree_stats</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+<div class="viewcode-block" id="load_tree_stats"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree_stats">[docs]</a><span class="k">def</span> <span class="nf">load_tree_stats</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the number of events in a list of rootfiles</span>
 
-    <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)[</span><span class="n">tree</span><span class="p">]</span>
+<span class="sd">    Args:</span>
+<span class="sd">        rootfile: a list of rootfiles</span>
+<span class="sd">        tree:     tree name to open</span>
+<span class="sd">        key:      key to use to get the number of events, if None then automatic</span>
+<span class="sd">        verbose:  verbose output print</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span></div>
-    <span class="c1">#print(events.numentries)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        number of events</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">rootfile</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">]</span>
+
+    <span class="n">num_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)):</span>
+        <span class="n">file</span>     <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">events</span>   <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">tree</span><span class="p">]</span>
+        <span class="n">key_name</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span>    
+
+        <span class="n">num_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">key_name</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: </span><span class="si">{</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: keys(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: values(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">num_events</span></div>
 
 
 <div class="viewcode-block" id="load_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree">[docs]</a><span class="k">def</span> <span class="nf">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>

@@ -37,7 +37,6 @@
 <span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -47,7 +46,6 @@
 
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
-
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
@@ -55,88 +53,13 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">process</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
 
-
 <span class="c1"># GLOBALS</span>
 <span class="kn">from</span> <span class="nn">configs.trg.mvavars</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.trg.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.trg.filter</span> <span class="kn">import</span> <span class="o">*</span>
 
 
-
-<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Initialize electron HLT trigger data.</span>
-<span class="sd">	</span>
-<span class="sd">    Args:</span>
-<span class="sd">        Implicit commandline and yaml file input.</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        jagged array data, arguments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">args</span><span class="p">,</span> <span class="n">cli</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">read_config</span><span class="p">(</span><span class="s1">&#39;./configs/trg&#39;</span><span class="p">)</span>
-    <span class="n">features</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
-    
-    
-    <span class="c1">### SET random seed</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
-
-    <span class="c1"># --------------------------------------------------------------------    </span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="c1">#print(__name__ + f&#39;.init: targetfunc =  {args[&quot;targetfunc&quot;]}&#39;)</span>
-    <span class="c1"># --------------------------------------------------------------------</span>
-
-    <span class="c1">### Load data</span>
-
-    <span class="c1"># Background (0) and signal (1)</span>
-    <span class="n">class_id</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAXEVENTS</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
-    <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_num_elements&#39;</span><span class="p">:</span> <span class="n">MAXEVENTS</span><span class="p">,</span>
-                 <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
-    
-    <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceTriplet</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="n">load_args</span><span class="o">=</span><span class="n">load_args</span><span class="p">,</span>
-        <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
-
-    <span class="c1"># @@ Imputation @@</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-
-        <span class="n">special_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="c1"># possible special values</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Imputing data for special values </span><span class="si">{</span><span class="n">special_values</span><span class="si">}</span><span class="s1"> for variables in &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;imputation_param&quot;</span><span class="p">][</span><span class="s2">&quot;var&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Choose active dimensions</span>
-        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">features</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># Parameters</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;dim&quot;</span><span class="p">:</span>        <span class="n">dim</span><span class="p">,</span>
-            <span class="s2">&quot;values&quot;</span><span class="p">:</span>     <span class="n">special_values</span><span class="p">,</span>
-            <span class="s2">&quot;labels&quot;</span><span class="p">:</span>     <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
-            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span>  <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;algorithm&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;knn_k&quot;</span><span class="p">:</span>      <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;knn_k&#39;</span><span class="p">]</span>
-        <span class="p">}</span>
-        
-        <span class="c1"># NOTE, UPDATE NEEDED: one should save here &#39;imputer_trn&#39; to a disk -&gt; can be used with real data</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer_trn</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># No imputation, but fix spurious NaN / Inf</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.common: Process RAM usage: </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
-<span class="s2">        [total RAM in use: </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span></div>
-
-
-<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Loads the root file with signal events from MC and background from DATA.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -150,7 +73,7 @@
 
     <span class="c1"># -----------------------------------------------</span>
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;max_num_elements&quot;</span><span class="p">:</span> <span class="n">max_num_elements</span><span class="p">,</span>
+        <span class="s2">&quot;max_num_elements&quot;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span>
     <span class="p">}</span>
 
