@@ -116,22 +116,15 @@ def main():
     optimizer = {}
     scheduler = {}
     param     = {}
+
     for i in range(len(args['active_models'])):
 
         ID        = args['active_models'][i]
         param[ID] = args[f'{ID}_param']
 
         if param[ID]['train'] == 'torch_graph':
-
-            print(f'Training <{ID}> | {param[ID]} \n')
-
-            # If not zero, then force the same value for every model
-            if args['batch_train_param']['local_epochs'] != 0:
-                param[ID]['epochs'] = int(args['batch_train_param']['local_epochs'])
-
-            model[ID], device[ID], optimizer[ID], scheduler[ID] = \
-                get_model(gdata, args=args, param=param[ID])
-    # ----------------------------------------------------------
+            model[ID], device[ID], optimizer[ID], scheduler[ID] = get_model(gdata, args=args, param=param[ID])
+    # -------------------------------------------------------------------------
 
     visited    = False
     N_epochs   = args['batch_train_param']['epochs']
@@ -196,18 +189,17 @@ def main():
                     train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
 
-                    # Local epoch loop
-                    for local_epoch in range(param[ID]['epochs']):
-
-                        loss             = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
-                        
-                        trn_acc, trn_AUC = deep.graph.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
-                        val_acc, val_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
-                        
-                        scheduler[ID].step()
-                        
-                        print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}, local epoch: {local_epoch+1:03d}/{param[ID]['epochs']:03d}] "
-                            f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
+                    # Train
+                    loss             = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
+                    
+                    # Evaluate
+                    trn_acc, trn_AUC = deep.graph.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
+                    val_acc, val_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                    
+                    scheduler[ID].step()
+                    
+                    print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}"
+                        f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
                     
         ## Save each model per global epoch
         for ID in model.keys():

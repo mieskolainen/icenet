@@ -19,9 +19,9 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     Args:
         rootfile: a list of rootfiles
         tree:     tree name to open
-        key:      key to use to get the number of events, if None then automatic
+        key:      key (variable name) to use to get the number of events, if None then use the first one
         verbose:  verbose output print
-
+    
     Returns:
         number of events
     """

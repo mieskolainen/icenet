@@ -15,6 +15,14 @@ num_classes: 2        # Number of classes in MVA
 signalclass: 1      
 tree_name:   'ntuplizer/tree'
 
+
+# Batched "deep" training
+batch_train_param:
+  blocksize: 150000   # Maximum number of events simultaneously in RAM
+  epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
+  #num_cpu: null      # Set null for auto, or an integer for manual.
+
+
 # ---------------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
@@ -52,14 +60,6 @@ distillation:
   drains:
     # - xgb1
     # - add more here
-
-
-# Batched "deep" training
-batch_train_param:
-  blocksize: 50000              # Maximum number of events simultaneously in RAM
-  epochs: 50                    # Number of global epochs (1 epoch = one iteration over the full input dataset)
-  local_epochs: 1               # Number of local epochs per algorithm. If 0, then use the custom value per model.
-  num_cpu: null                 # Set null for auto, or an integer for manual.
 
 
 inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
