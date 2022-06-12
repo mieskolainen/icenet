@@ -98,7 +98,7 @@ def main():
     
     # Load stats
     num_events = iceroot.load_tree_stats(rootfile=root_files, tree=args['tree_name'])
-    print(f'Number of events per file: {num_events} (MAXEVENTS = {args["MAXEVENTS"]})')
+    print(f'Number of events per file: {num_events}')
 
     # =========================================================================
     # Load data for each re-weight PDFs
@@ -161,7 +161,7 @@ def main():
                 entry_stop  = block_ind[block][-1]
 
                 prints.printbar('=')
-                cprint(__name__ + f'.block {block+1} / {N_blocks} (events = {entry_stop - entry_start}) \n', 'yellow')
+                cprint(__name__ + f'.block {block+1} / {N_blocks} (events = {entry_stop - entry_start} | total = {num_events[f]}) \n', 'yellow')
 
                 # =========================================================================
                 # LOAD DATA

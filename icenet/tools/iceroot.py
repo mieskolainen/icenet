@@ -48,6 +48,34 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     return num_events
 
 
+def process_tree(events, ids=None, entry_start=0, entry_stop=None):
+    """
+    Process uproot tree
+
+    Args:
+        events:      uproot tree
+        ids:         variable names
+        entry_start: first event to consider
+        entry_stop:  last event to consider
+    
+    Returns:
+        numpy array (with jagged content)
+    """
+    if ids is None: ids = events.keys()
+
+    N      = len(events.arrays(ids[0]))
+    X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
+    X      = np.empty((len(X_test), len(ids)), dtype=object) 
+    
+    cprint( __name__ + f'.process_tree: Entry_start = {entry_start}, entry_stop = {entry_stop} | total = {N}', 'yellow')
+    
+    for j in tqdm(range(len(ids))):
+        x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
+        X[:,j] = np.asarray(x)
+
+    return X,ids
+
+
 def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
     """
     Load ROOT files wrapper function

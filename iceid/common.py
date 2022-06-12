@@ -30,7 +30,7 @@ from icenet.tools import aux
 from icenet.tools import plots
 from icenet.tools import prints
 from icenet.tools import process
-
+from icenet.tools import iceroot
 
 from iceid import graphio
 
@@ -43,10 +43,10 @@ from configs.eid.cuts import *
 
 
 def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop=None, args=None, library='np'):
-    """ Loads the root file.
+    """ Loads a single root file.
     
     Args:
-        root_path : paths to root files
+        root_path : paths to root file
         class_id  : class ids
     
     Returns:
@@ -60,37 +60,18 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     FILTERFUNC = globals()[args['filterfunc']]
     # -----------------------------------------------
 
-    ### From root trees
     print('\n')
-    cprint( __name__ + f'.load_root_file: Loading file {root_path} | entry_start = {entry_start}, entry_stop = {entry_stop}', 'yellow')
-    
+    cprint( __name__ + f'.common: Loading root file {root_path}', 'yellow')
     file   = uproot.open(root_path)
     events = file[args['tree_name']]
-
-    ### All variables
-    if ids is None:
-        ids = events.keys() #[x for x in events.keys()]
-    #VARS_scalar = [x.decode() for x in events.keys() if b'image_' not in x]
-    #print(ids)
     
     # Check is it MC (based on the first event)
-    X_test = events.arrays('is_mc', entry_start=entry_start, entry_stop=entry_stop)
-
-    isMC   = bool(X_test[0]['is_mc'])
-    N      = len(X_test)
-    print(__name__ + f'.load_root_file: isMC: {isMC}')
-
+    isMC   = bool(events.arrays('is_mc')[0]['is_mc'])
+    
     # --------------------------------------------------------------
-    # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
-
-    # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !
-    X = np.empty((N, len(ids)), dtype=object) 
-
-    for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
-        X[:,j] = np.asarray(x)
-    # --------------------------------------------------------------
+    X,ids = iceroot.process_tree(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
     Y = None
+    # --------------------------------------------------------------
 
     print(__name__ + f'common: X.shape = {X.shape}')
     io.showmem()
