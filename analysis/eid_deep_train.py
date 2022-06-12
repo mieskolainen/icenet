@@ -180,7 +180,9 @@ def main():
 
                     gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=ids, weights=val_weights,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-                
+                    
+                    io.showmem()
+
                 # =========================================================================
                 ### Train all model over this block of data
                 for ID in model.keys():

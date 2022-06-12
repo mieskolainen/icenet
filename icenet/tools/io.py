@@ -63,8 +63,7 @@ def glob_expand_files(datasets, datapath):
 
 
 def showmem(color='red'):
-    cprint(__name__ + f""".showmem: Process RAM usage: {process_memory_use():0.2f} GB 
-        [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
+    cprint(__name__ + f""".showmem: Process RAM usage: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
 
 
 def get_gpu_memory_map():
