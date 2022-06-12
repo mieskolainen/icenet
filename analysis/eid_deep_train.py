@@ -198,7 +198,7 @@ def main():
                     
                     scheduler[ID].step()
                     
-                    print(f"[epoch: {epoch+1:03d}/{N_epochs:03d}, block {block+1:03d}/{N_blocks:03d}"
+                    print(f"[epoch: {epoch+1:03d}/{N_epochs:03d} | file: {f} / {len(root_files)} | block: {block+1:03d}/{N_blocks:03d} | "
                         f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
                     
         ## Save each model per global epoch
