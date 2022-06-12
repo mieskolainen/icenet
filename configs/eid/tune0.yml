@@ -6,21 +6,22 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 300000     # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000      # Maximum total number of events (per root file) to process
 
 eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
 
 num_classes: 2        # Number of classes in MVA
 signalclass: 1      
+tree_name:   'ntuplizer/tree'
 
 # ---------------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
 
+  - gxgb0
   - cnn0
-
   - gnet0
 #  - gnet1
   - gnet0-logit-norm
@@ -35,7 +36,6 @@ active_models:
   - dmx0
 #  - dmlp
   - dbnf0
-  - gxgb0
 
 # ---------------------------------------------------------
 

@@ -54,7 +54,7 @@ distillation:
 inputvar: 'MVA_ID'               # Input variables, implemented under mvavars.py
 
 
-#targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
+targetfunc: null                 # Training target,    implemented under mctargets.py
 filterfunc: 'filter_standard'    # Training filtering, implemented under mcfilter.py
 cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
 

@@ -28,81 +28,7 @@ from configs.dqcd.cuts import *
 from configs.dqcd.filter import *
 
 
-def init(MAXEVENTS=None):
-    """ Initialize the input data.
-    
-    Args:
-        Implicit commandline and yaml file input.
-    
-    Returns:
-        jagged array data, arguments
-    """
-    
-    args, cli = process.read_config('./configs/dqcd')
-    #features  = globals()[args['imputation_param']['var']]
-    
-    
-    ### SET random seed
-    print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
-    np.random.seed(args['rngseed'])
-
-    # --------------------------------------------------------------------    
-    #print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
-    print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
-    #print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
-    # --------------------------------------------------------------------
-
-    ### Load data
-
-    # Background (0) and signal (1)
-    class_id  = [0,1]
-    
-    if MAXEVENTS is None:
-        MAXEVENTS = args['MAXEVENTS']
-    load_args = {'max_num_elements': MAXEVENTS,
-                 'args': args}
-
-    data = io.IceTriplet(func_loader=load_root_file, load_args=load_args, files=args['root_files'],
-        class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
-    
-    # @@ Imputation @@
-    if args['imputation_param']['active']:
-
-        special_values = args['imputation_param']['values'] # possible special values
-        print(__name__ + f': Imputing data for special values {special_values} for variables in <{args["imputation_param"]["var"]}>')
-
-        # Choose active dimensions
-        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
-
-        # Parameters
-        param = {
-            "dim":        dim,
-            "values":     special_values,
-            "labels":     data.ids,
-            "algorithm":  args['imputation_param']['algorithm'],
-            "fill_value": args['imputation_param']['fill_value'],
-            "knn_k":      args['imputation_param']['knn_k']
-        }
-        
-        # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with data
-        data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
-        data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
-        data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
-        
-    else:
-        True
-        # No imputation, but fix spurious NaN / Inf
-        #data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
-        #data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
-        #data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
-
-    cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
-        [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
-    
-    return data, args
-
-
-def load_root_file(root_path, ids=None, max_num_elements=None, class_id=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
@@ -117,7 +43,7 @@ def load_root_file(root_path, ids=None, max_num_elements=None, class_id=None, ar
     # -----------------------------------------------
 
     param = {
-        "max_num_elements": max_num_elements,
+        "max_num_elements": entry_stop,
         "args": args
     }
     
@@ -226,7 +152,6 @@ def splitfactor(data, args):
     jagged_ind, jagged_vars = io.pick_vars(data, globals()[args['inputvar_jagged']])
     
     jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
-    
     
     arg = {
         'scalar_vars':   scalar_ind,

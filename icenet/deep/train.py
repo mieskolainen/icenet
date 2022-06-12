@@ -602,7 +602,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         return model
 
 
-def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, args=None, param=None):
+def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None, args=None, param=None):
     """
     Train graph model + xgb hybrid model
 
@@ -635,14 +635,16 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
             break
         except:
             continue
-    
+        
     if Z == 0:
         raise Exception(__name__ + '.train_graph_xgb: Could not auto-detect latent space dimension')
+    else:
+        print(__name__  + f'.train_graph_xgb: Latent z-space dimension = {Z}')
     # -------------------------
-    
 
     ## Evaluate Graph model output
-    
+    graph_model.eval() # ! important
+
     x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
     x_val = np.zeros((len(data_val), Z + len(data_val[0].u)))
 
@@ -664,8 +666,9 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
 
     print(f'after extension: {x_trn.shape}')
 
+    ## Train xgboost
     dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
-    dtest     = xgboost.DMatrix(data = x_val, label = y_val)
+    dtest     = xgboost.DMatrix(data = x_val, label = y_val, weight = val_weights)
 
     evallist  = [(dtrain, 'train'), (dtest, 'eval')]
     results   = dict()
@@ -678,14 +681,12 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, a
     losses   = results['train']['logloss']
     trn_aucs = results['train']['auc']
     val_aucs = results['eval']['auc']
-
-
+    
     # Plot evolution
     plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
     fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
-
-
+    
     # ------------------------------------------------------------------------------------
     ## Plot feature importance (xgb does Not return it for all of them)
     fscores  = model.get_score(importance_type='gain')

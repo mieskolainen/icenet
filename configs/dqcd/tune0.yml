@@ -58,12 +58,13 @@ distillation:
 
 # ----------------------------------------------------
 
+inputvar:        null
 inputvar_scalar: 'MVA_SCALAR_ID' # Input variables, implemented under mvavars.py
 inputvar_jagged: 'MVA_JAGGED_ID'
 jagged_maxdim:   6
 
 
-#targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
+targetfunc: null                 # Training target,    implemented under mctargets.py
 filterfunc: 'filter_standard'    # Training filtering, implemented under mcfilter.py
 cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
 

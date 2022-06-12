@@ -12,14 +12,40 @@ import re
 from icenet.tools.icemap import icemap
 
 
-def load_tree_stats(rootfile, tree):
+def load_tree_stats(rootfile, tree, key=None, verbose=False):
+    """
+    Load the number of events in a list of rootfiles
 
-    events = uproot.open(rootfile)[tree]
+    Args:
+        rootfile: a list of rootfiles
+        tree:     tree name to open
+        key:      key to use to get the number of events, if None then automatic
+        verbose:  verbose output print
 
-    print(events)
-    print(events.name)
-    print(events.title)
-    #print(events.numentries)
+    Returns:
+        number of events
+    """
+
+    if type(rootfile) is not list:
+        rootfile = [rootfile]
+
+    num_events = np.zeros(len(rootfile), dtype=int)
+    
+    for i in range(len(rootfile)):
+        file     = uproot.open(rootfile[i])
+        events   = file[tree]
+        key_name = events.keys()[0] if key is None else key    
+
+        num_events[i] = len(events.arrays(key_name))
+        
+        if verbose:
+            print(__name__ + f'.load_tree_stats: {rootfile[i]}')
+            print(__name__ + f'.load_tree_stats: keys(): {events.keys()}')
+            print(__name__ + f'.load_tree_stats: values(): {events.values()}')
+        
+        file.close()
+
+    return num_events
 
 
 def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):

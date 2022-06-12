@@ -33,6 +33,8 @@ from icenet.tools import aux_torch
 from icenet.tools import reweight
 from icenet.tools import plots
 from icenet.tools import prints
+from icenet.tools import iceroot
+
 
 # deep learning
 from icenet.deep  import train
@@ -57,10 +59,10 @@ def get_model(X, Y, ids, weights, features, args, param):
 
     # Get model
     netparam, conv_type = train.getgraphparam(data_trn=gdata['trn'], num_classes=args['num_classes'], param=param)
-    model    = train.getgraphmodel(conv_type=conv_type, netparam=netparam)
+    model               = train.getgraphmodel(conv_type=conv_type, netparam=netparam)
 
     # CPU or GPU
-    model, device = deep.dopt.model_to_cuda(model=model, device_type=param['device'])
+    model, device       = deep.dopt.model_to_cuda(model=model, device_type=param['device'])
 
     # Count the number of parameters
     cprint(__name__ + f'.graph_train: Number of free parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
@@ -72,13 +74,13 @@ def get_model(X, Y, ids, weights, features, args, param):
     return model, device, optimizer, scheduler
 
 
-def compute_reweight(root_files, N_events, args):
+def compute_reweight(root_files, num_events, args):
 
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    entry_stop   = np.min([args['reweight_param']['maxevents'], N_events[index]])
-    X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id = [0,1], entry_stop=entry_stop, args=args, library='np')
+    entry_stop   = np.min([args['reweight_param']['maxevents'], num_events[index]])
+    X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id=[0,1], entry_stop=entry_stop, args=args, library='np')
 
     # Compute re-weights
     _, pdf = reweight.compute_ND_reweights(x=X, y=Y, ids=ids, args=args['reweight_param'])
@@ -97,28 +99,14 @@ def main():
     # Create save path
     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
     
-
-    # Find number of events in each file
-    N_events = np.zeros(len(root_files), dtype=int)
-
-    for i in range(len(root_files)):
-        file   = uproot.open(root_files[i])
-        events = file["ntuplizer"]["tree"]
-
-        X      = events.arrays('is_mc')
-        N_events[i] = len(X)
-        file.close()
-        
-        # ** Apply MAXEVENTS cutoff for each file **
-        N_events[i] = np.min([N_events[i], args['MAXEVENTS']])
-
-    print(f'Number of events per file: {N_events} (MAXEVENTS = {args["MAXEVENTS"]})')
-
-
+    # Load stats
+    num_events = iceroot.load_tree_stats(rootfile=root_files, tree=args['tree_name'])
+    print(f'Number of events per file: {num_events} (MAXEVENTS = {args["MAXEVENTS"]})')
+    
     # =========================================================================
     # Load data for each re-weight PDFs
 
-    pdf,X,Y,ids = compute_reweight(root_files=root_files, N_events=N_events, args=args)
+    pdf,X,Y,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
 
     # =========================================================================
     ### Initialize all models
@@ -158,11 +146,11 @@ def main():
         for f in range(len(root_files)):
 
             prints.printbar('=')
-            cprint(__name__ + f'.file {f+1} / {len(root_files)} (size = {N_events[f]}) \n', 'yellow')
+            cprint(__name__ + f'.file {f+1} / {len(root_files)} (size = {num_events[f]}) \n', 'yellow')
             
             # ------------------------------------------------------------
-            N_blocks   = int(np.ceil(N_events[f] / args['batch_train_param']['blocksize']))
-            block_ind  = aux.split_start_end(range(N_events[f]), N_blocks)
+            N_blocks   = int(np.ceil(num_events[f] / args['batch_train_param']['blocksize']))
+            block_ind  = aux.split_start_end(range(num_events[f]), N_blocks)
             # ------------------------------------------------------------
 
             ### Over blocks of data from this file

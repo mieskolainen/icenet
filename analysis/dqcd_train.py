@@ -30,15 +30,25 @@ from icenet.tools import process
 
 # icedqcd
 from icedqcd import common
+from configs.dqcd.mvavars import *
 
 
 # Main function
 #
 def main() :
 
-    ### Get input
-    data, args = common.init()
+    args, cli = process.read_config(config_path='./configs/dqcd')
+    
+    ### Load data full in memory
+    data      = io.IceTriplet(func_loader=common.load_root_file, files=args['root_files'],
+                    load_args={'entry_start': 0, 'entry_stop': args['MAXEVENTS'], 'args': args},
+                    class_id=[0,1], frac=args['frac'], rngseed=args['rngseed'])
 
+    ### Imputation
+    #imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
+    #features  = globals()[args['imputation_param']['var']]
+    #data, _   = process.impute_datasets(data=data, features=features, args=args['imputation_param'], imputer=imputer)
+    
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)
     

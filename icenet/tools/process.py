@@ -33,16 +33,16 @@ roc_mstats    = []
 roc_labels    = []
 # **************************
 
-
 def read_config(config_path='./configs/xyz'):
     """
     Commandline and YAML configuration reader
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config",   type = str, default='tune0')
-    parser.add_argument("--datapath", type = str, default=".")
-    parser.add_argument("--datasets", type = str, default="*")
+    parser.add_argument("--config",    type = str, default='tune0')
+    parser.add_argument("--datapath",  type = str, default=".")
+    parser.add_argument("--datasets",  type = str, default="*")
+    parser.add_argument("--maxevents", type = int, default=None)
 
     cli = parser.parse_args()
 
@@ -56,7 +56,8 @@ def read_config(config_path='./configs/xyz'):
         except yaml.YAMLError as exc:
             print(exc)
             
-    args['config'] = cli.config
+    args['config']   = cli.config
+    args['modeldir'] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
 
     # -------------------------------------------------------------------
     ### Set image and graph constructions on/off
@@ -86,7 +87,55 @@ def read_config(config_path='./configs/xyz'):
     print('')
     print(" torch.__version__: " + torch.__version__)
 
+    ### SET random seed
+    print(__name__ + f'.read_config: Setting random seed: {args["rngseed"]}')
+    np.random.seed(args['rngseed'])
+
+    # --------------------------------------------------------------------    
+    print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
+    print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
+    print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
+    # --------------------------------------------------------------------
+
     return args, cli
+
+
+def impute_datasets(data, features, args, imputer=None):
+    """
+    Dataset imputation
+    """
+
+    imputer_trn = None
+
+    if args['active']:
+
+        special_values = args['values'] # possible special values
+        print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
+
+        # Choose active dimensions
+        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
+
+        # Parameters
+        param = {
+            "dim":        dim,
+            "values":     special_values,
+            "labels":     data.ids,
+            "algorithm":  args['algorithm'],
+            "fill_value": args['fill_value'],
+            "knn_k":      args['knn_k']
+        }
+        
+        data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=imputer,     **param)
+        data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
+        data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
+        
+    else:
+        # No imputation, but fix spurious NaN / Inf
+        data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
+        data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
+        data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
+
+    return data, imputer_trn
 
 
 def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_weights=None, val_weights=None, args=None) :
@@ -218,9 +267,10 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
         elif param['train'] == 'torch_image_vector':
             train.train_torch_image_vector(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, 
                 trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)
-            
+        
         elif param['train'] == 'graph_xgb':
-            train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)  
+            train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], 
+                trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)  
         
         elif param['train'] == 'flr':
             train.train_flr(data=data, trn_weights=trn_weights, args=args, param=param)

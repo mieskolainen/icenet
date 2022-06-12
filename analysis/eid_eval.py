@@ -9,15 +9,19 @@ import sys
 sys.path.append(".")
 
 import numpy as np
+import pickle
 
 # icenet
+from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import process
 from icenet.tools import reweight
 
+
 # iceid
 from iceid import common
 from iceid import graphio
+from configs.eid.mvavars import *
 
 
 def ele_mva_classifier(data, data_tensor=None, data_kin=None, data_graph=None, weights=None, args=None):
@@ -41,9 +45,18 @@ def ele_mva_classifier(data, data_tensor=None, data_kin=None, data_graph=None, w
 #
 def main() :
 
-    ## Get input
-    data, args, features = common.init()
-    
+    args, cli = process.read_config(config_path='./configs/eid')
+
+    ### Load data full in memory
+    data      = io.IceTriplet(func_loader=common.load_root_file, files=args['root_files'],
+                    load_args={'entry_start': 0, 'entry_stop': args['MAXEVENTS'], 'args': args},
+                    class_id=[0,1], frac=args['frac'], rngseed=args['rngseed'])
+
+    ### Imputation
+    imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
+    features  = globals()[args['imputation_param']['var']]
+    data, _   = process.impute_datasets(data=data, features=features, args=args['imputation_param'], imputer=imputer)
+
     ### Compute reweighting weights for the evaluation (before split&factor !)
     if args['eval_reweight']:
         tst_weights,_ = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.ids, args=args['reweight_param'])
@@ -65,7 +78,6 @@ def main() :
     process.roc_mstats.append(met_elemva)
     process.roc_labels.append('elemva15')
     # ----------------------------
-
     
     ## Split and factor data
     data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
@@ -77,5 +89,4 @@ def main() :
 
 
 if __name__ == '__main__' :
-
     main()

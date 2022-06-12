@@ -7,9 +7,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import xgboost
-from termcolor import colored
+import psutil
 
+from termcolor import colored, cprint
 from icenet.tools import aux
+
+
+def print_RAM_usage():
+    """ 
+    """
+    cprint(__name__ + f""".prints: Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
 
 
 def printbar(marker='-', marks = 75):

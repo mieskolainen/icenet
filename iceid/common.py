@@ -42,151 +42,6 @@ from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
-def init(MAXEVENTS=None):
-    """ Initialize electron ID data.
-
-    Args:
-        Implicit commandline and yaml file input.
-    
-    Returns:
-        jagged array data, arguments
-    """
-    
-    args, cli = process.read_config(config_path='./configs/eid')
-    features  = globals()[args['imputation_param']['var']]
-    
-    ### SET random seed
-    print(__name__ + f'.init: Setting random seed: {args["rngseed"]}')
-    np.random.seed(args['rngseed'])
-    
-    # --------------------------------------------------------------------    
-    print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
-    print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
-    print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
-    # --------------------------------------------------------------------
-
-    ### Load data
-
-    # Background (0) and signal (1)
-    class_id = [0,1]
-
-    files = io.glob_expand_files(datapath=cli.datapath, datasets=cli.datasets)
-    args['root_files'] = files
-
-    if MAXEVENTS is None:
-        MAXEVENTS = args['MAXEVENTS']
-    load_args = {'entry_stop': MAXEVENTS,
-                 'args': args}
-
-    data = io.IceTriplet(func_loader=load_root_file, files=files, load_args=load_args,
-        class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
-    
-    # @@ Imputation @@
-    if args['imputation_param']['active']:
-
-        special_values = args['imputation_param']['values'] # possible special values
-        print(__name__ + f': Imputing data for special values {special_values} for variables in <{args["imputation_param"]["var"]}>')
-
-        # Choose active dimensions
-        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
-
-        # Parameters
-        param = {
-            "dim":        dim,
-            "values":     special_values,
-            "labels":     data.ids,
-            "algorithm":  args['imputation_param']['algorithm'],
-            "fill_value": args['imputation_param']['fill_value'],
-            "knn_k":      args['imputation_param']['knn_k']
-        }
-        
-        # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with data
-        data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
-        data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
-        data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
-        
-    else:
-        # No imputation, but fix spurious NaN / Inf
-        data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
-        data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
-        data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
-
-    cprint(__name__ + f""".common: Process RAM usage: {io.process_memory_use():0.2f} GB 
-        [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
-
-    return data, args, features
-
-
-def splitfactor(data, args):
-    """
-    Split electron ID data into different datatypes.
-    
-    Args:
-        data:        jagged numpy arrays
-        args:        arguments dictionary
-    
-    Returns:
-        data:        scalar (vector) data
-        data_tensor: tensor data (images)
-        data_kin:    kinematic data
-    """
-    
-    ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.ids     = k_vars
-
-    data_tensor      = None
-
-    if args['image_on']:
-
-        ### Pick active jagged array / "image" variables out
-        j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
-        
-        data_image       = copy.deepcopy(data)
-        data_image.trn.x = data.trn.x[:, j_ind]
-        data_image.val.x = data.val.x[:, j_ind]
-        data_image.tst.x = data.tst.x[:, j_ind]
-        data_image.ids  = j_vars 
-
-        # Use single channel tensors
-        if   args['image_param']['channels'] == 1:
-            xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
-
-        # Use multichannel tensors
-        elif args['image_param']['channels'] == 2:
-            xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
-                    ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
-        else:
-            raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
-
-        eta_binedges = args['image_param']['eta_bins']
-        phi_binedges = args['image_param']['phi_bins']    
-
-        # Pick tensor data out
-        cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
-
-        data_tensor = {}
-        data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-    
-
-    ### Pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
-    
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids      = s_vars
-    
-    return data, data_tensor, data_kin
-
-
 def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop=None, args=None, library='np'):
     """ Loads the root file.
     
@@ -211,11 +66,8 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     cprint( __name__ + f'.load_root_file: entry_start = {entry_start}, entry_stop = {entry_stop}')
 
     file   = uproot.open(root_path)
-    events = file["ntuplizer"]["tree"]
-    
+    events = file[args['tree_name']]
     print(events)
-    print(events.name)
-    print(events.title)
 
     ### All variables
     if ids is None:
@@ -287,6 +139,74 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     return X, Y, ids
 
 
+def splitfactor(data, args):
+    """
+    Split electron ID data into different datatypes.
+    
+    Args:
+        data:        jagged numpy arrays
+        args:        arguments dictionary
+    
+    Returns:
+        data:        scalar (vector) data
+        data_tensor: tensor data (images)
+        data_kin:    kinematic data
+    """
+    
+    ### Pick kinematic variables out
+    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
+    
+    data_kin         = copy.deepcopy(data)
+    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
+    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
+    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
+    data_kin.ids     = k_vars
+
+    data_tensor      = None
+
+    if args['image_on']:
+
+        ### Pick active jagged array / "image" variables out
+        j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
+        
+        data_image       = copy.deepcopy(data)
+        data_image.trn.x = data.trn.x[:, j_ind]
+        data_image.val.x = data.val.x[:, j_ind]
+        data_image.tst.x = data.tst.x[:, j_ind]
+        data_image.ids  = j_vars 
+
+        # Use single channel tensors
+        if   args['image_param']['channels'] == 1:
+            xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+
+        # Use multichannel tensors
+        elif args['image_param']['channels'] == 2:
+            xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
+                    ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
+        else:
+            raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
+
+        eta_binedges = args['image_param']['eta_bins']
+        phi_binedges = args['image_param']['phi_bins']    
+
+        # Pick tensor data out
+        cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
+
+        data_tensor = {}
+        data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+        data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+        data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
+    
+
+    ### Pick active scalar variables out
+    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    
+    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
+    data.val.x    = data.val.x[:, s_ind].astype(np.float)
+    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
+    data.ids      = s_vars
+    
+    return data, data_tensor, data_kin
 
 
 # ========================================================================

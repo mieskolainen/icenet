@@ -31,22 +31,31 @@ from icenet.tools import process
 # iceid
 from iceid import common
 from iceid import graphio
+from configs.eid.mvavars import *
 
 
 # Main function
 #
 def main() :
     
-    ### Get input
-    data, args, features = common.init()
-    
+    args, cli     = process.read_config(config_path='./configs/eid')
+
+    ### Load data full in memory
+    data          = io.IceTriplet(func_loader=common.load_root_file, files=args['root_files'],
+                    load_args={'entry_start': 0, 'entry_stop': args['MAXEVENTS'], 'args': args},
+                    class_id=[0,1], frac=args['frac'], rngseed=args['rngseed'])
+
+    ### Imputation
+    features      = globals()[args['imputation_param']['var']]
+    data, imputer = process.impute_datasets(data=data, features=features, args=args['imputation_param'], imputer=None)
+    pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))    
+
     ### Print ranges
     #prints.print_variables(X=data.trn.x, ids=data.ids)
 
     ### Compute reweighting weights
     trn_weights,_ = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.ids, args=args['reweight_param'])
     val_weights,_ = reweight.compute_ND_reweights(x=data.val.x, y=data.val.y, ids=data.ids, args=args['reweight_param'])
-    
     
     ### Plot some kinematic variables
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/')
