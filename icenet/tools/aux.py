@@ -1,6 +1,6 @@
 # Auxialary functions
 # 
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import math
@@ -18,13 +18,6 @@ import scipy.special as special
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
-
-def makedir(targetdir, exist_ok=True):
-    """
-    Make directory
-    """
-    os.makedirs(targetdir, exist_ok = exist_ok)
-    return targetdir
 
 #@numba.njit
 def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0), library='ak'):
@@ -93,6 +86,97 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
             k += d
 
     return mat
+
+
+def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
+    """
+    Args:
+        
+        X          : input data (samples x dimensions) with jagged structure
+        ids        : all variable names
+        xyz        : array of (x,y,z) channel triplet strings such as [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
+        x_binedges
+        y_binedges : arrays of bin edges
+    
+    Returns:
+        T : tensor of size (samples x channels x rows x columns)
+    """
+
+    # Samples x Channels x Rows x Columns
+    T = np.zeros((X.shape[0], len(xyz), len(x_binedges)-1, len(y_binedges)-1), dtype=float)
+
+    # Choose targets
+    for c in range(len(xyz)):
+        ind = [ids.index(x) for x in xyz[c]]
+
+        # Loop over all events
+        for i in tqdm(range(X.shape[0])):
+            T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
+                x_binedges=x_binedges, y_binedges=y_binedges)
+
+    print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
+
+    return T
+
+
+def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
+    """
+    Array representation summed to matrix.
+    
+    Args:
+        x_arr :      array of [x values]
+        y_arr :      array of [y values]
+        z_arr :      array of [z values]
+        x_binedges : array of binedges
+        y_binedges : array of binedges
+        
+    Returns:
+        Matrix output
+    """
+
+    x_ind = x2ind(x=x_arr, binedges=x_binedges)
+    y_ind = x2ind(x=y_arr, binedges=y_binedges)
+
+    # Loop and sum (accumulate)
+    A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=float)
+    try:
+        for i in range(len(x_ind)):
+            A[x_ind[i], y_ind[i]] += z_arr[i]
+    except:
+        print(__name__ + f'.arrays2matrix: not valid input (returning 0-matrix)')
+
+    return A
+
+
+def x2ind(x, binedges) :
+    """ Return histogram bin indices for data in x, which needs to be an array [].
+    Args:
+        x:        data to be classified between bin edges
+        binedges: histogram bin edges
+    Returns:
+        inds:     histogram bin indices
+    """
+    NBINS = len(binedges) - 1
+    inds = np.digitize(x, binedges, right=True) - 1
+
+    if len(x) > 1:
+        inds[inds >= NBINS] = NBINS-1
+        inds[inds < 0] = 0
+    else:
+        if inds < 0:
+            inds = 0
+        if inds >= NBINS:
+            inds = NBINS - 1
+
+    return inds
+
+
+def makedir(targetdir, exist_ok=True):
+    """
+    Make directory
+    """
+    os.makedirs(targetdir, exist_ok = exist_ok)
+    return targetdir
 
 
 def split(a, n):
@@ -412,25 +496,6 @@ def binaryvec2int(X):
     return Y
 
 
-def weight2onehot(weights, Y, N_classes):
-    """
-    Weights into one-hot encoding.
-    Args:
-        weights   : array of weights
-        Y         : targets
-        N_classes : number of classes
-
-    """
-    one_hot_weights = np.zeros((len(weights), N_classes))
-    for i in range(N_classes):
-        try:
-            one_hot_weights[Y == i, i] = weights[Y == i]
-        except:
-            print(__name__ + f'weight2onehot: Failed with class = {i} (zero samples)')
-    
-    return one_hot_weights
-
-
 def int2onehot(Y, N_classes):
     """ Integer class vector to class "one-hot encoding"
 
@@ -489,88 +554,6 @@ def pick_ind(x, minmax):
         indices
     """
     return (minmax[0] <= x) & (x < minmax[1])
-
-
-def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
-    """
-    Args:
-        
-        X          : input data (samples x dimensions) with jagged structure
-        ids        : all variable names
-        xyz        : array of (x,y,z) channel triplet strings such as [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
-        x_binedges
-        y_binedges : arrays of bin edges
-    
-    Returns:
-        T : tensor of size (samples x channels x rows x columns)
-    """
-
-    # Samples x Channels x Rows x Columns
-    T = np.zeros((X.shape[0], len(xyz), len(x_binedges)-1, len(y_binedges)-1), dtype=np.float)
-
-    # Choose targets
-    for c in range(len(xyz)):
-        ind = [ids.index(x) for x in xyz[c]]
-
-        # Loop over all events
-        for i in tqdm(range(X.shape[0])):
-            T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
-                x_binedges=x_binedges, y_binedges=y_binedges)
-
-    print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
-
-    return T
-
-
-def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
-    """
-    Array representation summed to matrix.
-    
-    Args:
-        x_arr :      array of [x values]
-        y_arr :      array of [y values]
-        z_arr :      array of [z values]
-        x_binedges : array of binedges
-        y_binedges : array of binedges
-        
-    Returns:
-        Matrix output
-    """
-
-    x_ind = x2ind(x=x_arr, binedges=x_binedges)
-    y_ind = x2ind(x=y_arr, binedges=y_binedges)
-
-    # Loop and sum
-    A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=np.float)
-    try:
-        for i in range(len(x_ind)):
-            A[x_ind[i], y_ind[i]] += z_arr[i]
-    except:
-        print(__name__ + f'.arrays2matrix: not valid input')
-
-    return A
-
-def x2ind(x, binedges) :
-    """ Return histogram bin indices for data in x, which needs to be an array [].
-    Args:
-        x:        data to be classified between bin edges
-        binedges: histogram bin edges
-    Returns:
-        inds:     histogram bin indices
-    """
-    NBINS = len(binedges) - 1
-    inds = np.digitize(x, binedges, right=True) - 1
-
-    if len(x) > 1:
-        inds[inds >= NBINS] = NBINS-1
-        inds[inds < 0] = 0
-    else:
-        if inds < 0:
-            inds = 0
-        if inds >= NBINS:
-            inds = NBINS - 1
-
-    return inds
 
 
 def hardclass(y_soft, valrange = [0,1]):

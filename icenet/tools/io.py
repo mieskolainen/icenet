@@ -1,8 +1,7 @@
 # Input data containers and memory management
 # 
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
-
 
 import numpy as np
 import numba
@@ -21,7 +20,6 @@ from sklearn.impute import SimpleImputer
 
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-
 
 # Command line arguments
 from glob import glob
@@ -157,23 +155,43 @@ class fastarray1:
         self.size = 0
 
 
-class DATASET:
+def pick_vars(data, set_of_vars):
+    """ Choose the active set of input variables.
+
+    Args:
+        data:        IceTriplet type object
+        set_of_vars: Variables to pick
+    Returns:
+        newind:      Chosen indices
+        newvars:     Chosen variables
+    """
+    
+    newind  = np.where(np.isin(data.ids, set_of_vars))
+    newind  = np.array(newind).flatten()
+    newvars = []
+    for i in newind :
+        newvars.append(data.ids[i])
+
+    return newind, newvars
+
+
+class IceTriplet:
     """ Main class for datasets
     """
-    def __init__(self, func_loader, files, frac, rngseed, load_args, class_id = []):
+    def __init__(self, func_loader, frac, rngseed, load_args, files=None, class_id=None):
         
-        if (class_id == []):
+        if class_id is None:
             class_id = [0,1] # By default two classes [0,1]
         
-        if (files == []):
-            cprint(__name__ + f'.DATASET.__init__: files = [], relying on func_loader()', 'red')
+        if files is None:
+            cprint(__name__ + f'.IceTriplet.__init__: files is None, relying on func_loader()', 'red')
             files = ['dummy.root'] # Will be defined in func_loader
         else:
-            cprint(__name__ + f'.DATASET.__init__: files = {files}', 'green')
+            cprint(__name__ + f'.IceTriplet.__init__: files = {files}', 'green')
 
-        self.trn = Data()
-        self.val = Data()
-        self.tst = Data()
+        self.trn = IceXYW()
+        self.val = IceXYW()
+        self.tst = IceXYW()
         
         for f in files :
             X, Y, self.ids = func_loader(root_path=f, class_id=class_id, **load_args)
@@ -187,18 +205,20 @@ class DATASET:
         print(__name__ + f'.__init__: n_dims = {self.n_dims}')
 
 
-class Data:
+class IceXYW:
     """
     Args:
         x : data                [N vectors x D dimensions]
-        y : target output data  [N vectors]
+        y : target output data  [N scalars or vectors]
+        w : weight              [N scalars]
     """
     
     # constructor
-    def __init__(self, x = np.array([]), y = np.array([])):
+    def __init__(self, x = np.array([]), y = np.array([]), w = None):
         self.N = x.shape[0]
         self.x = x
-        self.y = y.flatten()
+        self.y = y
+        self.w = w
 
     # + operator
     def __add__(self, other):
@@ -207,9 +227,14 @@ class Data:
             return other
 
         x = np.concatenate((self.x, other.x), axis=0)
-        y = np.concatenate((self.y, other.y.flatten()), axis=0)
+        y = np.concatenate((self.y, other.y), axis=0)
 
-        return Data(x, y)
+        if self.w is not None:
+            w = np.concatenate((self.w, other.w), axis=0)
+        else:
+            w = None
+
+        return IceXYW(x, y, w)
 
     # += operator
     def __iadd__(self, other):
@@ -218,8 +243,13 @@ class Data:
             return other
 
         self.x = np.concatenate((self.x, other.x), axis=0)
-        self.y = np.concatenate((self.y, other.y.flatten()), axis=0)
+        self.y = np.concatenate((self.y, other.y), axis=0)
+
+        if self.w is not None:
+            self.w = np.concatenate((self.w, other.w), axis=0)
+
         self.N = len(self.y)
+
         return self
 
     # filter operator
@@ -227,20 +257,46 @@ class Data:
 
         x = self.x[self.y == classid]
         y = self.y[self.y == classid]
+
+        if self.w is not None:
+            w = self.w[self.w == classid]
+        else:
+            w = None
+
+        return IceXYW(x, y, w)
+
+    # Permute events
+    def permute(self, permutation):
         
-        return Data(x, y)
+        self.x = self.x[permutation]
+        self.y = self.y[permutation]
+
+        if self.w is not None:
+            self.w = self.w[permutation]
+        else:
+            self.w = None
+
+        return self
 
 
-def split_data(X, Y, frac, rngseed, class_id = []):
-    """ Split into [A = train & validation] + [B = test] sets
+def split_data(X, Y, frac, rngseed, class_id=None):
+    """ Split machine learning data into [A = train & validation] + [B = test] sets
+    
+    Args:
+        X:         data matrix
+        Y:         target matrix
+        frac:      fraction
+        rngseed:   random seed
+        class_id:  class ids array, e.g. [0,1], if not None, splitting based on that array
     """
 
     ### Permute events to have random mixing between classes (a must!)
     np.random.seed(int(rngseed)) # seed it!
     randi = np.random.permutation(X.shape[0])
     X = X[randi]
-    Y = Y[randi].squeeze() # Squeeze, so it is for sure a single dimensional
-    
+    Y = Y[randi]
+    # --------------------------------------------------------------------
+
     N     = X.shape[0]
     N_A   = round(N * frac)
     N_B   = N - N_A
@@ -258,51 +314,45 @@ def split_data(X, Y, frac, rngseed, class_id = []):
     Y_val = Y[N_trn:N_trn + N_val]
 
     # B. Test
-    X_tst = X[N-N_tst:N]
-    Y_tst = Y[N-N_tst:N]
+    X_tst = X[N - N_tst:N]
+    Y_tst = Y[N - N_tst:N]
 
-    trn = Data()
-    val = Data()
-    tst = Data()
+    trn = IceXYW()
+    val = IceXYW()
+    tst = IceXYW()
 
     # No spesific class selected
-    if (class_id == []) : 
+    if class_id is None: 
 
-        trn = Data(x = X_trn, y = Y_trn)
-        val = Data(x = X_val, y = Y_val)
-        tst = Data(x = X_tst, y = Y_tst)
+        trn = IceXYW(x = X_trn, y = Y_trn)
+        val = IceXYW(x = X_val, y = Y_val)
+        tst = IceXYW(x = X_tst, y = Y_tst)
     
     # Loop over all classes selected
     else:
 
         for c in class_id : 
             ind  = (Y_trn[:,...] == c)
-            trn += Data(x = X_trn[ind], y = np.ones(ind.sum())*c)
+            trn += IceXYW(x = X_trn[ind], y = np.ones(ind.sum())*c)
 
             ind  = (Y_val[:,...] == c)
-            val += Data(x = X_val[ind], y = np.ones(ind.sum())*c)
+            val += IceXYW(x = X_val[ind], y = np.ones(ind.sum())*c)
 
             ind  = (Y_tst[:,...] == c)
-            tst += Data(x = X_tst[ind], y = np.ones(ind.sum())*c)
+            tst += IceXYW(x = X_tst[ind], y = np.ones(ind.sum())*c)
 
-    ### Permute events once again to have random mixing between classes
-    def mix(data):
-        randi  = np.random.permutation(data.x.shape[0])
-        data.x = data.x[randi]
-        data.y = data.y[randi]
-        return data
-    
-    trn = mix(trn)
-    val = mix(val)
-    tst = mix(tst)
-    
     print(__name__ + ".split_data: fractions [train: {:0.3f}, validate: {:0.3f}, test: {:0.3f}]".
         format(X_trn.shape[0]/ N, X_val.shape[0]/ N, X_tst.shape[0] / N))
+
+    # Finally, re-permutate once more (needed if class-wise selection was done)
+    trn = trn.permute(np.random.permutation(trn.N))
+    val = val.permute(np.random.permutation(val.N))
+    tst = tst.permute(np.random.permutation(tst.N))
 
     return trn, val, tst
 
 
-def impute_data(X, imputer=None, dim=[], values=[-999], labels=[], algorithm='iterative', fill_value=0, knn_k=6):
+def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm='iterative', fill_value=0, knn_k=6):
     """ Data imputation (treatment of missing values, Nan and Inf).
     
     Args:
@@ -315,13 +365,13 @@ def impute_data(X, imputer=None, dim=[], values=[-999], labels=[], algorithm='it
         knn_k     : knn k-nearest neighbour parameter
         
     Returns:
-        X       : Imputed output data
+        X         : Imputed output data
     """
     
-    if dim == []:
+    if dim is None:
         dim = np.arange(X.shape[1])
 
-    if labels == []:
+    if labels is None:
         labels = np.zeros(X.shape[1])
 
     N = X.shape[0]
@@ -486,16 +536,3 @@ def apply_madscore(X : np.array, X_m, X_mad, EPS=1E-12):
     for i in range(len(X_m)):
         Y[:,i] = scale * (X[:,i] - X_m[i]) / (X_mad[i] + EPS)
     return Y
-
-
-def pick_vars(data : DATASET, set_of_variables):
-    """ Choose the active set of input variables.
-    """
-
-    newind  = np.where(np.isin(data.ids, set_of_variables))
-    newind  = np.array(newind).flatten()
-    newvars = []
-    for i in newind :
-        newvars.append(data.ids[i])
-
-    return newind, newvars

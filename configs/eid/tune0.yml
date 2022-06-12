@@ -6,21 +6,21 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 10000000     # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000     # Maximum total number of events (per root file) to process
 
 eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
 
 num_classes: 2        # Number of classes in MVA
-
+signalclass: 1      
 
 # ---------------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
 
-#  - dmlp
-#  - cnn0 # NOT WORKING CURRENTLY --> FIX!
+  - cnn0
+
   - gnet0
 #  - gnet1
   - gnet0-logit-norm
@@ -33,7 +33,8 @@ active_models:
   - lgr0
 #  - xtx0
   - dmx0
-#  - dbnf0
+#  - dmlp
+  - dbnf0
 #  - gxgb0
 
 # ---------------------------------------------------------
@@ -652,7 +653,7 @@ xgb0_param:
 # Deep MLP
 dmlp_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'DMLP'
   raytune:  null
 
@@ -687,7 +688,7 @@ dmlp_param:
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'LGR'
   raytune:  null
 
@@ -718,11 +719,11 @@ lgr0_param:
   readmode: -1                 # -1 is the last saved epoch
 
 
-# Convolutional Neural Net
+# Convolutional Neural Net + MAXOUT MLP
 cnn0_param:
-  train:   'torch_image'
-  predict: 'torch_image'
-  label:   'CNN'
+  train:   'torch_image_vector'
+  predict: 'torch_image_vector'
+  label:   'CNN+MAXO'
   raytune:  null
 
   # Model
@@ -791,7 +792,7 @@ xtx0_param:
 # Deep MAXOUT network
 dmx0_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'MAXO'
   raytune:  null
 

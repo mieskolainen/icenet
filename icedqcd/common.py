@@ -62,8 +62,8 @@ def init(MAXEVENTS=None):
     load_args = {'max_num_elements': MAXEVENTS,
                  'args': args}
 
-    data      = io.DATASET(func_loader=load_root_file, load_args=load_args, files=args['root_files'], class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
-    
+    data = io.IceTriplet(func_loader=load_root_file, load_args=load_args, files=args['root_files'],
+        class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
     
     # @@ Imputation @@
     if args['imputation_param']['active']:
@@ -102,7 +102,7 @@ def init(MAXEVENTS=None):
     return data, args
 
 
-def load_root_file(root_path, ids=None, max_num_elements=None, class_id = [], args=None):
+def load_root_file(root_path, ids=None, max_num_elements=None, class_id=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:

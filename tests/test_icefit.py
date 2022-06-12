@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append(".")
 
-import iceplot
+from iceplot import iceplot
 
 # numpy
 import numpy as onp # original numpy

@@ -3,9 +3,8 @@
 # N.B. One needs to have a classifier with
 # predict: 'torch_image' turned on in the steering .json file.
 # (otherwise no image tensor input is processed)
-#
-#
-# Mikael Mieskolainen, 2021
+# 
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 # icenet system paths
@@ -31,6 +30,7 @@ from termcolor import cprint
 # matplotlib
 from matplotlib import pyplot as plt
 
+from icenet.tools import aux
 from icenet.tools import plots
 from icenet.algo import nmf
 
@@ -44,7 +44,7 @@ import numpy as np
 # Main function
 #
 def main() :
-
+    
     ### Get input
     data, args, features = common.init(MAXEVENTS=30000)
     
@@ -72,7 +72,7 @@ def main() :
 
         # Non-Negative matrix factorization
         W,H = nmf.ML_nmf(V=V_new, k=k, threshold=1e-5, maxiter=300)
-
+        
         # Loop over "basis" components
         for i in range(k):
             B = W[:,i].reshape(V.shape[1],V.shape[2])
@@ -138,9 +138,9 @@ def main() :
         ax.set_xlabel('$\\eta$')
         ax.set_ylabel('$\\phi$ [rad]')
         
-        pt  = data_kin.trn.x[i, data_kin.VARS.index("trk_pt")]
-        eta = data_kin.trn.x[i, data_kin.VARS.index("trk_eta")]
-        phi = data_kin.trn.x[i, data_kin.VARS.index("trk_phi")]
+        pt  = data_kin.trn.x[i, data_kin.ids.index("trk_pt")]
+        eta = data_kin.trn.x[i, data_kin.ids.index("trk_eta")]
+        phi = data_kin.trn.x[i, data_kin.ids.index("trk_phi")]
         ax.set_title(f'Track $(p_t = {pt:0.1f}, \\eta = {eta:0.1f}, \\phi = {phi:0.1f})$ | class = {data.trn.y[i]:0.0f}')
 
         fig.colorbar(c, ax=ax)

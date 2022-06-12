@@ -77,8 +77,8 @@ def compute_reweight(root_files, N_events, args):
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    entrystop    = np.min([args['reweight_param']['maxevents'], N_events[index]])
-    X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id = [0,1], max_num_elements=entrystop, args=args, library='np')
+    entry_stop   = np.min([args['reweight_param']['maxevents'], N_events[index]])
+    X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id = [0,1], entry_stop=entry_stop, args=args, library='np')
 
     # Compute re-weights
     _, pdf = reweight.compute_ND_reweights(x=X, y=Y, ids=ids, args=args['reweight_param'])
@@ -180,7 +180,7 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,ids       = common.load_root_file(root_files[f], entry_start=entry_start, max_num_elements=entry_stop, args=args, library='np')
+                    X,Y,ids       = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
                     trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
 
                     # =========================================================================

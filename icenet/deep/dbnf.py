@@ -25,7 +25,8 @@ from torch.utils import data
 from icenet.deep  import dopt
 
 from . bnaf import *
-from .. tools import aux
+from icenet.tools import aux
+from icenet.tools import aux_torch
 
 
 def compute_log_p_x(model, x):
@@ -188,9 +189,9 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
 
         stop = scheduler.step(validation_loss,
-            callback_best   = aux.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
+            callback_best   = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),
-            callback_reduce = aux.load_torch_model(model=model, optimizer=optimizer,
+            callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'))
         
         if param['tensorboard']:
@@ -202,7 +203,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             break
     
     # Re-load the model        
-    aux.load_torch_model(model=model, optimizer=optimizer, \
+    aux_torch.load_torch_model(model=model, optimizer=optimizer, \
         filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth')()
 
     optimizer.swap()

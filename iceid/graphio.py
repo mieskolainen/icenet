@@ -47,7 +47,7 @@ def parse_tensor_data(X, ids, image_vars, args):
     """
     Args:
         X     :  Jagged array of variables
-        ids  :  Variable names as an array of strings
+        ids   :  Variable names as an array of strings
         args  :  Arguments
     
     Returns:
@@ -152,33 +152,24 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
         # Training weights, note [] is important to have for right dimensions
         w = [W[e]] if W is not None else [1.0]
 
-        ###y = torch.tensor(y, dtype=torch.long)
-        ###w = torch.tensor(w, dtype=torch.float)
-
         ## Construct global feature vector
         u = X[e, feature_ind].tolist()
-        ###u = torch.tensor(u, dtype=torch.float)
         
         ## Construct node features
         x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
-        ###x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
         edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
-        ###edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
 
         ## Construct edge connectivity
         edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
-        ###edge_index = torch.tensor(edge_index, dtype=torch.long)
 
         # Add this event
         if global_on == False: # Null the global features
             u = np.zeros(len(u))
-            ###u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
 
         # Pure dictionary
-        dataset.append({'x':x, 'edge_index':edge_index, 'edge_attr':edge_attr, 'y':y, 'w':w, 'u':u})
-        #dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
+        dataset.append({'x': x, 'edge_index': edge_index, 'edge_attr': edge_attr, 'y': y, 'w': w, 'u': u})
 
     return dataset
 

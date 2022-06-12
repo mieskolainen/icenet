@@ -84,7 +84,7 @@ def pred_cutset(args, param):
     return func_predict
 
 
-def pred_graph_xgb(args, param, signalclass = 1, device='cpu'):
+def pred_graph_xgb(args, param, device='cpu'):
 
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
@@ -124,7 +124,7 @@ def pred_graph_xgb(args, param, signalclass = 1, device='cpu'):
     return func_predict
 
 
-def pred_torch_graph(args, param, signalclass = 1):
+def pred_torch_graph(args, param):
 
     label = param['label']
     
@@ -144,12 +144,12 @@ def pred_torch_graph(args, param, signalclass = 1):
         # Geometric type -> need to use batch loader
         loader  = torch_geometric.loader.DataLoader(x_in, batch_size=len(x), shuffle=False)
         for batch in loader:
-            return model.softpredict(batch.to(device))[:, signalclass].detach().cpu().numpy()
+            return model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
 
     return func_predict
 
 
-def pred_torch_generic(args, param, signalclass = 1):
+def pred_torch_generic(args, param):
     
     label = param['label']
 
@@ -167,11 +167,10 @@ def pred_torch_generic(args, param, signalclass = 1):
             x_in = copy.deepcopy(x)
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
-
-        return model.softpredict(x_in)[:, signalclass].detach().cpu().numpy()
+        
+        return model.softpredict(x_in)[:, args['signalclass']].detach().cpu().numpy()
     
     return func_predict
-
 
 '''
 def pred_xtx(args, param):
@@ -225,7 +224,7 @@ def pred_xtx(args, param):
     fig,ax = plots.plot_auc_matrix(AUC, pt_edges, eta_edges)
     ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
     
-    targetdir = f'./figs/eid/{args["config"]}/eval/'; os.makedirs(targetdir, exist_ok = True)
+    targetdir = aux.makedir(f'./figs/eid/{args["config"]}/eval/')
     plt.savefig('{}/{}_AUC.pdf'.format(targetdir, label), bbox_inches='tight')
 '''
 
@@ -243,7 +242,7 @@ def pred_xgb(args, param):
     return func_predict
 
 
-def pred_flow(args, param, n_dims, N_class=2):
+def pred_flow(args, param, n_dims):
 
     label = param['label']
     print(f'\nEvaluate {label} classifier ...')
@@ -252,7 +251,7 @@ def pred_flow(args, param, n_dims, N_class=2):
     param['model_param']['n_dims'] = n_dims # Set input dimension
     
     modelnames = []
-    for i in range(N_class):
+    for i in range(args['num_classes']):
         modelnames.append(f'{label}_class_{i}')
 
     models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])

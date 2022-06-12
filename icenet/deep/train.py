@@ -440,7 +440,7 @@ def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=Non
 
         return model
 
-def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None,
+def train_torch_image_vector(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=None,
     trn_weights=None, val_weights=None, args=None, param=None):
     """
     Train CNN neural model
@@ -453,7 +453,7 @@ def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=
     """
 
     label = param['label']
-
+    
     # -------------------------------------------------------------------------------
     # Into torch format
 
@@ -493,6 +493,7 @@ def train_torch_image(config={}, data=None, data_tensor=None, Y_trn=None, Y_val=
 
     if len(config) == 0:
         return model
+
 
 def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=None, args=None, param=None, plot_importance=True):
     """

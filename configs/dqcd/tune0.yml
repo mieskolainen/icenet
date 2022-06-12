@@ -21,7 +21,7 @@ eval_reweight: True  # Event-by-event re-weighting used in the evaluation phase 
 rngseed: 123456      # Fixed seed for training data mixing
 
 num_classes: 2       # Number of classes in MVA
-
+signalclass: 1      
 
 # ----------------------------------------------------
 # ** Activate models here **
@@ -434,7 +434,7 @@ xgb1_param:
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'LGR'
   raytune:  null
   
@@ -471,7 +471,7 @@ lgr0_param:
 # Deep MAXOUT network
 dmx0_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'MAXO'
   raytune:  null
 
@@ -506,7 +506,7 @@ dmx0_param:
 # Deep MAXOUT network
 dmx1_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'MAXO-LNCE'
   raytune:  null
 

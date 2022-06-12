@@ -214,11 +214,11 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)
-        
-        elif param['train'] == 'torch_image':
-            train.train_image(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, 
+            
+        elif param['train'] == 'torch_image_vector':
+            train.train_torch_image_vector(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, 
                 trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)
-
+            
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], args=args, param=param)  
         
@@ -454,19 +454,22 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             func_predict = predict.pred_graph_xgb(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, label = param['label'])
             
-        elif param['predict'] == 'torch_generic':
+        elif param['predict'] == 'torch_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, label = param['label'])
 
         elif param['predict'] == 'torch_image':
-            func_predict = predict.pred_torch_image(args=args, param=param)
-
-            X_tensor      = {}
-            X_tensor['x'] = X_2D_ptr # image tensors
-            X_tensor['u'] = X_ptr    # global features
-            
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_tensor, label = param['label'])
+            func_predict = predict.pred_torch_generic(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr, label = param['label'])
         
+        elif param['predict'] == 'torch_image_vector':
+            func_predict = predict.pred_torch_generic(args=args, param=param)
+
+            X_dual      = {}
+            X_dual['x'] = X_2D_ptr # image tensors
+            X_dual['u'] = X_ptr    # global features
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, label = param['label'])
+            
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X, label = param['label'])

@@ -23,6 +23,8 @@ from torch_scatter import scatter_add, scatter_max, scatter_mean
 from icenet.deep.pgraph import *
 from icenet.deep import dopt
 from icenet.tools import aux
+from icenet.tools import aux_torch
+
 from icenet.deep import losstools
 
 
@@ -123,7 +125,7 @@ def train(model, loader, optimizer, device, param):
         optimizer.zero_grad()
 
         # Compute loss
-        batch_weights = torch.tensor(aux.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)).to(device)
+        batch_weights = aux_torch.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)
         loss = losstools.loss_wrapper(model=model, x=batch, y=batch.y, N_classes=model.C, weights=batch_weights, param=param)
 
         # Propagate gradients

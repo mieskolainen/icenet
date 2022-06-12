@@ -1,6 +1,6 @@
 # Common input & data reading routines for the HLT electron trigger studies
 # 
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -63,8 +63,8 @@ def init(MAXEVENTS=None):
     load_args = {'max_num_elements': MAXEVENTS,
                  'args': args}
     
-    data      = io.DATASET(func_loader=load_root_file, files=args['root_files'], load_args=load_args, class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
-    
+    data = io.IceTriplet(func_loader=load_root_file, files=args['root_files'], load_args=load_args,
+        class_id=class_id, frac=args['frac'], rngseed=args['rngseed'])
 
     # @@ Imputation @@
     if args['imputation_param']['active']:
@@ -85,7 +85,7 @@ def init(MAXEVENTS=None):
             "knn_k":      args['imputation_param']['knn_k']
         }
         
-        # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with data
+        # NOTE, UPDATE NEEDED: one should save here 'imputer_trn' to a disk -> can be used with real data
         data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=None,        **param)
         data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
         data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
@@ -102,7 +102,7 @@ def init(MAXEVENTS=None):
     return data, args
 
 
-def load_root_file(root_path, ids=None, max_num_elements=None, class_id = [], args=None):
+def load_root_file(root_path, ids=None, max_num_elements=None, class_id=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:

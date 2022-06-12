@@ -12,8 +12,8 @@ datafile:  'datadist.root'
 eval_reweight: False     # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
 rngseed: 123456          # Fixed seed for training data mixing
 
-num_classes: 2           # Number of classes in MVA
-
+num_classes: 2        # Number of classes in MVA
+signalclass: 1      
 
 # ----------------------------------------------------
 # ** Activate models here **
@@ -457,7 +457,7 @@ xgb1_param:
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0_param:
   train:   'torch_generic'
-  predict: 'torch_generic'
+  predict: 'torch_vector'
   label:   'LGR'
   raytune:  null
 

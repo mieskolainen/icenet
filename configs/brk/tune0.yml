@@ -11,7 +11,7 @@ MAXEVENTS: 500
 rngseed: 123456                 # Fixed seed for training data mixing
 
 num_classes: null               # Num of classes in MVA
-
+signalclass: null
 
 # -----------------------------------------------------------------------------
 # TRAINING AND ANALYSIS
