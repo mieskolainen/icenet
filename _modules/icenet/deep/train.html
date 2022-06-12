@@ -474,7 +474,7 @@
 
         <span class="k">return</span> <span class="n">model</span></div>
 
-<div class="viewcode-block" id="train_torch_image"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_image">[docs]</a><span class="k">def</span> <span class="nf">train_torch_image</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="train_torch_image_vector"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_image_vector">[docs]</a><span class="k">def</span> <span class="nf">train_torch_image_vector</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train CNN neural model</span>
@@ -487,7 +487,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-
+    
     <span class="c1"># -------------------------------------------------------------------------------</span>
     <span class="c1"># Into torch format</span>
 
@@ -527,6 +527,7 @@
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">model</span></div>
+
 
 <div class="viewcode-block" id="train_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

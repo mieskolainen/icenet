@@ -34,7 +34,7 @@
   <h1>Source code for iceid.common</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Common input &amp; data reading routines for the electron ID</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -76,6 +76,255 @@
 <span class="kn">from</span> <span class="nn">configs.eid.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 
 
+<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Implicit commandline and yaml file input.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        jagged array data, arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">args</span><span class="p">,</span> <span class="n">cli</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/eid&#39;</span><span class="p">)</span>
+    <span class="n">features</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
+    
+    <span class="c1">### SET random seed</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># --------------------------------------------------------------------    </span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------------------------------</span>
+
+    <span class="c1">### Load data</span>
+
+    <span class="c1"># Background (0) and signal (1)</span>
+    <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">files</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
+
+    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">MAXEVENTS</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
+    <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="n">MAXEVENTS</span><span class="p">,</span>
+                 <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceTriplet</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">load_args</span><span class="o">=</span><span class="n">load_args</span><span class="p">,</span>
+        <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># @@ Imputation @@</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+
+        <span class="n">special_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="c1"># possible special values</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Imputing data for special values </span><span class="si">{</span><span class="n">special_values</span><span class="si">}</span><span class="s1"> for variables in &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;imputation_param&quot;</span><span class="p">][</span><span class="s2">&quot;var&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Choose active dimensions</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">features</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># Parameters</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dim&quot;</span><span class="p">:</span>        <span class="n">dim</span><span class="p">,</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span>     <span class="n">special_values</span><span class="p">,</span>
+            <span class="s2">&quot;labels&quot;</span><span class="p">:</span>     <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span>  <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;algorithm&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;knn_k&quot;</span><span class="p">:</span>      <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;knn_k&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># NOTE, UPDATE NEEDED: one should save here &#39;imputer_trn&#39; to a disk -&gt; can be used with data</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer_trn</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No imputation, but fix spurious NaN / Inf</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.common: Process RAM usage: </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
+<span class="s2">        [total RAM in use: </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span></div>
+
+
+<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split electron ID data into different datatypes.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data:        jagged numpy arrays</span>
+<span class="sd">        args:        arguments dictionary</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        data:        scalar (vector) data</span>
+<span class="sd">        data_tensor: tensor data (images)</span>
+<span class="sd">        data_kin:    kinematic data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">### Pick kinematic variables out</span>
+    <span class="n">k_ind</span><span class="p">,</span> <span class="n">k_vars</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">KINEMATIC_ID</span><span class="p">)</span>
+    
+    <span class="n">data_kin</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_kin</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data_kin</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data_kin</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>     <span class="o">=</span> <span class="n">k_vars</span>
+
+    <span class="n">data_tensor</span>      <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_on&#39;</span><span class="p">]:</span>
+
+        <span class="c1">### Pick active jagged array / &quot;image&quot; variables out</span>
+        <span class="n">j_ind</span><span class="p">,</span> <span class="n">j_vars</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;CMSSW_MVA_ID_IMAGE&#39;</span><span class="p">])</span>
+        
+        <span class="n">data_image</span>       <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data_image</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
+        <span class="n">data_image</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
+        <span class="n">data_image</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
+        <span class="n">data_image</span><span class="o">.</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">j_vars</span> 
+
+        <span class="c1"># Use single channel tensors</span>
+        <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_phi&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_e&#39;</span><span class="p">]]</span>
+
+        <span class="c1"># Use multichannel tensors</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">xyz</span>  <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_phi&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_e&#39;</span><span class="p">],</span> 
+                    <span class="p">[</span><span class="s1">&#39;image_pf_eta&#39;</span><span class="p">,</span>  <span class="s1">&#39;image_pf_phi&#39;</span><span class="p">,</span>  <span class="s1">&#39;image_pf_p&#39;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Except</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Unknown [image_param][channels] parameter&#39;</span><span class="p">)</span>
+
+        <span class="n">eta_binedges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;eta_bins&#39;</span><span class="p">]</span>
+        <span class="n">phi_binedges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;phi_bins&#39;</span><span class="p">]</span>    
+
+        <span class="c1"># Pick tensor data out</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: jagged2tensor processing ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+
+        <span class="n">data_tensor</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
+        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
+        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
+    
+
+    <span class="c1">### Pick active scalar variables out</span>
+    <span class="n">s_ind</span><span class="p">,</span> <span class="n">s_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar&#39;</span><span class="p">]])</span>
+    
+    <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">ids</span>      <span class="o">=</span> <span class="n">s_vars</span>
+    
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="n">data_kin</span></div>
+
+
+<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Loads the root file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        root_path : paths to root files</span>
+<span class="sd">        class_id  : class ids</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        X,Y       : input, output matrices</span>
+<span class="sd">        ids       : variable names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
+    <span class="n">TARFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
+    <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
+    <span class="c1"># -----------------------------------------------</span>
+
+    <span class="c1">### From root trees</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">file</span>   <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;ntuplizer&quot;</span><span class="p">][</span><span class="s2">&quot;tree&quot;</span><span class="p">]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="c1">### All variables</span>
+    <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#[x for x in events.keys()]</span>
+    <span class="c1">#VARS_scalar = [x.decode() for x in events.keys() if b&#39;image_&#39; not in x]</span>
+    <span class="c1">#print(ids)</span>
+    
+    <span class="c1"># Check is it MC (based on the first event)</span>
+    <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="s1">&#39;is_mc&#39;</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+
+    <span class="n">isMC</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;is_mc&#39;</span><span class="p">])</span>
+    <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: isMC: </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------------------------------------</span>
+    <span class="c1"># Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)</span>
+
+    <span class="c1"># Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------------------------</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;common: X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+    <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+
+    <span class="c1"># =================================================================</span>
+    <span class="c1"># *** MC ONLY ***</span>
+
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
+
+        <span class="c1"># @@ MC target definition here @@</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;common: Y.shape = </span><span class="si">{</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># For info</span>
+        <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
+        <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+
+        <span class="c1"># @@ MC filtering done here @@</span>
+        <span class="n">indmc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">indmc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+        
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Remove useless dimension</span>
+    
+    <span class="c1"># =================================================================</span>
+
+    <span class="c1"># @@ Observable cut selections done here @@</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">),</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cind</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: &lt;cutfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cind</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
+
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+    <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">ids</span></div>
+
+
+
+
+<span class="c1"># ========================================================================</span>
+<span class="c1"># ========================================================================</span>
 
 <div class="viewcode-block" id="init_multiprocess"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init_multiprocess">[docs]</a><span class="k">def</span> <span class="nf">init_multiprocess</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Initialize electron ID data [UNTESTED FUNCTION]</span>
@@ -191,158 +440,6 @@
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;X_graph&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">graph2torch</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;X_graph&#39;</span><span class="p">])</span>
     
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span></div>
-
-
-<div class="viewcode-block" id="init"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Initialize electron ID data.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        Implicit commandline and yaml file input.</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        jagged array data, arguments</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">args</span><span class="p">,</span> <span class="n">cli</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/eid&#39;</span><span class="p">)</span>
-    <span class="n">features</span>  <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]]</span>
-    
-    <span class="c1">### SET random seed</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: Setting random seed: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rngseed&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
-    
-    <span class="c1"># --------------------------------------------------------------------    </span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="c1"># --------------------------------------------------------------------</span>
-
-    <span class="c1">### Load data</span>
-
-    <span class="c1"># Background (0) and signal (1)</span>
-    <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span>
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
-
-    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAXEVENTS</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
-    <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_num_elements&#39;</span><span class="p">:</span> <span class="n">MAXEVENTS</span><span class="p">,</span>
-                 <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
-
-    <span class="n">data</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DATASET</span><span class="p">(</span><span class="n">func_loader</span><span class="o">=</span><span class="n">load_root_file</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">load_args</span><span class="o">=</span><span class="n">load_args</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">],</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
-    
-    <span class="c1"># @@ Imputation @@</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-
-        <span class="n">special_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="c1"># possible special values</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Imputing data for special values </span><span class="si">{</span><span class="n">special_values</span><span class="si">}</span><span class="s1"> for variables in &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;imputation_param&quot;</span><span class="p">][</span><span class="s2">&quot;var&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Choose active dimensions</span>
-        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">features</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
-        <span class="c1"># Parameters</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;dim&quot;</span><span class="p">:</span>        <span class="n">dim</span><span class="p">,</span>
-            <span class="s2">&quot;values&quot;</span><span class="p">:</span>     <span class="n">special_values</span><span class="p">,</span>
-            <span class="s2">&quot;labels&quot;</span><span class="p">:</span>     <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
-            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span>  <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;algorithm&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">],</span>
-            <span class="s2">&quot;knn_k&quot;</span><span class="p">:</span>      <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;knn_k&#39;</span><span class="p">]</span>
-        <span class="p">}</span>
-        
-        <span class="c1"># NOTE, UPDATE NEEDED: one should save here &#39;imputer_trn&#39; to a disk -&gt; can be used with data</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer_trn</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span>           <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer_trn</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># No imputation, but fix spurious NaN / Inf</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.common: Process RAM usage: </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB </span>
-<span class="s2">        [total RAM in use: </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span></div>
-
-
-<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Split electron ID data into different datatypes.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        data:  jagged arrays</span>
-<span class="sd">        args:  arguments dictionary</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        scalar (vector) data</span>
-<span class="sd">        tensor data (images)</span>
-<span class="sd">        kinematic data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="c1">### Pick kinematic variables out</span>
-    <span class="n">k_ind</span><span class="p">,</span> <span class="n">k_vars</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">KINEMATIC_ID</span><span class="p">)</span>
-    
-    <span class="n">data_kin</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">data_kin</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data_kin</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data_kin</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>     <span class="o">=</span> <span class="n">k_vars</span>
-
-    <span class="n">data_tensor</span>      <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_on&#39;</span><span class="p">]:</span>
-
-        <span class="c1">### Pick active jagged array / &quot;image&quot; variables out</span>
-        <span class="n">j_ind</span><span class="p">,</span> <span class="n">j_vars</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;CMSSW_MVA_ID_IMAGE&#39;</span><span class="p">])</span>
-        
-        <span class="n">data_image</span>       <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">data_image</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
-        <span class="n">data_image</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
-        <span class="n">data_image</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">j_ind</span><span class="p">]</span>
-        <span class="n">data_image</span><span class="o">.</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">j_vars</span> 
-
-        <span class="c1"># Use single channel tensors</span>
-        <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">xyz</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_phi&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_e&#39;</span><span class="p">]]</span>
-
-        <span class="c1"># Use multichannel tensors</span>
-        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">xyz</span>  <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_phi&#39;</span><span class="p">,</span> <span class="s1">&#39;image_clu_e&#39;</span><span class="p">],</span> 
-                    <span class="p">[</span><span class="s1">&#39;image_pf_eta&#39;</span><span class="p">,</span>  <span class="s1">&#39;image_pf_phi&#39;</span><span class="p">,</span>  <span class="s1">&#39;image_pf_p&#39;</span><span class="p">]]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">Except</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Unknown [image_param][channels] parameter&#39;</span><span class="p">)</span>
-
-        <span class="n">eta_binedges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;eta_bins&#39;</span><span class="p">]</span>
-        <span class="n">phi_binedges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;phi_bins&#39;</span><span class="p">]</span>    
-
-        <span class="c1"># Pick tensor data out</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: jagged2tensor processing ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
-        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
-        <span class="n">data_tensor</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_image</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">j_vars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
-    
-
-    <span class="c1">### Pick active scalar variables out</span>
-    <span class="n">s_ind</span><span class="p">,</span> <span class="n">s_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar&#39;</span><span class="p">]])</span>
-    
-    <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">ids</span>      <span class="o">=</span> <span class="n">s_vars</span>
-    
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="n">data_kin</span></div>
-
-
-<div class="viewcode-block" id="slow_conversion"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.slow_conversion">[docs]</a><span class="k">def</span> <span class="nf">slow_conversion</span><span class="p">(</span><span class="n">hdfarray</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hdfarray</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="fast_conversion"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.fast_conversion">[docs]</a><span class="k">def</span> <span class="nf">fast_conversion</span><span class="p">(</span><span class="n">hdfarray</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-    <span class="n">a</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">hdfarray</span><span class="p">[:]</span>
-    <span class="k">return</span> <span class="n">a</span></div>
 
 
 <div class="viewcode-block" id="load_root_file_multiprocess"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.load_root_file_multiprocess">[docs]</a><span class="k">def</span> <span class="nf">load_root_file_multiprocess</span><span class="p">(</span><span class="n">procnumber</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">return_dict</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
@@ -506,106 +603,6 @@
 
     <span class="n">return_dict</span><span class="p">[</span><span class="n">procnumber</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">ids</span><span class="p">,</span> <span class="s2">&quot;X_tensor&quot;</span><span class="p">:</span> <span class="n">X_tensor</span><span class="p">,</span> <span class="s2">&quot;X_graph&quot;</span><span class="p">:</span> <span class="n">X_graph</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span></div>
 
-
-<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Loads the root file.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        root_path : paths to root files</span>
-<span class="sd">        class_id  : class ids</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        X,Y       : input, output matrices</span>
-<span class="sd">        ids      : variable names</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># -----------------------------------------------</span>
-    <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
-    <span class="n">TARFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
-    <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
-    <span class="c1"># -----------------------------------------------</span>
-
-    <span class="c1">### From root trees</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading with uproot from file &#39;</span> <span class="o">+</span> <span class="n">root_path</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: entry_start = </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">max_num_elements</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="n">file</span>   <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;ntuplizer&quot;</span><span class="p">][</span><span class="s2">&quot;tree&quot;</span><span class="p">]</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-    <span class="c1">#cprint(__name__ + f&#39;.load_root_file: events.numentries = {events.numentries}&#39;, &#39;green&#39;)</span>
-
-    <span class="c1">### All variables</span>
-    <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#[x for x in events.keys()]</span>
-    <span class="c1">#VARS_scalar = [x.decode() for x in events.keys() if b&#39;image_&#39; not in x]</span>
-    <span class="c1">#print(ids)</span>
-    
-    <span class="c1"># Check is it MC (based on the first event)</span>
-    <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="s1">&#39;is_mc&#39;</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">)</span>
-
-    <span class="n">isMC</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">X_test</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;is_mc&#39;</span><span class="p">])</span>
-    <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: isMC: </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="c1"># --------------------------------------------------------------</span>
-    <span class="c1"># Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)</span>
-
-    <span class="c1"># Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
-
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-        <span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="c1"># --------------------------------------------------------------</span>
-    <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;common: X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
-    <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-
-    <span class="c1"># =================================================================</span>
-    <span class="c1"># *** MC ONLY ***</span>
-
-    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
-
-        <span class="c1"># @@ MC target definition here @@</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;common: Y.shape = </span><span class="si">{</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="c1"># For info</span>
-        <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
-        <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-
-        <span class="c1"># @@ MC filtering done here @@</span>
-        <span class="n">indmc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">indmc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-        
-        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">indmc</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Remove useless dimension</span>
-    
-    <span class="c1"># =================================================================</span>
-
-    <span class="c1"># @@ Observable cut selections done here @@</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">),</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    <span class="n">cind</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: &lt;cutfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cind</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
-
-    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
-    <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">ids</span></div>
 </pre></div>
 
           </div>

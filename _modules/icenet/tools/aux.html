@@ -34,7 +34,7 @@
   <h1>Source code for icenet.tools.aux</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Auxialary functions</span>
 <span class="c1"># </span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
@@ -52,13 +52,6 @@
 <span class="kn">import</span> <span class="nn">icenet.tools.prints</span> <span class="k">as</span> <span class="nn">prints</span>
 <span class="kn">import</span> <span class="nn">icenet.tools.stx</span> <span class="k">as</span> <span class="nn">stx</span>
 
-
-<div class="viewcode-block" id="makedir"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.makedir">[docs]</a><span class="k">def</span> <span class="nf">makedir</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Make directory</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="n">exist_ok</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">targetdir</span></div>
 
 <span class="c1">#@numba.njit</span>
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_maxdim</span><span class="o">=</span><span class="p">[],</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">):</span>
@@ -127,6 +120,97 @@
             <span class="n">k</span> <span class="o">+=</span> <span class="n">d</span>
 
     <span class="k">return</span> <span class="n">mat</span></div>
+
+
+<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        </span>
+<span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
+<span class="sd">        ids        : all variable names</span>
+<span class="sd">        xyz        : array of (x,y,z) channel triplet strings such as [[&#39;image_clu_eta&#39;, &#39;image_clu_phi&#39;, &#39;image_clu_e&#39;]]</span>
+<span class="sd">        x_binedges</span>
+<span class="sd">        y_binedges : arrays of bin edges</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        T : tensor of size (samples x channels x rows x columns)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Samples x Channels x Rows x Columns</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Choose targets</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+
+        <span class="c1"># Loop over all events</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">z_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> 
+                <span class="n">x_binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2tensor: Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Array representation summed to matrix.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x_arr :      array of [x values]</span>
+<span class="sd">        y_arr :      array of [y values]</span>
+<span class="sd">        z_arr :      array of [z values]</span>
+<span class="sd">        x_binedges : array of binedges</span>
+<span class="sd">        y_binedges : array of binedges</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Matrix output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">)</span>
+    <span class="n">y_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
+
+    <span class="c1"># Loop and sum (accumulate)</span>
+    <span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_ind</span><span class="p">)):</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">x_ind</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.arrays2matrix: not valid input (returning 0-matrix)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">A</span></div>
+
+
+<div class="viewcode-block" id="x2ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.x2ind">[docs]</a><span class="k">def</span> <span class="nf">x2ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Return histogram bin indices for data in x, which needs to be an array [].</span>
+<span class="sd">    Args:</span>
+<span class="sd">        x:        data to be classified between bin edges</span>
+<span class="sd">        binedges: histogram bin edges</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        inds:     histogram bin indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NBINS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">NBINS</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">NBINS</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">inds</span></div>
+
+
+<div class="viewcode-block" id="makedir"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.makedir">[docs]</a><span class="k">def</span> <span class="nf">makedir</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="n">exist_ok</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">targetdir</span></div>
 
 
 <div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
@@ -446,25 +530,6 @@
     <span class="k">return</span> <span class="n">Y</span></div>
 
 
-<div class="viewcode-block" id="weight2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.weight2onehot">[docs]</a><span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Weights into one-hot encoding.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        weights   : array of weights</span>
-<span class="sd">        Y         : targets</span>
-<span class="sd">        N_classes : number of classes</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">one_hot_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_classes</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">one_hot_weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;weight2onehot: Failed with class = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (zero samples)&#39;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">one_hot_weights</span></div>
-
-
 <div class="viewcode-block" id="int2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.int2onehot">[docs]</a><span class="k">def</span> <span class="nf">int2onehot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Integer class vector to class &quot;one-hot encoding&quot;</span>
 
@@ -523,88 +588,6 @@
 <span class="sd">        indices</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
-
-
-<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        </span>
-<span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
-<span class="sd">        ids        : all variable names</span>
-<span class="sd">        xyz        : array of (x,y,z) channel triplet strings such as [[&#39;image_clu_eta&#39;, &#39;image_clu_phi&#39;, &#39;image_clu_e&#39;]]</span>
-<span class="sd">        x_binedges</span>
-<span class="sd">        y_binedges : arrays of bin edges</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        T : tensor of size (samples x channels x rows x columns)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Samples x Channels x Rows x Columns</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-
-    <span class="c1"># Choose targets</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)):</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
-
-        <span class="c1"># Loop over all events</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
-            <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">z_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> 
-                <span class="n">x_binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2tensor: Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">T</span></div>
-
-
-<div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Array representation summed to matrix.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        x_arr :      array of [x values]</span>
-<span class="sd">        y_arr :      array of [y values]</span>
-<span class="sd">        z_arr :      array of [z values]</span>
-<span class="sd">        x_binedges : array of binedges</span>
-<span class="sd">        y_binedges : array of binedges</span>
-<span class="sd">        </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        Matrix output</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">x_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">)</span>
-    <span class="n">y_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
-
-    <span class="c1"># Loop and sum</span>
-    <span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_ind</span><span class="p">)):</span>
-            <span class="n">A</span><span class="p">[</span><span class="n">x_ind</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.arrays2matrix: not valid input&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">A</span></div>
-
-<div class="viewcode-block" id="x2ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.x2ind">[docs]</a><span class="k">def</span> <span class="nf">x2ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Return histogram bin indices for data in x, which needs to be an array [].</span>
-<span class="sd">    Args:</span>
-<span class="sd">        x:        data to be classified between bin edges</span>
-<span class="sd">        binedges: histogram bin edges</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        inds:     histogram bin indices</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">NBINS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">NBINS</span><span class="o">-</span><span class="mi">1</span>
-        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">inds</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">:</span>
-            <span class="n">inds</span> <span class="o">=</span> <span class="n">NBINS</span> <span class="o">-</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">inds</span></div>
 
 
 <div class="viewcode-block" id="hardclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.hardclass">[docs]</a><span class="k">def</span> <span class="nf">hardclass</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]):</span>

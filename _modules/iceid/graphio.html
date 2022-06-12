@@ -81,7 +81,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        X     :  Jagged array of variables</span>
-<span class="sd">        ids  :  Variable names as an array of strings</span>
+<span class="sd">        ids   :  Variable names as an array of strings</span>
 <span class="sd">        args  :  Arguments</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
@@ -186,33 +186,24 @@
         <span class="c1"># Training weights, note [] is important to have for right dimensions</span>
         <span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">W</span><span class="p">[</span><span class="n">e</span><span class="p">]]</span> <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
 
-        <span class="c1">###y = torch.tensor(y, dtype=torch.long)</span>
-        <span class="c1">###w = torch.tensor(w, dtype=torch.float)</span>
-
         <span class="c1">## Construct global feature vector</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">feature_ind</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="c1">###u = torch.tensor(u, dtype=torch.float)</span>
         
         <span class="c1">## Construct node features</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="o">=</span><span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="o">=</span><span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">)</span>
-        <span class="c1">###x = torch.tensor(x, dtype=torch.float)</span>
 
         <span class="c1">## Construct edge features</span>
         <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">get_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">)</span>
-        <span class="c1">###edge_attr  = torch.tensor(edge_attr, dtype=torch.float)</span>
 
         <span class="c1">## Construct edge connectivity</span>
         <span class="n">edge_index</span> <span class="o">=</span> <span class="n">get_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">)</span>
-        <span class="c1">###edge_index = torch.tensor(edge_index, dtype=torch.long)</span>
 
         <span class="c1"># Add this event</span>
         <span class="k">if</span> <span class="n">global_on</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># Null the global features</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
-            <span class="c1">###u = torch.tensor(np.zeros(len(u)), dtype=torch.float)</span>
 
         <span class="c1"># Pure dictionary</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;edge_index&#39;</span><span class="p">:</span><span class="n">edge_index</span><span class="p">,</span> <span class="s1">&#39;edge_attr&#39;</span><span class="p">:</span><span class="n">edge_attr</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="n">w</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span><span class="n">u</span><span class="p">})</span>
-        <span class="c1">#dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;edge_index&#39;</span><span class="p">:</span> <span class="n">edge_index</span><span class="p">,</span> <span class="s1">&#39;edge_attr&#39;</span><span class="p">:</span> <span class="n">edge_attr</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span> <span class="n">w</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="n">u</span><span class="p">})</span>
 
     <span class="k">return</span> <span class="n">dataset</span></div>
 

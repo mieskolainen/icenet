@@ -41,6 +41,23 @@
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
+<div class="viewcode-block" id="weight2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.weight2onehot">[docs]</a><span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Weights into one-hot encoding.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        weights   : array of weights (torch type)</span>
+<span class="sd">        Y         : targets (torch type)</span>
+<span class="sd">        N_classes : number of classes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">one_hot_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_classes</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">one_hot_weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.weight2onehot: Failed with class = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (zero samples)&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">one_hot_weights</span></div>
 
 <div class="viewcode-block" id="count_parameters_torch"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.count_parameters_torch">[docs]</a><span class="k">def</span> <span class="nf">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -81,7 +98,7 @@
     <span class="sd">&quot;&quot;&quot; PyTorch model saver</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving model..&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.save_torch_model: Saving model to disk ...&#39;</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">({</span>
             <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
             <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>

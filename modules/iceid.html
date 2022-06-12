@@ -40,11 +40,6 @@
 <section id="module-iceid.common">
 <span id="iceid-common"></span><h2>iceid.common<a class="headerlink" href="#module-iceid.common" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="iceid.common.fast_conversion">
-<span class="sig-name descname"><span class="pre">fast_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdfarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#fast_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.fast_conversion" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="iceid.common.init">
 <span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MAXEVENTS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize electron ID data.</p>
@@ -74,7 +69,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.common.load_root_file">
-<span class="sig-name descname"><span class="pre">load_root_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#load_root_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.load_root_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_root_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#load_root_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.load_root_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the root file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -85,7 +80,7 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>input, output matrices
-ids      : variable names</p>
+ids       : variable names</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>X,Y</p>
@@ -100,25 +95,23 @@ ids      : variable names</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="iceid.common.slow_conversion">
-<span class="sig-name descname"><span class="pre">slow_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdfarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#slow_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.slow_conversion" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="iceid.common.splitfactor">
 <span class="sig-name descname"><span class="pre">splitfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#splitfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.splitfactor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split electron ID data into different datatypes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – jagged arrays</p></li>
+<li><p><strong>data</strong> – jagged numpy arrays</p></li>
 <li><p><strong>args</strong> – arguments dictionary</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>scalar (vector) data
-tensor data (images)
-kinematic data</p>
+data_tensor: tensor data (images)
+data_kin:    kinematic data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>data</p>
 </dd>
 </dl>
 </dd></dl>
