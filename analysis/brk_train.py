@@ -122,7 +122,8 @@ def main() :
 
     ### Weights: CURRENTLY UNIT WEIGHTS
     # (UPDATE THIS TO IMPLEMENT E.G. PILE-UP DEPENDENT WEIGHTS)!
-    trn_weights = np.ones(X.shape[0])
+    trn_weights = None
+    val_weights = None
 
     # Number of classes (powerset dimension)
     C = BMAT.shape[0]
@@ -176,7 +177,7 @@ def main() :
         print(f'\nTraining {label} classifier ...')
         maxo_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, **args['maxo_param']['model_param'])
         maxo_model, losses, trn_aucs, val_aucs = dopt.train(model = maxo_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, param = args['maxo_param'], modeldir = modeldir)
+            trn_weights = trn_weights, val_weights=val_weights, param = args['maxo_param'], modeldir = modeldir)
         
         # Plot evolution
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
@@ -205,7 +206,7 @@ def main() :
         print(f'\nTraining {label} classifier ...')
         deps_model = deps.DEPS(D = D, C = C, **args['deps_param']['model_param'])
         deps_model, losses, trn_aucs, val_aucs = dopt.train(model = deps_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val, 
-            trn_weights = trn_weights, param = args['deps_param'], modeldir = modeldir)
+            trn_weights = trn_weights, val_weights=val_weights, param = args['deps_param'], modeldir = modeldir)
         
         # Plot evolution
         fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)

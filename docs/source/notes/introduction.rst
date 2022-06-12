@@ -17,11 +17,12 @@ Folder structure
 	-docs         Documentation
 	-figs         Output figures
 	-icebrk       B/R(K) functions
+	-icedqcd      DQCD functions
 	-icefit       Fitting and statistics functions
 	-iceid        Electron ID functions
 	-icenet       Deep learning classes & functions
-	-icetrg       HLT trigger classifiers
 	-iceplot      Plotting tools
+	-icetrg       HLT trigger functions
 	-tests        Test and steering scripts
 	-output       HDF5, pickle outputs
 	-dev          Development code

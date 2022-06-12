@@ -154,8 +154,8 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, modeldir,
-    clip_gradients=True, raytune_on=False, save_period=5):
+def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
+    trn_weights=None, val_weights=None, clip_gradients=True, raytune_on=False, save_period=5):
     """
     Main training loop
     """
@@ -191,17 +191,12 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
     print('')
     
     # Class fractions
-    frac = []
-    for i in range(model.C):
-        frac.append( sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size )
-
-    print(__name__ + '.train: Class fractions in the training sample: ')
+    frac = [sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size for i in range(model.C)]
 
     ## Classes
-    for i in range(len(frac)):
-        print(f' {i:4d} : {frac[i]:5.6f} ({sum(Y_trn.cpu().numpy() == i)} counts)')
+    print(__name__ + '.train: Class fractions in the training sample: ')
+    for i in range(model.C): print(f' {i:4d} : {frac[i]:5.6f} ({sum(Y_trn.cpu().numpy() == i)} counts)')
     print(__name__ + f'.train: Found {len(np.unique(Y_trn.cpu().numpy()))} / {model.C} classes in the training sample')
-    
 
     # Define the optimizer
     opt           = param['opt_param']['optimizer']
@@ -225,11 +220,14 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
     print(__name__ + '.train: Training loop ...')
 
     params = {'batch_size': param['opt_param']['batch_size'],
-            'shuffle'     : True,
-            'num_workers' : param['num_workers'],
-            'pin_memory'  : True}
+              'shuffle'     : True,
+              'num_workers' : param['num_workers'],
+              'pin_memory'  : True}
 
-    # Change the shape
+    # Check the size and change the shape
+    if trn_weights is None: trn_weights = np.ones(Y_trn.shape[0])
+    if val_weights is None: val_weights = np.ones(Y_val.shape[0])
+
     trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
     val_one_hot_weights = np.zeros((len(val_weights), model.C))
 
@@ -257,7 +255,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, trn_weights, val_weights, param, mo
         # Minibatch loop
         sumloss = 0
         nbatch  = 0
-
+        
         for batch_x, batch_y, batch_weights in training_generator:
             
             # ----------------------------------------------------------------

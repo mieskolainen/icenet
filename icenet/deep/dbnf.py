@@ -66,27 +66,32 @@ def get_pdf(model, x) :
     return (torch.exp(compute_log_p_x(model, x))).detach().numpy()
 
 
-def predict(X, models, EPS=1E-12) :
+def predict(X, models, return_prob=True, EPS=1E-12, ):
     """
     2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.
     
     Args:
-        param    : input parameters
-        X        : pytorch tensor of vectors
-        models   : list of model objects
+        param      : input parameters
+        X          : pytorch tensor of vectors
+        models     : list of model objects
+        return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)
     Returns:
-        LLR      : log-likelihood ratio
+        LLR        : log-likelihood ratio
     """
     
-    print(__name__ + f': Likelihood (density) ratio pdf(x,S)/pdf(x,B) for N = {X.shape[0]} events ...')
-
+    print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events ...')
+    
     sgn_likelihood = get_pdf(models[1], X)
     bgk_likelihood = get_pdf(models[0], X)
     
-    LLR = sgn_likelihood / (bgk_likelihood + EPS)
-    LLR[~np.isfinite(LLR)] = 0
+    if return_prob:
+        out = sgn_likelihood / (sgn_likelihood + bgk_likelihood + EPS)
+    else:
+        out = sgn_likelihood / (bgk_likelihood + EPS)
     
-    return LLR
+    out[~np.isfinite(out)] = 0
+
+    return out
 
 
 class Dataset(torch.utils.data.Dataset):

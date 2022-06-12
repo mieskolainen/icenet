@@ -78,16 +78,16 @@ def main() :
         return io.checkinfnan(y)
     
     ### MAXOUT
-    DMAX_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['dmax_param']['label'], epoch=args['dmax_param']['readmode'])
+    MAXO_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['maxo_param']['label'], epoch=args['maxo_param']['readmode'])
     
-    DMAX_model, device = dopt.model_to_cuda(DMAX_model, device_type=args['dmax_param']['device'])
-    DMAX_model.eval() # Turn on eval mode!
+    MAXO_model, device = dopt.model_to_cuda(MAXO_model, device_type=args['maxo_param']['device'])
+    MAXO_model.eval() # Turn on eval mode!
     
     def func_predict_B(X):
         X_ptr = torch.from_numpy(standardize(X)).type(torch.FloatTensor).to(device)
-        y = DMAX_model.softpredict(X_ptr).detach().cpu().numpy()
+        y = MAXO_model.softpredict(X_ptr).detach().cpu().numpy()
         return io.checkinfnan(y)
-
+    
     ### XGB
     XGB_model = pickle.load(open(modeldir + '/XGB_model.dat', 'rb'))
     def func_predict_C(X):
