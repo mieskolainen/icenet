@@ -2305,13 +2305,13 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.load_tree">
 <span class="sig-name descname"><span class="pre">load_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#load_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.load_tree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load ROOT files wrapper function</p>
+<dd><p>Load ROOT files using uproot ‘concatenate’ of files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rootfile</strong> – Name of root file paths (string or a list of strings)</p></li>
 <li><p><strong>tree</strong> – Tree to read out</p></li>
-<li><p><strong>max_num_elements</strong> – Max events to read</p></li>
+<li><p><strong>max_num_elements</strong> – Max events to read (NOT IMPLEMENTED)</p></li>
 <li><p><strong>ids</strong> – Variable names to read out from the root tree</p></li>
 <li><p><strong>library</strong> – Return type ‘np’ (numpy dict) or ‘ak’ (awkward) of the array</p></li>
 </ul>
@@ -2342,14 +2342,31 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.iceroot.process_regexp_ids">
+<span class="sig-name descname"><span class="pre">process_regexp_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#process_regexp_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.process_regexp_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process regular expressions for variable names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_ids</strong> – all keys in a tree</p></li>
+<li><p><strong>ids</strong> – keys to pick, if None, use all keys</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ids matching regular expressions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.process_tree">
-<span class="sig-name descname"><span class="pre">process_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#process_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.process_tree" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">process_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#process_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.process_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process uproot tree</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>events</strong> – uproot tree</p></li>
-<li><p><strong>ids</strong> – variable names</p></li>
+<li><p><strong>ids</strong> – variable names to pick</p></li>
 <li><p><strong>entry_start</strong> – first event to consider</p></li>
 <li><p><strong>entry_stop</strong> – last event to consider</p></li>
 </ul>

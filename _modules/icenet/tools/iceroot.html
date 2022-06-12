@@ -82,24 +82,23 @@
     <span class="k">return</span> <span class="n">num_events</span></div>
 
 
-<div class="viewcode-block" id="process_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.process_tree">[docs]</a><span class="k">def</span> <span class="nf">process_tree</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="process_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.process_tree">[docs]</a><span class="k">def</span> <span class="nf">process_tree</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process uproot tree</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        events:      uproot tree</span>
-<span class="sd">        ids:         variable names</span>
+<span class="sd">        ids:         variable names to pick</span>
 <span class="sd">        entry_start: first event to consider</span>
 <span class="sd">        entry_stop:  last event to consider</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        numpy array (with jagged content)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-
-    <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
-    <span class="n">X</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
+    
+    <span class="n">N</span>        <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">X_test</span>   <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+    <span class="n">X</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
     
     <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_tree: Entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
@@ -112,12 +111,12 @@
 
 <div class="viewcode-block" id="load_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree">[docs]</a><span class="k">def</span> <span class="nf">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load ROOT files wrapper function</span>
+<span class="sd">    Load ROOT files using uproot &#39;concatenate&#39; of files</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        rootfile:          Name of root file paths (string or a list of strings)</span>
 <span class="sd">        tree:              Tree to read out</span>
-<span class="sd">        max_num_elements:  Max events to read</span>
+<span class="sd">        max_num_elements:  Max events to read (NOT IMPLEMENTED)</span>
 <span class="sd">        ids:               Variable names to read out from the root tree</span>
 <span class="sd">        library:           Return type &#39;np&#39; (numpy dict) or &#39;ak&#39; (awkward) of the array</span>
 <span class="sd">    </span>
@@ -138,6 +137,25 @@
     <span class="n">all_ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
     <span class="n">events</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+    <span class="n">load_ids</span> <span class="o">=</span> <span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">all_ids</span><span class="o">=</span><span class="n">all_ids</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">uproot</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">expressions</span><span class="o">=</span><span class="n">load_ids</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_regexp_ids"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.process_regexp_ids">[docs]</a><span class="k">def</span> <span class="nf">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process regular expressions for variable names</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        all_ids: all keys in a tree</span>
+<span class="sd">        ids:     keys to pick, if None, use all keys</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ids matching regular expressions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">load_ids</span> <span class="o">=</span> <span class="n">all_ids</span>
     <span class="k">else</span><span class="p">:</span>
@@ -156,17 +174,7 @@
                     <span class="n">load_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                     <span class="n">chosen</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#print(__name__ + f&#39;.load_tree: All variables     ({len(all_ids)}): \n{all_ids} \n&#39;)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: max_num_elements (NOT IMPLEMENTED): </span><span class="si">{</span><span class="n">max_num_elements</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="c1"># ----------------------------------------------------------</span>
-
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">expressions</span><span class="o">=</span><span class="n">load_ids</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Y</span></div>
-    
-    <span class="c1">#for Y in uproot.iterate(files, expressions=load_ids, library=library, step_size=max_num_elements):</span>
-    <span class="c1">#    return Y</span>
+    <span class="k">return</span> <span class="n">load_ids</span></div>
 </pre></div>
 
           </div>
