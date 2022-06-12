@@ -7,8 +7,8 @@
 CONFIG="tune0"
 
 DATAPATH="./travis-stash/input/iceid"
-#DATAPATH="/vols/cms/icenet/data/2020Oct16/"
-
+#DATAPATH="/vols/cms/icenet/data/2020Oct16"
+#DATAPATH="/home/user/imperial_new_trees/2020Oct16"
 
 mkdir ./figs/eid/$CONFIG -p # for output ascii dump
 

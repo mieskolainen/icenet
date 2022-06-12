@@ -64,7 +64,6 @@ def save_torch_model(model, optimizer, epoch, filename):
     """ PyTorch model saver
     """
     def f():
-        print(__name__ + f'.save_torch_model: Saving model to disk ...')
         torch.save({
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
