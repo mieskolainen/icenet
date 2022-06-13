@@ -192,7 +192,7 @@ def main():
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss             = deep.dopt.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
+                    loss             = deep.dopt.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Evaluate
                     trn_acc, trn_AUC = deep.dopt.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
