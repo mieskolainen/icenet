@@ -13,12 +13,15 @@ A deep learning driven library for high energy physics and beyond. See the docum
 https://mieskolainen.github.io/icenet
 
 </br>
-Or within:
-</br>
+Start with
 ```
 docs/source/notes/installation.rst
 ```
 </br>
+</br>
+
+For end-to-end deep learning examples, see github action (CI) workflows under .github/workflows
+
 </br>
 
 Mikael Mieskolainen, 2022 \
