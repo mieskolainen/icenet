@@ -13,9 +13,9 @@ import datetime
 import json
 import pickle
 import sys
+
 import numpy as np
 import torch
-#import uproot4
 import uproot
 import awkward as ak
 
@@ -234,15 +234,15 @@ def init_multiprocess(MAXEVENTS=None):
     for i in range(len(args['root_files'])):
 
         file     = uproot.open(args['root_files'][i])
-        N_events = int(file["ntuplizer"]["tree"].numentries)
+        num_events = int(file["ntuplizer"]["tree"].numentries)
         file.close()
 
         # Truncate upto max events
-        N_events = np.min([args['MAXEVENTS'], N_events])
-        N_cpu    = 1 if N_events <= 128 else CPU_count
+        num_events = np.min([args['MAXEVENTS'], num_events])
+        N_cpu    = 1 if num_events <= 128 else CPU_count
 
         # Create blocks
-        block_ind = aux.split_start_end(range(N_events), N_cpu)
+        block_ind = aux.split_start_end(range(num_events), N_cpu)
 
         manager = multiprocessing.Manager()
         return_dict = manager.dict()

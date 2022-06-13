@@ -3,33 +3,32 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
 
-def loss_wrapper(model, x, y, N_classes, weights, param):
+def loss_wrapper(model, x, y, num_classes, weights, param):
     """
     Wrapper function to call loss functions
     """
     if   param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
-        return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, N_classes=N_classes, weights=weights)
+        return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
-        return multiclass_logit_norm_loss(logit=logit, y=y, N_classes=N_classes, weights=weights, t=param['temperature'])
+        return multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
-        return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, N_classes=N_classes, weights=weights, gamma=param['gamma'])
+        return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
 
     else:
         print(__name__ + f".loss_wrapper: Error with unknown lossfunc {param['lossfunc']}")
 
 
-def logsumexp(x,dim=-1):
+def logsumexp(x, dim=-1):
     """ 
     https://en.wikipedia.org/wiki/LogSumExp
     """
@@ -50,7 +49,7 @@ def log_softmax(x, dim=-1):
     y = x - log_z
     return y
 
-def multiclass_logit_norm_loss(logit, y, N_classes, weights, t=1.0, EPS=1e-7):
+def multiclass_logit_norm_loss(logit, y, num_classes, weights, t=1.0, EPS=1e-7):
     """
     https://arxiv.org/abs/2205.09310
     """
@@ -58,48 +57,48 @@ def multiclass_logit_norm_loss(logit, y, N_classes, weights, t=1.0, EPS=1e-7):
     logit_norm = torch.div(logit, norms) / t
     log_phat = F.log_softmax(logit_norm, dim=-1) # Numerically more stable than pure softmax
 
-    return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, N_classes=N_classes, weights=weights)
+    return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
-def multiclass_cross_entropy_logprob(log_phat, y, N_classes, weights):
+def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights):
     """ 
     Per instance weighted cross entropy loss
     (negative log-likelihood)
     
     Numerically more stable version.
     """  
-    y    = F.one_hot(y, N_classes)
+    y    = F.one_hot(y, num_classes)
     loss = - y*log_phat * weights
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_cross_entropy(phat, y, N_classes, weights, EPS=1e-30):
+def multiclass_cross_entropy(phat, y, num_classes, weights, EPS=1e-30):
     """
     Per instance weighted cross entropy loss
     (negative log-likelihood)
     """
-    y = F.one_hot(y, N_classes)
+    y = F.one_hot(y, num_classes)
 
     # Protection
     loss = - y*torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_focal_entropy_logprob(log_phat, y, N_classes, weights, gamma, EPS=1e-30) :
+def multiclass_focal_entropy_logprob(log_phat, y, num_classes, weights, gamma, EPS=1e-30) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
     """
-    y = F.one_hot(y, N_classes)
+    y = F.one_hot(y, num_classes)
     loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_focal_entropy(phat, y, N_classes, weights, gamma, EPS=1e-30) :
+def multiclass_focal_entropy(phat, y, num_classes, weights, gamma, EPS=1e-30) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
     """
-    y = F.one_hot(y, N_classes)
+    y = F.one_hot(y, num_classes)
     loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
     loss = loss.sum() / y.shape[0]
     return loss

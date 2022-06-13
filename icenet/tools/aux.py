@@ -496,17 +496,17 @@ def binaryvec2int(X):
     return Y
 
 
-def int2onehot(Y, N_classes):
+def int2onehot(Y, num_classes):
     """ Integer class vector to class "one-hot encoding"
 
     Args:
         Y:         Class indices (# samples)
-        N_classes: Number of classes
+        num_classes: Number of classes
 
     Returns:
         onehot:    Onehot representation
     """
-    onehot = np.zeros(shape=(len(Y), N_classes), dtype=np.bool_)
+    onehot = np.zeros(shape=(len(Y), num_classes), dtype=np.bool_)
     for i in range(onehot.shape[0]):
         onehot[i, int(Y[i])] = 1
     return onehot
@@ -556,30 +556,12 @@ def pick_ind(x, minmax):
     return (minmax[0] <= x) & (x < minmax[1])
 
 
-def hardclass(y_soft, valrange = [0,1]):
-    """ Soft decision to hard decision at point (valrange[1] - valrange[0]) / 2
-    
-    Args:
-        y_soft : probabilities for two classes
-    Returns:
-        y_out  : classification results
-    """
-
-    y_out = copy.deepcopy(y_soft)
-
-    boundary = (valrange[1] - valrange[0]) / 2
-    y_out[y_out  > boundary] = 1
-    y_out[y_out <= boundary] = 0
-
-    return y_out
-
-
 def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
     """ Multiclass AUC (area under the curve).
 
     Args:
         y_true : True classifications
-        y_soft : Soft probabilities
+        y_soft : Soft probabilities per class
         weights: Sample weights 
         average: Averaging strategy
     Returns:
@@ -591,44 +573,56 @@ def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
     y_true = lb.transform(y_true)
     y_soft = lb.transform(y_soft)
     
-    auc = sklearn.metrics.roc_auc_score(y_true, y_soft, weights=weights, average=average)
+    auc = sklearn.metrics.roc_auc_score(y_true, y_soft, sample_weights=weights, average=average)
     return auc
 
 
 class Metric:
-    """ Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, weights=None, valrange='auto', N_class = 2, N_mva_bins=30):
+    Classifier performance evaluation metrics.
+    """
+    def __init__(self, y_true, y_soft, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30):
         """
         Args:
-            y_true   : true classifications
-            y_soft   : probabilities for two classes
-            weights  : event weights
-            valrange : range of probabilities / soft scores
+            y_true     : true classifications
+            y_soft     : probabilities per class (N x 1), (N x 2) or (N x K) dimensional array
+            weights    : event weights
+            num_classes: number of classses
+            
+            hist       : histogram soft decision values
+            valrange   : histogram range selection type
+            N_mva_bins : number of bins
+    
+        Returns:
+            metrics, see the source code for details
         """
 
-        self.N_class = N_class
+        self.num_classes = num_classes
 
+        # Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)
+        if (num_classes == 2) and (np.squeeze(y_soft).ndim == 2):
+            y_soft = y_soft[:,-1]
+        
         ok = np.isfinite(y_true) & np.isfinite(y_soft)
         
-        # Make sure the weights array is 1-dimensional (not events N) x (num class K)
+        # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
         if (weights is not None) and len(weights.shape) > 1:
             weights = np.sum(weights, axis=1)
 
         lhs = len(y_true) 
         rhs = (ok == True).sum()
-        if (lhs != rhs) :
+        if (lhs != rhs):
             print(__name__ + f'.Metric: input length = {lhs} with non-finite values = {lhs - rhs}')
             print(y_soft)
         
-        # invalid input
-        if (np.sum(y_true == 0) == 0) | (np.sum(y_true == 1) == 0):
-            print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)')
+        # Invalid input
+        if len(np.unique(y_true)) <= 1:
+            print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (return -1)')
+            self.acc = -1
+            self.auc = -1
             self.fpr = -1
             self.tpr = -1
             self.thresholds = -1
-            self.auc = -1
-            self.acc = -1
 
             self.mva_bins = []
             self.mva_hist = []
@@ -638,23 +632,46 @@ class Metric:
         if weights is not None:
             weights = weights[ok]
         
-        # Bin the prediction values over different classes
-        if valrange == 'auto':
-            valrange = [np.percentile(y_soft, 1), np.percentile(y_soft, 99)]
-        
-        self.mva_bins = np.linspace(valrange[0], valrange[1], N_mva_bins)
-        self.mva_hist = []
-        
-        for c in range(N_class):
-            ind    = (y_true == c)
-            counts = []
+        if hist is True:
             
-            if np.sum(ind) != 0:
-                w  = weights[ind] if weights is not None else None
-                counts, edges = np.histogram(y_soft[ind], weights=w, bins=self.mva_bins)
-            self.mva_hist.append(counts)
+            # Bin the soft prediction values
+            if   valrange == 'prob':
+                valrange = [0.0, 1.0]
+            elif valrange == 'auto':
+                valrange = [np.percentile(y_soft, 1), np.percentile(y_soft, 99)]
+            else:
+                raise Exception('Metric: Unknown valrange parameter')
 
-        # Metrics    
-        self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
-        self.auc = metrics.roc_auc_score(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
-        self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=hardclass(y_soft=y_soft[ok], valrange=valrange), sample_weight=weights)
+            self.mva_bins = np.linspace(valrange[0], valrange[1], N_mva_bins)
+            self.mva_hist = []
+            
+            for c in range(num_classes):
+                ind    = (y_true == c)
+                counts = []
+                
+                if np.sum(ind) != 0:
+                    w = weights[ind] if weights is not None else None
+                    x = y_soft[ind] if num_classes == 2 else y_soft[ind,c]
+                    counts, edges = np.histogram(x, weights=w, bins=self.mva_bins)
+                self.mva_hist.append(counts)
+        else:
+            self.mva_bins = None
+            self.mva_hist = None
+
+        # ------------------------------------
+        # Compute Metrics
+        
+        self.acc = None
+        self.auc = None
+        self.fpr = None
+        self.tpr = None
+        self.thresholds = None
+
+        if  num_classes == 2:
+            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
+            self.auc = metrics.roc_auc_score(y_true=y_true[ok],  y_score=y_soft[ok], sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=np.round(y_soft[ok]), sample_weight=weights)
+        else:
+            self.auc = metrics.roc_auc_score(y_true = y_true[ok], y_score = y_soft[ok], sample_weight = weights, \
+                        average="weighted", multi_class='ovo', labels=class_labels)
+            self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=y_soft[ok].argmax(axis=1), sample_weight=weights)

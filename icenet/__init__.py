@@ -8,7 +8,7 @@ import socket
 
 __version__    = '0.0.4'
 __release__    = 'alpha'
-__date__       = '11/06/2022'
+__date__       = '13/06/2022'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \

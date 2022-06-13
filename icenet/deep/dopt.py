@@ -277,7 +277,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
 
             # Evaluate loss
             loss_type = param['opt_param']['lossfunc']
-            loss = losstools.loss_wrapper(model=model, x=batch_x, y=batch_y, N_classes=model.C, weights=batch_weights, param=param['opt_param'])
+            loss = losstools.loss_wrapper(model=model, x=batch_x, y=batch_y, num_classes=model.C, weights=batch_weights, param=param['opt_param'])
 
             # ------------------------------------------------------------
             # Mutual information regularization for the output independence w.r.t the target variable
@@ -342,24 +342,18 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
                     batch_weights = batch_weights.to(device, non_blocking=True)
                     # ----------------------------------------------------------------
 
+                    # Predict
                     phat = model.softpredict(batch_x)
 
-                    # 2-class problems
-                    if model.C == 2:
-                        metric = aux.Metric(y_true = batch_y.detach().cpu().numpy(), \
-                            y_soft  = phat.detach().cpu().numpy()[:, SIGNAL_ID], \
-                            weights = batch_weights.detach().cpu().numpy(), valrange=[0,1])
-                        if metric.auc > 0:
+                    # Compute metrics
+                    metric = aux.Metric(y_true  = batch_y.detach().cpu().numpy(), \
+                                        y_soft  = phat.detach().cpu().numpy(), \
+                                        weights = batch_weights.detach().cpu().numpy(), \
+                                        num_classes = model.C, hist=False)
+                    
+                    if metric.auc > 0:
                             auc += metric.auc
                             k += 1
-
-                    # N-class problems
-                    else:
-                        auc += sklearn.metrics.roc_auc_score(y_true = batch_y.detach().cpu().numpy(), \
-                            y_score = phat.detach().cpu().numpy(), \
-                            sample_weight = None, \
-                            average="weighted", multi_class='ovo', labels=class_labels)
-                        k += 1
 
                 # Add AUC
                 if j == 0:

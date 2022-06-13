@@ -591,14 +591,14 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=N
 
     if classes is None:
         classes = np.zeros(N)
-        N_class = int(1)
+        num_classes = int(1)
     else:
-        N_class = len(np.unique(classes))
+        num_classes = len(np.unique(classes))
 
     figs = {}
     axs  = {}
 
-    for i in range(N_class):
+    for i in range(num_classes):
 
         label = f'class_{i}'
 
@@ -714,18 +714,18 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             print(__name__ + f'.MVA_plot: Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
             return -1
         else:
-            N_class = metrics[i].N_class
+            num_classes = metrics[i].num_classes
         
-        if len(metrics[i].mva_hist) != N_class:
-            print(__name__ + f'.MVA_plot: Error: N_class != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
+        if len(metrics[i].mva_hist) != num_classes:
+            print(__name__ + f'.MVA_plot: Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
             return -1
 
     for k in [0,1]: # linear & log
         
-        fig,ax = plt.subplots(1, N_class, figsize=(7*N_class, 5))
+        fig,ax = plt.subplots(1, num_classes, figsize=(7*num_classes, 5))
 
         # Loop over classes
-        for c in range(N_class):
+        for c in range(num_classes):
 
             # Loop over cells
             N      = len(metrics[0].mva_hist[c]) # Number of bins
@@ -768,7 +768,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
         if k == 1:
             #plt.ylim(0.0, 1.0)
             #plt.xlim(1e-4, 1.0)
-            for c in range(N_class):
+            for c in range(num_classes):
                 plt.sca(ax[c])
                 plt.gca().set_yscale('log')
                 #ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)

@@ -1,6 +1,6 @@
 # Graph data readers and parsers for electron ID
 #
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -106,7 +106,7 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
     num_edge_features = 4
     num_classes       = 2
 
-    N_events = X.shape[0]
+    num_events = X.shape[0]
     dataset  = []
     zerovec  = vec4()
 
@@ -128,7 +128,7 @@ def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord=
 
 
     # Loop over events
-    for e in tqdm(range(N_events)):
+    for e in tqdm(range(num_events)):
 
         num_nodes = 1 + len(X[e, ind__image_clu_eta]) # +1 virtual node
         num_edges = num_nodes**2 # include self-connections
@@ -195,10 +195,10 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     num_edge_features = 4
     num_classes       = 2
 
-    N_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
+    num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
     dataset  = []
 
-    print(__name__ + f'.parse_graph_data: Converting {N_events} events into graphs ...')
+    print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
     zerovec = vec4()
 
     # Collect feature indices
@@ -220,7 +220,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     num_empty_ECAL = 0
 
     # Loop over events
-    for i in tqdm(range(N_events)):
+    for i in tqdm(range(num_events)):
 
         num_nodes = 1 + len(X[i, ind__image_clu_eta]) # + 1 virtual node
         num_edges = num_nodes**2                      # include self-connections
@@ -287,7 +287,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
 
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
-    print(__name__ + f'.parse_graph_data: Empty ECAL cluster events: {num_empty_ECAL} / {N_events} = {num_empty_ECAL/N_events:0.5f} (using only global data u)')        
+    print(__name__ + f'.parse_graph_data: Empty ECAL cluster events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
     
     return dataset
 

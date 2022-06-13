@@ -1,6 +1,6 @@
 # Graph Neural Nets
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -34,6 +34,86 @@ from torch_geometric.typing import OptTensor, PairTensor, PairOptTensor, Adj
 import torch
 from torch import Tensor
 from torch_geometric.nn.conv import MessagePassing
+
+
+def train(model, loader, optimizer, device, param):
+    """
+    Pytorch geometric based training routine.
+    
+    Args:
+        model     : pytorch geometric model
+        loader    : pytorch geometric dataloader
+        optimizer : pytorch optimizer
+        device    : 'cpu' or 'device'
+        param:    : optimization parameters
+    
+    Returns
+        trained model (return implicit via input arguments)
+    """
+    model.train()
+    
+    total_loss = 0
+    n = 0
+    for batch in loader:
+
+        batch = batch.to(device)
+        optimizer.zero_grad()
+
+        # Compute loss
+        batch_weights = aux_torch.weight2onehot(weights=batch.w, Y=batch.y, num_classes=model.C)
+        loss = losstools.loss_wrapper(model=model, x=batch, y=batch.y, num_classes=model.C, weights=batch_weights, param=param)
+
+        # Propagate gradients
+        loss.backward()
+        
+        total_loss += loss.item() * batch.num_graphs
+        optimizer.step()
+        n += batch.num_graphs
+
+    return total_loss / n
+
+
+def test(model, loader, optimizer, device):
+    """
+    Pytorch geometric based testing routine.
+    
+    Args:
+        model    : pytorch geometric model
+        loader   : pytorch geometric dataloader
+        optimizer: pytorch optimizer
+        device   : 'cpu' or 'device'
+    
+    Returns
+        accuracy, AUC
+    """
+
+    model.eval()
+
+    accsum = 0
+    aucsum = 0
+    k = 0
+
+    for data in loader:
+        data = data.to(device)
+
+        with torch.no_grad():
+            phat = model.softpredict(data) # Probability
+            #pred = phat.argmax(dim=1)      # Maximum probability class (index)
+        
+        y_true  = data.y.detach().cpu().numpy()
+        y_soft  = phat.detach().cpu().numpy()
+        weights = data.w.detach().cpu().numpy()
+        
+        # Classification metrics
+        N       = len(y_true)
+        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False)
+        
+        if metrics.auc > -1: # Bad batch protection
+            aucsum += (metrics.auc * N)
+            accsum += (metrics.acc * N)
+            k += N
+
+    return accsum / k, aucsum / k
 
 
 class SuperEdgeConv(MessagePassing):
@@ -100,83 +180,6 @@ def MLP(channels, activation='relu', batch_norm=True):
             for i in range(1,len(channels))
         ])
 
-
-def train(model, loader, optimizer, device, param):
-    """
-    Pytorch geometric based training routine.
-    
-    Args:
-        model     : pytorch geometric model
-        loader    : pytorch geometric dataloader
-        optimizer : pytorch optimizer
-        device    : 'cpu' or 'device'
-        param:    : optimization parameters
-    
-    Returns
-        trained model (return implicit via input arguments)
-    """
-    model.train()
-    
-    total_loss = 0
-    n = 0
-    for batch in loader:
-
-        batch = batch.to(device)
-        optimizer.zero_grad()
-
-        # Compute loss
-        batch_weights = aux_torch.weight2onehot(weights=batch.w, Y=batch.y, N_classes=model.C)
-        loss = losstools.loss_wrapper(model=model, x=batch, y=batch.y, N_classes=model.C, weights=batch_weights, param=param)
-
-        # Propagate gradients
-        loss.backward()
-        
-        total_loss += loss.item() * batch.num_graphs
-        optimizer.step()
-        n += batch.num_graphs
-
-    return total_loss / n
-
-
-def test(model, loader, optimizer, device):
-    """
-    Pytorch geometric based testing routine.
-    
-    Args:
-        model     : pytorch geometric model
-        loader    : pytorch geometric dataloader
-        optimizer : pytorch optimizer
-        device    : 'cpu' or 'device'
-    
-    Returns
-        accuracy, auc
-    """
-
-    model.eval()
-
-    correct = 0
-    aucsum  = 0
-    k = 0
-    signal_class = 1
-
-    for data in loader:
-        data = data.to(device)
-        with torch.no_grad():
-
-            phat = model.softpredict(data)
-            pred = phat.max(dim=1)[1]
-            
-            y_true  = data.y.to('cpu').numpy()
-            y_soft  = phat[:, signal_class].to('cpu').numpy()
-            weights = data.w.to('cpu').numpy()
-            
-            metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights)
-            aucsum += metrics.auc
-
-        correct += pred.eq(data.y).sum().item()
-        k += 1
-
-    return correct / len(loader.dataset), aucsum / k
 
 # PANConv based graph net
 # https://arxiv.org/abs/2006.16811

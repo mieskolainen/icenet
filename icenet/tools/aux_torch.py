@@ -1,23 +1,24 @@
 # Torch aux tools
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import torch
 import numpy as np
 
 from icenet.tools import aux
 
-def weight2onehot(weights, Y, N_classes):
+
+def weight2onehot(weights, Y, num_classes):
     """
     Weights into one-hot encoding.
     Args:
         weights   : array of weights (torch type)
         Y         : targets (torch type)
-        N_classes : number of classes
+        num_classes : number of classes
 
     """
-    one_hot_weights = torch.zeros((len(weights), N_classes)).to(weights.device)
-    for i in range(N_classes):
+    one_hot_weights = torch.zeros((len(weights), num_classes)).to(weights.device)
+    for i in range(num_classes):
         try:
             one_hot_weights[Y == i, i] = weights[Y == i]
         except:
