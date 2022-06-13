@@ -34,7 +34,7 @@
   <h1>Source code for iceid.graphio</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Graph data readers and parsers for electron ID</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -140,7 +140,7 @@
     <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="n">num_classes</span>       <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="n">N_events</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_events</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">dataset</span>  <span class="o">=</span> <span class="p">[]</span>
     <span class="n">zerovec</span>  <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
 
@@ -162,7 +162,7 @@
 
 
     <span class="c1"># Loop over events</span>
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_events</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_events</span><span class="p">)):</span>
 
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># +1 virtual node</span>
         <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span> <span class="c1"># include self-connections</span>
@@ -229,10 +229,10 @@
     <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="n">num_classes</span>       <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="n">N_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">maxevents</span><span class="p">])</span> <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">maxevents</span><span class="p">])</span> <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">dataset</span>  <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Converting </span><span class="si">{</span><span class="n">N_events</span><span class="si">}</span><span class="s1"> events into graphs ...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Converting </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> events into graphs ...&#39;</span><span class="p">)</span>
     <span class="n">zerovec</span> <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
 
     <span class="c1"># Collect feature indices</span>
@@ -254,7 +254,7 @@
     <span class="n">num_empty_ECAL</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Loop over events</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_events</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_events</span><span class="p">)):</span>
 
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># + 1 virtual node</span>
         <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span>                      <span class="c1"># include self-connections</span>
@@ -321,7 +321,7 @@
 
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">N_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">N_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">num_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
     
     <span class="k">return</span> <span class="n">dataset</span></div>
 

@@ -34,24 +34,25 @@
   <h1>Source code for icenet.tools.aux_torch</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Torch aux tools</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2022</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
-<div class="viewcode-block" id="weight2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.weight2onehot">[docs]</a><span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
+
+<div class="viewcode-block" id="weight2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.weight2onehot">[docs]</a><span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Weights into one-hot encoding.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        weights   : array of weights (torch type)</span>
 <span class="sd">        Y         : targets (torch type)</span>
-<span class="sd">        N_classes : number of classes</span>
+<span class="sd">        num_classes : number of classes</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">one_hot_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_classes</span><span class="p">):</span>
+    <span class="n">one_hot_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">num_classes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">one_hot_weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">Y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>

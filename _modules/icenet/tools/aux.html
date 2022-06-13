@@ -530,17 +530,17 @@
     <span class="k">return</span> <span class="n">Y</span></div>
 
 
-<div class="viewcode-block" id="int2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.int2onehot">[docs]</a><span class="k">def</span> <span class="nf">int2onehot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">N_classes</span><span class="p">):</span>
+<div class="viewcode-block" id="int2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.int2onehot">[docs]</a><span class="k">def</span> <span class="nf">int2onehot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Integer class vector to class &quot;one-hot encoding&quot;</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        Y:         Class indices (# samples)</span>
-<span class="sd">        N_classes: Number of classes</span>
+<span class="sd">        num_classes: Number of classes</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        onehot:    Onehot representation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="n">N_classes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+    <span class="n">onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="n">num_classes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">onehot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="n">onehot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">onehot</span></div>
@@ -590,30 +590,12 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="hardclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.hardclass">[docs]</a><span class="k">def</span> <span class="nf">hardclass</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot; Soft decision to hard decision at point (valrange[1] - valrange[0]) / 2</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        y_soft : probabilities for two classes</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        y_out  : classification results</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">y_out</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
-
-    <span class="n">boundary</span> <span class="o">=</span> <span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">y_out</span><span class="p">[</span><span class="n">y_out</span>  <span class="o">&gt;</span> <span class="n">boundary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">y_out</span><span class="p">[</span><span class="n">y_out</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="k">return</span> <span class="n">y_out</span></div>
-
-
 <div class="viewcode-block" id="multiclass_roc_auc_score"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.multiclass_roc_auc_score">[docs]</a><span class="k">def</span> <span class="nf">multiclass_roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Multiclass AUC (area under the curve).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_true : True classifications</span>
-<span class="sd">        y_soft : Soft probabilities</span>
+<span class="sd">        y_soft : Soft probabilities per class</span>
 <span class="sd">        weights: Sample weights </span>
 <span class="sd">        average: Averaging strategy</span>
 <span class="sd">    Returns:</span>
@@ -625,44 +607,56 @@
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
     <span class="n">y_soft</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
     
-    <span class="n">auc</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">)</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">sample_weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">auc</span></div>
 
 
 <div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Classifier performance evaluation metrics.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classifier performance evaluation metrics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valrange</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">N_class</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">valrange</span><span class="o">=</span><span class="s1">&#39;prob&#39;</span><span class="p">,</span> <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            y_true   : true classifications</span>
-<span class="sd">            y_soft   : probabilities for two classes</span>
-<span class="sd">            weights  : event weights</span>
-<span class="sd">            valrange : range of probabilities / soft scores</span>
+<span class="sd">            y_true     : true classifications</span>
+<span class="sd">            y_soft     : probabilities per class (N x 1), (N x 2) or (N x K) dimensional array</span>
+<span class="sd">            weights    : event weights</span>
+<span class="sd">            num_classes: number of classses</span>
+<span class="sd">            </span>
+<span class="sd">            hist       : histogram soft decision values</span>
+<span class="sd">            valrange   : histogram range selection type</span>
+<span class="sd">            N_mva_bins : number of bins</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            metrics, see the source code for details</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">N_class</span> <span class="o">=</span> <span class="n">N_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">num_classes</span>
 
+        <span class="c1"># Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">y_soft</span> <span class="o">=</span> <span class="n">y_soft</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
         <span class="n">ok</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
         
-        <span class="c1"># Make sure the weights array is 1-dimensional (not events N) x (num class K)</span>
+        <span class="c1"># Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">lhs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span> 
         <span class="n">rhs</span> <span class="o">=</span> <span class="p">(</span><span class="n">ok</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">lhs</span> <span class="o">!=</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">lhs</span> <span class="o">!=</span> <span class="n">rhs</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: input length = </span><span class="si">{</span><span class="n">lhs</span><span class="si">}</span><span class="s1"> with non-finite values = </span><span class="si">{</span><span class="n">lhs</span> <span class="o">-</span> <span class="n">rhs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">y_soft</span><span class="p">)</span>
         
-        <span class="c1"># invalid input</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: only one class present in y_true, cannot evaluate metrics (set all == -1)&#39;</span><span class="p">)</span>
+        <span class="c1"># Invalid input</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: only one class present in y_true, cannot evaluate metrics (return -1)&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
@@ -672,26 +666,49 @@
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span>
         
-        <span class="c1"># Bin the prediction values over different classes</span>
-        <span class="k">if</span> <span class="n">valrange</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
-            <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">99</span><span class="p">)]</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_mva_bins</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
-        
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_class</span><span class="p">):</span>
-            <span class="n">ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
-            <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">w</span>  <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-                <span class="n">counts</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+            <span class="c1"># Bin the soft prediction values</span>
+            <span class="k">if</span>   <span class="n">valrange</span> <span class="o">==</span> <span class="s1">&#39;prob&#39;</span><span class="p">:</span>
+                <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">valrange</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+                <span class="n">valrange</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">y_soft</span><span class="p">,</span> <span class="mi">99</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Metric: Unknown valrange parameter&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Metrics    </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_curve</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">hardclass</span><span class="p">(</span><span class="n">y_soft</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">valrange</span><span class="o">=</span><span class="n">valrange</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">valrange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">valrange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N_mva_bins</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+                <span class="n">ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">y_soft</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+                    <span class="n">counts</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># ------------------------------------</span>
+        <span class="c1"># Compute Metrics</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span>  <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_curve</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span>  <span class="n">y_score</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">]),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_score</span> <span class="o">=</span> <span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">weights</span><span class="p">,</span> \
+                        <span class="n">average</span><span class="o">=</span><span class="s2">&quot;weighted&quot;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovo&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">class_labels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">ok</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_soft</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
