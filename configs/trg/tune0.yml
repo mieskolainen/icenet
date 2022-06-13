@@ -83,13 +83,13 @@ reweight_param:
   
   
   differential_reweight: False
-  dimension: 'pseudo-2D'       # '2D', 'pseudo-2D', '1D'
-  pseudo_type: 'geometric_mean'  # 'product', 'geometric_mean'
+  dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
+  pseudo_type: 'product'         # 'product', 'geometric_mean'
   
   var_A: 'x_hlt_pt'
   var_B: 'x_hlt_eta'
 
-  bins_A:  [0.001, 100.0, 150]     # Make sure the bounds cover the phase space
+  bins_A:  [0.001, 100.0, 150]   # Make sure the bounds cover the phase space
   binmode_A:  'linear'           # 'log10' or 'linear' binning
   
   bins_B: [-3.1, 3.1, 150]
