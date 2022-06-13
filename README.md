@@ -13,7 +13,7 @@ A deep learning driven library for high energy physics and beyond. See the docum
 https://mieskolainen.github.io/icenet
 
 </br>
-Start with installation
+Start with installation:
 
 ```
 docs/source/notes/installation.rst
