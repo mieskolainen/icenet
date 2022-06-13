@@ -598,23 +598,23 @@ class Metric:
         """
 
         self.num_classes = num_classes
-
+        
         # Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)
         if (num_classes == 2) and (np.squeeze(y_soft).ndim == 2):
             y_soft = y_soft[:,-1]
-        
-        ok = np.isfinite(y_true) & np.isfinite(y_soft)
-        
-        # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
-        if (weights is not None) and len(weights.shape) > 1:
-            weights = np.sum(weights, axis=1)
 
-        lhs = len(y_true) 
-        rhs = (ok == True).sum()
-        if (lhs != rhs):
-            print(__name__ + f'.Metric: input length = {lhs} with non-finite values = {lhs - rhs}')
-            print(y_soft)
+        # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
+        if (weights is not None) and (np.squeeze(y_soft).ndim > 1):
+            weights = np.sum(weights, axis=1)
         
+        # Check numerical validity
+        ok = np.isfinite(y_true) & np.isfinite(np.sum(y_soft,axis=1))
+
+        y_true = y_true[ok]
+        y_soft = y_soft[ok]
+        if weights is not None:
+            weights = weights[ok]
+
         # Invalid input
         if len(np.unique(y_true)) <= 1:
             print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (return -1)')
@@ -627,10 +627,7 @@ class Metric:
             self.mva_bins = []
             self.mva_hist = []
 
-            return
-        
-        if weights is not None:
-            weights = weights[ok]
+            return self
         
         if hist is True:
             
@@ -668,10 +665,10 @@ class Metric:
         self.thresholds = None
 
         if  num_classes == 2:
-            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true[ok], y_score=y_soft[ok], sample_weight=weights)
-            self.auc = metrics.roc_auc_score(y_true=y_true[ok],  y_score=y_soft[ok], sample_weight=weights)
-            self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=np.round(y_soft[ok]), sample_weight=weights)
+            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true, y_score=y_soft, sample_weight=weights)
+            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_soft, sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_soft), sample_weight=weights)
         else:
-            self.auc = metrics.roc_auc_score(y_true = y_true[ok], y_score = y_soft[ok], sample_weight = weights, \
-                        average="weighted", multi_class='ovo', labels=class_labels)
-            self.acc = metrics.accuracy_score(y_true=y_true[ok], y_pred=y_soft[ok].argmax(axis=1), sample_weight=weights)
+            self.auc = metrics.roc_auc_score(y_true=y_true, y_score=y_soft, sample_weight=None, \
+                        average="weighted", multi_class='ovo', labels=np.arange(num_classes))
+            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=y_soft.argmax(axis=1), sample_weight=weights)

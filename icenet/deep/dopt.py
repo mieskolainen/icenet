@@ -159,10 +159,6 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
     """
     Main training loop
     """
-    
-    cprint(__name__ + f""".train: Process RAM usage: {io.process_memory_use():0.2f} GB 
-        [total RAM in use {psutil.virtual_memory()[2]} %]""", 'red')
-    
     model, device = model_to_cuda(model, param['device'])
     
     # Input checks
@@ -187,8 +183,6 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
     #print(__name__ + f'.train: Weight initialization')
     #model.apply(weights_init_normal_rule)
     # --------------------------------------------------------------------
-
-    print('')
     
     # Class fractions
     frac = [sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size for i in range(model.C)]
@@ -248,6 +242,8 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
 
     # Training mode on!
     model.train()
+
+    io.print_RAM_usage()
 
     ### Epoch loop
     for epoch in tqdm(range(param['opt_param']['epochs']), ncols = 60):
@@ -311,7 +307,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
 
         avgloss = sumloss / nbatch
         losses.append(avgloss)
-
+        
         # ================================================================
         # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)
 
@@ -320,10 +316,7 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
             # Evaluation mode on (crucial e.g. for batchnorm etc.)!
             model.eval()
 
-            SIGNAL_ID    = 1
-            class_labels = np.arange(model.C)
             j = 0
-
             for gen in [training_generator, validation_generator]:
 
                 auc = 0
@@ -350,10 +343,10 @@ def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
                                         y_soft  = phat.detach().cpu().numpy(), \
                                         weights = batch_weights.detach().cpu().numpy(), \
                                         num_classes = model.C, hist=False)
-                    
+
                     if metric.auc > 0:
-                            auc += metric.auc
-                            k += 1
+                        auc += metric.auc
+                        k += 1
 
                 # Add AUC
                 if j == 0:
