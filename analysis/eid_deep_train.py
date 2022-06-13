@@ -173,7 +173,7 @@ def main():
 
                     # =========================================================================
                     ### Parse data into graphs
-
+                    
                     gdata = {}
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, ids=ids, weights=trn_weights,
                         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
@@ -190,13 +190,13 @@ def main():
 
                     train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
-
+                    
                     # Train
-                    loss             = deep.graph.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
+                    loss             = deep.dopt.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], param=param[ID]['opt_param'])
                     
                     # Evaluate
-                    trn_acc, trn_AUC = deep.graph.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
-                    val_acc, val_AUC = deep.graph.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                    trn_acc, trn_AUC = deep.dopt.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
+                    val_acc, val_AUC = deep.dopt.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
                     
                     scheduler[ID].step()
                     

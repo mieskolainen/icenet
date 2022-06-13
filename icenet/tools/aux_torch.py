@@ -8,23 +8,24 @@ import numpy as np
 from icenet.tools import aux
 
 
-def weight2onehot(weights, Y, num_classes):
+def weight2onehot(weights, y, num_classes):
     """
-    Weights into one-hot encoding.
+    Weights into one-hot encoding
+
     Args:
         weights   : array of weights (torch type)
-        Y         : targets (torch type)
+        y         : targets (torch type)
         num_classes : number of classes
 
     """
     one_hot_weights = torch.zeros((len(weights), num_classes)).to(weights.device)
     for i in range(num_classes):
         try:
-            one_hot_weights[Y == i, i] = weights[Y == i]
+            one_hot_weights[y == i, i] = weights[y == i]
         except:
             print(__name__ + f'.weight2onehot: Failed with class = {i} (zero samples)')
-    
     return one_hot_weights
+
 
 def count_parameters_torch(model):
     """

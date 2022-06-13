@@ -82,44 +82,162 @@ class Dataset(torch.utils.data.Dataset):
 
     def __init__(self, X, Y, W):
         """ Initialization """
-        self.X = X
-        self.Y = Y
-        self.W = W
+        self.x = X
+        self.y = Y
+        self.w = W
 
     def __len__(self):
         """ Return the total number of samples """
-        return self.X.shape[0]
+        return self.y.shape[0]
 
     def __getitem__(self, index):
         """ Generates one sample of data """
 
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
-        return self.X[index,...], self.Y[index], self.W[index,:]
+        return {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
 
 class DualDataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, Y, W):
+    def __init__(self, X, U, Y, W):
         """ Initialization """
-        self.x = X['x'] # e.g. image tensors
-        self.u = X['u'] # e.g. global features 
+        self.x = X  # e.g. image tensors
+        self.u = U  # e.g. global features 
         
-        self.Y = Y
-        self.W = W
+        self.y = Y
+        self.w = W
     
     def __len__(self):
         """ Return the total number of samples """
-        return self.x.shape[0]
+        return self.y.shape[0]
 
     def __getitem__(self, index):
         """ Generates one sample of data """
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
 
-        O      = {}
-        O['x'] = self.x[index,...]
-        O['u'] = self.u[index,...]
+        return {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
-        return O, self.Y[index], self.W[index,:]
+
+def dict_batch_to_cuda(batch, device):
+    """
+    Transfer to (GPU) device memory
+    """
+    for key in batch.keys():
+        batch[key] = batch[key].to(device, non_blocking=True)
+
+    return batch
+
+
+def batch2tensor(batch, device):
+    """
+    Transform batch objects to a correct device
+    """
+
+    # Dataset or Dualdataset
+    if type(batch) is dict:
+        batch = dict_batch_to_cuda(batch, device)
+        if 'u' in batch.keys():
+            x = {'x': batch['x'], 'u': batch['u']}
+        else:
+            x = batch['x']
+        w = batch['w']
+        y = batch['y']
+
+    # Pytorch geometric type
+    else:
+        batch = batch.to(device)
+        x = batch # this contains all graph (node and edge) information
+        y = batch.y
+        w = batch.w
+
+    return x,y,w
+
+
+def train(model, loader, optimizer, device, param):
+    """
+    Pytorch based training routine.
+    
+    Args:
+        model     : pytorch geometric model
+        loader    : pytorch geometric dataloader
+        optimizer : pytorch optimizer
+        device    : 'cpu' or 'device'
+        param:    : optimization parameters
+    
+    Returns
+        trained model (return implicit via input arguments)
+    """
+    model.train()
+    
+    total_loss = 0
+    n = 0
+    for i, batch in enumerate(loader):
+
+        x,y,w = batch2tensor(batch, device)
+
+        optimizer.zero_grad() # !
+
+        # Compute loss
+        weights = aux_torch.weight2onehot(weights=w, y=y, num_classes=model.C)
+        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=weights, param=param)
+
+        # Propagate gradients
+        loss.backward()
+        
+        if type(batch) is dict: # DualDataset or Dataset
+            total_loss += loss.item()
+            n += y.shape[0]
+        else:
+            total_loss += loss.item() * batch.num_graphs # torch-geometric
+            n += batch.num_graphs
+
+        optimizer.step()
+
+    return total_loss / n
+
+
+def test(model, loader, optimizer, device):
+    """
+    Pytorch based testing routine.
+    
+    Args:
+        model    : pytorch geometric model
+        loader   : pytorch geometric dataloader
+        optimizer: pytorch optimizer
+        device   : 'cpu' or 'device'
+    
+    Returns
+        accuracy, AUC
+    """
+
+    model.eval()
+
+    accsum = 0
+    aucsum = 0
+    k = 0
+
+    for i, batch in enumerate(loader):
+        
+        x,y,w = batch2tensor(batch, device)
+
+        with torch.no_grad():
+            phat = model.softpredict(x) # Probability
+            #pred = phat.argmax(dim=1)  # Maximum probability class (index)
+        
+        weights = w.detach().cpu().numpy()
+        y_true  = y.detach().cpu().numpy()
+        y_soft  = phat.detach().cpu().numpy()
+        
+        # Classification metrics
+        N       = len(y_true)
+        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False)
+
+        if metrics.auc > -1: # Bad batch protection
+            aucsum += (metrics.auc * N)
+            accsum += (metrics.acc * N)
+            k += N
+
+    return accsum / k, aucsum / k
 
 
 def model_to_cuda(model, device_type='auto'):
@@ -154,245 +272,33 @@ def model_to_cuda(model, device_type='auto'):
     return model, device
 
 
-def train(model, X_trn, Y_trn, X_val, Y_val, param, modeldir,
-    trn_weights=None, val_weights=None, clip_gradients=True, raytune_on=False, save_period=5):
-    """
-    Main training loop
-    """
-    model, device = model_to_cuda(model, param['device'])
-    
-    # Input checks
-    # more than 1 class sample required, will crash otherwise
-    if len(np.unique(Y_trn.detach().cpu().numpy())) <= 1:
-        raise Exception(__name__ + '.train: Number of classes in ''Y_trn'' <= 1')
-    if len(np.unique(Y_val.detach().cpu().numpy())) <= 1:
-        raise Exception(__name__ + '.train: Number of classes in ''Y_val'' <= 1')
+"""
+def train_loop():
 
-    # --------------------------------------------------------------------
-    if type(X_trn) is dict:
-        print(__name__ + f".train: Training samples = {X_trn['x'].shape[0]}, Validation samples = {X_val['x'].shape[0]}")
-    else:
-        print(__name__ + f'.train: Training samples = {X_trn.shape[0]}, Validation samples = {X_val.shape[0]}')
-
-    # Prints the weights and biases
-    print(model)
-    cprint(__name__ + f'.train: Number of free model parameters = {aux_torch.count_parameters_torch(model)} (requires_grad)', 'yellow')
-    
-    # --------------------------------------------------------------------
     ### Weight initialization
     #print(__name__ + f'.train: Weight initialization')
     #model.apply(weights_init_normal_rule)
-    # --------------------------------------------------------------------
     
     # Class fractions
     frac = [sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size for i in range(model.C)]
-
-    ## Classes
-    print(__name__ + '.train: Class fractions in the training sample: ')
-    for i in range(model.C): print(f' {i:4d} : {frac[i]:5.6f} ({sum(Y_trn.cpu().numpy() == i)} counts)')
-    print(__name__ + f'.train: Found {len(np.unique(Y_trn.cpu().numpy()))} / {model.C} classes in the training sample')
-
-    # Define the optimizer
-    opt           = param['opt_param']['optimizer']
-    learning_rate = param['opt_param']['learning_rate']
-    weight_decay  = param['opt_param']['weight_decay']
     
-    if   opt == 'AdamW':
-        optimizer = torch.optim.AdamW(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
-    elif opt == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
-    elif opt == 'SGD':
-        optimizer = torch.optim.SGD(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
-    else:
-        raise Exception(__name__ + f'.train: Unknown optimizer {opt} (use "Adam", "AdamW" or "SGD")')
+    # ------------------------------------------------------------
+    # Mutual information regularization for the output independence w.r.t the target variable
     
-    # List to store losses
-    losses   = []
-    trn_aucs = []
-    val_aucs = []
+    if param['opt_param']['MI_reg_on'] == True:
+
+        # Input variables, make output orthogonal with respect to 'ortho' variable
+        x1 = log_phat
+        x2 = batch_x['ortho']
+
+        MI, MI_err = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
+
+        # Adaptive gradient clipping
+        # ...
+
+        # Add to the loss
+        loss += param['opt_param']['MI_reg_beta'] * MI
     
-    print(__name__ + '.train: Training loop ...')
-
-    params = {'batch_size': param['opt_param']['batch_size'],
-              'shuffle'     : True,
-              'num_workers' : param['num_workers'],
-              'pin_memory'  : True}
-
-    # Check the size and change the shape
-    if trn_weights is None: trn_weights = np.ones(Y_trn.shape[0])
-    if val_weights is None: val_weights = np.ones(Y_val.shape[0])
-
-    trn_one_hot_weights = np.zeros((len(trn_weights), model.C))
-    val_one_hot_weights = np.zeros((len(val_weights), model.C))
-
-    for i in range(model.C):
-        trn_one_hot_weights[Y_trn.cpu().numpy() == i, i] = trn_weights[Y_trn.cpu().numpy() == i]
-        val_one_hot_weights[Y_val.cpu().numpy() == i, i] = val_weights[Y_val.cpu().numpy() == i]
-    
-    ### Generators
-    if type(X_trn) is dict:
-        training_set   = DualDataset(X_trn, Y_trn, trn_one_hot_weights)
-        validation_set = DualDataset(X_val, Y_val, val_one_hot_weights)
-    else:
-        training_set   = Dataset(X_trn, Y_trn, trn_one_hot_weights)
-        validation_set = Dataset(X_val, Y_val, val_one_hot_weights)
-
-    training_generator   = torch.utils.data.DataLoader(training_set,   **params)
-    validation_generator = torch.utils.data.DataLoader(validation_set, **params)
-
-    # Training mode on!
-    model.train()
-
-    io.print_RAM_usage()
-
-    ### Epoch loop
-    for epoch in tqdm(range(param['opt_param']['epochs']), ncols = 60):
-
-        # Minibatch loop
-        sumloss = 0
-        nbatch  = 0
-        
-        for batch_x, batch_y, batch_weights in training_generator:
-            
-            # ----------------------------------------------------------------
-            # Transfer to (GPU) device memory
-            if type(batch_x) is dict: # If multiobject type
-                for key in batch_x.keys():
-                    batch_x[key] = batch_x[key].to(device, non_blocking=True, dtype=torch.float)
-            else:
-                batch_x   = batch_x.to(device, non_blocking=True, dtype=torch.float)
-
-            batch_y       = batch_y.to(device, non_blocking=True)
-            batch_weights = batch_weights.to(device, non_blocking=True)
-            # ----------------------------------------------------------------
-            
-            # Noise regularization (NOT ACTIVE)
-            #if param['noise_reg'] > 0:
-            #    noise   = torch.empty(batch_x.shape).normal_(mean=0, std=param['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
-            #    batch_x = batch_x + noise
-
-            # Evaluate loss
-            loss_type = param['opt_param']['lossfunc']
-            loss = losstools.loss_wrapper(model=model, x=batch_x, y=batch_y, num_classes=model.C, weights=batch_weights, param=param['opt_param'])
-
-            # ------------------------------------------------------------
-            # Mutual information regularization for the output independence w.r.t the target variable
-            """
-            if param['opt_param']['MI_reg_on'] == True:
-
-                # Input variables, make output orthogonal with respect to 'ortho' variable
-                x1 = log_phat
-                x2 = batch_x['ortho']
-
-                MI, MI_err = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
-
-                # Adaptive gradient clipping
-                # ...
-
-                # Add to the loss
-                loss += param['opt_param']['MI_reg_beta'] * MI
-            """
-            # ------------------------------------------------------------
-            optimizer.zero_grad() # Zero gradients
-            loss.backward()       # Compute gradients
-            if clip_gradients:
-            	torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # Clip gradient for NaN problems
-
-            # Update parameters
-            optimizer.step()
-
-            ### Save metrics
-            sumloss += loss.item() # item() important for performance
-            nbatch  += 1
-
-        avgloss = sumloss / nbatch
-        losses.append(avgloss)
-        
-        # ================================================================
-        # TEST AUC PERFORMANCE SPARSILY (SLOW -- IMPROVE PERFORMANCE)
-
-        if (epoch % save_period == 0) :
-
-            # Evaluation mode on (crucial e.g. for batchnorm etc.)!
-            model.eval()
-
-            j = 0
-            for gen in [training_generator, validation_generator]:
-
-                auc = 0
-                k   = 0
-                for batch_x, batch_y, batch_weights in gen:
-                    
-                    # ----------------------------------------------------------------
-                    # Transfer to (GPU) device memory
-                    if type(batch_x) is dict: # If multiobject type
-                        for key in batch_x.keys():
-                            batch_x[key] = batch_x[key].to(device, non_blocking=True, dtype=torch.float)
-                    else:
-                        batch_x   = batch_x.to(device, non_blocking=True, dtype=torch.float)
-
-                    batch_y       = batch_y.to(device, non_blocking=True)
-                    batch_weights = batch_weights.to(device, non_blocking=True)
-                    # ----------------------------------------------------------------
-
-                    # Predict
-                    phat = model.softpredict(batch_x)
-
-                    # Compute metrics
-                    metric = aux.Metric(y_true  = batch_y.detach().cpu().numpy(), \
-                                        y_soft  = phat.detach().cpu().numpy(), \
-                                        weights = batch_weights.detach().cpu().numpy(), \
-                                        num_classes = model.C, hist=False)
-
-                    if metric.auc > 0:
-                        auc += metric.auc
-                        k += 1
-
-                # Add AUC
-                if j == 0:
-                    trn_aucs.append(auc / (k + 1E-12))
-                else:
-                    val_aucs.append(auc / (k + 1E-12))
-                j += 1
-
-            print(f'Epoch = {epoch} : train loss = {avgloss:0.3f} [trn AUC = {trn_aucs[-1]:0.3f}, val AUC = {val_aucs[-1]:0.3f}]')
-
-            # Back to training mode!
-            model.train()
-
-        # Just print the loss
-        else:
-            trn_aucs.append(trn_aucs[-1]) # Take previous
-            val_aucs.append(val_aucs[-1])
-
-            print(f'Epoch = {epoch} : train loss = {avgloss:0.3f}')
-            
-        # ------------------------------------------------------------------------------
-        # Raytune on
-        if raytune_on:
-            with tune.checkpoint_dir(epoch) as checkpoint_dir:
-                path = os.path.join(checkpoint_dir, "checkpoint")
-                torch.save((model.state_dict(), optimizer.state_dict()), path)
-
-            tune.report(loss = losses[-1], AUC = val_aucs[-1])
-
-        # No raytune
-        else:
-            ## Save
-            checkpoint = {'model': model, 'state_dict': model.state_dict()}
-            torch.save(checkpoint, modeldir + f'/{param["label"]}_' + str(epoch) + '.pth')
-        # ------------------------------------------------------------------------------        
-
-    # -------------------------------------------------------
-    # Temperature scaling post-processing
-    """
-    if param['post_process']['temperature_scale']:
-
-        scaled_model = ModelWithTemperature(model, device=device)
-        scaled_model.set_temperature(valid_loader=validation_generator)
-
-        model = scaled_model
-    """
-    # -------------------------------------------------------
-    
-    return model, losses, trn_aucs, val_aucs
+    if clip_gradients:
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # Clip gradient for NaN problems
+"""

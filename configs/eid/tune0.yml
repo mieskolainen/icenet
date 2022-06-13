@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 1000000    # Maximum total number of events (per root file) to process
+MAXEVENTS: 10000    # Maximum total number of events (per root file) to process
 
 eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
@@ -186,7 +186,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: true
+    active: false
     nbins:  70
   
   contours: 
@@ -671,6 +671,11 @@ dmlp_param:
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001     # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
   
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -706,6 +711,11 @@ lgr0_param:
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
 
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1  
+
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -716,16 +726,22 @@ lgr0_param:
 
 # Convolutional Neural Net + MAXOUT MLP
 cnn0_param:
-  train:   'torch_image_vector'
+  train:   'torch_generic'
   predict: 'torch_image_vector'
   label:   'CNN+MAXO'
   raytune:  null
-
+  
   # Model
+  conv_type: 'cnn+maxo'
   model_param:
     dropout_cnn: 0.25
     dropout_mlp: 0.5
     mlp_dim: 64
+
+    # Set these according to the input matrix (could autodetect ...)
+    nchannels: 2
+    nrows:     59
+    ncols:     59
 
   # Optimization
   opt_param:  
@@ -740,7 +756,12 @@ cnn0_param:
     batch_size: 128
     learning_rate: 0.001
     weight_decay: 0.00        # L2-regularization
-    
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+      
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -811,6 +832,11 @@ dmx0_param:
     batch_size: 128
     learning_rate: 0.005
     weight_decay: 0.00001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4

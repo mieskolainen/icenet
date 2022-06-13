@@ -598,17 +598,20 @@ class Metric:
         """
 
         self.num_classes = num_classes
-        
+
         # Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)
         if (num_classes == 2) and (np.squeeze(y_soft).ndim == 2):
             y_soft = y_soft[:,-1]
 
         # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
-        if (weights is not None) and (np.squeeze(y_soft).ndim > 1):
+        if (weights is not None) and (np.squeeze(weights).ndim > 1):
             weights = np.sum(weights, axis=1)
         
         # Check numerical validity
-        ok = np.isfinite(y_true) & np.isfinite(np.sum(y_soft,axis=1))
+        if (np.squeeze(y_soft).ndim > 1):
+            ok = np.isfinite(np.sum(y_soft,axis=1))
+        else:
+            ok = np.isfinite(y_soft)
 
         y_true = y_true[ok]
         y_soft = y_soft[ok]
@@ -627,8 +630,8 @@ class Metric:
             self.mva_bins = []
             self.mva_hist = []
 
-            return self
-        
+            return # Return None
+            
         if hist is True:
             
             # Bin the soft prediction values

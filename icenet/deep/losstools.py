@@ -14,14 +14,17 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
     """
     if   param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
+        y = y.type(torch.int64)
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
+        y = y.type(torch.int64)
         return multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
+        y = y.type(torch.int64)
         return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
 
     else:
@@ -65,7 +68,7 @@ def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights):
     (negative log-likelihood)
     
     Numerically more stable version.
-    """  
+    """
     y    = F.one_hot(y, num_classes)
     loss = - y*log_phat * weights
     loss = loss.sum() / y.shape[0]

@@ -6,7 +6,7 @@
 rootname: 'brk'
 
 VERBOSE: false
-MAXEVENTS: 500
+MAXEVENTS: 1000
 
 rngseed: 123456                 # Fixed seed for training data mixing
 
@@ -32,6 +32,7 @@ SUPERSETS: true
 # ...
 
 # Variable normalization
+frac: 0.9                 # Train/validate/test split fraction
 varnorm: 'zscore'         # variable normalization: 'zscore', 'minmax', 'none'
 
 ## Outlier protection in the training phase
@@ -107,9 +108,9 @@ xgb_param:
   tree_method: 'auto' # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
   
   # booster parameters
-  learning_rate: 0.15
+  learning_rate: 0.3
   
-  max_depth: 15
+  max_depth: 10
   min_child_weight: 1.0
   gamma: 0.0
   max_delta_step: 0
@@ -126,7 +127,7 @@ xgb_param:
   
   # learning task parameters
   objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
-  eval_metric: ['mlogloss']   # 'mlogloss' is multiclass log-loss
+  eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
@@ -139,6 +140,7 @@ maxo_param:
   label:  'MAXO'
   
   # Model parameters
+  conv_type: 'maxo'
   model_param:
     num_units: 12
     neurons:  36
@@ -156,6 +158,11 @@ maxo_param:
     batch_size:  256
     learning_rate: 0.005
     weight_decay: 0.01            # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
     
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
@@ -171,6 +178,7 @@ deps_param:
   label:  'DEPS'
 
   # Model parameters
+  conv_type: 'deps'
   model_param:  
     z_dim: 64                   # Latent dimension
 
@@ -186,7 +194,12 @@ deps_param:
     batch_size:  256
     learning_rate: 0.005
     weight_decay: 0.01            # L2-regularization
-  
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
   

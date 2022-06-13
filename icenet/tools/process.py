@@ -191,14 +191,7 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
     
     prints.print_variables(data.trn.x, data.ids)
 
-    ### Pick training data into PyTorch format
-    X_trn = torch.from_numpy(data.trn.x).type(torch.FloatTensor)
-    Y_trn = torch.from_numpy(data.trn.y).type(torch.LongTensor)
 
-    X_val = torch.from_numpy(data.val.x).type(torch.FloatTensor)
-    Y_val = torch.from_numpy(data.val.y).type(torch.LongTensor)
-    
-    
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -242,15 +235,17 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                 model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
                 model = train.train_xgb(**inputs)
-        
+            
         elif param['train'] == 'torch_generic':
             
-            inputs = {'X_trn': X_trn,
-                      'Y_trn': Y_trn,
-                      'X_val': X_val,
-                      'Y_val': Y_val,
-                      'trn_weights': trn_weights,
-                      'val_weights': val_weights,
+            inputs = {'X_trn': torch.tensor(data.trn.x, dtype=torch.float),
+                      'Y_trn': torch.tensor(data.trn.y, dtype=torch.long),
+                      'X_val': torch.tensor(data.val.x, dtype=torch.float),
+                      'Y_val': torch.tensor(data.val.y, dtype=torch.long),
+                      'X_trn_2D': None if data_tensor is None else torch.tensor(data_tensor['trn'], dtype=torch.float),
+                      'X_val_2D': None if data_tensor is None else torch.tensor(data_tensor['val'], dtype=torch.float),
+                      'trn_weights': torch.tensor(trn_weights, dtype=torch.float),
+                      'val_weights': torch.tensor(val_weights, dtype=torch.float),
                       'args':  args,
                       'param': param}
 
@@ -263,11 +258,7 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, trn_wei
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)
-            
-        elif param['train'] == 'torch_image_vector':
-            train.train_torch_image_vector(data=data, data_tensor=data_tensor, Y_trn=Y_trn, Y_val=Y_val, 
-                trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)
-        
+
         elif param['train'] == 'graph_xgb':
             train.train_graph_xgb(data_trn=data_graph['trn'], data_val=data_graph['val'], 
                 trn_weights=trn_weights, val_weights=val_weights, args=args, param=param)  

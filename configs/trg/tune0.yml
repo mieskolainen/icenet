@@ -480,6 +480,11 @@ lgr0_param:
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
 
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
   post_process:
     temperature_scale: true
 

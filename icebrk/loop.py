@@ -429,11 +429,23 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
             print_input(events)
 
         ## Loop over this file
-        for i,evtgroup in enumerate(events.iterate(step_size = EVTGROUPSIZE)):
-                        
-            print(f'evtgroup = {i} [EVTGROUPSIZE = {EVTGROUPSIZE}]')
+        skips = 0
+        for evt_i, evtgroup in enumerate(events.iterate(step_size = EVTGROUPSIZE)):
+
+            print(f'evtgroup = {evt_i} [EVTGROUPSIZE = {EVTGROUPSIZE}]')
             d = copy.deepcopy(evtgroup)
 
+            """
+            if not isMC:
+                if skips < 1:
+                    # Skip events hack
+                    print('Skipping evtgroup due to simulation')
+                    skips += 1
+                    continue;
+                else:
+                    True
+            """
+            
             # --------------------------------------------------------------------
             # *** FULLY VECTORIZED KINEMATICS CONSTRUCTION (JAGGED/COLUMNAR) ***
 

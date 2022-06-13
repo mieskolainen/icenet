@@ -17,7 +17,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 import xgboost
-from sklearn.model_selection import train_test_split
+import sklearn
 
 
 # icenet
@@ -32,6 +32,7 @@ from icenet.deep  import bnaf
 from icenet.deep  import dbnf
 from icenet.deep  import deps
 from icenet.deep  import maxo
+from icenet.deep  import train
 
 from icenet.optim import adam
 from icenet.optim import adamax
@@ -42,10 +43,8 @@ from icenet.optim import scheduler
 from icebrk import common
 from icebrk import loop
 from icebrk import features
-
-
-
 from iceplot import iceplot
+
 
 # Main function
 #
@@ -54,8 +53,9 @@ def main() :
     ### Get input
     paths, args, cli, iodir = common.init()
     VARS = features.generate_feature_names(args['MAXT3'])
-    modeldir = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
-    plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+
+    args['modeldir'] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
+    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
     
     # ========================================================================
     ### Event loop
@@ -75,6 +75,9 @@ def main() :
     print(__name__ + ': Variables before normalization:')
     prints.print_variables(X, VARS)    
     # =======================================================================
+    
+    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+    fig,ax    = plots.plot_correlations(X=X, netvars=VARS, targetdir=targetdir)    
     
     
     # ------------------------------------------------------------------------
@@ -117,7 +120,7 @@ def main() :
         prints.print_variables(X, VARS)
 
         # Save it for the evaluation
-        pickle.dump([X_mu, X_std], open(modeldir + '/zscore.dat', 'wb'))
+        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.dat', 'wb'))
 
 
     ### Weights: CURRENTLY UNIT WEIGHTS
@@ -135,7 +138,10 @@ def main() :
     
     if args['xgb_param']['active']:
 
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y_i, test_size=0.1, random_state=42)
+        label = 'xgb'
+
+        X_train, X_eval, Y_train, Y_eval = \
+            sklearn.model_selection.train_test_split(X, Y_i, test_size=1-args['frac'], random_state=args['rngseed'])
 
         if args['xgb_param']['tree_method'] == 'auto':
             args['xgb_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
@@ -144,46 +150,62 @@ def main() :
         args['xgb_param'].update({'num_class': C})
         
         dtrain = xgboost.DMatrix(data = X_train, label = Y_train) #, weight = trn_weights)
-        dtest  = xgboost.DMatrix(data = X_test , label = Y_test)
+        deval  = xgboost.DMatrix(data = X_eval , label = Y_eval)
 
-        evallist  = [(dtrain, 'train'), (dtest, 'eval')]
+        evallist  = [(dtrain, 'train'), (deval, 'eval')]
         results   = dict()
         xgb_model = xgboost.train(params=args['xgb_param'], num_boost_round = args['xgb_param']['num_boost_round'],
             dtrain=dtrain, evals=evallist, evals_result=results, verbose_eval=True)
 
         ## Save
-        pickle.dump(xgb_model, open(modeldir + '/XGB_model.dat', 'wb'))
+        pickle.dump(xgb_model, open(args['modeldir'] + '/XGB_model.dat', 'wb'))
+
+        # ================================================================
+        losses   = results['train']['mlogloss']
+        trn_aucs = results['train']['auc']
+        val_aucs = results['eval']['auc']
+
+        # Plot evolution
+        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+        # ================================================================
+
 
 
     # ------------------------------------------------------------------------
     # PyTorch based training
+
+    def torch_split(x, y, test_size, random_state):
+
+        X_trn, X_val, Y_trn, Y_val = \
+            sklearn.model_selection.train_test_split(x,y, test_size=test_size, random_state=random_state)
+        
+        X_trn = torch.from_numpy(X_trn).type(torch.FloatTensor)
+        X_val = torch.from_numpy(X_val).type(torch.FloatTensor)
+        
+        Y_trn = torch.from_numpy(Y_trn).type(torch.LongTensor) # class targets as ints
+        Y_val = torch.from_numpy(Y_val).type(torch.LongTensor)
+
+        return X_trn, X_val, Y_trn, Y_val
     
-    # Target outputs [** NOW SAME -- UPDATE THIS **]
-    Y_trn = torch.from_numpy(Y_i).type(torch.LongTensor)
-    Y_val = torch.from_numpy(Y_i).type(torch.LongTensor)
-    
-    
+
     # ====================================================================
     print('<< TRAINING DEEP MAXOUT >>')
     
     if args['maxo_param']['active']:
         
-        label = args['maxo_param']['label']
-        
-        # Input [** NOW SAME -- UPDATE THIS **]
-        X_trn = torch.from_numpy(X).type(torch.FloatTensor)
-        X_val = torch.from_numpy(X).type(torch.FloatTensor)
+        X_trn, X_val, Y_trn, Y_val = torch_split(x=X, y=Y_i, test_size=1 - args['frac'], random_state=args['rngseed'])
+        args['num_classes'] = C
 
-        print(f'\nTraining {label} classifier ...')
-        maxo_model = maxo.MAXOUT(D = X_trn.shape[1], C = C, **args['maxo_param']['model_param'])
-        maxo_model, losses, trn_aucs, val_aucs = dopt.train(model = maxo_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val,
-            trn_weights = trn_weights, val_weights=val_weights, param = args['maxo_param'], modeldir = modeldir)
-        
-        # Plot evolution
-        fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+        model, train_loader, test_loader = \
+            train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
+             trn_weights=trn_weights, val_weights=val_weights, param=args['maxo_param'], args=args, config={})
 
-    
+        model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                    args=args, param=args['maxo_param'], config={})
+
+
     # ====================================================================
     print('<< TRAINING DEEP SETS >>')
 
@@ -191,31 +213,20 @@ def main() :
 
         M = args['MAXT3']           # Number of triplets per event
         D = features.getdimension() # Triplet feature vector dimension
-        C = BMAT.shape[0]           # Number of classes
-
         X_DS = aux.longvec2matrix(X, M, D)
-        
-        # [NOW SAME -- UPDATE THIS!]
-        X_trn = torch.from_numpy(X_DS).type(torch.FloatTensor)
-        X_val = torch.from_numpy(X_DS).type(torch.FloatTensor)
-        
-        # ----------------------------------------------------------------
-        
-        label = args['deps_param']['label']
-        
-        print(f'\nTraining {label} classifier ...')
-        deps_model = deps.DEPS(D = D, C = C, **args['deps_param']['model_param'])
-        deps_model, losses, trn_aucs, val_aucs = dopt.train(model = deps_model, X_trn = X_trn, Y_trn = Y_trn, X_val = X_val, Y_val = Y_val, 
-            trn_weights = trn_weights, val_weights=val_weights, param = args['deps_param'], modeldir = modeldir)
-        
-        # Plot evolution
-        fig,ax = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-        plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
-    
-        
+
+        X_trn, X_val, Y_trn, Y_val = torch_split(x=X_DS, y=Y_i, test_size=1 - args['frac'], random_state=args['rngseed'])
+        args['num_classes'] = C
+
+        model, train_loader, test_loader = \
+            train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
+             trn_weights=trn_weights, val_weights=val_weights, param=args['deps_param'], args=args, config={})
+
+        model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                    args=args, param=args['deps_param'], config={})
+
     print('\n' + __name__+ ' DONE')
 
     
 if __name__ == '__main__' :
-    
     main()

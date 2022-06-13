@@ -122,7 +122,7 @@ def main() :
     dataA_template = {
         'data'   : None,
         'weights': None,
-        'label'  : '$icenet$ A0',
+        'label'  : '$icenet$ (DEPS)',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,
@@ -132,7 +132,7 @@ def main() :
     dataB_template = {
         'data'   : None,
         'weights': None,
-        'label'  : '$icenet$ A1',
+        'label'  : '$icenet$ (MAXO)',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,
@@ -142,7 +142,7 @@ def main() :
     dataC_template = {
         'data'   : None,
         'weights': None,
-        'label'  : '$icenet$ A2',
+        'label'  : '$icenet$ (XGB)',
         'hfunc'  : 'errorbar',
         'style'  : iceplot.errorbar_style,
         'obs'    : None,
@@ -159,7 +159,7 @@ def main() :
 
         # MC
         sources.append(MC_template.copy())
-
+        
         # DATA
         sources.append(dataA_template.copy())
         sources.append(dataB_template.copy())

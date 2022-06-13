@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class CNN_DMAX(nn.Module):
+class CNN_MAXO(nn.Module):
     """
     Dual (simultaneous) input network [image tensors x global vectors]
     """
@@ -18,7 +18,7 @@ class CNN_DMAX(nn.Module):
 
     def __init__(self, D, C, nchannels=1, nrows=32, ncols=32,
                     dropout_cnn=0.0, mlp_dim=50, num_units=6, dropout_mlp=0.1):
-        super(CNN_DMAX, self).__init__()
+        super(CNN_MAXO, self).__init__()
         
         # -------------------------------------------
         # CNN BLOCK
@@ -94,15 +94,27 @@ class CNN_DMAX(nn.Module):
         Input data dictionary with members
             'x' : as image tensor
             'u'' : global feature tensor
+
+        or a class with data.x and data.u
         """
 
+        #print(f"forward: {data['x'].shape}")
+        #print(f"forward: {data['u'].shape}")
+        
+        if type(data) is dict:
+            X = data['x']
+            U = data['u']
+        else:
+            X = data.x
+            U = data.u
+        
         # print(f'\nINPUT: {x.shape}')
-        x1 = self.block1(data['x'])
+        x1 = self.block1(X)
         # print(f'\nAFTER BLOCK 1: {x.shape}')
         x1 = x1.view(-1, self.Z)
 
         # ***
-        x = torch.cat((x1, data['u']), 1)
+        x = torch.cat((x1, U), 1)
         # ***
 
         x = self.maxout(x, self.fc1_list)
