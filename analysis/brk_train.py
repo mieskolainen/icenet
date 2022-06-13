@@ -200,10 +200,10 @@ def main() :
 
         model, train_loader, test_loader = \
             train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
-             trn_weights=trn_weights, val_weights=val_weights, param=args['maxo_param'], args=args, config={})
+             trn_weights=trn_weights, val_weights=val_weights, param=args['maxo_param'], args=args)
 
         model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                    args=args, param=args['maxo_param'], config={})
+                    args=args, param=args['maxo_param'])
 
 
     # ====================================================================
@@ -220,11 +220,11 @@ def main() :
 
         model, train_loader, test_loader = \
             train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
-             trn_weights=trn_weights, val_weights=val_weights, param=args['deps_param'], args=args, config={})
+             trn_weights=trn_weights, val_weights=val_weights, param=args['deps_param'], args=args)
 
         model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                    args=args, param=args['deps_param'], config={})
-
+                    args=args, param=args['deps_param'])
+    
     print('\n' + __name__+ ' DONE')
 
     

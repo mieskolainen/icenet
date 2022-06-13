@@ -153,7 +153,7 @@ def batch2tensor(batch, device):
     return x,y,w
 
 
-def train(model, loader, optimizer, device, param):
+def train(model, loader, optimizer, device, opt_param):
     """
     Pytorch based training routine.
     
@@ -162,7 +162,7 @@ def train(model, loader, optimizer, device, param):
         loader    : pytorch geometric dataloader
         optimizer : pytorch optimizer
         device    : 'cpu' or 'device'
-        param:    : optimization parameters
+        opt_param : optimization parameters
     
     Returns
         trained model (return implicit via input arguments)
@@ -179,8 +179,8 @@ def train(model, loader, optimizer, device, param):
 
         # Compute loss
         weights = aux_torch.weight2onehot(weights=w, y=y, num_classes=model.C)
-        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=weights, param=param)
-
+        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=weights, param=opt_param)
+        
         # Propagate gradients
         loss.backward()
         

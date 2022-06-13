@@ -120,7 +120,6 @@ def getgraphmodel(conv_type, netparam):
     
     return model
 
-
 def getgenericparam(param, D, num_classes, config={}):
     """
     Construct generic torch network parameters
@@ -136,7 +135,6 @@ def getgenericparam(param, D, num_classes, config={}):
             netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
 
     return netparam, param['conv_type']
-
 
 def getgraphparam(data_trn, num_classes, param, config={}):
     """
@@ -161,19 +159,17 @@ def getgraphparam(data_trn, num_classes, param, config={}):
 
     return netparam, param['conv_type']
 
-
 def raytune_main(inputs, train_func=None):
     """
     Raytune mainloop
     """
+
     args  = inputs['args']
     param = inputs['param']
-
 
     ### General raytune parameters
     num_samples    = args['raytune_param']['num_samples']
     max_num_epochs = args['raytune_param']['max_num_epochs']
-
 
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
@@ -235,40 +231,27 @@ def raytune_main(inputs, train_func=None):
     # Get the best config
     best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="last")
 
-    cprint(f'raytune: Best trial config:                {best_trial.config}', 'green')
+    cprint(f'raytune: Best trial config:                {best_trial.config}',              'green')
     cprint(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
-    cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}', 'green')
+    cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}',  'green')
 
     # Torch graph networks
-    if train_func == train_torch_graph:
+    if (train_func == train_torch_graph) or (train_func == train_torch_generic):
 
-        ### Load the best model from raytune folder
-        bestparam, conv_type = getgraphparam(config=best_trial.config, data_trn=inputs['data_trn'], num_classes=inputs['args']['num_classes'], param=inputs['param'])
-        best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
+        # Construct models
+        if   train_func == train_torch_graph:
+            bestparam, conv_type = getgraphparam(config=best_trial.config, data_trn=inputs['data_trn'], num_classes=inputs['args']['num_classes'], param=inputs['param'])
+            best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
 
-        device = "cpu"
-        if torch.cuda.is_available():
-            device = "cuda:0"
-            if gpus_per_trial > 1:
-                best_trained_model = nn.DataParallel(best_trained_model)
-        best_trained_model.to(device)
+        elif train_func == train_torch_generic:
+            bestparam, conv_type = getgenericparam(config=best_trial.config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
+            best_trained_model   = getgenericmodel(conv_type=conv_type, netparam=bestparam)
 
-        best_checkpoint_dir          = best_trial.checkpoint.value
-        model_state, optimizer_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
-        best_trained_model.load_state_dict(model_state)
-
-        ### Finally save it under model folder
-        checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
-        torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
-
-    ## Generic Torch model
-    elif train_func == train_torch_generic:
-
-        ### Construct model
-        netparam, conv_type = getgenericparam(config=best_trial.config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
-        model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
+        else:
+            raise Exception(__name__ + f'.raytune_main: Unknown error with input')
 
         device = "cpu"
+        
         if torch.cuda.is_available():
             device = "cuda:0"
             if gpus_per_trial > 1:
@@ -306,7 +289,11 @@ def raytune_main(inputs, train_func=None):
 
     return best_trained_model
 
+
 def torch_train_loop(model, train_loader, test_loader, args, param, config={}, save_period=5):
+    """
+    Main training loop for all torch based models
+    """
 
     losses   = []
     trn_aucs = []
@@ -314,19 +301,29 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
     
     model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
 
+    ### ** Optimization hyperparameters [possibly from Raytune] **
+    opt_param = {}
+    for key in param['opt_param'].keys():
+        opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
+
+    scheduler_param = {}
+    for key in param['scheduler_param'].keys():
+        scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
+
     # Create optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=param['opt_param']['learning_rate'], weight_decay=param['opt_param']['weight_decay'])
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=param['scheduler_param']['step_size'], gamma=param['scheduler_param']['gamma'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
+
 
     cprint(__name__ + f'.graph_train: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
-    for epoch in range(param['opt_param']['epochs']):
+    for epoch in range(opt_param['epochs']):
 
-        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, param=param['opt_param'])
+        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param)
 
         if (epoch % save_period) == 0:
-            train_acc, train_auc       = dopt.test( model=model, loader=train_loader, optimizer=optimizer, device=device)
-            validate_acc, validate_auc = dopt.test( model=model, loader=test_loader,  optimizer=optimizer, device=device)
+            train_acc, train_auc       = dopt.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
+            validate_acc, validate_auc = dopt.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
         # Push
         losses.append(loss)
@@ -372,34 +369,22 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     Returns:
         trained model
     """
+    print(__name__ + f'.train_torch_graph: Training {param["label"]} classifier ...')
 
-    label = param['label']
-    print(f'\nTraining {label} classifier ...')
-
-    ### ** Optimization hyperparameters **
-    opt_param = {}
-    for key in param['opt_param'].keys():
-        opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
-
-    scheduler_param = {}
-    for key in param['scheduler_param'].keys():
-        scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
-
-    ## ------------------------
-    ### Construct model
+    # Construct model
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
     # Data loaders
-    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
+    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=param['opt_param']['batch_size'], shuffle=True)
     test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
 
     return torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 
 
-def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None,
-    trn_weights=None, val_weights=None, X_trn_2D=None, X_val_2D=None, args=None, param=None):
+def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
+    trn_weights=None, val_weights=None, X_trn_2D=None, X_val_2D=None, args=None, param=None, config={}):
     """
     Train generic neural model [R^d x (2D) -> softmax]
     
@@ -409,37 +394,33 @@ def train_torch_generic(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=Non
     Returns:
         trained model
     """
-
-    label = param['label']
-    print(f'\nTraining {label} classifier ...')
-
-    ### ** Optimization hyperparameters **
-    opt_param = {}
-    for key in param['opt_param'].keys():
-        opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
-
-    scheduler_param = {}
-    for key in param['scheduler_param'].keys():
-        scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
+    print(__name__ + f'.train_torch_generic: Training {param["label"]} classifier ...')
 
     model, train_loader, test_loader = \
-            deep.train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
-             trn_weights=trn_weights, val_weights=val_weights, param=param, args=args, config=config)
+        torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
+                trn_weights=trn_weights, val_weights=val_weights, param=param, args=args, config=config)
     
     return torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 
 
-
 def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights, val_weights, param, args, config={}):
+    """
+    Torch model and data loader constructor
+
+    Args:
+        See other train_*
+    
+    Returns:
+        model, train_loader, test_loader
+    """
 
     ## ------------------------
     ### Construct model
     netparam, conv_type = getgenericparam(config=config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
     model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
 
-    # ============================================================================
-    # Check the size and change the shape
+
     if trn_weights is None: trn_weights = torch.tensor(np.ones(Y_trn.shape[0]), dtype=torch.float)
     if val_weights is None: val_weights = torch.tensor(np.ones(Y_val.shape[0]), dtype=torch.float)
 
@@ -473,12 +454,10 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         trained model
     """
 
-    label = param['label']
-
     if param['tree_method'] == 'auto':
         param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
-    print(f'\nTraining {label} classifier ...')
+    print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
 
     ### ** Hyperparameter optimization **
     if config is not {}:
@@ -515,7 +494,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
     else:
     
         ## Save
-        filename = args['modeldir'] + f'/{label}_' + str(0)
+        filename = args['modeldir'] + f'/{param["label"]}_' + str(0)
         pickle.dump(model, open(filename + '.dat', 'wb'))
         
         # Save in JSON format
@@ -528,8 +507,8 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
 
     # Plot evolution
     plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
-    plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param["label"])
+    plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
 
     ## Plot feature importance
     if plot_importance:
@@ -552,15 +531,15 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         plt.xlabel('f-score (gain)')
 
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
-        plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+        plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
     ## Plot decision tree
     #xgboost.plot_tree(xgb_model, num_trees=2)
     #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
     
-    ### Plot contours
+    ## Plot contours
     if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
@@ -578,13 +557,10 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     Returns:
         trained model
     """
-
-    label = param['label']
-
     if param['xgb']['tree_method'] == 'auto':
         param['xgb'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
-    print(f'\nTraining {label} classifier ...')
+    print(__name__ + f'.train_graph_xgb: Training {param["label"]} classifier ...')
 
     ### Compute graphnet convolution output
     graph_model = train_torch_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
@@ -605,7 +581,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     if Z == 0:
         raise Exception(__name__ + '.train_graph_xgb: Could not auto-detect latent space dimension')
     else:
-        print(__name__  + f'.train_graph_xgb: Latent z-space dimension = {Z}')
+        print(__name__  + f'.train_graph_xgb: Latent z-space dimension = {Z} auto-detected')
     # -------------------------
 
     ## Evaluate Graph model output
@@ -630,7 +606,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         y_val[i]   = data_val[i].y.numpy()
 
 
-    print(f'after extension: {x_trn.shape}')
+    print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
 
     ## Train xgboost
     dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
@@ -654,7 +630,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
     # ------------------------------------------------------------------------------------
-    ## Plot feature importance (xgb does Not return it for all of them)
+    ## Plot feature importance
     fscores  = model.get_score(importance_type='gain')
     print(fscores)
 
@@ -662,19 +638,18 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     xx = np.arange(D)
     yy = np.zeros(D)
 
-    for i in range(D):
+    for i in range(D): # Use try, except -- xgb does Not return it for all of them
         try:
             yy[i] = fscores['f' + str(i)]
         except:
             yy[i] = 0.0
 
-
     fig  = plt.figure(figsize=(12,8))
     bars = plt.barh(xx, yy, align='center', height=0.5)
-    plt.xlabel('f-score (gain)')
+    plt.xlabel('F-score (gain)')
 
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
-    plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
+    plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
     
     ## Plot decision tree
     #xgboost.plot_tree(xgb_model, num_trees=2)
@@ -700,13 +675,11 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     Returns:
         trained model
     """
+    print(__name__ + f'.train_flr: Training {param["label"]} classifier ...')
 
-    label = param['label']
-
-    print(f'\nTraining {label} classifier ...')
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data.trn.x, y = data.trn.y, weights = trn_weights, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
-        open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'wb'))
+        open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '_.dat', 'wb'))
 
     def func_predict(X):
         return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
@@ -714,7 +687,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     ### Plot contours (TOO SLOW!)
     """
     if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
         plots.plot_decision_contour(lambda x : func_predict(x),
             X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
@@ -732,13 +705,12 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
         trained model
     """
 
-    label = param['label']
-
     # Set input dimensions
     param['model_param']['n_dims'] = data.trn.x.shape[1]
 
-    print(f'\nTraining {label} classifier ...')
-    
+    print(__name__ + f'.train_flow: Training {param["label"]} classifier ...')
+
+
     for classid in range(args['num_classes']):
         param['model'] = 'class_' + str(classid)
 
@@ -770,7 +742,7 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
                                       early_stopping = param['scheduler_param']['early_stopping'],
                                       threshold_mode = 'abs')
         
-        print(f'Training density for class = {classid} ...')
+        print(__name__ + f'.train_flow: Training density for class = {classid} ...')
         dbnf.train(model, optimizer, sched, trn.x, val.x, weights, param, args['modeldir'])
 
     return True

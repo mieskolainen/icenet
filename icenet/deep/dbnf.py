@@ -164,14 +164,12 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
                     std=param['opt_param']['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
                 batch_x = batch_x + noise
 
-
             # Per sample weights
             log_weights = torch.log(batch_weights + EPS)
             
             # Weighted negative log-likelihood loss
             lossvec = compute_log_p_x(model, batch_x)
             loss    = -(lossvec + log_weights).sum()
-            
             
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
