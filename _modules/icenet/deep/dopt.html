@@ -187,7 +187,7 @@
     <span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">w</span></div>
 
 
-<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pytorch based training routine.</span>
 <span class="sd">    </span>
@@ -196,7 +196,7 @@
 <span class="sd">        loader    : pytorch geometric dataloader</span>
 <span class="sd">        optimizer : pytorch optimizer</span>
 <span class="sd">        device    : &#39;cpu&#39; or &#39;device&#39;</span>
-<span class="sd">        param:    : optimization parameters</span>
+<span class="sd">        opt_param : optimization parameters</span>
 <span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">        trained model (return implicit via input arguments)</span>
@@ -213,8 +213,8 @@
 
         <span class="c1"># Compute loss</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
-        <span class="n">loss</span>    <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">loss_wrapper</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-
+        <span class="n">loss</span>    <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">loss_wrapper</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">opt_param</span><span class="p">)</span>
+        
         <span class="c1"># Propagate gradients</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
         

@@ -198,14 +198,12 @@
                     <span class="n">std</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">batch_x</span> <span class="o">=</span> <span class="n">batch_x</span> <span class="o">+</span> <span class="n">noise</span>
 
-
             <span class="c1"># Per sample weights</span>
             <span class="n">log_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">batch_weights</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
             
             <span class="c1"># Weighted negative log-likelihood loss</span>
             <span class="n">lossvec</span> <span class="o">=</span> <span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch_x</span><span class="p">)</span>
             <span class="n">loss</span>    <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">+</span> <span class="n">log_weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            
             
             <span class="c1"># Zero gradients, calculate loss, calculate gradients and update parameters</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
