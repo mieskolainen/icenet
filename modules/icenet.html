@@ -402,33 +402,34 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CNN_DMAX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nchannels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_cnn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_mlp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_MAXO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CNN_MAXO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nchannels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_cnn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_mlp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_MAXO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_MAXO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dual (simultaneous) input network [image tensors x global vectors]</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.forward" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_MAXO.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_MAXO.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_MAXO.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Input data dictionary with members</dt><dd><p>‘x’ : as image tensor
 ‘u’’ : global feature tensor</p>
 </dd>
 </dl>
+<p>or a class with data.x and data.u</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX.maxout">
-<span class="sig-name descname"><span class="pre">maxout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.maxout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.maxout" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_MAXO.maxout">
+<span class="sig-name descname"><span class="pre">maxout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_MAXO.maxout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_MAXO.maxout" title="Permalink to this definition">¶</a></dt>
 <dd><p>MAXOUT layer</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX.softpredict">
-<span class="sig-name descname"><span class="pre">softpredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_DMAX.softpredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.softpredict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_MAXO.softpredict">
+<span class="sig-name descname"><span class="pre">softpredict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/cnn.html#CNN_MAXO.softpredict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.cnn.CNN_MAXO.softpredict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_DMAX.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icenet.deep.cnn.CNN_DMAX.training" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.deep.cnn.CNN_MAXO.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#icenet.deep.cnn.CNN_MAXO.training" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -735,8 +736,20 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="icenet.deep.dopt.DualDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DualDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#DualDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.DualDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DualDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#DualDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.DualDataset" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.batch2tensor">
+<span class="sig-name descname"><span class="pre">batch2tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#batch2tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.batch2tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform batch objects to a correct device</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.dict_batch_to_cuda">
+<span class="sig-name descname"><span class="pre">dict_batch_to_cuda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#dict_batch_to_cuda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.dict_batch_to_cuda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer to (GPU) device memory</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dopt.model_to_cuda">
@@ -745,9 +758,44 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dopt.test">
+<span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pytorch based testing routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – pytorch geometric model</p></li>
+<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
+<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
+<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>accuracy, AUC</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dopt.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modeldir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raytune_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main training loop</p>
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dopt.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dopt.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pytorch based training routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – pytorch geometric model</p></li>
+<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
+<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
+<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
+<li><p><strong>param</strong> – : optimization parameters</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>trained model (return implicit via input arguments)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1154,47 +1202,6 @@ respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <sp
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">_j</span></code> to the variable name, <em>.e.g.</em> <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_i</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">x_j</span></code>.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.deep.graph.test">
-<span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.graph.test" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pytorch geometric based testing routine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> – pytorch geometric model</p></li>
-<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
-<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
-<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Returns</dt><dd><p>accuracy, AUC</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.deep.graph.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/graph.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.graph.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pytorch geometric based training routine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> – pytorch geometric model</p></li>
-<li><p><strong>loader</strong> – pytorch geometric dataloader</p></li>
-<li><p><strong>optimizer</strong> – pytorch optimizer</p></li>
-<li><p><strong>device</strong> – ‘cpu’ or ‘device’</p></li>
-<li><p><strong>param</strong> – : optimization parameters</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Returns</dt><dd><p>trained model (return implicit via input arguments)</p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
@@ -1622,7 +1629,7 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.train.getgenericparam">
-<span class="sig-name descname"><span class="pre">getgenericparam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#getgenericparam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.getgenericparam" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">getgenericparam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#getgenericparam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.getgenericparam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct generic torch network parameters</p>
 </dd></dl>
 
@@ -1643,6 +1650,16 @@ registered hooks while the latter silently ignores them.</p>
 <span class="sig-name descname"><span class="pre">raytune_main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#raytune_main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.raytune_main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raytune mainloop</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.train.torch_construct">
+<span class="sig-name descname"><span class="pre">torch_construct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_trn_2D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val_2D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#torch_construct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.torch_construct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.train.torch_train_loop">
+<span class="sig-name descname"><span class="pre">torch_train_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#torch_train_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.torch_train_loop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.train.train_flow">
@@ -1688,8 +1705,8 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.train.train_torch_generic">
-<span class="sig-name descname"><span class="pre">train_torch_generic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_trn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_trn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#train_torch_generic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.train_torch_generic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Train generic neural model [R^d -&gt; softmax]</p>
+<span class="sig-name descname"><span class="pre">train_torch_generic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_trn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_trn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_trn_2D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_val_2D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#train_torch_generic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.train_torch_generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train generic neural model [R^d x (2D) -&gt; softmax]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>train_*</strong> (<em>See other</em>) – </p>
@@ -1713,20 +1730,6 @@ registered hooks while the latter silently ignores them.</p>
 <li><p><strong>args</strong> – arg parameters dict</p></li>
 <li><p><strong>param</strong> – model parameters dict</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>trained model</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.deep.train.train_torch_image_vector">
-<span class="sig-name descname"><span class="pre">train_torch_image_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_tensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_trn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/train.html#train_torch_image_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.train.train_torch_image_vector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Train CNN neural model</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>train_*</strong> (<em>See other</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>trained model</p>
@@ -2245,11 +2248,17 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux_torch.weight2onehot">
-<span class="sig-name descname"><span class="pre">weight2onehot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux_torch.html#weight2onehot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux_torch.weight2onehot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Weights into one-hot encoding.
-:param weights: array of weights (torch type)
-:param Y: targets (torch type)
-:param num_classes: number of classes</p>
+<span class="sig-name descname"><span class="pre">weight2onehot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux_torch.html#weight2onehot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux_torch.weight2onehot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights into one-hot encoding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weights</strong> – array of weights (torch type)</p></li>
+<li><p><strong>y</strong> – targets (torch type)</p></li>
+<li><p><strong>num_classes</strong> – number of classes</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

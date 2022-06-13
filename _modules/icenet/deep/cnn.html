@@ -43,7 +43,7 @@
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 
-<div class="viewcode-block" id="CNN_DMAX"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX">[docs]</a><span class="k">class</span> <span class="nc">CNN_DMAX</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_MAXO"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO">[docs]</a><span class="k">class</span> <span class="nc">CNN_MAXO</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dual (simultaneous) input network [image tensors x global vectors]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -52,7 +52,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">nchannels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
                     <span class="n">dropout_cnn</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">mlp_dim</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">dropout_mlp</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CNN_DMAX</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CNN_MAXO</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="c1"># -------------------------------------------</span>
         <span class="c1"># CNN BLOCK</span>
@@ -114,7 +114,7 @@
 
         <span class="c1"># -------------------------------------------</span>
 
-<div class="viewcode-block" id="CNN_DMAX.maxout"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.maxout">[docs]</a>    <span class="k">def</span> <span class="nf">maxout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">layer_list</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_MAXO.maxout"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.maxout">[docs]</a>    <span class="k">def</span> <span class="nf">maxout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">layer_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; MAXOUT layer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">max_output</span> <span class="o">=</span> <span class="n">layer_list</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">x</span><span class="p">)</span>
@@ -123,20 +123,32 @@
         <span class="k">return</span> <span class="n">max_output</span></div>
 
 
-<div class="viewcode-block" id="CNN_DMAX.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_MAXO.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Input data dictionary with members</span>
 <span class="sd">            &#39;x&#39; : as image tensor</span>
 <span class="sd">            &#39;u&#39;&#39; : global feature tensor</span>
+
+<span class="sd">        or a class with data.x and data.u</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1">#print(f&quot;forward: {data[&#39;x&#39;].shape}&quot;)</span>
+        <span class="c1">#print(f&quot;forward: {data[&#39;u&#39;].shape}&quot;)</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">u</span>
+        
         <span class="c1"># print(f&#39;\nINPUT: {x.shape}&#39;)</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="c1"># print(f&#39;\nAFTER BLOCK 1: {x.shape}&#39;)</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
 
         <span class="c1"># ***</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">U</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="c1"># ***</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxout</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1_list</span><span class="p">)</span>
@@ -146,7 +158,7 @@
         <span class="k">return</span> <span class="n">x</span></div>
 
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN_DMAX.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_DMAX.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="CNN_MAXO.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable</span>
         <span class="k">else</span><span class="p">:</span>

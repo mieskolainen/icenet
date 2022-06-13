@@ -463,11 +463,23 @@
             <span class="n">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
         <span class="c1">## Loop over this file</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">evtgroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">EVTGROUPSIZE</span><span class="p">)):</span>
-                        
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;evtgroup = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> [EVTGROUPSIZE = </span><span class="si">{</span><span class="n">EVTGROUPSIZE</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+        <span class="n">skips</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">evt_i</span><span class="p">,</span> <span class="n">evtgroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">EVTGROUPSIZE</span><span class="p">)):</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;evtgroup = </span><span class="si">{</span><span class="n">evt_i</span><span class="si">}</span><span class="s1"> [EVTGROUPSIZE = </span><span class="si">{</span><span class="n">EVTGROUPSIZE</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">evtgroup</span><span class="p">)</span>
 
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            if not isMC:</span>
+<span class="sd">                if skips &lt; 1:</span>
+<span class="sd">                    # Skip events hack</span>
+<span class="sd">                    print(&#39;Skipping evtgroup due to simulation&#39;)</span>
+<span class="sd">                    skips += 1</span>
+<span class="sd">                    continue;</span>
+<span class="sd">                else:</span>
+<span class="sd">                    True</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
             <span class="c1"># --------------------------------------------------------------------</span>
             <span class="c1"># *** FULLY VECTORIZED KINEMATICS CONSTRUCTION (JAGGED/COLUMNAR) ***</span>
 
