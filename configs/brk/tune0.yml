@@ -6,7 +6,7 @@
 rootname: 'brk'
 
 VERBOSE: false
-MAXEVENTS: 1000
+maxevents: 1000
 
 rngseed: 123456                 # Fixed seed for training data mixing
 

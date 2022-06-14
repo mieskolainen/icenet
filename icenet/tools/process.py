@@ -33,6 +33,18 @@ roc_mstats    = []
 roc_labels    = []
 # **************************
 
+def parse_vars(items):
+    """
+    Parse a series of key-value pairs and return a dictionary
+    """
+    d = {}
+
+    if items:
+        for item in items:
+            key, value = parse_var(item)
+            d[key] = value
+    return d
+
 def read_config(config_path='./configs/xyz'):
     """
     Commandline and YAML configuration reader
@@ -44,7 +56,8 @@ def read_config(config_path='./configs/xyz'):
     parser.add_argument("--datasets",  type = str, default="*")
     parser.add_argument("--maxevents", type = int, default=None)
 
-    cli = parser.parse_args()
+    cli      = parser.parse_args()
+    cli_dict = vars(cli)
 
     # -------------------------------------------------------------------
     ## Read configuration
@@ -55,9 +68,21 @@ def read_config(config_path='./configs/xyz'):
             args = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-            
-    args['config']   = cli.config
-    args['modeldir'] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
+    
+    # -------------------------------------------------------------------
+    ## Commandline override of yaml variables
+    
+    for key in cli_dict.keys():
+        if key in args:
+            print(__name__ + f'.read_config: Overriding {config_yaml_file} variable: {key} with value {cli_dict[key]}')
+            args[key] = cli_dict[key]
+    
+    # -------------------------------------------------------------------
+    ## Create new variables
+
+    args["config"]     = cli.config
+    args['modeldir']   = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
+    args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # -------------------------------------------------------------------
     ### Set image and graph constructions on/off
@@ -76,10 +101,6 @@ def read_config(config_path='./configs/xyz'):
     print('\n')
     cprint(__name__ + f'.read_config: graph_on = {args["graph_on"]}', 'yellow')
     cprint(__name__ + f'.read_config: image_on = {args["image_on"]}', 'yellow')    
-
-    # -------------------------------------------------------------------
-
-    args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # -------------------------------------------------------------------
     

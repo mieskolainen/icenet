@@ -111,7 +111,7 @@ def main() :
 
     output = loop.process(paths=paths, func_predict=[],
         isMC=True, MAXT3=args['MAXT3'], MAXN=args['MAXN'], WNORM=args['WNORM'],
-        MAXEVENTS=args['MAXEVENTS'], VERBOSE=args['VERBOSE'], SUPERSETS=args['SUPERSETS'], BMAT=BMAT, hd5dir=iodir, outputXY=True)
+        maxevents=args['maxevents'], VERBOSE=args['VERBOSE'], SUPERSETS=args['SUPERSETS'], BMAT=BMAT, hd5dir=iodir, outputXY=True)
     
     # Save it for the evaluation
     pickle.dump(output, open(iodir + 'MC_output.pkl', 'wb'))
@@ -122,7 +122,7 @@ def main() :
 
     output = loop.process(paths=paths, func_predict=func_predict,
         isMC=False, MAXT3=args['MAXT3'], MAXN=args['MAXN'], WNORM=args['WNORM'],
-        MAXEVENTS=args['MAXEVENTS'], VERBOSE=args['VERBOSE'], SUPERSETS=args['SUPERSETS'], BMAT=BMAT, hd5dir=iodir, outputXY=False, outputP=True)
+        maxevents=args['maxevents'], VERBOSE=args['VERBOSE'], SUPERSETS=args['SUPERSETS'], BMAT=BMAT, hd5dir=iodir, outputXY=False, outputP=True)
         
     # Save it for the evaluation
     pickle.dump(output, open(iodir + 'DA_output.pkl', 'wb'))

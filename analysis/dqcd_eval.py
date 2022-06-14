@@ -25,7 +25,7 @@ def main() :
 
     ### Load data full in memory
     data      = io.IceTriplet(func_loader=common.load_root_file, files=args['root_files'],
-                    load_args={'entry_start': 0, 'entry_stop': args['MAXEVENTS'], 'args': args},
+                    load_args={'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args},
                     class_id=[0,1], frac=args['frac'], rngseed=args['rngseed'])
     
     ### Imputation

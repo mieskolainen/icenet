@@ -30,7 +30,7 @@ def MLP(channels, activation='relu', batch_norm=True):
             )
             for i in range(1,len(channels) - 1)
         ],
-            nn.Linear(channels[-2], channel[-1]) # N.B. Last without activation!
+            nn.Linear(channels[-2], channels[-1]) # N.B. Last without activation!
         )
     
     else:

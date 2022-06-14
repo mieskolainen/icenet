@@ -67,7 +67,7 @@ def main() :
 
     output = loop.process(paths=paths, 
         isMC=True, MAXT3=args['MAXT3'], MAXN=args['MAXN'], WNORM=args['WNORM'],
-        MAXEVENTS=args['MAXEVENTS'], VERBOSE=args['VERBOSE'], BMAT=BMAT, SUPERSETS=args['SUPERSETS'], hd5dir=None, outputXY=True)
+        maxevents=args['maxevents'], VERBOSE=args['VERBOSE'], BMAT=BMAT, SUPERSETS=args['SUPERSETS'], hd5dir=None, outputXY=True)
 
     X = output['X']
     Y = output['Y']

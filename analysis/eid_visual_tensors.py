@@ -46,7 +46,7 @@ import numpy as np
 def main() :
     
     ### Get input
-    data, args, features = common.init(MAXEVENTS=30000)
+    data, args, features = common.init(maxevents=30000)
     
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/image/')
 

@@ -3,7 +3,7 @@
 rootname: 'dqcd'
 
 # ----------------------------------------------------
-MAXEVENTS: 2000      # Maximum total number of events (in total) to process per process
+maxevents: 2000      # Maximum total number of events (in total) to process per process
 
 MC_input:
   signal:
@@ -13,8 +13,6 @@ MC_input:
   
   background:
       'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-
-
 # ----------------------------------------------------
 
 eval_reweight: True  # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
@@ -136,7 +134,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: true
+    active: false
     nbins:  70
   
   contours: 
@@ -195,7 +193,7 @@ raytune_setup:
       
       num_boost_round:
         type: "tune.randint"
-        value: [20, 120]
+        value: [20, 400]
 
       learning_rate:
         type: "tune.uniform"
@@ -373,7 +371,7 @@ xgb0_param:
   # booster parameters
   learning_rate: 0.075
   gamma: 1.67
-  max_depth: 8
+  max_depth: 10
   min_child_weight: 1.0
   max_delta_step: 1
   subsample: 1
@@ -489,10 +487,10 @@ deps_param:
   model_param:  
     z_dim: 64                   # Latent dimension
     pool: 'max'
-    dropout: 0.5
-    phi_layers: 5
-    rho_layers: 5
-  
+    dropout: 0.1
+    phi_layers: 3
+    rho_layers: 3
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

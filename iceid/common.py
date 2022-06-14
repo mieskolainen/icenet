@@ -192,7 +192,7 @@ def splitfactor(data, args):
 # ========================================================================
 # ========================================================================
 
-def init_multiprocess(MAXEVENTS=None):
+def init_multiprocess(maxevents=None):
     """ Initialize electron ID data [UNTESTED FUNCTION]
 
     Args:
@@ -214,8 +214,8 @@ def init_multiprocess(MAXEVENTS=None):
     global ARGS
     ARGS = args
 
-    if MAXEVENTS is not None:
-        ARGS['MAXEVENTS'] = MAXEVENTS
+    if maxevents is not None:
+        ARGS['maxevents'] = maxevents
     
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
@@ -238,7 +238,7 @@ def init_multiprocess(MAXEVENTS=None):
         file.close()
 
         # Truncate upto max events
-        num_events = np.min([args['MAXEVENTS'], num_events])
+        num_events = np.min([args['maxevents'], num_events])
         N_cpu    = 1 if num_events <= 128 else CPU_count
 
         # Create blocks
@@ -347,7 +347,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict, library='np'):
     FILTERFUNC = globals()[args['filterfunc']]
 
     if entry_stop is None:
-        entry_stop = args['MAXEVENTS']
+        entry_stop = args['maxevents']
     # -----------------------------------------------
 
     

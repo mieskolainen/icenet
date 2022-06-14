@@ -304,7 +304,7 @@ def initarrays(BUFFER, func_predict, isMC):
     return reco, hobj
 
 
-def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=10000000000,
+def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, maxevents=10000000000,
     EVTGROUPSIZE=1024, CHUNKBUFFER=512, VERBOSE=False, BMAT=[], WNORM=[], SUPERSETS=True,
     hd5dir=None, outputXY=False, outputP=False, **kwargs):
     """ Main event processing loop
@@ -355,14 +355,14 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
     y = None
 
     if outputXY:
-        X = np.zeros(shape=(MAXEVENTS, DTOT))
+        X = np.zeros(shape=(maxevents, DTOT))
 
     if outputP:
         P = dict()
-        for i in range(len(func_predict)): P[str(i)] = np.zeros(shape=(MAXEVENTS, NCLASS))
+        for i in range(len(func_predict)): P[str(i)] = np.zeros(shape=(maxevents, NCLASS))
     
     if isMC:
-        Y = np.zeros(shape=(MAXEVENTS, MAXT3))
+        Y = np.zeros(shape=(maxevents, MAXT3))
 
 
     # --------------------------------------------------------------------
@@ -413,7 +413,7 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
         print(__name__ + f'.process: WNORM      = {WNORM}')
         print(__name__ + f'.process: SUPERSETS  = {SUPERSETS}')
         print('')
-        print(__name__ + f'.process: MAXEVENTS  = {MAXEVENTS}')
+        print(__name__ + f'.process: maxevents  = {maxevents}')
         prints.printbar()
     
 
@@ -471,8 +471,8 @@ def process(paths=[], func_predict=None, isMC=True, MAXT3=5, MAXN=2, MAXEVENTS=1
 
             for evt_index in iterator:
 
-                if (evtcount == MAXEVENTS): 
-                    print(colored(__name__ + f': Maximum event count {MAXEVENTS} reached', 'red'))
+                if (evtcount == maxevents): 
+                    print(colored(__name__ + f': Maximum event count {maxevents} reached', 'red'))
                     iterator.close() # So we don't get ghost messages
                     break # this event group
                     

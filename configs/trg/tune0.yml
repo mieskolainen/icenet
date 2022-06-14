@@ -3,7 +3,7 @@
 rootname: 'trg'
 
 # ----------------------------------------------------
-MAXEVENTS: 1000000       # Maximum total number of events (per root file) to process
+maxevents: 1000000       # Maximum total number of events (per root file) to process
 
 mcfile:    'eff.root'
 datafile:  'datadist.root'
