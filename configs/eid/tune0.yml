@@ -656,8 +656,9 @@ dmlp_param:
   conv_type: 'dmlp'
   model_param:
     mlp_dim: [64, 64, 64]     # hidden layer dimensions
+    activation: 'relu'
     batch_norm: True    
-
+    
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

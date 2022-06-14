@@ -188,13 +188,15 @@ deps_param:
   predict: 'torch_vector'
   label:   'DEPS'
   raytune:  null
-  
+
   # Model parameters
   conv_type: 'deps'
   model_param:  
     z_dim: 64                  # Latent dimension
     pool: 'max'
     dropout: 0.5
+    phi_layers: 3
+    rho_layers: 3
 
   # Optimization
   opt_param:  

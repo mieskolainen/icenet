@@ -22,6 +22,8 @@ from torch_scatter import scatter_add, scatter_max, scatter_mean
 
 from icenet.deep.pgraph import *
 from icenet.deep import dopt
+from icenet.deep.dmlp import MLP
+
 from icenet.tools import aux
 from icenet.tools import aux_torch
 
@@ -64,41 +66,6 @@ class SuperEdgeConv(MessagePassing):
 
     def __repr__(self):
         return '{}(nn={})'.format(self.__class__.__name__, self.nn)
-
-
-def MLP(channels, activation='relu', batch_norm=True):
-    """
-    Return a Multi Layer Perceptron with an arbitrary number of layers.
-    
-    Args:
-        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
-        batch_norm : batch normalization
-    Returns:
-        nn.sequential object
-    
-    """
-    if activation == 'relu':
-        print(f'MLP: Using relu activation')
-    else:
-        print(f'MLP: Using tanh activation')
-
-    if batch_norm:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.BatchNorm1d(channels[i])
-            )
-            for i in range(1,len(channels))
-        ])
-    else:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh()
-            )
-            for i in range(1,len(channels))
-        ])
 
 
 # PANConv based graph net

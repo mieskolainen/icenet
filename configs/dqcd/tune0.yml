@@ -489,7 +489,9 @@ deps_param:
   model_param:  
     z_dim: 64                   # Latent dimension
     pool: 'max'
-    dropout: 0.1
+    dropout: 0.5
+    phi_layers: 5
+    rho_layers: 5
   
   # Optimization
   opt_param:  
@@ -570,7 +572,7 @@ dmx1_param:
     num_units: 8
     neurons:  50
     dropout:  0.1
-  
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

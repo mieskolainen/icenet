@@ -8,11 +8,46 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-from icenet.deep import graph
+def MLP(channels, activation='relu', batch_norm=True):
+    """
+    Return a Multi Layer Perceptron with an arbitrary number of layers.
+    
+    Args:
+        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        batch_norm : batch normalization
+    Returns:
+        nn.sequential object
+    
+    """
+    print(__name__ + f'.MLP: Using {activation} activation')
+
+    if batch_norm:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh(),
+                nn.BatchNorm1d(channels[i])
+            )
+            for i in range(1,len(channels) - 1)
+        ],
+            nn.Linear(channels[-2], channel[-1]) # N.B. Last without activation!
+        )
+    
+    else:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh()
+            )
+            for i in range(1,len(channels) - 1)
+        ], 
+            nn.Linear(channels[-2], channels[-1]) # N.B. Last without activation!
+        )
+
 
 class DMLP(nn.Module):
 
-    def __init__(self, D, C, mlp_dim = [128,64], batch_norm = True):
+    def __init__(self, D, C, mlp_dim = [128,64], activation='relu', batch_norm=True):
         """
         Args:
             D       : Input dimension
@@ -24,13 +59,17 @@ class DMLP(nn.Module):
         self.D = D
         self.C = C
         
-        # Layer structure
+        # Add input dimension
         channels = [D]
+
+        # Add hidden dimensions
         for i in range(len(mlp_dim)):
             channels.append(mlp_dim[i])
-        channels.append(C)
 
-        self.mlp = graph.MLP(channels, batch_norm=batch_norm)
+        # Add output dimension
+        channels.append(C)
+        
+        self.mlp = MLP(channels, activation=activation, batch_norm=batch_norm)
 
     def forward(self,x):
         

@@ -85,10 +85,10 @@ class PEN1_mean(nn.Module):
 class DEPS(nn.Module):
     """ Permutation equivariant networks.
     """
-    def __init__(self, D, z_dim, C=2, pool='max', dropout=0.5):
+    def __init__(self, D, z_dim, phi_layers=3, rho_layers=3, C=2, pool='max', dropout=0.5):
         """
         Args:
-            D:        Input dimesion
+            D:        Input dimension
             z_dim:    Latent dimension
             C:        Number of classes
             pool:     Pooling operation type: 'max','mean' or 'max1','mean1' (multi dimensional or single)
@@ -102,57 +102,60 @@ class DEPS(nn.Module):
         self.C       = C
         self.dropout = dropout
         
+        phi_channels = [D]
+        for i in range(phi_layers - 1): phi_channels.append(z_dim)
+        phi_channels.append(z_dim)
+
+        rho_channels = [z_dim]
+        for i in range(rho_layers - 1): rho_channels.append(z_dim)
+        rho_channels.append(C)
+
         if   pool == 'max':
-            self.phi = nn.Sequential(
-                PEN_max(self.D,     self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN_max(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN_max(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-            )
+            accumulator = PEN_max
         elif pool == 'mean':
-            self.phi = nn.Sequential(
-                PEN_mean(self.D,     self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN_mean(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN_mean(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-            )
+            accumulator = PEN_mean
         elif pool == 'max1':
-            self.phi = nn.Sequential(
-                PEN1_max(self.D,     self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN1_max(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN1_max(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-            )
+            accumulator = PEN1_max
         elif pool == 'mean1':
-            self.phi = nn.Sequential(
-                PEN1_mean(self.D,     self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN1_mean(self.z_dim, self.z_dim),
-                nn.ReLU(inplace=True),
-                PEN1_mean(self.z_dim, self.z_dim),
+            accumulator = PEN1_mean
+
+        # -------------------------------------------
+        # Create phi-function
+        self.phi = nn.Sequential(*[
+            nn.Sequential(
+                accumulator(phi_channels[i-1], phi_channels[i]),
+                nn.ReLU(inplace=True)
+            )
+            for i in range(1,len(phi_channels))
+        ])
+        # -------------------------------------------
+
+        # -------------------------------------------
+        # Create rho-function
+        self.rho = nn.Sequential(*[
+            nn.Sequential(
+                nn.Dropout(p=dropout),
+                nn.Linear(rho_channels[i-1], rho_channels[i]),
                 nn.ReLU(inplace=True),
             )
-
-        self.ro = nn.Sequential(
+            for i in range(1,len(rho_channels) - 1)
+        ])
+        
+        # N.B. Last layer without activation
+        self.rho = nn.Sequential(
+            self.rho,
             nn.Dropout(p=dropout),
-            nn.Linear(self.z_dim, self.z_dim),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
-            nn.Linear(self.z_dim, self.C),
+            nn.Linear(rho_channels[-2], rho_channels[-1]),
         )
-        print(self)
+        # -------------------------------------------
 
+        print(self)
+    
     # Forward operator
     def forward(self, x):
         x = self.phi(x)
         x = x.mean(1)
-        x = self.ro(x)
+        x = self.rho(x)
         return x
     
     # Returns softmax probability
