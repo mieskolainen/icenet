@@ -109,7 +109,7 @@
 <span id="icenet-algo-flr"></span><h3>icenet.algo.flr<a class="headerlink" href="#module-icenet.algo.flr" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.algo.flr.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_pdfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_pdfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/flr.html#predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.flr.predict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_pdfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_pdfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/flr.html#predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.flr.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the likelihood ratio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -118,10 +118,11 @@
 <li><p><strong>b_pdfs</strong> – background pdfs</p></li>
 <li><p><strong>s_pdfs</strong> – signal pdfs</p></li>
 <li><p><strong>bin_edges</strong> – bin edges</p></li>
+<li><p><strong>return_prob</strong> – return probability if True, or likelihood ratio</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>likelihood ratio</p>
+<dd class="field-even"><p>likelihood ratio, or probability</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>LR</p>
@@ -3171,6 +3172,26 @@ ax:  figure axis</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>fig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.plots.plot_xgb_importance">
+<span class="sig-name descname"><span class="pre">plot_xgb_importance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gain'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_xgb_importance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_xgb_importance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot XGBoost model feature importance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – xgboost model object</p></li>
+<li><p><strong>dim</strong> – feature space dimension</p></li>
+<li><p><strong>tick_label</strong> – feature names</p></li>
+<li><p><strong>importance_type</strong> – type of importance metric</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>fig, ax</p>
 </dd>
 </dl>
 </dd></dl>

@@ -271,7 +271,10 @@
             <span class="n">accsum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">acc</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
             <span class="n">k</span> <span class="o">+=</span> <span class="n">N</span>
 
-    <span class="k">return</span> <span class="n">accsum</span> <span class="o">/</span> <span class="n">k</span><span class="p">,</span> <span class="n">aucsum</span> <span class="o">/</span> <span class="n">k</span></div>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">accsum</span> <span class="o">/</span> <span class="n">k</span><span class="p">,</span> <span class="n">aucsum</span> <span class="o">/</span> <span class="n">k</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">accsum</span><span class="p">,</span> <span class="n">aucsum</span></div>
 
 
 <div class="viewcode-block" id="model_to_cuda"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dopt.model_to_cuda">[docs]</a><span class="k">def</span> <span class="nf">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
