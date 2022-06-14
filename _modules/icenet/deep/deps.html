@@ -103,7 +103,7 @@
 
 <div class="viewcode-block" id="PEN1_mean"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.PEN1_mean">[docs]</a><span class="k">class</span> <span class="nc">PEN1_mean</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Permutation Equivariant Network (PEN) mean-type layers.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Single dimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
@@ -119,22 +119,24 @@
 <div class="viewcode-block" id="DEPS"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.DEPS">[docs]</a><span class="k">class</span> <span class="nc">DEPS</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Permutation equivariant networks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            D:     Input dimesion</span>
-<span class="sd">            z_dim: Latent dimension</span>
-<span class="sd">            C:     Number of classes</span>
-<span class="sd">            pool:  Pooling operation type</span>
-<span class="sd">        </span>
+<span class="sd">            D:        Input dimesion</span>
+<span class="sd">            z_dim:    Latent dimension</span>
+<span class="sd">            C:        Number of classes</span>
+<span class="sd">            pool:     Pooling operation type: &#39;max&#39;,&#39;mean&#39; or &#39;max1&#39;,&#39;mean1&#39; (multi dimensional or single)</span>
+<span class="sd">            dimtype:  &#39;multi&#39; or &#39;single&#39;</span>
+<span class="sd">            dropout:  Dropout regularization</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DEPS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">D</span>     <span class="o">=</span> <span class="n">D</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">=</span> <span class="n">z_dim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">C</span>     <span class="o">=</span> <span class="n">C</span>
         
-        <span class="k">if</span> <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span>       <span class="o">=</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span>   <span class="o">=</span> <span class="n">z_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span>       <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+        
+        <span class="k">if</span>   <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                 <span class="n">PEN_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
@@ -172,10 +174,10 @@
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ro</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">dropout</span><span class="p">),</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">dropout</span><span class="p">),</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>

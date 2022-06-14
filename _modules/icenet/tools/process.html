@@ -172,7 +172,7 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">imputer_trn</span></div>
 
 
-<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_deps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train ML/AI models.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -203,7 +203,7 @@
             <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxval</span>
 
     <span class="c1"># @@ Variable normalization @@</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span> <span class="p">:</span>
+    <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span> <span class="p">:</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Z-score normalizing variables ...&#39;</span><span class="p">)</span>
         <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">calc_zscore</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
@@ -243,10 +243,10 @@
                       <span class="s1">&#39;param&#39;</span><span class="p">:</span>    <span class="n">param</span><span class="p">}</span>
             
             <span class="c1">#### Add distillation, if turned on</span>
-            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
-                    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
-            <span class="c1">###</span>
+            <span class="c1">#if args[&#39;distillation&#39;][&#39;drains&#39;] is not None:</span>
+            <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
+            <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
+            
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_graph</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -264,12 +264,35 @@
             <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
                     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
-            <span class="c1">###</span>
+            
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_deps&#39;</span><span class="p">:</span>
             
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X_trn&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_deps</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+                      <span class="s1">&#39;Y_trn&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_deps</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span>
+                      <span class="s1">&#39;X_val&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_deps</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+                      <span class="s1">&#39;Y_val&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_deps</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span>
+                      <span class="s1">&#39;X_trn_2D&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="s1">&#39;X_val_2D&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="s1">&#39;trn_weights&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">trn_weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+                      <span class="s1">&#39;val_weights&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val_weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+                      <span class="s1">&#39;args&#39;</span><span class="p">:</span>  <span class="n">args</span><span class="p">,</span>
+                      <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
+
+            <span class="c1">#### Add distillation, if turned on</span>
+            <span class="c1">#if args[&#39;distillation&#39;][&#39;drains&#39;] is not None:</span>
+            <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
+            <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
+
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>        
+
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_generic&#39;</span><span class="p">:</span>
             
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X_trn&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
@@ -284,10 +307,10 @@
                       <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
 
             <span class="c1">#### Add distillation, if turned on</span>
-            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
-                    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
-            <span class="c1">###</span>
+            <span class="c1">#if args[&#39;distillation&#39;][&#39;drains&#39;] is not None:</span>
+            <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
+            <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
+            
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -323,8 +346,6 @@
                 <span class="n">y_soft</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
             <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_graph&#39;</span><span class="p">:</span>
                 <span class="n">y_soft</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_generic&#39;</span><span class="p">:</span>
-                <span class="n">y_soft</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">X_trn</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.train_models: Unsupported distillation source &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
         <span class="c1"># --------------------------------------------------------</span>
@@ -332,7 +353,7 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="evaluate_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a><span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluate_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a><span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_deps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate ML/AI models.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -388,6 +409,9 @@
 
     <span class="k">if</span> <span class="n">data_graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">X_graph</span>  <span class="o">=</span> <span class="n">data_graph</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">data_deps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X_deps</span>   <span class="o">=</span> <span class="n">data_deps</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>
     
     <span class="n">VARS_kin</span> <span class="o">=</span> <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>
     <span class="c1"># --------------------------------------------------------------------</span>
@@ -421,8 +445,13 @@
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># For pytorch based</span>
     <span class="n">X_ptr</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">data_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">X_2D_ptr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_2D</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">data_deps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X_deps_ptr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_deps</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
+    
     <span class="c1"># --------------------------------------------------------------------</span>
 
     <span class="c1"># ====================================================================</span>
@@ -532,6 +561,10 @@
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_vector&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
             <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_deps&#39;</span><span class="p">:</span>
+            <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_deps_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
 
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_image&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>

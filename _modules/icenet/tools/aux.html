@@ -275,21 +275,22 @@
 
 
 <div class="viewcode-block" id="longvec2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.longvec2matrix">[docs]</a><span class="k">def</span> <span class="nf">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A matrix representation / dimension converter function.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A matrix representation / dimension converter function</span>
+<span class="sd">    useful e.g. for DeepSets and similar neural architectures.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        X:     Input matrix</span>
+<span class="sd">        X:     Input matrix (2-dim) (N x [MD])</span>
 <span class="sd">        M:     Number of set elements</span>
 <span class="sd">        D:     Feature dimension</span>
 <span class="sd">        order: Reshape direction</span>
-
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Y:     Output matrix</span>
-
+<span class="sd">        Y:     Output matrix (3-dim) (N x M x D)</span>
+<span class="sd">    </span>
 <span class="sd">    Examples:</span>
-<span class="sd">        X = [# number of samples N ] x [# M x D long feature vectors]</span>
-<span class="sd">        --&gt;</span>
-<span class="sd">        Y = [# number of samples N ] x [# number of set elements M] x [# vector dimension D]</span>
+<span class="sd">        X = [number of samples N ] x [feature vectors of size M x D] --&gt;</span>
+<span class="sd">        Y = [number of samples N ] x [number of set elements M] x [vector dimension D]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
