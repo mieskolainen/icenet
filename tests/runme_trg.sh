@@ -10,7 +10,7 @@ DATAPATH="./travis-stash/input/icetrg"
 #DATAPATH="/vols/cms/mmieskol/HLT_electron_data/22112021"
 #DATAPATH="/home/user/HLT_electron_data/22112021"
 
-if [ -z ${MAXEVENTS+x} ]; then MAX="--maxevents $MAXEVENTS"; else MAX=""; fi
+if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames
 mkdir ./figs/trg/$CONFIG -p # for output ascii dump

@@ -54,7 +54,7 @@ jobs:
       - name: Run Deep Learning system integration tests
         run: |
           git clone https://github.com/mieskolainen/travis-stash.git
-          source setenv.sh && MAXEVENTS=1000 && source tests/runme_trg.sh
-          source setenv.sh && MAXEVENTS=1000 && source tests/runme_eid.sh
-          source setenv.sh && MAXEVENTS=1000 && source tests/runme_eid_deep.sh
-          source setenv.sh && MAXEVENTS=1000 && source tests/runme_brk.sh
+          source setenv.sh && maxevents=1000 source tests/runme_trg.sh
+          source setenv.sh && maxevents=1000 source tests/runme_eid.sh
+          source setenv.sh && maxevents=1000 source tests/runme_eid_deep.sh
+          source setenv.sh && maxevents=1000 source tests/runme_brk.sh

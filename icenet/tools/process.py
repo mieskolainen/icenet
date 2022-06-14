@@ -51,16 +51,19 @@ def read_config(config_path='./configs/xyz'):
     """
 
     parser = argparse.ArgumentParser()
+
+    print(parser)
+
     parser.add_argument("--config",    type = str, default='tune0')
     parser.add_argument("--datapath",  type = str, default=".")
-    parser.add_argument("--datasets",  type = str, default="*")
+    parser.add_argument("--datasets",  type = str, default="*.root")
     parser.add_argument("--maxevents", type = int, default=None)
 
     cli      = parser.parse_args()
     cli_dict = vars(cli)
 
     # -------------------------------------------------------------------
-    ## Read configuration
+    ## Read yaml configuration
     args = {}
     config_yaml_file = cli.config + '.yml'
     with open(config_path + '/' + config_yaml_file, 'r') as stream:
@@ -71,12 +74,12 @@ def read_config(config_path='./configs/xyz'):
     
     # -------------------------------------------------------------------
     ## Commandline override of yaml variables
-    
     for key in cli_dict.keys():
         if key in args:
-            print(__name__ + f'.read_config: Overriding {config_yaml_file} variable: {key} with value {cli_dict[key]}')
+            cprint(__name__ + f'.read_config: Override {config_yaml_file} input with --{key} {cli_dict[key]}', 'red')
             args[key] = cli_dict[key]
-    
+    print()
+
     # -------------------------------------------------------------------
     ## Create new variables
 
@@ -84,6 +87,9 @@ def read_config(config_path='./configs/xyz'):
     args['modeldir']   = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
+    # Technical
+    args['__raytune_running__'] = False
+    
     # -------------------------------------------------------------------
     ### Set image and graph constructions on/off
     args['graph_on'] = False

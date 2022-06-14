@@ -32,6 +32,10 @@ def binengine(bindef, x):
     Returns:
         edges:   binning edges
     """
+    
+    if len(x) == 0:
+        print(__name__ + f'.binengine: Input is zero-array, returning [0,0]')
+        return np.array([0,0])
 
     def mylinspace(minval, maxval, nbin):
 

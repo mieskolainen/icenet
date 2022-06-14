@@ -7,7 +7,7 @@
 CONFIG="tune0"
 DATAPATH="./travis-stash/input/icebrk"
 
-if [ -z ${MAXEVENTS+x} ]; then MAX="--maxevents $MAXEVENTS"; else MAX=""; fi
+if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Training, Calculation, Statistics
 python analysis/brk_train.py  $MAX --config $CONFIG --datapath $DATAPATH --datasets 0

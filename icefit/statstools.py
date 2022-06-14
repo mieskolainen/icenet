@@ -272,16 +272,19 @@ def mc_extreme_multivariate_npdf(x, mu, cov, trials=int(1e6)):
 
 def analytical_extreme_npdf(N, mu=0, sigma=1):
 	"""
-	Analytical expectation (mean) value approximation
+	Analytical expectation (mean) value approximation (based on an expansion)
 	for a normal pdf max (extreme) values with a sample size of N.
 	
 	References:
-		Youtube talk:
-		"From one extreme to another: the statistics of extreme events, Jon Keating, Oxford"
-		
 		https://en.wikipedia.org/wiki/Extreme_value_theory
 		https://en.wikipedia.org/wiki/Gumbel_distribution
 	"""
+
+	# Ref: https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution
+	# y = 0.5772156649 # Euler–Mascheroni constant
+	# return np.sqrt(np.log(N**2/(2*np.pi*np.log(N**2/(2*np.pi)) ) ) ) *(1+y/np.log(N))
+
+	# Ref: Youtube, <From one extreme to another: the statistics of extreme events, Jon Keating, Oxford>
 	return mu + sigma*np.sqrt(2*np.log(N)) - 0.5*sigma*(np.log(np.log(N))) / (np.sqrt(2*np.log(N)))
 
 
@@ -320,7 +323,7 @@ def test_extreme_npdf():
 	print(f' Extreme value p-value for x >= {x} is {p_value:0.2E} [with N = {N}]')
 	print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
 	print(f' Analytical expectation:  <extreme> = {analytical_extreme_npdf(N=N, mu=mu, sigma=sigma):0.3f}')
-
+	
 	# -------
 	# Uncorrelated case, will return the same as independent Gaussians
 	print('\nIndependent standard N-dim normal PDF')

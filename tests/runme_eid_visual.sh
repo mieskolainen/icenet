@@ -9,4 +9,6 @@ DATAPATH="./travis-stash/input/iceid"
 
 # Use * or other glob wildcards for filenames
 
-python analysis/eid_visual_tensors.py --config $CONFIG --datapath $DATAPATH --datasets "output_*.root"
+if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
+
+python analysis/eid_visual_tensors.py $MAX --config $CONFIG --datapath $DATAPATH --datasets "output_*.root"

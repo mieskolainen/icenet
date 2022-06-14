@@ -218,6 +218,9 @@ def raytune_main(inputs, train_func=None):
         grace_period     = 1,
         reduction_factor = 2)
 
+    ## Flag raytune on for training functions
+    inputs['args']['__raytune_running__'] = True
+
     # Raytune main setup
     analysis = tune.run(
         partial(train_func, **inputs),
@@ -235,57 +238,30 @@ def raytune_main(inputs, train_func=None):
     cprint(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
     cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}',  'green')
 
+
+    # Set the best config, training functions will update the parameters
+    inputs['config'] = best_trial.config
+    inputs['args']['__raytune_running__'] = False
+    
     # Torch graph networks
     if (train_func == train_torch_graph) or (train_func == train_torch_generic):
 
-        # Construct models
+        # Train
         if   train_func == train_torch_graph:
-            bestparam, conv_type = getgraphparam(config=best_trial.config, data_trn=inputs['data_trn'], num_classes=inputs['args']['num_classes'], param=inputs['param'])
-            best_trained_model   = getgraphmodel(conv_type=conv_type, netparam=bestparam)
-
+            best_trained_model = train_torch_graph(**inputs)
         elif train_func == train_torch_generic:
-            bestparam, conv_type = getgenericparam(config=best_trial.config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
-            best_trained_model   = getgenericmodel(conv_type=conv_type, netparam=bestparam)
-
+            best_trained_model = train_torch_generic(**inputs)
         else:
             raise Exception(__name__ + f'.raytune_main: Unknown error with input')
-
-        device = "cpu"
-        
-        if torch.cuda.is_available():
-            device = "cuda:0"
-            if gpus_per_trial > 1:
-                best_trained_model = nn.DataParallel(best_trained_model)
-        best_trained_model.to(device)
-
-        best_checkpoint_dir          = best_trial.checkpoint.value
-        model_state, optimizer_state = torch.load(os.path.join(best_checkpoint_dir, "checkpoint"))
-        best_trained_model.load_state_dict(model_state)
-
-        ### Finally save it under model folder
-        checkpoint = {'model': best_trained_model, 'state_dict': best_trained_model.state_dict()}
-        torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}' + '_raytune.pth')
 
     ## XGboost
     elif train_func == train_xgb:
 
-        # Get the best config
-        config = best_trial.config
-
-        # Load the optimal values for the given hyperparameters
-        optimal_param = {}
-        for key in param.keys():
-            optimal_param[key] = config[key] if key in config.keys() else param[key]
-        
-        print('Best parameters:')
-        print(optimal_param)
-        
-        # ** Final train with the optimal parameters **
-        inputs['param'] = optimal_param
+        # Train
         best_trained_model = train_xgb(**inputs)
 
     else:
-        raise Exception(__name__ + f'raytune_main: Unknown train_func = {train_func}')
+        raise Exception(__name__ + f'raytune_main: Unsupported train_func = {train_func}')
 
     return best_trained_model
 
@@ -332,8 +308,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
         print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
         scheduler.step()
         
-        # Raytune on
-        if len(config) != 0:
+        if args['__raytune_running__']:
             with tune.checkpoint_dir(epoch) as checkpoint_dir:
                 path = os.path.join(checkpoint_dir, "checkpoint")
                 torch.save((model.state_dict(), optimizer.state_dict()), path)
@@ -351,7 +326,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
         plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
 
-        return model    
+    return model    
 
 
 def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None, save_period=5):
@@ -489,11 +464,9 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
 
-    # Raytune on
-    if len(config) != 0:
+    if args['__raytune_running__']:
 
-        epoch = 0 # FIXED
-
+        epoch = 0 # Fixed to 0 (no epochs in use)
         with tune.checkpoint_dir(epoch) as checkpoint_dir:
             path = os.path.join(checkpoint_dir, "checkpoint")
             pickle.dump(model, open(path, 'wb'))
@@ -504,8 +477,6 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         ## Save
         filename = args['modeldir'] + f'/{param["label"]}_' + str(0)
         pickle.dump(model, open(filename + '.dat', 'wb'))
-        
-        # Save in JSON format
         model.save_model(filename + '.json')
         model.dump_model(filename + '.text', dump_format='text')
     
@@ -535,8 +506,8 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
-    if len(config) == 0:
-        return model
+    return model
+
 
 def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None, args=None, param=None):
     """
@@ -643,8 +614,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
-    if len(config) == 0:
-        return model
+    return model
 
 
 def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):

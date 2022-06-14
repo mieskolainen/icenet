@@ -3,7 +3,7 @@
 rootname: 'dqcd'
 
 # ----------------------------------------------------
-maxevents: 2000      # Maximum total number of events (in total) to process per process
+maxevents: 1000000      # Maximum total number of events (in total) to process per process
 
 MC_input:
   signal:
