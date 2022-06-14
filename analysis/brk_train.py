@@ -215,10 +215,10 @@ def main() :
 
     if args['deps_param']['active']:
 
-        M = args['MAXT3']           # Number of triplets per event
-        D = features.getdimension() # Triplet feature vector dimension
-        X_DS = aux.longvec2matrix(X, M, D)
-
+        M    = args['MAXT3']                      # Number of triplets per event
+        D    = features.getdimension()            # Triplet feature vector dimension
+        X_DS = aux.longvec2matrix(X=X, M=M, D=D)
+        
         X_trn, X_val, Y_trn, Y_val = torch_split(x=X_DS, y=Y_i, test_size=1 - args['frac'], random_state=args['rngseed'])
         args['num_classes'] = C
 

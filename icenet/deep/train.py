@@ -313,9 +313,8 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
     # Create optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
-
-
-    cprint(__name__ + f'.graph_train: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
+    
+    cprint(__name__ + f'.torch_train_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
     for epoch in range(opt_param['epochs']):
 
@@ -344,7 +343,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-
+        
     if len(config) == 0:
 
         # Plot evolution

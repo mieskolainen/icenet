@@ -23,10 +23,13 @@ rngseed: 123456      # Fixed seed for training data mixing
 num_classes: 2       # Number of classes in MVA
 signalclass: 1      
 
+
 # ----------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
+
+  - deps
   - xgb0
   #- xgb1
   - lgr0
@@ -474,6 +477,46 @@ lgr0_param:
   readmode: -1                  # -1 is the last saved epoch
 
 
+# Permutation Equivariant Network
+deps_param:
+  train:   'torch_deps'
+  predict: 'torch_deps'
+  label:   'DEPS'
+  raytune:  null
+  
+  # Model parameters
+  conv_type: 'deps'
+  model_param:  
+    z_dim: 64                   # Latent dimension
+    pool: 'max'
+    dropout: 0.1
+  
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'AdamW'
+    noise_reg: 0.0                # Noise regularization
+    epochs:  200
+    batch_size:  256
+    learning_rate: 0.005
+    weight_decay: 0.01            # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+  
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
 # Deep MAXOUT network
 dmx0_param:
   train:   'torch_generic'
@@ -486,7 +529,7 @@ dmx0_param:
   model_param:
     num_units: 8
     neurons:  50
-    dropout:  0.4
+    dropout:  0.1
 
   # Optimization
   opt_param:  
@@ -526,8 +569,8 @@ dmx1_param:
   model_param:
     num_units: 8
     neurons:  50
-    dropout:  0.4
-
+    dropout:  0.1
+  
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

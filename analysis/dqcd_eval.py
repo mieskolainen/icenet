@@ -41,10 +41,10 @@ def main() :
         tst_weights = None
     
     ### Split and factor data
-    data, data_kin = common.splitfactor(data=data, args=args)
+    data, data_deps, data_kin = common.splitfactor(data=data, args=args)
     
     # Evaluate classifiers
-    process.evaluate_models(data=data, data_kin=data_kin, weights=tst_weights, args=args)
+    process.evaluate_models(data=data, data_kin=data_kin, data_deps=data_deps, weights=tst_weights, args=args)
     
     print(__name__ + ' [Done]')
 

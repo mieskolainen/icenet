@@ -136,7 +136,7 @@ def splitfactor(data, args):
         scalar (vector) data
         kinematic data
     """
-    
+
     ### Pick kinematic variables out
     if KINEMATIC_ID is not None:
         k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
@@ -154,20 +154,41 @@ def splitfactor(data, args):
     jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
     
     arg = {
-        'scalar_vars':   scalar_ind,
-        'jagged_vars':   jagged_ind,
-        'jagged_maxdim': jagged_maxdim,
-        'library': 'np'
+        'scalar_vars'  :  scalar_ind,
+        'jagged_vars'  :  jagged_ind,
+        'jagged_maxdim':  jagged_maxdim,
+        'library'      :  'np'
     }
 
     data.trn.x = aux.jagged2matrix(data.trn.x, **arg)
     data.val.x = aux.jagged2matrix(data.val.x, **arg)
     data.tst.x = aux.jagged2matrix(data.tst.x, **arg)
-    
-    # Create variable names
-    data.ids   = scalar_vars
+
+    # --------------------------------------------------------------------------
+    # Create tuplet expanded jagged variable names
+    all_jagged_vars = []
     for i in range(len(jagged_vars)):
         for j in range(jagged_maxdim[i]):
-            data.ids.append( f'{jagged_vars[i]}[{j}]' )
+            all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
+    # --------------------------------------------------------------------------
+    
+    data.ids  = scalar_vars + all_jagged_vars
 
-    return data, data_kin
+
+    # --------------------------------------------------------------------------
+    # Create DeepSet style input from the jagged content
+    data_deps = copy.deepcopy(data)
+
+    M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
+    D = len(jagged_ind)            # Tuplet feature vector dimension
+
+    data_deps.trn.x = aux.longvec2matrix(X=data.trn.x[:, len(scalar_ind):], M=M, D=D)
+    data_deps.val.x = aux.longvec2matrix(X=data.val.x[:, len(scalar_ind):], M=M, D=D)
+    data_deps.tst.x = aux.longvec2matrix(X=data.tst.x[:, len(scalar_ind):], M=M, D=D)
+
+    data_deps.ids   = all_jagged_vars
+    # --------------------------------------------------------------------------
+
+    
+    return data, data_deps, data_kin
+

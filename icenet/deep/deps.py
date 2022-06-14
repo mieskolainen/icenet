@@ -69,7 +69,7 @@ class PEN1_max(nn.Module):
 
 class PEN1_mean(nn.Module):
     """ Permutation Equivariant Network (PEN) mean-type layers.
-
+    
     Single dimensional model.
     """
     def __init__(self, in_dim, out_dim):
@@ -85,22 +85,24 @@ class PEN1_mean(nn.Module):
 class DEPS(nn.Module):
     """ Permutation equivariant networks.
     """
-    def __init__(self, D, z_dim, C = 2, pool = 'max'):
+    def __init__(self, D, z_dim, C=2, pool='max', dropout=0.5):
         """
         Args:
-            D:     Input dimesion
-            z_dim: Latent dimension
-            C:     Number of classes
-            pool:  Pooling operation type
-        
+            D:        Input dimesion
+            z_dim:    Latent dimension
+            C:        Number of classes
+            pool:     Pooling operation type: 'max','mean' or 'max1','mean1' (multi dimensional or single)
+            dimtype:  'multi' or 'single'
+            dropout:  Dropout regularization
         """
         super(DEPS, self).__init__()
-            
-        self.D     = D
-        self.z_dim = z_dim
-        self.C     = C
         
-        if pool == 'max':
+        self.D       = D
+        self.z_dim   = z_dim
+        self.C       = C
+        self.dropout = dropout
+        
+        if   pool == 'max':
             self.phi = nn.Sequential(
                 PEN_max(self.D,     self.z_dim),
                 nn.ReLU(inplace=True),
@@ -138,10 +140,10 @@ class DEPS(nn.Module):
             )
 
         self.ro = nn.Sequential(
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=dropout),
             nn.Linear(self.z_dim, self.z_dim),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=dropout),
             nn.Linear(self.z_dim, self.C),
         )
         print(self)

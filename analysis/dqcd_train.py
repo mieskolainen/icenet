@@ -66,7 +66,7 @@ def main() :
     """
 
     ### Split and factor data
-    data, data_kin = common.splitfactor(data=data, args=args)
+    data, data_deps, data_kin = common.splitfactor(data=data, args=args)
 
     ### Plot variables
     if args['plot_param']['basic']['active']:
@@ -83,7 +83,7 @@ def main() :
     
     ### Execute training
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
-    process.train_models(data = data, data_kin = data_kin, trn_weights = trn_weights, val_weights=val_weights, args = args)
+    process.train_models(data = data, data_kin = data_kin, data_deps=data_deps, trn_weights = trn_weights, val_weights=val_weights, args = args)
         
     print(__name__ + ' [done]')
 

@@ -241,21 +241,22 @@ def count_targets(events, ids, entry_start=0, entry_stop=None, new=False, librar
 
 
 def longvec2matrix(X, M, D, order='F'):
-    """ A matrix representation / dimension converter function.
+    """
+    A matrix representation / dimension converter function
+    useful e.g. for DeepSets and similar neural architectures.
     
     Args:
-        X:     Input matrix
+        X:     Input matrix (2-dim) (N x [MD])
         M:     Number of set elements
         D:     Feature dimension
         order: Reshape direction
-
+    
     Returns:
-        Y:     Output matrix
-
+        Y:     Output matrix (3-dim) (N x M x D)
+    
     Examples:
-        X = [# number of samples N ] x [# M x D long feature vectors]
-        -->
-        Y = [# number of samples N ] x [# number of set elements M] x [# vector dimension D]
+        X = [number of samples N ] x [feature vectors of size M x D] -->
+        Y = [number of samples N ] x [number of set elements M] x [vector dimension D]
     """
 
     Y = np.zeros((X.shape[0], M, D))

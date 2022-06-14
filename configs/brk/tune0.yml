@@ -100,8 +100,12 @@ WNORM: 'event'
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb_param:
   active: true
-  label: 'XGB'
-  
+
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB'
+  raytune: null
+
   # general parameters
   booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
   num_boost_round: 300   # Number of epochs
@@ -137,8 +141,12 @@ xgb_param:
 # Deep MaxOut network
 maxo_param:
   active: true
-  label:  'MAXO'
   
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:  'MAXO'
+  raytune:  null
+
   # Model parameters
   conv_type: 'maxo'
   model_param:
@@ -175,34 +183,40 @@ maxo_param:
 # Permutation Equivariant Network
 deps_param:
   active: true
-  label:  'DEPS'
-
+  
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'DEPS'
+  raytune:  null
+  
   # Model parameters
   conv_type: 'deps'
   model_param:  
-    z_dim: 64                   # Latent dimension
+    z_dim: 64                  # Latent dimension
+    pool: 'max'
+    dropout: 0.5
 
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
     
     optimizer: 'AdamW'
-    noise_reg: 0.0                # Noise regularization
+    noise_reg: 0.0             # Noise regularization
     epochs:  200
     batch_size:  256
     learning_rate: 0.005
-    weight_decay: 0.01            # L2-regularization
+    weight_decay: 0.01         # L2-regularization
 
   # Scheduler
   scheduler_param:
     step_size: 200
     gamma: 0.1
     
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 1
   
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
-  readmode: -1                  # -1 is the last saved epoch
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
