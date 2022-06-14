@@ -67,6 +67,18 @@
 <span class="n">roc_labels</span>    <span class="o">=</span> <span class="p">[]</span>
 <span class="c1"># **************************</span>
 
+<div class="viewcode-block" id="parse_vars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.parse_vars">[docs]</a><span class="k">def</span> <span class="nf">parse_vars</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a series of key-value pairs and return a dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">parse_var</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">d</span></div>
+
 <div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/xyz&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Commandline and YAML configuration reader</span>
@@ -78,7 +90,8 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span>  <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--maxevents&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="n">cli</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">cli</span>      <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">cli_dict</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Read configuration</span>
@@ -89,9 +102,21 @@
             <span class="n">args</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-            
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1">## Commandline override of yaml variables</span>
+    
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cli_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Overriding </span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1"> variable: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> with value </span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    
+    <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1">## Create new variables</span>
+
+    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">### Set image and graph constructions on/off</span>
@@ -110,10 +135,6 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: graph_on = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;graph_on&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: image_on = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;image_on&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>    
-
-    <span class="c1"># -------------------------------------------------------------------</span>
-
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     

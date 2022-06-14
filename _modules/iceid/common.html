@@ -226,7 +226,7 @@
 <span class="c1"># ========================================================================</span>
 <span class="c1"># ========================================================================</span>
 
-<div class="viewcode-block" id="init_multiprocess"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init_multiprocess">[docs]</a><span class="k">def</span> <span class="nf">init_multiprocess</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="init_multiprocess"><a class="viewcode-back" href="../../modules/iceid.html#iceid.common.init_multiprocess">[docs]</a><span class="k">def</span> <span class="nf">init_multiprocess</span><span class="p">(</span><span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Initialize electron ID data [UNTESTED FUNCTION]</span>
 
 <span class="sd">    Args:</span>
@@ -248,8 +248,8 @@
     <span class="k">global</span> <span class="n">ARGS</span>
     <span class="n">ARGS</span> <span class="o">=</span> <span class="n">args</span>
 
-    <span class="k">if</span> <span class="n">MAXEVENTS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAXEVENTS</span>
+    <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ARGS</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxevents</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -272,7 +272,7 @@
         <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># Truncate upto max events</span>
-        <span class="n">num_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">],</span> <span class="n">num_events</span><span class="p">])</span>
+        <span class="n">num_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">],</span> <span class="n">num_events</span><span class="p">])</span>
         <span class="n">N_cpu</span>    <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">num_events</span> <span class="o">&lt;=</span> <span class="mi">128</span> <span class="k">else</span> <span class="n">CPU_count</span>
 
         <span class="c1"># Create blocks</span>
@@ -381,7 +381,7 @@
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
 
     <span class="k">if</span> <span class="n">entry_stop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">entry_stop</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;MAXEVENTS&#39;</span><span class="p">]</span>
+        <span class="n">entry_stop</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span>
     <span class="c1"># -----------------------------------------------</span>
 
     
