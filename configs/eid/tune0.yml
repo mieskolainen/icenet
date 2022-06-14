@@ -6,7 +6,7 @@
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 rootname: 'eid'
 
-MAXEVENTS: 10000    # Maximum total number of events (per root file) to process
+MAXEVENTS: 100000    # Maximum total number of events (per root file) to process
 
 eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase
 rngseed: 123456       # Fixed seed for training data mixing
@@ -29,7 +29,7 @@ batch_train_param:
 active_models:
 
   - gxgb0
-  - cnn0
+#  - cnn0
   - gnet0
 #  - gnet1
   - gnet0-logit-norm
@@ -37,12 +37,12 @@ active_models:
 #  - gnet3
 #  - gnet4
 
-#  - flr0
+  - flr0
   - xgb0
   - lgr0
 #  - xtx0
   - dmx0
-#  - dmlp
+  - dmlp
   - dbnf0
 
 # ---------------------------------------------------------
@@ -225,7 +225,7 @@ plot_param:
 
 
 raytune_param:
-  active:         [] # Add model identifiers here
+  active:         ['gnet0'] # Add model identifiers here
   num_samples:    10
   max_num_epochs: 10
 
@@ -246,11 +246,11 @@ raytune_setup:
 
       global_pool:
         type: "tune.choice"
-        value: ['mean', 'max', 'add', 'mean']
+        value: ['mean', 'max', 'add']
 
-      batch_size:
-        type: "tune.choice"
-        value: [16, 32, 64, 128]
+    #  batch_size:
+    #    type: "tune.choice"
+    #    value: [16, 32, 64, 128]
 
       learning_rate:
         type: "tune.loguniform"
@@ -326,7 +326,7 @@ gxgb0_param:
 
     # general parameters
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 500    # number of epochs (equal to the number of trees!)
+    num_boost_round: 300    # number of epochs (equal to the number of trees!)
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
     
     # booster parameters

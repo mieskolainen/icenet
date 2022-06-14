@@ -11,12 +11,10 @@ import os
 
 from tqdm import tqdm
 
-
 from iceplot import iceplot
 
 from icenet.tools import aux
 from icenet.tools import process
-
 
 
 def binengine(bindef, x):
@@ -861,3 +859,34 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
             
             plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf", bbox_inches='tight')
             plt.close()
+
+
+def plot_xgb_importance(model, dim, tick_label=None, importance_type='gain'):
+    """
+    Plot XGBoost model feature importance
+    
+    Args:
+        model:           xgboost model object
+        dim:             feature space dimension
+        tick_label:      feature names
+        importance_type: type of importance metric
+
+    Returns
+        fig, ax
+    """
+    fscores = model.get_score(importance_type=importance_type)
+    
+    xx = np.arange(dim)
+    yy = np.zeros(dim)
+    
+    for i in range(dim): # try, except needed because xgb does Not return it for all of them
+        try:
+            yy[i] = fscores['f' + str(i)]
+        except:
+            yy[i] = 0.0
+
+    fig,ax = plt.subplots(figsize=(1.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
+    plt.barh(xx, yy, align='center', height=0.5, tick_label=tick_label)
+    plt.xlabel(f'F-score ({importance_type})')
+    
+    return fig, ax

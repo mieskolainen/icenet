@@ -162,14 +162,14 @@ plot_param:
 # ========================================================================
 
 raytune_param:
-  #active:         ['xgb1']
-  active:  [null]
+  active:         ['xgb1']
+  #active:  [null]
   num_samples:    1000
   max_num_epochs: 50 # has no impact on xgboost
 
 
 raytune_setup:
-
+  
   xgb_trial_0:
     search_algo: 'HyperOpt'
 

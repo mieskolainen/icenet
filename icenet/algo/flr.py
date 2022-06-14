@@ -50,23 +50,22 @@ def train(X, y, weights, param):
     return b_pdfs, s_pdfs, bin_edges
 
 
-def predict(X, b_pdfs, s_pdfs, bin_edges):
+def predict(X, b_pdfs, s_pdfs, bin_edges, return_prob=True, EPS=1e-12):
     """ Evaluate the likelihood ratio.
     
     Args:
-        X:         input data [# vectors x # dimensions]
-        b_pdfs:    background pdfs
-        s_pdfs:    signal pdfs
-        bin_edges: bin edges
+        X:           input data [# vectors x # dimensions]
+        b_pdfs:      background pdfs
+        s_pdfs:      signal pdfs
+        bin_edges:   bin edges
+        return_prob: return probability if True, or likelihood ratio
     
     Returns:
-        LR:        likelihood ratio
+        LR:        likelihood ratio, or probability
     """
-
-    EPS = 1e-12
-
+    
     # Loop over events
-    LR = np.zeros((X.shape[0]))
+    out = np.zeros((X.shape[0]))
     for k in range(X.shape[0]):
 
         # Log-likelihoods
@@ -75,7 +74,7 @@ def predict(X, b_pdfs, s_pdfs, bin_edges):
         
         # Loop over dimensions
         for j in range(X.shape[1]):
-
+            
             x   = X[k,j]
 
             # Evaluate likelihoods for this dimension
@@ -91,7 +90,14 @@ def predict(X, b_pdfs, s_pdfs, bin_edges):
             if (s > EPS):
                 s_ll += np.log(s)
 
-        # Likelihood ratio
-        LR[k] = np.exp(s_ll) / np.exp(b_ll)
+        # Probability
+        if return_prob:
+            out[k] = np.exp(s_ll) / (np.exp(s_ll) + np.exp(b_ll))
 
-    return LR
+        # Likelihood ratio
+        else:
+            out[k] = np.exp(s_ll) / np.exp(b_ll)
+    
+    out[~np.isfinite(out)] = 0
+    
+    return out

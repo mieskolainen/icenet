@@ -66,7 +66,7 @@ def get_pdf(model, x) :
     return (torch.exp(compute_log_p_x(model, x))).detach().numpy()
 
 
-def predict(X, models, return_prob=True, EPS=1E-12, ):
+def predict(X, models, return_prob=True, EPS=1E-12):
     """
     2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.
     

@@ -237,7 +237,10 @@ def test(model, loader, optimizer, device):
             accsum += (metrics.acc * N)
             k += N
 
-    return accsum / k, aucsum / k
+    if k > 0:
+        return accsum / k, aucsum / k
+    else:
+        return accsum, aucsum
 
 
 def model_to_cuda(model, device_type='auto'):

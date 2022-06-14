@@ -339,7 +339,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
                 path = os.path.join(checkpoint_dir, "checkpoint")
                 torch.save((model.state_dict(), optimizer.state_dict()), path)
 
-            tune.report(loss = loss, AUC = validate_AUC)
+            tune.report(loss = loss, AUC = validate_auc)
         else:
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
@@ -375,8 +375,13 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
+    ### ** Optimization hyperparameters [possibly from Raytune] **
+    opt_param = {}
+    for key in param['opt_param'].keys():
+        opt_param[key] = config[key] if key in config.keys() else param['opt_param'][key]
+
     # Data loaders
-    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=param['opt_param']['batch_size'], shuffle=True)
+    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
     test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
 
     return torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
@@ -432,7 +437,12 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
         training_set   = dopt.Dataset(X=X_trn, Y=Y_trn, W=trn_weights)
         validation_set = dopt.Dataset(X=X_val, Y=Y_val, W=val_weights)
 
-    params = {'batch_size'  : param['opt_param']['batch_size'],
+    ### ** Optimization hyperparameters [possibly from Raytune] **
+    opt_param = {}
+    for key in param['opt_param'].keys():
+        opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
+
+    params = {'batch_size'  : opt_param['batch_size'],
               'shuffle'     : True,
               'num_workers' : param['num_workers'],
               'pin_memory'  : True}
@@ -459,7 +469,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
 
     print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
 
-    ### ** Hyperparameter optimization **
+    ### ** Optimization hyperparameters [possibly from Raytune] **
     if config is not {}:
         for key in param.keys():
             param[key] = config[key] if key in config.keys() else param[key]
@@ -492,7 +502,6 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
 
     else:
-    
         ## Save
         filename = args['modeldir'] + f'/{param["label"]}_' + str(0)
         pickle.dump(model, open(filename + '.dat', 'wb'))
@@ -513,23 +522,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
     ## Plot feature importance
     if plot_importance:
 
-        fscores  = model.get_score(importance_type='gain')
-        print(fscores)
-
-        D  = data.trn.x.shape[1]
-        xx = np.arange(D)
-        yy = np.zeros(D)
-        
-        for i in range(D): # try, except needed because xgb does Not return it for all of them
-            try:
-                yy[i] = fscores['f' + str(i)]
-            except:
-                yy[i] = 0.0
-
-        fig  = plt.figure(figsize=(1.5 * (np.ceil(D/6) + 2), np.ceil(D/6) + 2))
-        bars = plt.barh(xx, yy, align='center', height=0.5, tick_label=data.ids)
-        plt.xlabel('f-score (gain)')
-
+        fig,ax = plots.plot_xgb_importance(model=model, dim=data.trn.x.shape[1], tick_label=data.ids)
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
         plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
@@ -545,7 +538,6 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
 
     if len(config) == 0:
         return model
-
 
 def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None, args=None, param=None):
     """
@@ -605,7 +597,6 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         x_val[i,:] = np.c_[xconv, [data_val[i].u.numpy()]]
         y_val[i]   = data_val[i].y.numpy()
 
-
     print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
 
     ## Train xgboost
@@ -629,25 +620,17 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
-    # ------------------------------------------------------------------------------------
+    # -------------------------------------------
     ## Plot feature importance
-    fscores  = model.get_score(importance_type='gain')
-    print(fscores)
 
-    D  = x_trn.shape[1]
-    xx = np.arange(D)
-    yy = np.zeros(D)
+    # Create feature names
+    ids = []
+    for i in range(Z):                  # Graph-net latent features
+        ids.append(f'gnn[{i}]')
+    for i in range(len(data_trn[0].u)): # Xgboost features
+        ids.append(f'xgb[{i}]')
 
-    for i in range(D): # Use try, except -- xgb does Not return it for all of them
-        try:
-            yy[i] = fscores['f' + str(i)]
-        except:
-            yy[i] = 0.0
-
-    fig  = plt.figure(figsize=(12,8))
-    bars = plt.barh(xx, yy, align='center', height=0.5)
-    plt.xlabel('F-score (gain)')
-
+    fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
     

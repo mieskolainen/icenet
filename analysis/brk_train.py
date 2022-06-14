@@ -169,9 +169,13 @@ def main() :
         plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
+
+        # Plot feature importance
+        fig,ax = plots.plot_xgb_importance(model=xgb_model, dim=X_train.shape[1], tick_label=VARS)
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
+        plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
         # ================================================================
-
-
+    
 
     # ------------------------------------------------------------------------
     # PyTorch based training
@@ -224,7 +228,7 @@ def main() :
 
         model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                     args=args, param=args['deps_param'])
-    
+
     print('\n' + __name__+ ' DONE')
 
     
