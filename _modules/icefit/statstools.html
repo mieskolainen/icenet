@@ -306,16 +306,19 @@
 
 <div class="viewcode-block" id="analytical_extreme_npdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf">[docs]</a><span class="k">def</span> <span class="nf">analytical_extreme_npdf</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Analytical expectation (mean) value approximation</span>
+<span class="sd">	Analytical expectation (mean) value approximation (based on an expansion)</span>
 <span class="sd">	for a normal pdf max (extreme) values with a sample size of N.</span>
 <span class="sd">	</span>
 <span class="sd">	References:</span>
-<span class="sd">		Youtube talk:</span>
-<span class="sd">		&quot;From one extreme to another: the statistics of extreme events, Jon Keating, Oxford&quot;</span>
-<span class="sd">		</span>
 <span class="sd">		https://en.wikipedia.org/wiki/Extreme_value_theory</span>
 <span class="sd">		https://en.wikipedia.org/wiki/Gumbel_distribution</span>
 <span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1"># Ref: https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution</span>
+	<span class="c1"># y = 0.5772156649 # Euler–Mascheroni constant</span>
+	<span class="c1"># return np.sqrt(np.log(N**2/(2*np.pi*np.log(N**2/(2*np.pi)) ) ) ) *(1+y/np.log(N))</span>
+
+	<span class="c1"># Ref: Youtube, &lt;From one extreme to another: the statistics of extreme events, Jon Keating, Oxford&gt;</span>
 	<span class="k">return</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sigma</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span></div>
 
 
@@ -354,7 +357,7 @@
 	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1"> [with N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Analytical expectation:  &lt;extreme&gt; = </span><span class="si">{</span><span class="n">analytical_extreme_npdf</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+	
 	<span class="c1"># -------</span>
 	<span class="c1"># Uncorrelated case, will return the same as independent Gaussians</span>
 	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Independent standard N-dim normal PDF&#39;</span><span class="p">)</span>

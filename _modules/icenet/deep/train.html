@@ -252,6 +252,9 @@
         <span class="n">grace_period</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">reduction_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
 
+    <span class="c1">## Flag raytune on for training functions</span>
+    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># Raytune main setup</span>
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
@@ -269,57 +272,30 @@
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation loss: </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation AUC:  </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;AUC&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
+
+    <span class="c1"># Set the best config, training functions will update the parameters</span>
+    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_trial</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    
     <span class="c1"># Torch graph networks</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_graph</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_generic</span><span class="p">):</span>
 
-        <span class="c1"># Construct models</span>
+        <span class="c1"># Train</span>
         <span class="k">if</span>   <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_graph</span><span class="p">:</span>
-            <span class="n">bestparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgraphparam</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">data_trn</span><span class="o">=</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;data_trn&#39;</span><span class="p">],</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;num_classes&#39;</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">])</span>
-            <span class="n">best_trained_model</span>   <span class="o">=</span> <span class="n">getgraphmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="o">=</span><span class="n">bestparam</span><span class="p">)</span>
-
+            <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_torch_graph</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_generic</span><span class="p">:</span>
-            <span class="n">bestparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgenericparam</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">])</span>
-            <span class="n">best_trained_model</span>   <span class="o">=</span> <span class="n">getgenericmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="o">=</span><span class="n">bestparam</span><span class="p">)</span>
-
+            <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_torch_generic</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Unknown error with input&#39;</span><span class="p">)</span>
-
-        <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-        
-        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda:0&quot;</span>
-            <span class="k">if</span> <span class="n">gpus_per_trial</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">(</span><span class="n">best_trained_model</span><span class="p">)</span>
-        <span class="n">best_trained_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-
-        <span class="n">best_checkpoint_dir</span>          <span class="o">=</span> <span class="n">best_trial</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">model_state</span><span class="p">,</span> <span class="n">optimizer_state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">best_checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">))</span>
-        <span class="n">best_trained_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model_state</span><span class="p">)</span>
-
-        <span class="c1">### Finally save it under model folder</span>
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">best_trained_model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">best_trained_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;_raytune.pth&#39;</span><span class="p">)</span>
 
     <span class="c1">## XGboost</span>
     <span class="k">elif</span> <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_xgb</span><span class="p">:</span>
 
-        <span class="c1"># Get the best config</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">best_trial</span><span class="o">.</span><span class="n">config</span>
-
-        <span class="c1"># Load the optimal values for the given hyperparameters</span>
-        <span class="n">optimal_param</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">optimal_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best parameters:&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">optimal_param</span><span class="p">)</span>
-        
-        <span class="c1"># ** Final train with the optimal parameters **</span>
-        <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimal_param</span>
+        <span class="c1"># Train</span>
         <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;raytune_main: Unknown train_func = </span><span class="si">{</span><span class="n">train_func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;raytune_main: Unsupported train_func = </span><span class="si">{</span><span class="n">train_func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">best_trained_model</span></div>
 
@@ -366,8 +342,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">, train loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | Train: </span><span class="si">{</span><span class="n">train_acc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (acc), </span><span class="si">{</span><span class="n">train_auc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (AUC) | Validate: </span><span class="si">{</span><span class="n">validate_acc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (acc), </span><span class="si">{</span><span class="n">validate_auc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (AUC)&#39;</span><span class="p">)</span>
         <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
         
-        <span class="c1"># Raytune on</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
             <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
@@ -385,7 +360,7 @@
         <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>   <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plotdir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_evolution.pdf&quot;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">model</span>    </div>
+    <span class="k">return</span> <span class="n">model</span>    </div>
 
 
 <div class="viewcode-block" id="train_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
@@ -523,11 +498,9 @@
     <span class="n">model</span>     <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="n">param</span><span class="p">,</span> <span class="n">dtrain</span> <span class="o">=</span> <span class="n">dtrain</span><span class="p">,</span>
         <span class="n">num_boost_round</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">],</span> <span class="n">evals</span> <span class="o">=</span> <span class="n">evallist</span><span class="p">,</span> <span class="n">evals_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span> <span class="n">verbose_eval</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># Raytune on</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
 
-        <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># FIXED</span>
-
+        <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Fixed to 0 (no epochs in use)</span>
         <span class="k">with</span> <span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
@@ -538,8 +511,6 @@
         <span class="c1">## Save</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-        
-        <span class="c1"># Save in JSON format</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">dump_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.text&#39;</span><span class="p">,</span> <span class="n">dump_format</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
     
@@ -569,8 +540,8 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span></div>
+
 
 <div class="viewcode-block" id="train_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -677,8 +648,7 @@
         <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
