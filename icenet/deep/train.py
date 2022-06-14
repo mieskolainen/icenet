@@ -629,7 +629,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         ids.append(f'gnn[{i}]')
     for i in range(len(data_trn[0].u)): # Xgboost features
         ids.append(f'xgb[{i}]')
-
+    
     fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
