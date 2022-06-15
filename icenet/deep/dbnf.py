@@ -149,6 +149,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
     # Training loop
     for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
 
+        model.train() # !
+
         train_loss  = []
         permutation = torch.randperm((trn_x.shape[0]))
 
@@ -181,12 +183,12 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
 
         train_loss = torch.stack(train_loss).mean()
         optimizer.swap()
-        
+
         # Compute validation loss (without weighting)
+        model.eval() # !
         validation_loss = -torch.stack([compute_log_p_x(model, batch_x).mean().detach()
                                         for batch_x, in validation_generator], -1).mean()
         optimizer.swap()
-        
 
         print('Epoch {:3}/{:3} -- train_loss: {:4.3f} -- validation_loss: {:4.3f}'.format(
             epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
@@ -195,7 +197,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             callback_best   = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),
             callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer,
-                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'))
+                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth', device=device))
         
         if param['tensorboard']:
             writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch)
@@ -265,7 +267,7 @@ def create_model(param, verbose=False, rngseed=0):
     return model
 
 
-def load_models(param, modelnames, modeldir):
+def load_models(param, modelnames, modeldir, device='cpu'):
     """ Load models from files
     """
     
@@ -278,7 +280,7 @@ def load_models(param, modelnames, modeldir):
 
         filename   = aux.create_model_filename(path=modeldir, label=modelnames[i], \
             epoch=param['readmode'], filetype='.pth')
-        checkpoint = torch.load(filename)
+        checkpoint = torch.load(filename, map_location=device)
         
         model.load_state_dict(checkpoint['model'])
         model.eval() # Turn on eval mode!
