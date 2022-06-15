@@ -198,8 +198,7 @@ def raytune_main(inputs, train_func=None):
 
         else:
             raise Exception(__name__ + f'.raytune_main: Unknown raytune parameter type = {rtp}')
-    # --------------------------------------------------------------------
-
+    
     # Raytune basic metrics
     reporter   = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
 
