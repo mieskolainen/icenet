@@ -225,14 +225,14 @@ plot_param:
 
 
 raytune_param:
-  active:         ['gnet0'] # Add model identifiers here
-  num_samples:    10
-  max_num_epochs: 10
+  active:         ['xgb0'] # Add model identifiers here
+  num_samples:    100
+  max_num_epochs: 50
 
 
 raytune_setup:
 
-  trial0:
+  gnn_setup:
     search_algo: 'HyperOpt'
 
     search_metric:
@@ -265,6 +265,65 @@ raytune_setup:
     # Add more steers here
     # ...
 
+  xgb_setup:
+    search_algo: 'HyperOpt'
+
+    search_metric:
+      metric: 'AUC'
+      mode: 'max'
+
+    param:
+      
+      num_boost_round:
+        type: "tune.randint"
+        value: [20, 120]
+
+      learning_rate:
+        type: "tune.uniform"
+        value: [0.01, 0.6]
+      
+      ## Tree parameters
+      max_depth:
+        type:  "tune.choice"
+        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+
+      ## Regularization
+      reg_lambda: # Smoothness
+        type: "tune.uniform"
+        value: [0.0, 5.0]
+
+      reg_alpha: # Sparsity
+        type: "tune.uniform"
+        value: [0.0, 0.5]
+
+      ## Tree splitting
+      #min_child_weight:
+      #  type: "tune.uniform"
+      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
+      
+      gamma:
+        type: "tune.uniform"
+        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
+      
+      #max_delta_step:
+      #  type: "tune.uniform"
+      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
+
+      #subsample:
+      #  type: "tune.uniform"
+      #  value: [0.5, 1]    # Between [0, 1] # Default 1
+
+      colsample_bytree:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
+
+      colsample_bylevel:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
+
+      colsample_bynode:
+        type: "tune.uniform"
+        value: [0.3, 1.0] # Between [0,1], default 1
 
 
 # ========================================================================
@@ -360,7 +419,7 @@ gnet0_param:
   train:    'torch_graph'
   predict:  'torch_graph'
   label:    'G-NN'
-  raytune:  'trial0'
+  raytune:  'gnn_setup'
 
   conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
@@ -439,7 +498,7 @@ gnet0-logit-norm_param:
   train:    'torch_graph'
   predict:  'torch_graph'
   label:    'G-NN-logit-norm'
-  raytune:  'trial0'
+  raytune:  'gnn_setup'
 
   conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
@@ -518,8 +577,8 @@ gnet3_param:
   train:   'torch_graph'
   predict: 'torch_graph'
   label:   'G-DEC-add'
-  raytune:  'trial0'
-
+  raytune:  'gnn_setup'
+  
   # Convolution model
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 

@@ -1,6 +1,6 @@
 # Common input & data reading routines
 #
-# Mikael Mieskolainen, 2021
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import argparse
@@ -29,8 +29,11 @@ import matplotlib.pyplot as plt
 
 
 # ******** GLOBALS *********
-roc_mstats    = []
-roc_labels    = []
+roc_mstats        = []
+roc_labels        = []
+ROC_binned_mstats = []
+ROC_binned_mlabel = []
+
 # **************************
 
 def parse_vars(items):
@@ -130,6 +133,15 @@ def read_config(config_path='./configs/xyz'):
 def impute_datasets(data, features, args, imputer=None):
     """
     Dataset imputation
+
+    Args:
+        data:     object of type .x, .y, .w, .ids
+        features: feature vector names
+        args:     imputer parameters
+        imputer:  imputer object (scikit-type)
+
+    Return:
+        imputed data
     """
 
     imputer_trn = None
@@ -165,9 +177,15 @@ def impute_datasets(data, features, args, imputer=None):
     return data, imputer_trn
 
 
-def train_models(data, data_tensor=None, data_kin=None, data_graph=None, data_deps=None, trn_weights=None, val_weights=None, args=None) :
+def train_models(data, data_tensor=None, data_graph=None, data_deps=None, data_kin=None, trn_weights=None, val_weights=None, args=None) :
     """
-    Train ML/AI models.
+    Train ML/AI models wrapper with pre-processing.
+    
+    Args:
+        Different datatype objects (see the code)
+    
+    Returns:
+        Saves trained models to disk
     """
     
     print(__name__ + f": Input with {data.trn.x.shape[0]} events and {data.trn.x.shape[1]} dimensions ")
@@ -329,7 +347,6 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, data_de
         else:
             raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
 
-
         # --------------------------------------------------------
         # If distillation
         if ID == args['distillation']['source']:
@@ -349,7 +366,14 @@ def train_models(data, data_tensor=None, data_kin=None, data_graph=None, data_de
 def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None, data_deps=None, weights=None, args=None):
     """
     Evaluate ML/AI models.
+
+    Args:
+        Different datatype objects (see the code)
+
+    Returns:
+        Saves evaluation plots to the disk
     """
+
     print(__name__ + ".evaluate_models: Evaluating models")
     if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
     print('')
@@ -362,8 +386,10 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
     global roc_mstats
     global roc_labels
+    global ROC_binned_mstats
+    global ROC_binned_mlabel
 
-    mva_mstats = []
+    #mva_mstats = []
     targetdir  = None
 
     #MVA_binned_mstats = []
@@ -372,19 +398,16 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
     ROC_binned_mstats = [list()] * len(args['active_models'])
     ROC_binned_mlabel = [list()] * len(args['active_models'])
 
-
     # -----------------------------
     # Prepare output folders
 
-    outputname = args['rootname']
-    targetdir  = f'./figs/{outputname}/{args["config"]}/eval'
+    targetdir  = f'./figs/{args["rootname"]}/{args["config"]}/eval'
 
     subdirs = ['', 'ROC', 'MVA', 'COR']
     for sd in subdirs:
         os.makedirs(targetdir + '/' + sd, exist_ok = True)
     
-    args["modeldir"] = f'./checkpoint/{outputname}/{args["config"]}/'
-    os.makedirs(args["modeldir"], exist_ok = True)
+    args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
 
     # --------------------------------------------------------------------
     # Collect data
@@ -434,150 +457,65 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
 
     except:
         cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
-    
+        
     # --------------------------------------------------------------------
     # For pytorch based
     X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
 
     if data_tensor is not None:
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
-    
+        
     if data_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
-    
-    # --------------------------------------------------------------------
-
-    # ====================================================================
-    # ** Plots for individual model inspection **
-
-    def plot_XYZ_wrap(func_predict, x_input, label):
-        """ XYZ-plot wrapper function.
-        """
-
-        # Compute predictions once and for all here
-        y_pred = func_predict(x_input)
-
-        # --------------------------------------
-        ## Total ROC Plot
-        met = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
-
-        roc_mstats.append(met)
-        roc_labels.append(label)
-        # --------------------------------------
-
-        # --------------------------------------
-        ### ROC, MVA binned plots
-        for i in range(100):
-            try:
-                var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
-                edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
-            except:
-                break # No more this type of plots 
-
-            if   len(var) == 1:
-
-                met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
-
-                # Save for multiple comparison
-                ROC_binned_mstats[i].append(met_1D)
-                ROC_binned_mlabel[i].append(label_1D)
-
-                # Plot this one
-                ROC_path = aux.makedir(f'{targetdir}/ROC/{label}')
-                MVA_path = aux.makedir(f'{targetdir}/MVA/{label}')
-
-                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=ROC_path + f'/ROC_binned__{i}')
-                plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=MVA_path + f'/MVA_binned__{i}')
-                
-
-            elif len(var) == 2:
-
-                fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
-
-                path = aux.makedir(f'{targetdir}/ROC/{label}')
-                plt.savefig(path + f'/ROC_binned__{i}.pdf', bbox_inches='tight')
-
-            else:
-                print(var)
-                raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
-
-        # ----------------------------------------------------------------
-        ### MVA  1D plot
-        hist_edges = args['plot_param'][f'plot_MVA_output']['edges']
-
-        inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
-            'label': f'{label}', 'path': targetdir + '/MVA/'}
-
-        plots.density_MVA_wclass(**inputs)
-
-
-        # ----------------------------------------------------------------
-        ### COR 2D plots
-
-        for i in range(100):
-            try:
-                var   = args['plot_param'][f'plot_COR__{i}']['var']
-                edges = args['plot_param'][f'plot_COR__{i}']['edges']
-            except:
-                break # No more this type of plots 
-
-            inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
-                'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
-
-            plots.density_COR_wclass(y=y, **inputs)
-            #plots.density_COR(**inputs) 
-    
-    # ====================================================================
-
-
+        
 
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
-
     for i in range(len(args['active_models'])):
 
         ID = args['active_models'][i]
         param = args[f'{ID}_param']
         print(f'Evaluating <{ID}> | {param} \n')
         
+        inputs = {'y':y, 'weights':weights, 'label': param['label'],
+                 'targetdir':targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
+
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
             
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
             
         elif param['predict'] == 'torch_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
 
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr,  **inputs)
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr, label = param['label'])
-        
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr,  **inputs)
+            
         elif param['predict'] == 'torch_image_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             X_dual      = {}
             X_dual['x'] = X_2D_ptr # image tensors
             X_dual['u'] = X_ptr    # global features
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual,  **inputs)
             
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,  **inputs)
             
         elif param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,  **inputs)
 
         #elif param['predict'] == 'xtx':
         # ...   
@@ -585,37 +523,125 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
         
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
             
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, label = param['label'])
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW,  **inputs)
             
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, label = param['label'])
-            
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW,  **inputs)
+                    
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
+    ## Multiple model comparisons
+    plot_XYZ_multiple_models(targetdir=targetdir, args=args)
+
+    return
+
+
+def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
+    X_kin, VARS_kin, X_RAW, ids_RAW):
+    """ 
+    Arbitrary plot wrapper function.
+    """
+
+    global roc_mstats
+    global roc_labels
+    global ROC_binned_mstats
+    global ROC_binned_mlabel
+
+    # Compute predictions once and for all here
+    y_pred = func_predict(x_input)
+
+    # --------------------------------------
+    ## Total ROC Plot
+    metric = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
+
+    roc_mstats.append(metric)
+    roc_labels.append(label)
+    # --------------------------------------
+
+    # --------------------------------------
+    ### ROC, MVA binned plots
+    for i in range(100):
+        try:
+            var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
+            edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
+        except:
+            break # No more this type of plots 
+
+        ## 1D
+        if   len(var) == 1:
+
+            met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
+                VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
+
+            # Save for multiple comparison
+            ROC_binned_mstats[i].append(met_1D)
+            ROC_binned_mlabel[i].append(label_1D)
+
+            # Plot this one
+            plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}/ROC_binned__{i}'))
+            plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}/MVA_binned__{i}'))
+
+        ## 2D
+        elif len(var) == 2:
+
+            fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
+                VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
+            
+            path = aux.makedir(f'{targetdir}/ROC/{label}')
+            plt.savefig(path + f'/ROC_binned__{i}.pdf', bbox_inches='tight')
+            
+        else:
+            print(var)
+            raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
+    
+    # ----------------------------------------------------------------
+    ### MVA  1D plot
+    hist_edges = args['plot_param'][f'plot_MVA_output']['edges']
+
+    inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
+        'label': f'{label}', 'path': targetdir + '/MVA/'}
+
+    plots.density_MVA_wclass(**inputs)
+
+    # ----------------------------------------------------------------
+    ### COR 2D plots
+
+    for i in range(100):
+        try:
+            var   = args['plot_param'][f'plot_COR__{i}']['var']
+            edges = args['plot_param'][f'plot_COR__{i}']['edges']
+        except:
+            break # No more this type of plots 
+
+        inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
+            'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
+
+        plots.density_COR_wclass(y=y, **inputs)
+        #plots.density_COR(**inputs) 
+
+    return True
+
+
+def plot_XYZ_multiple_models(targetdir, args):
+
+    global roc_mstats
+    global roc_labels
+    global ROC_binned_mstats
 
     # ===================================================================
     # ** Plots for multiple model comparison **
 
-
     ### Plot all ROC curves
-    os.makedirs(targetdir + '/ROC/__ALL__/', exist_ok = True)
-    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename = targetdir + '/ROC/__ALL__/ROC')
+    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename=aux.makedir(targetdir + '/ROC/__ALL__/', exist_ok = True))
 
-
-    ### Plot all MVA outputs
-    """
-    os.makedirs(targetdir + '/MVA/_ALL_/', exist_ok = True)
-    plots.MVA_plot(mva_mstats, mva_labels, \
-        title = 'training re-weight reference_class: ' + str(args['reweight_param']['reference_class']),
-        filename = targetdir + '/MVA/_ALL_/')    
-    """
-
+    ### Plot all MVA outputs (not implemented)
+    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/__ALL__/', exist_ok = True))
 
     ### Plot all binned ROC curves
     for i in range(100):
@@ -644,28 +670,8 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
                 title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                 plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned__{i}_bin_{b}')
 
-                ### MVA
+                ### MVA (not implemented)
                 #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                 #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned__{i}_bin_{b}')
 
-
-    # ===================================================================
-
-    return
-
-
-def compute_predictions(func_predict, X):
-    """
-    Compute predictions
-    """
-    if type(X) is list:  # Evaluate one by one
-
-        print(__name__ + f'.compute_predictions: one by one evaluation required')
-        y_pred = np.zeros(len(X))
-
-        for k in range(len(y_pred)):
-            y_pred[k] = func_predict(X[k])
-    else:
-        y_pred = func_predict(X)
-
-    return y_pred
+    return True
