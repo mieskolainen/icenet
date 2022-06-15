@@ -21,6 +21,7 @@ figs/
 output/
 testfigs/
 tbfigs/
+tmp/
 
 # torch-geometric test data
 tests/Planetoid
