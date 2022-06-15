@@ -172,60 +172,11 @@ def pred_torch_generic(args, param):
     
     return func_predict
 
+
 '''
 def pred_xtx(args, param):
 
-    label = param['label']
-    y_tot      = np.array([])
-    y_pred_tot = np.array([])
-
-    AUC = np.zeros((len(pt_edges)-1, len(eta_edges)-1))
-
-    for i in range(len(pt_edges) - 1):
-        for j in range(len(eta_edges) - 1):
-
-            pt_range  = [ pt_edges[i],  pt_edges[i+1]]
-            eta_range = [eta_edges[j], eta_edges[j+1]]
-            
-            # Indices
-            tst_ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index('trk_pt')],   pt_range),
-                                     aux.pick_ind(X_kin[:, VARS_kin.index('trk_eta')], eta_range))
-
-            print('\nEvaluate {} classifier ...'.format(label))
-            print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.format(
-                pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
-
-            try:
-                
-                xtx_model = aux.load_torch_checkpoint('{}/{}_checkpoint_bin_{}_{}.pth'.format(modeldir, label, i, j)).to('cpu')
-                xtx_model.eval() # Turn on eval mode!
-                
-                signalclass = 1
-                y_pred = xtx_model.softpredict(X_ptr)[tst_ind, signalclass].detach().numpy()
-                
-                met_xtx = aux.Metric(y_true = y[tst_ind], y_soft = y_pred)
-                print('AUC = {:.5f}'.format(met_xtx.auc))
-
-                # Accumulate
-                y_tot      = np.concatenate((y_tot, y[tst_ind]))
-                y_pred_tot = np.concatenate((y_pred_tot, y_pred))
-
-            except:
-
-                print('Error loading and evaluating the classifier.')
-
-            AUC[i,j]   = met_xtx.auc
-
-    # Evaluate total performance
-    met = aux.Metric(y_true = y_tot, y_soft = y_pred_tot)
-    roc_mstats.append(met)
-    roc_labels.append(label)
-
-    fig,ax = plots.plot_auc_matrix(AUC, pt_edges, eta_edges)
-    ax.set_title('{}: Integrated AUC = {:.3f}'.format(label, met.auc))
-    
-    targetdir = aux.makedir(f'./figs/eid/{args["config"]}/eval/')
-    plt.savefig('{}/{}_AUC.pdf'.format(targetdir, label), bbox_inches='tight')
+# Not implemented
 '''
 
 

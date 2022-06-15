@@ -256,8 +256,6 @@ def raytune_main(inputs, train_func=None):
 
     ## XGboost
     elif train_func == train_xgb:
-
-        # Train
         best_trained_model = train_xgb(**inputs)
 
     else:
@@ -319,14 +317,16 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
         
-    if len(config) == 0:
+    if not args['__raytune_running__']:
 
         # Plot evolution
         plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
         plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
 
-    return model    
+        return model
+
+    return # No return value for raytune
 
 
 def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None, save_period=5):
@@ -480,33 +480,35 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         model.save_model(filename + '.json')
         model.dump_model(filename + '.text', dump_format='text')
     
-    losses   = results['train']['logloss']
-    trn_aucs = results['train']['auc']
-    val_aucs = results['eval']['auc']
+        losses   = results['train']['logloss']
+        trn_aucs = results['train']['auc']
+        val_aucs = results['eval']['auc']
 
-    # Plot evolution
-    plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param["label"])
-    plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
+        # Plot evolution
+        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param["label"])
+        plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
 
-    ## Plot feature importance
-    if plot_importance:
+        ## Plot feature importance
+        if plot_importance:
 
-        fig,ax = plots.plot_xgb_importance(model=model, dim=data.trn.x.shape[1], tick_label=data.ids)
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
-        plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
+            fig,ax = plots.plot_xgb_importance(model=model, dim=data.trn.x.shape[1], tick_label=data.ids)
+            targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
+            plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
-    ## Plot decision tree
-    #xgboost.plot_tree(xgb_model, num_trees=2)
-    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
-    
-    ## Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
-        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
+        ## Plot decision tree
+        #xgboost.plot_tree(xgb_model, num_trees=2)
+        #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
+        
+        ## Plot contours
+        if args['plot_param']['contours']['active']:
+            targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
+            plots.plot_decision_contour(lambda x : xgb_model.predict(x),
+                X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
-    return model
+        return model
+
+    return # No return value for raytune
 
 
 def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None, args=None, param=None):
@@ -702,66 +704,67 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
 
 def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):
     """
-    Train xtx neural model
+    Train binned neural model (untested function; TODO add weights)
     
     Args:
         See other train_*
-
+    
     Returns:
         trained model
     """
 
-    label     = param['label']
-    pt_edges  = args['plot_param']['pt_edges']
-    eta_edges = args['plot_param']['eta_edges'] 
+    label  = param['label']
+    var0   = param['binning']['var'][0]
+    var1   = param['binning']['var'][1]
 
-    for i in range(len(pt_edges) - 1):
-        for j in range(len(eta_edges) - 1):
+    edges0 = param['binning']['edges'][0]
+    edges1 = param['binning']['edges'][1]
+
+
+    for i in range(len(edges0) - 1):
+        for j in range(len(edges1) - 1):
 
             try:
-                pt_range  = [ pt_edges[i],  pt_edges[i+1]]
-                eta_range = [eta_edges[j], eta_edges[j+1]]
+                range0 = [edges0[i], edges0[i+1]]
+                range1 = [edges1[j], edges1[j+1]]
 
                 # Indices
-                trn_ind = np.logical_and(aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index('trk_pt')],   pt_range),
-                                         aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index('trk_eta')], eta_range))
+                trn_ind = np.logical_and(aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index(var0)], range0),
+                                         aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index(var1)], range1))
 
-                val_ind = np.logical_and(aux.pick_ind(data_kin.val.x[:, data_kin.ids.index('trk_pt')],   pt_range),
-                                         aux.pick_ind(data_kin.val.x[:, data_kin.ids.index('trk_eta')], eta_range))
+                val_ind = np.logical_and(aux.pick_ind(data_kin.val.x[:, data_kin.ids.index(var0)], range0),
+                                         aux.pick_ind(data_kin.val.x[:, data_kin.ids.index(var1)], range1))
 
-                print('*** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.
-                    format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
+                print(__name__ + f'.train_xtx: --- {var0} = {range0}], {var1} = {range1} ---')
 
 
                 # Compute weights for this hyperbin (balance class ratios)
-                yy = data.trn.y[trn_ind]
-                frac = [0,0]
-                for k in range(2):
-                    frac[k] = np.sum(yy == k) / yy.shape[0]
+                y = Y_trn[trn_ind]
+                frac = [np.sum(y == k) / y.shape[0] for k in range(args['num_classes'])]
 
-                print('*** frac = [{:.3f},{:.3f}]'.format(frac[0], frac[1]))
+                print(__name__ + f'.train_xtx: --- frac = [{frac[0]:.3f}, {frac[1]:.3f}] ---')
 
                 # Inverse weights
-                weights = np.zeros(yy.shape[0])
+                weights = np.zeros(y.shape[0])
                 for k in range(weights.shape[0]):
-                    weights[k] = 1.0 / frac[int(yy[k])] / yy.shape[0] / 2
+                    weights[k] = 1.0 / frac[int(y[k])] / y.shape[0] / args['num_classes']
                 
-                print(f'weightsum = {np.sum(weights[yy == 0])}')
+                for c in range(args[num_classes]):
+                    print(__name__ + f'.train_xtx: class = {c} | sum(weights) = {np.sum(weights[y == c])}')
+                
 
-
-                # Train
-                model = maxo.MAXOUT(D=X_trn.shape[1], C=args['num_classes'], **param['model_param'])
-
-                # Set hyperbin label
+                # Set hyperbin label and train
                 param['label'] = f'{label}_bin_{i}_{j}'
 
-                model, losses, trn_aucs, val_aucs = dopt.train(model = model,
-                    X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
-                    X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], trn_weights = weights, param = param, modeldir=args['modeldir'])
+                model, train_loader, test_loader = \
+                    train.torch_construct(X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
+                        X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], X_trn_2D=None, X_val_2D=None, \
+                     trn_weights=weights, val_weights=None, param=param['model_param'], args=args)
+
+                model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                            args=args, param=param['model_param'])
 
             except:
-                print('Problem with training *** PT = [{:.3f},{:.3f}], ETA = [{:.3f},{:.3f}] ***'.
-                    format(pt_range[0], pt_range[1], eta_range[0], eta_range[1]))
+                print(__name__ + f'.train_xtx: Problem in training with bin: {var0} = {range0}], {var1} = {range1}')
 
     return True
-

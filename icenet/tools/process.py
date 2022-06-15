@@ -566,10 +566,10 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # --------------------------------------
     ### ROC, MVA binned plots
-    for i in range(100):
+    for i in range(100): # Loop over plot types
         try:
-            var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
-            edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
+            var   = args['plot_param'][f'plot_ROC_binned[{i}]']['var']
+            edges = args['plot_param'][f'plot_ROC_binned[{i}]']['edges']
         except:
             break # No more this type of plots 
 
@@ -584,22 +584,21 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             ROC_binned_mlabel[i].append(label_1D)
 
             # Plot this one
-            plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}/ROC_binned__{i}'))
-            plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}/MVA_binned__{i}'))
+            plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}]')
+            plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA_binned[{i}]')
 
         ## 2D
         elif len(var) == 2:
 
             fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
                 VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
-            
-            path = aux.makedir(f'{targetdir}/ROC/{label}')
-            plt.savefig(path + f'/ROC_binned__{i}.pdf', bbox_inches='tight')
+
+            plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}].pdf', bbox_inches='tight')
             
         else:
             print(var)
             raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
-    
+
     # ----------------------------------------------------------------
     ### MVA  1D plot
     hist_edges = args['plot_param'][f'plot_MVA_output']['edges']
@@ -612,10 +611,10 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     # ----------------------------------------------------------------
     ### COR 2D plots
 
-    for i in range(100):
+    for i in range(100): # Loop over plot types
         try:
-            var   = args['plot_param'][f'plot_COR__{i}']['var']
-            edges = args['plot_param'][f'plot_COR__{i}']['edges']
+            var   = args['plot_param'][f'plot_COR[{i}]']['var']
+            edges = args['plot_param'][f'plot_COR[{i}]']['edges']
         except:
             break # No more this type of plots 
 
@@ -638,16 +637,16 @@ def plot_XYZ_multiple_models(targetdir, args):
     # ** Plots for multiple model comparison **
 
     ### Plot all ROC curves
-    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename=aux.makedir(targetdir + '/ROC/__ALL__/', exist_ok = True))
+    plots.ROC_plot(roc_mstats, roc_labels, title = '', filename=aux.makedir(targetdir + '/ROC/__ALL__') + '/ROC')
 
     ### Plot all MVA outputs (not implemented)
-    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/__ALL__/', exist_ok = True))
+    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/__ALL__') + '/MVA')
 
     ### Plot all binned ROC curves
     for i in range(100):
         try:
-            var   = args['plot_param'][f'plot_ROC_binned__{i}']['var']
-            edges = args['plot_param'][f'plot_ROC_binned__{i}']['edges']
+            var   = args['plot_param'][f'plot_ROC_binned[{i}]']['var']
+            edges = args['plot_param'][f'plot_ROC_binned[{i}]']['edges']
         except:
             return # No more plots 
 
@@ -668,10 +667,10 @@ def plot_XYZ_multiple_models(targetdir, args):
 
                 ### ROC
                 title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned__{i}_bin_{b}')
+                plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned[{i}]_bin[{b}]')
 
                 ### MVA (not implemented)
                 #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned__{i}_bin_{b}')
+                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]')
 
     return True
