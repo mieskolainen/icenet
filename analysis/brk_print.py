@@ -22,6 +22,8 @@ from numba import jit
 # icenet
 from iceplot import iceplot
 
+
+from icenet.tools import process
 from icenet.tools import aux
 from icenet.tools import io
 from icenet.tools import prints
@@ -86,11 +88,10 @@ def print_true(output, BMAT):
 #
 def main() :
 
-    ### Get input
-    paths, args, cli, iodir = common.init()
-    VARS = features.generate_feature_names(args['MAXT3'])
-    targetdir = f'./figs/brk/{cli.tag}/eval/'; os.makedirs(targetdir, exist_ok = True)
-    
+    args, cli = process.read_config(config_path='./configs/brk')
+    iodir = aux.makedir(f'./output/{args["rootname"]}/{cli.tag}/')
+    paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
+
     # ====================================================================
 
     ## Binary matrix

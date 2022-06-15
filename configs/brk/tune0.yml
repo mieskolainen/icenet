@@ -13,6 +13,11 @@ rngseed: 123456                 # Fixed seed for training data mixing
 num_classes: null               # Num of classes in MVA
 signalclass: null
 
+
+inputvar: null
+cutfunc: null
+targetfunc: null
+
 # -----------------------------------------------------------------------------
 # TRAINING AND ANALYSIS
 # -----------------------------------------------------------------------------
@@ -61,6 +66,10 @@ WNORM: 'event'
 #           per output c_i depends on the object multiplicity of the class
 # -----------------------------------------------------------------------------
 
+active_models:
+  - xgb
+  - maxo
+  - deps
 
 ## Classifier setup
 

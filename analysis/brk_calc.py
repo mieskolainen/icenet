@@ -20,6 +20,8 @@ from numba import jit
 
 # icenet
 import iceplot
+
+from icenet.tools import process
 from icenet.tools import aux
 from icenet.tools import aux_torch
 from icenet.tools import io
@@ -37,8 +39,11 @@ from icebrk import features
 #
 def main() :
     
-    ### Get input
-    paths, args, cli, iodir = common.init()
+    args, cli = process.read_config(config_path='./configs/brk')
+    iodir = aux.makedir(f'./output/{args["rootname"]}/{cli.tag}/')
+    paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
+
+
     VARS = features.generate_feature_names(args['MAXT3'])
     modeldir = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
     

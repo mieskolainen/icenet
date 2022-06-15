@@ -59,6 +59,7 @@ def read_config(config_path='./configs/xyz'):
     parser.add_argument("--config",    type = str, default='tune0')
     parser.add_argument("--datapath",  type = str, default=".")
     parser.add_argument("--datasets",  type = str, default="*.root")
+    parser.add_argument("--tag",       type = str, default='tag0')
     parser.add_argument("--maxevents", type = int, default=argparse.SUPPRESS)
     
     cli      = parser.parse_args()
