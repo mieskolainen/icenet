@@ -75,19 +75,20 @@ def predict(X, models, return_prob=True, EPS=1E-12):
         X          : pytorch tensor of vectors
         models     : list of model objects
         return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)
+    
     Returns:
-        LLR        : log-likelihood ratio
+        likelihood ratio (or probability)
     """
     
     print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events ...')
     
-    sgn_likelihood = get_pdf(models[1], X)
-    bgk_likelihood = get_pdf(models[0], X)
+    bgk pdf = get_pdf(models[0], X)
+    sgn_pdf = get_pdf(models[1], X)
     
     if return_prob:
-        out = sgn_likelihood / (sgn_likelihood + bgk_likelihood + EPS)
+        out = sgn_pdf / np.clip(sgn_pdf + bgk_pdf, a_min=EPS, a_max=None)
     else:
-        out = sgn_likelihood / (bgk_likelihood + EPS)
+        out = sgn_pdf / np.clip(bgk_pdf, a_min=EPS, a_max=None)
     
     out[~np.isfinite(out)] = 0
 
