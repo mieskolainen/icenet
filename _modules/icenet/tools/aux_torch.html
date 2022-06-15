@@ -108,17 +108,18 @@
     <span class="k">return</span> <span class="n">f</span></div>
 
 
-<div class="viewcode-block" id="load_torch_model"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.load_torch_model">[docs]</a><span class="k">def</span> <span class="nf">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">load_start_epoch</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="load_torch_model"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.load_torch_model">[docs]</a><span class="k">def</span> <span class="nf">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">load_start_epoch</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; PyTorch model loader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_torch_model: Loading model to CPU memory ...&#39;</span><span class="p">)</span>
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">map_location</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_torch_model: Loading model to &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; memory ...&#39;</span><span class="p">)</span>
+        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">map_location</span> <span class="o">=</span> <span class="n">device</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">])</span>
         
         <span class="k">if</span> <span class="n">load_start_epoch</span><span class="p">:</span>
             <span class="n">param</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span>
+    
     <span class="k">return</span> <span class="n">f</span></div>
 </pre></div>
 
