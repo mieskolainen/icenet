@@ -476,6 +476,7 @@ lgr0_param:
   readmode: -1                  # -1 is the last saved epoch
 
 
+
 # Permutation Equivariant Network
 deps_param:
   train:   'torch_deps'
@@ -491,7 +492,7 @@ deps_param:
     dropout: 0.1
     phi_layers: 3
     rho_layers: 3
-    
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
