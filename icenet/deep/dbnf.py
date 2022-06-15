@@ -82,7 +82,7 @@ def predict(X, models, return_prob=True, EPS=1E-12):
     
     print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events ...')
     
-    bgk pdf = get_pdf(models[0], X)
+    bgk_pdf = get_pdf(models[0], X)
     sgn_pdf = get_pdf(models[1], X)
     
     if return_prob:
