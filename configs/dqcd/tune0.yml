@@ -135,7 +135,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: false
+    active: true
     nbins:  70
   
   contours: 
@@ -613,7 +613,7 @@ dbnf0_param:
     optimizer: 'Adam'
     learning_rate: 0.003
     weight_decay: 0.0         # L2-regularization
-    
+
     noise_reg: 0.001          # Noise regularization
     polyak: 0.998
     clip_norm: 0.1
