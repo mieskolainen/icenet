@@ -22,7 +22,6 @@ batch_train_param:
   epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
   #num_cpu: null      # Set null for auto, or an integer for manual.
 
-
 # ---------------------------------------------------------
 # ** Activate models here **
 # Give all models some unique identifier and label
