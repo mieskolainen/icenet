@@ -578,7 +578,7 @@ gnet3_param:
   predict: 'torch_graph'
   label:   'G-DEC-add'
   raytune:  'gnn_setup'
-  
+
   # Convolution model
   conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
 
@@ -670,7 +670,7 @@ xgb0_param:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB'
-  raytune:  null
+  raytune:  'xgb_setup'
 
   # general parameters
   booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
