@@ -54,14 +54,13 @@ def read_config(config_path='./configs/xyz'):
     """
 
     parser = argparse.ArgumentParser()
-
-    print(parser)
-
+    
+    ## argparse.SUPPRESS removes argument from the namespace if not passed
     parser.add_argument("--config",    type = str, default='tune0')
     parser.add_argument("--datapath",  type = str, default=".")
     parser.add_argument("--datasets",  type = str, default="*.root")
-    parser.add_argument("--maxevents", type = int, default=None)
-
+    parser.add_argument("--maxevents", type = int, default=argparse.SUPPRESS)
+    
     cli      = parser.parse_args()
     cli_dict = vars(cli)
 

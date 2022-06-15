@@ -225,6 +225,7 @@ def raytune_main(inputs, train_func=None):
     analysis = tune.run(
         partial(train_func, **inputs),
         search_alg          = search_alg,
+        local_dir           = f'./tmp/ray/local_dir',
         resources_per_trial = {"cpu": multiprocessing.cpu_count(), "gpu": 1 if torch.cuda.is_available() else 0},
         config              = config,
         num_samples         = num_samples,
@@ -751,7 +752,7 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
                 
                 for c in range(args[num_classes]):
                     print(__name__ + f'.train_xtx: class = {c} | sum(weights) = {np.sum(weights[y == c])}')
-                
+
 
                 # Set hyperbin label and train
                 param['label'] = f'{label}_bin_{i}_{j}'
