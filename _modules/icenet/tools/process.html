@@ -34,7 +34,7 @@
   <h1>Source code for icenet.tools.process</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Common input &amp; data reading routines</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
@@ -63,8 +63,11 @@
 
 
 <span class="c1"># ******** GLOBALS *********</span>
-<span class="n">roc_mstats</span>    <span class="o">=</span> <span class="p">[]</span>
-<span class="n">roc_labels</span>    <span class="o">=</span> <span class="p">[]</span>
+<span class="n">roc_mstats</span>        <span class="o">=</span> <span class="p">[]</span>
+<span class="n">roc_labels</span>        <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ROC_binned_mstats</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ROC_binned_mlabel</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="c1"># **************************</span>
 
 <div class="viewcode-block" id="parse_vars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.parse_vars">[docs]</a><span class="k">def</span> <span class="nf">parse_vars</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
@@ -164,6 +167,15 @@
 <div class="viewcode-block" id="impute_datasets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.impute_datasets">[docs]</a><span class="k">def</span> <span class="nf">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dataset imputation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data:     object of type .x, .y, .w, .ids</span>
+<span class="sd">        features: feature vector names</span>
+<span class="sd">        args:     imputer parameters</span>
+<span class="sd">        imputer:  imputer object (scikit-type)</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        imputed data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">imputer_trn</span> <span class="o">=</span> <span class="kc">None</span>
@@ -199,9 +211,15 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">imputer_trn</span></div>
 
 
-<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_deps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_deps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Train ML/AI models.</span>
+<span class="sd">    Train ML/AI models wrapper with pre-processing.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        Different datatype objects (see the code)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Saves trained models to disk</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;: Input with </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> events and </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> dimensions &quot;</span><span class="p">)</span>
@@ -363,7 +381,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Unknown param[&quot;train&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> for ID = </span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-
         <span class="c1"># --------------------------------------------------------</span>
         <span class="c1"># If distillation</span>
         <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;source&#39;</span><span class="p">]:</span>
@@ -383,7 +400,14 @@
 <div class="viewcode-block" id="evaluate_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a><span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_deps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate ML/AI models.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Different datatype objects (see the code)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Saves evaluation plots to the disk</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;.evaluate_models: Evaluating models&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot; -- per event weighted evaluation ON &quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -396,8 +420,10 @@
 
     <span class="k">global</span> <span class="n">roc_mstats</span>
     <span class="k">global</span> <span class="n">roc_labels</span>
+    <span class="k">global</span> <span class="n">ROC_binned_mstats</span>
+    <span class="k">global</span> <span class="n">ROC_binned_mlabel</span>
 
-    <span class="n">mva_mstats</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#mva_mstats = []</span>
     <span class="n">targetdir</span>  <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#MVA_binned_mstats = []</span>
@@ -406,19 +432,16 @@
     <span class="n">ROC_binned_mstats</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])</span>
     <span class="n">ROC_binned_mlabel</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])</span>
 
-
     <span class="c1"># -----------------------------</span>
     <span class="c1"># Prepare output folders</span>
 
-    <span class="n">outputname</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;rootname&#39;</span><span class="p">]</span>
-    <span class="n">targetdir</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">outputname</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/eval&#39;</span>
+    <span class="n">targetdir</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/eval&#39;</span>
 
     <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="s1">&#39;MVA&#39;</span><span class="p">,</span> <span class="s1">&#39;COR&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">sd</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
     
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./checkpoint/</span><span class="si">{</span><span class="n">outputname</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/&#39;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">],</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
 
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Collect data</span>
@@ -468,150 +491,65 @@
 
     <span class="k">except</span><span class="p">:</span>
         <span class="n">cprint</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; WARNING: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> in normalization. Continue without! </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-    
+        
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># For pytorch based</span>
     <span class="n">X_ptr</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">data_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">X_2D_ptr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_2D</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
-    
+        
     <span class="k">if</span> <span class="n">data_deps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">X_deps_ptr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">X_deps</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">)</span>
-    
-    <span class="c1"># --------------------------------------------------------------------</span>
-
-    <span class="c1"># ====================================================================</span>
-    <span class="c1"># ** Plots for individual model inspection **</span>
-
-    <span class="k">def</span> <span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; XYZ-plot wrapper function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Compute predictions once and for all here</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">x_input</span><span class="p">)</span>
-
-        <span class="c1"># --------------------------------------</span>
-        <span class="c1">## Total ROC Plot</span>
-        <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-
-        <span class="n">roc_mstats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
-        <span class="n">roc_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-        <span class="c1"># --------------------------------------</span>
-
-        <span class="c1"># --------------------------------------</span>
-        <span class="c1">### ROC, MVA binned plots</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">var</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
-                <span class="n">edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">break</span> <span class="c1"># No more this type of plots </span>
-
-            <span class="k">if</span>   <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-
-                <span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">X_kin</span><span class="o">=</span><span class="n">X_kin</span><span class="p">,</span> \
-                    <span class="n">VARS_kin</span><span class="o">=</span><span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-                <span class="c1"># Save for multiple comparison</span>
-                <span class="n">ROC_binned_mstats</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_1D</span><span class="p">)</span>
-                <span class="n">ROC_binned_mlabel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label_1D</span><span class="p">)</span>
-
-                <span class="c1"># Plot this one</span>
-                <span class="n">ROC_path</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/ROC/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">MVA_path</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/MVA/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-                <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">ROC_path</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">plots</span><span class="o">.</span><span class="n">MVA_plot</span><span class="p">(</span><span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">MVA_path</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/MVA_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                
-
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-
-                <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">met</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">binned_2D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">X_kin</span><span class="o">=</span><span class="n">X_kin</span><span class="p">,</span> \
-                    <span class="n">VARS_kin</span><span class="o">=</span><span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
-
-                <span class="n">path</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/ROC/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AUC_wrap: Unknown dimensionality </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="c1"># ----------------------------------------------------------------</span>
-        <span class="c1">### MVA  1D plot</span>
-        <span class="n">hist_edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
-
-        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;hist_edges&#39;</span><span class="p">:</span> <span class="n">hist_edges</span><span class="p">,</span> \
-            <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/MVA/&#39;</span><span class="p">}</span>
-
-        <span class="n">plots</span><span class="o">.</span><span class="n">density_MVA_wclass</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-
-
-        <span class="c1"># ----------------------------------------------------------------</span>
-        <span class="c1">### COR 2D plots</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">var</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_COR__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
-                <span class="n">edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_COR__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">break</span> <span class="c1"># No more this type of plots </span>
-
-            <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;X_RAW&#39;</span><span class="p">:</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="s1">&#39;ids_RAW&#39;</span><span class="p">:</span> <span class="n">ids_RAW</span><span class="p">,</span> \
-                <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;hist_edges&#39;</span><span class="p">:</span> <span class="n">edges</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/COR/&#39;</span><span class="p">}</span>
-
-            <span class="n">plots</span><span class="o">.</span><span class="n">density_COR_wclass</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-            <span class="c1">#plots.density_COR(**inputs) </span>
-    
-    <span class="c1"># ====================================================================</span>
-
-
+        
 
     <span class="c1"># ====================================================================</span>
     <span class="c1"># **  MAIN LOOP OVER MODELS **</span>
     <span class="c1">#</span>
-
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
 
         <span class="n">ID</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
         <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Evaluating &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span><span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;targetdir&#39;</span><span class="p">:</span><span class="n">targetdir</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;X_kin&#39;</span><span class="p">:</span> <span class="n">X_kin</span><span class="p">,</span> <span class="s1">&#39;VARS_kin&#39;</span><span class="p">:</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="s1">&#39;X_RAW&#39;</span><span class="p">:</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="s1">&#39;ids_RAW&#39;</span><span class="p">:</span> <span class="n">ids_RAW</span><span class="p">}</span>
+
         <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_graph&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_graph</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_graph</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_graph</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;graph_xgb&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_graph_xgb</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_graph</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_graph</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_vector&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_deps&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_deps_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_deps_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_image&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_2D_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
-        
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_2D_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+            
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_image_vector&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
 
             <span class="n">X_dual</span>      <span class="o">=</span> <span class="p">{}</span>
             <span class="n">X_dual</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_2D_ptr</span> <span class="c1"># image tensors</span>
             <span class="n">X_dual</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_ptr</span>    <span class="c1"># global features</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_dual</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_dual</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;flr&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_flr</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
         <span class="c1">#elif param[&#39;predict&#39;] == &#39;xtx&#39;:</span>
         <span class="c1"># ...   </span>
@@ -619,37 +557,125 @@
         
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_flow&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_flow</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">n_dims</span><span class="o">=</span><span class="n">X_ptr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cut&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_cut</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cutset&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_cutset</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
-            
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+                    
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Unknown param[&quot;predict&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;predict&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> for ID = </span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+    <span class="c1">## Multiple model comparisons</span>
+    <span class="n">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="plot_XYZ_wrap"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_wrap">[docs]</a><span class="k">def</span> <span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
+    <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Arbitrary plot wrapper function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">roc_mstats</span>
+    <span class="k">global</span> <span class="n">roc_labels</span>
+    <span class="k">global</span> <span class="n">ROC_binned_mstats</span>
+    <span class="k">global</span> <span class="n">ROC_binned_mlabel</span>
+
+    <span class="c1"># Compute predictions once and for all here</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">x_input</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------------</span>
+    <span class="c1">## Total ROC Plot</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+
+    <span class="n">roc_mstats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+    <span class="n">roc_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------</span>
+
+    <span class="c1"># --------------------------------------</span>
+    <span class="c1">### ROC, MVA binned plots</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">var</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">break</span> <span class="c1"># No more this type of plots </span>
+
+        <span class="c1">## 1D</span>
+        <span class="k">if</span>   <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+            <span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">X_kin</span><span class="o">=</span><span class="n">X_kin</span><span class="p">,</span> \
+                <span class="n">VARS_kin</span><span class="o">=</span><span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># Save for multiple comparison</span>
+            <span class="n">ROC_binned_mstats</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_1D</span><span class="p">)</span>
+            <span class="n">ROC_binned_mlabel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label_1D</span><span class="p">)</span>
+
+            <span class="c1"># Plot this one</span>
+            <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/ROC/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+            <span class="n">plots</span><span class="o">.</span><span class="n">MVA_plot</span><span class="p">(</span><span class="n">met_1D</span><span class="p">,</span> <span class="n">label_1D</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/MVA/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/MVA_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+
+        <span class="c1">## 2D</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">met</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">binned_2D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">X_kin</span><span class="o">=</span><span class="n">X_kin</span><span class="p">,</span> \
+                <span class="n">VARS_kin</span><span class="o">=</span><span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
+            
+            <span class="n">path</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/ROC/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AUC_wrap: Unknown dimensionality </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># ----------------------------------------------------------------</span>
+    <span class="c1">### MVA  1D plot</span>
+    <span class="n">hist_edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;hist_edges&#39;</span><span class="p">:</span> <span class="n">hist_edges</span><span class="p">,</span> \
+        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/MVA/&#39;</span><span class="p">}</span>
+
+    <span class="n">plots</span><span class="o">.</span><span class="n">density_MVA_wclass</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="c1"># ----------------------------------------------------------------</span>
+    <span class="c1">### COR 2D plots</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">var</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_COR__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_COR__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">break</span> <span class="c1"># No more this type of plots </span>
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;X_RAW&#39;</span><span class="p">:</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="s1">&#39;ids_RAW&#39;</span><span class="p">:</span> <span class="n">ids_RAW</span><span class="p">,</span> \
+            <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;hist_edges&#39;</span><span class="p">:</span> <span class="n">edges</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/COR/&#39;</span><span class="p">}</span>
+
+        <span class="n">plots</span><span class="o">.</span><span class="n">density_COR_wclass</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="c1">#plots.density_COR(**inputs) </span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="plot_XYZ_multiple_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_multiple_models">[docs]</a><span class="k">def</span> <span class="nf">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">roc_mstats</span>
+    <span class="k">global</span> <span class="n">roc_labels</span>
+    <span class="k">global</span> <span class="n">ROC_binned_mstats</span>
 
     <span class="c1"># ===================================================================</span>
     <span class="c1"># ** Plots for multiple model comparison **</span>
 
-
     <span class="c1">### Plot all ROC curves</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/ROC/__ALL__/&#39;</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">,</span> <span class="n">roc_labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/ROC/__ALL__/ROC&#39;</span><span class="p">)</span>
+    <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">,</span> <span class="n">roc_labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/ROC/__ALL__/&#39;</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span>
 
-
-    <span class="c1">### Plot all MVA outputs</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    os.makedirs(targetdir + &#39;/MVA/_ALL_/&#39;, exist_ok = True)</span>
-<span class="sd">    plots.MVA_plot(mva_mstats, mva_labels, \</span>
-<span class="sd">        title = &#39;training re-weight reference_class: &#39; + str(args[&#39;reweight_param&#39;][&#39;reference_class&#39;]),</span>
-<span class="sd">        filename = targetdir + &#39;/MVA/_ALL_/&#39;)    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1">### Plot all MVA outputs (not implemented)</span>
+    <span class="c1">#plots.MVA_plot(mva_mstats, mva_labels, title = &#39;&#39;, filename=aux.makedir(targetdir + &#39;/MVA/__ALL__/&#39;, exist_ok = True))</span>
 
     <span class="c1">### Plot all binned ROC curves</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
@@ -678,31 +704,11 @@
                 <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;BINNED ROC: </span><span class="si">{</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">$ </span><span class="se">\\</span><span class="s1">in [</span><span class="si">{</span><span class="n">edges</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">edges</span><span class="p">[</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)$&#39;</span>
                 <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">legs</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/__ALL__/ROC_binned__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">_bin_</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-                <span class="c1">### MVA</span>
+                <span class="c1">### MVA (not implemented)</span>
                 <span class="c1">#title = f&#39;BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$&#39;</span>
                 <span class="c1">#plots.MVA_plot(xy, legs, title=title, filename=targetdir + f&#39;/MVA/__ALL__/MVA_binned__{i}_bin_{b}&#39;)</span>
 
-
-    <span class="c1"># ===================================================================</span>
-
-    <span class="k">return</span></div>
-
-
-<div class="viewcode-block" id="compute_predictions"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.compute_predictions">[docs]</a><span class="k">def</span> <span class="nf">compute_predictions</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute predictions</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># Evaluate one by one</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_predictions: one by one evaluation required&#39;</span><span class="p">)</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)):</span>
-            <span class="n">y_pred</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">y_pred</span></div>
+    <span class="k">return</span> <span class="kc">True</span></div>
 </pre></div>
 
           </div>
