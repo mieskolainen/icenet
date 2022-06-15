@@ -181,7 +181,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
 
         train_loss = torch.stack(train_loss).mean()
         optimizer.swap()
-
+        
         # Compute validation loss (without weighting)
         validation_loss = -torch.stack([compute_log_p_x(model, batch_x).mean().detach()
                                         for batch_x, in validation_generator], -1).mean()

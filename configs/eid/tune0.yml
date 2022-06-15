@@ -358,6 +358,7 @@ gxgb0_param:
       gamma: 2                  # focal_entropy exponent
       temperature: 1            # logit norm temperature
       
+      optimizer: 'Adam'
       epochs: 50
       batch_size: 64
       learning_rate: 0.003
@@ -405,7 +406,7 @@ gxgb0_param:
     scale_pos_weight: 1
 
     # learning task parameters
-    objective: 'binary:logistic'     #
+    objective:    'binary:logistic'  #
     eval_metric: ['auc', 'logloss']  # for evaluation
 
     # Read/Write of epochs
@@ -434,6 +435,7 @@ gnet0_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -474,6 +476,7 @@ gnet1_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -513,6 +516,7 @@ gnet0-logit-norm_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -553,6 +557,7 @@ gnet2_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -593,6 +598,7 @@ gnet3_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -633,6 +639,7 @@ gnet4_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
+    optimizer: 'Adam'
     epochs: 50
     batch_size: 64
     learning_rate: 0.003
@@ -723,7 +730,7 @@ dmlp_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'AdamW'
+    optimizer: 'Adam'
     noise_reg: 0.0            # Noise regularization
     
     epochs: 50
@@ -762,7 +769,7 @@ lgr0_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'AdamW'
+    optimizer: 'Adam'
     noise_reg: 0.0            # Noise regularization
 
     epochs: 50
@@ -808,12 +815,12 @@ cnn0_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'AdamW'
+    optimizer: 'Adam'
     noise_reg: 0.0            # Noise regularization
   
-    epochs: 50
+    epochs: 100
     batch_size: 128
-    learning_rate: 0.001
+    learning_rate: 0.003
     weight_decay: 0.00        # L2-regularization
 
   # Scheduler
@@ -855,7 +862,7 @@ xtx0_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'AdamW'        # Adam, AdamW
+    optimizer: 'Adam'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
     
     epochs: 50
@@ -891,12 +898,12 @@ dmx0_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'AdamW'        # Adam, AdamW
+    optimizer: 'Adam'        # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
 
     epochs: 50
     batch_size: 128
-    learning_rate: 0.005
+    learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
 
   # Scheduler
@@ -921,10 +928,11 @@ dbnf0_param:
 
   # Gradient descent
   opt_param:
-    epochs: 50
-    batch_size: 512
+    epochs: 100
+    batch_size: 128
+    
     optimizer: 'Adam'
-    learning_rate: 0.05
+    learning_rate: 0.003
     weight_decay: 0.0         # L2-regularization
     noise_reg: 0.001          # Noise regularization
     polyak: 0.998
