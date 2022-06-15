@@ -609,10 +609,11 @@ dbnf0_param:
   # Gradient descent
   opt_param:
     epochs: 150
-    batch_size: 128
+    batch_size: 512           # Keep it high!
     optimizer: 'Adam'
     learning_rate: 0.003
     weight_decay: 0.0         # L2-regularization
+    
     noise_reg: 0.001          # Noise regularization
     polyak: 0.998
     clip_norm: 0.1

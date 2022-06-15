@@ -929,7 +929,7 @@ dbnf0_param:
   # Gradient descent
   opt_param:
     epochs: 100
-    batch_size: 128
+    batch_size: 512           # Keep it high!
     
     optimizer: 'Adam'
     learning_rate: 0.003

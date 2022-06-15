@@ -91,7 +91,7 @@ def predict(X, models, return_prob=True, EPS=1E-12):
         out = sgn_pdf / np.clip(bgk_pdf, a_min=EPS, a_max=None)
     
     out[~np.isfinite(out)] = 0
-
+    
     return out
 
 
