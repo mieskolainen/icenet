@@ -87,7 +87,7 @@ def print_true(output, BMAT):
 # Main function
 #
 def main() :
-
+    
     args, cli = process.read_config(config_path='./configs/brk')
     iodir = aux.makedir(f'./output/{args["rootname"]}/{cli.tag}/')
     paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
