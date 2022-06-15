@@ -31,9 +31,9 @@ active_models:
   - xgb0
   #- xgb1
   - lgr0
-  - dbnf0
+  #- dbnf0
   #- dmlp
-  #- dmx0
+  - dmx0
   #- dmx1
 
   - cut0
@@ -498,12 +498,12 @@ deps_param:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
     
-    optimizer: 'AdamW'
-    noise_reg: 0.0                # Noise regularization
-    epochs:  300
+    optimizer: 'Adam'
+    noise_reg: 0.0              # Noise regularization
+    epochs:  200
     batch_size:  128
-    learning_rate: 0.005
-    weight_decay: 0.01            # L2-regularization
+    learning_rate: 0.003
+    weight_decay: 0.00001       # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -577,7 +577,7 @@ dmx1_param:
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
-
+    
     optimizer: 'Adam'         # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
 
