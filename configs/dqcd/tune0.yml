@@ -31,9 +31,10 @@ active_models:
   - xgb0
   #- xgb1
   - lgr0
+  #- dbnf0
   #- dmlp
   - dmx0
-  - dmx1
+  #- dmx1
 
   - cut0
   - cut1
@@ -62,7 +63,7 @@ distillation:
 inputvar:        null
 inputvar_scalar: 'MVA_SCALAR_ID' # Input variables, implemented under mvavars.py
 inputvar_jagged: 'MVA_JAGGED_ID'
-jagged_maxdim:   6
+jagged_maxdim:   5
 
 
 targetfunc: null                 # Training target,    implemented under mctargets.py
@@ -134,7 +135,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: false
+    active: true
     nbins:  70
   
   contours: 
@@ -454,7 +455,7 @@ lgr0_param:
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
 
-    epochs: 15
+    epochs: 30
     batch_size: 196
     learning_rate: 0.003
     weight_decay: 0.00001       # L2-regularization
@@ -475,6 +476,7 @@ lgr0_param:
   readmode: -1                  # -1 is the last saved epoch
 
 
+
 # Permutation Equivariant Network
 deps_param:
   train:   'torch_deps'
@@ -490,19 +492,19 @@ deps_param:
     dropout: 0.1
     phi_layers: 3
     rho_layers: 3
-
+    
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
     
-    optimizer: 'AdamW'
-    noise_reg: 0.0                # Noise regularization
+    optimizer: 'Adam'
+    noise_reg: 0.0             # Noise regularization
     epochs:  200
-    batch_size:  256
-    learning_rate: 0.005
-    weight_decay: 0.01            # L2-regularization
+    batch_size:  128
+    learning_rate: 0.003
+    weight_decay: 0.0001       # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -533,24 +535,24 @@ dmx0_param:
 
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
 
-    optimizer: 'AdamW'        # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
+    optimizer: 'Adam'          # Adam, AdamW
+    noise_reg: 0.0             # Noise regularization
 
-    epochs: 50
+    epochs: 200
     batch_size: 128
-    learning_rate: 0.005
-    weight_decay: 0.00001       # L2-regularization
+    learning_rate: 0.003
+    weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
   scheduler_param:
     step_size: 200
     gamma: 0.1
     
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
@@ -576,13 +578,13 @@ dmx1_param:
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
-
-    optimizer: 'AdamW'        # Adam, AdamW
+    
+    optimizer: 'Adam'         # Adam, AdamW
     noise_reg: 0.0            # Noise regularization
 
-    epochs: 50
+    epochs: 200
     batch_size: 128
-    learning_rate: 0.005
+    learning_rate: 0.003
     weight_decay: 0.00001     # L2-regularization
 
   # Scheduler
@@ -590,6 +592,52 @@ dmx1_param:
     step_size: 200
     gamma: 0.1
 
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # -1 is the last saved epoch
+
+
+# Deep Normalizing Flow
+dbnf0_param:
+  train:   'flow'
+  predict: 'torch_flow'
+  label:   'DBNF'
+  raytune:  null
+
+  # Gradient descent
+  opt_param:
+    epochs: 150
+    batch_size: 512           # Keep it high!
+    optimizer: 'Adam'
+    learning_rate: 0.003
+    weight_decay: 0.0         # L2-regularization
+
+    noise_reg: 0.001          # Noise regularization
+    polyak: 0.998
+    clip_norm: 0.1
+    start_epoch: 0
+
+  # Learning rate reduction on plateau
+  scheduler_param:  
+    factor:  0.1
+    patience: 20
+    cooldown: 10
+    min_lr: 0.0005
+    early_stopping: 100
+
+  # Model structure
+  model_param:  
+    flows: 10                 # number of flow blocks
+    layers: 0                 # intermediate layers in a flow block
+    hidden_dim: 10            # 
+    residual: 'gated'         # choises 'none', 'normal', 'gated'
+    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
+  
+  modelname: 'null'
+  tensorboard: 'tensorboard'
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 

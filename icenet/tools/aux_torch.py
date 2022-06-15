@@ -74,15 +74,16 @@ def save_torch_model(model, optimizer, epoch, filename):
     return f
 
 
-def load_torch_model(model, optimizer, filename, load_start_epoch = False):
+def load_torch_model(model, optimizer, filename, load_start_epoch = False, device='cpu'):
     """ PyTorch model loader
     """
     def f():
-        print(__name__ + '.load_torch_model: Loading model to CPU memory ...')
-        checkpoint = torch.load(filename, map_location = 'cpu')
+        print(__name__ + f'.load_torch_model: Loading model to <{device}> memory ...')
+        checkpoint = torch.load(filename, map_location = device)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         
         if load_start_epoch:
             param.start_epoch = checkpoint['epoch']
+    
     return f
