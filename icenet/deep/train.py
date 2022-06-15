@@ -283,9 +283,15 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
     scheduler_param = {}
     for key in param['scheduler_param'].keys():
         scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
-
+    
     # Create optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+    if   param_opt['optimizer'] == 'Adam':
+        optimizer = torch.optim.Adam(model.parameters(),  lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+    elif param_opt['optimizer'] == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+    else:
+        raise Exception(__name__ + f".torch_train_loop: Unknown optimizer <{opt_param['optimizer']}> chosen")
+
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
     
     cprint(__name__ + f'.torch_train_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
