@@ -109,22 +109,23 @@
 <span class="sd">        X          : pytorch tensor of vectors</span>
 <span class="sd">        models     : list of model objects</span>
 <span class="sd">        return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        LLR        : log-likelihood ratio</span>
+<span class="sd">        likelihood ratio (or probability)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.predict: Computing density (likelihood) ratio for N = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> events ...&#39;</span><span class="p">)</span>
     
-    <span class="n">sgn_likelihood</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
-    <span class="n">bgk_likelihood</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    <span class="n">bgk_pdf</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    <span class="n">sgn_pdf</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">return_prob</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_likelihood</span> <span class="o">/</span> <span class="p">(</span><span class="n">sgn_likelihood</span> <span class="o">+</span> <span class="n">bgk_likelihood</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_pdf</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">sgn_pdf</span> <span class="o">+</span> <span class="n">bgk_pdf</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_likelihood</span> <span class="o">/</span> <span class="p">(</span><span class="n">bgk_likelihood</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_pdf</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">bgk_pdf</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     
     <span class="n">out</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">out</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
-
+    
     <span class="k">return</span> <span class="n">out</span></div>
 
 
