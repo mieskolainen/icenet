@@ -1,17 +1,16 @@
-
-# -----------------------------------------------------
-# Profiler
-python -m cProfile -o out.profile "brk_eval.py" --config $CONFIG
-snakeviz out.profile # visualize
+# Python Developer Mini Guide
+m.mieskolainen@imperial.ac.uk, 2022
 
 
-# -----------------------------------------------------
-# Google Python Style Guide
+## Google Python Style Guide
+```
 http://google.github.io/styleguide/pyguide.html
+```
+
+## Git
 
 
-# -----------------------------------------------------
-# Git
+### Branching
 
 Show branches
 ```
@@ -33,6 +32,7 @@ Create a branch from commit hash
 git branch <branch-name> <hash>
 ```
 
+### Commits
 
 Add all files
 ```
@@ -54,11 +54,12 @@ Push to (github)
 git push origin <branch-name>
 ```
 
-
 Pull from (github)
 ```
 git pull origin <branch-name>
 ```
+
+### Status
 
 Show log
 ```
@@ -70,8 +71,16 @@ Show status
 git status
 ```
 
+### Risky
+
 [Dangerous] hard undo latest commit (removes updates physically)
 ```
 git reset --hard HEAD~
 ```
 
+
+## Profiler in Python
+```
+python -m cProfile -o out.profile "brk_eval.py" --config $CONFIG
+snakeviz out.profile # visualize
+```
