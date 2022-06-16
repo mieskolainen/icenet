@@ -527,6 +527,10 @@
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
             <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
+        <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_scalar&#39;</span><span class="p">:</span>
+            <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_scalar</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+            <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_deps&#39;</span><span class="p">:</span>
             <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
             <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span> <span class="o">=</span> <span class="n">X_deps_ptr</span><span class="p">,</span>  <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
@@ -777,7 +781,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

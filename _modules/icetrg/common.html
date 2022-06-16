@@ -73,14 +73,15 @@
 
     <span class="c1"># -----------------------------------------------</span>
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;max_num_elements&quot;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span>
+        <span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span>
+        <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entry_stop</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span>
     <span class="p">}</span>
 
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** MC (signal) ***</span>
     
-    <span class="n">rootfile</span>      <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;mcfile&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+    <span class="n">rootfile</span>      <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;mcfile&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
     
     <span class="c1"># e1</span>
     <span class="n">X_MC</span><span class="p">,</span> <span class="n">VARS_MC</span> <span class="o">=</span> <span class="n">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="s1">&#39;mode_e1&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
@@ -99,7 +100,7 @@
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** DATA (background) ***</span>
 
-    <span class="n">rootfile</span>          <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+    <span class="n">rootfile</span>          <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="n">X_DATA</span><span class="p">,</span> <span class="n">VARS_DATA</span> <span class="o">=</span> <span class="n">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
     <span class="n">X_DATA</span> <span class="o">=</span> <span class="n">X_DATA</span><span class="p">[:,</span> <span class="p">[</span><span class="n">VARS_DATA</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">NEW_VARS</span><span class="p">]]</span>
@@ -129,16 +130,16 @@
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">NEW_VARS</span></div>
 
 
-<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
 
-    <span class="n">Y</span>   <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">)</span>
-    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Y</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-    <span class="n">X</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
-        <span class="n">X</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+    <span class="n">events</span>  <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ids</span>     <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">process_tree</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+
 
     <span class="c1"># @@ Filtering done here @@</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
@@ -261,7 +262,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
