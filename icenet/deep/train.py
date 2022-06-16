@@ -42,6 +42,7 @@ from icenet.deep  import mlgr
 from icenet.deep  import maxo
 from icenet.deep  import dmlp
 from icenet.deep  import dbnf
+from icenet.deep  import vae
 
 from icenet.deep  import cnn
 from icenet.deep  import graph
@@ -83,7 +84,9 @@ def getgenericmodel(conv_type, netparam):
     elif conv_type == 'cnn':
         model = cnn.CNN(**netparam)
     elif conv_type == 'cnn+maxo':
-        model = cnn.CNN_MAXO(**netparam)        
+        model = cnn.CNN_MAXO(**netparam)       
+    elif conv_type == 'vae':
+        model = vae.VAE(**netparam) 
     else:
         raise Exception(__name__ + f'.getgenericmodel: Unknown network <conv_type> = {conv_type}')
 
@@ -309,7 +312,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
-        print(f'Epoch {epoch+1:03d}, train loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
+        print(__name__ + f'.torch_train_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
         scheduler.step()
         
         if args['__raytune_running__']:

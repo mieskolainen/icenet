@@ -26,7 +26,7 @@ signalclass: 1
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
-
+  - vae0
   - deps
   - xgb0
   #- xgb1
@@ -50,11 +50,11 @@ distillation:
 
   # Big, sophisticated model
   source:
-    xgb0
+    #xgb0
     
   # Simple, compressed models
   drains:
-    - xgb1
+    #- xgb1
     # - add more here
 
 
@@ -644,3 +644,46 @@ dbnf0_param:
   # Read/Write of epochs
   savemode: 'all'             # 'all', 'latest'
   readmode: -1                # -1 is the last saved epoch
+
+
+# Variational Autoencoder
+vae0_param:
+  train:   'torch_generic'
+  predict: 'torch_scalar'
+  label:   'VAE'
+  raytune:  null
+
+  # Model param
+  conv_type: 'vae'
+  model_param:
+    hidden_dim: 64
+    latent_dim: 6
+    
+  # Optimization
+  opt_param:  
+    lossfunc: 'vae_background_l2' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                      # focal_entropy exponent
+    temperature: 1                # logit norm temperature
+    
+    optimizer: 'Adam'
+    noise_reg: 0.0                # Noise regularization
+
+    epochs: 300
+    batch_size: 256
+    learning_rate: 1.0e-3
+    weight_decay: 0.00001         # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  post_process:
+    temperature_scale: true
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch

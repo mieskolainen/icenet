@@ -493,6 +493,10 @@ def evaluate_models(data=None, data_tensor=None, data_kin=None, data_graph=None,
             func_predict = predict.pred_torch_generic(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
 
+        elif param['predict'] == 'torch_scalar':
+            func_predict = predict.pred_torch_scalar(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
+        
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr,  **inputs)

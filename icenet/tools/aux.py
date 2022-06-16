@@ -582,7 +582,7 @@ class Metric:
     """
     Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30):
+    def __init__(self, y_true, y_soft, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30, verbose=True):
         """
         Args:
             y_true     : true classifications
@@ -618,10 +618,11 @@ class Metric:
         y_soft = y_soft[ok]
         if weights is not None:
             weights = weights[ok]
-
+        
         # Invalid input
         if len(np.unique(y_true)) <= 1:
-            print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (return -1)')
+            if verbose:
+                print(__name__ + f'.Metric: only one class present in y_true, cannot evaluate metrics (return -1)')
             self.acc = -1
             self.auc = -1
             self.fpr = -1
