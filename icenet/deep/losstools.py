@@ -33,11 +33,11 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         xhat = model.forward(x[ind, ...]) 
         MSE  = torch.sum((xhat - x[ind, ...])**2, dim=-1).mean(dim=0)
         KL   = torch.sum(model.encoder.kl_i, dim=-1).mean(dim=0)
-        
-        return MSE + param['VAE_beta']*KL
 
+        return MSE + param['VAE_beta']*KL
+        
     else:
-        print(__name__ + f".loss_wrapper: Error with unknown lossfunc {param['lossfunc']}")
+        print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 
 
 def logsumexp(x, dim=-1):

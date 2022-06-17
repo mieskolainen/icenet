@@ -56,11 +56,11 @@ def read_config(config_path='./configs/xyz'):
     parser = argparse.ArgumentParser()
     
     ## argparse.SUPPRESS removes argument from the namespace if not passed
-    parser.add_argument("--config",    type = str, default='tune0')
-    parser.add_argument("--datapath",  type = str, default=".")
-    parser.add_argument("--datasets",  type = str, default="*.root")
-    parser.add_argument("--tag",       type = str, default='tag0')
-    parser.add_argument("--maxevents", type = int, default=argparse.SUPPRESS)
+    parser.add_argument("--config",    type=str, default='tune0')
+    parser.add_argument("--datapath",  type=str, default=".")
+    parser.add_argument("--datasets",  type=str, default="*.root")
+    parser.add_argument("--tag",       type=str, default='tag0')
+    parser.add_argument("--maxevents", type=int, default=argparse.SUPPRESS)
     
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -94,33 +94,36 @@ def read_config(config_path='./configs/xyz'):
     args['__raytune_running__'] = False
     
     # -------------------------------------------------------------------
-    ### Set image and graph constructions on/off
-    args['graph_on'] = False
-    args['image_on'] = False
+    ### Set graph, image and deepset constructions on/off
+    
+    special_keys = ['graph', 'image', 'deps']
+
+    for key in special_keys:
+        args[f'{key}_on'] = False
 
     for i in range(len(args['active_models'])):
         ID    = args['active_models'][i]
         param = args[f'{ID}_param']
 
-        if ('graph' in param['train']) or ('graph' in param['predict']):
-            args['graph_on'] = True
-        if ('image' in param['train']) or ('image' in param['predict']):
-            args['image_on'] = True
+        for key in special_keys:
+            if key in param['train'] or key in param['predict']:
+                args[f'{key}_on'] = True
 
     print('\n')
-    cprint(__name__ + f'.read_config: graph_on = {args["graph_on"]}', 'yellow')
-    cprint(__name__ + f'.read_config: image_on = {args["image_on"]}', 'yellow')    
+    for key in special_keys:
+        cprint(__name__ + f'.read_config: {key}_on = {args[f"{key}_on"]}', 'yellow')
 
     # -------------------------------------------------------------------
-    
+    # Set random seeds for reproducability and train-validate-test splits
+
     print(args)
     print('')
     print(" torch.__version__: " + torch.__version__)
 
-    ### SET random seed
-    print(__name__ + f'.read_config: Setting random seed: {args["rngseed"]}')
+    cprint(__name__ + f'.read_config: Setting random seed: {args["rngseed"]}', 'yellow')
     np.random.seed(args['rngseed'])
-
+    torch.manual_seed(args['rngseed'])
+    
     # --------------------------------------------------------------------    
     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
@@ -280,7 +283,7 @@ def train_models(data, data_tensor=None, data_graph=None, data_deps=None, data_k
                 model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
                 model = train.train_xgb(**inputs)
-        
+
         elif param['train'] == 'torch_deps':
             
             inputs = {'X_trn': torch.tensor(data_deps.trn.x, dtype=torch.float),

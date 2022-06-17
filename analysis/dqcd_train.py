@@ -68,15 +68,17 @@ def main() :
     ### Split and factor data
     data, data_deps, data_kin = common.splitfactor(data=data, args=args)
 
-    ### Plot variables
     if args['plot_param']['basic']['active']:
+
+        ### Plot variables
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
         plots.plotvars(X = data.trn.x, y = data.trn.y, NBINS = args['plot_param']['basic']['nbins'], ids = data.ids,
             weights = trn_weights, targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+        
+        ### Plot correlation matrix
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        fig,ax = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
     
-    ### Plot correlation matrix
-    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax = plots.plot_correlations(X=data.trn.x, netvars=data.ids, classes=data.trn.y, targetdir=targetdir)
     
     print(__name__ + ': Active variables:')
     prints.print_variables(X=data.trn.x, ids=data.ids)

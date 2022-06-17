@@ -24,7 +24,28 @@ from sklearn.impute import IterativeImputer
 # Command line arguments
 from glob import glob
 from braceexpand import braceexpand
+import copy
 
+
+import hashlib
+import base64
+
+def make_hash_sha256(o):
+    hasher = hashlib.sha256()
+    hasher.update(repr(make_hashable(o)).encode())
+    return base64.b64encode(hasher.digest()).decode()
+
+def make_hashable(o):
+    if isinstance(o, (tuple, list)):
+        return tuple((make_hashable(e) for e in o))
+
+    if isinstance(o, dict):
+        return tuple(sorted((k,make_hashable(v)) for k,v in o.items()))
+
+    if isinstance(o, (set, frozenset)):
+        return tuple(sorted(make_hashable(e) for e in o))
+
+    return o
 
 
 def glob_expand_files(datasets, datapath):

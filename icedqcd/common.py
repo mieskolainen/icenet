@@ -177,16 +177,19 @@ def splitfactor(data, args):
 
     # --------------------------------------------------------------------------
     # Create DeepSet style input from the jagged content
-    data_deps = copy.deepcopy(data)
+    data_deps = None
+    
+    if args['deps_on']:
+        data_deps = copy.deepcopy(data)
+        
+        M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
+        D = len(jagged_ind)            # Tuplet feature vector dimension
 
-    M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
-    D = len(jagged_ind)            # Tuplet feature vector dimension
+        data_deps.trn.x = aux.longvec2matrix(X=data.trn.x[:, len(scalar_ind):], M=M, D=D)
+        data_deps.val.x = aux.longvec2matrix(X=data.val.x[:, len(scalar_ind):], M=M, D=D)
+        data_deps.tst.x = aux.longvec2matrix(X=data.tst.x[:, len(scalar_ind):], M=M, D=D)
 
-    data_deps.trn.x = aux.longvec2matrix(X=data.trn.x[:, len(scalar_ind):], M=M, D=D)
-    data_deps.val.x = aux.longvec2matrix(X=data.val.x[:, len(scalar_ind):], M=M, D=D)
-    data_deps.tst.x = aux.longvec2matrix(X=data.tst.x[:, len(scalar_ind):], M=M, D=D)
-
-    data_deps.ids   = all_jagged_vars
+        data_deps.ids   = all_jagged_vars
     # --------------------------------------------------------------------------
 
     
