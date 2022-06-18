@@ -135,7 +135,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: false
+    active: true
     nbins:  70
   
   contours: 

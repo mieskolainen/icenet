@@ -376,10 +376,10 @@ def train_models(data_trn, data_val, args=None) :
 
         elif param['train'] == 'torch_deps':
             
-            inputs = {'X_trn':       torch.tensor(data_trn['data_deps'], dtype=torch.float),
-                      'Y_trn':       torch.tensor(data_trn['data'].y,    dtype=torch.long),
-                      'X_val':       torch.tensor(data_val['data_deps'], dtype=torch.float),
-                      'Y_val':       torch.tensor(data_val['data'].y,    dtype=torch.long),
+            inputs = {'X_trn':       torch.tensor(data_trn['data_deps'].x, dtype=torch.float),
+                      'Y_trn':       torch.tensor(data_trn['data'].y,      dtype=torch.long),
+                      'X_val':       torch.tensor(data_val['data_deps'].x, dtype=torch.float),
+                      'Y_val':       torch.tensor(data_val['data'].y,      dtype=torch.long),
                       'X_trn_2D':    None,
                       'X_val_2D':    None,
                       'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
