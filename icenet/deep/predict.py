@@ -173,6 +173,29 @@ def pred_torch_generic(args, param):
     return func_predict
 
 
+def pred_torch_scalar(args, param):
+    
+    label = param['label']
+
+    print(f'\nEvaluate {label} classifier ...')
+    
+    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model, device = dopt.model_to_cuda(model, device_type=param['device'])
+    model.eval() # Turn on eval mode!
+    
+    def func_predict(x):
+
+        if not isinstance(x, dict):
+            x_in = x.to(device)
+        else:
+            x_in = copy.deepcopy(x)
+            for key in x_in.keys():
+                x_in[key] = x_in[key].to(device)
+        
+        return model.softpredict(x_in).detach().cpu().numpy()
+    
+    return func_predict
+
 '''
 def pred_xtx(args, param):
 

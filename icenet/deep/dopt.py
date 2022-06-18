@@ -173,7 +173,7 @@ def train(model, loader, optimizer, device, opt_param):
     n = 0
     for i, batch in enumerate(loader):
 
-        x,y,w = batch2tensor(batch, device)
+        x,y,w   = batch2tensor(batch, device)
 
         optimizer.zero_grad() # !
 
@@ -186,7 +186,7 @@ def train(model, loader, optimizer, device, opt_param):
         
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
-            n += y.shape[0]
+            n += 1 # Losses are already mean aggregated, so add 1 per batch
         else:
             total_loss += loss.item() * batch.num_graphs # torch-geometric
             n += batch.num_graphs
@@ -230,7 +230,7 @@ def test(model, loader, optimizer, device):
         
         # Classification metrics
         N       = len(y_true)
-        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False)
+        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False, verbose=True)
 
         if metrics.auc > -1: # Bad batch protection
             aucsum += (metrics.auc * N)
@@ -259,6 +259,13 @@ def model_to_cuda(model, device_type='auto'):
 
     model = model.to(device, non_blocking=True)
 
+    # Try special map (.to() does not map all variables)
+    try:
+        model = model.to_device(device=device)
+        print(__name__ + f'.model_to_cuda: <{model}> mapping special to <{device}>')
+    except:
+        True
+    
     # Multi-GPU setup
     if torch.cuda.device_count() > 1:
         print(__name__ + f'.model_to_cuda: Multi-GPU {torch.cuda.device_count()}')

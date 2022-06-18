@@ -34,8 +34,7 @@ from icenet.tools import aux
 from icenet.tools import plots
 from icenet.algo import nmf
 
-# iceid
-from iceid import common
+import iceid
 
 import numba
 import numpy as np
@@ -45,15 +44,15 @@ import numpy as np
 #
 def main() :
     
-    ### Get input
-    data, args, features = common.init(maxevents=30000)
-    
+    args, cli = process.read_config(config_path='./configs/eid')
+    data      = process.read_data(args=args, func_loader=iceid.common.load_root_file)
+
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/image/')
 
     ### Split and factor data
-    data, data_tensor, data_kin = common.splitfactor(data=data, args=args)
-
-
+    data, data_tensor, data_kin = iceid.common.splitfactor(data=data, args=args)
+    
+    
     # --------------------------------------------------------------------
     # NMF factorization
 

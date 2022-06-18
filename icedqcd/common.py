@@ -124,28 +124,41 @@ def process_root(rootfile, tree, isMC, max_num_elements, args):
     return X, ids
 
 
-def splitfactor(data, args):
+def splitfactor(x, y, w, ids, args):
     """
-    Split electron ID data into different datatypes.
+    Transform data into different datatypes.
     
     Args:
         data:  jagged arrays
         args:  arguments dictionary
     
     Returns:
-        scalar (vector) data
-        kinematic data
+        dictionary with different data representations
     """
 
+    data = io.IceXYW(x=x, y=y, w=w, ids=ids)
+
+    # -------------------------------------------------------------------------
     ### Pick kinematic variables out
+    data_kin = None
+    
     if KINEMATIC_ID is not None:
         k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
         
-        data_kin        = copy.deepcopy(data)
-        data_kin.trn.x  = data.trn.x[:, k_ind].astype(np.float)
-        data_kin.val.x  = data.val.x[:, k_ind].astype(np.float)
-        data_kin.tst.x  = data.tst.x[:, k_ind].astype(np.float)
-        data_kin.ids    = k_vars
+        data_kin     = copy.deepcopy(data)
+        data_kin.x   = data.x[:, k_ind].astype(np.float)
+        data_kin.ids = k_vars
+
+    # -------------------------------------------------------------------------
+    ## Graph representation
+    data_graph  = None
+
+    # -------------------------------------------------------------------------
+    ## Tensor representation
+    data_tensor = None
+
+    # -------------------------------------------------------------------------
+    ## Turn jagged to "long-vector" matrix representation
 
     ### Pick active scalar variables out
     scalar_ind, scalar_vars = io.pick_vars(data, globals()[args['inputvar_scalar']])
@@ -160,35 +173,30 @@ def splitfactor(data, args):
         'library'      :  'np'
     }
 
-    data.trn.x = aux.jagged2matrix(data.trn.x, **arg)
-    data.val.x = aux.jagged2matrix(data.val.x, **arg)
-    data.tst.x = aux.jagged2matrix(data.tst.x, **arg)
-
-    # --------------------------------------------------------------------------
     # Create tuplet expanded jagged variable names
     all_jagged_vars = []
     for i in range(len(jagged_vars)):
         for j in range(jagged_maxdim[i]):
             all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
-    # --------------------------------------------------------------------------
     
-    data.ids  = scalar_vars + all_jagged_vars
-
-
-    # --------------------------------------------------------------------------
-    # Create DeepSet style input from the jagged content
-    data_deps = copy.deepcopy(data)
-
-    M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
-    D = len(jagged_ind)            # Tuplet feature vector dimension
-
-    data_deps.trn.x = aux.longvec2matrix(X=data.trn.x[:, len(scalar_ind):], M=M, D=D)
-    data_deps.val.x = aux.longvec2matrix(X=data.val.x[:, len(scalar_ind):], M=M, D=D)
-    data_deps.tst.x = aux.longvec2matrix(X=data.tst.x[:, len(scalar_ind):], M=M, D=D)
-
-    data_deps.ids   = all_jagged_vars
+    # Update representation
+    data.x   = aux.jagged2matrix(data.x, **arg)
+    data.ids = scalar_vars + all_jagged_vars
     # --------------------------------------------------------------------------
 
-    
-    return data, data_deps, data_kin
+    # --------------------------------------------------------------------------
+    # Create DeepSet style representation from the "long-vector" content
+    data_deps = None
 
+    if args['deps_on']:
+        data_deps = copy.deepcopy(data)
+
+        M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
+        D = len(jagged_ind)            # Tuplet feature vector dimension
+
+        data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
+        data_deps.ids = all_jagged_vars
+    # --------------------------------------------------------------------------
+
+
+    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

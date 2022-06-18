@@ -39,14 +39,15 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
 
     # -----------------------------------------------
     param = {
-        "max_num_elements": entry_stop,
+        'entry_start': entry_start,
+        "entry_stop":  entry_stop,
         "args": args
     }
 
     # =================================================================
     # *** MC (signal) ***
     
-    rootfile      = [f'{root_path}/{args["mcfile"]}']
+    rootfile      = f'{root_path}/{args["mcfile"]}'
     
     # e1
     X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e1', **param)
@@ -65,7 +66,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     # =================================================================
     # *** DATA (background) ***
 
-    rootfile          = [f'{root_path}/{args["datafile"]}']
+    rootfile          = f'{root_path}/{args["datafile"]}'
     X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
 
     X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
@@ -95,16 +96,16 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     return X, Y, NEW_VARS
 
 
-def process_root(rootfile, tree, isMC, max_num_elements, args):
+def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    Y   = iceroot.load_tree(rootfile=rootfile, tree=tree, max_num_elements=max_num_elements, ids=LOAD_VARS)
-    ids = [i for i in Y.keys()]
-    X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
-    for i in range(len(ids)):
-        X[:,i] = Y[ids[i]]
+
+    events  = uproot.open(f'{rootfile}:{tree}')
+    ids     = events.keys()
+    X,ids = iceroot.process_tree(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
+
 
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
@@ -127,34 +128,45 @@ def process_root(rootfile, tree, isMC, max_num_elements, args):
     return X, ids
 
 
-def splitfactor(data, args):
+def splitfactor(x, y, w, ids, args):
     """
-    Split electron ID data into different datatypes.
+    Transform data into different datatypes.
     
     Args:
         data:  jagged arrays
         args:  arguments dictionary
     
     Returns:
-        scalar (vector) data
-        kinematic data
+        dictionary with different data representations
     """
-    
-    ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.ids    = k_vars
 
-    ### Pick active scalar variables out
+    data = io.IceXYW(x=x, y=y, w=w, ids=ids)
+
+    # -------------------------------------------------------------------------
+    ### Pick kinematic variables out
+    data_kin = None
+
+    if KINEMATIC_ID is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+        
+        data_kin      = copy.deepcopy(data)
+        data_kin.x    = data.x[:, k_ind].astype(np.float)
+        data_kin.ids  = k_vars
+
+    # -------------------------------------------------------------------------
+    data_deps   = None
+
+    # -------------------------------------------------------------------------
+    data_tensor = None
+
+    # -------------------------------------------------------------------------
+    data_graph  = None
+
+    # --------------------------------------------------------------------
+    ### Finally pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids     = s_vars
-
-    return data, data_kin
+    data.x   = data.x[:, s_ind].astype(np.float)
+    data.ids = s_vars
+    
+    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

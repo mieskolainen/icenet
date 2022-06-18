@@ -139,6 +139,11 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             'num_workers' : param['num_workers'],
             'pin_memory'  : True}
 
+
+    print(trn_x.shape)
+    print(trn_weights.shape)
+    
+    
     # Training generator
     training_set         = Dataset(trn_x, trn_weights)
     training_generator   = torch.utils.data.DataLoader(training_set, **params)

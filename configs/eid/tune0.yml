@@ -27,22 +27,25 @@ batch_train_param:
 # Give all models some unique identifier and label
 active_models:
 
+  - dbnf0
+  - xgb0
   - gxgb0
-#  - cnn0
+
   - gnet0
-#  - gnet1
-  - gnet0-logit-norm
+  - gnet1
+
+#  - gnet0-logit-norm
 #  - gnet2
 #  - gnet3
 #  - gnet4
 
   - flr0
-  - xgb0
   - lgr0
-#  - xtx0
   - dmx0
   - dmlp
-  - dbnf0
+
+  - cnn0
+#  - xtx0
 
 # ---------------------------------------------------------
 
@@ -181,7 +184,6 @@ outlier_param:
   qmax: 99.9         # in [0,100]
 
 
-
 ## Pure plotting setup
 plot_param:
   basic:
@@ -224,7 +226,8 @@ plot_param:
 
 
 raytune_param:
-  active:         ['xgb0'] # Add model identifiers here
+  #active:         ['xgb0'] # Add model identifiers here
+  active:         [null]
   num_samples:    5
   max_num_epochs: 50
 
