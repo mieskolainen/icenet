@@ -33,7 +33,15 @@ import base64
 def make_hash_sha256(o):
     hasher = hashlib.sha256()
     hasher.update(repr(make_hashable(o)).encode())
-    return base64.b64encode(hasher.digest()).decode()
+    hash_str = base64.b64encode(hasher.digest()).decode()
+
+    # May cause problems with directories
+    hash_str = hash_str.replace('/',  '_')
+    hash_str = hash_str.replace('\\', '_')
+    hash_str = hash_str.replace('.',  '_')
+    
+    return hash_str
+
 
 def make_hashable(o):
     if isinstance(o, (tuple, list)):
@@ -179,7 +187,7 @@ def pick_vars(data, set_of_vars):
     """ Choose the active set of input variables.
 
     Args:
-        data:        IceTriplet type object
+        data:        IceTriplet / IceXYW type object
         set_of_vars: Variables to pick
     Returns:
         newind:      Chosen indices
@@ -196,13 +204,13 @@ def pick_vars(data, set_of_vars):
 
 
 class IceTriplet:
-    """ Main class for datasets
+    """ Main class for MC type datasets
     """
     def __init__(self, func_loader, frac, rngseed, load_args, files=None, class_id=None):
         
         if class_id is None:
             class_id = [0,1] # By default two classes [0,1]
-        
+            
         if files is None:
             cprint(__name__ + f'.IceTriplet.__init__: files is None, relying on func_loader()', 'red')
             files = ['dummy.root'] # Will be defined in func_loader
@@ -214,12 +222,16 @@ class IceTriplet:
         self.tst = IceXYW()
         
         for f in files :
-            X, Y, self.ids = func_loader(root_path=f, class_id=class_id, **load_args)
+            X, Y, ids      = func_loader(root_path=f, class_id=class_id, **load_args)
             trn, val, tst  = split_data(X=X, Y=Y, frac=frac, rngseed=rngseed, class_id=class_id)
 
             self.trn += trn
             self.val += val
             self.tst += tst
+
+            self.trn.ids = ids
+            self.val.ids = ids
+            self.tst.ids = ids
 
         self.n_dims  = self.trn.x.shape[1]
         print(__name__ + f'.__init__: n_dims = {self.n_dims}')
@@ -228,17 +240,18 @@ class IceTriplet:
 class IceXYW:
     """
     Args:
-        x : data                [N vectors x D dimensions]
-        y : target output data  [N scalars or vectors]
-        w : weight              [N scalars]
+        x : data object
+        y : target output data
+        w : weights
     """
     
     # constructor
-    def __init__(self, x = np.array([]), y = np.array([]), w = None):
-        self.N = x.shape[0]
+    def __init__(self, x = np.array([]), y = np.array([]), w = np.array([]), ids=None):
+
         self.x = x
         self.y = y
         self.w = w
+        self.ids = ids
 
     # + operator
     def __add__(self, other):
@@ -248,11 +261,7 @@ class IceXYW:
 
         x = np.concatenate((self.x, other.x), axis=0)
         y = np.concatenate((self.y, other.y), axis=0)
-
-        if self.w is not None:
-            w = np.concatenate((self.w, other.w), axis=0)
-        else:
-            w = None
+        w = np.concatenate((self.w, other.w), axis=0)
 
         return IceXYW(x, y, w)
 
@@ -264,37 +273,33 @@ class IceXYW:
 
         self.x = np.concatenate((self.x, other.x), axis=0)
         self.y = np.concatenate((self.y, other.y), axis=0)
-
-        if self.w is not None:
-            self.w = np.concatenate((self.w, other.w), axis=0)
-
-        self.N = len(self.y)
+        self.w = np.concatenate((self.w, other.w), axis=0)
 
         return self
 
     # filter operator
     def classfilter(self, classid):
 
-        x = self.x[self.y == classid]
-        y = self.y[self.y == classid]
+        ind = (self.y == classid)
 
-        if self.w is not None:
-            w = self.w[self.w == classid]
+        x = self.x[ind]
+        y = self.y[ind]
+
+        if len(self.w) != 0:
+            w = self.w[ind]
         else:
-            w = None
-
-        return IceXYW(x, y, w)
-
+            w = self.w
+        
+        return IceXYW(x=x, y=y, w=w, ids=self.ids)
+        
     # Permute events
     def permute(self, permutation):
         
         self.x = self.x[permutation]
         self.y = self.y[permutation]
 
-        if self.w is not None:
+        if len(self.w) != 0:
             self.w = self.w[permutation]
-        else:
-            self.w = None
 
         return self
 
@@ -365,10 +370,10 @@ def split_data(X, Y, frac, rngseed, class_id=None):
         format(X_trn.shape[0]/ N, X_val.shape[0]/ N, X_tst.shape[0] / N))
 
     # Finally, re-permutate once more (needed if class-wise selection was done)
-    trn = trn.permute(np.random.permutation(trn.N))
-    val = val.permute(np.random.permutation(val.N))
-    tst = tst.permute(np.random.permutation(tst.N))
-
+    trn = trn.permute(np.random.permutation(trn.x.shape[0]))
+    val = val.permute(np.random.permutation(val.x.shape[0]))
+    tst = tst.permute(np.random.permutation(tst.x.shape[0]))
+    
     return trn, val, tst
 
 

@@ -515,17 +515,17 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        inds:     histogram bin indices</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">NBINS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">nbins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">NBINS</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">nbins</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbins</span><span class="o">-</span><span class="mi">1</span>
         <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">inds</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">:</span>
-            <span class="n">inds</span> <span class="o">=</span> <span class="n">NBINS</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">nbins</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">nbins</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">inds</span></div>
 

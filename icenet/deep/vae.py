@@ -65,7 +65,7 @@ class VariationalEncoder(nn.Module):
         # Take torch.sum(self.kl_i, dim=-1) to obtain the MC estimate
         self.kl_i = 0.5 * (std.pow(2) + mu.pow(2) - 1 - logvar)
 
-        return z
+        return z, mu, std
 
     def to_device(self, device):
         """ Needed for cuda
@@ -103,22 +103,22 @@ class VAE(nn.Module):
         return self
 
     def forward(self, x):
-        z    = self.encoder(x)
-        xhat = self.decoder(z)
+        z,mu,std = self.encoder(x)
+        xhat     = self.decoder(z)
         return xhat
 
     def softpredict(self, x):
-        z     = self.encoder(x)
-        xhat  = self.decoder(z)
+        z,mu,std = self.encoder(x)
+        xhat     = self.decoder(z)
         
         # "Test statistic"
         if   self.anomaly_score == 'mse':
-            score = torch.sum((xhat - x)**2 / x.shape[-1], dim=-1)
-        elif self.anomaly_score == 'var_kl':
-            score = torch.var(self.encoder.kl_i, dim=-1) / z.shape[-1]
-
-        if self.training:
-            return torch.log(torch.tanh(score)) # Numerically more stable
-        else:
+            score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1]
             return torch.tanh(score)
 
+        elif self.anomaly_score == 'mse_kl':
+            score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1] + torch.sum(self.encoder.kl_i, dim=-1)/z.shape[-1]
+            return 1 - torch.tanh(1/score)
+        
+        else:
+            raise Exception(__name__ + f'.softpredict: Unknown <anomaly_score> = {self.anomaly_score} selected.')

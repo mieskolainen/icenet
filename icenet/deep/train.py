@@ -436,7 +436,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     return model, train_loader, test_loader
 
 
-def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=None, args=None, param=None, plot_importance=True):
+def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True):
     """
     Train XGBoost model
     
@@ -460,11 +460,11 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
     ### *********************************
 
     # Extended data
-    x_trn_    = data.trn.x
-    x_val_    = data.val.x
+    x_trn_    = data_trn.x
+    x_val_    = data_val.x
 
-    dtrain    = xgboost.DMatrix(data = x_trn_, label = data.trn.y if y_soft is None else y_soft, weight = trn_weights)
-    deval     = xgboost.DMatrix(data = x_val_, label = data.val.y, weight = val_weights)
+    dtrain    = xgboost.DMatrix(data = x_trn_, label = data_trn.y if y_soft is None else y_soft, weight = data_trn.w)
+    deval     = xgboost.DMatrix(data = x_val_, label = data_val.y, weight = data_val.w)
 
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     results   = dict()
@@ -501,7 +501,7 @@ def train_xgb(config={}, data=None, y_soft=None, trn_weights=None, val_weights=N
         ## Plot feature importance
         if plot_importance:
 
-            fig,ax = plots.plot_xgb_importance(model=model, dim=data.trn.x.shape[1], tick_label=data.ids)
+            fig,ax = plots.plot_xgb_importance(model=model, dim=data_trn.x.shape[1], tick_label=data_trn.ids)
             targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
             plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
@@ -628,7 +628,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     return model
 
 
-def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
+def train_flr(config={}, data_trn=None, args=None, param=None):
     """
     Train factorized likelihood model
 
@@ -640,7 +640,7 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     """
     print(__name__ + f'.train_flr: Training {param["label"]} classifier ...')
 
-    b_pdfs, s_pdfs, bin_edges = flr.train(X = data.trn.x, y = data.trn.y, weights = trn_weights, param = param)
+    b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
         open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '_.dat', 'wb'))
 
@@ -652,12 +652,12 @@ def train_flr(config={}, data=None, trn_weights=None, args=None, param=None):
     if args['plot_param']['contours']['active']:
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
         plots.plot_decision_contour(lambda x : func_predict(x),
-            X = data.trn.x, y = data.trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
+            X = data_trn.x, y = data_trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """
     return (b_pdfs, s_pdfs)
 
 
-def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
+def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
     """
     Train normalizing flow (BNAF) neural model
 
@@ -667,22 +667,18 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
     Returns:
         trained model
     """
-
+    
     # Set input dimensions
-    param['model_param']['n_dims'] = data.trn.x.shape[1]
+    param['model_param']['n_dims'] = data_trn.x.shape[1]
 
     print(__name__ + f'.train_flow: Training {param["label"]} classifier ...')
-
-
+    
     for classid in range(args['num_classes']):
         param['model'] = 'class_' + str(classid)
 
         # Load datasets
-        trn = data.trn.classfilter(classid)
-        val = data.val.classfilter(classid)
-
-        # Load re-weighting weights
-        weights = trn_weights[data.trn.y == classid]
+        trn   = data_trn.classfilter(classid)
+        val   = data_val.classfilter(classid)
 
         # Create model
         model = dbnf.create_model(param=param['model_param'], verbose = True)
@@ -706,8 +702,9 @@ def train_flow(config={}, data=None, trn_weights=None, args=None, param=None):
                                       threshold_mode = 'abs')
         
         print(__name__ + f'.train_flow: Training density for class = {classid} ...')
-        dbnf.train(model, optimizer, sched, trn.x, val.x, weights, param, args['modeldir'])
-
+        dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
+            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, param=param, modeldir=args['modeldir'])
+        
     return True
 
 

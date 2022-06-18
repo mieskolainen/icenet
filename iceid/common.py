@@ -61,7 +61,7 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     # -----------------------------------------------
 
     print('\n')
-    cprint( __name__ + f'.common: Loading root file {root_path}', 'yellow')
+    cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
     file   = uproot.open(root_path)
     events = file[args['tree_name']]
 
@@ -74,7 +74,7 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     Y = None
     # --------------------------------------------------------------
 
-    print(__name__ + f'common: X.shape = {X.shape}')
+    print(__name__ + f'.load_root_file: X.shape = {X.shape}')
     io.showmem()
     prints.printbar()
 
@@ -87,8 +87,8 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
         Y = TARFUNC(events, entry_start=entry_start, entry_stop=entry_stop, new=True)
         Y = np.asarray(Y).T
-        print(__name__ + f'common: Y.shape = {Y.shape}')
-
+        print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
+        
         # For info
         labels1 = ['is_e', 'is_egamma']
         aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop, new=True)
@@ -115,45 +115,47 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     io.showmem()
     prints.printbar()
     file.close()
-
+    
     return X, Y, ids
 
 
-def splitfactor(data, args):
+def splitfactor(x, y, w, ids, args):
     """
-    Split electron ID data into different datatypes.
+    Transform data into different datatypes.
     
     Args:
-        data:        jagged numpy arrays
-        args:        arguments dictionary
+        data:  jagged arrays
+        args:  arguments dictionary
     
     Returns:
-        data:        scalar (vector) data
-        data_tensor: tensor data (images)
-        data_kin:    kinematic data
+        dictionary with different data representations
     """
-    
-    ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.ids     = k_vars
 
-    data_tensor      = None
+    data = io.IceXYW(x=x, y=y, w=w, ids=ids)
+
+    # -------------------------------------------------------------------------
+    ### Pick kinematic variables out
+    data_kin = None
+    
+    if KINEMATIC_ID is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+        
+        data_kin     = copy.deepcopy(data)
+        data_kin.x   = data.x[:, k_ind].astype(np.float)
+        data_kin.ids = k_vars
+
+    # -------------------------------------------------------------------------
+    ### DeepSets representation
+    data_deps = None
+    
+    # -------------------------------------------------------------------------
+    ### Tensor representation
+    data_tensor = None
 
     if args['image_on']:
 
         ### Pick active jagged array / "image" variables out
-        j_ind, j_vars    = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
-        
-        data_image       = copy.deepcopy(data)
-        data_image.trn.x = data.trn.x[:, j_ind]
-        data_image.val.x = data.val.x[:, j_ind]
-        data_image.tst.x = data.tst.x[:, j_ind]
-        data_image.ids  = j_vars 
+        j_ind, j_vars = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
 
         # Use single channel tensors
         if   args['image_param']['channels'] == 1:
@@ -172,21 +174,26 @@ def splitfactor(data, args):
         # Pick tensor data out
         cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
 
-        data_tensor = {}
-        data_tensor['trn'] = aux.jagged2tensor(X=data_image.trn.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['val'] = aux.jagged2tensor(X=data_image.val.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-        data_tensor['tst'] = aux.jagged2tensor(X=data_image.tst.x, ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-    
+        data_tensor = aux.jagged2tensor(X=data.x[:, j_ind], ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
 
-    ### Pick active scalar variables out
+    # -------------------------------------------------------------------------
+    ## Graph representation
+    data_graph = None
+
+    if args['graph_on']:
+        
+        features   = globals()[args['inputvar']]
+        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+
+    # --------------------------------------------------------------------
+    ### Finally pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids      = s_vars
+    data.x   = data.x[:, s_ind].astype(np.float)
+    data.ids = s_vars
     
-    return data, data_tensor, data_kin
+    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
 
 
 # ========================================================================

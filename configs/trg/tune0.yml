@@ -22,8 +22,6 @@ active_models:
 
   - xgb0
   - xgb1
-
-  - vae0
   - lgr0
 
   - cut0

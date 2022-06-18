@@ -128,34 +128,45 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
     return X, ids
 
 
-def splitfactor(data, args):
+def splitfactor(x, y, w, ids, args):
     """
-    Split electron ID data into different datatypes.
+    Transform data into different datatypes.
     
     Args:
         data:  jagged arrays
         args:  arguments dictionary
     
     Returns:
-        scalar (vector) data
-        kinematic data
+        dictionary with different data representations
     """
-    
-    ### Pick kinematic variables out
-    k_ind, k_vars    = io.pick_vars(data, KINEMATIC_ID)
-    
-    data_kin         = copy.deepcopy(data)
-    data_kin.trn.x   = data.trn.x[:, k_ind].astype(np.float)
-    data_kin.val.x   = data.val.x[:, k_ind].astype(np.float)
-    data_kin.tst.x   = data.tst.x[:, k_ind].astype(np.float)
-    data_kin.ids    = k_vars
 
-    ### Pick active scalar variables out
+    data = io.IceXYW(x=x, y=y, w=w, ids=ids)
+
+    # -------------------------------------------------------------------------
+    ### Pick kinematic variables out
+    data_kin = None
+
+    if KINEMATIC_ID is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+        
+        data_kin      = copy.deepcopy(data)
+        data_kin.x    = data.x[:, k_ind].astype(np.float)
+        data_kin.ids  = k_vars
+
+    # -------------------------------------------------------------------------
+    data_deps   = None
+
+    # -------------------------------------------------------------------------
+    data_tensor = None
+
+    # -------------------------------------------------------------------------
+    data_graph  = None
+
+    # --------------------------------------------------------------------
+    ### Finally pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
-    data.trn.x    = data.trn.x[:, s_ind].astype(np.float)
-    data.val.x    = data.val.x[:, s_ind].astype(np.float)
-    data.tst.x    = data.tst.x[:, s_ind].astype(np.float)
-    data.ids     = s_vars
-
-    return data, data_kin
+    data.x   = data.x[:, s_ind].astype(np.float)
+    data.ids = s_vars
+    
+    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

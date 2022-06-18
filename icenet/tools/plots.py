@@ -522,20 +522,20 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
-def plotvars(X, y, ids, weights, NBINS = 70, title = '', targetdir = '.'):
+def plotvars(X, y, ids, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot all variables.
     """
     print(__name__ + f'.plotvars: Creating plots ...')
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
         var = ids[i]
-        plotvar(x, y, var, weights, NBINS, title, targetdir)
+        plotvar(x, y, var, weights, nbins, title, targetdir)
 
 
-def plotvar(x, y, var, weights, NBINS = 70, title = '', targetdir = '.'):
+def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot a single variable.
     """
-    bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), NBINS)
+    bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
     plot_reweight_result(x, y, bins, weights, title = title, xlabel = var)
     plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
     plt.close()
@@ -602,7 +602,7 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=N
 
     for i in range(num_classes):
 
-        label = f'class_{i}'
+        label = f'all' if (num_classes == 1) else f'class_{i}'
 
         # Compute correlation matrix
         C = np.corrcoef(X[classes == i, :], rowvar = False)
@@ -610,7 +610,7 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=N
         C *= 100
 
         # Compute suitable figsize
-        size = np.ceil(C.shape[0]/3)
+        size = np.ceil(C.shape[0] / 3)
         
         # Plot it
         figs[label], axs[label] = plt.subplots(1,1, figsize=(size,size))

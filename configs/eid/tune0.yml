@@ -26,6 +26,8 @@ batch_train_param:
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
+
+  - dbnf0
   - xgb0
   - gxgb0
 
@@ -41,9 +43,8 @@ active_models:
   - lgr0
   - dmx0
   - dmlp
-  - dbnf0
 
-#  - cnn0
+  - cnn0
 #  - xtx0
 
 # ---------------------------------------------------------
@@ -183,11 +184,10 @@ outlier_param:
   qmax: 99.9         # in [0,100]
 
 
-
 ## Pure plotting setup
 plot_param:
   basic:
-    active: false
+    active: true
     nbins:  70
   
   contours: 

@@ -19,6 +19,19 @@ import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
 
+def parse_vars(items):
+    """
+    Parse a series of key-value pairs and return a dictionary
+    """
+    d = {}
+
+    if items:
+        for item in items:
+            key, value = parse_var(item)
+            d[key] = value
+    return d
+
+
 #@numba.njit
 def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0), library='ak'):
     """
@@ -156,17 +169,17 @@ def x2ind(x, binedges) :
     Returns:
         inds:     histogram bin indices
     """
-    NBINS = len(binedges) - 1
+    nbins = len(binedges) - 1
     inds = np.digitize(x, binedges, right=True) - 1
 
     if len(x) > 1:
-        inds[inds >= NBINS] = NBINS-1
+        inds[inds >= nbins] = nbins-1
         inds[inds < 0] = 0
     else:
         if inds < 0:
             inds = 0
-        if inds >= NBINS:
-            inds = NBINS - 1
+        if inds >= nbins:
+            inds = nbins - 1
 
     return inds
 
