@@ -14,8 +14,8 @@ cuts     = 'gen_e1_l1_dr < 0.2 AND gen_e2_l1_dr < 0.2 AND e1_l1_pt >=6 AND e2_l1
 for key in ['tree;1', 'tree;2']:
 	
 	print(key)
-	Y = iceroot.load_tree(rootfile=rootfile, tree=key)
-	X = icemap(Y)
+	X,ids = iceroot.load_tree(rootfile=rootfile, tree=key)
+	X = icemap(X,ids)
 
 	y1 = X[cuts]
 	print(f'before: {X.x.shape[0]}, after: {y1.x.shape[0]}, ratio: {y1.x.shape[0] / X.x.shape[0]:0.3E}')
