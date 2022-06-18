@@ -84,16 +84,16 @@
 <span class="sd">        class_id  : class ids</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        X,Y       : input, output matrices</span>
+<span class="sd">        X,Y       : input, output data (with jagged content)</span>
 <span class="sd">        ids       : variable names</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="c1"># -----------------------------------------------</span>
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">TARFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;targetfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
     <span class="c1"># -----------------------------------------------</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading root file </span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">file</span>   <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
@@ -104,7 +104,7 @@
 
     <span class="c1"># --------------------------------------------------------------</span>
     <span class="n">load_ids</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">all_ids</span><span class="o">=</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">X</span><span class="p">,</span><span class="n">ids</span>    <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">process_tree</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">load_ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span>    <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">events_to_jagged_numpy</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">load_ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># --------------------------------------------------------------</span>
 
@@ -127,7 +127,7 @@
         <span class="n">labels1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_e&#39;</span><span class="p">,</span> <span class="s1">&#39;is_egamma&#39;</span><span class="p">]</span>
         <span class="n">aux</span><span class="o">.</span><span class="n">count_targets</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">labels1</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-
+        
         <span class="c1"># @@ MC filtering done here @@</span>
         <span class="n">indmc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">indmc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
@@ -142,14 +142,14 @@
     <span class="n">cprint</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">),</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">cind</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: &lt;cutfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cind</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
+    
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
-
+    
     <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
     <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    
+
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">ids</span></div>
 
 

@@ -77,8 +77,9 @@
     <span class="c1"># -----------------------------------------------</span>
 
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;max_num_elements&quot;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span>
-        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span>
+        <span class="s2">&quot;entry_start&quot;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span>
+        <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entry_stop</span><span class="p">,</span>
+        <span class="s2">&quot;args&quot;</span><span class="p">:</span>        <span class="n">args</span>
     <span class="p">}</span>
     
     <span class="c1"># =================================================================</span>
@@ -126,17 +127,13 @@
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">VARS</span></div>
 
 
-<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
 
-    <span class="n">Y</span>   <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">max_num_elements</span><span class="o">=</span><span class="n">max_num_elements</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">)</span>
-    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Y</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-    <span class="n">X</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
-        <span class="n">X</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>        
-
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span>      <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">)</span>
+    
     <span class="c1"># @@ Filtering done here @@</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="n">plots</span><span class="o">.</span><span class="n">plot_selection</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;&lt;filter&gt;_</span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">varlist</span><span class="o">=</span><span class="n">PLOT_VARS</span><span class="p">)</span>
@@ -200,13 +197,6 @@
     
     <span class="n">jagged_maxdim</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     
-    <span class="n">arg</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;scalar_vars&#39;</span>  <span class="p">:</span>  <span class="n">scalar_ind</span><span class="p">,</span>
-        <span class="s1">&#39;jagged_vars&#39;</span>  <span class="p">:</span>  <span class="n">jagged_ind</span><span class="p">,</span>
-        <span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">:</span>  <span class="n">jagged_maxdim</span><span class="p">,</span>
-        <span class="s1">&#39;library&#39;</span>      <span class="p">:</span>  <span class="s1">&#39;np&#39;</span>
-    <span class="p">}</span>
-
     <span class="c1"># Create tuplet expanded jagged variable names</span>
     <span class="n">all_jagged_vars</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
@@ -214,6 +204,12 @@
             <span class="n">all_jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="p">)</span>
     
     <span class="c1"># Update representation</span>
+    <span class="n">arg</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;scalar_vars&#39;</span>  <span class="p">:</span>  <span class="n">scalar_ind</span><span class="p">,</span>
+        <span class="s1">&#39;jagged_vars&#39;</span>  <span class="p">:</span>  <span class="n">jagged_ind</span><span class="p">,</span>
+        <span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">:</span>  <span class="n">jagged_maxdim</span><span class="p">,</span>
+        <span class="s1">&#39;library&#39;</span>      <span class="p">:</span>  <span class="s1">&#39;np&#39;</span>
+    <span class="p">}</span>
     <span class="n">data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
