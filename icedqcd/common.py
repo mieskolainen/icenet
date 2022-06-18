@@ -43,8 +43,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     # -----------------------------------------------
 
     param = {
-        "max_num_elements": entry_stop,
-        "args": args
+        "entry_start": entry_start,
+        "entry_stop":  entry_stop,
+        "args":        args
     }
     
     # =================================================================
@@ -92,17 +93,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     return X, Y, VARS
 
 
-def process_root(rootfile, tree, isMC, max_num_elements, args):
+def process_root(rootfile, tree, isMC, entry_start, entry_stop, args):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    Y   = iceroot.load_tree(rootfile=rootfile, tree=tree, max_num_elements=max_num_elements, ids=LOAD_VARS)
-    ids = [i for i in Y.keys()]
-    X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
-    for i in range(len(ids)):
-        X[:,i] = Y[ids[i]]        
-
+    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=LOAD_VARS)
+    
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
@@ -166,13 +163,6 @@ def splitfactor(x, y, w, ids, args):
     
     jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
     
-    arg = {
-        'scalar_vars'  :  scalar_ind,
-        'jagged_vars'  :  jagged_ind,
-        'jagged_maxdim':  jagged_maxdim,
-        'library'      :  'np'
-    }
-
     # Create tuplet expanded jagged variable names
     all_jagged_vars = []
     for i in range(len(jagged_vars)):
@@ -180,6 +170,12 @@ def splitfactor(x, y, w, ids, args):
             all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
     
     # Update representation
+    arg = {
+        'scalar_vars'  :  scalar_ind,
+        'jagged_vars'  :  jagged_ind,
+        'jagged_maxdim':  jagged_maxdim,
+        'library'      :  'np'
+    }
     data.x   = aux.jagged2matrix(data.x, **arg)
     data.ids = scalar_vars + all_jagged_vars
     # --------------------------------------------------------------------------

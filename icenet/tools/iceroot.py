@@ -48,9 +48,9 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     return num_events
 
 
-def process_tree(events, ids, entry_start=0, entry_stop=None):
+def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
     """
-    Process uproot tree
+    Process uproot tree to a jagged numpy (object) array
     
     Args:
         events:      uproot tree
@@ -59,35 +59,37 @@ def process_tree(events, ids, entry_start=0, entry_stop=None):
         entry_stop:  last event to consider
     
     Returns:
-        numpy array (with jagged content)
+        X
     """
     
-    N        = len(events.arrays(ids[0]))
-    X_test   = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
-    X        = np.empty((len(X_test), len(ids)), dtype=object) 
+    N_all  = len(events.arrays(ids[0]))
+    X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
+    N      = len(X_test)
+    X      = np.empty((N, len(ids)), dtype=object) 
     
-    cprint( __name__ + f'.process_tree: Entry_start = {entry_start}, entry_stop = {entry_stop} | total = {N}', 'yellow')
+    cprint( __name__ + f'.process_tree: Entry_start = {entry_start}, entry_stop = {entry_stop} | realized = {N} ({100*N/N_all:0.3f} % | available = {N_all})', 'yellow')
     
-    for j in tqdm(range(len(ids))):
+    for j in range(len(ids)):
         x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
         X[:,j] = np.asarray(x)
+    
+    return X, ids
 
-    return X,ids
 
-
-def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
+def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library='np'):
     """
-    Load ROOT files using uproot 'concatenate' of files
+    Load ROOT files
     
     Args:
         rootfile:          Name of root file paths (string or a list of strings)
         tree:              Tree to read out
-        max_num_elements:  Max events to read (NOT IMPLEMENTED)
+        entry_start:       First event to read per file
+        entry_stop:        Last event to read per file
         ids:               Variable names to read out from the root tree
-        library:           Return type 'np' (numpy dict) or 'ak' (awkward) of the array
+        library:           Return type 'np' (jagged numpy) or 'ak' (awkward) of the array
     
     Returns:
-        Tree array of type 'library'
+        array of type 'library'
     """
 
     if type(rootfile) is not list:
@@ -106,8 +108,39 @@ def load_tree(rootfile, tree, max_num_elements=None, ids=None, library='np'):
     load_ids = process_regexp_ids(ids=ids, all_ids=all_ids)
 
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
+    print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
 
-    return uproot.concatenate(files, expressions=load_ids, library=library)
+    if   library == 'np':
+
+        for i in tqdm(range(len(files))):
+            events = uproot.open(files[i])
+            if i == 0:
+                X,ids  = events_to_jagged_numpy(events=events, ids=load_ids, entry_start=0, entry_stop=entry_stop)
+            else:
+                temp,_ = events_to_jagged_numpy(events=events, ids=load_ids, entry_start=0, entry_stop=entry_stop)
+                X = np.concatenate((X,temp), axis=0)
+            
+            if (entry_stop is not None) and (len(X) > entry_stop):
+                X = X[0:entry_stop]
+                print(__name__ + f'.load_tree: Maximum event count {entry_stop} reached')
+                break
+
+        print(X.shape)
+
+        return X,ids
+        """
+        # uproot.concatenate does not allow (??) to control maximum number of events per file
+        
+        Y = uproot.concatenate(files, expressions=load_ids, library=library)
+
+        ids = [i for i in Y.keys()]
+        X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) 
+        for i in range(len(ids)):
+            X[:,i] = Y[ids[i]]
+        """
+
+    elif library == 'ak':
+        raise Exception(__name__ + f'.load_tree: Unknown library support')
 
 
 def process_regexp_ids(all_ids, ids=None):

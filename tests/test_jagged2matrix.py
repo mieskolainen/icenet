@@ -25,17 +25,16 @@ def test_jagged2matrix():
 	ids      = ['nsv', 'nMuon', 'nJet', 'sv_dxy', 'sv_dxysig', 'sv_dphi', 'sv_ptrel', 'sv_deta', 'sv_deltaR', 'sv_chi2']
 	#ids = None
 
-	library  = 'ak'
-	#library = 'np'
+	#library  = 'ak'
+	library = 'np'
 	max_num_elements = 100
 
-	X   = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, max_num_elements=max_num_elements, ids=ids, library=library)
+	X = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, entry_stop=max_num_elements, ids=ids, library=library)
 	
 	#pprint.pprint(X.keys())
 	#print(len(X))
 	#print(X['sv_deta'])
 	
-
 	scalar_vars   = ['nsv', 'nMuon', 'nJet']
 	jagged_vars   = ['sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_chi2']
 	jagged_maxdim = [3,3,3,3]

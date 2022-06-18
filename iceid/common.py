@@ -50,16 +50,16 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
         class_id  : class ids
     
     Returns:
-        X,Y       : input, output matrices
+        X,Y       : input, output data (with jagged content)
         ids       : variable names
     """
-
+    
     # -----------------------------------------------
     CUTFUNC    = globals()[args['cutfunc']]
     TARFUNC    = globals()[args['targetfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
     # -----------------------------------------------
-
+    
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
     file   = uproot.open(root_path)
@@ -70,7 +70,7 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
 
     # --------------------------------------------------------------
     load_ids = iceroot.process_regexp_ids(ids=ids, all_ids=events.keys())
-    X,ids    = iceroot.process_tree(events=events, ids=load_ids, entry_start=entry_start, entry_stop=entry_stop)
+    X,ids    = iceroot.events_to_jagged_numpy(events=events, ids=load_ids, entry_start=entry_start, entry_stop=entry_stop)
     Y = None
     # --------------------------------------------------------------
 
@@ -93,7 +93,7 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
         labels1 = ['is_e', 'is_egamma']
         aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop, new=True)
         prints.printbar()
-
+        
         # @@ MC filtering done here @@
         indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
         cprint(__name__ + f'.load_root_file: <filterfunc> | before: {len(X)}, after: {sum(indmc)} events', 'green')
@@ -108,14 +108,14 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
     cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
     cprint(__name__ + f".load_root_file: <cutfunc> | before: {len(X)}, after: {np.sum(cind)} events \n", 'green')
-
+    
     X = X[cind]
     if isMC: Y = Y[cind]
-
+    
     io.showmem()
     prints.printbar()
     file.close()
-    
+
     return X, Y, ids
 
 

@@ -100,12 +100,10 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
-
-
-    events  = uproot.open(f'{rootfile}:{tree}')
-    ids     = events.keys()
-    X,ids = iceroot.process_tree(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
-
+    
+    events = uproot.open(f'{rootfile}:{tree}')
+    ids    = events.keys()
+    X,ids  = iceroot.events_to_jagged_numpy(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
 
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
