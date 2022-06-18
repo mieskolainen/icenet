@@ -53,6 +53,19 @@
 <span class="kn">import</span> <span class="nn">icenet.tools.stx</span> <span class="k">as</span> <span class="nn">stx</span>
 
 
+<div class="viewcode-block" id="parse_vars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.parse_vars">[docs]</a><span class="k">def</span> <span class="nf">parse_vars</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a series of key-value pairs and return a dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">parse_var</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">d</span></div>
+
+
 <span class="c1">#@numba.njit</span>
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_maxdim</span><span class="o">=</span><span class="p">[],</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -190,17 +203,17 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        inds:     histogram bin indices</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">NBINS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">nbins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binedges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">NBINS</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">nbins</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbins</span><span class="o">-</span><span class="mi">1</span>
         <span class="n">inds</span><span class="p">[</span><span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">inds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">inds</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">NBINS</span><span class="p">:</span>
-            <span class="n">inds</span> <span class="o">=</span> <span class="n">NBINS</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">inds</span> <span class="o">&gt;=</span> <span class="n">nbins</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">nbins</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">inds</span></div>
 

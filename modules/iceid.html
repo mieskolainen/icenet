@@ -82,22 +82,17 @@ ids       : variable names</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceid.common.splitfactor">
-<span class="sig-name descname"><span class="pre">splitfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#splitfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.splitfactor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Split electron ID data into different datatypes.</p>
+<span class="sig-name descname"><span class="pre">splitfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceid/common.html#splitfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceid.common.splitfactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform data into different datatypes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – jagged numpy arrays</p></li>
+<li><p><strong>data</strong> – jagged arrays</p></li>
 <li><p><strong>args</strong> – arguments dictionary</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>scalar (vector) data
-data_tensor: tensor data (images)
-data_kin:    kinematic data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>data</p>
+<dd class="field-even"><p>dictionary with different data representations</p>
 </dd>
 </dl>
 </dd></dl>

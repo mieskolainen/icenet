@@ -158,28 +158,41 @@
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span></div>
 
 
-<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Split electron ID data into different datatypes.</span>
+<span class="sd">    Transform data into different datatypes.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        data:  jagged arrays</span>
 <span class="sd">        args:  arguments dictionary</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        scalar (vector) data</span>
-<span class="sd">        kinematic data</span>
+<span class="sd">        dictionary with different data representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Pick kinematic variables out</span>
+    <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
+    
     <span class="k">if</span> <span class="n">KINEMATIC_ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">k_ind</span><span class="p">,</span> <span class="n">k_vars</span>   <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">KINEMATIC_ID</span><span class="p">)</span>
         
-        <span class="n">data_kin</span>        <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">data_kin</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        <span class="n">data_kin</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        <span class="n">data_kin</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>    <span class="o">=</span> <span class="n">k_vars</span>
+        <span class="n">data_kin</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data_kin</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">k_vars</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## Graph representation</span>
+    <span class="n">data_graph</span>  <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## Tensor representation</span>
+    <span class="n">data_tensor</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## Turn jagged to &quot;long-vector&quot; matrix representation</span>
 
     <span class="c1">### Pick active scalar variables out</span>
     <span class="n">scalar_ind</span><span class="p">,</span> <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]])</span>
@@ -194,41 +207,33 @@
         <span class="s1">&#39;library&#39;</span>      <span class="p">:</span>  <span class="s1">&#39;np&#39;</span>
     <span class="p">}</span>
 
-    <span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
-
-    <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># Create tuplet expanded jagged variable names</span>
     <span class="n">all_jagged_vars</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
             <span class="n">all_jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="p">)</span>
-    <span class="c1"># --------------------------------------------------------------------------</span>
     
-    <span class="n">data</span><span class="o">.</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span>
-
+    <span class="c1"># Update representation</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span>
+    <span class="c1"># --------------------------------------------------------------------------</span>
 
     <span class="c1"># --------------------------------------------------------------------------</span>
-    <span class="c1"># Create DeepSet style input from the jagged content</span>
+    <span class="c1"># Create DeepSet style representation from the &quot;long-vector&quot; content</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="kc">None</span>
-    
+
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;deps_on&#39;</span><span class="p">]:</span>
         <span class="n">data_deps</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        
+
         <span class="n">M</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span>      <span class="c1"># Number of (jagged) tuplets per event</span>
         <span class="n">D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_ind</span><span class="p">)</span>            <span class="c1"># Tuplet feature vector dimension</span>
 
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
-
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">ids</span>   <span class="o">=</span> <span class="n">all_jagged_vars</span>
+        <span class="n">data_deps</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
+        <span class="n">data_deps</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">all_jagged_vars</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
 
-    
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_deps</span><span class="p">,</span> <span class="n">data_kin</span></div>
 
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
 </pre></div>
 
           </div>
