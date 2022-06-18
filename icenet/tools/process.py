@@ -386,7 +386,7 @@ def train_models(data_trn, data_val, args=None) :
                       'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
                       'args':        args,
                       'param':       param}
-
+            
             #### Add distillation, if turned on
             #if args['distillation']['drains'] is not None:
             #    if ID in args['distillation']['drains']:
@@ -518,8 +518,8 @@ def evaluate_models(data=None, args=None):
         X_graph = data['data_graph']
 
     if data['data_deps'] is not None:
-        X_deps  = data['data_deps']
-
+        X_deps  = data['data_deps'].x
+    
     VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
 
