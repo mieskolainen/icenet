@@ -72,7 +72,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
     for j in range(len(ids)):
         x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
         X[:,j] = np.asarray(x)
-    
+
     return X, ids
 
 
@@ -112,13 +112,15 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
 
     if   library == 'np':
 
+        param = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop}
+
         for i in tqdm(range(len(files))):
             events = uproot.open(files[i])
             if i == 0:
-                X,ids  = events_to_jagged_numpy(events=events, ids=load_ids, entry_start=0, entry_stop=entry_stop)
+                X,ids  = events_to_jagged_numpy(**param)
             else:
-                temp,_ = events_to_jagged_numpy(events=events, ids=load_ids, entry_start=0, entry_stop=entry_stop)
-                X = np.concatenate((X,temp), axis=0)
+                temp,_ = events_to_jagged_numpy(**param)
+                X = np.concatenate((X, temp), axis=0)
             
             if (entry_stop is not None) and (len(X) > entry_stop):
                 X = X[0:entry_stop]
@@ -140,6 +142,25 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
         """
 
     elif library == 'ak':
+
+        param = {'entry_start': entry_start, 'entry_stop': entry_stop, 'library': 'ak', 'how': 'zip'}
+
+        for i in tqdm(range(len(files))):
+            events = uproot.open(files[i])
+            if i == 0:
+                X    = events.arrays(load_ids, **param)
+            else:
+                temp = events.arrays(load_ids, **param)
+                X = ak.concatenate((X,temp), axis=0)
+                
+            if (entry_stop is not None) and (len(X) > entry_stop):
+                X = X[0:entry_stop]
+                print(__name__ + f'.load_tree: Maximum event count {entry_stop} reached')
+                break
+
+        return X
+
+    else:
         raise Exception(__name__ + f'.load_tree: Unknown library support')
 
 
@@ -166,10 +187,10 @@ def process_regexp_ids(all_ids, ids=None):
 
             # Compile regular expression
             reg = re.compile(string)
-
+            
             # Loop over all keys in the tree
             for i in range(len(all_ids)):
-                if re.match(reg, all_ids[i]) and not chosen[i]:
+                if re.fullmatch(reg, all_ids[i]) and not chosen[i]:
                     load_ids.append(all_ids[i])
                     chosen[i] = 1
 
