@@ -42,9 +42,11 @@
 <li><p><a class="reference internal" href="#preliminaries-conda-installation" id="id1">Preliminaries: Conda installation</a></p></li>
 <li><p><a class="reference internal" href="#pre-installed-cuda-paths-optional" id="id2">Pre-installed CUDA paths (optional)</a></p></li>
 <li><p><a class="reference internal" href="#automated-setup" id="id3">Automated setup</a></p></li>
-<li><p><a class="reference internal" href="#gpu-support-commands" id="id4">GPU-support commands</a></p></li>
-<li><p><a class="reference internal" href="#grid-engine-gpu-job-submission" id="id5">Grid engine GPU job submission</a></p></li>
-<li><p><a class="reference internal" href="#conda-virtual-environment-commands" id="id6">Conda virtual environment commands</a></p></li>
+<li><p><a class="reference internal" href="#possible-problems" id="id4">Possible problems</a></p></li>
+<li><p><a class="reference internal" href="#gpu-support-commands" id="id5">GPU-support commands</a></p></li>
+<li><p><a class="reference internal" href="#grid-engine-gpu-job-submission" id="id6">Grid engine GPU job submission</a></p></li>
+<li><p><a class="reference internal" href="#conda-virtual-environment-commands" id="id7">Conda virtual environment commands</a></p></li>
+<li><p><a class="reference internal" href="#c-library-versions" id="id8">C-library versions</a></p></li>
 </ul>
 </div>
 <section id="preliminaries-conda-installation">
@@ -63,7 +65,13 @@
 </section>
 <section id="automated-setup">
 <h2><a class="toc-backref" href="#id3">Automated setup</a><a class="headerlink" href="#automated-setup" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/mieskolainen/icenet &amp;&amp; cd icenet
+<p>Remark: To avoid ´No space left on device´ problem with conda or pip, set the temporary path, e.g.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir $HOME/tmp
+export TMPDIR=$HOME/tmp
+</pre></div>
+</div>
+<p>Execute</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:mieskolainen/icenet.git &amp;&amp; cd icenet
 
 # Create environment
 conda create -y --name icenet python==3.9.6
@@ -78,11 +86,9 @@ pip install -r requirements.txt
 (OR pip install -r requirements-cpu-only.txt)
 </pre></div>
 </div>
-<p>Note: If you experience ´No space left on device´ problem with conda or pip, set the temporary path</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir $HOME/tmp
-export TMPDIR=$HOME/tmp
-</pre></div>
-</div>
+</section>
+<section id="possible-problems">
+<h2><a class="toc-backref" href="#id4">Possible problems</a><a class="headerlink" href="#possible-problems" title="Permalink to this heading">¶</a></h2>
 <p>Note: If you experience ´OSError: libcusparse.so.11´ (or similar) with torch-geometric, set the system path</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>export LD_LIBRARY_PATH=&quot;$CONDA_PREFIX/lib:$LD_LIBRARY_PATH&quot;
 </pre></div>
@@ -97,10 +103,10 @@ removing e.g. ´tensorflow´ from requirements.txt, and install it separately wi
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install tensorflow
 </pre></div>
 </div>
-<p>Then if something else fails, study the instructions step-by-step below.</p>
+<p>Then if something else fails, google with the error message.</p>
 </section>
 <section id="gpu-support-commands">
-<h2><a class="toc-backref" href="#id4">GPU-support commands</a><a class="headerlink" href="#gpu-support-commands" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id5">GPU-support commands</a><a class="headerlink" href="#gpu-support-commands" title="Permalink to this heading">¶</a></h2>
 <p>Show the graphics card status</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>nvidia-smi
 </pre></div>
@@ -121,14 +127,14 @@ print(torch.cuda.get_device_name(0))
 </div>
 </section>
 <section id="grid-engine-gpu-job-submission">
-<h2><a class="toc-backref" href="#id5">Grid engine GPU job submission</a><a class="headerlink" href="#grid-engine-gpu-job-submission" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id6">Grid engine GPU job submission</a><a class="headerlink" href="#grid-engine-gpu-job-submission" title="Permalink to this heading">¶</a></h2>
 <p>Use the following command with IC machines</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>qsub -q gpu.q@lxcgpu* &lt;other commands&gt;
 </pre></div>
 </div>
 </section>
 <section id="conda-virtual-environment-commands">
-<h2><a class="toc-backref" href="#id6">Conda virtual environment commands</a><a class="headerlink" href="#conda-virtual-environment-commands" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id7">Conda virtual environment commands</a><a class="headerlink" href="#conda-virtual-environment-commands" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda create -y --name icenet python==3.9.6
 conda activate icenet
 
@@ -141,6 +147,12 @@ conda list --name icenet
 
 # Remove environment completely
 conda env remove --name icenet
+</pre></div>
+</div>
+</section>
+<section id="c-library-versions">
+<h2><a class="toc-backref" href="#id8">C-library versions</a><a class="headerlink" href="#c-library-versions" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ldd --version
 </pre></div>
 </div>
 </section>
