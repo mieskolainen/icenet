@@ -16,9 +16,9 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
     Args:
-        x      : training data input
-        y      : training data labels
-        w      : training data weights
+        x      : training sample input
+        y      : training sample (class) labels
+        w      : training sample weights
         ids    : variable names of columns of x
         pdf    : pre-computed pdfs
         args   : reweighting parameters in a dictionary
@@ -120,9 +120,9 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 pdf = {}
                 for c in range(num_classes):
 
-                    pdf_weights = w[y==c] if w is not None else None # Feed in the input weights
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
-                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], w=pdf_weights, \
+                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], w=sample_weights, \
                         binedges_A=binedges['A'], binedges_B=binedges['B'])
 
                 pdf['binedges_A']  = binedges['A']
@@ -141,10 +141,10 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 pdf = {}
                 for c in range(num_classes):
 
-                    pdf_weights = w[y==c] if w is not None else None # Feed in the input weights
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
-                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], w=pdf_weights, binedges=binedges['A'])
-                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], w=pdf_weights, binedges=binedges['B'])
+                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
+                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], w=sample_weights, binedges=binedges['B'])
                     
                     if   args['pseudo_type'] == 'geometric_mean':
                         pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
@@ -168,8 +168,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
-                    pdf_weights = w[y==c] if w is not None else None # Feed in the input weights
-                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], w=pdf_weights, binedges=binedges['A'])
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
+                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
 
                 pdf['binedges']    = binedges['A']
                 pdf['num_classes'] = num_classes
@@ -183,8 +183,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
         weights_doublet = np.zeros((x.shape[0], num_classes))
         for c in range(num_classes):
 
-            pdf_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights
-            weights_doublet[y == c, c] = pdf_weights
+            sample_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights
+            weights_doublet[y == c, c] = sample_weights
 
         # Apply class balance equalizing weight
         if (args['equal_frac'] == True):
