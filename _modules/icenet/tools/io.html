@@ -414,6 +414,8 @@
 <div class="viewcode-block" id="impute_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.impute_data">[docs]</a><span class="k">def</span> <span class="nf">impute_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">999</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;iterative&#39;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">knn_k</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Data imputation (treatment of missing values, Nan and Inf).</span>
 <span class="sd">    </span>
+<span class="sd">    NOTE: This function can impute only fixed dimensional input currently (not Jagged numpy arrays)</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X         : Input data matrix [N vectors x D dimensions]</span>
 <span class="sd">        imputer   : Pre-trained imputator, default None</span>
