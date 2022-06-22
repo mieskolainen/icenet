@@ -498,29 +498,39 @@ def evaluate_models(data=None, args=None):
     # --------------------------------------------------------------------
     # Collect data
 
-    X_RAW    = data['data'].x
-    ids_RAW  = data['data'].ids
+    X       = None
+    X_RAW   = None
+    ids_RAW = None
+    if data['data'].x is not None:
 
-    X        = copy.deepcopy(data['data'].x)
-
+        X        = copy.deepcopy(data['data'].x)
+        X_RAW    = data['data'].x
+        ids_RAW  = data['data'].ids
+    
+    # These should be always there    
     y        = data['data'].y
     weights  = data['data'].w
 
-    X_kin    = data['data_kin'].x
-
+    X_2D = None
     if data['data_tensor'] is not None:
         X_2D    = data['data_tensor']
 
+    X_graph = None
     if data['data_graph'] is not None:
         X_graph = data['data_graph']
 
+    X_deps = None
     if data['data_deps'] is not None:
         X_deps  = data['data_deps'].x
     
-    VARS_kin = data['data_kin'].ids
+    X_kin    = None
+    VARS_kin = None
+    if data['data_kin'] is not None:
+        X_kin    = data['data_kin'].x
+        VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
 
-    print(__name__ + f": Input with {X.shape[0]} events and {X.shape[1]} dimensions ") 
+    print(__name__ + f": Input with {y.shape[0]} events") 
     if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
     
     try:
@@ -549,12 +559,13 @@ def evaluate_models(data=None, args=None):
         
     # --------------------------------------------------------------------
     # For pytorch based
-    X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
+    if X is not None:
+        X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
 
-    if data['data_tensor'] is not None:
+    if X_2D is not None:
         X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
         
-    if data['data_deps'] is not None:
+    if X_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
         
 

@@ -203,6 +203,7 @@ def splitfactor(x, y, w, ids, args):
     data.x   = data.x[:, s_ind].astype(np.float)
     data.ids = s_vars
     """
+    data.x = None
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
 
