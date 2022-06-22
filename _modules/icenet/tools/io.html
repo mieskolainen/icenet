@@ -237,40 +237,6 @@
     <span class="k">return</span> <span class="n">newind</span><span class="p">,</span> <span class="n">newvars</span></div>
 
 
-<div class="viewcode-block" id="IceTriplet"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.IceTriplet">[docs]</a><span class="k">class</span> <span class="nc">IceTriplet</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Main class for MC type datasets</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="p">,</span> <span class="n">load_args</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        
-        <span class="k">if</span> <span class="n">class_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">class_id</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># By default two classes [0,1]</span>
-            
-        <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.IceTriplet.__init__: files is None, relying on func_loader()&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dummy.root&#39;</span><span class="p">]</span> <span class="c1"># Will be defined in func_loader</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.IceTriplet.__init__: files = </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">trn</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tst</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-        
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="p">:</span>
-            <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">ids</span>      <span class="o">=</span> <span class="n">func_loader</span><span class="p">(</span><span class="n">root_path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="o">**</span><span class="n">load_args</span><span class="p">)</span>
-            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span>  <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="o">=</span><span class="n">rngseed</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">trn</span> <span class="o">+=</span> <span class="n">trn</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">+=</span> <span class="n">val</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tst</span> <span class="o">+=</span> <span class="n">tst</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tst</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.__init__: n_dims = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="IceXYW"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.IceXYW">[docs]</a><span class="k">class</span> <span class="nc">IceXYW</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
@@ -280,7 +246,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># constructor</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">w</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
@@ -295,7 +261,8 @@
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">w</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">w</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
@@ -307,7 +274,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">w</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">w</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -319,7 +287,7 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span>
@@ -332,21 +300,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">permutation</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">permutation</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">permutation</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
-<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Split machine learning data into [A = train &amp; validation] + [B = test] sets</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X:         data matrix</span>
 <span class="sd">        Y:         target matrix</span>
+<span class="sd">        W:         weight matrix</span>
+<span class="sd">        ids:       variable names of columns</span>
 <span class="sd">        frac:      fraction</span>
 <span class="sd">        rngseed:   random seed</span>
-<span class="sd">        class_id:  class ids array, e.g. [0,1], if not None, splitting based on that array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">### Permute events to have random mixing between classes (a must!)</span>
@@ -354,6 +323,9 @@
     <span class="n">randi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
+
     <span class="c1"># --------------------------------------------------------------------</span>
 
     <span class="n">N</span>     <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -367,39 +339,34 @@
     <span class="c1"># A. Train</span>
     <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
     <span class="n">Y_trn</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">W_trn</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">W_trn</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># A. Validation</span>
     <span class="n">X_val</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">N_trn</span><span class="p">:</span><span class="n">N_trn</span> <span class="o">+</span> <span class="n">N_val</span><span class="p">]</span>
     <span class="n">Y_val</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">N_trn</span><span class="p">:</span><span class="n">N_trn</span> <span class="o">+</span> <span class="n">N_val</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">W_val</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">N_trn</span><span class="p">:</span><span class="n">N_trn</span> <span class="o">+</span> <span class="n">N_val</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">W_val</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># B. Test</span>
     <span class="n">X_tst</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">N_tst</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
     <span class="n">Y_tst</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">N_tst</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
-
-    <span class="n">trn</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-    <span class="n">tst</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">()</span>
-
-    <span class="c1"># No spesific class selected</span>
-    <span class="k">if</span> <span class="n">class_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
-
-        <span class="n">trn</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">)</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_val</span><span class="p">)</span>
-        <span class="n">tst</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_tst</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_tst</span><span class="p">)</span>
-    
-    <span class="c1"># Loop over all classes selected</span>
+    <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">W_tst</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">N_tst</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">W_tst</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_id</span> <span class="p">:</span> 
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_trn</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
-            <span class="n">trn</span> <span class="o">+=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
-
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_val</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
-            <span class="n">val</span> <span class="o">+=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
-
-            <span class="n">ind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Y_tst</span><span class="p">[:,</span><span class="o">...</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
-            <span class="n">tst</span> <span class="o">+=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_tst</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
-
+    <span class="c1"># --------------------------------------------------------</span>
+    <span class="c1"># Construct</span>
+    <span class="n">trn</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">W_trn</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">W_val</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">tst</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X_tst</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_tst</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">W_tst</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------------------</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;.split_data: fractions [train: </span><span class="si">{:0.3f}</span><span class="s2">, validate: </span><span class="si">{:0.3f}</span><span class="s2">, test: </span><span class="si">{:0.3f}</span><span class="s2">]&quot;</span><span class="o">.</span>
         <span class="nb">format</span><span class="p">(</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="n">X_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="n">X_tst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>
 

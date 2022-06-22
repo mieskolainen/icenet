@@ -2389,6 +2389,25 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple_MC">
+<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop over different MC processes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>process_func</strong> – data processing function</p></li>
+<li><p><strong>processes</strong> – MC processes dictionary (from yaml)</p></li>
+<li><p><strong>root_path</strong> – main path of files</p></li>
+<li><p><strong>param</strong> – parameters of ‘process_func’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X, Y, W, VARS</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-icenet.tools.icevec">
 <span id="icenet-tools-icevec"></span><h3>icenet.tools.icevec<a class="headerlink" href="#module-icenet.tools.icevec" title="Permalink to this heading">¶</a></h3>
@@ -2658,14 +2677,8 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <section id="module-icenet.tools.io">
 <span id="icenet-tools-io"></span><h3>icenet.tools.io<a class="headerlink" href="#module-icenet.tools.io" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="icenet.tools.io.IceTriplet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IceTriplet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rngseed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#IceTriplet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.IceTriplet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main class for MC type datasets</p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="icenet.tools.io.IceXYW">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IceXYW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#IceXYW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.IceXYW" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IceXYW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#IceXYW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.IceXYW" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2887,16 +2900,17 @@ newvars:     Chosen variables</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.split_data">
-<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rngseed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rngseed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split machine learning data into [A = train &amp; validation] + [B = test] sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – data matrix</p></li>
 <li><p><strong>Y</strong> – target matrix</p></li>
+<li><p><strong>W</strong> – weight matrix</p></li>
+<li><p><strong>ids</strong> – variable names of columns</p></li>
 <li><p><strong>frac</strong> – fraction</p></li>
 <li><p><strong>rngseed</strong> – random seed</p></li>
-<li><p><strong>class_id</strong> – class ids array, e.g. [0,1], if not None, splitting based on that array</p></li>
 </ul>
 </dd>
 </dl>
@@ -3150,7 +3164,7 @@ other dimensions evaluated at zero=(0,0,…0)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.plot_reweight_result">
-<span class="sig-name descname"><span class="pre">plot_reweight_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_reweight_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_reweight_result" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_reweight_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_reweight_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_reweight_result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Here plot pure event counts
 so we see that also integrated class fractions are equalized (or not)!</p>
 </dd></dl>
@@ -3262,7 +3276,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.prints.print_variables">
-<span class="sig-name descname"><span class="pre">print_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.prints.print_variables" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">print_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.prints.print_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print in a format (# samples x # dimensions)</p>
 </dd></dl>
 
@@ -3303,12 +3317,14 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.impute_datasets">
-<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dataset imputation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – trn, val, tst, object of type .x, .y, .w, .ids</p></li>
+<li><p><strong>trn</strong> – .x, .y, .w, .ids type object</p></li>
+<li><p><strong>val</strong> – .x, .y, .w, .ids type object</p></li>
+<li><p><strong>tst</strong> – .x, .y, .w, .ids type object</p></li>
 <li><p><strong>features</strong> – feature vector names</p></li>
 <li><p><strong>args</strong> – imputer parameters</p></li>
 <li><p><strong>imputer</strong> – imputer object (scikit-type)</p></li>
@@ -3396,13 +3412,14 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.reweight.compute_ND_reweights">
-<span class="sig-name descname"><span class="pre">compute_ND_reweights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#compute_ND_reweights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.compute_ND_reweights" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">compute_ND_reweights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#compute_ND_reweights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.compute_ND_reweights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute N-dim reweighting coefficients (currently 2D or 1D supported)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> – training data input</p></li>
 <li><p><strong>y</strong> – training data labels</p></li>
+<li><p><strong>w</strong> – training data weights</p></li>
 <li><p><strong>ids</strong> – variable names of columns of x</p></li>
 <li><p><strong>pdf</strong> – pre-computed pdfs</p></li>
 <li><p><strong>args</strong> – reweighting parameters in a dictionary</p></li>
@@ -3419,13 +3436,13 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.reweight.pdf_1D_hist">
-<span class="sig-name descname"><span class="pre">pdf_1D_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#pdf_1D_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.pdf_1D_hist" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pdf_1D_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#pdf_1D_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.pdf_1D_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute re-weighting 1D pdfs.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.reweight.pdf_2D_hist">
-<span class="sig-name descname"><span class="pre">pdf_2D_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges_B</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#pdf_2D_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.pdf_2D_hist" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pdf_2D_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges_B</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#pdf_2D_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.pdf_2D_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute re-weighting 2D pdfs.</p>
 </dd></dl>
 

@@ -43,7 +43,40 @@
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
+
+
+<div class="viewcode-block" id="read_multiple_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_multiple_MC">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">processes</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loop over different MC processes</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        process_func:  data processing function</span>
+<span class="sd">        processes:     MC processes dictionary (from yaml)</span>
+<span class="sd">        root_path:     main path of files</span>
+<span class="sd">        param:         parameters of &#39;process_func&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        X, Y, W, VARS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">datasets</span>    <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+        <span class="n">xs</span>          <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;xs&#39;</span><span class="p">]</span>
+        <span class="n">model_param</span> <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
+        
+        <span class="n">rootfile</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">VARS</span>     <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="n">N</span>           <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Y</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">W</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">/</span> <span class="n">N</span>
+    
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">VARS</span></div>
 
 
 <div class="viewcode-block" id="load_tree_stats"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree_stats">[docs]</a><span class="k">def</span> <span class="nf">load_tree_stats</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -129,8 +162,8 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">rootfile</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">]</span>
 
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Opening rootfile &lt;</span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1">&gt; with key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Opening rootfile </span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1"> with a tree key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    
     <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">))]</span>
     
     <span class="c1"># ----------------------------------------------------------</span>

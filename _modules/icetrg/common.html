@@ -127,7 +127,10 @@
     <span class="n">ind</span>      <span class="o">=</span> <span class="n">NEW_VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;x_hlt_pms2&#39;</span><span class="p">)</span>
     <span class="n">X</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]),</span> <span class="n">a_min</span><span class="o">=-</span><span class="mf">1e10</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1e10</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">NEW_VARS</span></div>
+    <span class="c1"># No weights</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">NEW_VARS</span></div>
 
 
 <div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
