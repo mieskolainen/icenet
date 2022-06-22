@@ -380,6 +380,8 @@ def split_data(X, Y, frac, rngseed, class_id=None):
 def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm='iterative', fill_value=0, knn_k=6):
     """ Data imputation (treatment of missing values, Nan and Inf).
     
+    NOTE: This function can impute only fixed dimensional input currently (not Jagged numpy arrays)
+    
     Args:
         X         : Input data matrix [N vectors x D dimensions]
         imputer   : Pre-trained imputator, default None

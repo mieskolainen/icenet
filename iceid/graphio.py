@@ -84,96 +84,6 @@ def parse_tensor_data(X, ids, image_vars, args):
     return tensor
 
 
-def parse_graph_data_np(X, ids, features, Y=None, W=None, global_on=True, coord='ptetaphim'):
-
-    """
-    Args:
-        X         :  Jagged array of variables
-        ids      :  Variable names as an array of strings
-        features  :  Array of active scalar feature strings
-        Y         :  Target class  array (if any, typically MC only)
-        W         :  (Re-)weighting array (if any, typically MC only)
-        global_on :  Global features on / off
-        coord     :  Coordinates used for nodes ('ptetaphim', 'pxpypze')
-        
-    Returns:
-        Array of pytorch-geometric Data objects
-    """
-
-    # -------------------------------------------
-
-    num_node_features = 6
-    num_edge_features = 4
-    num_classes       = 2
-
-    num_events = X.shape[0]
-    dataset  = []
-    zerovec  = vec4()
-
-
-    # Collect feature indices
-    feature_ind = np.zeros(len(features), dtype=np.int32)
-    for i in range(len(features)):
-        feature_ind[i] = ids.index(features[i])
-
-
-    # Collect indices
-    ind__trk_pt        = ids.index('trk_pt')
-    ind__trk_eta       = ids.index('trk_eta')
-    ind__trk_phi       = ids.index('trk_phi')
-
-    ind__image_clu_e   = ids.index('image_clu_e')
-    ind__image_clu_eta = ids.index('image_clu_eta')
-    ind__image_clu_phi = ids.index('image_clu_phi')
-
-
-    # Loop over events
-    for e in tqdm(range(num_events)):
-
-        num_nodes = 1 + len(X[e, ind__image_clu_eta]) # +1 virtual node
-        num_edges = num_nodes**2 # include self-connections
-        
-        # Construct 4-vector for the track, with pion mass
-        p4track = vec4.setPtEtaPhiM(X[e, ind__trk_pt], X[e, ind__trk_eta], X[e, ind__trk_phi], 0.13957)
-
-        # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
-        p4vec = []
-        if len(X[e, ind__image_clu_e]) > 0:
-            pt    = X[e, ind__image_clu_e] / np.cosh(X[e, ind__image_clu_eta]) # Massless approx.
-            p4vec = vec4.setPtEtaPhiM(pt, X[e, ind__image_clu_eta], X[e, ind__image_clu_phi], 0) # Massless
-
-
-        # ====================================================================
-        # CONSTRUCT TENSORS
-
-        # Construct output class, note [] is important to have for right dimensions
-        y = [Y[e]] if Y is not None else [0]
-
-        # Training weights, note [] is important to have for right dimensions
-        w = [W[e]] if W is not None else [1.0]
-
-        ## Construct global feature vector
-        u = X[e, feature_ind].tolist()
-        
-        ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[e], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
-
-        ## Construct edge features
-        edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
-
-        ## Construct edge connectivity
-        edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
-
-        # Add this event
-        if global_on == False: # Null the global features
-            u = np.zeros(len(u))
-
-        # Pure dictionary
-        dataset.append({'x': x, 'edge_index': edge_index, 'edge_attr': edge_attr, 'y': y, 'w': w, 'u': u})
-
-    return dataset
-
-
 def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
@@ -244,7 +154,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
                 v.setPtEtaPhiM(pt, eta, phi, 0)
 
                 p4vec.append( v )
-        
+
         # Empty ECAL cluster information
         else:
             num_empty_ECAL += 1
@@ -279,8 +189,8 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         ## Construct edge connectivity
         edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
-
-
+        
+        
         # Add this event
         if global_on == False: # Null the global features
             u = torch.tensor(np.zeros(len(u)), dtype=torch.float)

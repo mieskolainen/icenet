@@ -57,6 +57,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
 
     # -----------------------------------------------
 
+    # ** Pick the variables **
+    ids = MVA_ID
+    
+
+    
     param = {
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
@@ -66,6 +71,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     
 
     tree = args['tree_name']
+
+
 
     # =================================================================
     # *** BACKGROUND MC ***
