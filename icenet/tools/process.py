@@ -86,6 +86,7 @@ def read_config(config_path='./configs/xyz'):
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
+    args['__use_cache__']       = False
     args['__raytune_running__'] = False
     
     # -------------------------------------------------------------------
@@ -142,7 +143,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
     args_hash      = io.make_hash_sha256(args)
     cache_filename = f'./tmp/{args_hash}.data'
 
-    if not os.path.exists(cache_filename):
+    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
         data      = io.IceTriplet(func_loader=func_loader, files=args['root_files'],
                         load_args={'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args},
                         class_id=np.arange(args['num_classes']), frac=args['frac'], rngseed=args['rngseed'])
@@ -172,9 +173,6 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
         output['trn'] = func_factor(x=data.trn.x, y=data.trn.y, w=trn_weights, ids=data.trn.ids, args=args)
         output['val'] = func_factor(x=data.val.x, y=data.val.y, w=val_weights, ids=data.val.ids, args=args)
         
-        ### Print ranges
-        prints.print_variables(X=output['trn']['data'].x, ids=output['trn']['data'].ids)
-
     # Test
     else:
 
@@ -190,10 +188,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         ### Split and factor data
         output['tst'] = func_factor(x=data.tst.x, y=data.tst.y, w=tst_weights, ids=data.tst.ids, args=args)
-
-        ### Print ranges
-        prints.print_variables(X=output['tst']['data'].x, ids=output['tst']['data'].ids)
-
+    
     return output
 
 

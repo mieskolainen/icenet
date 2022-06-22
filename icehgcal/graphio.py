@@ -75,42 +75,49 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     for i in range(len(features)):
         feature_ind[i] = ids.index(features[i])
 
-
     # Collect indices
-    ind__trk_pt        = ids.index('trk_pt')
-    ind__trk_eta       = ids.index('trk_eta')
-    ind__trk_phi       = ids.index('trk_phi')
+    #ind__trk_pt        = ids.index('trk_pt')
+    #ind__trk_eta       = ids.index('trk_eta')
+    #ind__trk_phi       = ids.index('trk_phi')
 
-    ind__image_clu_e   = ids.index('image_clu_e')
-    ind__image_clu_eta = ids.index('image_clu_eta')
-    ind__image_clu_phi = ids.index('image_clu_phi')
-
+    ind__candidate_energy = ids.index('candidate_energy')
+    ind__candidate_px     = ids.index('candidate_px')
+    ind__candidate_py     = ids.index('candidate_py')
+    ind__candidate_pz     = ids.index('candidate_pz')
 
     num_empty_ECAL = 0
 
     # Loop over events
     for i in tqdm(range(num_events)):
 
-        num_nodes = 1 + len(X[i, ind__image_clu_eta]) # + 1 virtual node
+        num_nodes = 1 + len(X[i, ind__candidate_energy]) # + 1 virtual node
         num_edges = num_nodes**2                      # include self-connections
         
         # Construct 4-vector for the track, with pion mass
-        p4track = vec4()
-        p4track.setPtEtaPhiM(X[i, ind__trk_pt], X[i, ind__trk_eta], X[i, ind__trk_phi], 0.13957)
+        #p4track = vec4()
+        #p4track.setPtEtaPhiM(X[i, ind__trk_pt], X[i, ind__trk_eta], X[i, ind__trk_phi], 0.13957)
 
-        # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
+        # Construct 4-vector for each HGCAL candidate [@@ JAGGED @@]
         p4vec = []
-        N_c = len(X[i, ind__image_clu_e])
+        N_c = len(X[i, ind__candidate_energy])
         
         if N_c > 0:
             for k in range(N_c): 
                 
-                pt    = X[i, ind__image_clu_e][k] / np.cosh(X[i, ind__image_clu_eta][k]) # Massless approx.
-                eta   = X[i, ind__image_clu_eta][k]
-                phi   = X[i, ind__image_clu_phi][k]
+                """
+                pt    = X[i, ind__candidate_e][k] / np.cosh(X[i, ind__candidate_eta][k]) # Massless approx.
+                eta   = X[i, ind__candidate_eta][k]
+                phi   = X[i, ind__candidate_phi][k]
+                """
 
+                energy = X[i, ind__candidate_energy][k]
+                px     = X[i, ind__candidate_px][k]
+                py     = X[i, ind__candidate_py][k]
+                pz     = X[i, ind__candidate_pz][k]
+                
                 v = vec4()
-                v.setPtEtaPhiM(pt, eta, phi, 0)
+                #v.setPtEtaPhiM(pt, eta, phi, 0)
+                v.setPxPyPzE(px, py, pz, energy)
 
                 p4vec.append( v )
         
@@ -138,9 +145,9 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=None, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
-
+        
         ## Construct edge features
         edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
@@ -184,14 +191,16 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
             else:
                 raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
             
+            """
             # other features
             x[i,4] = p4track.deltaR(p4vec[i-1])
 
             try:
-                x[i,5] = X[ids.index('image_clu_nhit')][i-1]
+                x[i,5] = X[ids.index('candidate_nhit')][i-1]
             except:
                 continue
                 # Not able to read it (empty cluster data)
+            """
             
     return x
 

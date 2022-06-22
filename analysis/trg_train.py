@@ -9,6 +9,7 @@ sys.path.append(".")
 
 # icenet
 from icenet.tools import process
+from icenet.tools import prints
 
 # icetrg
 from icetrg import common
@@ -21,6 +22,9 @@ def main() :
     args, cli = process.read_config(config_path='./configs/trg')
     data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor, 
         train_mode=True, imputation_vars=globals()[args['imputation_param']['var']])
+
+    ### Print ranges
+    prints.print_variables(X=data['trn']['data'].x, ids=data['trn']['data'].ids)
 
     process.make_plots(data=data['trn'], args=args)
     process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)

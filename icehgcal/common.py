@@ -61,7 +61,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     ids = MVA_ID
     
 
-    
+
     param = {
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
@@ -191,15 +191,18 @@ def splitfactor(x, y, w, ids, args):
     if args['graph_on']:
         
         features   = globals()[args['inputvar']]
+
         data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
+    """
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
     data.x   = data.x[:, s_ind].astype(np.float)
     data.ids = s_vars
+    """
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
 

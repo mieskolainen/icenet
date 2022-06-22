@@ -4,12 +4,21 @@
 # Use these to test that the (re-weight trained) classifier
 # is independent of these
 KINEMATIC_ID = [
-  'trk_pt',
-  'trk_eta',
-  'trk_phi'
+
 ]
 
 MVA_ID = [
+  'candidate_energy',
+  'candidate_px',
+  'candidate_py',
+  'candidate_pz',
+
+  'candidate_charge',
+  'candidate_pdgId'
+]
+"""
+MVA_ID = [
+
   'candidate_charge',
   'candidate_pdgId',
   #'candidate_id_probabilities',
@@ -22,3 +31,4 @@ MVA_ID = [
   'track_in_candidate',
   'tracksters_in_candidate'
 ]
+"""
