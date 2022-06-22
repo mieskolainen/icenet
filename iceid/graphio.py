@@ -1,4 +1,4 @@
-# Graph data readers and parsers for electron ID
+# Graph and tensor data readers and parsers for electron ID
 #
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
@@ -189,8 +189,8 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         ## Construct edge connectivity
         edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
-        
-        
+
+
         # Add this event
         if global_on == False: # Null the global features
             u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
