@@ -95,7 +95,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        X</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">N_all</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">X_test</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
     <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -137,8 +137,8 @@
     <span class="c1">### Select variables</span>
     <span class="n">events</span>  <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">all_ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="n">events</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
+    <span class="c1">#events.close() # This will cause memmap problems</span>
+    
     <span class="n">load_ids</span> <span class="o">=</span> <span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">all_ids</span><span class="o">=</span><span class="n">all_ids</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
