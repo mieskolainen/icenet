@@ -116,7 +116,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
     """
     
-    return X, Y, VARS
+    # No weights
+    W = None
+
+    return X, Y, W, VARS
 
 
 def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):

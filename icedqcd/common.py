@@ -39,7 +39,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
         X,Y       : input, output matrices
         ids       : variable names
     """
-    
+
     # -----------------------------------------------
 
     param = {
@@ -47,34 +47,30 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
         "args":        args,
-        "load_ids":    LOAD_VARS
+        "load_ids":    LOAD_VARS,
+        "isMC":        True
     }
-    
+
     # =================================================================
     # *** BACKGROUND MC ***
 
-    filename = args["MC_input"]['background']
-    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
-
-    X_B, VARS = process_root(rootfile=rootfile, isMC=True, **param)
-    Y_B = np.zeros(X_B.shape[0])
+    proc = args["MC_input"]['background']
+    X_B, Y_B, W_B, VARS_B = iceroot.read_multiple_MC(process_func=process_root, processes=proc, root_path=root_path, param=param)
 
 
     # =================================================================
     # *** SIGNAL MC ***
 
-    filename = args["MC_input"]['signal']
-    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
+    proc = args["MC_input"]['signal']
+    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(process_func=process_root, processes=proc, root_path=root_path, param=param)
 
-    X_S, VARS = process_root(rootfile=rootfile, isMC=True, **param)
-    Y_S = np.ones(X_S.shape[0])
-    
-    
+
     # =================================================================
-    # Finally combine
+    # *** Finally combine ***
 
     X = np.concatenate((X_B, X_S), axis=0)
     Y = np.concatenate((Y_B, Y_S), axis=0)
+    W = np.concatenate((W_B, W_S), axis=0)
     
     
     # ** Crucial -- randomize order to avoid problems with other functions **
@@ -82,17 +78,18 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     rind = np.random.shuffle(arr)
 
     X    = X[rind, ...].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rind].squeeze()
+    Y    = Y[rind, ...].squeeze()
+    W    = W[rind, ...].squeeze()
     
     # =================================================================
     # Custom treat specific variables
-
+    
     """
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
     """
     
-    return X, Y, VARS
+    return X, Y, W, VARS_S
 
 
 def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):

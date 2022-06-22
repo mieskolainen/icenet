@@ -163,12 +163,12 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,ids       = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
-                    trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
-
+                    X,Y,W,ids     = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
+                    trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], rngseed=args['rngseed'])
+                    
                     # =========================================================================
                     # COMPUTE RE-WEIGHTS
-
+                    
                     trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, ids=ids, args=args['reweight_param'])
                     val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, ids=ids, args=args['reweight_param'])
 

@@ -93,7 +93,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
 
-    return X, Y, NEW_VARS
+    # No weights
+    W = None
+    
+    return X, Y, W, NEW_VARS
 
 
 def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):

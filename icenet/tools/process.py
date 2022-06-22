@@ -144,16 +144,29 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
     cache_filename = f'./tmp/{args_hash}.data'
 
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
-        data      = io.IceTriplet(func_loader=func_loader, files=args['root_files'],
-                        load_args={'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args},
-                        class_id=np.arange(args['num_classes']), frac=args['frac'], rngseed=args['rngseed'])
-        
+
+        load_args     = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
+
+        k = 0
+        for root_path in args['root_files']:
+            X_, Y_, W_, ids  = func_loader(root_path=root_path, class_id=np.arange(args['num_classes']), **load_args)
+            if k == 0:
+                X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
+            else:
+                X = np.concatenate((X, X_), axis=0)
+                Y = np.concatenate((Y, Y_), axis=0)
+                if W is not None:
+                    W = np.concatenate((W, W_), axis=0)
+            k += 1
+
+        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], rngseed=args['rngseed'])
+
         with open(cache_filename, 'wb') as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)      
+            pickle.dump([trn,val,tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      
     else:
         with open(cache_filename, 'rb') as handle:
             print(__name__ + f'.get_data: loading from cache file {cache_filename}')
-            data = pickle.load(handle)
+            trn,val,tst = pickle.load(handle)
 
     output = {}
 
@@ -162,32 +175,30 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         # Imputation
         if args['imputation_param']['active']:
-            data, imputer = impute_datasets(data=data, features=imputation_vars, args=args['imputation_param'], imputer=None)
+            trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=None)
             pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
-        trn_weights,_ = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.trn.ids, args=args['reweight_param'])
-        val_weights,_ = reweight.compute_ND_reweights(x=data.val.x, y=data.val.y, ids=data.val.ids, args=args['reweight_param'])
+        trn.w,_ = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
+        val.w,_ = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
 
         ### Split and factor data
-        output['trn'] = func_factor(x=data.trn.x, y=data.trn.y, w=trn_weights, ids=data.trn.ids, args=args)
-        output['val'] = func_factor(x=data.val.x, y=data.val.y, w=val_weights, ids=data.val.ids, args=args)
+        output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
+        output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
         
     # Test
     else:
 
         if args['imputation_param']['active']:
             imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
-            data, _   = impute_datasets(data=data, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
+            trn, val, tst, _ = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
         if args['eval_reweight']:
-            tst_weights,_ = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.tst.ids, args=args['reweight_param'])
-        else:
-            tst_weights = None
+            tst.w,_ = reweight.compute_ND_reweights(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
 
         ### Split and factor data
-        output['tst'] = func_factor(x=data.tst.x, y=data.tst.y, w=tst_weights, ids=data.tst.ids, args=args)
+        output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
     return output
 
@@ -207,23 +218,23 @@ def make_plots(data, args):
          
         ###
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
-            weights = data['data'].w, targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
+            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
         
         ### Plot correlations
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax    = plots.plot_correlations(X=data['data'].x, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
 
 
-def impute_datasets(data, features, args, imputer=None):
+def impute_datasets(trn, val, tst, features, args, imputer=None):
     """
     Dataset imputation
 
     Args:
-        data:     trn, val, tst, object of type .x, .y, .w, .ids
-        features: feature vector names
-        args:     imputer parameters
-        imputer:  imputer object (scikit-type)
+        trn,val,tst: .x, .y, .w, .ids type object
+        features:    feature vector names
+        args:        imputer parameters
+        imputer:     imputer object (scikit-type)
 
     Return:
         imputed data
@@ -237,29 +248,29 @@ def impute_datasets(data, features, args, imputer=None):
         print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
 
         # Choose active dimensions
-        dim = np.array([i for i in range(len(data.trn.ids)) if data.trn.ids[i] in features], dtype=int)
+        dim = np.array([i for i in range(len(trn.ids)) if trn.ids[i] in features], dtype=int)
 
         # Parameters
         param = {
             "dim":        dim,
             "values":     special_values,
-            "labels":     data.trn.ids,
+            "labels":     trn.ids,
             "algorithm":  args['algorithm'],
             "fill_value": args['fill_value'],
             "knn_k":      args['knn_k']
         }
         
-        data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=imputer,     **param)
-        data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
-        data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
+        trn.x, imputer_trn = io.impute_data(X=trn.x, imputer=imputer,     **param)
+        tst.x, _           = io.impute_data(X=tst.x, imputer=imputer_trn, **param)
+        val.x, _           = io.impute_data(X=val.x, imputer=imputer_trn, **param)
         
     else:
         # No imputation, but fix spurious NaN / Inf
-        data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
-        data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
-        data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
+        trn.x[np.logical_not(np.isfinite(trn.x))] = 0
+        val.x[np.logical_not(np.isfinite(val.x))] = 0
+        tst.x[np.logical_not(np.isfinite(tst.x))] = 0
 
-    return data, imputer_trn
+    return trn, val, tst, imputer_trn
 
 
 def train_models(data_trn, data_val, args=None) :

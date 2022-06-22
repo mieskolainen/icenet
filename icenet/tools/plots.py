@@ -322,8 +322,8 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     """
 
     # Number of classes
-    C         = int(np.max(y) - np.min(y) + 1)
-
+    C         = len(np.unique(y))
+    
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
@@ -529,19 +529,19 @@ def plotvars(X, y, ids, weights, nbins = 70, title = '', targetdir = '.'):
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
         var = ids[i]
-        plotvar(x, y, var, weights, nbins, title, targetdir)
+        plotvar(x=x, y=y, weights=weights, var=var, nbins=nbins, title=title, targetdir=targetdir)
 
 
 def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot a single variable.
     """
     bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
-    plot_reweight_result(x, y, bins, weights, title = title, xlabel = var)
+    plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
     plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
     plt.close()
 
 
-def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
+def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not)!
     """
@@ -553,13 +553,13 @@ def plot_reweight_result(X, y, bins, trn_weights, title = '', xlabel = 'x'):
 
         # Loop over classes
         for c in range(2) :
-            w = trn_weights[y == c]
+            w = weights[y == c]
             ax.hist(X[y == c], bins, density = False,
                 histtype = 'step', fill = False, linewidth = 1.5)
 
         # Loop over classes
         for c in range(2) :
-            w = trn_weights[y == c]
+            w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
                 histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
         

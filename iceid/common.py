@@ -116,7 +116,10 @@ def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop
     prints.printbar()
     file.close()
 
-    return X, Y, ids
+    # No weights
+    W = None
+
+    return X, Y, W, ids
 
 
 def splitfactor(x, y, w, ids, args):
