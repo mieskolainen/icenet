@@ -1,18 +1,29 @@
-# Common input & data reading routines for the DQCD analysis
-# 
+# Common input & data reading routines for HGCAL
+#
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
+import copy
+import math
+import argparse
+import pprint
+import psutil
+import os
+import datetime
+import json
+import pickle
+import sys
 
 import numpy as np
+import torch
 import uproot
-from tqdm import tqdm
-import psutil
-import copy
-import os
+import awkward as ak
+
+import multiprocessing
+
 
 from termcolor import colored, cprint
-
+from tqdm import tqdm
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -21,15 +32,19 @@ from icenet.tools import prints
 from icenet.tools import process
 from icenet.tools import iceroot
 
+from icehgcal import graphio
 
-# GLOBALS
-from configs.dqcd.mvavars import *
-from configs.dqcd.cuts import *
-from configs.dqcd.filter import *
+
+from configs.hgcal.mctargets import *
+from configs.hgcal.mcfilter  import *
+
+from configs.hgcal.mvavars import *
+from configs.hgcal.cuts import *
+
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id=None, args=None):
-    """ Loads the root file with signal events from MC and background from DATA.
+    """ Loads the root file.
     
     Args:
         root_path : paths to root files
@@ -39,24 +54,26 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
         X,Y       : input, output matrices
         ids       : variable names
     """
-    
+
     # -----------------------------------------------
 
     param = {
-        "tree":        "Events",
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
         "args":        args,
-        "load_ids":    LOAD_VARS
+        "load_ids":    ids     
     }
     
+
+    tree = args['tree_name']
+
     # =================================================================
     # *** BACKGROUND MC ***
 
     filename = args["MC_input"]['background']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
-
-    X_B, VARS = process_root(rootfile=rootfile, isMC=True, **param)
+    
+    X_B, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
     Y_B = np.zeros(X_B.shape[0])
 
 
@@ -66,7 +83,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     filename = args["MC_input"]['signal']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
-    X_S, VARS = process_root(rootfile=rootfile, isMC=True, **param)
+    X_S, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
     Y_S = np.ones(X_S.shape[0])
     
     
@@ -102,6 +119,7 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
 
     X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids)
     
+    """
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
@@ -109,8 +127,7 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
     
     X   = X[ind]
     prints.printbar()
-
-
+    
     # @@ Observable cut selections done here @@
     ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
@@ -119,6 +136,7 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
     X   = X[ind]
     io.showmem()
     prints.printbar()
+    """
 
     return X, ids
 
@@ -140,61 +158,44 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
-    
+    """
     if KINEMATIC_ID is not None:
-        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)
         data_kin.ids = k_vars
-
+    """
+    # -------------------------------------------------------------------------
+    ### DeepSets representation
+    data_deps = None
+    
+    # -------------------------------------------------------------------------
+    ### Tensor representation
+    data_tensor = None
+    """
+    if args['image_on']:
+        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+    """
     # -------------------------------------------------------------------------
     ## Graph representation
-    data_graph  = None
+    data_graph = None
 
-    # -------------------------------------------------------------------------
-    ## Tensor representation
-    data_tensor = None
-
-    # -------------------------------------------------------------------------
-    ## Turn jagged to "long-vector" matrix representation
-
-    ### Pick active scalar variables out
-    scalar_ind, scalar_vars = io.pick_vars(data, globals()[args['inputvar_scalar']])
-    jagged_ind, jagged_vars = io.pick_vars(data, globals()[args['inputvar_jagged']])
+    if args['graph_on']:
+        
+        features   = globals()[args['inputvar']]
+        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
-    jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
+    # --------------------------------------------------------------------
+    ### Finally pick active scalar variables out
+    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
-    # Create tuplet expanded jagged variable names
-    all_jagged_vars = []
-    for i in range(len(jagged_vars)):
-        for j in range(jagged_maxdim[i]):
-            all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
+    data.x   = data.x[:, s_ind].astype(np.float)
+    data.ids = s_vars
     
-    # Update representation
-    arg = {
-        'scalar_vars'  :  scalar_ind,
-        'jagged_vars'  :  jagged_ind,
-        'jagged_maxdim':  jagged_maxdim,
-        'library'      :  'np'
-    }
-    data.x   = aux.jagged2matrix(data.x, **arg)
-    data.ids = scalar_vars + all_jagged_vars
-    # --------------------------------------------------------------------------
-
-    # --------------------------------------------------------------------------
-    # Create DeepSet style representation from the "long-vector" content
-    data_deps = None
-
-    if args['deps_on']:
-        data_deps = copy.deepcopy(data)
-
-        M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
-        D = len(jagged_ind)            # Tuplet feature vector dimension
-
-        data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
-        data_deps.ids = all_jagged_vars
-    # --------------------------------------------------------------------------
-
-
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+
+
+# ========================================================================
+# ========================================================================

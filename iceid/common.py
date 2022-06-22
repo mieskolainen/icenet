@@ -153,29 +153,8 @@ def splitfactor(x, y, w, ids, args):
     data_tensor = None
 
     if args['image_on']:
-
-        ### Pick active jagged array / "image" variables out
-        j_ind, j_vars = io.pick_vars(data, globals()['CMSSW_MVA_ID_IMAGE'])
-
-        # Use single channel tensors
-        if   args['image_param']['channels'] == 1:
-            xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]
-
-        # Use multichannel tensors
-        elif args['image_param']['channels'] == 2:
-            xyz  = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
-                    ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
-        else:
-            raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
-
-        eta_binedges = args['image_param']['eta_bins']
-        phi_binedges = args['image_param']['phi_bins']    
-
-        # Pick tensor data out
-        cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
-
-        data_tensor = aux.jagged2tensor(X=data.x[:, j_ind], ids=j_vars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
-
+        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+    
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
@@ -185,7 +164,7 @@ def splitfactor(x, y, w, ids, args):
         features   = globals()[args['inputvar']]
         data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
-
+    
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])

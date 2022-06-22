@@ -61,7 +61,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
     Returns:
         X
     """
-    
+
     N_all  = len(events.arrays(ids[0]))
     X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
     N      = len(X_test)
@@ -103,8 +103,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     ### Select variables
     events  = uproot.open(files[0])
     all_ids = events.keys()
-    events.close()
-
+    #events.close() # This will cause memmap problems
+    
     load_ids = process_regexp_ids(ids=ids, all_ids=all_ids)
 
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
