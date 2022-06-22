@@ -275,7 +275,7 @@ def train_models(data_trn, data_val, args=None) :
     
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
 
-    print(__name__ + f": Input with {data_trn['data'].x.shape[0]} events and {data_val['data'].x.shape[1]} dimensions ")
+    print(__name__ + f": Input with {data_trn['data'].y.shape[0]} events ")
 
 
     # @@ Tensor normalization @@

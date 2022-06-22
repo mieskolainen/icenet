@@ -128,7 +128,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         
         # ====================================================================
         # CONSTRUCT TENSORS
-        
+
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
             y = torch.tensor([Y[i]], dtype=torch.long)
@@ -142,12 +142,12 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
             w = torch.tensor([1.0],  dtype=torch.float)
 
         ## Construct global feature vector
-        u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
+        #u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
         x = get_node_features(p4vec=p4vec, p4track=None, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
-        
+
         ## Construct edge features
         edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
@@ -156,11 +156,11 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
 
-
         # Add this event
         if global_on == False: # Null the global features
-            u = torch.tensor(np.zeros(len(u)), dtype=torch.float)
-
+            size = 1
+            u = torch.tensor(np.zeros(size), dtype=torch.float)
+        
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
     print(__name__ + f'.parse_graph_data: Empty ECAL cluster events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
