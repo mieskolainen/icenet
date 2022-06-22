@@ -32,7 +32,7 @@
           <div class="body" role="main">
             
   <h1>Source code for iceid.graphio</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Graph data readers and parsers for electron ID</span>
+<span></span><span class="c1"># Graph and tensor data readers and parsers for electron ID</span>
 <span class="c1">#</span>
 <span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
@@ -223,8 +223,8 @@
         <span class="c1">## Construct edge connectivity</span>
         <span class="n">edge_index</span> <span class="o">=</span> <span class="n">get_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">)</span>
         <span class="n">edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
-        
-        
+
+
         <span class="c1"># Add this event</span>
         <span class="k">if</span> <span class="n">global_on</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># Null the global features</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
