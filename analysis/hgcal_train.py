@@ -24,7 +24,7 @@ def main() :
     data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor,
         train_mode=True, imputation_vars=globals()[args['imputation_param']['var']])
 
-    process.make_plots(data=data['trn'], args=args)
+    #process.make_plots(data=data['trn'], args=args)
     process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
     
     print(__name__ + ' [done]')

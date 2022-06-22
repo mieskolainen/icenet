@@ -128,7 +128,7 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         
         # ====================================================================
         # CONSTRUCT TENSORS
-
+        
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
             y = torch.tensor([Y[i]], dtype=torch.long)

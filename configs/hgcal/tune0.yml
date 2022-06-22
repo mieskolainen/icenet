@@ -37,24 +37,24 @@ batch_train_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - dbnf0
-  - xgb0
-  - gxgb0
+#  - dbnf0
+#  - xgb0
+#  - gxgb0
 
   - gnet0
-  - gnet1
+#  - gnet1
 
 #  - gnet0-logit-norm
 #  - gnet2
 #  - gnet3
 #  - gnet4
 
-  - flr0
-  - lgr0
-  - dmx0
-  - dmlp
+#  - flr0
+#  - lgr0
+#  - dmx0
+#  - dmlp
 
-  - cnn0
+#  - cnn0
 #  - xtx0
 
 # ---------------------------------------------------------
@@ -83,7 +83,7 @@ cutfunc:    'cut_standard'      # Basic cuts,         implemented under cuts.py
 xcorr_flow: True                # Full N-point correlations computed between cuts
 
 frac: 0.9                       # Train/validate/test split fraction
-varnorm: 'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
+varnorm: 'none' #'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
 varnorm_tensor: 'zscore'        # Tensor variable normalization
 #varnorm_graph: 'none'          # Not implemented yet
 
@@ -189,7 +189,7 @@ imputation_param:
 
 ## Outlier protection in the training phase
 outlier_param:
-  algo: 'truncate'   # algorithm: 'truncate', 'none'
+  algo: 'none' #'truncate'   # algorithm: 'truncate', 'none'
   qmin: 0.01         # in [0,100] 
   qmax: 99.9         # in [0,100]
 

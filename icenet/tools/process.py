@@ -188,7 +188,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         ### Split and factor data
         output['tst'] = func_factor(x=data.tst.x, y=data.tst.y, w=tst_weights, ids=data.tst.ids, args=args)
-    
+
     return output
 
 
@@ -312,6 +312,8 @@ def train_models(data_trn, data_val, args=None) :
 
         # Save it for the evaluation
         pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.dat', 'wb'))
+        
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
     elif args['varnorm'] == 'madscore' :
 
@@ -323,7 +325,7 @@ def train_models(data_trn, data_val, args=None) :
         # Save it for the evaluation
         pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.dat', 'wb'))
     
-    prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
 
     # Loop over active models
