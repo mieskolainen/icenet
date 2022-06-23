@@ -22,7 +22,7 @@ def covmat2corrmat(C, EPS=1e-12):
     outer_v = np.outer(v, v)
     corr    = C / (outer_v + EPS)
     corr[C == 0] = np.nan # Not defined
-    
+
     return corr
 
 def correlation_matrix(X, weights=None, return_cov=False):
@@ -48,13 +48,13 @@ def correlation_matrix(X, weights=None, return_cov=False):
         C = covmat2corrmat(C=C)
 
     else:
-        # Zero-mean each column (variable)
+        # Zero-mean each column (variable), repeat weights
         Q = copy.deepcopy(X)
         W = np.zeros(X.shape)
         for j in range(Q.shape[1]):
             Q[:,j] = Q[:,j] - np.average(X[:,j], weights=weights)
             W[:,j] = weights
-
+        
         # Compute a weighted covariance matrix
         QW = Q*W
         C  = QW.T.dot(QW) / W.T.dot(W)

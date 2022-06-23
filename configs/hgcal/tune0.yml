@@ -11,10 +11,10 @@ maxevents: 1000000   # Maximum total number of events (in total) to process per 
 
 MC_input:
   signal:
-      'single_electron/*.root'
+    'single_electron/*.root'
   
   background:
-      'single_pion/*.root'
+    'single_pion/*.root'
 # ----------------------------------------------------
 
 eval_reweight: True  # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
