@@ -72,9 +72,19 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, ids, active_dim = []):
+def print_variables(X : np.array, ids, active_dim = [], W=None):
     """ Print in a format (# samples x # dimensions)
     """
+
+    def weighted_avg_and_std(values, weights):
+        """
+        Return the weighted average and standard deviation
+        """
+        average  = np.average(values, weights=weights)
+        variance = np.average((values - average)**2, weights=weights)
+        
+        return average, np.sqrt(variance)
+
     print('\n')
     print(__name__ + f'.print_variables:')
 
@@ -88,12 +98,11 @@ def print_variables(X : np.array, ids, active_dim = []):
         
         x = np.array(X[:,j], dtype=np.float)
 
-        minval = np.min(x)
-        maxval = np.max(x)
-        mean   = np.mean(x)
-        med    = np.median(x)
-        std    = np.std(x)
-
+        minval   = np.min(x)
+        med      = np.median(x)
+        maxval   = np.max(x)
+        mean,std = weighted_avg_and_std(values=x, weights=W)
+        
         isinf  = np.any(np.isinf(x))
         isnan  = np.any(np.isnan(x))
 

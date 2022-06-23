@@ -203,40 +203,6 @@ def pick_vars(data, set_of_vars):
     return newind, newvars
 
 
-class IceTriplet:
-    """ Main class for MC type datasets
-    """
-    def __init__(self, func_loader, frac, rngseed, load_args, files=None, class_id=None):
-        
-        if class_id is None:
-            class_id = [0,1] # By default two classes [0,1]
-            
-        if files is None:
-            cprint(__name__ + f'.IceTriplet.__init__: files is None, relying on func_loader()', 'red')
-            files = ['dummy.root'] # Will be defined in func_loader
-        else:
-            cprint(__name__ + f'.IceTriplet.__init__: files = {files}', 'green')
-
-        self.trn = IceXYW()
-        self.val = IceXYW()
-        self.tst = IceXYW()
-        
-        for f in files :
-            X, Y, ids      = func_loader(root_path=f, class_id=class_id, **load_args)
-            trn, val, tst  = split_data(X=X, Y=Y, frac=frac, rngseed=rngseed, class_id=class_id)
-
-            self.trn += trn
-            self.val += val
-            self.tst += tst
-
-            self.trn.ids = ids
-            self.val.ids = ids
-            self.tst.ids = ids
-
-        self.n_dims  = self.trn.x.shape[1]
-        print(__name__ + f'.__init__: n_dims = {self.n_dims}')
-
-
 class IceXYW:
     """
     Args:
@@ -246,7 +212,7 @@ class IceXYW:
     """
     
     # constructor
-    def __init__(self, x = np.array([]), y = np.array([]), w = np.array([]), ids=None):
+    def __init__(self, x = np.array([]), y = np.array([]), w = None, ids=None):
 
         self.x = x
         self.y = y
@@ -261,7 +227,8 @@ class IceXYW:
 
         x = np.concatenate((self.x, other.x), axis=0)
         y = np.concatenate((self.y, other.y), axis=0)
-        w = np.concatenate((self.w, other.w), axis=0)
+        if self.w is not None:
+            w = np.concatenate((self.w, other.w), axis=0)
 
         return IceXYW(x, y, w)
 
@@ -273,7 +240,8 @@ class IceXYW:
 
         self.x = np.concatenate((self.x, other.x), axis=0)
         self.y = np.concatenate((self.y, other.y), axis=0)
-        self.w = np.concatenate((self.w, other.w), axis=0)
+        if self.w is not None:
+            self.w = np.concatenate((self.w, other.w), axis=0)
 
         return self
 
@@ -285,7 +253,7 @@ class IceXYW:
         x = self.x[ind]
         y = self.y[ind]
 
-        if len(self.w) != 0:
+        if self.w is not None:
             w = self.w[ind]
         else:
             w = self.w
@@ -298,28 +266,31 @@ class IceXYW:
         self.x = self.x[permutation]
         self.y = self.y[permutation]
 
-        if len(self.w) != 0:
+        if self.w is not None:
             self.w = self.w[permutation]
 
         return self
 
 
-def split_data(X, Y, frac, rngseed, class_id=None):
+def split_data(X, Y, W, ids, frac):
     """ Split machine learning data into [A = train & validation] + [B = test] sets
     
     Args:
         X:         data matrix
         Y:         target matrix
+        W:         weight matrix
+        ids:       variable names of columns
         frac:      fraction
         rngseed:   random seed
-        class_id:  class ids array, e.g. [0,1], if not None, splitting based on that array
     """
 
     ### Permute events to have random mixing between classes (a must!)
-    np.random.seed(int(rngseed)) # seed it!
     randi = np.random.permutation(X.shape[0])
     X = X[randi]
     Y = Y[randi]
+    if W is not None:
+        W = W[randi]
+
     # --------------------------------------------------------------------
 
     N     = X.shape[0]
@@ -333,39 +304,34 @@ def split_data(X, Y, frac, rngseed, class_id=None):
     # A. Train
     X_trn = X[0:N_trn]
     Y_trn = Y[0:N_trn]
+    if W is not None:
+        W_trn = W[0:N_trn]
+    else:
+        W_trn = None
 
     # A. Validation
     X_val = X[N_trn:N_trn + N_val]
     Y_val = Y[N_trn:N_trn + N_val]
+    if W is not None:
+        W_val = W[N_trn:N_trn + N_val]
+    else:
+        W_val = None
 
     # B. Test
     X_tst = X[N - N_tst:N]
     Y_tst = Y[N - N_tst:N]
-
-    trn = IceXYW()
-    val = IceXYW()
-    tst = IceXYW()
-
-    # No spesific class selected
-    if class_id is None: 
-
-        trn = IceXYW(x = X_trn, y = Y_trn)
-        val = IceXYW(x = X_val, y = Y_val)
-        tst = IceXYW(x = X_tst, y = Y_tst)
-    
-    # Loop over all classes selected
+    if W is not None:
+        W_tst = W[N - N_tst:N]
     else:
+        W_tst = None
 
-        for c in class_id : 
-            ind  = (Y_trn[:,...] == c)
-            trn += IceXYW(x = X_trn[ind], y = np.ones(ind.sum())*c)
-
-            ind  = (Y_val[:,...] == c)
-            val += IceXYW(x = X_val[ind], y = np.ones(ind.sum())*c)
-
-            ind  = (Y_tst[:,...] == c)
-            tst += IceXYW(x = X_tst[ind], y = np.ones(ind.sum())*c)
-
+    # --------------------------------------------------------
+    # Construct
+    trn = IceXYW(x = X_trn, y = Y_trn, w=W_trn, ids=ids)
+    val = IceXYW(x = X_val, y = Y_val, w=W_val, ids=ids)
+    tst = IceXYW(x = X_tst, y = Y_tst, w=W_tst, ids=ids)
+    # --------------------------------------------------------
+    
     print(__name__ + ".split_data: fractions [train: {:0.3f}, validate: {:0.3f}, test: {:0.3f}]".
         format(X_trn.shape[0]/ N, X_val.shape[0]/ N, X_tst.shape[0] / N))
 
@@ -379,6 +345,8 @@ def split_data(X, Y, frac, rngseed, class_id=None):
 
 def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm='iterative', fill_value=0, knn_k=6):
     """ Data imputation (treatment of missing values, Nan and Inf).
+    
+    NOTE: This function can impute only fixed dimensional input currently (not Jagged numpy arrays)
     
     Args:
         X         : Input data matrix [N vectors x D dimensions]

@@ -75,12 +75,12 @@ def compute_reweight(root_files, num_events, args):
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
     entry_stop   = np.min([args['reweight_param']['maxevents'], num_events[index]])
-    X,Y,ids      = common.load_root_file(root_files[index], ids=None, class_id=[0,1], entry_stop=entry_stop, args=args, library='np')
+    X,Y,W,ids    = common.load_root_file(root_files[index], ids=None, entry_stop=entry_stop, args=args, library='np')
 
     # Compute re-weights
-    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, ids=ids, args=args['reweight_param'])
+    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
 
-    return pdf, X, Y, ids
+    return pdf, X, Y, W, ids
 
 
 # Main function
@@ -92,22 +92,21 @@ def main():
     root_files = args['root_files']
     features   = globals()[args['inputvar']]
     
-
     # Create save path
     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
     
     # Load stats
     num_events = iceroot.load_tree_stats(rootfile=root_files, tree=args['tree_name'])
     print(f'Number of events per file: {num_events}')
-    
-    
+
+
     # =========================================================================
     # Load data for each re-weight PDFs
 
-    pdf,X,Y,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
+    pdf,X,Y,W,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
 
     gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=None, maxevents=1,
+    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, maxevents=1,
         features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # =========================================================================
@@ -163,14 +162,14 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,ids       = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
-                    trn, val, tst = io.split_data(X=X, Y=Y, frac=args['frac'], rngseed=args['rngseed'])
-
+                    X,Y,W,ids     = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
+                    trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
+                    
                     # =========================================================================
                     # COMPUTE RE-WEIGHTS
-
-                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, ids=ids, args=args['reweight_param'])
-                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, ids=ids, args=args['reweight_param'])
+                    
+                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=ids, args=args['reweight_param'])
+                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=ids, args=args['reweight_param'])
 
                     # =========================================================================
                     ### Parse data into graphs

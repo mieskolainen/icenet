@@ -1,4 +1,4 @@
-# Electron ID [TRAINING] steering code
+# HGCAL [TRAINING] steering code
 #
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
@@ -11,24 +11,20 @@ sys.path.append(".")
 from icenet.tools import process
 from icenet.tools import aux
 from icenet.tools import plots
-from icenet.tools import prints
 
-# iceid
-from iceid import common
-from configs.eid.mvavars import *
+# icehgcal
+from icehgcal import common
+from configs.hgcal.mvavars import *
 
 # Main function
 #
 def main() :
     
-    args, cli = process.read_config(config_path='./configs/eid')
+    args, cli = process.read_config(config_path='./configs/hgcal')
     data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor,
         train_mode=True, imputation_vars=globals()[args['imputation_param']['var']])
 
-    ### Print ranges
-    prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
-    
-    process.make_plots(data=data['trn'], args=args)
+    #process.make_plots(data=data['trn'], args=args)
     process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
     
     print(__name__ + ' [done]')

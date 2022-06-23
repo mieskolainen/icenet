@@ -2,6 +2,7 @@
 *.pth
 *.dat
 *.profile
+*.exe
 *.hd5
 *.pkl
 *.pt

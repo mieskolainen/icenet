@@ -11,19 +11,20 @@ import copy
 from icenet.tools import aux
 
 
-def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
+def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     """
     Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
     Args:
-        x      : training data input
-        y      : training data labels
+        x      : training sample input
+        y      : training sample (class) labels
+        w      : training sample weights
         ids    : variable names of columns of x
         pdf    : pre-computed pdfs
         args   : reweighting parameters in a dictionary
     
     Returns:
-        weights: array of re-weights
+        weights: 1D-array of re-weights
     """
 
     num_classes = len(np.unique(y))
@@ -38,11 +39,11 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
         except:
             break
     
-    print(__name__ + f".compute_ND_reweights: reference class: <{args['reference_class']}> (Found {num_classes} classes from y) | Using variables: {paramdict}")
-    
     # Compute event-by-event weights
     if args['differential_reweight']:
         
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
+
         ### Re-weighting variables
         RV = {}
         for var in paramdict.keys():
@@ -107,7 +108,6 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
 
         rwparam = {
             'y':               y,
-            'equal_frac':      args['equal_frac'],
             'reference_class': args['reference_class'],
             'max_reg':         args['max_reg']
         }
@@ -118,14 +118,17 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
-                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], \
+
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
+
+                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], w=sample_weights, \
                         binedges_A=binedges['A'], binedges_B=binedges['B'])
 
                 pdf['binedges_A']  = binedges['A']
                 pdf['binedges_B']  = binedges['B']
                 pdf['num_classes'] = num_classes
 
-            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, binedges=binedges, **rwparam)
+            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, binedges=binedges, **rwparam)
 
         ### Compute geometric mean factorized 1D x 1D product
         elif args['dimension'] == 'pseudo-2D':
@@ -136,8 +139,11 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
-                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
-                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], binedges=binedges['B'])
+
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
+
+                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
+                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], w=sample_weights, binedges=binedges['B'])
                     
                     if   args['pseudo_type'] == 'geometric_mean':
                         pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
@@ -153,7 +159,7 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
                 pdf['binedges_B']  = binedges['B']
                 pdf['num_classes'] = num_classes
 
-            weights = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
 
         ### Compute 1D-PDFs for each class
         elif args['dimension'] == '1D':
@@ -161,36 +167,40 @@ def compute_ND_reweights(x, y, ids, args, pdf=None, EPS=1e-12):
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
-                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], binedges=binedges['A'])
+                    sample_weights = w[y==c] if w is not None else None # Feed in the input weights
+                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
 
                 pdf['binedges']    = binedges['A']
                 pdf['num_classes'] = num_classes
 
-            weights = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
+            weights_doublet = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
         else:
             raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality mode <{args["dimension"]}>')
     
     # No differential re-weighting    
     else:
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y)")
         weights_doublet = np.zeros((x.shape[0], num_classes))
-        for c in range(num_classes):
-            weights_doublet[y == c, c] = 1
 
-        # Apply class balance equalizing weight
-        if (args['equal_frac'] == True):
-            cprint(__name__ + f'.Compute_ND_reweights: Computing only equal class balance weights (no differential re-weighting).', 'green')
-            weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
-        
-        weights = np.sum(weights_doublet, axis=1)
+        for c in range(num_classes):
+            sample_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights
+            weights_doublet[y == c, c] = sample_weights
+
+    ### Apply class balance equalizing weight
+    if (args['equal_frac'] == True):
+        cprint(__name__ + f'.Compute_ND_reweights: Equalizing class fractions', 'green')
+        weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
     
-    # Compute the sum of weights per class for the output print
+    ### Finally map back to 1D-array
+    weights = np.sum(weights_doublet, axis=1)
+    
+    ### Compute the sum of weights per class for the output print
     frac = np.zeros(num_classes)
     sums = np.zeros(num_classes)
     for c in range(num_classes):
-        frac[c] = np.sum(y == c)
-        sums[c] = np.sum(weights[y == c])
+        frac[c], sums[c] = np.sum(y == c), np.sum(weights[y == c])
     
-    print(__name__ + f'.compute_ND_reweights: sum[y == c]: {frac} | sum[weights[y == c]]: {sums}')
+    print(__name__ + f'.compute_ND_reweights: Output with sum[y == c]: {frac} | sum[weights[y == c]]: {sums}')
     
     return weights, pdf
 
@@ -199,10 +209,9 @@ def reweightcoeff1D(X, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1
     """ Compute N-class density reweighting coefficients.
     
     Args:
-        X  :   Observable of interest (N x 1)
-        y  :   Class labels (0,1,...) (N x 1)
-        pdf:   PDF for each class
-        equal_frac:  equalize class fractions
+        X  :              Observable of interest (N x 1)
+        y  :              Class labels (0,1,...) (N x 1)
+        pdf:              PDF for each class
         reference_class : e.g. 0 (background) or 1 (signal)
     
     Returns:
@@ -224,17 +233,10 @@ def reweightcoeff1D(X, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1
     # Maximum weight cut-off regularization
     weights_doublet[weights_doublet > max_reg] = max_reg
 
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=reference_class, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-
-    return weights
+    return weights_doublet
 
 
-def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1E-12):
+def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12):
     """ Compute N-class density reweighting coefficients.
     
     Operates in full 2D without any factorization.
@@ -245,7 +247,6 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, equal_frac, max_reg = 1e3
         y   :             Signal (1) and background (0) labels (N x 1)
         pdf :             Density histograms for each class
         reference_class : e.g. Background (0) or signal (1)
-        equal_frac :      Equalize class fractions
         max_reg :         Regularize the maximum reweight coefficient
     
     Returns:
@@ -268,35 +269,29 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, equal_frac, max_reg = 1e3
     # Maximum weight cut-off regularization
     weights_doublet[weights_doublet > max_reg] = max_reg
 
-    # Apply class balance equalizing weight
-    if (equal_frac == True):
-        weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=reference_class, y=y)
-
-    # Get 1D array
-    weights = np.sum(weights_doublet, axis=1)
-    return weights
+    return weights_doublet
 
 
-def pdf_1D_hist(X, binedges):
+def pdf_1D_hist(X, w, binedges):
     """ 
     Compute re-weighting 1D pdfs.
     """
 
     # Take re-weighting variables
-    pdf,_,_ = plt.hist(x = X, bins = binedges)
+    pdf,_,_ = plt.hist(x = X, weights=w, bins = binedges)
 
     # Make them densities
     pdf  /= np.sum(pdf.flatten())
     return pdf
 
 
-def pdf_2D_hist(X_A, X_B, binedges_A, binedges_B):
+def pdf_2D_hist(X_A, X_B, w, binedges_A, binedges_B):
     """
     Compute re-weighting 2D pdfs.
     """
 
     # Take re-weighting variables
-    pdf,_,_,_ = plt.hist2d(x = X_A, y = X_B, bins = [binedges_A, binedges_B])
+    pdf,_,_,_ = plt.hist2d(x = X_A, y = X_B, weights=w, bins = [binedges_A, binedges_B])
 
     # Make them densities
     pdf  /= np.sum(pdf.flatten())

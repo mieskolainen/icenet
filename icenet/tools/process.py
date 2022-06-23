@@ -86,6 +86,7 @@ def read_config(config_path='./configs/xyz'):
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
+    args['__use_cache__']       = False
     args['__raytune_running__'] = False
     
     # -------------------------------------------------------------------
@@ -142,17 +143,31 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
     args_hash      = io.make_hash_sha256(args)
     cache_filename = f'./tmp/{args_hash}.data'
 
-    if not os.path.exists(cache_filename):
-        data      = io.IceTriplet(func_loader=func_loader, files=args['root_files'],
-                        load_args={'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args},
-                        class_id=np.arange(args['num_classes']), frac=args['frac'], rngseed=args['rngseed'])
-        
+    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
+
+        load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
+
+        # N.B. This loop is needed, because certain applications have each root file loaded here,
+        # whereas some apps do all the multi-file processing under 'func_loader'
+        for k in range(len(args['root_files'])):
+            X_,Y_,W_,ids = func_loader(root_path=args['root_files'][k], **load_args)
+
+            if k == 0:
+                X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
+            else:
+                X = np.concatenate((X, X_), axis=0)
+                Y = np.concatenate((Y, Y_), axis=0)
+                if W is not None:
+                    W = np.concatenate((W, W_), axis=0)
+
+        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
+
         with open(cache_filename, 'wb') as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)      
+            pickle.dump([trn, val, tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      
     else:
         with open(cache_filename, 'rb') as handle:
             print(__name__ + f'.get_data: loading from cache file {cache_filename}')
-            data = pickle.load(handle)
+            trn, val, tst = pickle.load(handle)
 
     output = {}
 
@@ -161,38 +176,30 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         # Imputation
         if args['imputation_param']['active']:
-            data, imputer = impute_datasets(data=data, features=imputation_vars, args=args['imputation_param'], imputer=None)
+            trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=None)
             pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
-        trn_weights,_ = reweight.compute_ND_reweights(x=data.trn.x, y=data.trn.y, ids=data.trn.ids, args=args['reweight_param'])
-        val_weights,_ = reweight.compute_ND_reweights(x=data.val.x, y=data.val.y, ids=data.val.ids, args=args['reweight_param'])
+        trn.w,_ = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
+        val.w,_ = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
 
         ### Split and factor data
-        output['trn'] = func_factor(x=data.trn.x, y=data.trn.y, w=trn_weights, ids=data.trn.ids, args=args)
-        output['val'] = func_factor(x=data.val.x, y=data.val.y, w=val_weights, ids=data.val.ids, args=args)
+        output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
+        output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
         
-        ### Print ranges
-        prints.print_variables(X=output['trn']['data'].x, ids=output['trn']['data'].ids)
-
     # Test
     else:
 
         if args['imputation_param']['active']:
             imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
-            data, _   = impute_datasets(data=data, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
+            trn, val, tst, _ = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
         if args['eval_reweight']:
-            tst_weights,_ = reweight.compute_ND_reweights(x=data.tst.x, y=data.tst.y, ids=data.tst.ids, args=args['reweight_param'])
-        else:
-            tst_weights = None
+            tst.w,_ = reweight.compute_ND_reweights(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
 
         ### Split and factor data
-        output['tst'] = func_factor(x=data.tst.x, y=data.tst.y, w=tst_weights, ids=data.tst.ids, args=args)
-
-        ### Print ranges
-        prints.print_variables(X=output['tst']['data'].x, ids=output['tst']['data'].ids)
+        output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
     return output
 
@@ -207,28 +214,28 @@ def make_plots(data, args):
             targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/')
             for k in data['data_kin'].ids:
                 plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
-                    y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = 70,
+                    y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
                     targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-         
-        ###
+        
+        ### Plot basic plots
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
-            weights = data['data'].w, targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
+            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
         
         ### Plot correlations
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax    = plots.plot_correlations(X=data['data'].x, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
 
 
-def impute_datasets(data, features, args, imputer=None):
+def impute_datasets(trn, val, tst, features, args, imputer=None):
     """
     Dataset imputation
 
     Args:
-        data:     trn, val, tst, object of type .x, .y, .w, .ids
-        features: feature vector names
-        args:     imputer parameters
-        imputer:  imputer object (scikit-type)
+        trn,val,tst: .x, .y, .w, .ids type object
+        features:    feature vector names
+        args:        imputer parameters
+        imputer:     imputer object (scikit-type)
 
     Return:
         imputed data
@@ -242,29 +249,29 @@ def impute_datasets(data, features, args, imputer=None):
         print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
 
         # Choose active dimensions
-        dim = np.array([i for i in range(len(data.trn.ids)) if data.trn.ids[i] in features], dtype=int)
+        dim = np.array([i for i in range(len(trn.ids)) if trn.ids[i] in features], dtype=int)
 
         # Parameters
         param = {
             "dim":        dim,
             "values":     special_values,
-            "labels":     data.trn.ids,
+            "labels":     trn.ids,
             "algorithm":  args['algorithm'],
             "fill_value": args['fill_value'],
             "knn_k":      args['knn_k']
         }
         
-        data.trn.x, imputer_trn = io.impute_data(X=data.trn.x, imputer=imputer,     **param)
-        data.tst.x, _           = io.impute_data(X=data.tst.x, imputer=imputer_trn, **param)
-        data.val.x, _           = io.impute_data(X=data.val.x, imputer=imputer_trn, **param)
+        trn.x, imputer_trn = io.impute_data(X=trn.x, imputer=imputer,     **param)
+        tst.x, _           = io.impute_data(X=tst.x, imputer=imputer_trn, **param)
+        val.x, _           = io.impute_data(X=val.x, imputer=imputer_trn, **param)
         
     else:
         # No imputation, but fix spurious NaN / Inf
-        data.trn.x[np.logical_not(np.isfinite(data.trn.x))] = 0
-        data.val.x[np.logical_not(np.isfinite(data.val.x))] = 0
-        data.tst.x[np.logical_not(np.isfinite(data.tst.x))] = 0
+        trn.x[np.logical_not(np.isfinite(trn.x))] = 0
+        val.x[np.logical_not(np.isfinite(val.x))] = 0
+        tst.x[np.logical_not(np.isfinite(tst.x))] = 0
 
-    return data, imputer_trn
+    return trn, val, tst, imputer_trn
 
 
 def train_models(data_trn, data_val, args=None) :
@@ -280,7 +287,7 @@ def train_models(data_trn, data_val, args=None) :
     
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
 
-    print(__name__ + f": Input with {data_trn['data'].x.shape[0]} events and {data_val['data'].x.shape[1]} dimensions ")
+    print(__name__ + f".train_models: Input with {data_trn['data'].y.shape[0]} events ")
 
 
     # @@ Tensor normalization @@
@@ -317,6 +324,8 @@ def train_models(data_trn, data_val, args=None) :
 
         # Save it for the evaluation
         pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.dat', 'wb'))
+        
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
     elif args['varnorm'] == 'madscore' :
 
@@ -328,7 +337,7 @@ def train_models(data_trn, data_val, args=None) :
         # Save it for the evaluation
         pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.dat', 'wb'))
     
-    prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
 
     # Loop over active models
@@ -501,30 +510,40 @@ def evaluate_models(data=None, args=None):
     # --------------------------------------------------------------------
     # Collect data
 
-    X_RAW    = data['data'].x
-    ids_RAW  = data['data'].ids
+    X       = None
+    X_RAW   = None
+    ids_RAW = None
+    if data['data'].x is not None:
 
-    X        = copy.deepcopy(data['data'].x)
-
+        X        = copy.deepcopy(data['data'].x)
+        X_RAW    = data['data'].x
+        ids_RAW  = data['data'].ids
+    
+    # These should be always there    
     y        = data['data'].y
     weights  = data['data'].w
 
-    X_kin    = data['data_kin'].x
-
+    X_2D = None
     if data['data_tensor'] is not None:
         X_2D    = data['data_tensor']
 
+    X_graph = None
     if data['data_graph'] is not None:
         X_graph = data['data_graph']
 
+    X_deps = None
     if data['data_deps'] is not None:
         X_deps  = data['data_deps'].x
     
-    VARS_kin = data['data_kin'].ids
+    X_kin    = None
+    VARS_kin = None
+    if data['data_kin'] is not None:
+        X_kin    = data['data_kin'].x
+        VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
 
-    print(__name__ + f": Input with {X.shape[0]} events and {X.shape[1]} dimensions ") 
-    if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
+    print(__name__ + f".evaluate_models: Input with {y.shape[0]} events") 
+    if weights is not None: print(__name__ + ".evaluate_models: -- per event weighted evaluation ON ")
     
     try:
         ### Tensor variable normalization
@@ -535,7 +554,7 @@ def evaluate_models(data=None, args=None):
             X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
         
         ### Variable normalization
-        if args['varnorm'] == 'zscore':
+        if   args['varnorm'] == 'zscore':
 
             print('\nZ-score normalizing variables ...')
             X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.dat', 'rb'))
@@ -552,12 +571,13 @@ def evaluate_models(data=None, args=None):
         
     # --------------------------------------------------------------------
     # For pytorch based
-    X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
+    if X is not None:
+        X_ptr      = torch.from_numpy(X).type(torch.FloatTensor)
 
-    if data['data_tensor'] is not None:
-        X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
+    if X_2D is not None:
+        X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)
         
-    if data['data_deps'] is not None:
+    if X_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
         
 
@@ -570,7 +590,7 @@ def evaluate_models(data=None, args=None):
         param = args[f'{ID}_param']
         print(f'Evaluating <{ID}> | {param} \n')
         
-        inputs = {'y':y, 'weights':weights, 'label': param['label'],
+        inputs = {'y': y, 'weights': weights, 'label': param['label'],
                  'targetdir':targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
 
         if   param['predict'] == 'torch_graph':

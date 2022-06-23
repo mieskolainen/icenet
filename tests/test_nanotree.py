@@ -62,7 +62,7 @@ for library in ['ak']:
 
 	print(f'---------------------------------------------------')
 	print(f'Testing nested object property based selection (not correct)')
-	X.sv = X.sv[X.sv['mass'] >= 2.0]
+	X.sv = X.sv[len(X.sv) < 2] #['mass'] >= 2.0
 	
 	loop(X)
 

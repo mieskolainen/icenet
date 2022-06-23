@@ -1,16 +1,29 @@
-# Common input & data reading routines for the HLT electron trigger studies
-# 
+# Common input & data reading routines for HGCAL
+#
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-import numpy as np
-import uproot
-from tqdm import tqdm
-import psutil
 import copy
+import math
+import argparse
+import pprint
+import psutil
 import os
+import datetime
+import json
+import pickle
+import sys
+
+import numpy as np
+import torch
+import uproot
+import awkward as ak
+
+import multiprocessing
+
 
 from termcolor import colored, cprint
+from tqdm import tqdm
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -19,14 +32,19 @@ from icenet.tools import prints
 from icenet.tools import process
 from icenet.tools import iceroot
 
-# GLOBALS
-from configs.trg.mvavars import *
-from configs.trg.cuts import *
-from configs.trg.filter import *
+from icehgcal import graphio
+
+
+from configs.hgcal.mctargets import *
+from configs.hgcal.mcfilter  import *
+
+from configs.hgcal.mvavars import *
+from configs.hgcal.cuts import *
+
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
-    """ Loads the root file with signal events from MC and background from DATA.
+    """ Loads the root file.
     
     Args:
         root_path : paths to root files
@@ -37,48 +55,51 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     """
 
     # -----------------------------------------------
+
+    # ** Pick the variables **
+    ids = MVA_ID
+    
+
+
     param = {
-        'entry_start': entry_start,
+        "entry_start": entry_start,
         "entry_stop":  entry_stop,
-        "args": args
+        "args":        args,
+        "load_ids":    ids     
     }
+    
+
+    tree = args['tree_name']
+
+
 
     # =================================================================
-    # *** MC (signal) ***
+    # *** BACKGROUND MC ***
+
+    filename = args["MC_input"]['background']
+    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
     
-    rootfile      = f'{root_path}/{args["mcfile"]}'
-    
-    # e1
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e1', **param)
-    
-    X_MC_e1 = X_MC[:, [VARS_MC.index(name.replace("x_", "e1_")) for name in NEW_VARS]]
-    Y_MC_e1 = np.ones(X_MC_e1.shape[0])
-    
-    
-    # e2
-    X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e2', **param)
-    
-    X_MC_e2 = X_MC[:, [VARS_MC.index(name.replace("x_", "e2_")) for name in NEW_VARS]]
-    Y_MC_e2 = np.ones(X_MC_e2.shape[0])
-    
-    
+    X_B, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
+    Y_B = np.zeros(X_B.shape[0])
+
+
     # =================================================================
-    # *** DATA (background) ***
+    # *** SIGNAL MC ***
 
-    rootfile          = f'{root_path}/{args["datafile"]}'
-    X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
+    filename = args["MC_input"]['signal']
+    rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
-    X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
-    Y_DATA = np.zeros(X_DATA.shape[0])
+    X_S, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
+    Y_S = np.ones(X_S.shape[0])
     
     
     # =================================================================
     # Finally combine
 
-    X = np.concatenate((X_MC_e1, X_MC_e2, X_DATA), axis=0)
-    Y = np.concatenate((Y_MC_e1, Y_MC_e2, Y_DATA), axis=0)
-
-
+    X = np.concatenate((X_B, X_S), axis=0)
+    Y = np.concatenate((Y_B, Y_S), axis=0)
+    
+    
     # ** Crucial -- randomize order to avoid problems with other functions **
     arr  = np.arange(X.shape[0])
     rind = np.random.shuffle(arr)
@@ -89,24 +110,25 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # Custom treat specific variables
 
+    """
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
-
+    """
+    
     # No weights
     W = None
 
-    return X, Y, W, NEW_VARS
+    return X, Y, W, VARS
 
 
-def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
+def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
-    
-    events = uproot.open(f'{rootfile}:{tree}')
-    ids    = events.keys()
-    X,ids  = iceroot.events_to_jagged_numpy(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
 
+    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids)
+    
+    """
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
@@ -114,8 +136,7 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
     
     X   = X[ind]
     prints.printbar()
-
-
+    
     # @@ Observable cut selections done here @@
     ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
@@ -124,6 +145,7 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
     X   = X[ind]
     io.showmem()
     prints.printbar()
+    """
 
     return X, ids
 
@@ -145,28 +167,48 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
-
+    """
     if KINEMATIC_ID is not None:
         k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
         
-        data_kin      = copy.deepcopy(data)
-        data_kin.x    = data.x[:, k_ind].astype(np.float)
-        data_kin.ids  = k_vars
-
+        data_kin     = copy.deepcopy(data)
+        data_kin.x   = data.x[:, k_ind].astype(np.float)
+        data_kin.ids = k_vars
+    """
     # -------------------------------------------------------------------------
-    data_deps   = None
-
+    ### DeepSets representation
+    data_deps = None
+    
     # -------------------------------------------------------------------------
+    ### Tensor representation
     data_tensor = None
-
+    """
+    if args['image_on']:
+        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+    """
     # -------------------------------------------------------------------------
-    data_graph  = None
+    ## Graph representation
+    data_graph = None
 
+    if args['graph_on']:
+        
+        features   = globals()[args['inputvar']]
+
+        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
+    """
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
     
     data.x   = data.x[:, s_ind].astype(np.float)
     data.ids = s_vars
+    """
+    data.x = None
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+
+
+# ========================================================================
+# ========================================================================

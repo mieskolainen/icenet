@@ -15,7 +15,6 @@ Preliminaries: Conda installation
 
 Then execute with 'bash filename.sh'
 
-
 Pre-installed CUDA paths (optional)
 ------------------------------------
 .. code-block:: none
@@ -27,9 +26,19 @@ This can be used with IC machines, however, is not needed with conda driven setu
 
 Automated setup
 ----------------------------------
+
+Remark: To avoid ´No space left on device´ problem with conda or pip, set the temporary path, e.g.
+
+.. code-block:: none
+	
+	mkdir $HOME/tmp
+	export TMPDIR=$HOME/tmp
+
+Execute
+
 .. code-block:: none
 
-	git clone https://github.com/mieskolainen/icenet && cd icenet
+	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
 	# Create environment
 	conda create -y --name icenet python==3.9.6
@@ -44,13 +53,8 @@ Automated setup
 	(OR pip install -r requirements-cpu-only.txt)
 
 
-Note: If you experience ´No space left on device´ problem with conda or pip, set the temporary path
-
-.. code-block:: none
-	
-	mkdir $HOME/tmp
-	export TMPDIR=$HOME/tmp
-
+Possible problems
+----------------------------------
 
 Note: If you experience ´OSError: libcusparse.so.11´ (or similar) with torch-geometric, set the system path
 
@@ -75,7 +79,7 @@ removing e.g. ´tensorflow´ from requirements.txt, and install it separately wi
 	pip install tensorflow
 
 
-Then if something else fails, study the instructions step-by-step below.
+Then if something else fails, google with the error message.
 
 
 GPU-support commands
@@ -133,3 +137,9 @@ Conda virtual environment commands
 	# Remove environment completely
 	conda env remove --name icenet
 
+C-library versions
+-----------------------------------
+
+.. code-block:: none
+
+	ldd --version

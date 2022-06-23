@@ -9,6 +9,8 @@ sys.path.append(".")
 
 # icenet
 from icenet.tools import process
+from icenet.tools import prints
+
 
 # icedqcd
 from icedqcd import common
@@ -22,6 +24,9 @@ def main() :
     data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor, 
         train_mode=True, imputation_vars=None)
 
+    ### Print ranges
+    prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
+    
     process.make_plots(data=data['trn'], args=args)
     process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 

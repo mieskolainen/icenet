@@ -9,7 +9,41 @@ from tqdm import tqdm
 from termcolor import colored, cprint
 import re
 
+from icenet.tools import io
 from icenet.tools.icemap import icemap
+
+
+def read_multiple_MC(process_func, processes, root_path, param, class_id):
+    """
+    Loop over different MC processes
+
+    Args:
+        process_func:  data processing function
+        processes:     MC processes dictionary (from yaml)
+        root_path:     main path of files
+        param:         parameters of 'process_func'
+        class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+    
+    Returns:
+        X, Y, W, VARS
+    """
+
+    for key in processes:
+
+        print(__name__ + f'.read_multiple_MC: {key}')
+
+        datasets    = processes[key]['path']
+        xs          = processes[key]['xs']
+        model_param = processes[key]['model_param']
+
+        rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
+        X, VARS     = process_func(rootfile=rootfile, **param)
+
+        N           = X.shape[0]
+        Y           = class_id * np.ones(N)
+        W           = np.ones(N) * xs / N
+    
+    return X,Y,W,VARS
 
 
 def load_tree_stats(rootfile, tree, key=None, verbose=False):
@@ -61,7 +95,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
     Returns:
         X
     """
-    
+
     N_all  = len(events.arrays(ids[0]))
     X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
     N      = len(X_test)
@@ -95,7 +129,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     if type(rootfile) is not list:
         rootfile = [rootfile]
 
-    cprint(__name__ + f'.load_tree: Opening rootfile <{rootfile}> with key <{tree}>', 'yellow')
+    cprint(__name__ + f'.load_tree: Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
 
     files = [rootfile[i] + f':{tree}' for i in range(len(rootfile))]
     
@@ -103,13 +137,13 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     ### Select variables
     events  = uproot.open(files[0])
     all_ids = events.keys()
-    events.close()
-
+    #events.close() # This will cause memmap problems
+    
     load_ids = process_regexp_ids(ids=ids, all_ids=all_ids)
 
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
-
+    
     if   library == 'np':
 
         param = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop}
