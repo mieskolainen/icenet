@@ -216,15 +216,16 @@ def make_plots(data, args):
                 plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
                     y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
                     targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-        
-        ### Plot basic plots
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
-            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-        
+
         ### Plot correlations
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-        fig,ax    = plots.plot_correlations(X=data['data'].x, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        
+        ### Plot basic plots
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_distributions/')
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
+            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+
 
 
 def impute_datasets(trn, val, tst, features, args, imputer=None):

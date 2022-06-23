@@ -12,7 +12,7 @@ import os
 from tqdm import tqdm
 
 from iceplot import iceplot
-
+from icefit import statstools
 from icenet.tools import aux
 from icenet.tools import process
 
@@ -574,7 +574,7 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     return fig, (ax1,ax2)
 
 
-def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
+def plot_correlations(X, netvars, weights=None, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
     """
     Plot a cross-correlation matrix of vector data
     
@@ -599,16 +599,17 @@ def plot_correlations(X, netvars, classes=None, round_threshold=0.0, targetdir=N
 
     figs = {}
     axs  = {}
-
+    
     for i in range(num_classes):
 
         label = f'all' if (num_classes == 1) else f'class_{i}'
 
         # Compute correlation matrix
-        C = np.corrcoef(X[classes == i, :], rowvar = False)
+        w = weights[classes==i] if weights is not None else None
+        C = statstools.correlation_matrix(X=X[classes==i,:], weights=w)
         C[np.abs(C) < round_threshold] = np.nan
         C *= 100
-
+        
         # Compute suitable figsize
         size = np.ceil(C.shape[0] / 3)
         
