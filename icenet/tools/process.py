@@ -214,10 +214,10 @@ def make_plots(data, args):
             targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/reweight/1D_kinematic/')
             for k in data['data_kin'].ids:
                 plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
-                    y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = 70,
+                    y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
                     targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-         
-        ###
+        
+        ### Plot basic plots
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
         plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
             targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
@@ -592,7 +592,7 @@ def evaluate_models(data=None, args=None):
         
         inputs = {'y': y, 'weights': weights, 'label': param['label'],
                  'targetdir':targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
-        
+
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
