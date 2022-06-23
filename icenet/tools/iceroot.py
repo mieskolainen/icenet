@@ -13,7 +13,7 @@ from icenet.tools import io
 from icenet.tools.icemap import icemap
 
 
-def read_multiple_MC(process_func, processes, root_path, param):
+def read_multiple_MC(process_func, processes, root_path, param, class_id):
     """
     Loop over different MC processes
 
@@ -22,6 +22,7 @@ def read_multiple_MC(process_func, processes, root_path, param):
         processes:     MC processes dictionary (from yaml)
         root_path:     main path of files
         param:         parameters of 'process_func'
+        class_id:      class identifier (integer), e.g. 0, 1, 2 ...
     
     Returns:
         X, Y, W, VARS
@@ -34,12 +35,12 @@ def read_multiple_MC(process_func, processes, root_path, param):
         datasets    = processes[key]['path']
         xs          = processes[key]['xs']
         model_param = processes[key]['model_param']
-        
+
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
         X, VARS     = process_func(rootfile=rootfile, **param)
 
         N           = X.shape[0]
-        Y           = np.zeros(N)
+        Y           = class_id * np.ones(N)
         W           = np.ones(N) * xs / N
     
     return X,Y,W,VARS
@@ -129,7 +130,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
         rootfile = [rootfile]
 
     cprint(__name__ + f'.load_tree: Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
-    
+
     files = [rootfile[i] + f':{tree}' for i in range(len(rootfile))]
     
     # ----------------------------------------------------------

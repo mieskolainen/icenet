@@ -42,7 +42,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     # Compute event-by-event weights
     if args['differential_reweight']:
         
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes from y) | Differential re-weighting using variables: {paramdict}")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
 
         ### Re-weighting variables
         RV = {}
@@ -105,7 +105,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             else:
                 raise Except(__name__ + ': Unknown re-weight binning mode')
         
-        
+
         rwparam = {
             'y':               y,
             'reference_class': args['reference_class'],
@@ -179,7 +179,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     
     # No differential re-weighting    
     else:
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes from y)")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y)")
         weights_doublet = np.zeros((x.shape[0], num_classes))
 
         for c in range(num_classes):
