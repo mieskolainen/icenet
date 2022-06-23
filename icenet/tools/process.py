@@ -149,7 +149,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         k = 0
         for root_path in args['root_files']:
-            X_, Y_, W_, ids  = func_loader(root_path=root_path, class_id=np.arange(args['num_classes']), **load_args)
+            X_, Y_, W_, ids  = func_loader(root_path=root_path, **load_args)
             if k == 0:
                 X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
             else:
@@ -158,7 +158,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
                 if W is not None:
                     W = np.concatenate((W, W_), axis=0)
             k += 1
-        
+
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
         with open(cache_filename, 'wb') as handle:
