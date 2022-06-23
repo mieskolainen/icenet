@@ -145,11 +145,13 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
-        load_args     = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
+        load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
 
-        k = 0
-        for root_path in args['root_files']:
-            X_, Y_, W_, ids  = func_loader(root_path=root_path, **load_args)
+        # N.B. This loop is needed, because certain applications have each root file loaded here,
+        # whereas some apps do all the multi-file processing under 'func_loader'
+        for k in range(len(args['root_files'])):
+            X_,Y_,W_,ids = func_loader(root_path=args['root_files'][k], **load_args)
+
             if k == 0:
                 X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
             else:
@@ -157,16 +159,15 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
                 Y = np.concatenate((Y, Y_), axis=0)
                 if W is not None:
                     W = np.concatenate((W, W_), axis=0)
-            k += 1
 
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
         with open(cache_filename, 'wb') as handle:
-            pickle.dump([trn,val,tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      
+            pickle.dump([trn, val, tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      
     else:
         with open(cache_filename, 'rb') as handle:
             print(__name__ + f'.get_data: loading from cache file {cache_filename}')
-            trn,val,tst = pickle.load(handle)
+            trn, val, tst = pickle.load(handle)
 
     output = {}
 
@@ -286,7 +287,7 @@ def train_models(data_trn, data_val, args=None) :
     
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
 
-    print(__name__ + f": Input with {data_trn['data'].y.shape[0]} events ")
+    print(__name__ + f".train_models: Input with {data_trn['data'].y.shape[0]} events ")
 
 
     # @@ Tensor normalization @@
@@ -541,8 +542,8 @@ def evaluate_models(data=None, args=None):
         VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
 
-    print(__name__ + f": Input with {y.shape[0]} events") 
-    if weights is not None: print(__name__ + " -- per event weighted evaluation ON ")
+    print(__name__ + f".evaluate_models: Input with {y.shape[0]} events") 
+    if weights is not None: print(__name__ + ".evaluate_models: -- per event weighted evaluation ON ")
     
     try:
         ### Tensor variable normalization
@@ -553,7 +554,7 @@ def evaluate_models(data=None, args=None):
             X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
         
         ### Variable normalization
-        if args['varnorm'] == 'zscore':
+        if   args['varnorm'] == 'zscore':
 
             print('\nZ-score normalizing variables ...')
             X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.dat', 'rb'))
@@ -571,10 +572,10 @@ def evaluate_models(data=None, args=None):
     # --------------------------------------------------------------------
     # For pytorch based
     if X is not None:
-        X_ptr    = torch.from_numpy(X).type(torch.FloatTensor)
+        X_ptr      = torch.from_numpy(X).type(torch.FloatTensor)
 
     if X_2D is not None:
-        X_2D_ptr = torch.from_numpy(X_2D).type(torch.FloatTensor)
+        X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)
         
     if X_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
@@ -589,9 +590,9 @@ def evaluate_models(data=None, args=None):
         param = args[f'{ID}_param']
         print(f'Evaluating <{ID}> | {param} \n')
         
-        inputs = {'y':y, 'weights':weights, 'label': param['label'],
+        inputs = {'y': y, 'weights': weights, 'label': param['label'],
                  'targetdir':targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
-
+        
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
