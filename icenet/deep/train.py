@@ -458,14 +458,10 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             param[key] = config[key] if key in config.keys() else param[key]
 
     ### *********************************
-
-    # Extended data
-    x_trn_    = data_trn.x
-    x_val_    = data_val.x
-
-    dtrain    = xgboost.DMatrix(data = x_trn_, label = data_trn.y if y_soft is None else y_soft, weight = data_trn.w)
-    deval     = xgboost.DMatrix(data = x_val_, label = data_val.y, weight = data_val.w)
-
+    
+    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = data_trn.w)
+    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y, weight = data_val.w)
+    
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     results   = dict()
     print(param)
