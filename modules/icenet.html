@@ -2900,7 +2900,7 @@ newvars:     Chosen variables</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.split_data">
-<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rngseed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split machine learning data into [A = train &amp; validation] + [B = test] sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3417,16 +3417,16 @@ ax:  figure axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – training data input</p></li>
-<li><p><strong>y</strong> – training data labels</p></li>
-<li><p><strong>w</strong> – training data weights</p></li>
+<li><p><strong>x</strong> – training sample input</p></li>
+<li><p><strong>y</strong> – training sample (class) labels</p></li>
+<li><p><strong>w</strong> – training sample weights</p></li>
 <li><p><strong>ids</strong> – variable names of columns of x</p></li>
 <li><p><strong>pdf</strong> – pre-computed pdfs</p></li>
 <li><p><strong>args</strong> – reweighting parameters in a dictionary</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>array of re-weights</p>
+<dd class="field-even"><p>1D-array of re-weights</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>weights</p>
@@ -3456,7 +3456,6 @@ ax:  figure axis</p>
 <li><p><strong>X</strong> – Observable of interest (N x 1)</p></li>
 <li><p><strong>y</strong> – Class labels (0,1,…) (N x 1)</p></li>
 <li><p><strong>pdf</strong> – PDF for each class</p></li>
-<li><p><strong>equal_frac</strong> – equalize class fractions</p></li>
 <li><p><strong>reference_class</strong> – e.g. 0 (background) or 1 (signal)</p></li>
 </ul>
 </dd>
@@ -3468,7 +3467,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.reweight.reweightcoeff2D">
-<span class="sig-name descname"><span class="pre">reweightcoeff2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equal_frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#reweightcoeff2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.reweightcoeff2D" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">reweightcoeff2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#reweightcoeff2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.reweightcoeff2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute N-class density reweighting coefficients.</p>
 <p>Operates in full 2D without any factorization.</p>
 <dl class="field-list simple">
@@ -3479,7 +3478,6 @@ ax:  figure axis</p>
 <li><p><strong>y</strong> – Signal (1) and background (0) labels (N x 1)</p></li>
 <li><p><strong>pdf</strong> – Density histograms for each class</p></li>
 <li><p><strong>reference_class</strong> – e.g. Background (0) or signal (1)</p></li>
-<li><p><strong>equal_frac</strong> – Equalize class fractions</p></li>
 <li><p><strong>max_reg</strong> – Regularize the maximum reweight coefficient</p></li>
 </ul>
 </dd>

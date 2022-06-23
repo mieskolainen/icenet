@@ -306,7 +306,7 @@
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
-<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">rngseed</span><span class="p">):</span>
+<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Split machine learning data into [A = train &amp; validation] + [B = test] sets</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -319,7 +319,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">### Permute events to have random mixing between classes (a must!)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rngseed</span><span class="p">))</span> <span class="c1"># seed it!</span>
     <span class="n">randi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">randi</span><span class="p">]</span>
