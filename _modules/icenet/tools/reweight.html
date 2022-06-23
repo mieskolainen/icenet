@@ -76,7 +76,7 @@
     <span class="c1"># Compute event-by-event weights</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;differential_reweight&#39;</span><span class="p">]:</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes from y) | Differential re-weighting using variables: </span><span class="si">{</span><span class="n">paramdict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> from y) | Differential re-weighting using variables: </span><span class="si">{</span><span class="n">paramdict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1">### Re-weighting variables</span>
         <span class="n">RV</span> <span class="o">=</span> <span class="p">{}</span>
@@ -139,7 +139,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">Except</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;: Unknown re-weight binning mode&#39;</span><span class="p">)</span>
         
-        
+
         <span class="n">rwparam</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;y&#39;</span><span class="p">:</span>               <span class="n">y</span><span class="p">,</span>
             <span class="s1">&#39;reference_class&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span>
@@ -213,7 +213,7 @@
     
     <span class="c1"># No differential re-weighting    </span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes from y)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> from y)&quot;</span><span class="p">)</span>
         <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>

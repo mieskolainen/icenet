@@ -88,16 +88,16 @@
     <span class="c1"># *** BACKGROUND MC ***</span>
 
     <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;MC_input&quot;</span><span class="p">][</span><span class="s1">&#39;background&#39;</span><span class="p">]</span>
-    <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">VARS_B</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+    <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">VARS_B</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
 
 
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** SIGNAL MC ***</span>
 
     <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;MC_input&quot;</span><span class="p">][</span><span class="s1">&#39;signal&#39;</span><span class="p">]</span>
-    <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">VARS_S</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-
-
+    <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">VARS_S</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+    
+    
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** Finally combine ***</span>
 

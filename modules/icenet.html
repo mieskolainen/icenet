@@ -2391,7 +2391,7 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple_MC">
-<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loop over different MC processes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2400,6 +2400,7 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <li><p><strong>processes</strong> – MC processes dictionary (from yaml)</p></li>
 <li><p><strong>root_path</strong> – main path of files</p></li>
 <li><p><strong>param</strong> – parameters of ‘process_func’</p></li>
+<li><p><strong>class_id</strong> – class identifier (integer), e.g. 0, 1, 2 …</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
