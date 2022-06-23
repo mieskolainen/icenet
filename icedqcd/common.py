@@ -28,12 +28,11 @@ from configs.dqcd.cuts import *
 from configs.dqcd.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
         root_path : paths to root files
-        class_id  : class ids
     
     Returns:
         X,Y       : input, output matrices
@@ -83,7 +82,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
     
     # =================================================================
     # Custom treat specific variables
-    
+
     """
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)

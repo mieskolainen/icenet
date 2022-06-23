@@ -43,12 +43,11 @@ from configs.hgcal.cuts import *
 
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
     """ Loads the root file.
     
     Args:
         root_path : paths to root files
-        class_id  : class ids
     
     Returns:
         X,Y       : input, output matrices

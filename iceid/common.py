@@ -42,12 +42,11 @@ from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
-def load_root_file(root_path, ids=None, class_id=None, entry_start=0, entry_stop=None, args=None, library='np'):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None, library='np'):
     """ Loads a single root file.
     
     Args:
         root_path : paths to root file
-        class_id  : class ids
     
     Returns:
         X,Y       : input, output data (with jagged content)

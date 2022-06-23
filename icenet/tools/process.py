@@ -158,8 +158,8 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
                 if W is not None:
                     W = np.concatenate((W, W_), axis=0)
             k += 1
-
-        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], rngseed=args['rngseed'])
+        
+        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
         with open(cache_filename, 'wb') as handle:
             pickle.dump([trn,val,tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      

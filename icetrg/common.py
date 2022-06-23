@@ -25,12 +25,11 @@ from configs.trg.cuts import *
 from configs.trg.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
         root_path : paths to root files
-        class_id  : class ids
     
     Returns:
         X,Y       : input, output matrices
@@ -95,7 +94,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, class_id
 
     # No weights
     W = None
-    
+
     return X, Y, W, NEW_VARS
 
 

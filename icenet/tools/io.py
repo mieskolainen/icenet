@@ -272,7 +272,7 @@ class IceXYW:
         return self
 
 
-def split_data(X, Y, W, ids, frac, rngseed):
+def split_data(X, Y, W, ids, frac):
     """ Split machine learning data into [A = train & validation] + [B = test] sets
     
     Args:
@@ -285,7 +285,6 @@ def split_data(X, Y, W, ids, frac, rngseed):
     """
 
     ### Permute events to have random mixing between classes (a must!)
-    np.random.seed(int(rngseed)) # seed it!
     randi = np.random.permutation(X.shape[0])
     X = X[randi]
     Y = Y[randi]
