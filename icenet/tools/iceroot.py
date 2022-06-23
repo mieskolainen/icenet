@@ -40,8 +40,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, VARS     = process_func(rootfile=rootfile, **param)
 
         N           = X.shape[0]
-        Y           = class_id * np.ones(N)
-        W           = np.ones(N) * xs / N
+        Y           = class_id * np.ones(N, dtype=int)
+        W           = np.ones(N, dtype=float) * xs / N
     
     return X,Y,W,VARS
 
