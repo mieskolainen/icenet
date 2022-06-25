@@ -68,6 +68,14 @@ class SuperEdgeConv(MessagePassing):
 
 
 class GNNGeneric(torch.nn.Module):
+    """
+    Technical Remarks:
+        
+        Remember always to use MLP_ALL_ACT in the intermediate blocks, i.e.
+        MLPs with an activation function also after the last layer.
+        (otherwise very bad performance may happen for certain message passing / convolution operators).
+        
+    """
 
     def SuperEdgeConv_(self, data):
         # Message passing

@@ -37,8 +37,8 @@ batch_train_param:
 # Give all models some unique identifier and label
 active_models:
 
-  - gnet0
   - gnet1
+  - gnet0
 
 # ---------------------------------------------------------
 
