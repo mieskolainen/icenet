@@ -30,17 +30,18 @@ active_models:
   - gnet0
   - gnet1
   
-  - dbnf0
+#  - dbnf0
   - xgb0
   - gxgb0
 
-  - flr0
-  - lgr0
-  - dmx0
-  - dmlp
+#  - flr0
+#  - lgr0
+#  - dmx0
+#  - dmlp
 
-  - cnn0
-#  - xtx0
+#  - cnn0
+
+##  - xtx0
 
 # ---------------------------------------------------------
 
@@ -342,7 +343,7 @@ gxgb0_param:
     raytune:  null
 
     # Convolution model
-    conv_type:   'SuperEdgeConv' # See models under icenet/deep/graph.py
+    conv_type:   'EdgeConv' # See models under icenet/deep/graph.py
 
     # Model
     model_param:
@@ -482,7 +483,7 @@ gnet0_param:
   predict:  'torch_graph'
   label:    'EdgeConv'
   raytune:  'gnn_setup'
-
+  
   conv_type: 'EdgeConv'       # See models under icenet/deep/graph.py
   
   # Model

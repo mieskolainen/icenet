@@ -66,7 +66,7 @@ cutfunc:    'cut_standard'      # Basic cuts,         implemented under cuts.py
 xcorr_flow: True                # Full N-point correlations computed between cuts
 
 frac: 0.9                       # Train/validate/test split fraction
-varnorm: 'none' #'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
+varnorm: 'none' #'zscore'       # Variable normalization: 'zscore', 'madscore', 'none'
 varnorm_tensor: 'zscore'        # Tensor variable normalization
 #varnorm_graph: 'none'          # Not implemented yet
 

@@ -186,7 +186,7 @@ class GNNGeneric(torch.nn.Module):
 
         final_MLP_act  = 'relu',
         final_MLP_bn   =  True):
-
+        
         super(GNNGeneric, self).__init__()
         
         self.d_dim = d_dim  # node feature dimension
