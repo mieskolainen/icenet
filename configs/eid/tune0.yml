@@ -478,12 +478,12 @@ gnet0_param:
 
 
 # Graph net
-gnet0_param:
+gnet1_param:
   train:    'torch_graph'
   predict:  'torch_graph'
   label:    'EdgeConv'
   raytune:  'gnn_setup'
-  
+
   conv_type: 'EdgeConv'       # See models under icenet/deep/graph.py
   
   # Model
