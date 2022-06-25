@@ -102,6 +102,14 @@
 
 
 <div class="viewcode-block" id="GNNGeneric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a><span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Technical Remarks:</span>
+<span class="sd">        </span>
+<span class="sd">        Remember always to use MLP_ALL_ACT in the intermediate blocks, i.e.</span>
+<span class="sd">        MLPs with an activation function also after the last layer.</span>
+<span class="sd">        (otherwise very bad performance may happen for certain message passing / convolution operators).</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="GNNGeneric.SuperEdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SuperEdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SuperEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
