@@ -728,6 +728,25 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="icenet.deep.dmlp.MLP">
 <span class="sig-name descname"><span class="pre">MLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#MLP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.MLP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a Multi Layer Perceptron with an arbitrary number of layers.</p>
+<p>WITHOUT LAST ACTIVATION</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> – input structure, such as [128, 64, 64] for a 3-layer network.</p></li>
+<li><p><strong>batch_norm</strong> – batch normalization</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nn.sequential object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.dmlp.MLP_ALL_ACT">
+<span class="sig-name descname"><span class="pre">MLP_ALL_ACT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dmlp.html#MLP_ALL_ACT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dmlp.MLP_ALL_ACT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a Multi Layer Perceptron with an arbitrary number of layers.</p>
+<p>ALL LAYERS WITH ACTIVATION</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
