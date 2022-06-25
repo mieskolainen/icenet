@@ -324,9 +324,15 @@ class GNNGeneric(torch.nn.Module):
             self.mlp_final = MLP([self.z_dim, self.z_dim, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn)
 
         # 2-point (node) probability computation function (edge level inference)
-        elif self.task == 'edge':
+        elif self.task == 'edge_directed':
             self.mlp_final = nn.Sequential(
                     MLP([2 * self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    #nn.Dropout(0.5),
+                    MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    )
+        elif self.task == 'edge_undirected':
+            self.mlp_final = nn.Sequential(
+                    MLP([self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
                     #nn.Dropout(0.5),
                     MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
                     )
@@ -339,11 +345,17 @@ class GNNGeneric(torch.nn.Module):
         """
         MLP decoder of two-point correlations (edges)
 
-        Because this function is not permutation symmetric between edge_index[0] and [1],
-        it can learn (in principle) a directed edge (adjacency) behavior.
+        Because this function is not (necessarily) permutation symmetric between edge_index[0] and [1],
+        we can learn (in principle) a directed or undirected edge (adjacency) behavior.
         """
-
-        X = torch.cat((z[edge_index[0], ...], z[edge_index[1], ...]), dim=-1)
+        
+        # Not permutation symmetric under i <-> j
+        if   self.task == 'edge_directed':
+            X = torch.cat((z[edge_index[0], ...], z[edge_index[1], ...]), dim=-1)
+        
+        # Permutation symmetric under i <-> j
+        elif self.task == 'edge_undirected':
+            X = z[edge_index[0], ...] * z[edge_index[1], ...]
 
         return self.mlp_final(X)
 
@@ -403,7 +415,7 @@ class GNNGeneric(torch.nn.Module):
         ## Final MLP map
 
         # Edge level inference
-        if self.task == 'edge':
+        if 'edge' in self.task:
             x = self.forward_2pt(x, data.edge_index)
 
         # Node or graph level inference
