@@ -132,10 +132,17 @@
 <span class="sd">    Wrapper to return different graph networks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="nb">print</span><span class="p">(</span><span class="n">conv_type</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">netparam</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if conv_type == &#39;NN&#39;:</span>
+<span class="sd">        model = graph.NNNet(**netparam)</span>
+<span class="sd">    else:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">GNNGeneric</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">model</span></div>
+
 
 <div class="viewcode-block" id="getgenericparam"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgenericparam">[docs]</a><span class="k">def</span> <span class="nf">getgenericparam</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot;</span>

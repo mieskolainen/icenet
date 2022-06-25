@@ -101,6 +101,93 @@
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(nn=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span></div>
 
 
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># NNConv based graph net</span>
+<span class="sd">#</span>
+<span class="sd"># https://arxiv.org/abs/1704.01212</span>
+<span class="sd">#</span>
+<span class="sd">class NNNet(torch.nn.Module):</span>
+<span class="sd">    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=1, z_dim=196, task=&#39;graph&#39;, conv_aggr=&#39;max&#39;, global_pool=&#39;mean&#39;):</span>
+<span class="sd">        super(NNNet, self).__init__()</span>
+
+<span class="sd">        self.D = d_dim  # node feature dimension</span>
+<span class="sd">        self.E = e_dim  # edge feature dimension</span>
+<span class="sd">        self.G = u_dim  # global feature dimension</span>
+<span class="sd">        self.C = c_dim  # number output classes</span>
+<span class="sd">        </span>
+<span class="sd">        self.cdim = cdim  # latent dimension</span>
+
+<span class="sd">        self.task        = task</span>
+<span class="sd">        self.global_pool = global_pool</span>
+
+<span class="sd">        # Convolution layers</span>
+<span class="sd">        # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]</span>
+<span class="sd">        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)</span>
+<span class="sd">        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)</span>
+<span class="sd">        </span>
+<span class="sd">        # &quot;Fusion&quot; layer taking in conv layer outputs</span>
+<span class="sd">        self.lin1  = MLP([D+D, self.cdim])</span>
+
+<span class="sd">        # Set2Set pooling operation produces always output with 2 x input dimension</span>
+<span class="sd">        # =&gt; use linear layer to project down</span>
+<span class="sd">        if self.global_pool == &#39;s2s&#39;:</span>
+<span class="sd">            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)</span>
+<span class="sd">            self.S2Slin  = Linear(2*self.cdim, self.cdim)</span>
+
+<span class="sd">        if (self.G &gt; 0):</span>
+<span class="sd">            self.Z = self.cdim + self.G</span>
+<span class="sd">        else:</span>
+<span class="sd">            self.Z = self.cdim</span>
+<span class="sd">        </span>
+<span class="sd">        # Final layers concatenating everything</span>
+<span class="sd">        self.mlp1  = MLP([self.Z, self.Z, self.C])</span>
+
+
+<span class="sd">    def forward(self, data, conv_only=False):</span>
+
+<span class="sd">        if not hasattr(data,&#39;batch&#39;) or data.batch is None:</span>
+<span class="sd">            # Create virtual null batch if singlet graph input</span>
+<span class="sd">            setattr(data, &#39;batch&#39;, torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))</span>
+
+<span class="sd">        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)</span>
+<span class="sd">        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)</span>
+<span class="sd">        x  = self.lin1(torch.cat([x1, x2], dim=1))</span>
+
+<span class="sd">        # ** Global pooling **</span>
+<span class="sd">        if self.task == &#39;graph&#39;:</span>
+<span class="sd">            if self.global_pool == &#39;s2s&#39;:</span>
+<span class="sd">                x = self.S2Spool(x, data.batch)</span>
+<span class="sd">                x = self.S2Slin(x)</span>
+<span class="sd">            elif self.global_pool == &#39;max&#39;:</span>
+<span class="sd">                x = global_max_pool(x, data.batch)</span>
+<span class="sd">            elif self.global_pool == &#39;add&#39;:</span>
+<span class="sd">                x = global_add_pool(x, data.batch)</span>
+<span class="sd">            elif self.global_pool == &#39;mean&#39;:</span>
+<span class="sd">                x = global_mean_pool(x, data.batch)</span>
+<span class="sd">            else:</span>
+<span class="sd">                raise Exception(__name__ + f&#39;: Unknown global_pool &lt;{self.global_pool}&gt;&#39;)</span>
+
+<span class="sd">        if conv_only: # Return convolution part</span>
+<span class="sd">            return x</span>
+
+<span class="sd">        # Global features concatenated</span>
+<span class="sd">        if self.G &gt; 0:</span>
+<span class="sd">            u = data.u.view(-1, self.G)</span>
+<span class="sd">            x = torch.cat([x, u], 1)</span>
+
+<span class="sd">        # Final layers</span>
+<span class="sd">        x = self.mlp1(x)</span>
+
+<span class="sd">        return x</span>
+<span class="sd">    </span>
+<span class="sd">    # Returns softmax probability</span>
+<span class="sd">    def softpredict(self,x) :</span>
+<span class="sd">        if self.training:</span>
+<span class="sd">            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
+<span class="sd">        else:</span>
+<span class="sd">            return F.softmax(self.forward(x), dim=-1)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="GNNGeneric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a><span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Technical Remarks:</span>
