@@ -132,28 +132,8 @@
 <span class="sd">    Wrapper to return different graph networks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span>   <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;GAT&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">GATNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;DEC&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">DECNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;PAN&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">PANNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;EC&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">ECNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SUP&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">SUPNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SG&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">SGNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SAGE&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">SAGENet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;NN&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">NNNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;GINE&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">GINENet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;spline&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">SplineNet</span><span class="p">(</span><span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">Except</span><span class="p">(</span><span class="n">name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.getgraphmodel: Unknown network &lt;conv_type&gt; = </span><span class="si">{</span><span class="n">conv_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">netparam</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">GNNGeneric</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="o">**</span><span class="n">netparam</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -177,16 +157,26 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct graph network parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">num_node_features</span>   <span class="o">=</span> <span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">num_edge_features</span>   <span class="o">=</span> <span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edge_attr</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">num_global_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">u</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_node_features</span>   <span class="o">=</span> <span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">num_node_features</span>   <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_edge_features</span>   <span class="o">=</span> <span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edge_attr</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">num_edge_features</span>   <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_global_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_trn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">u</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">num_global_features</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">netparam</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;C&#39;</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_classes</span><span class="p">),</span>
-        <span class="s1">&#39;D&#39;</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_node_features</span><span class="p">),</span>
-        <span class="s1">&#39;E&#39;</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_edge_features</span><span class="p">),</span>
-        <span class="s1">&#39;G&#39;</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_global_features</span><span class="p">),</span>
-        <span class="s1">&#39;task&#39;</span> <span class="p">:</span> <span class="s1">&#39;graph&#39;</span>
+        <span class="s1">&#39;c_dim&#39;</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_classes</span><span class="p">),</span>
+        <span class="s1">&#39;d_dim&#39;</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_node_features</span><span class="p">),</span>
+        <span class="s1">&#39;e_dim&#39;</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_edge_features</span><span class="p">),</span>
+        <span class="s1">&#39;u_dim&#39;</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_global_features</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1"># Add model hyperparameter keys</span>
