@@ -9,6 +9,7 @@ sys.path.append(".")
 
 # icenet
 from icenet.tools import process
+from icenet.tools import aux
 
 # iceid
 from iceid import common
@@ -42,7 +43,7 @@ def main() :
 
     # ----------------------------
     # Evaluate external classifiers
-    met_elemva = ele_mva_classifier(data=data['tst']['data'])
+    met_elemva = ele_mva_classifier(data=data['tst']['data_kin'])
     
     # Add to the stack
     process.roc_mstats.append(met_elemva)
