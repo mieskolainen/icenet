@@ -98,10 +98,17 @@ def getgraphmodel(conv_type, netparam):
     Wrapper to return different graph networks
     """
 
+    print(conv_type)
     print(netparam)
+    """
+    if conv_type == 'NN':
+        model = graph.NNNet(**netparam)
+    else:
+    """
     model = graph.GNNGeneric(conv_type=conv_type, **netparam)
     
     return model
+
 
 def getgenericparam(param, D, num_classes, config={}):
     """

@@ -180,9 +180,10 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
             pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
-        trn.w,_ = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
-        val.w,_ = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
-
+        trn.w, pdf = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, pdf=None, ids=trn.ids, args=args['reweight_param'])
+        pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
+        val.w,_    = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, pdf=None,  ids=val.ids, args=args['reweight_param'])
+        
         ### Split and factor data
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
@@ -196,7 +197,8 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
         if args['eval_reweight']:
-            tst.w,_ = reweight.compute_ND_reweights(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+            pdf     = pickle.dump(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
+            tst.w,_ = reweight.compute_ND_reweights(pdf=None, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
 
         ### Split and factor data
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)

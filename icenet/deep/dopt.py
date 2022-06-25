@@ -231,7 +231,7 @@ def test(model, loader, optimizer, device):
         # Classification metrics
         N       = len(y_true)
         metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False, verbose=True)
-
+        
         if metrics.auc > -1: # Bad batch protection
             aucsum += (metrics.auc * N)
             accsum += (metrics.acc * N)
