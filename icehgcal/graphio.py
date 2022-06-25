@@ -26,23 +26,6 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-# Torch conversion
-def graph2torch(X):
-
-    # Turn into torch geometric Data object
-    Y = np.zeros(len(X), dtype=object)
-    for i in range(len(X)):
-
-        d = X[i]
-        Y[i] = Data(x=torch.tensor(d['x'], dtype=torch.float),
-                    edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
-                    edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
-                    y=torch.tensor(d['y'], dtype=torch.long),
-                    w=torch.tensor(d['w'], dtype=torch.float),
-                    u=torch.tensor(d['u'], dtype=torch.float))
-    return Y
-
-
 def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
@@ -60,13 +43,14 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         Array of pytorch-geometric Data objects
     """
     
-    num_node_features = 6
-    num_edge_features = 4
-    num_classes       = 2
-
+    num_node_features   = 4
+    num_edge_features   = 4
+    num_global_features = 0
+    num_classes         = 2
+    
     num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
     dataset  = []
-
+    
     print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
     zerovec = vec4()
 
@@ -75,23 +59,23 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
     for i in range(len(features)):
         feature_ind[i] = ids.index(features[i])
 
-    # Collect indices
+    # Collect track indices
     #ind__trk_pt        = ids.index('trk_pt')
     #ind__trk_eta       = ids.index('trk_eta')
     #ind__trk_phi       = ids.index('trk_phi')
-
+    
     ind__candidate_energy = ids.index('candidate_energy')
     ind__candidate_px     = ids.index('candidate_px')
     ind__candidate_py     = ids.index('candidate_py')
     ind__candidate_pz     = ids.index('candidate_pz')
 
-    num_empty_ECAL = 0
+    num_empty_HGCAL = 0
 
     # Loop over events
     for i in tqdm(range(num_events)):
 
         num_nodes = 1 + len(X[i, ind__candidate_energy]) # + 1 virtual node
-        num_edges = num_nodes**2                      # include self-connections
+        num_edges = num_nodes**2                         # include self-connections
         
         # Construct 4-vector for the track, with pion mass
         #p4track = vec4()
@@ -104,27 +88,20 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         if N_c > 0:
             for k in range(N_c): 
                 
-                """
-                pt    = X[i, ind__candidate_e][k] / np.cosh(X[i, ind__candidate_eta][k]) # Massless approx.
-                eta   = X[i, ind__candidate_eta][k]
-                phi   = X[i, ind__candidate_phi][k]
-                """
-
                 energy = X[i, ind__candidate_energy][k]
                 px     = X[i, ind__candidate_px][k]
                 py     = X[i, ind__candidate_py][k]
                 pz     = X[i, ind__candidate_pz][k]
                 
                 v = vec4()
-                #v.setPtEtaPhiM(pt, eta, phi, 0)
                 v.setPxPyPzE(px, py, pz, energy)
 
                 p4vec.append( v )
         
-        # Empty ECAL cluster information
+        # Empty HGCAL cluster information
         else:
-            num_empty_ECAL += 1
-            # However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed
+            num_empty_HGCAL += 1
+            # However, never skip empty HGCAL cluster events here!!, do pre-filtering before this function if needed
         
         # ====================================================================
         # CONSTRUCT TENSORS
@@ -158,12 +135,11 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
 
         # Add this event
         if global_on == False: # Null the global features
-            size = 1
-            u = torch.tensor(np.zeros(size), dtype=torch.float)
+            u = torch.tensor(np.zeros(num_global_features), dtype=torch.float)
         
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
-    print(__name__ + f'.parse_graph_data: Empty ECAL cluster events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
+    print(__name__ + f'.parse_graph_data: Empty HGCAL cluster events: {num_empty_HGCAL} / {num_events} = {num_empty_HGCAL/num_events:0.5f} (using only global data u)')        
     
     return dataset
 
@@ -264,21 +240,3 @@ def get_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EPS=1E-12)
             n += 1
 
     return edge_attr
-
-
-'''
-def find_k_nearest(edge_attr, num_nodes, k=5):
-    """
-    Find fixed k-nearest neighbours, return corresponding edge connectivities
-    """
-
-    # Loop over each node
-    for i in range(num_nodes):
-
-        # Loop over each other node, take distances
-        for j in range(num_nodes):
-
-    # Graph connectivity: (~ adjacency matrix)
-    edge_index = torch.tensor(np.zeros((2, num_edges)), dtype=torch.long)
-'''
-

@@ -343,190 +343,88 @@ raytune_setup:
 ## Classifier setup
 # ========================================================================
 
-# Dual graph + XGB network
-gxgb0_param:
-
-  train:   'graph_xgb'
-  predict: 'graph_xgb'
-  label:   'DGXGB'
-
-  # ** GRAPH NETWORK **
-  graph:
-    train:   'torch_graph'
-    predict: 'torch_graph'
-    label:   'GXGB-G'
-    raytune:  null
-
-    # Convolution model
-    conv_type:   'SUP'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-    # Model
-    model_param:
-      conv_aggr:   'add'
-      global_pool: 'mean'
-      cdim: 96                   # Convolution output dimension
+# Graph net
+gnet0_param:
+  train:    'torch_graph'
+  predict:  'torch_graph'
+  label:    'SuperEdgeConv'
+  raytune:  'gnn_setup'
+  
+  conv_type:   'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  
+  # Model
+  model_param:
+    task: 'graph'             # 'graph', 'node', 'edge' (level of inference)
+    global_pool: 'mean'
+    z_dim: 196                # Convolution output dimension
     
-    # Optimization
-    opt_param:  
-      lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-      gamma: 2                  # focal_entropy exponent
-      temperature: 1            # logit norm temperature
-      
-      optimizer: 'Adam'
-      epochs: 50
-      batch_size: 64
-      learning_rate: 0.003
-      weight_decay:  0.00005     # L2-regularization
+    # Message passing parameters
+    conv_MLP_act: 'relu'
+    conv_MLP_bn: True
+    conv_aggr: 'max'
+    conv_knn: 8
 
-    # Scheduler
-    scheduler_param:
-      step_size: 200
-      gamma: 0.1
-    
-    device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-    num_workers: 4
-    
-    # Read/Write of epochs
-    savemode: 'all'              # 'all', 'latest'
-    readmode: -1                 # -1 is the last saved epoch
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: True
 
-  # ** XGBOOST **
-  xgb:
-    train:   'xgb'
-    predict: 'xgb'
-    label:   'GXGB-XGB'
-    raytune:  null
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True
 
-    # general parameters
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 300    # number of epochs (equal to the number of trees!)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-    
-    # booster parameters
-    learning_rate: 0.3
-    gamma: 0.0
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
 
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
-    
-    reg_lambda: 2.0        # L2 regularization
-    reg_alpha: 0.0         # L1 regularization
-    
-    scale_pos_weight: 1
+    optimizer: 'Adam'
+    epochs: 50
+    batch_size: 64
+    learning_rate: 0.003
+    weight_decay:  0.00005      # L2-regularization
 
-    # learning task parameters
-    objective:    'binary:logistic'  #
-    eval_metric: ['auc', 'logloss']  # for evaluation
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
 
-    # Read/Write of epochs
-    savemode: 'all'                  # 'all', 'latest'
-    readmode: -1                     # -1 is the last saved epoch
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
 
 # Graph net
 gnet0_param:
   train:    'torch_graph'
   predict:  'torch_graph'
-  label:    'G-NN'
+  label:    'EdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
+  conv_type:   'EdgeConv'       # See models under icenet/deep/graph.py
+  
   # Model
   model_param:
-    conv_aggr:   'max'
+    task: 'graph'             # 'graph', 'node', 'edge' (level of inference)
     global_pool: 'mean'
-    cdim: 196                 # Convolution output dimension
+    z_dim: 196                # Convolution output dimension
+    
+    # Message passing parameters
+    conv_MLP_act: 'relu'
+    conv_MLP_bn: True
+    conv_aggr: 'max'
+    conv_knn: 8
+
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True
 
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet1_param:
-  train:   'torch_graph'
-  predict: 'torch_graph'
-  label:   'G-SUP'
-  raytune:  null
-
-  # Convolution model
-  conv_type: 'SUP'              # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  # Model
-  model_param:
-    conv_aggr:   'add'
-    global_pool: 'mean'
-    cdim: 96                   # Convolution output dimension
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 50
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Graph net
-gnet0-logit-norm_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'G-NN-logit-norm'
-  raytune:  'gnn_setup'
-
-  conv_type:   'NN'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  # Model
-  model_param:
-    conv_aggr:   'max'
-    global_pool: 'mean'
-    cdim: 196                 # Convolution output dimension
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'logit_norm_cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
@@ -547,434 +445,4 @@ gnet0-logit-norm_param:
   # Read/Write of epochs
   savemode: 'all'             # 'all', 'latest'
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet2_param:
-  train:   'torch_graph'
-  predict: 'torch_graph'
-  label:   'G-EC-add'
-  raytune:  null
-
-  # Convolution model
-  conv_type: 'EC'            # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  # Model
-  model_param:
-    conv_aggr:   'add'
-    global_pool: 'mean'
-    cdim: 96                   # Convolution output dimension
-  
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 50
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Graph net
-gnet3_param:
-  train:   'torch_graph'
-  predict: 'torch_graph'
-  label:   'G-DEC-add'
-  raytune:  'gnn_setup'
-
-  # Convolution model
-  conv_type: 'DEC'           # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  # Model
-  model_param:
-    conv_aggr:   'add'
-    global_pool: 'mean'
-    cdim: 96                   # Convolution output dimension
-  
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 50
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'             # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Graph net
-gnet4_param:
-  train:   'torch_graph'
-  predict: 'torch_graph'
-  label:   'G-GAT'
-  raytune:  null
-
-  # Convolution model
-  conv_type:   'GAT'         # 'NN', SAGE', 'GINE', 'DEC', spline', 'SG', 'GAT'
-
-  # Model
-  model_param:
-    conv_aggr:   'max'
-    global_pool: 'mean'
-    cdim: 64                   # Convolution output dimension
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 50
-    batch_size: 64
-    learning_rate: 0.003
-    weight_decay:  0.00005     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Factorized Likelihood Ratio
-flr0_param:
-  train:   'flr'
-  predict: 'flr'
-  label:   'FLR'
-  raytune:  null
-
-  nbins: 60
-  qmin:  0.5 # in [0,100]
-  qmax: 99.5 # in [0,100]
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB'
-  raytune:  'xgb_setup'
-
-  # general parameters
-  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 300    # number of epochs (equal to the number of trees!)
-  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
-
-  # booster parameters
-  learning_rate: 0.3
-  gamma: 0.0
-  max_depth: 10
-  min_child_weight: 1.0
-  max_delta_step: 1
-  subsample: 1
-
-  colsample_bytree:  1
-  colsample_bylevel: 1
-  colsample_bynode:  1
-  
-  reg_lambda: 2.0       # L2 regularization
-  reg_alpha: 0.0        # L1 regularization
-  
-  scale_pos_weight: 1
-
-  # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep MLP
-dmlp_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'DMLP'
-  raytune:  null
-
-  # Model
-  conv_type: 'dmlp'
-  model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    activation: 'relu'
-    batch_norm: True    
-    
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-    
-    epochs: 50
-    batch_size: 196
-    learning_rate: 0.003
-    weight_decay: 0.00001     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-  
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr0_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-
-    epochs: 50
-    batch_size: 196
-    learning_rate: 0.003
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1  
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Convolutional Neural Net + MAXOUT MLP
-cnn0_param:
-  train:   'torch_generic'
-  predict: 'torch_image_vector'
-  label:   'CNN+MAXO'
-  raytune:  null
-  
-  # Model
-  conv_type: 'cnn+maxo'
-  model_param:
-    dropout_cnn: 0.25
-    dropout_mlp: 0.5
-    mlp_dim: 64
-
-    # Set these according to the input matrix (could autodetect ...)
-    nchannels: 2
-    nrows:     59
-    ncols:     59
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-  
-    epochs: 100
-    batch_size: 128
-    learning_rate: 0.003
-    weight_decay: 0.00        # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-      
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XTX (hyperbinned) classifier
-xtx0_param:
-  train:   'xtx'
-  predict: 'xtx'
-  label:   'XTX'
-  raytune:  null
-
-  # Choose kinematic binning variables
-  binning:
-    var:   ['trk_eta', 'trk_pt']
-    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
-            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
-
-  # Model param
-  conv_type: 'maxo'
-  model_param:
-    num_units: 2
-    neurons:  20
-    dropout:  0.5
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'        # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
-    
-    epochs: 50
-    batch_size:  196
-    learning_rate: 0.005
-    weight_decay: 0.01        # L2-regularization
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep MAXOUT network
-dmx0_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'MAXO'
-  raytune:  null
-
-  # Model parameter
-  conv_type: 'maxo'
-  model_param:
-    num_units: 8
-    neurons:  50
-    dropout:  0.4
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'        # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
-
-    epochs: 50
-    batch_size: 128
-    learning_rate: 0.003
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep Normalizing Flow
-dbnf0_param:
-  train:   'flow'
-  predict: 'torch_flow'
-  label:   'DBNF'
-  raytune:  null
-
-  # Gradient descent
-  opt_param:
-    epochs: 100
-    batch_size: 512           # Keep it high!
-    
-    optimizer: 'Adam'
-    learning_rate: 0.003
-    weight_decay: 0.0         # L2-regularization
-    noise_reg: 0.001          # Noise regularization
-    polyak: 0.998
-    clip_norm: 0.1
-    start_epoch: 0
-
-  # Learning rate reduction on plateau
-  scheduler_param:  
-    factor:  0.1
-    patience: 20
-    cooldown: 10
-    min_lr: 0.0005
-    early_stopping: 100
-
-  # Model structure
-  model_param:  
-    flows: 10                 # number of flow blocks
-    layers: 0                 # intermediate layers in a flow block
-    hidden_dim: 10            # 
-    residual: 'gated'         # choises 'none', 'normal', 'gated'
-    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
-  
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 

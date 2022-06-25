@@ -98,28 +98,8 @@ def getgraphmodel(conv_type, netparam):
     Wrapper to return different graph networks
     """
 
-    if   conv_type == 'GAT':
-        model = graph.GATNet(**netparam)
-    elif conv_type == 'DEC':
-        model = graph.DECNet(**netparam)
-    elif conv_type == 'PAN':
-        model = graph.PANNet(**netparam)
-    elif conv_type == 'EC':
-        model = graph.ECNet(**netparam)
-    elif conv_type == 'SUP':
-        model = graph.SUPNet(**netparam)
-    elif conv_type == 'SG':
-        model = graph.SGNet(**netparam)
-    elif conv_type == 'SAGE':
-        model = graph.SAGENet(**netparam)
-    elif conv_type == 'NN':
-        model = graph.NNNet(**netparam)
-    elif conv_type == 'GINE':
-        model = graph.GINENet(**netparam)
-    elif conv_type == 'spline':
-        model = graph.SplineNet(**netparam)
-    else:
-        raise Except(name__ + f'.getgraphmodel: Unknown network <conv_type> = {conv_type}')
+    print(netparam)
+    model = graph.GNNGeneric(conv_type=conv_type, **netparam)
     
     return model
 
@@ -143,16 +123,26 @@ def getgraphparam(data_trn, num_classes, param, config={}):
     """
     Construct graph network parameters
     """
-    num_node_features   = data_trn[0].x.size(-1)
-    num_edge_features   = data_trn[0].edge_attr.size(-1)
-    num_global_features = len(data_trn[0].u)
+    try:
+        num_node_features   = data_trn[0].x.size(-1)
+    except:
+        num_node_features   = 0
+
+    try:
+        num_edge_features   = data_trn[0].edge_attr.size(-1)
+    except:
+        num_edge_features   = 0
+
+    try:
+        num_global_features = len(data_trn[0].u)
+    except:
+        num_global_features = 0
 
     netparam = {
-        'C'    : int(num_classes),
-        'D'    : int(num_node_features),
-        'E'    : int(num_edge_features),
-        'G'    : int(num_global_features),
-        'task' : 'graph'
+        'c_dim' : int(num_classes),
+        'd_dim' : int(num_node_features),
+        'e_dim' : int(num_edge_features),
+        'u_dim' : int(num_global_features)
     }
 
     # Add model hyperparameter keys
