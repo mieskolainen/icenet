@@ -11,6 +11,8 @@ import torch.nn.functional as F
 def MLP(channels, activation='relu', batch_norm=True):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
+
+    WITHOUT LAST ACTIVATION
     
     Args:
         channels   : input structure, such as [128, 64, 64] for a 3-layer network.
@@ -43,6 +45,44 @@ def MLP(channels, activation='relu', batch_norm=True):
         ], 
             nn.Linear(channels[-2], channels[-1]) # N.B. Last without activation!
         )
+
+
+def MLP_ALL_ACT(channels, activation='relu', batch_norm=True):
+    """
+    Return a Multi Layer Perceptron with an arbitrary number of layers.
+    
+    ALL LAYERS WITH ACTIVATION
+    
+    Args:
+        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        batch_norm : batch normalization
+    Returns:
+        nn.sequential object
+    
+    """
+    print(__name__ + f'.MLP_all_act: Using {activation} activation')
+
+    if batch_norm:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh(),
+                nn.BatchNorm1d(channels[i])
+            )
+            for i in range(1,len(channels))
+        ]
+        )
+    
+    else:
+        return nn.Sequential(*[
+            nn.Sequential(
+                nn.Linear(channels[i - 1], channels[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh()
+            )
+            for i in range(1,len(channels))
+        ]
+        )
+
 
 
 class DMLP(nn.Module):

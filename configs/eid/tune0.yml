@@ -358,10 +358,10 @@ gxgb0_param:
       conv_knn: 8
 
       fusion_MLP_act: 'relu'
-      fusion_MLP_bn: True
+      fusion_MLP_bn: False
 
       final_MLP_act: 'relu'
-      final_MLP_bn:  True
+      final_MLP_bn:  False
     
     # Optimization
     opt_param:  
@@ -370,7 +370,7 @@ gxgb0_param:
       temperature: 1            # logit norm temperature
       
       optimizer: 'Adam'
-      epochs: 50
+      epochs: 150
       batch_size: 64
       learning_rate: 0.003
       weight_decay:  0.00005     # L2-regularization
@@ -429,10 +429,10 @@ gxgb0_param:
 gnet0_param:
   train:    'torch_graph'
   predict:  'torch_graph'
-  label:    'SuperEdgeConv'
+  label:    'NNConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'NNConv'       # See models under icenet/deep/graph.py
   
   # Model
   model_param:
@@ -459,7 +459,7 @@ gnet0_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005      # L2-regularization
@@ -511,7 +511,7 @@ gnet1_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
     learning_rate: 0.003
     weight_decay:  0.00005      # L2-regularization

@@ -29,7 +29,7 @@ def ele_mva_classifier(data, weights=None, args=None):
 
         return aux.Metric(y_true=y, y_soft=yhat, weights=data.w)
     except:
-        print(__name__ + 'Variable not found')
+        raise Exception(__name__ + f'.ele_mva_classifier: Problem with <{varname}>')
 
 
 # Main function
