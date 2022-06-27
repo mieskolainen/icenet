@@ -22,11 +22,10 @@ from torch_scatter import scatter_add, scatter_max, scatter_mean
 
 from icenet.deep.pgraph import *
 from icenet.deep import dopt
-from icenet.deep.dmlp import MLP
+from icenet.deep.dmlp import MLP, MLP_ALL_ACT
 
 from icenet.tools import aux
 from icenet.tools import aux_torch
-
 from icenet.deep import losstools
 
 
@@ -68,459 +67,19 @@ class SuperEdgeConv(MessagePassing):
         return '{}(nn={})'.format(self.__class__.__name__, self.nn)
 
 
-# PANConv based graph net
-# https://arxiv.org/abs/2006.16811
-#
-class PANNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, cdim=64, dropout=0.5, conv_aggr=None, global_pool='max', filter_size=5, task='node'):
-
-        super(PANNet, self).__init__()
-
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.dropout     = dropout
-        self.task        = task
-        self.global_pool = global_pool
-        self.task = task
-
-        # --------------------------------------------
-
-        self.conv1 = PANConv(D, cdim, filter_size)
-        self.pool1 = PANXUMPooling(cdim)
-        # self.drop1 = PANDropout()
-
-        self.conv2 = PANConv(cdim, cdim, filter_size)
-        self.pool2 = PANXUMPooling(cdim)
-        # self.drop2 = PANDropout()
-
-        self.conv3 = PANConv(cdim, cdim, filter_size)
-        self.pool3 = PANXUMPooling(cdim)
-        
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-        
-        # ------------------------------
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-
-    def forward(self, data, conv_only=False):
-        
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-
-        x, edge_index, batch = data.x, data.edge_index, data.batch
-        perm_list = list()
-        edge_mask_list = None
-
-        x = self.conv1(x, edge_index)
-        M = self.conv1.m
-        x, edge_index, _, batch, perm, score_perm = self.pool1(x, edge_index, batch=batch, M=M)
-        perm_list.append(perm)
-
-        # AFTERDROP, edge_mask_list = self.drop1(edge_index, p=0.5)
-        x = self.conv2(x, edge_index, edge_mask_list=edge_mask_list)
-        M = self.conv2.m
-        x, edge_index, _, batch, perm, score_perm = self.pool2(x, edge_index, batch=batch, M=M)
-        perm_list.append(perm)
-
-        # AFTERDROP, edge_mask_list = self.drop2(edge_index, p=0.5)
-        x = self.conv3(x, edge_index, edge_mask_list=edge_mask_list)
-        M = self.conv3.m
-        x, edge_index, _, batch, perm, score_perm = self.pool3(x, edge_index, batch=batch, M=M)
-        perm_list.append(perm)
-
-        # ** Global pooling (to handle graph level classification) **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-        
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        # Final layers
-        x = self.mlp1(x)
-        return x
-    
-    # Returns softmax probability
-    def softpredict(self,x):
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-# GATConv based graph net
-#
-# https://arxiv.org/abs/1710.10903
-#
-class GATNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, cdim=96, conv_aggr=None, global_pool='max', dropout=0.0, task='node'):
-        super(GATNet, self).__init__()
-
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.dropout     = dropout
-        self.task        = task
-        self.global_pool = global_pool
-
-        self.conv1 = GATConv(self.D, self.D, heads=2, dropout=dropout)
-        self.conv2 = GATConv(self.D * 2, self.D, heads=1, concat=False, dropout=dropout)
-
-        # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D*2 + self.D, self.cdim])
-        
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-    def forward(self, data, conv_only=False):
-        
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-        x1 = self.conv1(data.x, data.edge_index)
-        x2 = self.conv2(x1,     data.edge_index)
-
-        x = self.lin1(torch.cat([x1, x2], dim=1))
-
-        # ** Global pooling (to handle graph level classification) **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        # Final layers
-        x = self.mlp1(x)
-
-        return x
-
-    # Returns softmax probability
-    def softpredict(self,x):
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-
-# SuperEdgeConv based graph net
-#
-# https://arxiv.org/abs/xyz
-#
-class SUPNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
-        super(SUPNet, self).__init__()
-        
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.task        = task
-        self.global_pool = global_pool
-
-        # Convolution layers
-        self.conv1 = SuperEdgeConv(MLP([2 * self.D + E, 32, 32]), aggr=conv_aggr)
-        self.conv2 = SuperEdgeConv(MLP([2 * 32 + E, 64]), aggr=conv_aggr)
-        
-        # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.cdim])
-        
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-        
-        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
-        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
-        
-        x  = self.lin1(torch.cat([x1, x2], dim=1))
-
-        # ** Global pooling (to handle graph level classification) **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-        
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        # Final layers
-        x = self.mlp1(x)
-
-        return x
-
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-# Pure EdgeConv based graph net
-# 
-# https://arxiv.org/abs/1801.07829
-#
-class ECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=1, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
-        super(ECNet, self).__init__()
-        
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.task  = task
-        self.global_pool = global_pool
-        
-        # Convolution layers
-        self.conv1 = EdgeConv(MLP([2 * self.D, 32, 32]), aggr=conv_aggr)
-        self.conv2 = EdgeConv(MLP([2 * 32, 64]), aggr=conv_aggr)
-        
-        # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.cdim])
-        
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-    def forward(self, data, conv_only=False):
-        
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-        
-        x1 = self.conv1(data.x, data.edge_index)
-        x2 = self.conv2(x1,     data.edge_index)
-        
-        x  = self.lin1(torch.cat([x1, x2], dim=1))
-
-        # ** Global pooling (to handle graph level classification) **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        # Final layers
-        x = self.mlp1(x)
-
-        return x
-
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-# DynamicEdgeConv based graph net
-#
-# https://arxiv.org/abs/1801.07829
-#
-class DECNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, k=4, E=None, cdim=96, task='node', conv_aggr='max', global_pool='max'):
-        super(DECNet, self).__init__()
-        
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.task  = task
-        self.global_pool = global_pool
-        
-        # Convolution layers
-        self.conv1 = DynamicEdgeConv(MLP([2 * self.D, 32, 32]), k=k, aggr=conv_aggr)
-        self.conv2 = DynamicEdgeConv(MLP([2 * 32, 64]), k=k, aggr=conv_aggr)
-        
-        # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([32 + 64, self.cdim])
-        
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-        x1 = self.conv1(data.x, data.batch)
-        x2 = self.conv2(x1,     data.batch)
-
-        x = self.lin1(torch.cat([x1, x2], dim=1))
-
-        # ** Global pooling (to handle graph level classification) **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        # Final layers
-        x = self.mlp1(x)
-
-        return x
-
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
+"""
 # NNConv based graph net
 #
 # https://arxiv.org/abs/1704.01212
 #
 class NNNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=1, cdim=96, task='node', conv_aggr='add', global_pool='s2s'):
+    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=1, z_dim=196, task='graph', conv_aggr='max', global_pool='mean'):
         super(NNNet, self).__init__()
 
-        self.D = D  # node feature dimension
-        self.E = E  # edge feature dimension
-        self.G = G  # global feature dimension
-        self.C = C  # number output classes
+        self.D = d_dim  # node feature dimension
+        self.E = e_dim  # edge feature dimension
+        self.G = u_dim  # global feature dimension
+        self.C = c_dim  # number output classes
         
         self.cdim = cdim  # latent dimension
 
@@ -529,8 +88,8 @@ class NNNet(torch.nn.Module):
 
         # Convolution layers
         # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
-        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
-        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP([E, D*D]), aggr=conv_aggr)
+        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)
+        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)
         
         # "Fusion" layer taking in conv layer outputs
         self.lin1  = MLP([D+D, self.cdim])
@@ -593,292 +152,313 @@ class NNNet(torch.nn.Module):
             return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
         else:
             return F.softmax(self.forward(x), dim=-1)
+"""
 
-
-# SplineConv based graph net
-#
-# https://arxiv.org/abs/1711.08920
-#
-class SplineNet(torch.nn.Module):
-    def __init__(self, D, C, G=0,  E=None, conv_aggr=None, global_pool='max', task='node'):
-        super(SplineNet, self).__init__()
-
-        self.D     = D
-        self.C     = C
-        self.E     = E
-        self.G     = G
-        self.task  = task
-        self.global_pool = global_pool
-
-        self.conv1 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=3)
-        self.conv2 = SplineConv(self.D, self.D, dim=E, degree=1, kernel_size=5)
+class GNNGeneric(torch.nn.Module):
+    """
+    Technical Remarks:
         
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.D, self.D)
-
-        if (self.G > 0):
-            self.Z = self.D + self.G
-        else:
-            self.Z = self.D
-        self.mlp1 = Linear(self.Z, self.Z)
-        self.mlp2 = Linear(self.Z, self.C)
-
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        Remember always to use MLP_ALL_ACT in the intermediate blocks, i.e.
+        MLPs with an activation function also after the last layer.
+        (otherwise very bad performance may happen for certain message passing / convolution operators).
         
-        # SplineConv supports only 1-dimensional edge attributes
-        x = F.elu(self.conv1(data.x, data.edge_index, data.edge_attr))
-        x = F.dropout(x, training=self.training)
+    """
 
-        x = F.elu(self.conv2(x,      data.edge_index, data.edge_attr))
-        x = F.dropout(x, training=self.training)
+    def SuperEdgeConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
+        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
         
-        # ** Global pooling **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
 
-        if conv_only: # Return convolution part
-            return x
+    def EdgeConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
 
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
+    def DynamicEdgeConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
 
-        x = F.relu(self.mlp1(x))
-        x = F.relu(self.mlp2(x))
+    def NNConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
+        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def GATConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def SplineConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
+        x1 = F.elu(x1)
+        
+        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
+        x2 = F.elu(x2)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def SAGEConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def SGConv_(self, data):
+        # Message passing
+        x1 = self.conv1(data.x, data.edge_index)
+        x2 = self.conv2(x1,     data.edge_index)
+        
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def GINEConv_(self, data):
+        # Message passing
+        x, edge_attr = self.GINE_helper(data)
+        x1 = self.conv1(x,  data.edge_index, edge_attr)
+        x2 = self.conv2(x1, data.edge_index, edge_attr)
+
+        # Apply "residual-fusion"
+        return self.lin1(torch.cat([x1, x2], dim=1))
+
+    def PANConv_(self, data):
+        # Message passing
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+        perm_list = list()
+        edge_mask_list = None
+
+        x = self.conv1(x, edge_index)
+        M = self.conv1.m
+        x, edge_index, _, batch, perm, score_perm = self.pool1(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
+
+        # AFTERDROP, edge_mask_list = self.drop1(edge_index, p=0.5)
+        x = self.conv2(x, edge_index, edge_mask_list=edge_mask_list)
+        M = self.conv2.m
+        x, edge_index, _, batch, perm, score_perm = self.pool2(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
+
+        # AFTERDROP, edge_mask_list = self.drop2(edge_index, p=0.5)
+        x = self.conv3(x, edge_index, edge_mask_list=edge_mask_list)
+        M = self.conv3.m
+        x, edge_index, _, batch, perm, score_perm = self.pool3(x, edge_index, batch=batch, M=M)
+        perm_list.append(perm)
 
         return x
 
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-# SAGEConv based graph net
-#
-# https://arxiv.org/abs/1706.02216
-# 
-class SAGENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, conv_aggr=None, global_pool='max', task='node'):
-        super(SAGENet, self).__init__()
-
-        self.D     = D
-        self.C     = C
-        self.G     = G
-
-        self.conv1 = SAGEConv(self.D, self.D)
-        self.conv2 = SAGEConv(self.D, self.D)
+    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=None, z_dim=96,
+        conv_type      = 'EdgeConv',
+        task           = 'node',
+        global_pool    = 'mean',
         
-        # Set2Set pooling operation produces always output with 2 x input dimension
+        conv_MLP_act   = 'relu',
+        conv_MLP_bn    = True,
+        conv_aggr      = 'max',
+        conv_knn       = 8,
+
+        fusion_MLP_act = 'relu',
+        fusion_MLP_bn  = True,
+
+        final_MLP_act  = 'relu',
+        final_MLP_bn   =  True):
+
+        super(GNNGeneric, self).__init__()
+        
+        self.d_dim = d_dim  # node feature dimension
+        self.u_dim = u_dim  # graph global feature dimension
+        self.e_dim = e_dim  # edge feature dimension
+
+        self.c_dim = c_dim  # number of output classes
+        self.C     = c_dim  # (used elsewhere in icenet)
+
+        self.z_dim = z_dim  # latent dimension
+
+        self.task        = task          # 'node', 'edge', 'graph'
+        self.global_pool = global_pool   # 's2s', 'max', 'mean', 'add'
+
+
+        # SuperEdgeConv,   https://arxiv.org/abs/xyz
+        if   conv_type == 'SuperEdgeConv':
+            self.conv1 = SuperEdgeConv(MLP_ALL_ACT([2 * self.d_dim + self.e_dim, 32, 32], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = SuperEdgeConv(MLP_ALL_ACT([2 * 32 + self.e_dim, 64], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.SuperEdgeConv_
+
+        # EdgeConv,        https://arxiv.org/abs/1801.07829
+        elif conv_type == 'EdgeConv':
+            self.conv1 = EdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = EdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.EdgeConv_
+
+        # DynamicEdgeConv, https://arxiv.org/abs/1801.07829
+        elif conv_type == 'DynamicEdgeConv':
+            self.conv1 = DynamicEdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), k=k, aggr=conv_aggr)
+            self.conv2 = DynamicEdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), k=k, aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.DynamicEdgeConv_
+
+        # NNConv,          https://arxiv.org/abs/1704.01212
+        # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
+        elif conv_type == 'NNConv':
+            self.conv1 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.NNConv_
+
+        # GATConv,         https://arxiv.org/abs/1710.10903
+        elif conv_type == 'GATConv':
+
+            dropout = 0.1
+
+            self.conv1 = GATConv(self.d_dim, self.d_dim, heads=2, dropout=dropout)
+            self.conv2 = GATConv(self.d_dim * 2, self.d_dim, heads=1, concat=False, dropout=dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim*2 + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.GATConv_
+
+        # SplineConv,      https://arxiv.org/abs/1711.08920
+        elif conv_type == 'SplineConv':
+
+            self.conv1 = SplineConv(self.d_dim, self.d_dim, dim=self.e_dim, degree=1, kernel_size=3),
+            self.conv2 = SplineConv(self.d_dim, self.d_dim, dim=self.e_dim, degree=1, kernel_size=5),
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+
+            self.conv  = self.SplineConv_
+
+        # SAGEConv,        https://arxiv.org/abs/1706.02216
+        elif conv_type == 'SAGEConv':
+            self.conv1 = SAGEConv(self.d_dim, self.d_dim)
+            self.conv2 = SAGEConv(self.d_dim, self.d_dim)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+            
+            self.conv  = self.SAGEConv_
+
+        # SGConv,          https://arxiv.org/abs/1902.07153
+        elif conv_type == 'SGConv':
+            K = 1 # Change this to input parameters
+
+            self.conv1 = SGConv(self.d_dim, self.d_dim, K, cached=False)
+            self.conv2 = SGConv(self.d_dim, self.d_dim, K, cached=False)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+            
+            self.conv  = self.SGConv_
+
+        # GINEConv,        https://arxiv.org/abs/1810.00826, https://arxiv.org/abs/1905.12265
+        elif conv_type == 'GINEConv':
+            self.conv1 = GINEConv(MLP([self.d_dim, self.d_dim])),
+            self.conv2 = GINEConv(MLP([self.d_dim, 64]))
+            self.lin1  = MLP_ALL_ACT([self.d_dim + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
+           
+            self.conv  = self.GINEConv_
+
+        # PANConv,         https://arxiv.org/abs/2006.16811
+        elif conv_type == 'PANConv':
+            filter_size = 5
+
+            self.conv1 = PANConv(self.d_dim, self.z_dim, filter_size)
+            self.pool1 = PANXUMPooling(self.z_dim)
+            # self.drop1 = PANDropout()
+
+            self.conv2 = PANConv(self.z_dim, self.z_dim, filter_size)
+            self.pool2 = PANXUMPooling(self.z_dim)
+            # self.drop2 = PANDropout()
+
+            self.conv3 = PANConv(self.z_dim, self.z_dim, filter_size)
+            self.pool3 = PANXUMPooling(self.z_dim)
+            
+            self.conv  = self.PANConv_
+            
+        else:
+            raise Exception(__name__ + f'.GraphNetGeneric: Unknown conv_type = {conv_type}')
+
+        # ----------------------------------------------------
+        ## Pooling for graph level inference
+        ## Set2Set pooling operation produces always output with 2 x input dimension
         # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.D, self.D)
 
-        if (self.G > 0):
-            self.Z = self.D + self.G
-        else:
-            self.Z = self.D
-        self.mlp1 = Linear(self.Z, self.Z)
-        self.mlp2 = Linear(self.Z, self.C)
+        if self.task == 'graph' and self.global_pool == 's2s':
+            self.S2Spool = Set2Set(in_channels=self.z_dim, processing_steps=3, num_layers=1)
+            self.S2Slin  = Linear(2*self.z_dim, self.z_dim)
+        # ----------------------------------------------------
 
-        self.task  = task
-        self.global_pool = global_pool
+        ## Add global feature dimension
+        if (self.u_dim > 0):
+            self.z_dim = self.z_dim + self.u_dim
         
-    def forward(self, data, conv_only=False):
 
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        # ----------------------------------------------------
+        ## Final MLP
 
-        x = F.elu(self.conv1(data.x, data.edge_index))
-        x = F.dropout(x, training=self.training)
+        # Node level or graph level inference
+        if self.task == 'node' or self.task == 'graph':
+            self.mlp_final = MLP([self.z_dim, self.z_dim, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn)
 
-        x = F.elu(self.conv2(x,      data.edge_index))
-        x = F.dropout(x, training=self.training)
-
-        # ** Global pooling **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        x = F.relu(self.mlp1(x))
-        x = F.relu(self.mlp2(x))
-
-        return x
-    
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        # 2-point (node) probability computation function (edge level inference)
+        elif self.task == 'edge_directed':
+            self.mlp_final = nn.Sequential(
+                    MLP_ALL_ACT([2 * self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    #nn.Dropout(0.5),
+                    MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    )
+        elif self.task == 'edge_undirected':
+            self.mlp_final = nn.Sequential(
+                    MLP_ALL_ACT([self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    #nn.Dropout(0.5),
+                    MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    )
         else:
-            return F.softmax(self.forward(x), dim=-1)
+            raise Exception(__name__ + f'.GraphNetGeneric: Unknown task = {task} parameter')
+        # ----------------------------------------------------
 
 
-# SGConv based graph net
-#
-# https://arxiv.org/abs/1902.07153
-# 
-class SGNet(torch.nn.Module):
-    def __init__(self, D, C, G=0, K=2, E=None, conv_aggr=None, global_pool='max', task='node'):
-        super(SGNet, self).__init__()
+    def forward_2pt(self, z, edge_index):
+        """
+        MLP decoder of two-point correlations (edges)
 
-        self.D     = D
-        self.C     = C
-        self.G     = G
-        self.K     = K
-
-        self.conv1 = SGConv(self.D, self.D, self.K, cached=False)
-        self.conv2 = SGConv(self.D, self.D, self.K, cached=False)
+        Because this function is not (necessarily) permutation symmetric between edge_index[0] and [1],
+        we can learn (in principle) a directed or undirected edge (adjacency) behavior.
+        """
         
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.D, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.D, self.D)
-
-        if (self.G > 0):
-            self.Z = self.D + self.G
-        else:
-            self.Z = self.D
-        self.mlp1 = Linear(self.Z, self.Z)
-        self.mlp2 = Linear(self.Z, self.C)
-
-        self.task  = task
-        self.global_pool = global_pool
-
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-        x = F.elu(self.conv1(data.x, data.edge_index))
-        x = F.dropout(x, training=self.training)
-
-        x = F.elu(self.conv2(x,      data.edge_index))
-        x = F.dropout(x, training=self.training)
-
-        # ** Global pooling **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat((x, u), 1)
-
-        x = F.relu(self.mlp1(x))
-        x = F.relu(self.mlp2(x))
-
-        return x
-    
-    # Returns softmax probability
-    def softpredict(self,x):
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
-# GINEConv based graph net
-#
-# https://arxiv.org/abs/1810.00826
-# https://arxiv.org/abs/1905.12265
-#
-class GINENet(torch.nn.Module):
-    def __init__(self, D, C, G=0, E=None, cdim=96, conv_aggr=None, global_pool='max', task='node'):
-        super(GINENet, self).__init__()
-
-        self.D = D
-        self.C = C
-        self.G = G
-        self.cdim = cdim
-
-        self.task  = task
-        self.global_pool = global_pool
-
-        # Convolution layers
-        self.conv1 = GINEConv(MLP([self.D, self.D]))
-        self.conv2 = GINEConv(MLP([self.D, 64]))
+        # Not permutation symmetric under i <-> j
+        if   self.task == 'edge_directed':
+            X = torch.cat((z[edge_index[0], ...], z[edge_index[1], ...]), dim=-1)
         
-        # "Fusion" layer taking in conv1 and conv2 outputs
-        self.lin1  = MLP([self.D + 64, self.cdim])
+        # Permutation symmetric under i <-> j
+        elif self.task == 'edge_undirected':
+            X = z[edge_index[0], ...] * z[edge_index[1], ...]
 
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
+        return self.mlp_final(X)
 
 
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-        # ----------------------------------------------------------------
-        # GINEConv requires node features and edge features with the same dimension.
-        # Increase dimensionality below
+    def GINE_helper(data):
+        """
+        GINEConv requires node features and edge features with the same dimension.
+        Increase dimensionality here.
+        """
         D_n = data.x[0].size(-1)
         D_e = data.edge_attr.size(-1)
         if D_n > D_e:
@@ -889,16 +469,22 @@ class GINENet(torch.nn.Module):
             lin = Linear(1, D_e)
             x   = lin(data.x)
             edge_attr = data.edge_attr
-        # ----------------------------------------------------------------
 
-        x1 = self.conv1(x,  data.edge_index, edge_attr)
-        x2 = self.conv2(x1, data.edge_index, edge_attr)
+        return x, edge_attr
 
-        x  = self.lin1(torch.cat([x1, x2], dim=1))
 
-        # ** Global pooling **
+    def forward(self, data, conv_only=False):
+
+        if not hasattr(data,'batch') or data.batch is None:
+            # Create virtual null batch if singlet graph input
+            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
+        
+        ## Apply message passing layers
+        x = self.conv(data)
+
+        ## Global node feature pooling (to handle graph level classification)
         if self.task == 'graph':
-            if self.global_pool == 's2s':
+            if   self.global_pool == 's2s':
                 x = self.S2Spool(x, data.batch)
                 x = self.S2Slin(x)
             elif self.global_pool == 'max':
@@ -910,16 +496,26 @@ class GINENet(torch.nn.Module):
             else:
                 raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
         
+        # ===========================================
         if conv_only: # Return convolution part
             return x
+        # ===========================================
 
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
+        ## Global features concatenated
+        if self.u_dim > 0:
+            u = data.u.view(-1, self.u_dim)
             x = torch.cat((x, u), 1)
 
-        # Final layers
-        x = self.mlp1(x)
+        ## Final MLP map
+
+        # Edge level inference
+        if 'edge' in self.task:
+            x = self.forward_2pt(x, data.edge_index)
+
+        # Node or graph level inference
+        else:
+            x = self.mlp_final(x)
+
         return x
 
     # Returns softmax probability
@@ -928,3 +524,5 @@ class GINENet(torch.nn.Module):
             return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
         else:
             return F.softmax(self.forward(x), dim=-1)
+
+

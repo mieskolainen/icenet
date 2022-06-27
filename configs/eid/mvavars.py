@@ -6,7 +6,8 @@
 KINEMATIC_ID = [
   'trk_pt',
   'trk_eta',
-  'trk_phi'
+  'trk_phi',
+  'ele_mva_value_depth15'
 ]
 
 UNIT_TEST_ID = [

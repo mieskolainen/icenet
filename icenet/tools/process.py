@@ -180,9 +180,10 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
             pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
-        trn.w,_ = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
-        val.w,_ = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
-
+        trn.w, pdf = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, pdf=None, ids=trn.ids, args=args['reweight_param'])
+        pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
+        val.w,_    = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, pdf=pdf,  ids=val.ids, args=args['reweight_param'])
+        
         ### Split and factor data
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
@@ -196,7 +197,8 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
 
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
         if args['eval_reweight']:
-            tst.w,_ = reweight.compute_ND_reweights(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+            pdf     = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
+            tst.w,_ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
 
         ### Split and factor data
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
@@ -216,15 +218,16 @@ def make_plots(data, args):
                 plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
                     y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
                     targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-        
-        ### Plot basic plots
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_all/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
-            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-        
+
         ### Plot correlations
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-        fig,ax    = plots.plot_correlations(X=data['data'].x, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        
+        ### Plot basic plots
+        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/1D_distributions/')
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
+            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+
 
 
 def impute_datasets(trn, val, tst, features, args, imputer=None):

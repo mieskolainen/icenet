@@ -40,8 +40,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, VARS     = process_func(rootfile=rootfile, **param)
 
         N           = X.shape[0]
-        Y           = class_id * np.ones(N)
-        W           = np.ones(N) * xs / N
+        Y           = class_id * np.ones(N, dtype=int)
+        W           = np.ones(N, dtype=float) * xs / N
     
     return X,Y,W,VARS
 
@@ -82,7 +82,7 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     return num_events
 
 
-def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
+def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, label=None):
     """
     Process uproot tree to a jagged numpy (object) array
     
@@ -101,7 +101,9 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None):
     N      = len(X_test)
     X      = np.empty((N, len(ids)), dtype=object) 
     
-    cprint( __name__ + f'.process_tree: Entry_start = {entry_start}, entry_stop = {entry_stop} | realized = {N} ({100*N/N_all:0.3f} % | available = {N_all})', 'yellow')
+    if label is not None:
+        cprint( __name__ + f'.events_to_jagged_numpy: Loading: {label}', 'yellow')
+    cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop} | realized = {N} ({100*N/N_all:0.3f} % | available = {N_all})', 'green')
     
     for j in range(len(ids)):
         x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
@@ -146,10 +148,11 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     
     if   library == 'np':
 
-        param = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop}
 
         for i in tqdm(range(len(files))):
             events = uproot.open(files[i])
+            param = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop, 'label': files[i]}
+
             if i == 0:
                 X,ids  = events_to_jagged_numpy(**param)
             else:

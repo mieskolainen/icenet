@@ -42,8 +42,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     # Compute event-by-event weights
     if args['differential_reweight']:
         
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
-
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
+        
         ### Re-weighting variables
         RV = {}
         for var in paramdict.keys():
@@ -128,8 +128,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 pdf['binedges_B']  = binedges['B']
                 pdf['num_classes'] = num_classes
 
-            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, binedges=binedges, **rwparam)
-
+            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            
         ### Compute geometric mean factorized 1D x 1D product
         elif args['dimension'] == 'pseudo-2D':
 

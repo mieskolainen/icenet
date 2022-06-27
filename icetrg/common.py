@@ -52,14 +52,14 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e1', **param)
     
     X_MC_e1 = X_MC[:, [VARS_MC.index(name.replace("x_", "e1_")) for name in NEW_VARS]]
-    Y_MC_e1 = np.ones(X_MC_e1.shape[0])
+    Y_MC_e1 = np.ones(X_MC_e1.shape[0], dtype=int)
     
     
     # e2
     X_MC, VARS_MC = process_root(rootfile=rootfile, tree='tree', isMC='mode_e2', **param)
     
     X_MC_e2 = X_MC[:, [VARS_MC.index(name.replace("x_", "e2_")) for name in NEW_VARS]]
-    Y_MC_e2 = np.ones(X_MC_e2.shape[0])
+    Y_MC_e2 = np.ones(X_MC_e2.shape[0], dtype=int)
     
     
     # =================================================================
@@ -69,7 +69,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
 
     X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
-    Y_DATA = np.zeros(X_DATA.shape[0])
+    Y_DATA = np.zeros(X_DATA.shape[0], dtype=int)
     
     
     # =================================================================

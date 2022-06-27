@@ -9,6 +9,7 @@ sys.path.append(".")
 
 # icenet
 from icenet.tools import process
+from icenet.tools import aux
 
 # iceid
 from iceid import common
@@ -16,7 +17,7 @@ from configs.eid.mvavars import *
 
 import numpy as np
 
-def ele_mva_classifier(data, weights=None, args=None):
+def ele_mva_classifier(data, args=None):
     """
     External classifier directly from the root tree
     """
@@ -27,9 +28,9 @@ def ele_mva_classifier(data, weights=None, args=None):
         y    = np.array(data.y, dtype=float)
         yhat = np.array(data.x[:, data.ids.index(varname)], dtype=float)
 
-        return aux.Metric(y_true=y, y_soft=yhat, weights=data.w)
+        return aux.Metric(y_true=y, y_soft=yhat, weights=data.w if args['eval_reweight'] else None)
     except:
-        print(__name__ + 'Variable not found')
+        raise Exception(__name__ + f'.ele_mva_classifier: Problem with <{varname}>')
 
 
 # Main function
@@ -42,7 +43,7 @@ def main() :
 
     # ----------------------------
     # Evaluate external classifiers
-    met_elemva = ele_mva_classifier(data=data['tst']['data'])
+    met_elemva = ele_mva_classifier(data=data['tst']['data_kin'], args=args)
     
     # Add to the stack
     process.roc_mstats.append(met_elemva)

@@ -24,7 +24,7 @@ def main() :
     args, cli = process.read_config(config_path='./configs/eid')
     data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor,
         train_mode=True, imputation_vars=globals()[args['imputation_param']['var']])
-
+    
     ### Print ranges
     prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
     
