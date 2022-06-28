@@ -611,7 +611,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         y_val[i]   = data_val[i].y.numpy()
 
     print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
-
+    
     # ------------------------------------------------------------------------------
     ## Train xgboost
     dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
