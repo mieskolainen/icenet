@@ -306,6 +306,39 @@
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
+<div class="viewcode-block" id="split_data_simple"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data_simple">[docs]</a><span class="k">def</span> <span class="nf">split_data_simple</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">frac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Split machine learning data into [A = train &amp; validation] + [B = test] sets</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        X:         data matrix</span>
+<span class="sd">        frac:      split fraction</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">### Permute events to have random mixing between classes (a must!)</span>
+    <span class="c1">#randi = np.random.permutation(len(X))</span>
+    <span class="c1">#X = X[randi]</span>
+    <span class="c1"># --------------------------------------------------------------------</span>
+
+    <span class="n">N</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">N_A</span>   <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>
+    <span class="n">N_B</span>   <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">N_A</span>
+    
+    <span class="n">N_trn</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N_A</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>
+    <span class="n">N_val</span> <span class="o">=</span> <span class="n">N_A</span> <span class="o">-</span> <span class="n">N_trn</span>
+    <span class="n">N_tst</span> <span class="o">=</span> <span class="n">N_B</span>
+
+    <span class="c1"># A. Train</span>
+    <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
+
+    <span class="c1"># A. Validation</span>
+    <span class="n">X_val</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">N_trn</span><span class="p">:</span><span class="n">N_trn</span> <span class="o">+</span> <span class="n">N_val</span><span class="p">]</span>
+
+    <span class="c1"># B. Test</span>
+    <span class="n">X_tst</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">N_tst</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">X_tst</span></div>
+
+
 <div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Split machine learning data into [A = train &amp; validation] + [B = test] sets</span>
 <span class="sd">    </span>
