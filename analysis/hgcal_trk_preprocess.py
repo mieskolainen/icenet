@@ -28,7 +28,8 @@ def main() :
     args, cli = process.read_config(config_path='./configs/hgcal')
     
     # Create trackster data
-    data      = preprocess.event_loop(files=args['root_files'], maxevents=args['maxevents'])
+    data      = preprocess.event_loop(files=args['root_files'], maxevents=args['maxevents'], 
+                    directed=args['graph_param']['directed'])
     X         = graphio.parse_graph_data_trackster(data=data, weights=None)
 
     # Pickle to disk

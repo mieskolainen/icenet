@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 
 @numba.jit
-def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, thresh=0.1, undirected=False):
+def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, thresh=0.1, directed=False):
     """
     
     Logic based on (but refined):
@@ -45,7 +45,7 @@ def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, thresh=
                 edge_labels.append(0)
 
             # If we want undirected graph
-            if undirected:
+            if not directed:
                 edge.append([i,j])
                 edge_labels.append(edge_labels[-1])
 
@@ -112,7 +112,7 @@ def create_trackster_data(files):
     return {'df_calo': df_calo, 'df_track': df_track, 'df_ass': df_ass, 'df_gra': df_gra}
 
 
-def event_loop(files, maxevents=int(1E9)):
+def event_loop(files, maxevents=int(1E9), directed=False):
 
     # Create trackster data
     data  = create_trackster_data(files=files)
@@ -146,8 +146,8 @@ def event_loop(files, maxevents=int(1E9)):
         
         # Compute edge data and labels
         compute_edges(trk_data=trk_data, ass_data=ass_data, gra_data=gra_data,
-            node=node_, edge=edge_index_, edge_labels=edge_labels_)
-
+            node=node_, edge=edge_index_, edge_labels=edge_labels_, directed=directed)
+        
         # Save event data
         x.append(x_)
         edge_index.append(np.array(edge_index_).T)
