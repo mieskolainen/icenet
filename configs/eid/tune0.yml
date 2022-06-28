@@ -238,7 +238,7 @@ raytune_setup:
     search_metric:
       metric: 'AUC'
       mode: 'max'
-
+      
     param:
       cdim:
         type: "tune.choice"
@@ -255,8 +255,7 @@ raytune_setup:
       lr:
         type: "tune.loguniform"
         value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
-
-
+    
     #
     #batch_size:
     #  type: "tune.choice"
@@ -362,7 +361,7 @@ gxgb0_param:
 
       fusion_MLP_act: 'relu'
       fusion_MLP_bn: False
-      
+
       final_MLP_act: 'relu'
       final_MLP_bn:  False
     
@@ -418,8 +417,6 @@ gxgb0_param:
       
       reg_lambda: 2.0        # L2 regularization
       reg_alpha: 0.0         # L1 regularization
-      
-      scale_pos_weight: 1
       
       # learning task parameters
       objective: 'multi:softprob'  # 'binary:logistic'     #
@@ -679,8 +676,6 @@ xgb0_param:
     
     reg_lambda: 2.0       # L2 regularization
     reg_alpha: 0.0        # L1 regularization
-    
-    scale_pos_weight: 1
     
     # learning task parameters
     objective: 'multi:softprob'  # 'binary:logistic'     #

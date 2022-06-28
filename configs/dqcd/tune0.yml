@@ -462,8 +462,6 @@ xgb0_param:
     reg_lambda: 4.8       # L2 regularization
     reg_alpha: 0.05        # L1 regularization
     
-    scale_pos_weight: 1
-
     # learning task parameters
     objective: 'multi:softprob'  # 'binary:logistic'     #
     eval_metric: ['mlogloss']    # for evaluation
