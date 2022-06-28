@@ -108,9 +108,10 @@ signalclass: 1
 # ** Activate models here **
 # Give all models some unique identifier and label
 active_models:
-  - vae0
-  - deps
   - xgb0
+  - deps
+  - vae0
+  
   #- xgb1
   #- lgr0
   #- dbnf0
