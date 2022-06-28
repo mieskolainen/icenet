@@ -168,7 +168,7 @@ class CNN(nn.Module):
             nn.MaxPool2d(2), # 2x2 window
             nn.Dropout2d(p = self.dropout_cnn)
         )
-
+        
         # Determine the intermediate dimension Z with a test input
         x = torch.tensor(np.ones((1, nchannels, nrows, ncols)), dtype=torch.float)
         dim = self.block1(x).shape

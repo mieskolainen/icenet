@@ -176,12 +176,11 @@ def train(model, loader, optimizer, device, opt_param):
         x,y,w   = batch2tensor(batch, device)
 
         optimizer.zero_grad() # !
-
-        # Compute loss
-        weights = aux_torch.weight2onehot(weights=w, y=y, num_classes=model.C)
-        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=weights, param=opt_param)
         
-        # Propagate gradients
+        # Compute loss
+        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param)
+        
+        # Propagate gradients 
         loss.backward()
         
         if type(batch) is dict: # DualDataset or Dataset
@@ -230,7 +229,7 @@ def test(model, loader, optimizer, device):
         
         # Classification metrics
         N       = len(y_true)
-        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=weights, num_classes=model.C, hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=None, num_classes=model.C, hist=False, verbose=True)
         
         if metrics.auc > -1: # Bad batch protection
             aucsum += (metrics.auc * N)
@@ -262,7 +261,7 @@ def model_to_cuda(model, device_type='auto'):
     # Try special map (.to() does not map all variables)
     try:
         model = model.to_device(device=device)
-        print(__name__ + f'.model_to_cuda: <{model}> mapping special to <{device}>')
+        print(__name__ + f'.model_to_cuda: Mapping special to <{device}>')
     except:
         True
     

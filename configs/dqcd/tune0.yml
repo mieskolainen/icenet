@@ -452,7 +452,7 @@ xgb0_param:
   num_boost_round: 200     # number of epochs (equal to the number of trees!)
   
   # booster parameters
-  learning_rate: 0.075
+  lr: 1.0e-3
   gamma: 1.67
   max_depth: 10
   min_child_weight: 1.0
@@ -491,7 +491,7 @@ xgb1_param:
   num_boost_round: 1      # number of epochs (equal to the number of trees!)
   
   # booster parameters
-  learning_rate: 0.45
+  learning_rate: 0.1
   gamma: 0.63
   max_depth: 10
   min_child_weight: 1.0
@@ -539,7 +539,7 @@ lgr0_param:
 
     epochs: 30
     batch_size: 196
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay: 0.00001       # L2-regularization
 
   # Scheduler
@@ -585,7 +585,7 @@ deps_param:
     noise_reg: 0.0             # Noise regularization
     epochs:  200
     batch_size:  128
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay: 0.0001       # L2-regularization
 
   # Scheduler
@@ -626,7 +626,7 @@ dmx0_param:
 
     epochs: 200
     batch_size: 128
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
@@ -666,7 +666,7 @@ dmx1_param:
 
     epochs: 200
     batch_size: 128
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay: 0.00001     # L2-regularization
 
   # Scheduler
@@ -694,7 +694,7 @@ dbnf0_param:
     epochs: 150
     batch_size: 512           # Keep it high!
     optimizer: 'Adam'
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay: 0.0         # L2-regularization
 
     noise_reg: 0.001          # Noise regularization
@@ -741,9 +741,12 @@ vae0_param:
     hidden_dim: 64
     latent_dim: 32
 
-    encoder_act: 'tanh'
+    encoder_act: 'relu'
+    encoder_bn: False
     decoder_act: 'tanh'
-    anomaly_score: 'mse_kl'         # 'mse', 'mse_kl'
+    decoder_bn: False
+
+    anomaly_score: 'MSE_KL'         # 'MSE', 'MSE_KL'
     
   # Optimization
   opt_param:  
@@ -757,7 +760,7 @@ vae0_param:
 
     epochs: 200
     batch_size: 256
-    learning_rate: 1.0e-3
+    lr: 1.0e-3
     weight_decay: 0.00001           # L2-regularization
 
   # Scheduler

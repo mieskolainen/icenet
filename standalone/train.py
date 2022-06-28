@@ -241,7 +241,15 @@ if args.train :
       nthread = args.nthreads,
       booster = 'gbtree',
       n_estimators = cfg['n_estimators'],
-      learning_rate = cfg['learning_rate'],
+      lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True = cfg['lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True'],
       min_child_weight = cfg['min_child_weight'],
       max_depth = cfg['max_depth'],
       gamma = cfg['gamma'],

@@ -8,86 +8,89 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-def MLP(channels, activation='relu', batch_norm=True):
+def MLP(layers, activation='relu', batch_norm=True, dropout=0.0):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
-
-    WITHOUT LAST ACTIVATION
+    
+    WITHOUT THE LAST ACTIVATION FUNCTION
     
     Args:
-        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        layers     : input structure, such as [128, 64, 64] for a 3-layer network.
         batch_norm : batch normalization
+        dropout    : dropout regularization
     Returns:
         nn.sequential object
-    
+
     """
     print(__name__ + f'.MLP: Using {activation} activation')
 
     if batch_norm:
         return nn.Sequential(*[
             nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
+                nn.Linear(layers[i - 1], layers[i]),
                 nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.BatchNorm1d(channels[i])
+                nn.BatchNorm1d(layers[i]),
+                nn.Dropout(dropout, inplace=False)
             )
-            for i in range(1,len(channels) - 1)
+            for i in range(1,len(layers) - 1)
         ],
-            nn.Linear(channels[-2], channels[-1]) # N.B. Last without activation!
+            nn.Linear(layers[-2], layers[-1]) # N.B. Last without activation!
         )
-    
     else:
         return nn.Sequential(*[
             nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh()
+                nn.Linear(layers[i - 1], layers[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh(),
+                nn.Dropout(dropout, inplace=False)
             )
-            for i in range(1,len(channels) - 1)
+            for i in range(1,len(layers) - 1)
         ], 
-            nn.Linear(channels[-2], channels[-1]) # N.B. Last without activation!
+            nn.Linear(layers[-2], layers[-1]) # N.B. Last without activation!
         )
 
 
-def MLP_ALL_ACT(channels, activation='relu', batch_norm=True):
+def MLP_ALL_ACT(layers, activation='relu', batch_norm=True, dropout=0.0):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     
-    ALL LAYERS WITH ACTIVATION
+    ALL LAYERS WITH THE ACTIVATION FUNCTION
     
     Args:
-        channels   : input structure, such as [128, 64, 64] for a 3-layer network.
+        layers     : input structure, such as [128, 64, 64] for a 3-layer network.
         batch_norm : batch normalization
+        dropout    : dropout regularization
     Returns:
         nn.sequential object
-    
     """
     print(__name__ + f'.MLP_all_act: Using {activation} activation')
 
     if batch_norm:
         return nn.Sequential(*[
             nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
+                nn.Linear(layers[i - 1], layers[i]),
                 nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.BatchNorm1d(channels[i])
+                nn.BatchNorm1d(layers[i]),
+                nn.Dropout(dropout, inplace=False),
             )
-            for i in range(1,len(channels))
+            for i in range(1,len(layers))
         ]
         )
     
     else:
         return nn.Sequential(*[
             nn.Sequential(
-                nn.Linear(channels[i - 1], channels[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh()
+                nn.Linear(layers[i - 1], layers[i]),
+                nn.ReLU() if activation == 'relu' else nn.Tanh(),
+                nn.Dropout(dropout, inplace=False)
             )
-            for i in range(1,len(channels))
+            for i in range(1,len(layers))
         ]
         )
 
 
-
 class DMLP(nn.Module):
 
-    def __init__(self, D, C, mlp_dim = [128,64], activation='relu', batch_norm=True):
+    def __init__(self, D, C, mlp_dim = [128, 64], activation='relu', batch_norm=True, dropout=0.0):
         """
         Args:
             D       : Input dimension
@@ -100,16 +103,16 @@ class DMLP(nn.Module):
         self.C = C
         
         # Add input dimension
-        channels = [D]
+        layers = [D]
 
         # Add hidden dimensions
         for i in range(len(mlp_dim)):
-            channels.append(mlp_dim[i])
+            layers.append(mlp_dim[i])
 
         # Add output dimension
-        channels.append(C)
+        layers.append(C)
         
-        self.mlp = MLP(channels, activation=activation, batch_norm=batch_norm)
+        self.mlp = MLP(layers, activation=activation, batch_norm=batch_norm, dropout=dropout)
 
     def forward(self,x):
         

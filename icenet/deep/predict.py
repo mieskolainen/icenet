@@ -145,7 +145,7 @@ def pred_torch_graph(args, param):
         loader  = torch_geometric.loader.DataLoader(x_in, batch_size=len(x), shuffle=False)
         for batch in loader:
             return model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
-
+    
     return func_predict
 
 

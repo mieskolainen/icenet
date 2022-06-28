@@ -320,7 +320,11 @@
     
 
     <span class="c1"># Create optimizer</span>
-    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True&#39;</span><span class="p">],</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
     <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">StepLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">scheduler_param</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">],</span> <span class="n">gamma</span><span class="o">=</span><span class="n">scheduler_param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
     
     <span class="c1"># Data loaders</span>
@@ -929,11 +933,19 @@
 
         <span class="c1"># Create optimizer &amp; scheduler</span>
         <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Adam&#39;</span><span class="p">:</span>
-            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">adam</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> \
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">adam</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True&#39;</span><span class="p">],</span> \
                 <span class="n">weight_decay</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">],</span> <span class="n">polyak</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;polyak&#39;</span><span class="p">])</span>
         
         <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AdamW&#39;</span><span class="p">:</span>
-            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> \
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True&#39;</span><span class="p">],</span> \
                 <span class="n">weight_decay</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
         
         <span class="n">sched</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span>

@@ -63,7 +63,11 @@ def get_model(gdata, args, param):
     cprint(__name__ + f'.graph_train: Number of free parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
     # Create optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=param['opt_param']['learning_rate'], weight_decay=param['opt_param']['weight_decay'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=param['opt_param']['lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True'], weight_decay=param['opt_param']['weight_decay'])
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=param['scheduler_param']['step_size'], gamma=param['scheduler_param']['gamma'])
 
     return model, device, optimizer, scheduler
@@ -201,7 +205,11 @@ def main():
                     scheduler[ID].step()
                     
                     print(f"[epoch: {epoch+1:03d}/{N_epochs:03d} | file: {f+1}/{len(root_files)} | block: {block+1}/{N_blocks} | "
-                        f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | learning_rate = {scheduler[ID].get_last_lr()}")
+                        f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC)  | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | lr
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True = {scheduler[ID].get_last_lr()}")
                     
         ## Save each model per global epoch
         for ID in model.keys():

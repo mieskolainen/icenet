@@ -26,6 +26,85 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
+def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
+    """
+    Parse graph data to torch geometric format
+    
+    Args:
+        data: awkward arra
+    """
+
+    event = 0
+    print(data['x'][0])
+    #print(data['edge_index'])
+    #print(data['edge_labels'])
+
+    nevents = len(data['x'])
+    print(f'nevents = {nevents}')
+
+    nevents = np.min([nevents, maxevents])
+
+    graph_dataset = []
+
+    ## For all events
+    for ev in tqdm(range(nevents)):
+
+        # --------------------------------------------
+        ## ** Construct node features **
+        nodes = data['x'][ev]
+
+        x = np.zeros((len(nodes), 8))
+        
+        x[:,0] = nodes.barycenter_x.to_numpy()
+        x[:,1] = nodes.barycenter_y.to_numpy()
+        x[:,2] = nodes.barycenter_z.to_numpy()
+        
+        x[:,3] = nodes.raw_energy.to_numpy()
+        x[:,4] = nodes.raw_em_energy.to_numpy()
+
+        x[:,5] = nodes.EV1.to_numpy()
+        x[:,6] = nodes.EV2.to_numpy()
+        x[:,7] = nodes.EV3.to_numpy()
+
+        x = torch.tensor(x, dtype=torch.float)
+        # --------------------------------------------
+
+
+        # --------------------------------------------
+        ## ** Construct edge indices ** (TBD: how about self-connections and (un)-direction?)
+
+        edge_index = data['edge_index'][ev]
+        
+        # size: 2 x num_edges
+        edge_index = torch.tensor(np.array(edge_index, dtype=int), dtype=torch.long)
+        # --------------------------------------------
+
+        # --------------------------------------------
+        ## ** Construct edge labels ** (training truth)
+
+        y = data['edge_labels'][ev]
+
+        # size: num_edges
+        y = torch.tensor(np.array(y, dtype=int), dtype=torch.long)
+        # --------------------------------------------
+        
+        # --------------------------------------------
+        # Training weights, note [] is important to have for right dimensions
+        if weights is not None:
+            w = torch.tensor([weights[ev]], dtype=torch.float)
+        else:
+            w = torch.tensor([1.0],  dtype=torch.float)
+        # --------------------------------------------
+        
+        # Global features
+        u = torch.tensor([], dtype=torch.float)
+        
+        
+        graph_dataset.append(Data(x=x, edge_index=edge_index, edge_attr=None, y=y, w=w, u=u))
+
+    return graph_dataset
+
+
 def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
@@ -126,9 +205,9 @@ def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coo
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
-        edge_attr  = get_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
-
+        
         ## Construct edge connectivity
         edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
@@ -198,45 +277,3 @@ def get_edge_index(num_nodes, num_edges):
     
     return edge_index
 
-
-def get_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EPS=1E-12):
-
-    # Edge features: [num_edges, num_edge_features]
-    edge_attr = np.zeros((num_edges, num_edge_features), dtype=float)
-    indexlist = np.zeros((num_nodes, num_nodes), dtype=int)
-    
-    n = 0
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-
-            # Compute only non-zero
-            if (i > 0 and j > 0) and (j > i):
-
-                p4_i   = p4vec[i-1]
-                p4_j   = p4vec[j-1]
-
-                # kt-metric (anti)
-                dR2_ij = p4_i.deltaR(p4_j)**2
-                kt2_i  = p4_i.pt2 + EPS 
-                kt2_j  = p4_j.pt2 + EPS
-                edge_attr[n,0] = analytic.ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
-                
-                # Lorentz scalars
-                edge_attr[n,1] = (p4_i + p4_j).m2  # Mandelstam s-like
-                edge_attr[n,2] = (p4_i - p4_j).m2  # Mandelstam t-like
-                edge_attr[n,3] = p4_i.dot4(p4_j)     # 4-dot
-
-            indexlist[i,j] = n
-            n += 1
-
-    ### Copy to the lower triangle for speed (we have symmetric adjacency)
-    n = 0
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-
-            # Copy only non-zero
-            if (i > 0 and j > 0) and (j < i):
-                edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !
-            n += 1
-
-    return edge_attr
