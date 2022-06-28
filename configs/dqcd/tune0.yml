@@ -110,10 +110,10 @@ signalclass: 1
 active_models:
   - xgb0
   - deps
+  - lgr0
   - vae0
-
   #- xgb1
-  #- lgr0
+
   #- dbnf0
   #- dmlp
   #- dmx0
@@ -443,69 +443,30 @@ xgb0_param:
   raytune:  xgb_trial_0
 
   # general parameters
-  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  num_boost_round: 200     # number of epochs (equal to the number of trees!)
-  
-  # booster parameters
-  lr: 1.0e-3
-  gamma: 1.67
-  max_depth: 10
-  min_child_weight: 1.0
-  max_delta_step: 1
-  subsample: 1
+  model_param:
+    num_boost_round: 200     # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
-  colsample_bytree:  0.86
-  colsample_bylevel: 0.6
-  colsample_bynode:  0.8
-  
-  reg_lambda: 4.8       # L2 regularization
-  reg_alpha: 0.05        # L1 regularization
-  
-  scale_pos_weight: 1
+    learning_rate: 1.0e-3
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
 
-  # learning task parameters
-  objective: 'multi:softprob'  # 'binary:logistic'     #
-  eval_metric: ['mlogloss']     # for evaluation
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8       # L2 regularization
+    reg_alpha: 0.05        # L1 regularization
+    
+    scale_pos_weight: 1
 
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb1_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB_tiny'
-  raytune: 'xgb_trial_1'
-
-  # general parameters
-  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  num_boost_round: 1      # number of epochs (equal to the number of trees!)
-  
-  # booster parameters
-  learning_rate: 0.1
-  gamma: 0.63
-  max_depth: 10
-  min_child_weight: 1.0
-  max_delta_step: 1
-  subsample: 1
-
-  colsample_bytree:  0.8
-  colsample_bylevel: 0.9
-  colsample_bynode:  0.95
-  
-  reg_lambda: 1.37       # L2 regularization
-  reg_alpha: 0.35        # L1 regularization
-  
-  scale_pos_weight: 1
-
-  # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+    # learning task parameters
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']    # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
@@ -526,14 +487,14 @@ lgr0_param:
 
   # Optimization
   opt_param:  
-    lossfunc: 'logit_norm_cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
+    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                    # focal_entropy exponent
+    temperature: 1              # logit norm temperature
     
     optimizer: 'AdamW'
     noise_reg: 0.0              # Noise regularization
 
-    epochs: 30
+    epochs: 50
     batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001       # L2-regularization

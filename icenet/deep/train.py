@@ -448,15 +448,15 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         trained model
     """
 
-    if param['tree_method'] == 'auto':
-        param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+    if param['model_param']['tree_method'] == 'auto':
+        param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
     print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     if config is not {}:
-        for key in param.keys():
-            param[key] = config[key] if key in config.keys() else param[key]
+        for key in param['model_param'].keys():
+            param['model_param'][key] = config[key] if key in config.keys() else param['model_param'][key]
 
     ### *********************************
     
@@ -472,15 +472,17 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     trn_aucs   = []
     val_aucs   = []
 
-    # Update the number of classes
-    param.update({'num_class': args['num_classes']})
+    # Update the parameters
+    model_param = copy.deepcopy(param['model_param'])
+    model_param.update({'num_class': args['num_classes']})
+    del model_param['num_boost_round']
 
     # Boosting iterations
-    for epoch in range(param['num_boost_round']):
+    for epoch in range(param['model_param']['num_boost_round']):
 
         results = dict()
         
-        a = {'params':          param,
+        a = {'params':          model_param,
              'dtrain':          dtrain,
              'num_boost_round': 1,
              'evals':           evallist,
@@ -520,7 +522,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             model.dump_model(filename + '.text', dump_format='text')
 
     if not args['__raytune_running__']:
-        
+
         # Plot evolution
         plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param["label"])
@@ -558,9 +560,9 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     Returns:
         trained model
     """
-    if param['xgb']['tree_method'] == 'auto':
-        param['xgb'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
-
+    if param['xgb']['model_param']['tree_method'] == 'auto':
+        param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+    
     print(__name__ + f'.train_graph_xgb: Training {param["label"]} classifier ...')
 
     # --------------------------------------------------------------------
@@ -624,15 +626,17 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     trn_aucs   = []
     val_aucs   = []
 
-    # Update the number of classes
-    param.update({'num_class': args['num_classes']})
+    # Update the parameters
+    model_param = copy.deepcopy(param['model_param'])
+    model_param.update({'num_class': args['num_classes']})
+    del model_param['num_boost_round']
 
     # Boosting iterations
-    for epoch in range(param['num_boost_round']):
-
+    for epoch in range(param['model_param']['num_boost_round']):
+        
         results = dict()
         
-        a = {'params':          param,
+        a = {'params':          model_param,
              'dtrain':          dtrain,
              'num_boost_round': 1,
              'evals':           evallist,
@@ -644,7 +648,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
 
         # Train it
         model = xgboost.train(**a)
-
+        
         # AUC
         pred    = model.predict(dtrain)[:, args['signalclass']]
         metrics = aux.Metric(y_true=data_trn.y, y_soft=pred, weights=data_trn.w, num_classes=args['num_classes'], hist=False, verbose=True)
