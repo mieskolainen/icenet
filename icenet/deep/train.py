@@ -615,9 +615,9 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     ## Train xgboost
     dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
-    dtest     = xgboost.DMatrix(data = x_val, label = y_val, weight = val_weights)
+    deval     = xgboost.DMatrix(data = x_val, label = y_val, weight = val_weights)
 
-    evallist  = [(dtrain, 'train'), (dtest, 'eval')]
+    evallist  = [(dtrain, 'train'), (deval, 'eval')]
     results   = dict()
 
     trn_losses = []
