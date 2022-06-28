@@ -155,7 +155,7 @@ cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
 
 xcorr_flow: True                 # Full N-point correlations computed between cuts
 
-frac: 0.5                        # Train/validate/test split fraction
+frac: 0.75                       # Train/validate/test split fraction
 varnorm: 'zscore'                # Variable normalization: 'zscore', 'madscore', 'none'
 #varnorm_tensor: 'zscore'        # Tensor variable normalization
 #varnorm_graph: 'none'           # Not implemented yet
