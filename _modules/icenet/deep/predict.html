@@ -153,7 +153,7 @@
             <span class="n">x_tot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">dim1</span><span class="p">]</span> <span class="o">=</span> <span class="n">conv_x</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>  <span class="c1"># Convoluted features</span>
             <span class="n">x_tot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">dim1</span><span class="p">:]</span>  <span class="o">=</span> <span class="n">x_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">u</span>    <span class="c1"># Global features</span>
 
-        <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x_tot</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x_tot</span><span class="p">))[:,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
 
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
@@ -218,7 +218,7 @@
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-
+        
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -245,8 +245,8 @@
     <span class="n">xgb_model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))</span>
-
+        <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))[:,</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
+    
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
 
@@ -261,7 +261,7 @@
     <span class="n">modelnames</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]):</span>
         <span class="n">modelnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_class_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    
     <span class="n">models</span> <span class="o">=</span> <span class="n">dbnf</span><span class="o">.</span><span class="n">load_models</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">modelnames</span><span class="o">=</span><span class="n">modelnames</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">])</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
