@@ -279,7 +279,7 @@ gnet0_param:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -300,7 +300,7 @@ gnet0_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -331,7 +331,7 @@ gnet1_param:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -352,7 +352,7 @@ gnet1_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -383,7 +383,7 @@ gnet2_param:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -404,7 +404,7 @@ gnet2_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization

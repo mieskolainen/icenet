@@ -632,7 +632,7 @@ def plot_correlations(X, netvars, weights=None, classes=None, round_threshold=0.
     return figs, axs
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1e-5) :
+def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1.0e-4) :
     """
     Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
 
