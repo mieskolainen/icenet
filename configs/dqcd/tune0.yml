@@ -111,7 +111,7 @@ active_models:
   - xgb0
   - deps
   - vae0
-  
+
   #- xgb1
   #- lgr0
   #- dbnf0
@@ -122,8 +122,7 @@ active_models:
   - cut0
   - cut1
   - cut2
-
-  #- cutset0
+  - cutset0
 # ----------------------------------------------------
 
 
@@ -405,13 +404,9 @@ cutset0_param:
   # Using yaml multiline suntax without last linebreak syntax with >-
   # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
   cutstring: >-
-    x_hlt_pms2 < 10000 &&  
-    x_hlt_invEInvP < 0.2 &&  
-    x_hlt_trkDEtaSeed < 0.01 &&  
-    x_hlt_trkDPhi < 0.2 && 
-    x_hlt_trkChi2 < 40 && 
-    x_hlt_trkValidHits >= 5 && 
-    x_hlt_trkNrLayerIT >= 2
+    nsv >=2 &&  
+    njet >= 2 &&  
+    nmuon >= 2
 
 
 cut0_param:

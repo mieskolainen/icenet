@@ -16,6 +16,6 @@ if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames
 
-#python analysis/hgcal_trk_preprocess.py $MAX --config $CONFIG --tag $TAG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
+python analysis/hgcal_trk_preprocess.py $MAX --config $CONFIG --tag $TAG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
 python analysis/hgcal_trk_train.py      $MAX --config $CONFIG --tag $TAG --datapath "none"    --datasets "none" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
 python analysis/hgcal_trk_eval.py       $MAX --config $CONFIG --tag $TAG --datapath "none"    --datasets "none" #| tee "./figs/hgcal/$CONFIG/eval_output.txt"
