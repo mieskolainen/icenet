@@ -418,10 +418,10 @@ gxgb0_param:
     reg_alpha: 0.0         # L1 regularization
     
     scale_pos_weight: 1
-
+    
     # learning task parameters
-    objective:    'binary:logistic'  #
-    eval_metric: ['auc', 'logloss']  # for evaluation
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']     # for evaluation
 
     # Read/Write of epochs
     savemode: 'all'                  # 'all', 'latest'
@@ -680,8 +680,8 @@ xgb0_param:
   scale_pos_weight: 1
 
   # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+  objective: 'multi:softprob'  # 'binary:logistic'     #
+  eval_metric: ['mlogloss']     # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

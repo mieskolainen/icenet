@@ -452,10 +452,13 @@ def train_models(data_trn, data_val, args=None) :
         if ID == args['distillation']['source']:
             print(__name__ + '.train.models: Computing distillation soft targets ...')
             
+            if args['num_classes'] != 2:
+                raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
+            
             if   param['train'] == 'xgb':
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
+                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
             elif param['train'] == 'torch_graph':
-                y_soft = model.softpredict(data_trn['data_graph'])
+                y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
                 raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
         # --------------------------------------------------------

@@ -399,8 +399,8 @@ xgb0_param:
   scale_pos_weight: 1
 
   # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+  objective: 'multi:softprob'  # 'binary:logistic'     #
+  eval_metric: ['mlogloss']    # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
@@ -439,8 +439,8 @@ xgb1_param:
   scale_pos_weight: 1
 
   # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+  objective: 'multi:softprob'  # 'binary:logistic'     #
+  eval_metric: ['mlogloss']     # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

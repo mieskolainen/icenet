@@ -145,7 +145,7 @@ distillation:
 inputvar:        null
 inputvar_scalar: 'MVA_SCALAR_ID' # Input variables, implemented under mvavars.py
 inputvar_jagged: 'MVA_JAGGED_ID'
-jagged_maxdim:   5
+jagged_maxdim:   6
 
 
 targetfunc: null                 # Training target,    implemented under mctargets.py
@@ -401,12 +401,12 @@ cutset0_param:
   label:   'cutset'
   raytune:  null
   
-  # Using yaml multiline suntax without last linebreak syntax with >-
+  # Using yaml multiline syntax without last linebreak syntax with >-
   # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
   cutstring: >-
     nsv >=2 &&  
-    njet >= 2 &&  
-    nmuon >= 2
+    nJet >= 2 &&  
+    nMuon >= 4
 
 
 cut0_param:
@@ -414,7 +414,7 @@ cut0_param:
   predict:  'cut'
   label:    'nsv'
   variable: 'nsv'
-  sign: -1
+  sign: 1
   transform: null
 
 cut1_param:
@@ -465,8 +465,8 @@ xgb0_param:
   scale_pos_weight: 1
 
   # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+  objective: 'multi:softprob'  # 'binary:logistic'     #
+  eval_metric: ['mlogloss']     # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
