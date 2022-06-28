@@ -645,7 +645,7 @@
         <span class="n">y_val</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>   <span class="o">=</span> <span class="n">data_val</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_graph_xgb: After extension: </span><span class="si">{</span><span class="n">x_trn</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    
     <span class="c1"># ------------------------------------------------------------------------------</span>
     <span class="c1">## Train xgboost</span>
     <span class="n">dtrain</span>    <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_trn</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">y_trn</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">trn_weights</span><span class="p">)</span>
@@ -661,12 +661,12 @@
     <span class="n">val_aucs</span>   <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Update the parameters</span>
-    <span class="n">model_param</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">])</span>
+    <span class="n">model_param</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;xgb&#39;</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">])</span>
     <span class="n">model_param</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;num_class&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]})</span>
     <span class="k">del</span> <span class="n">model_param</span><span class="p">[</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">]</span>
 
     <span class="c1"># Boosting iterations</span>
-    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;xgb&#39;</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_boost_round&#39;</span><span class="p">]):</span>
         
         <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         
