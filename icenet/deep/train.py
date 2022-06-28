@@ -627,12 +627,12 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     val_aucs   = []
 
     # Update the parameters
-    model_param = copy.deepcopy(param['model_param'])
+    model_param = copy.deepcopy(param['xgb']['model_param'])
     model_param.update({'num_class': args['num_classes']})
     del model_param['num_boost_round']
 
     # Boosting iterations
-    for epoch in range(param['model_param']['num_boost_round']):
+    for epoch in range(param['xgb']['model_param']['num_boost_round']):
         
         results = dict()
         
