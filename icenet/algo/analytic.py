@@ -89,3 +89,46 @@ def ktmetric(kt2_i, kt2_j, dR2_ij, p = -1, R = 1.0):
     c = (dR2_ij/R**2)
     
     return (a * c) if (a < b) else (b * c)
+
+
+def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EPS=1E-12):
+    
+    # Edge features: [num_edges, num_edge_features]
+    edge_attr = np.zeros((num_edges, num_edge_features), dtype=float)
+    indexlist = np.zeros((num_nodes, num_nodes), dtype=int)
+    
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            # Compute only non-zero
+            if (i > 0 and j > 0) and (j > i):
+
+                p4_i   = p4vec[i-1]
+                p4_j   = p4vec[j-1]
+
+                # kt-metric (anti)
+                dR2_ij = p4_i.deltaR(p4_j)**2
+                kt2_i  = p4_i.pt2 + EPS 
+                kt2_j  = p4_j.pt2 + EPS
+                edge_attr[n,0] = ktmetric(kt2_i=kt2_i, kt2_j=kt2_j, dR2_ij=dR2_ij, p=-1, R=1.0)
+                
+                # Lorentz scalars
+                edge_attr[n,1] = (p4_i + p4_j).m2  # Mandelstam s-like
+                edge_attr[n,2] = (p4_i - p4_j).m2  # Mandelstam t-like
+                edge_attr[n,3] = p4_i.dot4(p4_j)   # 4-dot
+
+            indexlist[i,j] = n
+            n += 1
+
+    ### Copy to the lower triangle for speed (we have symmetric adjacency)
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            # Copy only non-zero
+            if (i > 0 and j > 0) and (j < i):
+                edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !
+            n += 1
+
+    return edge_attr

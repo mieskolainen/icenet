@@ -179,7 +179,7 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
             trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=None)
             pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
 
-        ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
+        ### Compute reweighting weights (before split&factor because we need the variables !)
         trn.w, pdf = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, pdf=None, ids=trn.ids, args=args['reweight_param'])
         pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
         val.w,_    = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, pdf=pdf,  ids=val.ids, args=args['reweight_param'])
@@ -194,15 +194,15 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
         if args['imputation_param']['active']:
             imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
             trn, val, tst, _ = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
-
+        
         ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
         if args['eval_reweight']:
-            pdf     = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
-            tst.w,_ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
-
+            pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
+            tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+        
         ### Split and factor data
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
-
+    
     return output
 
 
@@ -289,8 +289,6 @@ def train_models(data_trn, data_val, args=None) :
     """
     
     args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
-
-    print(__name__ + f".train_models: Input with {data_trn['data'].y.shape[0]} events ")
 
 
     # @@ Tensor normalization @@
@@ -479,8 +477,6 @@ def evaluate_models(data=None, args=None):
     print(__name__ + ".evaluate_models: Evaluating models")
     print('')
     
-    ## Set feature indices for simple cut classifiers
-    args['features'] = data['data'].ids
     
     # -----------------------------
     # ** GLOBALS **
@@ -516,15 +512,21 @@ def evaluate_models(data=None, args=None):
     X       = None
     X_RAW   = None
     ids_RAW = None
-    if data['data'].x is not None:
+
+    y       = None
+    weights = None
+    
+    if data['data'] is not None:
+
+        ## Set feature indices for simple cut classifiers
+        args['features'] = data['data'].ids
 
         X        = copy.deepcopy(data['data'].x)
         X_RAW    = data['data'].x
         ids_RAW  = data['data'].ids
-    
-    # These should be always there    
-    y        = data['data'].y
-    weights  = data['data'].w
+
+        y        = data['data'].y
+        weights  = data['data'].w
 
     X_2D = None
     if data['data_tensor'] is not None:
@@ -545,7 +547,6 @@ def evaluate_models(data=None, args=None):
         VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
 
-    print(__name__ + f".evaluate_models: Input with {y.shape[0]} events") 
     if weights is not None: print(__name__ + ".evaluate_models: -- per event weighted evaluation ON ")
     
     try:
@@ -593,32 +594,37 @@ def evaluate_models(data=None, args=None):
         param = args[f'{ID}_param']
         print(f'Evaluating <{ID}> | {param} \n')
         
-        inputs = {'y': y, 'weights': weights, 'label': param['label'],
-                 'targetdir':targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
-
+        inputs = {'weights': weights, 'label': param['label'],
+                 'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
+        
         if   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
-            
+
+            # Geometric type -> need to use batch loader, get each graph, node or edge prediction
+            import torch_geometric
+            loader  = torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False)
+            for batch in loader: # Only one big batch
+                plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y = batch.to('cpu').y.detach().cpu().numpy(), **inputs)
+        
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph,    y = y, **inputs)
             
         elif param['predict'] == 'torch_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
 
         elif param['predict'] == 'torch_scalar':
             func_predict = predict.pred_torch_scalar(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
         
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr, y = y, **inputs)
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr,   y = y, **inputs)
             
         elif param['predict'] == 'torch_image_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
@@ -626,15 +632,15 @@ def evaluate_models(data=None, args=None):
             X_dual      = {}
             X_dual['x'] = X_2D_ptr # image tensors
             X_dual['u'] = X_ptr    # global features
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, y = y, **inputs)
             
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
             
         elif param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
 
         #elif param['predict'] == 'xtx':
         # ...   
@@ -642,15 +648,15 @@ def evaluate_models(data=None, args=None):
         
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
             
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
             
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW,  **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
                     
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
@@ -674,6 +680,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # Compute predictions once and for all here
     y_pred = func_predict(x_input)
+
+    print(y_pred)
 
     # --------------------------------------
     ## Total ROC Plot

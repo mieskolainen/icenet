@@ -163,7 +163,7 @@ class GNNGeneric(torch.nn.Module):
         (otherwise very bad performance may happen for certain message passing / convolution operators).
         
     """
-
+    
     def SuperEdgeConv_(self, data):
         # Message passing
         x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
@@ -182,8 +182,8 @@ class GNNGeneric(torch.nn.Module):
 
     def DynamicEdgeConv_(self, data):
         # Message passing
-        x1 = self.conv1(data.x, data.edge_index)
-        x2 = self.conv2(x1,     data.edge_index)
+        x1 = self.conv1(data.x, data.batch)
+        x2 = self.conv2(x1,     data.batch)
         
         # Apply "residual-fusion"
         return self.lin1(torch.cat([x1, x2], dim=1))
@@ -314,8 +314,8 @@ class GNNGeneric(torch.nn.Module):
 
         # DynamicEdgeConv, https://arxiv.org/abs/1801.07829
         elif conv_type == 'DynamicEdgeConv':
-            self.conv1 = DynamicEdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), k=k, aggr=conv_aggr)
-            self.conv2 = DynamicEdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), k=k, aggr=conv_aggr)
+            self.conv1 = DynamicEdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), k=conv_knn, aggr=conv_aggr)
+            self.conv2 = DynamicEdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), k=conv_knn, aggr=conv_aggr)
             self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.DynamicEdgeConv_
@@ -366,7 +366,7 @@ class GNNGeneric(torch.nn.Module):
             self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
             
             self.conv  = self.SGConv_
-
+            
         # GINEConv,        https://arxiv.org/abs/1810.00826, https://arxiv.org/abs/1905.12265
         elif conv_type == 'GINEConv':
             self.conv1 = GINEConv(MLP([self.d_dim, self.d_dim])),

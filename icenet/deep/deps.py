@@ -148,8 +148,6 @@ class DEPS(nn.Module):
             nn.Linear(rho_channels[-2], rho_channels[-1]),
         )
         # -------------------------------------------
-
-        print(self)
     
     # Forward operator
     def forward(self, x):

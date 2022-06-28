@@ -4,7 +4,7 @@
 #
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
-rootname: 'hgcal'
+rootname: 'hgcal_cnd'
 
 # ----------------------------------------------------
 maxevents: 1000000   # Maximum total number of events (in total) to process per process
@@ -37,6 +37,7 @@ batch_train_param:
 # Give all models some unique identifier and label
 active_models:
 
+  - gnet2
   - gnet1
   - gnet0
 
@@ -248,7 +249,7 @@ raytune_setup:
     #    type: "tune.choice"
     #    value: [16, 32, 64, 128]
 
-      learning_rate:
+      lr:
         type: "tune.loguniform"
         value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
 
@@ -260,68 +261,7 @@ raytune_setup:
 
     # Add more steers here
     # ...
-
-  xgb_setup:
-    search_algo: 'HyperOpt'
-
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
-    param:
-      
-      num_boost_round:
-        type: "tune.randint"
-        value: [20, 120]
-
-      learning_rate:
-        type: "tune.uniform"
-        value: [0.01, 0.6]
-      
-      ## Tree parameters
-      max_depth:
-        type:  "tune.choice"
-        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-
-      ## Regularization
-      reg_lambda: # Smoothness
-        type: "tune.uniform"
-        value: [0.0, 5.0]
-
-      reg_alpha: # Sparsity
-        type: "tune.uniform"
-        value: [0.0, 0.5]
-
-      ## Tree splitting
-      #min_child_weight:
-      #  type: "tune.uniform"
-      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
-      
-      gamma:
-        type: "tune.uniform"
-        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
-      
-      #max_delta_step:
-      #  type: "tune.uniform"
-      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
-
-      #subsample:
-      #  type: "tune.uniform"
-      #  value: [0.5, 1]    # Between [0, 1] # Default 1
-
-      colsample_bytree:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bylevel:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bynode:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-
+    
 # ========================================================================
 ## Classifier setup
 # ========================================================================
@@ -337,9 +277,9 @@ gnet0_param:
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge' (level of inference)
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -360,9 +300,9 @@ gnet0_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -379,7 +319,7 @@ gnet0_param:
 
 
 # Graph net
-gnet0_param:
+gnet1_param:
   train:    'torch_graph'
   predict:  'torch_graph'
   label:    'EdgeConv'
@@ -389,9 +329,9 @@ gnet0_param:
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge' (level of inference)
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -412,9 +352,9 @@ gnet0_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -429,20 +369,21 @@ gnet0_param:
   savemode: 'all'             # 'all', 'latest'
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
+
 # Graph net
-gnet1_param:
+gnet2_param:
   train:    'torch_graph'
   predict:  'torch_graph'
-  label:    'SuperEdgeConv'
+  label:    'DynamicEdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'DynamicEdgeConv'       # See models under icenet/deep/graph.py
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge' (level of inference)
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
+    z_dim: 64                # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -463,9 +404,9 @@ gnet1_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    epochs: 50
+    epochs: 150
     batch_size: 64
-    learning_rate: 0.003
+    lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -479,3 +420,4 @@ gnet1_param:
   # Read/Write of epochs
   savemode: 'all'             # 'all', 'latest'
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+

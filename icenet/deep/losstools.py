@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
+from icenet.tools import aux_torch
+
 
 def loss_wrapper(model, x, y, num_classes, weights, param):
     """
@@ -17,6 +19,11 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         y = y.type(torch.int64)
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
+    elif param['lossfunc'] == 'cross_entropy_per_edge':
+        log_phat = model.softpredict(x)
+        y = y.type(torch.int64)
+        return F.nll_loss(log_phat, y)
+        
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         y = y.type(torch.int64)
@@ -61,7 +68,7 @@ def log_softmax(x, dim=-1):
     y = x - log_z
     return y
 
-def multiclass_logit_norm_loss(logit, y, num_classes, weights, t=1.0, EPS=1e-7):
+def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1e-7):
     """
     https://arxiv.org/abs/2205.09310
     """
@@ -71,47 +78,67 @@ def multiclass_logit_norm_loss(logit, y, num_classes, weights, t=1.0, EPS=1e-7):
 
     return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
-def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights):
+def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
     """ 
     Per instance weighted cross entropy loss
     (negative log-likelihood)
     
     Numerically more stable version.
     """
+    if weights is not None:
+        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
+    else:
+        w = 1.0
+
     y    = F.one_hot(y, num_classes)
-    loss = - y*log_phat * weights
+    loss = - y*log_phat * w
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_cross_entropy(phat, y, num_classes, weights, EPS=1e-30):
+def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
     """
     Per instance weighted cross entropy loss
     (negative log-likelihood)
     """
+    if weights is not None:
+        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
+    else:
+        w = 1.0
+
     y = F.one_hot(y, num_classes)
 
     # Protection
-    loss = - y*torch.log(phat + EPS) * weights
+    loss = - y*torch.log(phat + EPS) * w
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_focal_entropy_logprob(log_phat, y, num_classes, weights, gamma, EPS=1e-30) :
+def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
     """
+    if weights is not None:
+        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
+    else:
+        w = 1.0
+
     y = F.one_hot(y, num_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
+    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
     loss = loss.sum() / y.shape[0]
     return loss
 
-def multiclass_focal_entropy(phat, y, num_classes, weights, gamma, EPS=1e-30) :
+def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
     """
+    if weights is not None:
+        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
+    else:
+        w = 1.0
+
     y = F.one_hot(y, num_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * weights
+    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
     loss = loss.sum() / y.shape[0]
     return loss
 

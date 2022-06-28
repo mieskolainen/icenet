@@ -12,7 +12,7 @@ from torch import nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-from icenet.deep.dmlp import MLP
+from icenet.deep.dmlp import MLP, MLP_ALL_ACT
 
 """
         |                                                    |
@@ -28,11 +28,11 @@ Training loop ELBO minimization:
 """
 
 class Encoder(nn.Module):
-    def __init__(self, D, hidden_dim=128, latent_dim=32, activation='tanh'):
+    def __init__(self, D, hidden_dim=128, latent_dim=32, activation='tanh', batch_norm=True):
         super(Encoder, self).__init__()
 
-        self.mlp = MLP([D, hidden_dim, latent_dim], activation=activation)
-
+        self.mlp = MLP_ALL_ACT([D, hidden_dim, latent_dim], activation=activation, batch_norm=batch_norm)
+        
         # modules  = [self.linear2, torch.sigmoid()]
         #self.linear2 = nn.Sequential(*modules)
 
@@ -40,14 +40,15 @@ class Encoder(nn.Module):
         return self.mlp(x)
 
 class VariationalEncoder(nn.Module):
-    def __init__(self, D, hidden_dim, latent_dim, activation='tanh'):
+    def __init__(self, D, hidden_dim, latent_dim, activation='relu', batch_norm=True):
         super(VariationalEncoder, self).__init__()
         
-        self.mlp        = MLP([D, hidden_dim, hidden_dim], activation=activation)
-
-        self.mlp_mu     = MLP([hidden_dim, latent_dim], activation=activation)
-        self.mlp_logvar = MLP([hidden_dim, latent_dim], activation=activation)
-
+        self.mlp        = MLP_ALL_ACT([D, hidden_dim, hidden_dim], activation=activation, batch_norm=batch_norm)
+        self.mlp_mu     = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='tanh', batch_norm=batch_norm)
+        
+        # This should output positive definite value (use relu)
+        self.mlp_logvar = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='relu', batch_norm=batch_norm)
+        
         self.N          = torch.distributions.Normal(0, 1)
         self.kl = 0
 
@@ -76,25 +77,26 @@ class VariationalEncoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, latent_dim, hidden_dim, D, activation='tanh'):
+    def __init__(self, latent_dim, hidden_dim, D, activation='tanh', batch_norm=True):
         super(Decoder, self).__init__()
 
-        self.mlp = MLP([latent_dim, hidden_dim, hidden_dim, D], activation=activation)
+        self.mlp = MLP([latent_dim, hidden_dim, hidden_dim, D], activation=activation, batch_norm=batch_norm)
 
     def forward(self, z):
         return self.mlp(z)
 
 
 class VAE(nn.Module):
-    def __init__(self, D, latent_dim, hidden_dim, encoder_act='tanh', decoder_act='tanh', anomaly_score='mse', C=None):
+    def __init__(self, D, latent_dim, hidden_dim,
+            encoder_bn=True, encoder_act='relu', decoder_bn=False, decoder_act='relu', anomaly_score='MSE', C=None):
         super(VAE, self).__init__()
 
         self.D       = D
         self.C       = C
         self.anomaly_score = anomaly_score
 
-        self.encoder = VariationalEncoder(D=D, hidden_dim=hidden_dim, latent_dim=latent_dim, activation=encoder_act)
-        self.decoder = Decoder(latent_dim=latent_dim, hidden_dim=hidden_dim, activation=decoder_act, D=D)
+        self.encoder = VariationalEncoder(D=D, hidden_dim=hidden_dim, latent_dim=latent_dim, activation=encoder_act, batch_norm=encoder_bn)
+        self.decoder = Decoder(latent_dim=latent_dim, hidden_dim=hidden_dim, activation=decoder_act, batch_norm=decoder_bn, D=D)
 
     def to_device(self, device):
         self.encoder = self.encoder.to(device)
@@ -112,11 +114,11 @@ class VAE(nn.Module):
         xhat     = self.decoder(z)
         
         # "Test statistic"
-        if   self.anomaly_score == 'mse':
+        if   self.anomaly_score == 'MSE':
             score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1]
             return torch.tanh(score)
 
-        elif self.anomaly_score == 'mse_kl':
+        elif self.anomaly_score == 'MSE_KL':
             score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1] + torch.sum(self.encoder.kl_i, dim=-1)/z.shape[-1]
             return 1 - torch.tanh(1/score)
         

@@ -59,8 +59,6 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # ** Pick the variables **
     ids = MVA_ID
     
-
-
     param = {
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
@@ -68,9 +66,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
         "load_ids":    ids     
     }
     
-
     tree = args['tree_name']
-
 
 
     # =================================================================
@@ -193,7 +189,6 @@ def splitfactor(x, y, w, ids, args):
     if args['graph_on']:
         
         features   = globals()[args['inputvar']]
-
         data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
             features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     

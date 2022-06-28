@@ -90,6 +90,8 @@ def getgenericmodel(conv_type, netparam):
     else:
         raise Exception(__name__ + f'.getgenericmodel: Unknown network <conv_type> = {conv_type}')
 
+    print(model)
+
     return model
 
 
@@ -106,6 +108,8 @@ def getgraphmodel(conv_type, netparam):
     else:
     """
     model = graph.GNNGeneric(conv_type=conv_type, **netparam)
+    
+    print(model)
     
     return model
 
@@ -264,7 +268,7 @@ def raytune_main(inputs, train_func=None):
     return best_trained_model
 
 
-def torch_train_loop(model, train_loader, test_loader, args, param, config={}, save_period=5):
+def torch_loop(model, train_loader, test_loader, args, param, config={}, save_period=5):
     """
     Main training loop for all torch based models
     """
@@ -279,25 +283,25 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
     opt_param = {}
     for key in param['opt_param'].keys():
         opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
-
+    
     scheduler_param = {}
     for key in param['scheduler_param'].keys():
         scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
     
     # Create optimizer
     if   opt_param['optimizer'] == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(),  lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+        optimizer = torch.optim.Adam(model.parameters(),  lr=opt_param['lr'], weight_decay=opt_param['weight_decay'])
     elif opt_param['optimizer'] == 'AdamW':
-        optimizer = torch.optim.AdamW(model.parameters(), lr=opt_param['learning_rate'], weight_decay=opt_param['weight_decay'])
+        optimizer = torch.optim.AdamW(model.parameters(), lr=opt_param['lr'], weight_decay=opt_param['weight_decay'])
     else:
-        raise Exception(__name__ + f".torch_train_loop: Unknown optimizer <{opt_param['optimizer']}> chosen")
+        raise Exception(__name__ + f".torch_loop: Unknown optimizer <{opt_param['optimizer']}> chosen")
     
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
     
-    cprint(__name__ + f'.torch_train_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
+    cprint(__name__ + f'.torch_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
     for epoch in range(opt_param['epochs']):
-
+        
         loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param)
 
         if (epoch % save_period) == 0:
@@ -309,7 +313,7 @@ def torch_train_loop(model, train_loader, test_loader, args, param, config={}, s
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
-        print(__name__ + f'.torch_train_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
+        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, loss: {loss:.4f} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC)')
         scheduler.step()
         
         if args['__raytune_running__']:
@@ -363,8 +367,8 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     # Data loaders
     train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
     test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
-
-    return torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+    
+    return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 
 
@@ -385,7 +389,7 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
         torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
                 trn_weights=trn_weights, val_weights=val_weights, param=param, args=args, config=config)
     
-    return torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+    return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 
 
@@ -465,7 +469,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
     model     = xgboost.train(params = param, dtrain = dtrain,
         num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
-
+    
     if args['__raytune_running__']:
 
         epoch = 0 # Fixed to 0 (no epochs in use)
@@ -678,11 +682,11 @@ def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
 
         # Create optimizer & scheduler
         if   param['opt_param']['optimizer'] == 'Adam':
-            optimizer = adam.Adam(model.parameters(), lr = param['opt_param']['learning_rate'], \
+            optimizer = adam.Adam(model.parameters(), lr = param['opt_param']['lr'], \
                 weight_decay = param['opt_param']['weight_decay'], polyak = param['opt_param']['polyak'])
         
         elif param['opt_param']['optimizer'] == 'AdamW':
-            optimizer = torch.optim.AdamW(model.parameters(), lr = param['opt_param']['learning_rate'], \
+            optimizer = torch.optim.AdamW(model.parameters(), lr = param['opt_param']['lr'], \
                 weight_decay = param['opt_param']['weight_decay'])
         
         sched = scheduler.ReduceLROnPlateau(optimizer,
@@ -760,7 +764,7 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
                         X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], X_trn_2D=None, X_val_2D=None, \
                      trn_weights=weights, val_weights=None, param=param['model_param'], args=args)
 
-                model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                model = train.torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                             args=args, param=param['model_param'])
 
             except:
