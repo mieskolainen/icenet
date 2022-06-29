@@ -29,6 +29,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, Y, W, ids
     """
 
+    i = 0
     for key in processes:
 
         print(__name__ + f'.read_multiple_MC: {key}')
@@ -40,20 +41,28 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
 
         # Load file
-        X,ids       = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
+        X__,ids     = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
                         entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='np')
-        N_before    = X.shape[0]
+        N_before    = X__.shape[0]
         
         # Apply selections
-        X,ids       = process_func(X=X, ids=ids, **param)
-        N_after     = X.shape[0]
+        X__,ids     = process_func(X=X__, ids=ids, **param)
+        N_after     = X__.shape[0]
 
         eff_acc     = N_after / N_before
 
         print(__name__ + f'.read_multiple_MC: Efficiency x Acceptance = {eff_acc}')
 
-        Y           = class_id * np.ones(N_after, dtype=int)
-        W           = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs)
+        Y__         = class_id * np.ones(N_after, dtype=int)
+        W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs)
+
+        # Concatenate processes
+        if i == 0:
+            X, Y, W = X__, Y__, W__
+        else:
+            X = np.concatenate((X, X__), axis=0)
+            Y = np.concatenate((Y, Y__), axis=0)
+            W = np.concatenate((W, W__), axis=0)
         
     return X,Y,W,ids
 
