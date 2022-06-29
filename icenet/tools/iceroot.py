@@ -28,7 +28,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
     Returns:
         X, Y, W, ids
     """
-    
+
     for key in processes:
 
         print(__name__ + f'.read_multiple_MC: {key}')
@@ -48,8 +48,9 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X,ids       = process_func(X=X, ids=ids, **param)
         N_after     = X.shape[0]
 
+        eff_acc     = N_after / N_before
         Y           = class_id * np.ones(N_after, dtype=int)
-        W           = np.ones(N_after, dtype=float) * xs / N_before
+        W           = np.ones(N_after, dtype=float) * xs * eff_acc / N_before
     
     return X,Y,W,ids
 
