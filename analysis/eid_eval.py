@@ -28,7 +28,7 @@ def ele_mva_classifier(data, args=None):
         y    = np.array(data.y, dtype=float)
         yhat = np.array(data.x[:, data.ids.index(varname)], dtype=float)
 
-        return aux.Metric(y_true=y, y_soft=yhat, weights=data.w if args['eval_reweight'] else None)
+        return aux.Metric(y_true=y, y_pred=yhat, weights=data.w if args['eval_reweight'] else None)
     except:
         raise Exception(__name__ + f'.ele_mva_classifier: Problem with <{varname}>')
 
