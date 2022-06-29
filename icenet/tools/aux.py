@@ -570,12 +570,12 @@ def pick_ind(x, minmax):
     return (minmax[0] <= x) & (x < minmax[1])
 
 
-def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
+def multiclass_roc_auc_score(y_true, y_pred, weights=None, average="macro"):
     """ Multiclass AUC (area under the curve).
 
     Args:
         y_true : True classifications
-        y_soft : Soft probabilities per class
+        y_pred : Soft probabilities per class
         weights: Sample weights 
         average: Averaging strategy
     Returns:
@@ -585,9 +585,9 @@ def multiclass_roc_auc_score(y_true, y_soft, weights=None, average="macro"):
     lb = sklearn.preprocessing.LabelBinarizer()
     lb.fit(y_true)
     y_true = lb.transform(y_true)
-    y_soft = lb.transform(y_soft)
+    y_pred = lb.transform(y_pred)
     
-    auc = sklearn.metrics.roc_auc_score(y_true, y_soft, sample_weights=weights, average=average)
+    auc = sklearn.metrics.roc_auc_score(y_true, y_pred, sample_weights=weights, average=average)
     return auc
 
 
@@ -595,11 +595,11 @@ class Metric:
     """
     Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_soft, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30, verbose=True):
+    def __init__(self, y_true, y_pred, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30, verbose=True):
         """
         Args:
             y_true     : true classifications
-            y_soft     : probabilities per class (N x 1), (N x 2) or (N x K) dimensional array
+            y_pred     : predicted probabilities per class (N x 1), (N x 2) or (N x K) dimensional array
             weights    : event weights
             num_classes: number of classses
             
@@ -614,21 +614,21 @@ class Metric:
         self.num_classes = num_classes
 
         # Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)
-        if (num_classes == 2) and (np.squeeze(y_soft).ndim == 2):
-            y_soft = y_soft[:,-1]
+        if (num_classes == 2) and (np.squeeze(y_pred).ndim == 2):
+            y_pred = y_pred[:,-1]
 
         # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
         if (weights is not None) and (np.squeeze(weights).ndim > 1):
             weights = np.sum(weights, axis=1)
         
         # Check numerical validity
-        if (np.squeeze(y_soft).ndim > 1):
-            ok = np.isfinite(np.sum(y_soft,axis=1))
+        if (np.squeeze(y_pred).ndim > 1):
+            ok = np.isfinite(np.sum(y_pred,axis=1))
         else:
-            ok = np.isfinite(y_soft)
+            ok = np.isfinite(y_pred)
 
         y_true = y_true[ok]
-        y_soft = y_soft[ok]
+        y_pred = y_pred[ok]
         if weights is not None:
             weights = weights[ok]
         
@@ -653,7 +653,7 @@ class Metric:
             if   valrange == 'prob':
                 valrange = [0.0, 1.0]
             elif valrange == 'auto':
-                valrange = [np.percentile(y_soft, 1), np.percentile(y_soft, 99)]
+                valrange = [np.percentile(y_pred, 1), np.percentile(y_pred, 99)]
             else:
                 raise Exception('Metric: Unknown valrange parameter')
 
@@ -666,7 +666,7 @@ class Metric:
                 
                 if np.sum(ind) != 0:
                     w = weights[ind] if weights is not None else None
-                    x = y_soft[ind] if num_classes == 2 else y_soft[ind,c]
+                    x = y_pred[ind] if num_classes == 2 else y_pred[ind,c]
                     counts, edges = np.histogram(x, weights=w, bins=self.mva_bins)
                 self.mva_hist.append(counts)
         else:
@@ -681,12 +681,12 @@ class Metric:
         self.fpr = None
         self.tpr = None
         self.thresholds = None
-
+        
         if  num_classes == 2:
-            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true, y_score=y_soft, sample_weight=weights)
-            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_soft, sample_weight=weights)
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_soft), sample_weight=weights)
+            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
+            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
         else:
-            self.auc = metrics.roc_auc_score(y_true=y_true, y_score=y_soft, sample_weight=None, \
+            self.auc = metrics.roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=None, \
                         average="weighted", multi_class='ovo', labels=np.arange(num_classes))
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=y_soft.argmax(axis=1), sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)

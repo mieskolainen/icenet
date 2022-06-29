@@ -497,11 +497,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
         # AUC
         pred    = model.predict(dtrain)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_trn.y, y_soft=pred, weights=data_trn.w, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=data_trn.w, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
         pred    = model.predict(deval)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_val.y, y_soft=pred, weights=data_val.w, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=data_val.w, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
         # Loss
@@ -651,11 +651,11 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         
         # AUC
         pred    = model.predict(dtrain)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_trn, y_soft=pred, weights=trn_weights, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=trn_weights, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
         pred    = model.predict(deval)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_val, y_soft=pred, weights=val_weights, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=val_weights, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
         
         # Loss

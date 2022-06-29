@@ -226,19 +226,18 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
                 
                 # Evaluate metric
                 if weights is not None:
-                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind], weights=weights[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind], weights=weights[ind])
                 else:
-                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind])
 
                 print(__name__ + f'.binned_2D_AUC: {string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
             else:
                 print(__name__ + f'.binned_2D_AUC: {string} | No events found in this cell!')
-
-
+    
     # Evaluate total performance
-    met = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
+    met = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
 
     # Finally plot it
     fig,ax = plot_AUC_matrix(AUC=AUC, edges_A=edges_A, edges_B=edges_B)
@@ -290,9 +289,9 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
                     
                 # Evaluate metric
                 if weights is not None:
-                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind], weights=weights[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind], weights=weights[ind])
                 else:
-                    met = aux.Metric(y_true=y[ind], y_soft=y_pred[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind])
 
                 AUC[i] = met.auc
                 METS.append(met)

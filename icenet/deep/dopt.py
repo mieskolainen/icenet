@@ -221,21 +221,20 @@ def test(model, loader, optimizer, device):
 
         with torch.no_grad():
             phat = model.softpredict(x) # Probability
-            #pred = phat.argmax(dim=1)  # Maximum probability class (index)
         
         weights = w.detach().cpu().numpy()
         y_true  = y.detach().cpu().numpy()
-        y_soft  = phat.detach().cpu().numpy()
+        y_pred  = phat.detach().cpu().numpy()
         
         # Classification metrics
         N       = len(y_true)
-        metrics = aux.Metric(y_true=y_true, y_soft=y_soft, weights=None, num_classes=model.C, hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, num_classes=model.C, hist=False, verbose=True)
         
         if metrics.auc > -1: # Bad batch protection
             aucsum += (metrics.auc * N)
             accsum += (metrics.acc * N)
             k += N
-
+    
     if k > 0:
         return accsum / k, aucsum / k
     else:

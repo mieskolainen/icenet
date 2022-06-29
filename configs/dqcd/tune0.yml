@@ -30,25 +30,25 @@ MC_input:
         ctau: 10
 
   background:
-    #QCD_Pt-20toInf:
-    #  path: 'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #  xs: 1.0
-    #  model_param: null
+    QCD_Pt-20toInf:
+      path: 'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 1.0
+      model_param: null
     
-    QCD_Pt-15to20: 
-      path: 'QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
-      xs: 2799000.0 # [pb]
-      model_param: null
+    # QCD_Pt-15to20: 
+    #   path: 'QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+    #   xs: 2799000.0 # [pb]
+    #   model_param: null
       
-    QCD_Pt-20to30: 
-      path: 'QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
-      xs: 2526000.0 # [pb]
-      model_param: null
+    # QCD_Pt-20to30: 
+    #   path: 'QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
+    #   xs: 2526000.0 # [pb]
+    #   model_param: null
 
-    QCD_Pt-30to50:
-      path: 'QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
-      xs: 1362000.0 # [pb]
-      model_param: null
+    # QCD_Pt-30to50:
+    #   path: 'QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+    #   xs: 1362000.0 # [pb]
+    #   model_param: null
 
     # QCD_Pt-50to80: 
     #   path: 'QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -595,46 +595,6 @@ dmx0_param:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
-
-# Deep MAXOUT network
-dmx1_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'MAXO-LNCE'
-  raytune:  null
-
-  # Model parameter
-  conv_type: 'maxo'
-  model_param:
-    num_units: 8
-    neurons:  50
-    dropout:  0.1
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'Adam'         # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
-
-    epochs: 200
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay: 0.00001     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # -1 is the last saved epoch
 
 
 # Deep Normalizing Flow
