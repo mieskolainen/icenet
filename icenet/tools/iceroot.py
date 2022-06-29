@@ -29,10 +29,10 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, Y, W, ids
     """
 
-    i = 0
-    for key in processes:
-
-        print(__name__ + f'.read_multiple_MC: {key}')
+    for i in range(len(processes)):
+        
+        key = processes[i]
+        print(__name__ + f'.read_multiple_MC: {processes[key]}')
 
         datasets    = processes[key]['path']
         xs          = processes[key]['xs']
@@ -50,12 +50,12 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         N_after     = X__.shape[0]
 
         eff_acc     = N_after / N_before
-        
+
         print(__name__ + f'.read_multiple_MC: Process {key}: efficiency x acceptance = {eff_acc}')
-        
+
         Y__         = class_id * np.ones(N_after, dtype=int)
         W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs)
-        
+
         # Concatenate processes
         if i == 0:
             X, Y, W = X__, Y__, W__
