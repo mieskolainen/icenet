@@ -10,6 +10,7 @@ from termcolor import colored, cprint
 import re
 
 from icenet.tools import io
+from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
 
@@ -25,9 +26,9 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
     
     Returns:
-        X, Y, W, VARS
+        X, Y, W, ids
     """
-
+    
     for key in processes:
 
         print(__name__ + f'.read_multiple_MC: {key}')
@@ -37,13 +38,20 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         model_param = processes[key]['model_param']
 
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
-        X, VARS     = process_func(rootfile=rootfile, **param)
 
-        N           = X.shape[0]
-        Y           = class_id * np.ones(N, dtype=int)
-        W           = np.ones(N, dtype=float) * xs / N
+        # Load file
+        X,ids       = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
+                        entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='np')
+        N_before    = X.shape[0]
+        
+        # Apply selections
+        X,ids       = process_func(X=X, ids=ids, **param)
+        N_after     = X.shape[0]
+
+        Y           = class_id * np.ones(N_after, dtype=int)
+        W           = np.ones(N_after, dtype=float) * xs / N_before
     
-    return X,Y,W,VARS
+    return X,Y,W,ids
 
 
 def load_tree_stats(rootfile, tree, key=None, verbose=False):
