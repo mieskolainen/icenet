@@ -63,9 +63,8 @@
 <span class="sd">        X, Y, W, ids</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)):</span>
-        
-        <span class="n">key</span> <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processes</span><span class="p">):</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">datasets</span>    <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
