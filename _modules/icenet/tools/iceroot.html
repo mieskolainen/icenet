@@ -44,6 +44,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
 
@@ -59,9 +60,9 @@
 <span class="sd">        class_id:      class identifier (integer), e.g. 0, 1, 2 ...</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        X, Y, W, VARS</span>
+<span class="sd">        X, Y, W, ids</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -71,13 +72,20 @@
         <span class="n">model_param</span> <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
 
         <span class="n">rootfile</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
-        <span class="n">X</span><span class="p">,</span> <span class="n">VARS</span>     <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
-        <span class="n">N</span>           <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">Y</span>           <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">W</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">/</span> <span class="n">N</span>
+        <span class="c1"># Load file</span>
+        <span class="n">X</span><span class="p">,</span><span class="n">ids</span>       <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tree&#39;</span><span class="p">],</span>
+                        <span class="n">entry_start</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_start&#39;</span><span class="p">],</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_stop&#39;</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;load_ids&#39;</span><span class="p">],</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">)</span>
+        <span class="n">N_before</span>    <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Apply selections</span>
+        <span class="n">X</span><span class="p">,</span><span class="n">ids</span>       <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        <span class="n">N_after</span>     <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">Y</span>           <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">W</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">/</span> <span class="n">N_before</span>
     
-    <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">VARS</span></div>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span></div>
 
 
 <div class="viewcode-block" id="load_tree_stats"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree_stats">[docs]</a><span class="k">def</span> <span class="nf">load_tree_stats</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
