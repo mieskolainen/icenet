@@ -53,8 +53,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         print(__name__ + f'.read_multiple_MC: Process {key}: efficiency x acceptance = {eff_acc}')
 
         Y__         = class_id * np.ones(N_after, dtype=int)
-        W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs)
-
+        W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs) # Sum over W yields = (eff_acc * xs)
+        
         # Concatenate processes
         if i == 0:
             X, Y, W = X__, Y__, W__
