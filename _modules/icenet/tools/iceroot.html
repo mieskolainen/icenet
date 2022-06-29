@@ -83,9 +83,12 @@
         <span class="n">N_after</span>     <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">eff_acc</span>     <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Efficiency x Acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
         <span class="n">Y</span>           <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">W</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span> <span class="o">/</span> <span class="n">N_before</span>
-    
+        <span class="n">W</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_after</span> <span class="o">*</span> <span class="p">(</span><span class="n">eff_acc</span> <span class="o">*</span> <span class="n">xs</span><span class="p">)</span>
+        
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span></div>
 
 
