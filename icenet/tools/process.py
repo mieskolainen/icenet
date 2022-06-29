@@ -688,8 +688,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # --------------------------------------
     ## Total ROC Plot
-    metric = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
-
+    metric = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
+    
     roc_mstats.append(metric)
     roc_labels.append(label)
     # --------------------------------------

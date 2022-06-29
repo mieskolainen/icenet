@@ -217,7 +217,7 @@ outlier_param:
 ## Pure plotting setup
 plot_param:
   basic:
-    active: true
+    active: false
     nbins:  70
   
   contours: 
@@ -511,7 +511,6 @@ lgr0_param:
   # Read/Write of epochs
   savemode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
-
 
 
 # Permutation Equivariant Network
