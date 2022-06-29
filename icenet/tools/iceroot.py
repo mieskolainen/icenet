@@ -49,9 +49,12 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         N_after     = X.shape[0]
 
         eff_acc     = N_after / N_before
+
+        print(__name__ + f'.read_multiple_MC: Efficiency x Acceptance = {eff_acc}')
+
         Y           = class_id * np.ones(N_after, dtype=int)
-        W           = np.ones(N_after, dtype=float) * xs * eff_acc / N_before
-    
+        W           = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs)
+        
     return X,Y,W,ids
 
 
