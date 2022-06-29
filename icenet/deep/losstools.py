@@ -38,11 +38,15 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         ind  = (y == 0) # Use only background to train
 
         xhat = model.forward(x[ind, ...]) 
-        MSE  = torch.sum((xhat - x[ind, ...])**2, dim=-1).mean(dim=0)
-        KL   = torch.sum(model.encoder.kl_i, dim=-1).mean(dim=0)
-
-        return MSE + param['VAE_beta']*KL
         
+        MSE  = torch.sum((xhat - x[ind, ...])**2, dim=-1)
+        KL   = param['VAE_beta'] * torch.sum(model.encoder.kl_i, dim=-1)
+
+        if weights is not None:
+            return ((MSE + KL)*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
+        else:
+            return (MSE + KL).mean(dim=0)
+    
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 
@@ -92,8 +96,11 @@ def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
 
     y    = F.one_hot(y, num_classes)
     loss = - y*log_phat * w
-    loss = loss.sum() / y.shape[0]
-    return loss
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
     """
@@ -109,8 +116,11 @@ def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
 
     # Protection
     loss = - y*torch.log(phat + EPS) * w
-    loss = loss.sum() / y.shape[0]
-    return loss
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
     """
@@ -124,8 +134,11 @@ def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=No
 
     y = F.one_hot(y, num_classes)
     loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
-    loss = loss.sum() / y.shape[0]
-    return loss
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
     """
@@ -139,8 +152,11 @@ def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-3
 
     y = F.one_hot(y, num_classes)
     loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
-    loss = loss.sum() / y.shape[0]
-    return loss
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 def log_sum_exp(x):
     """ 

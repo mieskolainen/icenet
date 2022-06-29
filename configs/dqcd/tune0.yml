@@ -448,7 +448,7 @@ xgb0_param:
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
-    learning_rate: 1.0e-3
+    learning_rate: 0.1
     gamma: 1.67
     max_depth: 10
     min_child_weight: 1.0

@@ -460,8 +460,12 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
     ### *********************************
     
-    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = data_trn.w)
-    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y, weight = data_val.w)
+    # Normalize weights to sum to number of events (xgboost library has no scale normalization)
+    w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
+    w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
+
+    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
+    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,                               weight = w_val)
     
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
@@ -497,11 +501,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
         # AUC
         pred    = model.predict(dtrain)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=data_trn.w, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
         pred    = model.predict(deval)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=data_val.w, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
         # Loss
@@ -614,8 +618,13 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
 
     # ------------------------------------------------------------------------------
     ## Train xgboost
-    dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
-    deval     = xgboost.DMatrix(data = x_val, label = y_val, weight = val_weights)
+
+    # Normalize weights to sum to number of events (xgboost library has no scale normalization)
+    w_trn     = trn_weights / np.sum(trn_weights) * trn_weights.shape[0]
+    w_val     = val_weights / np.sum(val_weights) * val_weights.shape[0]
+
+    dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = w_trn)
+    deval     = xgboost.DMatrix(data = x_val, label = y_val, weight = w_val)
 
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     results   = dict()
@@ -651,11 +660,11 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         
         # AUC
         pred    = model.predict(dtrain)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=trn_weights, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
         pred    = model.predict(deval)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=val_weights, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
         
         # Loss
