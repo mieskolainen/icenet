@@ -29,9 +29,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, Y, W, ids
     """
 
-    for i in range(len(processes)):
-        
-        key = processes[i]
+    for i,key in enumerate(processes):
+
         print(__name__ + f'.read_multiple_MC: {processes[key]}')
 
         datasets    = processes[key]['path']
