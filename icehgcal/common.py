@@ -57,7 +57,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # -----------------------------------------------
 
     # ** Pick the variables **
-    ids = MVA_ID
+    ids = MVA_SCALAR_VARS
     
     param = {
         "entry_start": entry_start,
@@ -164,8 +164,8 @@ def splitfactor(x, y, w, ids, args):
     ### Pick kinematic variables out
     data_kin = None
     """
-    if KINEMATIC_ID is not None:
-        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+    if KINEMATIC_VARS is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_VARS)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)
@@ -180,7 +180,7 @@ def splitfactor(x, y, w, ids, args):
     data_tensor = None
     """
     if args['image_on']:
-        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
     """
     # -------------------------------------------------------------------------
     ## Graph representation

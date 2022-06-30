@@ -128,15 +128,14 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
-
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-
+    
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
     
-    if KINEMATIC_ID is not None:
-        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
+    if KINEMATIC_VARS is not None:
+        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_VARS)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)

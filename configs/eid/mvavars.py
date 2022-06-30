@@ -1,21 +1,20 @@
-# MVA variables. Use here only variables available in real data.
+# MVA variables.
 
-
-# Use these to test that the (re-weight trained) classifier
-# is independent of these
-KINEMATIC_ID = [
+KINEMATIC_VARS = [
   'trk_pt',
   'trk_eta',
   'trk_phi',
   'ele_mva_value_depth15'
 ]
 
+# Use these to test that the (re-weight trained) classifier
+# is independent of these
 UNIT_TEST_ID = [
   'trk_pt',
   'trk_eta'
 ]
 
-CMSSW_MVA_ID = [
+CMSSW_MVA_SCALAR_VARS = [
   'gsf_bdtout1',
   'eid_rho',
   'eid_ele_pt',
@@ -39,7 +38,7 @@ CMSSW_MVA_ID = [
   'eid_trk_p',
 ]
 
-CMSSW_MVA_ID_IMAGE = [
+CMSSW_MVA_IMAGE_VARS = [
  'image_gsf_ref_eta',
  'image_gsf_ref_phi',
  'image_gsf_ref_R',
@@ -78,7 +77,7 @@ CMSSW_MVA_ID_IMAGE = [
  'image_pf_lost'
 ]
 
-CMSSW_MVA_ID_ORIG = [
+CMSSW_MVA_SCALAR_VARS_ORIG = [
   'gsf_bdtout1',
   'eid_rho',
   'eid_ele_pt',

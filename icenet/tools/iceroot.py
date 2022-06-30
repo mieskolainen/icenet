@@ -54,7 +54,30 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
         Y__         = class_id * np.ones(N_after, dtype=int)
         W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs) # Sum over W yields = (eff_acc * xs)
-        
+
+
+        # -------------------------------------------------
+        # Add conditional (theory param) variables
+
+        print(__name__ + f'.read_multiple_MC: Add conditional theory (model) parameters')
+        print(X__.shape)
+
+        for var in model_param.keys():
+
+            value = model_param[var]
+
+            # Pick random between [a,b]
+            if type(value) == list:
+                col = value[0]  + (value[1] - value[0]) * np.random.rand(X__.shape[0], 1)
+            # Pick specific fixed value
+            else:
+                col = value * np.ones((X__.shape[0], 1))
+            
+            X__ = np.append(X__, col, axis=1)
+            ids.append(f'__model_{var}')
+
+        # -------------------------------------------------
+
         # Concatenate processes
         if i == 0:
             X, Y, W = X__, Y__, W__

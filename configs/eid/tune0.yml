@@ -62,7 +62,7 @@ distillation:
     # - add more here
 
 
-inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
+inputvar: 'CMSSW_MVA_SCALAR_VARS_ORIG'   # Input variables, implemented under mvavars.py
 
 targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
 filterfunc: 'filter_no_egamma'  # Training filtering, implemented under mcfilter.py
@@ -168,7 +168,7 @@ reweight_param:
 # Imputation
 imputation_param:
   active: true                 # True / False
-  var: 'CMSSW_MVA_ID_ORIG'     # Array of variables to be imputated
+  var: 'CMSSW_MVA_SCALAR_VARS_ORIG'     # Array of variables to be imputated
   algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
   fill_value: 0                # For constant imputation
   knn_k: 8                     # Number of nearest neighbours considered

@@ -1,26 +1,18 @@
 # HLT-MVA variables. Use here only variables available in real data.
 
-
-# Variables we read out from the root files (regular expressions supported here)
-#LOAD_VARS = ['.+hlt.?', '.?gen.?']
-LOAD_VARS = ['.'] # all
-
-
-
-KINEMATIC_GEN_ID = [
+KINEMATIC_GEN_VARS = [
   'gen_pt',
   'gen_eta',
   'gen_phi',
   'gen_energy'
 ]
 
-KINEMATIC_ID = [
+KINEMATIC_VARS = [
   'x_hlt_pt',
   'x_hlt_eta'
 ]
 
-
-MVA_ID = [
+MVA_SCALAR_VARS = [
   'x_hlt_pms2',
   'x_hlt_invEInvP',
   'x_hlt_trkDEtaSeed',
@@ -44,7 +36,6 @@ NEW_VARS = [
   'x_hlt_trkNrLayerIT'
 ]
 
-
 PLOT_VARS = [
   'gen_e1_pt',
   'gen_e1_eta',
@@ -54,3 +45,6 @@ PLOT_VARS = [
   'gen_eta'
 ]
 
+# Variables we read out from the root files (regular expressions supported here)
+#LOAD_VARS = ['.+hlt.?', '.?gen.?']
+LOAD_VARS = ['.'] # all

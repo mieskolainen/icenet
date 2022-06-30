@@ -52,7 +52,7 @@ distillation:
 
 # ----------------------------------------------------
 
-inputvar: 'MVA_ID'               # Input variables, implemented under mvavars.py
+inputvar: 'MVA_SCALAR_VARS'               # Input variables, implemented under mvavars.py
 
 
 targetfunc: null                 # Training target,    implemented under mctargets.py
@@ -107,7 +107,7 @@ reweight_param:
 # Imputation
 imputation_param:
   active: true                   # True / False
-  var: 'MVA_ID'                  # Array of variables to be imputated
+  var: 'MVA_SCALAR_VARS'                  # Array of variables to be imputated
   algorithm: 'constant'          # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
   fill_value: 0                  # For constant imputation
   knn_k: 8                       # Number of nearest neighbours considered
