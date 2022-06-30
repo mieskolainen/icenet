@@ -452,10 +452,13 @@ def train_models(data_trn, data_val, args=None) :
         if ID == args['distillation']['source']:
             print(__name__ + '.train.models: Computing distillation soft targets ...')
             
+            if args['num_classes'] != 2:
+                raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
+            
             if   param['train'] == 'xgb':
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
+                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
             elif param['train'] == 'torch_graph':
-                y_soft = model.softpredict(data_trn['data_graph'])
+                y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
                 raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
         # --------------------------------------------------------
@@ -685,8 +688,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # --------------------------------------
     ## Total ROC Plot
-    metric = aux.Metric(y_true=y, y_soft=y_pred, weights=weights)
-
+    metric = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
+    
     roc_mstats.append(metric)
     roc_labels.append(label)
     # --------------------------------------

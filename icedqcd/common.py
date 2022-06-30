@@ -91,13 +91,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     return X, Y, W, VARS_S
 
 
-def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
-
+def process_root(X, ids, isMC, args, **extra):
+    
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids)
-    
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)

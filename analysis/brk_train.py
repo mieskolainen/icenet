@@ -148,20 +148,24 @@ def main() :
         X_train, X_eval, Y_train, Y_eval = \
             sklearn.model_selection.train_test_split(X, Y_i, test_size=1-args['frac'], random_state=args['rngseed'])
 
-        if args['xgb_param']['tree_method'] == 'auto':
-            args['xgb_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+        if args['xgb_param']['model_param']['tree_method'] == 'auto':
+            args['xgb_param']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
         
         # Update parameters
-        args['xgb_param'].update({'num_class': C})
+        args['xgb_param']['model_param'].update({'num_class': C})
         
         dtrain = xgboost.DMatrix(data = X_train, label = Y_train) #, weight = trn_weights)
         deval  = xgboost.DMatrix(data = X_eval , label = Y_eval)
 
         evallist  = [(dtrain, 'train'), (deval, 'eval')]
         results   = dict()
-        xgb_model = xgboost.train(params=args['xgb_param'], num_boost_round = args['xgb_param']['num_boost_round'],
-            dtrain=dtrain, evals=evallist, evals_result=results, verbose_eval=True)
 
+        num_boost_round = args['xgb_param']['num_boost_round']
+        del args['xgb_param']['num_boost_round']
+
+        xgb_model = xgboost.train(params=args['xgb_param']['model_param'], num_boost_round = num_boost_round,
+            dtrain=dtrain, evals=evallist, evals_result=results, verbose_eval=True)
+        
         ## Save
         pickle.dump(xgb_model, open(args['modeldir'] + '/XGB_model.dat', 'wb'))
 

@@ -448,51 +448,88 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         trained model
     """
 
-    if param['tree_method'] == 'auto':
-        param.update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+    if param['model_param']['tree_method'] == 'auto':
+        param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
     print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     if config is not {}:
-        for key in param.keys():
-            param[key] = config[key] if key in config.keys() else param[key]
+        for key in param['model_param'].keys():
+            param['model_param'][key] = config[key] if key in config.keys() else param['model_param'][key]
 
     ### *********************************
     
-    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = data_trn.w)
-    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y, weight = data_val.w)
+    # Normalize weights to sum to number of events (xgboost library has no scale normalization)
+    w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
+    w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
+
+    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
+    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,                               weight = w_val)
     
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
-    results   = dict()
     print(param)
 
-    model     = xgboost.train(params = param, dtrain = dtrain,
-        num_boost_round = param['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
+    trn_losses = []
+    val_losses = []
     
-    if args['__raytune_running__']:
+    trn_aucs   = []
+    val_aucs   = []
 
-        epoch = 0 # Fixed to 0 (no epochs in use)
-        with tune.checkpoint_dir(epoch) as checkpoint_dir:
-            path = os.path.join(checkpoint_dir, "checkpoint")
-            pickle.dump(model, open(path, 'wb'))
+    # Update the parameters
+    model_param = copy.deepcopy(param['model_param'])
+    model_param.update({'num_class': args['num_classes']})
+    del model_param['num_boost_round']
 
-        tune.report(loss = results['train']['logloss'][-1], AUC = results['eval']['auc'][-1])
+    # Boosting iterations
+    for epoch in range(param['model_param']['num_boost_round']):
 
-    else:
-        ## Save
-        filename = args['modeldir'] + f'/{param["label"]}_' + str(0)
-        pickle.dump(model, open(filename + '.dat', 'wb'))
-        model.save_model(filename + '.json')
-        model.dump_model(filename + '.text', dump_format='text')
-    
-        losses   = results['train']['logloss']
-        trn_aucs = results['train']['auc']
-        val_aucs = results['eval']['auc']
+        results = dict()
+        
+        a = {'params':          model_param,
+             'dtrain':          dtrain,
+             'num_boost_round': 1,
+             'evals':           evallist,
+             'evals_result':    results,
+             'verbose_eval':    True}
+
+        if epoch > 0: # Continue from the previous epoch model
+            a['xgb_model'] = model
+
+        # Train it
+        model = xgboost.train(**a)
+
+        # AUC
+        pred    = model.predict(dtrain)[:, args['signalclass']]
+        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
+        trn_aucs.append(metrics.auc)
+        
+        pred    = model.predict(deval)[:, args['signalclass']]
+        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
+        val_aucs.append(metrics.auc)
+
+        # Loss
+        trn_losses.append(results['train']['mlogloss'])
+        val_losses.append(results['eval']['mlogloss'])
+        
+        if args['__raytune_running__']:
+            with tune.checkpoint_dir(epoch) as checkpoint_dir:
+                path = os.path.join(checkpoint_dir, "checkpoint")
+                pickle.dump(model, open(path, 'wb'))
+
+            tune.report(loss = trn_losses[-1], AUC = val_aucs[-1])
+        else:
+            ## Save
+            filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
+            pickle.dump(model, open(filename + '.dat', 'wb'))
+            model.save_model(filename + '.json')
+            model.dump_model(filename + '.text', dump_format='text')
+
+    if not args['__raytune_running__']:
 
         # Plot evolution
         plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param["label"])
+        fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param["label"])
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Plot feature importance
@@ -527,12 +564,13 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     Returns:
         trained model
     """
-    if param['xgb']['tree_method'] == 'auto':
-        param['xgb'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
-
+    if param['xgb']['model_param']['tree_method'] == 'auto':
+        param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+    
     print(__name__ + f'.train_graph_xgb: Training {param["label"]} classifier ...')
 
-    ### Compute graphnet convolution output
+    # --------------------------------------------------------------------
+    ### Train GNN
     graph_model = train_torch_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'])
     graph_model = graph_model.to('cpu')    
 
@@ -552,9 +590,10 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         raise Exception(__name__ + '.train_graph_xgb: Could not auto-detect latent space dimension')
     else:
         print(__name__  + f'.train_graph_xgb: Latent z-space dimension = {Z} auto-detected')
+    
     # -------------------------
+    ## Evaluate GNN output
 
-    ## Evaluate Graph model output
     graph_model.eval() # ! important
 
     x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
@@ -577,25 +616,68 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
 
     print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
 
+    # ------------------------------------------------------------------------------
     ## Train xgboost
-    dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = trn_weights)
-    dtest     = xgboost.DMatrix(data = x_val, label = y_val, weight = val_weights)
 
-    evallist  = [(dtrain, 'train'), (dtest, 'eval')]
+    # Normalize weights to sum to number of events (xgboost library has no scale normalization)
+    w_trn     = trn_weights / np.sum(trn_weights) * trn_weights.shape[0]
+    w_val     = val_weights / np.sum(val_weights) * val_weights.shape[0]
+
+    dtrain    = xgboost.DMatrix(data = x_trn, label = y_trn, weight = w_trn)
+    deval     = xgboost.DMatrix(data = x_val, label = y_val, weight = w_val)
+
+    evallist  = [(dtrain, 'train'), (deval, 'eval')]
     results   = dict()
-    model     = xgboost.train(params = param['xgb'], dtrain = dtrain,
-        num_boost_round = param['xgb']['num_boost_round'], evals = evallist, evals_result = results, verbose_eval = True)
 
-    ## Save
-    pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_" + str(0) + '.dat', 'wb'))
-
-    losses   = results['train']['logloss']
-    trn_aucs = results['train']['auc']
-    val_aucs = results['eval']['auc']
+    trn_losses = []
+    val_losses = []
     
+    trn_aucs   = []
+    val_aucs   = []
+
+    # Update the parameters
+    model_param = copy.deepcopy(param['xgb']['model_param'])
+    model_param.update({'num_class': args['num_classes']})
+    del model_param['num_boost_round']
+
+    # Boosting iterations
+    for epoch in range(param['xgb']['model_param']['num_boost_round']):
+        
+        results = dict()
+        
+        a = {'params':          model_param,
+             'dtrain':          dtrain,
+             'num_boost_round': 1,
+             'evals':           evallist,
+             'evals_result':    results,
+             'verbose_eval':    True}
+
+        if epoch > 0: # Continue from the previous epoch model
+            a['xgb_model'] = model
+
+        # Train it
+        model = xgboost.train(**a)
+        
+        # AUC
+        pred    = model.predict(dtrain)[:, args['signalclass']]
+        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
+        trn_aucs.append(metrics.auc)
+        
+        pred    = model.predict(deval)[:, args['signalclass']]
+        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
+        val_aucs.append(metrics.auc)
+        
+        # Loss
+        trn_losses.append(results['train']['mlogloss'])
+        val_losses.append(results['eval']['mlogloss'])
+
+        ## Save
+        pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))
+    
+    # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['xgb']['label'])
+    fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
@@ -621,7 +703,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
-
+    
     return model
 
 

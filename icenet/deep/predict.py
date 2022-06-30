@@ -119,7 +119,7 @@ def pred_graph_xgb(args, param, device='cpu'):
             x_tot[i,0:dim1] = conv_x[i,:]  # Convoluted features
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
-        return xgb_model.predict(xgboost.DMatrix(data=x_tot))
+        return xgb_model.predict(xgboost.DMatrix(data=x_tot))[:, args['signalclass']]
 
     return func_predict
 
@@ -184,7 +184,7 @@ def pred_torch_scalar(args, param):
     model.eval() # Turn on eval mode!
     
     def func_predict(x):
-
+        
         if not isinstance(x, dict):
             x_in = x.to(device)
         else:
@@ -211,8 +211,8 @@ def pred_xgb(args, param):
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        return xgb_model.predict(xgboost.DMatrix(data = x))
-
+        return xgb_model.predict(xgboost.DMatrix(data = x))[:,args['signalclass']]
+    
     return func_predict
 
 
@@ -227,7 +227,7 @@ def pred_flow(args, param, n_dims):
     modelnames = []
     for i in range(args['num_classes']):
         modelnames.append(f'{label}_class_{i}')
-
+    
     models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
     
     def func_predict(x):

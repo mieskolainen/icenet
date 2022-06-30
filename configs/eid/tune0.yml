@@ -238,7 +238,7 @@ raytune_setup:
     search_metric:
       metric: 'AUC'
       mode: 'max'
-
+      
     param:
       cdim:
         type: "tune.choice"
@@ -255,8 +255,7 @@ raytune_setup:
       lr:
         type: "tune.loguniform"
         value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
-
-
+    
     #
     #batch_size:
     #  type: "tune.choice"
@@ -398,30 +397,30 @@ gxgb0_param:
     raytune:  null
 
     # general parameters
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 300    # number of epochs (equal to the number of trees!)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-    
-    # booster parameters
-    learning_rate: 0.1
-    gamma: 0.0
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
+    model_param:
+      num_boost_round: 300    # number of epochs (equal to the number of trees!)
+      
+      booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+      tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+      
+      # booster parameters
+      learning_rate: 0.1
+      gamma: 0.0
+      max_depth: 10
+      min_child_weight: 1.0
+      max_delta_step: 1
+      subsample: 1
 
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
-    
-    reg_lambda: 2.0        # L2 regularization
-    reg_alpha: 0.0         # L1 regularization
-    
-    scale_pos_weight: 1
-
-    # learning task parameters
-    objective:    'binary:logistic'  #
-    eval_metric: ['auc', 'logloss']  # for evaluation
+      colsample_bytree:  1
+      colsample_bylevel: 1
+      colsample_bynode:  1
+      
+      reg_lambda: 2.0        # L2 regularization
+      reg_alpha: 0.0         # L1 regularization
+      
+      # learning task parameters
+      objective: 'multi:softprob'  # 'binary:logistic'     #
+      eval_metric: ['mlogloss']     # for evaluation
 
     # Read/Write of epochs
     savemode: 'all'                  # 'all', 'latest'
@@ -657,31 +656,30 @@ xgb0_param:
   raytune:  'xgb_setup'
 
   # general parameters
-  booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 300    # number of epochs (equal to the number of trees!)
-  tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+  model_param:
+    num_boost_round: 300    # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
+    # booster parameters
+    learning_rate: 0.1
+    gamma: 0.0
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
 
-  # booster parameters
-  learning_rate: 0.1
-  gamma: 0.0
-  max_depth: 10
-  min_child_weight: 1.0
-  max_delta_step: 1
-  subsample: 1
-
-  colsample_bytree:  1
-  colsample_bylevel: 1
-  colsample_bynode:  1
-  
-  reg_lambda: 2.0       # L2 regularization
-  reg_alpha: 0.0        # L1 regularization
-  
-  scale_pos_weight: 1
-
-  # learning task parameters
-  objective: 'binary:logistic'     #
-  eval_metric: ['auc', 'logloss']  # for evaluation
+    colsample_bytree:  1
+    colsample_bylevel: 1
+    colsample_bynode:  1
+    
+    reg_lambda: 2.0       # L2 regularization
+    reg_alpha: 0.0        # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']     # for evaluation
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

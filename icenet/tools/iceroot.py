@@ -10,6 +10,7 @@ from termcolor import colored, cprint
 import re
 
 from icenet.tools import io
+from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
 
@@ -25,25 +26,44 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
     
     Returns:
-        X, Y, W, VARS
+        X, Y, W, ids
     """
 
-    for key in processes:
+    for i,key in enumerate(processes):
 
-        print(__name__ + f'.read_multiple_MC: {key}')
+        print(__name__ + f'.read_multiple_MC: {processes[key]}')
 
         datasets    = processes[key]['path']
         xs          = processes[key]['xs']
         model_param = processes[key]['model_param']
 
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
-        X, VARS     = process_func(rootfile=rootfile, **param)
 
-        N           = X.shape[0]
-        Y           = class_id * np.ones(N, dtype=int)
-        W           = np.ones(N, dtype=float) * xs / N
-    
-    return X,Y,W,VARS
+        # Load file
+        X__,ids     = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
+                        entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='np')
+        N_before    = X__.shape[0]
+        
+        # Apply selections
+        X__,ids     = process_func(X=X__, ids=ids, **param)
+        N_after     = X__.shape[0]
+
+        eff_acc     = N_after / N_before
+
+        print(__name__ + f'.read_multiple_MC: Process {key}: efficiency x acceptance = {eff_acc}')
+
+        Y__         = class_id * np.ones(N_after, dtype=int)
+        W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs) # Sum over W yields = (eff_acc * xs)
+        
+        # Concatenate processes
+        if i == 0:
+            X, Y, W = X__, Y__, W__
+        else:
+            X = np.concatenate((X, X__), axis=0)
+            Y = np.concatenate((Y, Y__), axis=0)
+            W = np.concatenate((W, W__), axis=0)
+        
+    return X,Y,W,ids
 
 
 def load_tree_stats(rootfile, tree, key=None, verbose=False):

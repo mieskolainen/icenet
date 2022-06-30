@@ -84,30 +84,30 @@ xgb_param:
   raytune: null
 
   # general parameters
-  booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
-  num_boost_round: 300   # Number of epochs
-  tree_method: 'auto' # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-  
-  # booster parameters
-  learning_rate: 0.1
-  max_depth: 10
-  min_child_weight: 1.0
-  gamma: 0.0
-  max_delta_step: 0
-  subsample: 1.0
+  model_param:
 
-  colsample_bytree:  1
-  colsample_bylevel: 1
-  colsample_bynode:  1
-  
-  reg_lambda: 2.0       # L2 regularization
-  reg_alpha: 0.0        # L1 regularization
-  
-  scale_pos_weight: 1
-  
-  # learning task parameters
-  objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
-  eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
+    booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 300   # Number of epochs
+    tree_method: 'auto'    # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    
+    # booster parameters
+    learning_rate: 0.1
+    max_depth: 10
+    min_child_weight: 1.0
+    gamma: 0.0
+    max_delta_step: 0
+    subsample: 1.0
+
+    colsample_bytree:  1
+    colsample_bylevel: 1
+    colsample_bynode:  1
+    
+    reg_lambda: 2.0       # L2 regularization
+    reg_alpha: 0.0        # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
+    eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

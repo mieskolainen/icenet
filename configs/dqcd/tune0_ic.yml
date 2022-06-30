@@ -23,77 +23,77 @@ MC_input:
     #    ctau: 100
 
     HiddenValley_vector:
-      path: 'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+      path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
       xs: 1.0
       model_param:
         m:    10
         ctau: 10
-
+  
   background:
-    # QCD_Pt-20toInf:
-    #   path: 'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 1.0
-    #   model_param: null
+    #QCD_Pt-20toInf:
+    #  path: 'QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+    #  xs: 1.0
+    #  model_param: null
     
     QCD_Pt-15to20: 
-      path: 'QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+      path: 'bparkProductionV1_bkg/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
       xs: 2799000.0 # [pb]
       model_param: null
-    
+      
     QCD_Pt-20to30: 
-      path: 'QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
+      path: 'bparkProductionV1_bkg/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
       xs: 2526000.0 # [pb]
       model_param: null
 
     QCD_Pt-30to50:
-      path: 'QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+      path: 'bparkProductionV1_bkg/QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
       xs: 1362000.0 # [pb]
       model_param: null
 
-    # QCD_Pt-50to80: 
-    #   path: 'QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 376600.0 # [pb]
-    #   model_param: null
+    QCD_Pt-50to80: 
+      path: 'bparkProductionV1_bkg/QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 376600.0 # [pb]
+      model_param: null
 
-    # QCD_Pt-80to120:
-    #   path: 'QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 88930.0 # [pb]
-    #   model_param: null
+    QCD_Pt-80to120:
+      path: 'bparkProductionV1_bkg/QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 88930.0 # [pb]
+      model_param: null
 
-    # QCD_Pt-120to170:
-    #   path: 'QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 21230.0 # [pb]
-    #   model_param: null
+    QCD_Pt-120to170:
+      path: 'bparkProductionV1_bkg/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 21230.0 # [pb]
+      model_param: null
 
-    # QCD_Pt-170to300:
-    #   path: 'QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 7055.0 # [pb]
-    #   model_param: null
+    QCD_Pt-170to300:
+      path: 'bparkProductionV1_bkg/QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 7055.0 # [pb]
+      model_param: null
 
-    # QCD_Pt-300to470:
-    #   path: 'QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 619.3 # [pb]
-    #   model_param: null
+    QCD_Pt-300to470:
+      path: 'bparkProductionV1_bkg/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 619.3 # [pb]
+      model_param: null
 
-    # QCD_Pt-470to600:
-    #   path: 'QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 59.24 # [pb]
-    #   model_param: null
+    QCD_Pt-470to600:
+      path: 'bparkProductionV1_bkg/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 59.24 # [pb]
+      model_param: null
 
-    # QCD_Pt-600to800:
-    #   path: 'QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 18.21 # [pb]
-    #   model_param: null
+    QCD_Pt-600to800:
+      path: 'bparkProductionV1_bkg/QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 18.21 # [pb]
+      model_param: null
 
-    # QCD_Pt-800to1000:
-    #   path: 'QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 3.275 # [pb]
-    #   model_param: null
+    QCD_Pt-800to1000:
+      path: 'bparkProductionV1_bkg/QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 3.275 # [pb]
+      model_param: null
 
-    # QCD_Pt-1000toInf:
-    #   path: 'QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
-    #   xs: 1.078 # [pb]
-    #   model_param: null
+    QCD_Pt-1000toInf:
+      path: 'bparkProductionV1_bkg/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
+      xs: 1.078 # [pb]
+      model_param: null
 
 # ----------------------------------------------------
 
@@ -513,6 +513,7 @@ lgr0_param:
   readmode: -1                  # -1 is the last saved epoch
 
 
+
 # Permutation Equivariant Network
 deps_param:
   train:   'torch_deps'
@@ -594,6 +595,46 @@ dmx0_param:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
+
+# Deep MAXOUT network
+dmx1_param:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'MAXO-LNCE'
+  raytune:  null
+
+  # Model parameter
+  conv_type: 'maxo'
+  model_param:
+    num_units: 8
+    neurons:  50
+    dropout:  0.1
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'Adam'         # Adam, AdamW
+    noise_reg: 0.0            # Noise regularization
+
+    epochs: 200
+    batch_size: 128
+    lr: 1.0e-3
+    weight_decay: 0.00001     # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # -1 is the last saved epoch
 
 
 # Deep Normalizing Flow
