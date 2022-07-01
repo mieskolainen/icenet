@@ -67,9 +67,14 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">datasets</span>    <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
-        <span class="n">xs</span>          <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;xs&#39;</span><span class="p">]</span>
-        <span class="n">model_param</span> <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
+        <span class="c1"># --------------------</span>
+
+        <span class="n">datasets</span>     <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+        <span class="n">xs</span>           <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;xs&#39;</span><span class="p">]</span>
+        <span class="n">model_param</span>  <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
+        <span class="n">force_xs</span>     <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;force_xs&#39;</span><span class="p">]</span>
+
+        <span class="c1"># --------------------</span>
 
         <span class="n">rootfile</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
 
@@ -84,16 +89,25 @@
 
         <span class="n">eff_acc</span>     <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Process </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Process &lt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&gt; | efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">Y__</span>         <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">W__</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_after</span> <span class="o">*</span> <span class="p">(</span><span class="n">eff_acc</span> <span class="o">*</span> <span class="n">xs</span><span class="p">)</span> <span class="c1"># Sum over W yields = (eff_acc * xs)</span>
 
+        <span class="c1"># -------------------------------------------------</span>
+        <span class="c1"># Visible cross-section weights</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">force_xs</span><span class="p">:</span>
+            <span class="n">W__</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span><span class="p">)</span> <span class="c1"># Sum over W yields --&gt; (eff_acc * xs)</span>
+        
+        <span class="c1"># Force mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants</span>
+        <span class="c1"># to have equal proportions for e.g. theory conditional MVA training.</span>
+        <span class="c1"># (then one uses the same xs value for each process in the steering .yaml file)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">W__</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span> <span class="c1"># Sum over W yields --&gt; xs</span>
 
         <span class="c1"># -------------------------------------------------</span>
         <span class="c1"># Add conditional (theory param) variables</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Add conditional theory (model) parameters&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -105,7 +119,9 @@
                 <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
             <span class="c1"># Pick specific fixed value</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span>  <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>                
             
             <span class="n">X__</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X__</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;__model_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
