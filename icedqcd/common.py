@@ -51,6 +51,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     }
 
     # =================================================================
+    # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
+
+    proc = args["MC_input"]['signal']
+    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1, process_func=process_root, processes=proc, root_path=root_path, param=param)
+    
+
+    # =================================================================
     # *** BACKGROUND MC ***
 
     proc = args["MC_input"]['background']
@@ -58,11 +65,15 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
 
     # =================================================================
-    # *** SIGNAL MC ***
+    # Sample conditional theory parameters for the background as they are distributed in signal sample
 
-    proc = args["MC_input"]['signal']
-    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1, process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
+    for var in MODEL_VARS:
+        
+        print(__name__ + f'.load_root_file: Sampling theory conditional <{var}> for the background')
+        ind = VARS_B.index(var)
+
+        # Random sample values as in the signal MC
+        X_B[:,ind] = np.random.choice(X_S[:,ind], size=X_B.shape[0], replace=True, p=W_S / np.sum(W_S))
     
     # =================================================================
     # *** Finally combine ***
