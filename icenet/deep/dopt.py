@@ -182,6 +182,8 @@ def train(model, loader, optimizer, device, opt_param):
         
         # Propagate gradients 
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
+        optimizer.step()
         
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
@@ -189,8 +191,6 @@ def train(model, loader, optimizer, device, opt_param):
         else:
             total_loss += loss.item() * batch.num_graphs # torch-geometric
             n += batch.num_graphs
-
-        optimizer.step()
 
     return total_loss / n
 

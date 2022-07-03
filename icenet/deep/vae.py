@@ -21,10 +21,6 @@ input x | decoder | latent space (z) ~ N(mu,sigma) | encoder | output xhat
         |                                                    |
         |                                                    |
 
-Training loop ELBO minimization:
-    xhat = model.forward(x)
-    loss = ((x - x_hat)**2).sum() + model.encoder.kl.sum()
-
 """
 
 class Encoder(nn.Module):
@@ -45,26 +41,20 @@ class VariationalEncoder(nn.Module):
         
         self.mlp        = MLP_ALL_ACT([D, hidden_dim, hidden_dim], activation=activation, batch_norm=batch_norm)
         self.mlp_mu     = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='tanh', batch_norm=batch_norm)
+        self.mlp_logvar = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='tanh', batch_norm=batch_norm)
         
-        # This should output positive definite value (use relu)
-        self.mlp_logvar = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='relu', batch_norm=batch_norm)
-        
-        self.N          = torch.distributions.Normal(0, 1)
-        self.kl = 0
+        self.N          = torch.distributions.Normal(0,1)
 
     def forward(self, x):
         q        = self.mlp(x)
 
         # "Re-parametrization" trick to allow gradients backpropagate
+        # For more info, see: https://arxiv.org/abs/1805.08498
         mu       = self.mlp_mu(q)
         logvar   = self.mlp_logvar(q)
         std      = torch.exp(0.5 * logvar)
 
         z        = mu + std*self.N.sample(mu.shape)
-
-        # Analytic KL-divergence against unit Gaussian (Wikipedia)
-        # Take torch.sum(self.kl_i, dim=-1) to obtain the MC estimate
-        self.kl_i = 0.5 * (std.pow(2) + mu.pow(2) - 1 - logvar)
 
         return z, mu, std
 
@@ -88,11 +78,15 @@ class Decoder(nn.Module):
 
 class VAE(nn.Module):
     def __init__(self, D, latent_dim, hidden_dim,
-            encoder_bn=True, encoder_act='relu', decoder_bn=False, decoder_act='relu', anomaly_score='MSE', C=None):
-        super(VAE, self).__init__()
+            encoder_bn=True, encoder_act='relu', decoder_bn=False, decoder_act='relu',
+            reco_prob='Gaussian', kl_prob='Gaussian', anomaly_score='KL_RECO', C=None):
 
-        self.D       = D
-        self.C       = C
+        super(VAE, self).__init__()
+        
+        self.D             = D
+        self.C             = C
+        self.reco_prob     = reco_prob
+        self.kl_prob       = kl_prob
         self.anomaly_score = anomaly_score
 
         self.encoder = VariationalEncoder(D=D, hidden_dim=hidden_dim, latent_dim=latent_dim, activation=encoder_act, batch_norm=encoder_bn)
@@ -107,20 +101,82 @@ class VAE(nn.Module):
     def forward(self, x):
         z,mu,std = self.encoder(x)
         xhat     = self.decoder(z)
-        return xhat
+        return xhat,z,mu,std
 
     def softpredict(self, x):
-        z,mu,std = self.encoder(x)
-        xhat     = self.decoder(z)
+        xhat,z,mu,std = self.forward(x)
         
         # "Test statistic"
-        if   self.anomaly_score == 'MSE':
-            score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1]
-            return torch.tanh(score)
+        if   self.anomaly_score == 'RECO':
 
-        elif self.anomaly_score == 'MSE_KL':
-            score = torch.sum((xhat - x)**2, dim=-1)/x.shape[-1] + torch.sum(self.encoder.kl_i, dim=-1)/z.shape[-1]
+            score = self.log_pxz(x=x, xhat=xhat)
+            return 1 - torch.tanh(score)
+
+        elif self.anomaly_score == 'KL_RECO':
+
+            score = self.loss_kl_reco(x=x, xhat=xhat, z=z, mu=mu, std=std)
             return 1 - torch.tanh(1/score)
         
         else:
             raise Exception(__name__ + f'.softpredict: Unknown <anomaly_score> = {self.anomaly_score} selected.')
+
+    def loss_kl_reco(self, x, xhat, z, mu, std, beta=1.0):
+        """
+        min ( E_q[log q(z|x) - log p(z)] - E_q log p(x|z) )
+        """
+        return beta * self.kl_div(z=z, mu=mu, std=std) - self.log_pxz(x=x, xhat=xhat)
+
+    def log_pxz(self, x, xhat):
+        """
+        Reconstruction loss
+        
+        log p(x|z)
+        """
+
+        if   self.reco_prob == 'Bernoulli':
+            # For continous Bernoulli, see: https://arxiv.org/abs/1907.06845
+
+            reco = F.binary_cross_entropy(xhat, x, reduction='none')
+            reco = reco.sum(dim=-1) # Sum over all dimensions
+
+            return reco
+
+        elif self.reco_prob == 'Gaussian':
+            log_scale = nn.Parameter(torch.Tensor([0.0]))
+            scale     = torch.exp(log_scale)
+            dist      = torch.distributions.Normal(xhat, scale)
+
+            reco = dist.log_prob(x)
+            reco = reco.sum(dim=-1) # Sum over all dimensions
+
+            return reco
+
+        else:
+            raise Exception(__name__ + f'.log_pxz: Unknown reco_prob = <{self.reco_prob}> chosen.')
+
+    def kl_div(self, z, mu, std):
+        """
+        KL divergence (always positive), taken against a diagonal multivariate normal here
+        
+        log q(z|x) - log p(z)
+        """
+        # We use here normal densities
+        if self.kl_prob == 'Gaussian':
+            p = torch.distributions.Normal(torch.zeros_like(mu), torch.ones_like(std))
+            q = torch.distributions.Normal(mu, std)
+        else:
+            raise Exception(__name__ + f'.kl_div: Unknown kl_prob = <{self.kl_prob}> chosen')
+
+        # Log-density values
+        log_qzx = q.log_prob(z)
+        log_pz  = p.log_prob(z)
+
+        # KL
+        kl = log_qzx - log_pz
+        kl = kl.sum(dim=-1) # Sum over all dimensions
+        
+        # Analytic KL-divergence against (diagonal) unit multivariate Gaussian (Wikipedia)
+        # Take torch.sum(self.kl_i, dim=-1) to obtain the MC estimate
+        #kl = (0.5 * (std.pow(2) + mu.pow(2) - 1 - logvar).sum(dim=-1)
+
+        return kl

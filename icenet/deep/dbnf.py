@@ -5,7 +5,7 @@
 # https://github.com/nicola-decao/BNAF (MIT license)
 #
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -30,7 +30,7 @@ from icenet.tools import aux_torch
 
 
 def compute_log_p_x(model, x):
-    """ Model log-likelihood: log [ prod_{j=1}^N pdf(x_j)], where x ~ (iid) pdf(x)
+    """ Model log-density value log[pdf(x), where x is the data vector]
     
     log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|
     
@@ -44,7 +44,7 @@ def compute_log_p_x(model, x):
     # Evaluate the non-diagonal and the diagonal part
     y, log_diag = model(x)
 
-    # Sum of log-likelihoods (log product)
+    # Sum of log-likelihoods (log product) pushed through the flow, evaluated for the unit Gaussian
     log_p_y = torch.distributions.Normal(torch.zeros_like(y), torch.ones_like(y)).log_prob(y).sum(dim=-1)
     
     return log_p_y + log_diag
@@ -63,7 +63,7 @@ def get_pdf(model, x) :
         > x = torch.tensor([[1.0, 2.0]])
         > l = get_pdf(model,x)
     """
-    return (torch.exp(compute_log_p_x(model, x))).detach().numpy()
+    return (torch.exp(compute_log_p_x(model=model, x=x))).detach().numpy()
 
 
 def predict(X, models, return_prob=True, EPS=1E-12):
@@ -77,7 +77,7 @@ def predict(X, models, return_prob=True, EPS=1E-12):
         return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)
     
     Returns:
-        likelihood ratio (or probability)
+        likelihood ratio (or alternatively probability)
     """
     
     print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events ...')
@@ -112,9 +112,9 @@ class Dataset(torch.utils.data.Dataset):
         return self.X[index,...], self.W[index]
 
 
-def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldir, EPS=1e-12):
+def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, param, modeldir):
     """ Train the model density.
-
+    
     Args:
         model       : initialized model object
         optimizer   : optimizer object
@@ -135,22 +135,28 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         writer = SummaryWriter(os.path.join(param['tensorboard'], param['modelname']))
 
     params = {'batch_size': param['opt_param']['batch_size'],
-            'shuffle'     : True,
-            'num_workers' : param['num_workers'],
-            'pin_memory'  : True}
-
-
-    print(trn_x.shape)
-    print(trn_weights.shape)
-    
+              'shuffle'     : True,
+              'num_workers' : param['num_workers'],
+              'pin_memory'  : True}
     
     # Training generator
     training_set         = Dataset(trn_x, trn_weights)
     training_generator   = torch.utils.data.DataLoader(training_set, **params)
     
     # Validation generator
-    validation_set       = torch.utils.data.TensorDataset(torch.from_numpy(val_x).float().to(device))
-    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=param['opt_param']['batch_size'], shuffle=False)
+    validation_set       = Dataset(val_x, val_weights)
+    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=512, shuffle=False)
+    
+    # Loss function
+    """
+    Note:
+        log-likelihood functions can be weighted linearly, due to
+        \\prod_i p_i(\\theta; x_i)**w_i ==\\log==> \\sum_i w_i \\log p_i(\\theta; x_i)
+    """
+    def lossfunc(model, x, weights):
+        w = weights / torch.sum(weights, dim=0)
+        lossvec = compute_log_p_x(model, x)
+        return -(lossvec * w).sum(dim=0) # log-likelihood
     
     # Training loop
     for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
@@ -165,19 +171,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
             # Transfer to GPU
             batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
             batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
-            
-            # Noise regularization
-            if param['opt_param']['noise_reg'] > 0:
-                noise   = torch.empty(batch_x.shape).normal_(mean=0, \
-                    std=param['opt_param']['noise_reg']).to(device, dtype=torch.float32, non_blocking=True)
-                batch_x = batch_x + noise
 
-            # Per sample weights
-            log_weights = torch.log(batch_weights + EPS)
-            
-            # Weighted negative log-likelihood loss
-            lossvec = compute_log_p_x(model, batch_x)
-            loss    = -(lossvec + log_weights).sum()
+            loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
             
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
@@ -190,17 +185,29 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         train_loss = torch.stack(train_loss).mean()
         optimizer.swap()
 
-        # Compute validation loss (without weighting)
+        # ----------------------------------------------------------------
+        # Compute validation loss
         model.eval() # !
-        validation_loss = -torch.stack([compute_log_p_x(model, batch_x).mean().detach()
-                                        for batch_x, in validation_generator], -1).mean()
-        optimizer.swap()
 
-        print('Epoch {:3}/{:3} -- train_loss: {:4.3f} -- validation_loss: {:4.3f}'.format(
+        validation_loss = []
+        for batch_x, batch_weights in validation_generator:
+
+            # Transfer to GPU
+            batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
+            batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+            
+            loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
+            validation_loss.append(loss)
+
+        validation_loss = torch.stack(validation_loss).mean()
+        optimizer.swap()
+        # ----------------------------------------------------------------
+
+        print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f}'.format(
             epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
 
         stop = scheduler.step(validation_loss,
-            callback_best   = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
+            callback_best = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),
             callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth', device=device))
@@ -212,17 +219,6 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, param, modeldi
         
         if stop:
             break
-    
-    # Re-load the model        
-    aux_torch.load_torch_model(model=model, optimizer=optimizer, \
-        filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth')()
-
-    optimizer.swap()
-    validation_loss = - torch.stack([compute_log_p_x(model, x_mb).mean().detach()
-                                     for x_mb, in validation_generator], -1).mean()
-    
-    print(f'###### Stop training after {epoch} epochs!')
-    print(f'Validation loss: {validation_loss.item():4.3f}')
 
 
 def create_model(param, verbose=False, rngseed=0):

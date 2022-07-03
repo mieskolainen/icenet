@@ -137,7 +137,8 @@ maxo_param:
     temperature: 1            # logit norm temperature
 
     optimizer: 'AdamW'
-    noise_reg: 0.0                # Noise regularization
+    clip_norm: 0.1
+
     epochs:  200
     batch_size:  256
     lr: 1.0e-3
@@ -181,7 +182,8 @@ deps_param:
     temperature: 1             # logit norm temperature
     
     optimizer: 'AdamW'
-    noise_reg: 0.0             # Noise regularization
+    clip_norm: 0.1
+    
     epochs:  200
     batch_size:  256
     lr: 1.0e-3

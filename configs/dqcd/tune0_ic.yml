@@ -5,7 +5,12 @@ rootname: 'dqcd'
 # ----------------------------------------------------
 maxevents: 1000000 # Maximum total number of events (in total) to process per process
 
+use_conditional: false # Conditional (parametric) input
+
 MC_input:
+
+  # N.B. Use unique names for each sub-sample!
+  
   signal:
 
     #HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1:
@@ -23,7 +28,7 @@ MC_input:
         m:    10
         ctau: 10
       force_xs: true
-
+    
     HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1:
       path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
       xs: 1.0
@@ -40,7 +45,7 @@ MC_input:
     #    m:    null
     #    ctau: null
     #  force_xs: false
-    
+
     QCD_Pt-15to20: 
       path: 'bparkProductionV1_bkg/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
       xs: 2799000.0 # [pb]
@@ -151,11 +156,11 @@ signalclass: 1
 # Give all models some unique identifier and label
 active_models:
   - xgb0
+  - vae0
   - deps
   - lgr0
-  - vae0
-  #- xgb1
 
+  #- xgb1
   #- dbnf0
   #- dmlp
   #- dmx0
@@ -446,20 +451,11 @@ cutset0_param:
   # Using yaml multiline syntax without last linebreak syntax with >-
   # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
   cutstring: >-
-    nsv >=2 &&  
-    nJet >= 2 &&  
-    nMuon >= 2
-
+    nsv   >= 1 &&  
+    nJet  >= 1 &&  
+    nMuon >= 4
 
 cut0_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'nsv'
-  variable: 'nsv'
-  sign: 1
-  transform: null
-
-cut1_param:
   train:    'cut'
   predict:  'cut'
   label:    'nMuon'
@@ -467,11 +463,19 @@ cut1_param:
   sign: 1
   transform: null
 
-cut2_param:
+cut1_param:
   train:    'cut'
   predict:  'cut'
   label:    'nJet'
   variable: 'nJet'
+  sign: 1
+  transform: null
+
+cut2_param:
+  train:    'cut'
+  predict:  'cut'
+  label:    'nsv'
+  variable: 'nsv'
   sign: 1
   transform: null
 
@@ -532,7 +536,7 @@ lgr0_param:
     temperature: 1              # logit norm temperature
     
     optimizer: 'AdamW'
-    noise_reg: 0.0              # Noise regularization
+    clip_norm: 0.1
 
     epochs: 50
     batch_size: 196
@@ -579,7 +583,8 @@ deps_param:
     temperature: 1            # logit norm temperature
     
     optimizer: 'Adam'
-    noise_reg: 0.0             # Noise regularization
+    clip_norm: 0.1
+
     epochs:  200
     batch_size:  128
     lr: 1.0e-3
@@ -619,7 +624,7 @@ dmx0_param:
     temperature: 1             # logit norm temperature
 
     optimizer: 'Adam'          # Adam, AdamW
-    noise_reg: 0.0             # Noise regularization
+    clip_norm: 0.1
 
     epochs: 200
     batch_size: 128
@@ -659,7 +664,7 @@ dmx1_param:
     temperature: 1            # logit norm temperature
     
     optimizer: 'Adam'         # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
+    clip_norm: 0.1
 
     epochs: 200
     batch_size: 128
@@ -679,52 +684,6 @@ dmx1_param:
   readmode: -1                # -1 is the last saved epoch
 
 
-# Deep Normalizing Flow
-dbnf0_param:
-  train:   'flow'
-  predict: 'torch_flow'
-  label:   'DBNF'
-  raytune:  null
-
-  # Gradient descent
-  opt_param:
-    epochs: 150
-    batch_size: 512           # Keep it high!
-    optimizer: 'Adam'
-    lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
-
-    noise_reg: 0.001          # Noise regularization
-    polyak: 0.998
-    clip_norm: 0.1
-    start_epoch: 0
-
-  # Learning rate reduction on plateau
-  scheduler_param:  
-    factor:  0.1
-    patience: 20
-    cooldown: 10
-    min_lr: 0.0005
-    early_stopping: 100
-
-  # Model structure
-  model_param:  
-    flows: 10                 # number of flow blocks
-    layers: 0                 # intermediate layers in a flow block
-    hidden_dim: 10            # 
-    residual: 'gated'         # choises 'none', 'normal', 'gated'
-    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
-  
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # -1 is the last saved epoch
-
-
 # Variational Autoencoder
 vae0_param:
   train:   'torch_generic'
@@ -736,14 +695,16 @@ vae0_param:
   conv_type: 'vae'
   model_param:
     hidden_dim: 64
-    latent_dim: 32
-
+    latent_dim: 12
+    
     encoder_act: 'relu'
     encoder_bn: False
     decoder_act: 'tanh'
     decoder_bn: False
 
-    anomaly_score: 'MSE_KL'         # 'MSE', 'MSE_KL'
+    reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
+    kl_prob:   'Gaussian'           # 'Gaussian'
+    anomaly_score: 'KL_RECO'        # 'RECO', 'KL_RECO'
     
   # Optimization
   opt_param:  
@@ -753,7 +714,7 @@ vae0_param:
     temperature: 1                  # logit norm temperature
     
     optimizer: 'Adam'
-    noise_reg: 0.0                  # Noise regularization
+    clip_norm: 0.1
 
     epochs: 200
     batch_size: 256

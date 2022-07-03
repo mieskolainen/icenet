@@ -463,8 +463,8 @@ lgr0_param:
     temperature: 1            # logit norm temperature
     
     optimizer: 'AdamW'
-    noise_reg: 0.0              # Noise regularization
-
+    clip_norm: 0.1
+    
     epochs: 50
     batch_size: 196
     lr: 1.0e-3

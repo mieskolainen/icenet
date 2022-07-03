@@ -328,7 +328,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
         
     if not args['__raytune_running__']:
-
+        
         # Plot evolution
         plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
@@ -482,7 +482,8 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     del model_param['num_boost_round']
 
     # Boosting iterations
-    for epoch in range(param['model_param']['num_boost_round']):
+    max_num_epochs = param['model_param']['num_boost_round']
+    for epoch in range(max_num_epochs):
 
         results = dict()
         
@@ -491,7 +492,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
              'num_boost_round': 1,
              'evals':           evallist,
              'evals_result':    results,
-             'verbose_eval':    True}
+             'verbose_eval':    False}
 
         if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
@@ -509,8 +510,10 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         val_aucs.append(metrics.auc)
 
         # Loss
-        trn_losses.append(results['train']['mlogloss'])
-        val_losses.append(results['eval']['mlogloss'])
+        trn_losses.append(results['train']['mlogloss'][0])
+        val_losses.append(results['eval']['mlogloss'][0])
+        
+        print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if args['__raytune_running__']:
             with tune.checkpoint_dir(epoch) as checkpoint_dir:
@@ -641,7 +644,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     del model_param['num_boost_round']
 
     # Boosting iterations
-    for epoch in range(param['xgb']['model_param']['num_boost_round']):
+    max_num_epochs = param['xgb']['model_param']['num_boost_round']
+    for epoch in range(max_num_epochs):
         
         results = dict()
         
@@ -650,7 +654,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
              'num_boost_round': 1,
              'evals':           evallist,
              'evals_result':    results,
-             'verbose_eval':    True}
+             'verbose_eval':    False}
 
         if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
@@ -668,12 +672,14 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         val_aucs.append(metrics.auc)
         
         # Loss
-        trn_losses.append(results['train']['mlogloss'])
-        val_losses.append(results['eval']['mlogloss'])
+        trn_losses.append(results['train']['mlogloss'][0])
+        val_losses.append(results['eval']['mlogloss'][0])
 
         ## Save
         pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))
-    
+        
+        print(__name__ + f'.train_graph_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
@@ -782,7 +788,7 @@ def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
         
         print(__name__ + f'.train_flow: Training density for class = {classid} ...')
         dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
-            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, param=param, modeldir=args['modeldir'])
+            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, val_weights=val.w, param=param, modeldir=args['modeldir'])
         
     return True
 
