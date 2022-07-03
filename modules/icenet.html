@@ -451,7 +451,7 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dbnf.compute_log_p_x">
 <span class="sig-name descname"><span class="pre">compute_log_p_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#compute_log_p_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dbnf.compute_log_p_x" title="Permalink to this definition">¶</a></dt>
-<dd><p>Model log-likelihood: log [ prod_{j=1}^N pdf(x_j)], where x ~ (iid) pdf(x)</p>
+<dd><p>Model log-density value log[pdf(x), where x is the data vector]</p>
 <p>log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -523,14 +523,14 @@ registered hooks while the latter silently ignores them.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>likelihood ratio (or probability)</p>
+<dd class="field-even"><p>likelihood ratio (or alternatively probability)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.dbnf.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modeldir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dbnf.train" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trn_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modeldir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/dbnf.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.dbnf.train" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train the model density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1070,7 +1070,12 @@ respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <sp
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.losstools.loss_wrapper">
 <span class="sig-name descname"><span class="pre">loss_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#loss_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.loss_wrapper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper function to call loss functions</p>
+<dd><p>A wrapper function to loss functions</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>log-likelihood functions can be weighted linearly, due to
+prod_i p_i(x_i; theta)**w_i ==log==&gt; sum_i w_i log p_i(x_i; theta)</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -2227,7 +2232,7 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple_MC">
-<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_conditional</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loop over different MC processes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
