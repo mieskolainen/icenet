@@ -10,6 +10,7 @@ input:
     #    m: 10
     #    ctau: 100
     #  force_xs: true
+    #  isMC: true
 
     HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1:
       path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
@@ -18,7 +19,8 @@ input:
         m:    10
         ctau: 10
       force_xs: true
-    
+      isMC: true
+
     HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1:
       path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
       xs: 1.0
@@ -26,6 +28,7 @@ input:
         m: 10
         ctau: 100
       force_xs: true
+      isMC: true
 
   class_0:
     #QCD_Pt-20toInf:
@@ -35,6 +38,7 @@ input:
     #    m:    null
     #    ctau: null
     #  force_xs: false
+    #  isMC: true
 
     QCD_Pt-15to20: 
       path: 'bparkProductionV1_bkg/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -43,6 +47,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-20to30: 
       path: 'bparkProductionV1_bkg/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -51,6 +56,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-30to50:
       path: 'bparkProductionV1_bkg/QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -59,6 +65,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-50to80: 
       path: 'bparkProductionV1_bkg/QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -67,6 +74,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-80to120:
       path: 'bparkProductionV1_bkg/QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -75,6 +83,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-120to170:
       path: 'bparkProductionV1_bkg/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -83,6 +92,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-170to300:
       path: 'bparkProductionV1_bkg/QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -91,6 +101,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-300to470:
       path: 'bparkProductionV1_bkg/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -99,6 +110,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-470to600:
       path: 'bparkProductionV1_bkg/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -107,6 +119,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-600to800:
       path: 'bparkProductionV1_bkg/QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -115,6 +128,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-800to1000:
       path: 'bparkProductionV1_bkg/QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -123,6 +137,7 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
 
     QCD_Pt-1000toInf:
       path: 'bparkProductionV1_bkg/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
@@ -131,3 +146,4 @@ input:
         m:    null
         ctau: null
       force_xs: false
+      isMC: true
