@@ -48,7 +48,8 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-
+<span class="kn">from</span> <span class="nn">yamlinclude</span> <span class="kn">import</span> <span class="n">YamlIncludeConstructor</span>
+    
 <span class="kn">import</span> <span class="nn">icenet.deep.train</span> <span class="k">as</span> <span class="nn">train</span>
 <span class="kn">import</span> <span class="nn">icenet.deep.predict</span> <span class="k">as</span> <span class="nn">predict</span>
 
@@ -110,7 +111,6 @@
     <span class="c1">## Read yaml configuration</span>
 
     <span class="c1"># This allows to use &quot;!include foo.yaml&quot; syntax</span>
-    <span class="kn">from</span> <span class="nn">yamlinclude</span> <span class="kn">import</span> <span class="n">YamlIncludeConstructor</span>
     <span class="n">YamlIncludeConstructor</span><span class="o">.</span><span class="n">add_to_loader_class</span><span class="p">(</span><span class="n">loader_class</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
