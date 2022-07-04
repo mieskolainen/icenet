@@ -87,15 +87,15 @@
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** SIGNAL MC *** (first signal, so we can use it&#39;s theory conditional parameters)</span>
 
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;MC_input&quot;</span><span class="p">][</span><span class="s1">&#39;signal&#39;</span><span class="p">]</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span>
     <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">VARS_S</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">use_conditional</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">])</span>
     
-
+    
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** BACKGROUND MC ***</span>
     
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;MC_input&quot;</span><span class="p">][</span><span class="s1">&#39;background&#39;</span><span class="p">]</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span>
     <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">VARS_B</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">use_conditional</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">])</span>
     
@@ -227,17 +227,16 @@
     <span class="c1"># Create DeepSet style representation from the &quot;long-vector&quot; content</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;deps_on&#39;</span><span class="p">]:</span>
-        <span class="n">data_deps</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data_deps</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="n">M</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span>      <span class="c1"># Number of (jagged) tuplets per event</span>
-        <span class="n">D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_ind</span><span class="p">)</span>            <span class="c1"># Tuplet feature vector dimension</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span>      <span class="c1"># Number of (jagged) tuplets per event</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_ind</span><span class="p">)</span>            <span class="c1"># Tuplet feature vector dimension</span>
 
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
-        <span class="n">data_deps</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">all_jagged_vars</span>
+    <span class="n">data_deps</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_ind</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
+    <span class="n">data_deps</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">all_jagged_vars</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
-
-
+    
+    
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
 </pre></div>
 

@@ -47,6 +47,7 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
 <span class="kn">import</span> <span class="nn">icenet.deep.train</span> <span class="k">as</span> <span class="nn">train</span>
 <span class="kn">import</span> <span class="nn">icenet.deep.predict</span> <span class="k">as</span> <span class="nn">predict</span>
@@ -70,40 +71,91 @@
 
 <span class="c1"># **************************</span>
 
-<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;./configs/xyz&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_cli"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_cli">[docs]</a><span class="k">def</span> <span class="nf">read_cli</span><span class="p">():</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    
+    <span class="c1">## argparse.SUPPRESS removes argument from the namespace if not passed</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--runmode&quot;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;null&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>     <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tune0&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span>   <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span>   <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;*.root&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--tag&quot;</span><span class="p">,</span>        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tag0&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--maxevents&quot;</span><span class="p">,</span>  <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--inputfiles&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--input_tag&quot;</span><span class="p">,</span>  <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;input0&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--model_tag&quot;</span><span class="p">,</span>  <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;model0&#39;</span><span class="p">)</span>
+
+    <span class="n">cli</span>      <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">cli_dict</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cli</span><span class="p">,</span> <span class="n">cli_dict</span></div>
+
+
+<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;configs/xyz/&#39;</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Commandline and YAML configuration reader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Create folders</span>
-    <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="s1">&#39;./tmp/&#39;</span><span class="p">)</span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="s1">&#39;tmp/&#39;</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Parse command line arguments</span>
-
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-    
-    <span class="c1">## argparse.SUPPRESS removes argument from the namespace if not passed</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tune0&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datapath&quot;</span><span class="p">,</span>  <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--datasets&quot;</span><span class="p">,</span>  <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;*.root&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--tag&quot;</span><span class="p">,</span>       <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tag0&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--maxevents&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
-    
-    <span class="n">cli</span>      <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-    <span class="n">cli_dict</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span>
+    <span class="n">cli</span><span class="p">,</span> <span class="n">cli_dict</span> <span class="o">=</span> <span class="n">read_cli</span><span class="p">()</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Read yaml configuration</span>
+
+    <span class="c1"># This allows to use &quot;!include foo.yaml&quot; syntax</span>
+    <span class="kn">from</span> <span class="nn">yamlinclude</span> <span class="kn">import</span> <span class="n">YamlIncludeConstructor</span>
+    <span class="n">YamlIncludeConstructor</span><span class="o">.</span><span class="n">add_to_loader_class</span><span class="p">(</span><span class="n">loader_class</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">config_yaml_file</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span> <span class="o">+</span> <span class="s1">&#39;.yml&#39;</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">config_yaml_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+    <span class="n">config_yaml_file</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
     
+
+    <span class="c1">## Inputfiles .yaml</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;genesis_runmode&quot;</span><span class="p">][</span><span class="s2">&quot;inputfiles&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;genesis_runmode&quot;</span><span class="p">][</span><span class="s2">&quot;inputfiles&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">inputfiles</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inputfiles</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1"># Mode setup</span>
+
+    <span class="n">new_args</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;rootname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;rootname&#39;</span><span class="p">]</span>
+    <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>
+    
+    <span class="k">if</span>   <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;_runmode&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;genesis&#39;</span><span class="p">:</span>
+        <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;genesis_runmode&#39;</span><span class="p">])</span>
+        <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
+        <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;train_runmode&#39;</span><span class="p">])</span>
+        <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
+        <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;eval_runmode&#39;</span><span class="p">])</span>
+        <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span>
+
+    <span class="n">old_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">args</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_args</span><span class="p">)</span>
+
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Commandline override of yaml variables</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cli_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -113,40 +165,37 @@
     <span class="nb">print</span><span class="p">()</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1">## Create a hash</span>
+
+    <span class="n">hash_args</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">old_args</span><span class="p">[</span><span class="s1">&#39;genesis_runmode&#39;</span><span class="p">])</span> <span class="c1"># This first !</span>
+    <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>
+    <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span>
+    <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">)</span>
+
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
+
+
+    <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Create new variables</span>
 
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">config</span>
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;datadir&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">)</span>
 
     <span class="c1"># Technical</span>
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="kc">True</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-    
+
     <span class="c1"># -------------------------------------------------------------------</span>
-    <span class="c1">### Set graph, image and deepset constructions on/off</span>
-    
-    <span class="n">special_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="s1">&#39;deps&#39;</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">special_keys</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
-        <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">special_keys</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]:</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">special_keys</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_on = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_on&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="c1">## Create directories</span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;datadir&#39;</span><span class="p">])</span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">])</span>
 
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1"># Set random seeds for reproducability and train-validate-test splits</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; torch.__version__: &quot;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 
@@ -154,19 +203,18 @@
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">])</span>
 
-    <span class="c1"># --------------------------------------------------------------------    </span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: inputvar   =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvar&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: cutfunc    =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;cutfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.init: targetfunc =  </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;targetfunc&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># ------------------------------------------------</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Created arguments dictionary with runmode = &lt;</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">&gt; :&#39;</span><span class="p">)</span>    
+    <span class="n">pprint</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="c1"># ------------------------------------------------</span>
 
     <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">cli</span></div>
 
 
-<div class="viewcode-block" id="read_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_data">[docs]</a><span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">train_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">imputation_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="read_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_data">[docs]</a><span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">impute_vars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load input data</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        args:  main argument dictionary</span>
 <span class="sd">        func_loader:  application specific root file loader function</span>
@@ -174,12 +222,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">args_hash</span>      <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./tmp/</span><span class="si">{</span><span class="n">args_hash</span><span class="si">}</span><span class="s1">.data&#39;</span>
+    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
 
         <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">runmode</span> <span class="o">!=</span> <span class="s2">&quot;genesis&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not &quot;genesis&quot;&#39;</span><span class="p">)</span>
 
         <span class="c1"># N.B. This loop is needed, because certain applications have each root file loaded here,</span>
         <span class="c1"># whereas some apps do all the multi-file processing under &#39;func_loader&#39;</span>
@@ -197,48 +247,51 @@
         <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">])</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">],</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>      
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: saving to cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">args</span><span class="p">],</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">imputer</span> <span class="o">=</span> <span class="n">impute_datasets</span><span class="p">(</span><span class="n">trn</span><span class="o">=</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="o">=</span><span class="n">tst</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">impute_vars</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">imputer</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/imputer_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.get_data: loading from cache file </span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: loading from cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">genesis_args</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: cached data was generated with arguments:&#39;</span><span class="p">)</span>
+            <span class="n">pprint</span><span class="p">(</span><span class="n">genesis_args</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;trn&#39;</span><span class="p">:</span> <span class="n">trn</span><span class="p">,</span> <span class="s1">&#39;val&#39;</span><span class="p">:</span> <span class="n">val</span><span class="p">,</span> <span class="s1">&#39;tst&#39;</span><span class="p">:</span> <span class="n">tst</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="process_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_data">[docs]</a><span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+
+    <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]</span>
+
+    <span class="c1">### Split and factor data</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span>   <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
 
-    <span class="c1"># Train</span>
-    <span class="k">if</span> <span class="n">train_mode</span><span class="p">:</span>
-
-        <span class="c1"># Imputation</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">imputer</span> <span class="o">=</span> <span class="n">impute_datasets</span><span class="p">(</span><span class="n">trn</span><span class="o">=</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="o">=</span><span class="n">tst</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">imputation_vars</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">imputer</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/imputer.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-
-        <span class="c1">### Compute reweighting weights (before split&amp;factor because we need the variables !)</span>
-        <span class="n">trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">])</span>
-        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/reweight_pdf.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-        <span class="n">val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span><span class="n">_</span>    <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span>  <span class="n">ids</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">])</span>
+        <span class="c1">### Compute reweighting weights (before funcfactor because we need the variables !)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight&#39;</span><span class="p">]:</span>
+            <span class="n">trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">compute_ND_reweights</span><span class="p">(</span><span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">])</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span><span class="n">_</span>    <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">compute_ND_reweights</span><span class="p">(</span><span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">])</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/reweight_pdf.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
         
-        <span class="c1">### Split and factor data</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_factor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_factor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-        
-    <span class="c1"># Test</span>
-    <span class="k">else</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-            <span class="n">imputer</span>   <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/imputer.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span> 
-            <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">impute_datasets</span><span class="p">(</span><span class="n">trn</span><span class="o">=</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="o">=</span><span class="n">tst</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">imputation_vars</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
         
-        <span class="c1">### Compute reweighting weights for the evaluation (before split&amp;factor because we need the variables !)</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;eval_reweight&#39;</span><span class="p">]:</span>
+        <span class="c1">### Compute reweighting weights (before funcfactor because we need the variables !)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight&#39;</span><span class="p">]:</span>
             <span class="n">pdf</span>      <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/reweight_pdf.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
             <span class="n">tst</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">compute_ND_reweights</span><span class="p">(</span><span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">])</span>
         
-        <span class="c1">### Split and factor data</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_factor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">tst</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">output</span></div>
 
+    <span class="k">return</span> <span class="n">output</span></div>
 
 <div class="viewcode-block" id="make_plots"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.make_plots">[docs]</a><span class="k">def</span> <span class="nf">make_plots</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 
@@ -264,14 +317,14 @@
 
 
 
-<div class="viewcode-block" id="impute_datasets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.impute_datasets">[docs]</a><span class="k">def</span> <span class="nf">impute_datasets</span><span class="p">(</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="impute_datasets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.impute_datasets">[docs]</a><span class="k">def</span> <span class="nf">impute_datasets</span><span class="p">(</span><span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dataset imputation</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        trn,val,tst: .x, .y, .w, .ids type object</span>
-<span class="sd">        features:    feature vector names</span>
 <span class="sd">        args:        imputer parameters</span>
+<span class="sd">        features:    variables to impute (list)</span>
 <span class="sd">        imputer:     imputer object (scikit-type)</span>
 
 <span class="sd">    Return:</span>
@@ -326,7 +379,7 @@
 
 
     <span class="c1"># @@ Tensor normalization @@</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_on&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm_tensor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">data_trn</span><span class="p">[</span><span class="s1">&#39;data_tensor&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm_tensor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span><span class="p">):</span>
             
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Z-score normalizing tensor variables ...&#39;</span><span class="p">)</span>
         <span class="n">X_mu_tensor</span><span class="p">,</span> <span class="n">X_std_tensor</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">calc_zscore_tensor</span><span class="p">(</span><span class="n">data_trn</span><span class="p">[</span><span class="s1">&#39;data_tensor&#39;</span><span class="p">])</span>
@@ -379,9 +432,8 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
 
         <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">]</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
 
         <span class="c1">## Different model</span>
         <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_graph&#39;</span><span class="p">:</span>
@@ -396,7 +448,7 @@
             <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
             <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
             
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_graph</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_torch_graph</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
@@ -413,7 +465,7 @@
                 <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
                     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_soft</span>
             
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
@@ -436,7 +488,7 @@
             <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
             <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
 
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>        
@@ -459,7 +511,7 @@
             <span class="c1">#    if ID in args[&#39;distillation&#39;][&#39;drains&#39;]:</span>
             <span class="c1">#        inputs[&#39;y_soft&#39;] = y_soft</span>
             
-            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">train_torch_generic</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
@@ -626,9 +678,9 @@
     <span class="c1"># **  MAIN LOOP OVER MODELS **</span>
     <span class="c1">#</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
-
-        <span class="n">ID</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">]</span>
+        
+        <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Evaluating &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
@@ -718,8 +770,6 @@
     <span class="c1"># Compute predictions once and for all here</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">x_input</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
-
     <span class="c1"># --------------------------------------</span>
     <span class="c1">## Total ROC Plot</span>
     <span class="n">metric</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -765,7 +815,7 @@
 
     <span class="c1"># ----------------------------------------------------------------</span>
     <span class="c1">### MVA  1D plot</span>
-    <span class="n">hist_edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;plot_MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
+    <span class="n">hist_edges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span>
 
     <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;hist_edges&#39;</span><span class="p">:</span> <span class="n">hist_edges</span><span class="p">,</span> \
         <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/MVA/&#39;</span><span class="p">}</span>
@@ -826,13 +876,13 @@
 
                     <span class="c1"># Take label for the legend</span>
                     <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
-                    <span class="n">label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_param&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
                     <span class="n">legs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-
+                
                 <span class="c1">### ROC</span>
                 <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;BINNED ROC: </span><span class="si">{</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">$ </span><span class="se">\\</span><span class="s1">in [</span><span class="si">{</span><span class="n">edges</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">edges</span><span class="p">[</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)$&#39;</span>
                 <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">legs</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/__ALL__/ROC_binned[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]_bin[</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
-
+                
                 <span class="c1">### MVA (not implemented)</span>
                 <span class="c1">#title = f&#39;BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$&#39;</span>
                 <span class="c1">#plots.MVA_plot(xy, legs, title=title, filename=targetdir + f&#39;/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]&#39;)</span>

@@ -204,19 +204,19 @@
 
     <span class="n">args</span>  <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span>
-
+    
     <span class="c1">### General raytune parameters</span>
-    <span class="n">num_samples</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_samples&#39;</span><span class="p">]</span>
-    <span class="n">max_num_epochs</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_param&#39;</span><span class="p">][</span><span class="s1">&#39;max_num_epochs&#39;</span><span class="p">]</span>
-
+    <span class="n">num_samples</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;num_samples&#39;</span><span class="p">]</span>
+    <span class="n">max_num_epochs</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;max_num_epochs&#39;</span><span class="p">]</span>
+    
     <span class="c1">### Construct hyperparameter config (setup) from yaml</span>
     <span class="n">steer</span>  <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">]</span>
     <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">]:</span>
 
-        <span class="n">rtp</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="n">rtp</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
         <span class="c1"># Random integer</span>
         <span class="k">if</span>   <span class="n">rtp</span> <span class="o">==</span> <span class="s1">&#39;tune.randint&#39;</span><span class="p">:</span>
@@ -239,14 +239,14 @@
     
     <span class="c1"># Raytune basic metrics</span>
     <span class="n">reporter</span>   <span class="o">=</span> <span class="n">CLIReporter</span><span class="p">(</span><span class="n">metric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;AUC&quot;</span><span class="p">,</span> <span class="s2">&quot;training_iteration&quot;</span><span class="p">])</span>
-
+    
     <span class="c1"># Raytune search algorithm</span>
-    <span class="n">metric</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
-    <span class="n">mode</span>       <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune_setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
-
+    <span class="n">metric</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+    <span class="n">mode</span>       <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
+    
     <span class="c1"># Hyperopt Bayesian / </span>
     <span class="n">search_alg</span> <span class="o">=</span> <span class="n">HyperOptSearch</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
-
+    
     <span class="c1"># Raytune scheduler</span>
     <span class="n">scheduler</span> <span class="o">=</span> <span class="n">ASHAScheduler</span><span class="p">(</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">,</span>
@@ -254,10 +254,10 @@
         <span class="n">max_t</span>  <span class="o">=</span> <span class="n">max_num_epochs</span><span class="p">,</span>
         <span class="n">grace_period</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">reduction_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
-
+    
     <span class="c1">## Flag raytune on for training functions</span>
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
+    
     <span class="c1"># Raytune main setup</span>
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>

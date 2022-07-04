@@ -74,7 +74,7 @@
             <span class="k">break</span>
     
     <span class="c1"># Compute event-by-event weights</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;differential_reweight&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;differential&#39;</span><span class="p">]:</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> from y) | Differential re-weighting using variables: </span><span class="si">{</span><span class="n">paramdict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
