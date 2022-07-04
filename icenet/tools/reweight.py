@@ -40,7 +40,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             break
     
     # Compute event-by-event weights
-    if args['differential_reweight']:
+    if args['differential']:
         
         print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
         

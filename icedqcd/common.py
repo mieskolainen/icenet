@@ -53,15 +53,15 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
 
-    proc = args["MC_input"]['signal']
+    proc = args["input"]['class_1']
     X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param, use_conditional=args['use_conditional'])
     
-
+    
     # =================================================================
     # *** BACKGROUND MC ***
     
-    proc = args["MC_input"]['background']
+    proc = args["input"]['class_0']
     X_B, Y_B, W_B, VARS_B = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param, use_conditional=args['use_conditional'])
     
@@ -193,15 +193,14 @@ def splitfactor(x, y, w, ids, args):
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
 
-    if args['deps_on']:
-        data_deps = copy.deepcopy(data)
+    data_deps = copy.deepcopy(data)
 
-        M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
-        D = len(jagged_ind)            # Tuplet feature vector dimension
+    M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
+    D = len(jagged_ind)            # Tuplet feature vector dimension
 
-        data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
-        data_deps.ids = all_jagged_vars
+    data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
+    data_deps.ids = all_jagged_vars
     # --------------------------------------------------------------------------
-
-
+    
+    
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

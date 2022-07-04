@@ -32,120 +32,132 @@ from matplotlib import pyplot as plt
 
 from icenet.tools import aux
 from icenet.tools import plots
+from icenet.tools import process
 from icenet.algo import nmf
-
-import iceid
 
 import numba
 import numpy as np
 
+# iceid
+import iceid
+from iceid import common
+from configs.eid.mvavars import *
 
 # Main function
 #
 def main() :
     
-    args, cli = process.read_config(config_path='./configs/eid')
-    data      = process.read_data(args=args, func_loader=iceid.common.load_root_file)
+    runmode     = 'genesis'
+    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    impute_vars = globals()[args['imputation_param']['var']] if runmode == 'genesis' else None
+    data = process.read_data(args=args, func_loader=common.load_root_file, impute_vars=impute_vars, runmode=runmode) 
+    
+    runmode     = 'train'
+    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    data = process.process_data(args=args, data=data, func_factor=common.splitfactor, runmode='train')
+
+    # Pick them out
+    data_tensor = data['trn']['data_tensor']
+    data_kin    = data['trn']['data_kin']
+    data        = data['trn']['data']
 
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/image/')
 
-    ### Split and factor data
-    data, data_tensor, data_kin = iceid.common.splitfactor(data=data, args=args)
-    
     
     # --------------------------------------------------------------------
     # NMF factorization
 
-    channel = 0
     k = 3        # Number of basis components
 
-    for class_ind in [0,1]:
-        
-        V = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
-        print(V.shape)
+    for channel in [0,1]:  # Which calorimeter
 
-        V_new = np.zeros((V.shape[1]*V.shape[2], V.shape[0]))
-        for i in range(V.shape[0]):
-            V_new[:,i] = V[i,:,:].flatten() + 1e-12
-        print(V_new.shape)
-
-        # Non-Negative matrix factorization
-        W,H = nmf.ML_nmf(V=V_new, k=k, threshold=1e-5, maxiter=300)
-        
-        # Loop over "basis" components
-        for i in range(k):
-            B = W[:,i].reshape(V.shape[1],V.shape[2])
-            print(B.shape)
-
-            fig,ax,c = plots.plot_matrix(XY = B,
-                x_bins=args['image_param']['eta_bins'],
-                y_bins=args['image_param']['phi_bins'],
-                vmin=0, vmax=None, figsize=(5,3), cmap='hot')
+        for class_ind in [0,1]:
             
-            ax.set_xlabel('$\\eta$')
-            ax.set_ylabel('$\\phi$ [rad]')
-            fig.colorbar(c, ax=ax)
-            ax.set_title(f'basis matrix $b_{{{i}}}$ | $E$ GeV | class = {class_ind}')
+            V = data_tensor[(data.y == class_ind), channel, :,:]
+            print(V.shape)
 
-            os.makedirs(f'{targetdir}/NMF/', exist_ok = True)            
-            plt.savefig(f'{targetdir}/NMF/class_{class_ind}_basis_{i}.pdf', bbox_inches='tight')
-            #plt.show()
-            plt.close()
+            V_new = np.zeros((V.shape[1]*V.shape[2], V.shape[0]))
+            for i in range(V.shape[0]):
+                V_new[:,i] = V[i,:,:].flatten() + 1e-12
+            print(V_new.shape)
+
+            # Non-Negative matrix factorization
+            W,H = nmf.ML_nmf(V=V_new, k=k, threshold=1e-5, maxiter=300)
+            
+            # Loop over "basis" components
+            for i in range(k):
+                B = W[:,i].reshape(V.shape[1],V.shape[2])
+                print(B.shape)
+                
+                fig,ax,c = plots.plot_matrix(XY = B,
+                    x_bins=args['image_param']['eta_bins'],
+                    y_bins=args['image_param']['phi_bins'],
+                    vmin=0, vmax=None, figsize=(5,3), cmap='hot')
+                
+                ax.set_xlabel('$\\eta$')
+                ax.set_ylabel('$\\phi$ [rad]')
+                fig.colorbar(c, ax=ax)
+                ax.set_title(f'basis matrix $b_{{{i}}}$ | $E$ GeV | class = {class_ind} | channel = {channel}')
+
+                os.makedirs(f'{targetdir}/NMF/', exist_ok = True)            
+                plt.savefig(f'{targetdir}/NMF/channel_{channel}_class_{class_ind}_basis_{i}.pdf', bbox_inches='tight')
+                #plt.show()
+                plt.close()
 
     # --------------------------------------------------------------------
 
     ### Moment images
     VMAX    = 0.5 # GeV, maximum visualization scale
     
-    channel = 0
-    
-    for class_ind in [0,1]:
+    for channel in [0,1]:
+        
+        for class_ind in [0,1]:
 
-        for moment in ['mean', 'std']:
+            for moment in ['mean', 'std']:
 
-            XY = data_tensor['trn'][(data.trn.y == class_ind), channel, :,:]
+                XY = data_tensor[(data.y == class_ind), channel, :,:]
 
-            if   moment == 'mean':
-                XY = np.mean(XY, axis=0)
-            elif moment == 'std':
-                XY = np.std(XY, axis=0)
+                if   moment == 'mean':
+                    XY = np.mean(XY, axis=0)
+                elif moment == 'std':
+                    XY = np.std(XY, axis=0)
 
-            fig,ax,c = plots.plot_matrix(XY = XY,
+                fig,ax,c = plots.plot_matrix(XY = XY,
+                    x_bins=args['image_param']['eta_bins'],
+                    y_bins=args['image_param']['phi_bins'],
+                    vmin=0, vmax=None, figsize=(5,3), cmap='hot')
+
+                ax.set_xlabel('$\\eta$')
+                ax.set_ylabel('$\\phi$ [rad]')
+
+                fig.colorbar(c, ax=ax)
+                ax.set_title(f'{moment}$(E)$ GeV | class = {class_ind}')
+                plt.savefig(f'{targetdir}/{moment}_E_channel_{channel}_class_{class_ind}.pdf', bbox_inches='tight')
+                plt.close()
+
+
+        ### Loop over individual events
+        MAXN = 30 # max number
+
+        for i in tqdm(range(np.min([MAXN, data_tensor.shape[0]]))):
+
+            fig,ax,c = plots.plot_matrix(XY=data_tensor[i,channel,:,:],
                 x_bins=args['image_param']['eta_bins'],
                 y_bins=args['image_param']['phi_bins'],
                 vmin=0, vmax=VMAX, figsize=(5,3), cmap='hot')
 
             ax.set_xlabel('$\\eta$')
             ax.set_ylabel('$\\phi$ [rad]')
+            
+            pt  = data_kin.x[i, data_kin.ids.index("trk_pt")]
+            eta = data_kin.x[i, data_kin.ids.index("trk_eta")]
+            phi = data_kin.x[i, data_kin.ids.index("trk_phi")]
+            ax.set_title(f'Track $(p_t = {pt:0.1f}, \\eta = {eta:0.1f}, \\phi = {phi:0.1f})$ | class = {data.y[i]:0.0f}')
 
             fig.colorbar(c, ax=ax)
-            ax.set_title(f'{moment}$(E)$ GeV | class = {class_ind}')
-            plt.savefig(f'{targetdir}/{moment}_E_channel_{channel}_class_{class_ind}.pdf', bbox_inches='tight')
+            os.makedirs(f'{targetdir}/channel_{channel}_class_{data.y[i]:0.0f}/', exist_ok = True)
+            plt.savefig(f'{targetdir}/channel_{channel}_class_{data.y[i]:0.0f}/event_{i}.pdf', bbox_inches='tight')
             plt.close()
-
-
-    ### Loop over individual events
-    MAXN = 30 # max number
-
-    for i in tqdm(range(np.min([MAXN, data_tensor['trn'].shape[0]]))):
-
-        fig,ax,c = plots.plot_matrix(XY=data_tensor['trn'][i,channel,:,:],
-            x_bins=args['image_param']['eta_bins'],
-            y_bins=args['image_param']['phi_bins'],
-            vmin=0, vmax=VMAX, figsize=(5,3), cmap='hot')
-
-        ax.set_xlabel('$\\eta$')
-        ax.set_ylabel('$\\phi$ [rad]')
-        
-        pt  = data_kin.trn.x[i, data_kin.ids.index("trk_pt")]
-        eta = data_kin.trn.x[i, data_kin.ids.index("trk_eta")]
-        phi = data_kin.trn.x[i, data_kin.ids.index("trk_phi")]
-        ax.set_title(f'Track $(p_t = {pt:0.1f}, \\eta = {eta:0.1f}, \\phi = {phi:0.1f})$ | class = {data.trn.y[i]:0.0f}')
-
-        fig.colorbar(c, ax=ax)
-        os.makedirs(f'{targetdir}/channel_{channel}_class_{data.trn.y[i]:0.0f}/', exist_ok = True)
-        plt.savefig(f'{targetdir}/channel_{channel}_class_{data.trn.y[i]:0.0f}/{i}.pdf', bbox_inches='tight')
-        plt.close()
 
 
     print(__name__ + ' [done]')

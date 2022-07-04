@@ -170,19 +170,19 @@ def raytune_main(inputs, train_func=None):
 
     args  = inputs['args']
     param = inputs['param']
-
+    
     ### General raytune parameters
-    num_samples    = args['raytune_param']['num_samples']
-    max_num_epochs = args['raytune_param']['max_num_epochs']
-
+    num_samples    = args['raytune']['param']['num_samples']
+    max_num_epochs = args['raytune']['param']['max_num_epochs']
+    
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
     config = {}
 
-    for key in args['raytune_setup'][steer]['param']:
+    for key in args['raytune']['setup'][steer]['param']:
 
-        rtp   = args['raytune_setup'][steer]['param'][key]['type']
-        value = args['raytune_setup'][steer]['param'][key]['value']
+        rtp   = args['raytune']['setup'][steer]['param'][key]['type']
+        value = args['raytune']['setup'][steer]['param'][key]['value']
 
         # Random integer
         if   rtp == 'tune.randint':
@@ -205,14 +205,14 @@ def raytune_main(inputs, train_func=None):
     
     # Raytune basic metrics
     reporter   = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
-
+    
     # Raytune search algorithm
-    metric     = args['raytune_setup'][steer]['search_metric']['metric']
-    mode       = args['raytune_setup'][steer]['search_metric']['mode']
-
+    metric     = args['raytune']['setup'][steer]['search_metric']['metric']
+    mode       = args['raytune']['setup'][steer]['search_metric']['mode']
+    
     # Hyperopt Bayesian / 
     search_alg = HyperOptSearch(metric=metric, mode=mode)
-
+    
     # Raytune scheduler
     scheduler = ASHAScheduler(
         metric = metric,
@@ -220,10 +220,10 @@ def raytune_main(inputs, train_func=None):
         max_t  = max_num_epochs,
         grace_period     = 1,
         reduction_factor = 2)
-
+    
     ## Flag raytune on for training functions
     inputs['args']['__raytune_running__'] = True
-
+    
     # Raytune main setup
     analysis = tune.run(
         partial(train_func, **inputs),

@@ -1,0 +1,34 @@
+## Pure plotting setup
+
+basic:
+  active: true
+  nbins:  70
+
+contours: 
+  active: false
+
+## Binned ROC plots can be 1D or 2D;
+# use a running number __0, __1, ... as an identifier for new plots
+plot_ROC_binned[0]:
+  var:   ['x_hlt_pt']
+  edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
+
+plot_ROC_binned[1]:
+  var:   ['x_hlt_eta', 'x_hlt_pt']
+  edges: [[-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5],
+          [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
+
+## MVA output density (1D)
+MVA_output:
+  edges: 80
+
+## (MVA output x external variable) density (2D)
+plot_COR[0]:
+  var:   ['']
+  edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
+          {'nbin': 50, 'q': [0.0, 0.95],  'space': 'log10'}]
+  
+#plot_COR[1]:
+#  var:   ['.?hlt_pms2.?']
+#  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
+#          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]

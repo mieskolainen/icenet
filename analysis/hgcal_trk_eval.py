@@ -22,16 +22,18 @@ from configs.hgcal.mvavars import *
 # Main function
 #
 def main() :
-    
-    args, cli = process.read_config(config_path='./configs/hgcal')
+    cli, cli_dict  = process.read_cli()
+    runmode   = cli_dict['runmode']
+      
+    args, cli = process.read_config(config_path=f'configs/hgcal', runmode=runmode)
     #data      = process.read_data(args=args, func_loader=common.load_root_file, func_factor=common.splitfactor,
     #    train_mode=True, imputation_vars=globals()[args['imputation_param']['var']])
 
     ## Read data
-    filename = "output/" + f"{cli.tag}.pkl"
+    filename = f"output/{args['rootname']}/{args['config']}/{cli.tag}.pkl"
     with open(filename, "rb") as fp:
         X = pickle.load(fp)
-
+    
     X_trn, X_val, X_tst = io.split_data_simple(X=X, frac=args['frac'])
     data = {}
     data['tst'] = {'data': None, 'data_kin': None, 'data_deps': None, 'data_tensor': None, 'data_graph': X_tst}

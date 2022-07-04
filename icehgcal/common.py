@@ -72,7 +72,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # *** BACKGROUND MC ***
 
-    filename = args["MC_input"]['background']
+    filename = args["input"]['class_0']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
     
     X_B, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
@@ -82,7 +82,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # *** SIGNAL MC ***
 
-    filename = args["MC_input"]['signal']
+    filename = args["input"]['class_1']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
     X_S, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
@@ -185,12 +185,10 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
-
-    if args['graph_on']:
-        
-        features   = globals()[args['inputvar']]
-        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    
+    features   = globals()[args['inputvar']]
+    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out

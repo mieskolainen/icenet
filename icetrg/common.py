@@ -139,7 +139,7 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
-
+    
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
     # -------------------------------------------------------------------------

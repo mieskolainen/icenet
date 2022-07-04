@@ -10,7 +10,6 @@ import torch
 import os
 import psutil
 import subprocess
-
 import sys
 
 from termcolor import colored, cprint
@@ -30,29 +29,45 @@ import copy
 import hashlib
 import base64
 
+
+import yaml
+
+
 def make_hash_sha256(o):
+    """
+    Create SHA256 hash from an object
+
+    Args:
+        o: python object (e.g. dictionary)
+    
+    Returns:
+        hash
+    """
     hasher = hashlib.sha256()
     hasher.update(repr(make_hashable(o)).encode())
     hash_str = base64.b64encode(hasher.digest()).decode()
 
     # May cause problems with directories
     hash_str = hash_str.replace('/',  '_')
-    hash_str = hash_str.replace('\\', '_')
-    hash_str = hash_str.replace('.',  '_')
+    hash_str = hash_str.replace('\\', '__')
+    hash_str = hash_str.replace('.',  '___')
     
     return hash_str
 
 
 def make_hashable(o):
+    """
+    Turn a python object into hashable type (recursively)
+    """
     if isinstance(o, (tuple, list)):
         return tuple((make_hashable(e) for e in o))
-
+    
     if isinstance(o, dict):
         return tuple(sorted((k,make_hashable(v)) for k,v in o.items()))
-
+    
     if isinstance(o, (set, frozenset)):
         return tuple(sorted(make_hashable(e) for e in o))
-
+    
     return o
 
 

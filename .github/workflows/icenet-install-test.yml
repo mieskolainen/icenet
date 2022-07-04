@@ -57,4 +57,5 @@ jobs:
           source setenv.sh && maxevents=10000; source tests/runme_trg.sh
           source setenv.sh && maxevents=10000; source tests/runme_eid.sh
           source setenv.sh && maxevents=10000; source tests/runme_eid_deep.sh
+          source setenv.sh && maxevents=10000; source tests/runme_eid_visual.sh
           source setenv.sh && maxevents=10000; source tests/runme_brk.sh

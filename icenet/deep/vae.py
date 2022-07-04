@@ -142,7 +142,7 @@ class VAE(nn.Module):
             return reco
 
         elif self.reco_prob == 'Gaussian':
-            log_scale = nn.Parameter(torch.Tensor([0.0]))
+            log_scale = nn.Parameter(torch.Tensor([0.0])).to(x.device)
             scale     = torch.exp(log_scale)
             dist      = torch.distributions.Normal(xhat, scale)
 

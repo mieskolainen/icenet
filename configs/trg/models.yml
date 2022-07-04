@@ -1,0 +1,193 @@
+
+cutset0:
+  train:   'cutset'
+  predict: 'cutset'
+  
+  label:   'cutset'
+  raytune:  null
+  
+  # Using yaml multiline suntax without last linebreak syntax with >-
+  # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+  cutstring: >-
+    x_hlt_pms2 < 10000 &&  
+    x_hlt_invEInvP < 0.2 &&  
+    x_hlt_trkDEtaSeed < 0.01 &&  
+    x_hlt_trkDPhi < 0.2 && 
+    x_hlt_trkChi2 < 40 && 
+    x_hlt_trkValidHits >= 5 && 
+    x_hlt_trkNrLayerIT >= 2
+
+
+cut0:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_pms2 x (-1)'
+  variable: 'x_hlt_pms2'
+  sign: -1
+  transform: null
+
+cut1:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_invEInvP x (-1)'
+  variable: 'x_hlt_invEInvP'
+  sign: -1
+  transform: 'tanh'
+
+cut2:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkDEtaSeed x (-1)'
+  variable: 'x_hlt_trkDEtaSeed'
+  sign: -1
+  transform: 'tanh'
+
+cut3:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkDPhi x (-1)'
+  variable: 'x_hlt_trkDPhi'
+  sign: -1
+  transform: 'tanh'
+
+cut4:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkChi2 x (-1)'
+  variable: 'x_hlt_trkChi2'
+  sign: -1
+  transform: 'tanh'
+
+cut5:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkValidHits'
+  variable: 'x_hlt_trkValidHits'
+  sign: 1
+  transform: null
+
+cut6:
+  train:    'cut'
+  predict:  'cut'
+  label:    'hlt_trkNrLayerIT'
+  variable: 'x_hlt_trkNrLayerIT'
+  sign: 1
+  transform: null
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb0:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_big'
+  raytune:  xgb_trial_0
+
+  # booster parameters
+  model_param:
+    num_boost_round: 56       # number of epochs (equal to the number of trees!)
+  
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 6
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8          # L2 regularization
+    reg_alpha: 0.05          # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']    # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb1:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB_tiny'
+  raytune: 'xgb_trial_1'
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 2      # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    learning_rate: 0.1
+    gamma: 0.63
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.8
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.95
+    
+    reg_lambda: 1.37       # L2 regularization
+    reg_alpha: 0.35        # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']     # for evaluation
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Logistic Regression (convex model = global optimum guarantee)
+lgr0:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'LGR'
+  raytune:  null
+
+  # Model param
+  conv_type: 'lgr'
+  model_param:
+    null
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+    
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  post_process:
+    temperature_scale: true
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch

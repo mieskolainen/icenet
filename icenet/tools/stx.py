@@ -33,7 +33,7 @@ def construct_columnar_cuts(X, ids, cutlist):
 
     return cuts,names
 
-def apply_cutflow(cut, names, xcorr_flow=True):
+def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     """ Apply cutflow
 
     Args:
@@ -51,7 +51,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
     ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
         ind = np.logical_and(ind, cut[i])
-        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/N:.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/N:0.4f}')
+        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:
@@ -65,7 +65,7 @@ def apply_cutflow(cut, names, xcorr_flow=True):
         BMAT   = aux.generatebinary(vec.shape[1])
         print(f'Boolean combinations for {names}: \n')
         for i in range(BMAT.shape[0]):
-            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
+            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
         print('\n')
     
     return ind

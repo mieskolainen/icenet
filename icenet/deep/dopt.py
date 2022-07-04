@@ -220,11 +220,11 @@ def test(model, loader, optimizer, device):
         x,y,w = batch2tensor(batch, device)
 
         with torch.no_grad():
-            phat = model.softpredict(x) # Probability
+            pred = model.softpredict(x) # Probability
         
         weights = w.detach().cpu().numpy()
         y_true  = y.detach().cpu().numpy()
-        y_pred  = phat.detach().cpu().numpy()
+        y_pred  = pred.detach().cpu().numpy()
         
         # Classification metrics
         N       = len(y_true)

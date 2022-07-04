@@ -1,0 +1,345 @@
+
+# ========================================================================
+## Classifier setup
+# ========================================================================
+
+cutset0:
+  train:   'cutset'
+  predict: 'cutset'
+  
+  label:   'cutset'
+  raytune:  null
+  
+  # Using yaml multiline syntax without last linebreak syntax with >-
+  # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+  cutstring: >-
+    nsv   >= 1 &&  
+    nJet  >= 1 &&  
+    nMuon >= 4
+
+cut0:
+  train:    'cut'
+  predict:  'cut'
+  label:    'nMuon'
+  variable: 'nMuon'
+  sign: 1
+  transform: null
+
+cut1:
+  train:    'cut'
+  predict:  'cut'
+  label:    'nJet'
+  variable: 'nJet'
+  sign: 1
+  transform: null
+
+cut2:
+  train:    'cut'
+  predict:  'cut'
+  label:    'nsv'
+  variable: 'nsv'
+  sign: 1
+  transform: null
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb0:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB'
+  raytune:  xgb_trial_0
+
+  # general parameters
+  model_param:
+    num_boost_round: 200     # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8       # L2 regularization
+    reg_alpha: 0.05        # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob'  # 'binary:logistic'     #
+    eval_metric: ['mlogloss']    # for evaluation
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Logistic Regression (convex model = global optimum guarantee)
+lgr0:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'LGR'
+  raytune:  null
+  
+  # Model parameter
+  conv_type: 'lgr'
+  model_param:  
+    null
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                    # focal_entropy exponent
+    temperature: 1              # logit norm temperature
+    
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+  
+  post_process:
+    temperature_scale: true
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
+# Permutation Equivariant Network
+deps:
+  train:   'torch_deps'
+  predict: 'torch_deps'
+  label:   'DEPS'
+  raytune:  null
+  
+  # Model parameters
+  conv_type: 'deps'
+  model_param:  
+    z_dim: 64                   # Latent dimension
+    pool: 'max'
+    dropout: 0.1
+    phi_layers: 3
+    rho_layers: 3
+    
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'Adam'
+    clip_norm: 0.1
+    
+    epochs:  200
+    batch_size:  128
+    lr: 1.0e-3
+    weight_decay: 0.0001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+  
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
+# Deep MAXOUT network
+dmx0:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'MAXO'
+  raytune:  null
+
+  # Model parameter
+  conv_type: 'maxo'
+  model_param:
+    num_units: 8
+    neurons:  50
+    dropout:  0.1
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
+
+    optimizer: 'Adam'          # Adam, AdamW
+    clip_norm: 0.1
+
+    epochs: 200
+    batch_size: 128
+    lr: 1.0e-3
+    weight_decay: 0.00001      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+# Deep MAXOUT network
+dmx1:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'MAXO-LNCE'
+  raytune:  null
+
+  # Model parameter
+  conv_type: 'maxo'
+  model_param:
+    num_units: 8
+    neurons:  50
+    dropout:  0.1
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'Adam'         # Adam, AdamW
+    clip_norm: 0.1
+
+    epochs: 200
+    batch_size: 128
+    lr: 1.0e-3
+    weight_decay: 0.00001     # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # -1 is the last saved epoch
+
+
+# Variational Autoencoder
+vae0:
+  train:   'torch_generic'
+  predict: 'torch_scalar'
+  label:   'VAE'
+  raytune:  null
+
+  # Model param
+  conv_type: 'vae'
+  model_param:
+    hidden_dim: 64
+    latent_dim: 12
+    
+    encoder_act: 'relu'
+    encoder_bn: False
+    decoder_act: 'tanh'
+    decoder_bn: False
+
+    reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
+    kl_prob:   'Gaussian'           # 'Gaussian'
+    anomaly_score: 'KL_RECO'        # 'RECO', 'KL_RECO'
+    
+  # Optimization
+  opt_param:  
+    lossfunc: 'VAE_background_only' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    VAE_beta:  1.0                  # (for vanilla VAE set beta = 1.0)
+    gamma: 2                        # focal_entropy exponent
+    temperature: 1                  # logit norm temperature
+    
+    optimizer: 'Adam'
+    clip_norm: 0.1
+
+    epochs: 200
+    batch_size: 256
+    lr: 1.0e-3
+    weight_decay: 0.00001           # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  post_process:
+    temperature_scale: true
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
+# Deep Normalizing Flow
+dbnf0:
+  train:   'flow'
+  predict: 'torch_flow'
+  label:   'DBNF'
+  raytune:  null
+
+  # Gradient descent
+  opt_param:
+    lossfunc: 'flow_logpx'
+    optimizer: 'Adam'
+    clip_norm: 0.1
+    
+    epochs: 100
+    batch_size: 512           # Keep it high!
+    lr: 1.0e-3
+    weight_decay: 0.0         # L2-regularization
+    polyak: 0.998
+
+    start_epoch: 0
+
+  # Learning rate reduction on plateau
+  scheduler_param:  
+    factor:  0.1
+    patience: 20
+    cooldown: 10
+    min_lr: 0.0005
+    early_stopping: 100
+
+  # Model structure
+  model_param:  
+    flows: 10                 # number of flow blocks
+    layers: 0                 # intermediate layers in a flow block
+    hidden_dim: 10            # 
+    residual: 'gated'         # choises 'none', 'normal', 'gated'
+    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
+  
+  modelname: 'null'
+  tensorboard: 'tensorboard'
+  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch

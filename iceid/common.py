@@ -153,19 +153,16 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ### Tensor representation
     data_tensor = None
-
-    if args['image_on']:
-        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
     
+    data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
+        
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
 
-    if args['graph_on']:
-        
-        features   = globals()[args['inputvar']]
-        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    features   = globals()[args['inputvar']]
+    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out

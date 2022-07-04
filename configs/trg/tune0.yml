@@ -1,486 +1,181 @@
 # Electron HLT trigger tune0.yml
 #
+# -------------------------------------------------------------------
+
 rootname: 'trg'
+rngseed: 123456                      # Fixed seed for training data mixing
 
 # ----------------------------------------------------
-maxevents: 1000000       # Maximum total number of events (per root file) to process
+input_param: &INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
 
-mcfile:    'eff.root'
-datafile:  'datadist.root'
+mva_param: &MVA_INPUT_PARAM
+  num_classes: 2                     # Number of classes in MVA
+  signalclass: 1                     # Signal class ID
+  
+  inputvar:         'MVA_SCALAR_VARS'
+  inputvar_scalar:  null             # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
+  jagged_maxdim:    6
+
+  varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
+  #varnorm_tensor: 'zscore'          # Tensor variable normalization
+  #varnorm_graph: null               # Not implemented yet
+  
+  # # Graph object construction
+  # graph_param:
+  #   global_on: True
+  #   coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
+
+  # # ** Image tensor object construction **
+  # image_param:
+
+  #   # See the corresponding construction under common.py
+  #   channels: 2                 # 1,2,...
+
+  #   # bin-edges
+  #   eta_bins: []
+  #   phi_bins: []
+
+
 # ----------------------------------------------------
+genesis_runmode:
 
-eval_reweight: False     # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
-rngseed: 123456          # Fixed seed for training data mixing
+  <<: *INPUT_PARAM
 
-num_classes: 2           # Number of classes in MVA
-signalclass: 1      
+  maxevents:  null
+  inputfiles: null #"mc_input.yml"
+
+  mcfile:     'eff.root'
+  datafile:   'datadist.root'
+  tree_name:  null                    # 'ntuplizer/tree'
+
+  frac: 0.9                           # Train/validate/test split fraction
+  targetfunc: null                    # Training target,    implemented under mctargets.py
+  filterfunc: 'filter_standard'       # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_fiducial'          # Basic cuts,         implemented under cuts.py
+
+  xcorr_flow: True                    # Full N-point correlations computed between cuts
+
+  # Imputation
+  imputation_param:
+    active: true                      # True / False
+    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: []                        # Special values which indicate the need for imputation
 
 # ----------------------------------------------------
-# ** Activate models here **
-# Give all models some unique identifier and label
-active_models:
+train_runmode:
 
-  - xgb0
-  - xgb1
-  - lgr0
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
 
-  - cut0
-  - cut1
-  - cut2
-  - cut3
-  - cut4
-  - cut5
-  - cut6
+  maxevents: null
+  
+  input_tag: null
+  model_tag: null
 
-  - cutset0
-# ----------------------------------------------------
+  ## Reweighting setup
+  reweight: true
+  reweight_param: &REWEIGHT_PARAM
 
-
-# Distillation training
-# -- the order must compatible with the causal order in active_models
-distillation:
-
-  # Big, sophisticated model
-  source:
-    xgb0
+    maxevents: 100000             # Maximum number of events for the PDF construction
+    equal_frac: true              # Equalize integrated class fractions
+    differential: true            # Differential reweighting
+    # ---------------------
     
-  # Simple, compressed models
-  drains:
+    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    # Note about asymmetry: Keep the reference class as 0 == background, because signal
+    # MC has much longer tail over pt. Thus, it is not possible to re-weight background
+    # to signal very easily, but it is possible to re-weight signal to background.
+    # This is seen by inspecting the re-weighted distributions with small and large statistics.
+
+    dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
+    pseudo_type: 'product'         # 'product', 'geometric_mean'
+    
+    var_A: 'x_hlt_pt'
+    var_B: 'x_hlt_eta'
+
+    bins_A:  [0.001, 100.0, 150]   # Make sure the bounds cover the phase space
+    binmode_A:  'linear'           # 'log10' or 'linear' binning
+    
+    bins_B: [-3.1, 3.1, 150]
+    binmode_B: 'linear'
+    
+    # ! Variable, and binning min/max boundaries are both transformed !
+    transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
+    transform_B: null
+
+    max_reg: 10000.0               # Maximum weight cut-off regularization
+
+
+  ## Outlier protection in the training
+  outlier_param:
+    algo: 'truncate'   # algorithm: 'truncate', null
+    qmin: 0.01         # in [0,100] 
+    qmax: 99.9         # in [0,100]
+
+
+  # ** Activate models here **
+  # Give all models some unique identifier and label
+  models:  !include configs/trg/models.yml
+  active_models: &ACTIVE_MODELS
+
+    - xgb0
     - xgb1
-    # - add more here
+    - lgr0
 
+    - cut0
+    - cut1
+    - cut2
+    - cut3
+    - cut4
+    - cut5
+    - cut6
+
+    - cutset0
+
+  raytune: !include configs/trg/raytune.yml
+
+  # Distillation training
+  # -- the order must be compatible with the causal order in 'active_models'
+  distillation:
+
+    # Big, sophisticated model
+    source:
+      xgb0
+      
+    # Simple, compressed models
+    drains:
+      - xgb1
+      # - add more here
+
+  # Batched "deep" training
+  batch_train_param:
+    blocksize: 150000   # Maximum number of events simultaneously in RAM
+    epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
+    #num_cpu: null      # Set null for auto, or an integer for manual.
 
 # ----------------------------------------------------
+eval_runmode:
 
-inputvar: 'MVA_SCALAR_VARS'               # Input variables, implemented under mvavars.py
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
 
+  maxevents: null
 
-targetfunc: null                 # Training target,    implemented under mctargets.py
-filterfunc: 'filter_standard'    # Training filtering, implemented under mcfilter.py
-cutfunc:    'cut_fiducial'       # Basic cuts,         implemented under cuts.py
+  input_tag: null
+  model_tag: null
 
+  reweight: true
+  reweight_param: *REWEIGHT_PARAM
 
-xcorr_flow: True                 # Full N-point correlations computed between cuts
+  models:  !include configs/trg/models.yml
+  active_models: *ACTIVE_MODELS
 
-frac: 0.8                        # Train/validate/test split fraction
-varnorm: 'zscore'                # Variable normalization: 'zscore', 'madscore', 'none'
-#varnorm_tensor: 'zscore'        # Tensor variable normalization
-#varnorm_graph: 'none'           # Not implemented yet
+# ----------------------------------------------------
+plot_param: !include configs/trg/plots.yml
 
 
-## Reweighting setup in the training phase
-reweight_param:
-  
-  maxevents: 1000000             # Maximum number of events for the PDF construction
-  equal_frac: True              # Equalize integrated class fractions
-
-  # ---------------------
-  
-  reference_class: 0             # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
-  # Note about asymmetry: Keep the reference class as 0 == background, because signal
-  # MC has much longer tail over pt. Thus, it is not possible to re-weight background
-  # to signal very easily, but it is possible to re-weight signal to background.
-  # This is seen by inspecting the re-weighted distributions with small and large statistics.
-  
-  
-  differential_reweight: False
-  dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
-  pseudo_type: 'product'         # 'product', 'geometric_mean'
-  
-  var_A: 'x_hlt_pt'
-  var_B: 'x_hlt_eta'
-
-  bins_A:  [0.001, 100.0, 150]   # Make sure the bounds cover the phase space
-  binmode_A:  'linear'           # 'log10' or 'linear' binning
-  
-  bins_B: [-3.1, 3.1, 150]
-  binmode_B: 'linear'
-  
-  # ! Variable, and binning min/max boundaries are both transformed !
-  transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
-  transform_B: null
-
-  max_reg: 10000.0               # Maximum weight cut-off regularization
-
-
-
-# Imputation
-imputation_param:
-  active: true                   # True / False
-  var: 'MVA_SCALAR_VARS'                  # Array of variables to be imputated
-  algorithm: 'constant'          # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: 0                  # For constant imputation
-  knn_k: 8                       # Number of nearest neighbours considered
-  values: []                     # Special values which indicate the need for imputation
-                                 # if set empty [], only inf/nan are imputed
-
-
-## Outlier protection in the training phase
-outlier_param:
-  algo: 'truncate'   # algorithm: 'truncate', 'none'
-  qmin: 0.01         # in [0,100] 
-  qmax: 99.9         # in [0,100]
-
-
-## Pure plotting setup
-plot_param:
-  basic:
-    active: true
-    nbins:  70
-  
-  contours: 
-    active: false
-  
-  ## Binned ROC plots can be 1D or 2D;
-  # use a running number __0, __1, ... as an identifier for new plots
-  plot_ROC_binned[0]:
-    var:   ['x_hlt_pt']
-    edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
-
-  plot_ROC_binned[1]:
-    var:   ['x_hlt_eta', 'x_hlt_pt']
-    edges: [[-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5],
-            [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
-
-  ## MVA output density (1D)
-  plot_MVA_output:
-    edges: 80
-  
-  ## (MVA output x external variable) density (2D)
-  plot_COR[0]:
-    var:   ['']
-    edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
-            {'nbin': 50, 'q': [0.0, 0.95],  'space': 'log10'}]
-    
-  #plot_COR[1]:
-  #  var:   ['.?hlt_pms2.?']
-  #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
-  #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
-
-
-# ========================================================================
-## Raytune setup
-# ========================================================================
-
-raytune_param:
-  #active:         ['xgb1']
-  active:  [null]
-  num_samples:    10
-  max_num_epochs: 50 # has no impact on xgboost
-
-
-raytune_setup:
-  
-  xgb_trial_0:
-    search_algo: 'HyperOpt'
-
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
-    param:
-      
-      num_boost_round:
-        type: "tune.randint"
-        value: [20, 120]
-
-      ## Tree parameters
-      max_depth:
-        type:  "tune.choice"
-        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-
-      ## Regularization
-      reg_lambda: # Smoothness
-        type: "tune.uniform"
-        value: [0.0, 5.0]
-
-      reg_alpha: # Sparsity
-        type: "tune.uniform"
-        value: [0.0, 0.5]
-
-      ## Tree splitting
-      #min_child_weight:
-      #  type: "tune.uniform"
-      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
-      
-      gamma:
-        type: "tune.uniform"
-        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
-      
-      #max_delta_step:
-      #  type: "tune.uniform"
-      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
-
-      #subsample:
-      #  type: "tune.uniform"
-      #  value: [0.5, 1]    # Between [0, 1] # Default 1
-
-      colsample_bytree:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bylevel:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bynode:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-  xgb_trial_1:
-    search_algo: 'HyperOpt'
-
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
-    param:
-      
-      ## Booster parameters
-      num_boost_round:
-      #  type: "tune.randint"
-      #  value: [1, 3]
-        type: "tune.choice"
-        value: [1]
-      
-      ## Tree parameters
-      max_depth:
-        type:  "tune.choice"
-        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-
-      ## Regularization
-      reg_lambda: # Smoothness
-        type: "tune.uniform"
-        value: [0.0, 5.0]
-
-      reg_alpha: # Sparsity
-        type: "tune.uniform"
-        value: [0.0, 0.5]
-
-      ## Tree splitting
-      #min_child_weight:
-      #  type: "tune.uniform"
-      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
-      
-      gamma:
-        type: "tune.uniform"
-        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
-      
-      #max_delta_step:
-      #  type: "tune.uniform"
-      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
-
-      #subsample:
-      #  type: "tune.uniform"
-      #  value: [0.5, 1]    # Between [0, 1] # Default 1
-
-      colsample_bytree:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bylevel:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bynode:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-      
-
-
-# ========================================================================
-## Classifier setup
-# ========================================================================
-
-cutset0_param:
-  train:   'cutset'
-  predict: 'cutset'
-  
-  label:   'cutset'
-  raytune:  null
-  
-  # Using yaml multiline suntax without last linebreak syntax with >-
-  # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
-  cutstring: >-
-    x_hlt_pms2 < 10000 &&  
-    x_hlt_invEInvP < 0.2 &&  
-    x_hlt_trkDEtaSeed < 0.01 &&  
-    x_hlt_trkDPhi < 0.2 && 
-    x_hlt_trkChi2 < 40 && 
-    x_hlt_trkValidHits >= 5 && 
-    x_hlt_trkNrLayerIT >= 2
-
-
-cut0_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_pms2 x (-1)'
-  variable: 'x_hlt_pms2'
-  sign: -1
-  transform: null
-
-cut1_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_invEInvP x (-1)'
-  variable: 'x_hlt_invEInvP'
-  sign: -1
-  transform: 'tanh'
-
-cut2_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkDEtaSeed x (-1)'
-  variable: 'x_hlt_trkDEtaSeed'
-  sign: -1
-  transform: 'tanh'
-
-cut3_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkDPhi x (-1)'
-  variable: 'x_hlt_trkDPhi'
-  sign: -1
-  transform: 'tanh'
-
-cut4_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkChi2 x (-1)'
-  variable: 'x_hlt_trkChi2'
-  sign: -1
-  transform: 'tanh'
-
-cut5_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkValidHits'
-  variable: 'x_hlt_trkValidHits'
-  sign: 1
-  transform: null
-
-cut6_param:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkNrLayerIT'
-  variable: 'x_hlt_trkNrLayerIT'
-  sign: 1
-  transform: null
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB_big'
-  raytune:  xgb_trial_0
-
-  # booster parameters
-  model_param:
-    num_boost_round: 56       # number of epochs (equal to the number of trees!)
-  
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 6
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 4.8          # L2 regularization
-    reg_alpha: 0.05          # L1 regularization
-    
-    # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']    # for evaluation
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb1_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB_tiny'
-  raytune: 'xgb_trial_1'
-  
-  # booster parameters
-  model_param:
-    num_boost_round: 2      # number of epochs (equal to the number of trees!)
-    
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-    learning_rate: 0.1
-    gamma: 0.63
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.8
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.95
-    
-    reg_lambda: 1.37       # L2 regularization
-    reg_alpha: 0.35        # L1 regularization
-    
-    # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']     # for evaluation
-  
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr0_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'AdamW'
-    clip_norm: 0.1
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  post_process:
-    temperature_scale: true
-
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
-  readmode: -1                  # -1 is the last saved epoch
