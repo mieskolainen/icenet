@@ -14,7 +14,8 @@ import pickle
 import torch
 import xgboost
 from pprint import pprint
-
+from yamlinclude import YamlIncludeConstructor
+    
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
@@ -76,7 +77,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Read yaml configuration
 
     # This allows to use "!include foo.yaml" syntax
-    from yamlinclude import YamlIncludeConstructor
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="")
 
     args = {}
