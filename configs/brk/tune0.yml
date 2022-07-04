@@ -86,3 +86,6 @@ eval_runmode:
 
   active_models: *ACTIVE_MODELS
 
+
+# ----------------------------------------------------
+plot_param: null

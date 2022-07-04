@@ -105,11 +105,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     new_args['rootname'] = args['rootname']
     new_args['rngseed']  = args['rngseed']
     
-    if   runmode == 'all':
-        for key in args.keys():
-            if "_runmode" in key:
-                new_args.update(args[key])
-    elif runmode == 'genesis':
+    # -----------------------------------------------------
+    if   runmode == 'genesis':
         new_args.update(args['genesis_runmode'])
         new_args.update(inputfiles)
     elif runmode == 'train':
@@ -118,6 +115,14 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     elif runmode == 'eval':
         new_args.update(args['eval_runmode'])
         new_args['plot_param'] = args['plot_param']
+    elif runmode == 'all':
+        for key in args.keys():
+            if "_runmode" in key:
+                new_args.update(args[key])
+        new_args['plot_param'] = args['plot_param']
+    else:
+        raise Exception(__name__ + f'.read_config: Unknown runmode = {runmode}')
+    # -----------------------------------------------------
 
     old_args = copy.deepcopy(args)
     args     = copy.deepcopy(new_args)
@@ -844,11 +849,11 @@ def plot_XYZ_multiple_models(targetdir, args):
                     ID    = args['active_models'][k]
                     label = args['models'][ID]['label']
                     legs.append(label)
-                
+
                 ### ROC
                 title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                 plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned[{i}]_bin[{b}]')
-                
+
                 ### MVA (not implemented)
                 #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                 #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]')
