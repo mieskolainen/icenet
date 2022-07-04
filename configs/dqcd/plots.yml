@@ -1,0 +1,41 @@
+basic:
+  active: false
+  nbins:  70
+
+contours:
+  active: false
+
+## Binned ROC plots can be 1D or 2D
+ROC_binned:
+  active: true
+  
+  variables:
+    - var0:
+      var:   ['ChsMET_pt']
+      edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
+
+    - var1:
+      var:   ['ChsMET_phi', 'ChsMET_pt']
+      edges: [[-3.14159, -2.24399286, -1.34639571, -0.44879857, 0.44879857, 1.34639571, 2.24399286, 3.14159],
+              [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
+
+## MVA output density (1D)
+MVA_output:
+  active: true
+  edges: 80
+
+## (MVA output x External variable) density (2D)
+
+MVA_2D:
+  active: true
+  
+  variables:
+    - var0:
+        var:   ['']
+        edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
+                {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
+    - var1:
+        var:   ['.?hlt_pms2.?']
+        edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
+                {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
+

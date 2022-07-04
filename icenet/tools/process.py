@@ -13,7 +13,9 @@ import sys
 import pickle
 import torch
 import xgboost
-
+from pprint import pprint
+from yamlinclude import YamlIncludeConstructor
+    
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
@@ -36,40 +38,95 @@ ROC_binned_mlabel = []
 
 # **************************
 
-def read_config(config_path='./configs/xyz'):
+def read_cli():
+
+    parser = argparse.ArgumentParser()
+    
+    ## argparse.SUPPRESS removes argument from the namespace if not passed
+    parser.add_argument("--runmode",    type=str, default='null')
+    parser.add_argument("--config",     type=str, default='tune0')
+    parser.add_argument("--datapath",   type=str, default=".")
+    parser.add_argument("--datasets",   type=str, default="*.root")
+    parser.add_argument("--tag",        type=str, default='tag0')
+
+    parser.add_argument("--maxevents",  type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--inputfiles", type=str, default=argparse.SUPPRESS)
+    parser.add_argument("--input_tag",  type=str, default='input0')
+    parser.add_argument("--model_tag",  type=str, default='model0')
+
+    cli      = parser.parse_args()
+    cli_dict = vars(cli)
+
+    return cli, cli_dict
+
+
+def read_config(config_path='configs/xyz/', runmode='all'):
     """
     Commandline and YAML configuration reader
     """
 
     # -------------------------------------------------------------------
     ## Create folders
-    aux.makedir('./tmp/')
+    aux.makedir('tmp/')
 
     # -------------------------------------------------------------------
     ## Parse command line arguments
-
-    parser = argparse.ArgumentParser()
-    
-    ## argparse.SUPPRESS removes argument from the namespace if not passed
-    parser.add_argument("--config",    type=str, default='tune0')
-    parser.add_argument("--datapath",  type=str, default=".")
-    parser.add_argument("--datasets",  type=str, default="*.root")
-    parser.add_argument("--tag",       type=str, default='tag0')
-    parser.add_argument("--maxevents", type=int, default=argparse.SUPPRESS)
-    
-    cli      = parser.parse_args()
-    cli_dict = vars(cli)
+    cli, cli_dict = read_cli()
 
     # -------------------------------------------------------------------
     ## Read yaml configuration
+
+    # This allows to use "!include foo.yaml" syntax
+    YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="")
+
     args = {}
-    config_yaml_file = cli.config + '.yml'
-    with open(config_path + '/' + config_yaml_file, 'r') as stream:
+    config_yaml_file = cli.config
+    with open(f'{config_path}/{config_yaml_file}', 'r') as f:
         try:
-            args = yaml.safe_load(stream)
+            args = yaml.load(f, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
     
+
+    ## Inputfiles .yaml
+    if args["genesis_runmode"]["inputfiles"] is not None:
+        with open(f'{config_path}/{args["genesis_runmode"]["inputfiles"]}', 'r') as f:
+            try:
+                inputfiles = yaml.load(f, Loader=yaml.FullLoader)
+            except yaml.YAMLError as exc:
+                print(exc)
+    else:
+        inputfiles = {}
+    
+    # -------------------------------------------------------------------
+    # Mode setup
+
+    new_args = {}
+    new_args['rootname'] = args['rootname']
+    new_args['rngseed']  = args['rngseed']
+    
+    # -----------------------------------------------------
+    if   runmode == 'genesis':
+        new_args.update(args['genesis_runmode'])
+        new_args.update(inputfiles)
+    elif runmode == 'train':
+        new_args.update(args['train_runmode'])
+        new_args['plot_param'] = args['plot_param']
+    elif runmode == 'eval':
+        new_args.update(args['eval_runmode'])
+        new_args['plot_param'] = args['plot_param']
+    elif runmode == 'all':
+        for key in args.keys():
+            if "_runmode" in key:
+                new_args.update(args[key])
+        new_args['plot_param'] = args['plot_param']
+    else:
+        raise Exception(__name__ + f'.read_config: Unknown runmode = {runmode}')
+    # -----------------------------------------------------
+
+    old_args = copy.deepcopy(args)
+    args     = copy.deepcopy(new_args)
+
     # -------------------------------------------------------------------
     ## Commandline override of yaml variables
     for key in cli_dict.keys():
@@ -79,40 +136,37 @@ def read_config(config_path='./configs/xyz'):
     print()
 
     # -------------------------------------------------------------------
+    ## Create a hash
+
+    hash_args = {}
+    hash_args.update(old_args['genesis_runmode']) # This first !
+    hash_args['rngseed']   = args['rngseed']
+    hash_args['maxevents'] = args['maxevents']
+    hash_args.update(inputfiles)
+
+    args['__hash__'] = io.make_hash_sha256(hash_args)
+
+
+    # -------------------------------------------------------------------
     ## Create new variables
 
-    args["config"]     = cli.config
-    args['modeldir']   = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
+    args["config"]     = cli_dict['config']
+    args['datadir']    = aux.makedir(f'output/{args["rootname"]}/{cli_dict["config"]}')
+    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/{cli_dict["config"]}')
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
-    args['__use_cache__']       = False
+    args['__use_cache__']       = True
     args['__raytune_running__'] = False
-    
+
     # -------------------------------------------------------------------
-    ### Set graph, image and deepset constructions on/off
-    
-    special_keys = ['graph', 'image', 'deps']
-
-    for key in special_keys:
-        args[f'{key}_on'] = False
-
-    for i in range(len(args['active_models'])):
-        ID    = args['active_models'][i]
-        param = args[f'{ID}_param']
-
-        for key in special_keys:
-            if key in param['train'] or key in param['predict']:
-                args[f'{key}_on'] = True
-
-    print('\n')
-    for key in special_keys:
-        cprint(__name__ + f'.read_config: {key}_on = {args[f"{key}_on"]}', 'yellow')
+    ## Create directories
+    aux.makedir(args['datadir'])
+    aux.makedir(args['modeldir'])
 
     # -------------------------------------------------------------------
     # Set random seeds for reproducability and train-validate-test splits
 
-    print(args)
     print('')
     print(" torch.__version__: " + torch.__version__)
 
@@ -120,19 +174,18 @@ def read_config(config_path='./configs/xyz'):
     np.random.seed(args['rngseed'])
     torch.manual_seed(args['rngseed'])
 
-    # --------------------------------------------------------------------    
-    print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
-    print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
-    print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
-    # --------------------------------------------------------------------
+    # ------------------------------------------------
+    print(__name__ + f'.read_config: Created arguments dictionary with runmode = <{runmode}> :')    
+    pprint(args)
+    # ------------------------------------------------
 
     return args, cli
 
 
-def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputation_vars=None):
+def read_data(args, func_loader, impute_vars, runmode):
     """
     Load input data
-
+    
     Args:
         args:  main argument dictionary
         func_loader:  application specific root file loader function
@@ -140,12 +193,14 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
     Returns:
         data
     """
-    args_hash      = io.make_hash_sha256(args)
-    cache_filename = f'./tmp/{args_hash}.data'
+    cache_filename = f'{args["datadir"]}/data_{args["__hash__"]}.pkl'
 
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
+
+        if runmode != "genesis":
+            raise Exception(__name__ + f'.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
 
         # N.B. This loop is needed, because certain applications have each root file loaded here,
         # whereas some apps do all the multi-file processing under 'func_loader'
@@ -163,48 +218,51 @@ def read_data(args, func_loader=None, func_factor=None, train_mode=False, imputa
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
         with open(cache_filename, 'wb') as handle:
-            pickle.dump([trn, val, tst], handle, protocol=pickle.HIGHEST_PROTOCOL)      
+            print(__name__ + f'.read_data: saving to cache: "{cache_filename}"')
+            pickle.dump([trn, val, tst, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        if args['imputation_param']['active']:
+            trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=impute_vars, args=args['imputation_param'], imputer=None)
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+
     else:
         with open(cache_filename, 'rb') as handle:
-            print(__name__ + f'.get_data: loading from cache file {cache_filename}')
-            trn, val, tst = pickle.load(handle)
+            print(__name__ + f'.read_data: loading from cache: "{cache_filename}"')
+            trn, val, tst, genesis_args = pickle.load(handle)
 
+            print(__name__ + f'.read_data: cached data was generated with arguments:')
+            pprint(genesis_args)
+
+    return {'trn': trn, 'val': val, 'tst': tst}
+
+
+def process_data(args, data, func_factor, runmode):
+
+    trn, val, tst = data['trn'], data['val'], data['tst']
+
+    ### Split and factor data
     output = {}
+    if   runmode == 'train':
 
-    # Train
-    if train_mode:
-
-        # Imputation
-        if args['imputation_param']['active']:
-            trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=None)
-            pickle.dump(imputer, open(args["modeldir"] + '/imputer.pkl', 'wb'))
-
-        ### Compute reweighting weights (before split&factor because we need the variables !)
-        trn.w, pdf = reweight.compute_ND_reweights(x=trn.x, y=trn.y, w=trn.w, pdf=None, ids=trn.ids, args=args['reweight_param'])
-        pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
-        val.w,_    = reweight.compute_ND_reweights(x=val.x, y=val.y, w=val.w, pdf=pdf,  ids=val.ids, args=args['reweight_param'])
+        ### Compute reweighting weights (before funcfactor because we need the variables !)
+        if args['reweight']:
+            trn.w, pdf = reweight.compute_ND_reweights(pdf=None, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
+            val.w,_    = reweight.compute_ND_reweights(pdf=pdf,  x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
+            pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
         
-        ### Split and factor data
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
-        
-    # Test
-    else:
 
-        if args['imputation_param']['active']:
-            imputer   = pickle.load(open(args["modeldir"] + '/imputer.pkl', 'rb')) 
-            trn, val, tst, _ = impute_datasets(trn=trn, val=val, tst=tst, features=imputation_vars, args=args['imputation_param'], imputer=imputer)
+    elif runmode == 'eval':
         
-        ### Compute reweighting weights for the evaluation (before split&factor because we need the variables !)
-        if args['eval_reweight']:
+        ### Compute reweighting weights (before funcfactor because we need the variables !)
+        if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
         
-        ### Split and factor data
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
-    
-    return output
 
+    return output
 
 def make_plots(data, args):
 
@@ -230,14 +288,14 @@ def make_plots(data, args):
 
 
 
-def impute_datasets(trn, val, tst, features, args, imputer=None):
+def impute_datasets(trn, val, tst, args, features, imputer=None):
     """
     Dataset imputation
 
     Args:
         trn,val,tst: .x, .y, .w, .ids type object
-        features:    feature vector names
         args:        imputer parameters
+        features:    variables to impute (list)
         imputer:     imputer object (scikit-type)
 
     Return:
@@ -292,7 +350,7 @@ def train_models(data_trn, data_val, args=None) :
 
 
     # @@ Tensor normalization @@
-    if args['image_on'] and (args['varnorm_tensor'] == 'zscore'):
+    if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
         print('\nZ-score normalizing tensor variables ...')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_trn['data_tensor'])
@@ -345,9 +403,8 @@ def train_models(data_trn, data_val, args=None) :
     for i in range(len(args['active_models'])):
 
         ID    = args['active_models'][i]
-        param = args[f'{ID}_param']
+        param = args['models'][ID]
         print(f'Training <{ID}> | {param} \n')
-
 
         ## Different model
         if   param['train'] == 'torch_graph':
@@ -362,7 +419,7 @@ def train_models(data_trn, data_val, args=None) :
             #    if ID in args['distillation']['drains']:
             #        inputs['y_soft'] = y_soft
             
-            if ID in args['raytune_param']['active']:
+            if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
             else:
                 model = train.train_torch_graph(**inputs)
@@ -379,7 +436,7 @@ def train_models(data_trn, data_val, args=None) :
                 if ID in args['distillation']['drains']:
                     inputs['y_soft'] = y_soft
             
-            if ID in args['raytune_param']['active']:
+            if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
             else:
                 model = train.train_xgb(**inputs)
@@ -402,7 +459,7 @@ def train_models(data_trn, data_val, args=None) :
             #    if ID in args['distillation']['drains']:
             #        inputs['y_soft'] = y_soft
 
-            if ID in args['raytune_param']['active']:
+            if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)        
@@ -425,7 +482,7 @@ def train_models(data_trn, data_val, args=None) :
             #    if ID in args['distillation']['drains']:
             #        inputs['y_soft'] = y_soft
             
-            if ID in args['raytune_param']['active']:
+            if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)
@@ -592,9 +649,9 @@ def evaluate_models(data=None, args=None):
     # **  MAIN LOOP OVER MODELS **
     #
     for i in range(len(args['active_models'])):
-
-        ID = args['active_models'][i]
-        param = args[f'{ID}_param']
+        
+        ID    = args['active_models'][i]
+        param = args['models'][ID]
         print(f'Evaluating <{ID}> | {param} \n')
         
         inputs = {'weights': weights, 'label': param['label'],
@@ -684,8 +741,6 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     # Compute predictions once and for all here
     y_pred = func_predict(x_input)
 
-    print(y_pred)
-
     # --------------------------------------
     ## Total ROC Plot
     metric = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
@@ -731,7 +786,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # ----------------------------------------------------------------
     ### MVA  1D plot
-    hist_edges = args['plot_param'][f'plot_MVA_output']['edges']
+    hist_edges = args['plot_param'][f'MVA_output']['edges']
 
     inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
         'label': f'{label}', 'path': targetdir + '/MVA/'}
@@ -792,7 +847,7 @@ def plot_XYZ_multiple_models(targetdir, args):
 
                     # Take label for the legend
                     ID    = args['active_models'][k]
-                    label = args[f'{ID}_param']['label']
+                    label = args['models'][ID]['label']
                     legs.append(label)
 
                 ### ROC

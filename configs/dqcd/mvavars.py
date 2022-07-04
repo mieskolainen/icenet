@@ -7,14 +7,13 @@
 
 
 """
-KINEMATIC_GEN_ID = [
+KINEMATIC_GEN_VARS = [
   'gen_pt',
   'gen_eta',
   'gen_phi',
   'gen_energy'
 ]
 """
-
 
 TRIGGER_VARS = [
   'HLT_Mu9_IP6_part0',
@@ -24,22 +23,29 @@ TRIGGER_VARS = [
   'HLT_Mu9_IP6_part4'
 ]
 
-KINEMATIC_ID = [
+KINEMATIC_VARS = [
   # "Dummy" variables
   'ChsMET_phi',
   'ChsMET_pt',
   'ChsMET_sumEt'
 ]
 
-MVA_SCALAR_ID = [
+MVA_SCALAR_VARS = [
   'nJet',
   'nMuon',
   'nsv'
 ]
 
-#MVA_JAGGED_ID = []
+# -----------------------------------------
+# Conditional (parametric) model variables
+MODEL_VARS = [
+  '__model_m',
+  '__model_ctau'
+]
+MVA_SCALAR_VARS += MODEL_VARS
+# -----------------------------------------
 
-MVA_JAGGED_ID = [
+MVA_JAGGED_VARS = [
   
   'Jet_chEmEF',
   'Jet_chHEF',
@@ -81,7 +87,6 @@ PLOT_VARS = [
   #'sv_deta'
 ]
 
-
 LOAD_VARS = [
   #'Jet_chEmEF',
   #'Jet_chHEF',
@@ -108,9 +113,9 @@ LOAD_VARS = [
   #'sv_ndof'
 ]
 
-LOAD_VARS += KINEMATIC_ID
-LOAD_VARS += MVA_SCALAR_ID
-LOAD_VARS += MVA_JAGGED_ID
+LOAD_VARS += KINEMATIC_VARS
+LOAD_VARS += MVA_SCALAR_VARS
+LOAD_VARS += MVA_JAGGED_VARS
 
 LOAD_VARS += PLOT_VARS
 LOAD_VARS += TRIGGER_VARS

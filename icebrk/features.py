@@ -151,6 +151,5 @@ def generate_feature_names(N=1):
     names = []
     for key in all_features.keys():
         for i in range(N):
-            names.append(str(i) + '|' + key)
-
+            names.append(f'{key}[{i}]')
     return names

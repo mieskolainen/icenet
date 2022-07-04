@@ -1,6 +1,6 @@
 # Generic model evaluation wrapper functions
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import math
 import numpy as np
@@ -41,16 +41,10 @@ from icenet.deep  import dbnf
 from icenet.deep  import mlgr
 from icenet.deep  import maxo
 
-# iceid
-from configs.eid.mvavars import *
-from iceid import common
-from iceid import graphio
-
 
 def pred_cut(args, param):
 
-    label = param['label']
-    print(f'\nEvaluate {label} cut classifier ...')
+    print(__name__ + f'.pred_cut: Evaluate <{param["label"]}> cut model ...')
 
     # Get feature name variables
     index = args['features'].index(param['variable'])
@@ -67,8 +61,7 @@ def pred_cut(args, param):
 
 def pred_cutset(args, param):
 
-    label = param['label']
-    print(f'\nEvaluate {label} fixed cutset classifier ...')
+    print(__name__ + f'.pred_cutset: Evaluate <{param["label"]}> fixed cutset model ...')
 
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
@@ -77,7 +70,6 @@ def pred_cutset(args, param):
     ids = args['features']
 
     def func_predict(x):
-        # Cut based two-class classifier
         y = stx.eval_boolean_syntax(expr=cutstring, X=x, ids=ids)
         return y.astype(float)
     
@@ -86,8 +78,7 @@ def pred_cutset(args, param):
 
 def pred_graph_xgb(args, param, device='cpu'):
 
-    label = param['label']
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_graph_xgb: Evaluate <{param["label"]}> model ...')
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
         label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
@@ -95,7 +86,6 @@ def pred_graph_xgb(args, param, device='cpu'):
     
     xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
         label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
-
 
     def func_predict(x):
 
@@ -126,9 +116,7 @@ def pred_graph_xgb(args, param, device='cpu'):
 
 def pred_torch_graph(args, param):
 
-    label = param['label']
-    
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
@@ -151,9 +139,7 @@ def pred_torch_graph(args, param):
 
 def pred_torch_generic(args, param):
     
-    label = param['label']
-
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
@@ -175,9 +161,7 @@ def pred_torch_generic(args, param):
 
 def pred_torch_scalar(args, param):
     
-    label = param['label']
-
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
@@ -202,10 +186,9 @@ def pred_xtx(args, param):
 # Not implemented
 '''
 
+def pred_xgb(args, param):
 
-def pred_xgb(args, param):     
-    label = param['label']
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
 
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
@@ -218,15 +201,14 @@ def pred_xgb(args, param):
 
 def pred_flow(args, param, n_dims):
 
-    label = param['label']
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
 
     # Load models
     param['model_param']['n_dims'] = n_dims # Set input dimension
     
     modelnames = []
     for i in range(args['num_classes']):
-        modelnames.append(f'{label}_class_{i}')
+        modelnames.append(f'{param["label"]}_class_{i}')
     
     models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
     
@@ -238,8 +220,7 @@ def pred_flow(args, param, n_dims):
 
 def pred_flr(args, param):
 
-    label = param['label']
-    print(f'\nEvaluate {label} classifier ...')
+    print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
 
     b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'rb'))
     def func_predict(x):

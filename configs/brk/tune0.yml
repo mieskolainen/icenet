@@ -4,197 +4,88 @@
 # General
 
 rootname: 'brk'
-
-VERBOSE: false
-maxevents: 1000
-
 rngseed: 123456                 # Fixed seed for training data mixing
 
-num_classes: null               # Num of classes in MVA
-signalclass: null
 
+input_param: &INPUT_PARAM
 
-inputvar: null
-cutfunc: null
-targetfunc: null
+  # Maximum number of triplets as an input to the neural network
+  MAXT3: 6
 
-# -----------------------------------------------------------------------------
-# TRAINING AND ANALYSIS
-# -----------------------------------------------------------------------------
+  # Maximum number of simultaneous "hot" objects considered with 0 < MAXN <= MAXT3
+  # Note! Exponential complexity growth
+  MAXN:  1
 
-# Maximum number of triplets as an input to the neural network
-MAXT3: 6
-
-# Maximum number of simultaneous "hot" objects considered with 0 < MAXN <= MAXT3
-# Note! Exponential complexity growth
-MAXN:  1
-
-# Create supersets (combine triplets with identical kinematics)
-SUPERSETS: true
-
-
-# Input imputation (NOT IMPLEMENTED)
-# ...
-
-# Variable normalization
-frac: 0.9                 # Train/validate/test split fraction
-varnorm: 'zscore'         # variable normalization: 'zscore', 'minmax', 'none'
-
-## Outlier protection in the training phase
-outlier_param:
-  algo: 'truncate' # algorithm: 'truncate', 'none'
-  qmin:  0.001   # in [0,100] 
-  qmax: 99.99    # in [0,100]
-
-
-# -----------------------------------------------------------------------------
-# ANALYSIS ONLY
-# -----------------------------------------------------------------------------
-
-# Normalization
-WNORM: 'event'
-
-
-# -----------------------------------------------------------------------------
-# WNORM: event-by-event weight normalization:
-#
-#   'event' gives ~ #active-elements^{-1} normalized weights,
-#           e.g class c3 = [1 0 0 1 0 0 0] (two hot objects) receives
-#           weight \hat{P}(c_3) / 2 filled two times by two different kinematics
-#
-#   'unit'  gives weights normalized by one, the relative weight
-#           per output c_i depends on the object multiplicity of the class
-# -----------------------------------------------------------------------------
-
-active_models:
-  - xgb
-  - maxo
-  - deps
-
-## Classifier setup
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_param:
-  active: true
-
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB'
-  raytune: null
-
-  # general parameters
-  model_param:
-
-    booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
-    num_boost_round: 300   # Number of epochs
-    tree_method: 'auto'    # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-    
-    # booster parameters
-    learning_rate: 0.1
-    max_depth: 10
-    min_child_weight: 1.0
-    gamma: 0.0
-    max_delta_step: 0
-    subsample: 1.0
-
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
-    
-    reg_lambda: 2.0       # L2 regularization
-    reg_alpha: 0.0        # L1 regularization
-    
-    # learning task parameters
-    objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
-    eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep MaxOut network
-maxo_param:
-  active: true
+  # Create supersets (combine triplets with identical kinematics)
+  SUPERSETS: true
   
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:  'MAXO'
-  raytune:  null
-
-  # Model parameters
-  conv_type: 'maxo'
-  model_param:
-    num_units: 12
-    neurons:  36
-    dropout:  0.5
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'AdamW'
-    noise_reg: 0.0                # Noise regularization
-    epochs:  200
-    batch_size:  256
-    lr: 1.0e-3
-    weight_decay: 0.01            # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-    
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Permutation Equivariant Network
-deps_param:
-  active: true
+  # Normalization
+  WNORM: 'event'
   
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'DEPS'
-  raytune:  null
+  # -----------------------------------------------------------------------------
+  # WNORM: event-by-event weight normalization:
+  #
+  #   'event' gives ~ #active-elements^{-1} normalized weights,
+  #           e.g class c3 = [1 0 0 1 0 0 0] (two hot objects) receives
+  #           weight \hat{P}(c_3) / 2 filled two times by two different kinematics
+  #
+  #   'unit'  gives weights normalized by one, the relative weight
+  #           per output c_i depends on the object multiplicity of the class
+  # -----------------------------------------------------------------------------
 
-  # Model parameters
-  conv_type: 'deps'
-  model_param:  
-    z_dim: 64                  # Latent dimension
-    pool: 'max'
-    dropout: 0.5
-    phi_layers: 3
-    rho_layers: 3
 
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                   # focal_entropy exponent
-    temperature: 1             # logit norm temperature
-    
-    optimizer: 'AdamW'
-    noise_reg: 0.0             # Noise regularization
-    epochs:  200
-    batch_size:  256
-    lr: 1.0e-3
-    weight_decay: 0.01         # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-    
-  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+mva_param: &MVA_INPUT_PARAM
   
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
+  num_classes: null         # Num of classes in MVA
+  signalclass: null
+
+  inputvar:    null
+  cutfunc:     null
+  targetfunc:  null
+
+  varnorm: 'zscore'         # variable normalization: 'zscore', 'minmax', 'none'
+
+
+# ----------------------------------------------------
+genesis_runmode:
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
+  
+  inputfiles: null
+  maxevents: 1000
+  frac: 0.9                 # Train/validate/test split fraction
+  
+  VERBOSE: false
+
+  # Input imputation (NOT IMPLEMENTED)
+  # ...
+
+
+# ----------------------------------------------------
+train_runmode:
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
+
+  models:  !include configs/brk/models.yml
+  active_models: &ACTIVE_MODELS
+    - xgb
+    - maxo
+    - deps
+
+  ## Outlier protection in the training phase
+  outlier_param:
+    algo: 'truncate' # algorithm: 'truncate', 'none'
+    qmin:  0.001     # in [0,100] 
+    qmax: 99.99      # in [0,100]
+
+
+# ----------------------------------------------------
+eval_runmode:
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
+
+  active_models: *ACTIVE_MODELS
+
+
+# ----------------------------------------------------
+plot_param: null

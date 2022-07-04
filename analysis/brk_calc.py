@@ -39,13 +39,13 @@ from icebrk import features
 #
 def main() :
     
-    args, cli = process.read_config(config_path='./configs/brk')
-    iodir = aux.makedir(f'./output/{args["rootname"]}/{cli.tag}/')
+    args, cli = process.read_config(config_path='configs/brk')
+    iodir = aux.makedir(f'output/{args["rootname"]}/{cli.tag}/')
     paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
-
-
+    
+    
     VARS = features.generate_feature_names(args['MAXT3'])
-    modeldir = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
+    modeldir = aux.makedir(f'checkpoint/{args["rootname"]}/{args["config"]}/')
     
     # ====================================================================
     print('\nLoading AI/ML models ...')
@@ -64,9 +64,9 @@ def main() :
     # Evaluate models
 
     ### DEEPSETS
-    DEPS_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['deps_param']['label'], epoch=args['deps_param']['readmode'])
+    DEPS_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['models']['deps']['label'], epoch=args['models']['deps']['readmode'])
 
-    DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['deps_param']['device'])
+    DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['models']['deps']['device'])
     DEPS_model.eval() # Turn on eval mode!
 
     def func_predict_A(X):
@@ -83,9 +83,9 @@ def main() :
         return io.checkinfnan(y)
     
     ### MAXOUT
-    MAXO_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['maxo_param']['label'], epoch=args['maxo_param']['readmode'])
+    MAXO_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['models']['maxo']['label'], epoch=args['models']['maxo']['readmode'])
     
-    MAXO_model, device = dopt.model_to_cuda(MAXO_model, device_type=args['maxo_param']['device'])
+    MAXO_model, device = dopt.model_to_cuda(MAXO_model, device_type=args['models']['maxo']['device'])
     MAXO_model.eval() # Turn on eval mode!
     
     def func_predict_B(X):
@@ -94,11 +94,11 @@ def main() :
         return io.checkinfnan(y)
     
     ### XGB
-    XGB_model = pickle.load(open(modeldir + '/XGB_model.dat', 'rb'))
+    label = args['models']['xgb']['label']
+    XGB_model = pickle.load(open(modeldir + f'/{label}_model.dat', 'rb'))
     def func_predict_C(X):
         y = XGB_model.predict(xgboost.DMatrix(data = standardize(X)))
         return io.checkinfnan(y)
-
 
     func_predict = [func_predict_A, func_predict_B, func_predict_C]
 
@@ -128,12 +128,11 @@ def main() :
     output = loop.process(paths=paths, func_predict=func_predict,
         isMC=False, MAXT3=args['MAXT3'], MAXN=args['MAXN'], WNORM=args['WNORM'],
         maxevents=args['maxevents'], VERBOSE=args['VERBOSE'], SUPERSETS=args['SUPERSETS'], BMAT=BMAT, hd5dir=iodir, outputXY=False, outputP=True)
-        
+    
     # Save it for the evaluation
     pickle.dump(output, open(iodir + 'DA_output.pkl', 'wb'))
 
     # ========================================================================
-
 
     print('\n' + __name__+ ' DONE')
 

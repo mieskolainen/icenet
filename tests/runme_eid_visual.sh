@@ -4,8 +4,7 @@
 #
 # Run with: source runme.sh
 
-CONFIG="tune0"
-
+CONFIG="tune0.yml"
 DATAPATH="./travis-stash/input/iceid"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

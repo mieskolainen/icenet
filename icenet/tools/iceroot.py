@@ -14,7 +14,7 @@ from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
 
-def read_multiple_MC(process_func, processes, root_path, param, class_id):
+def read_multiple_MC(process_func, processes, root_path, param, class_id, use_conditional):
     """
     Loop over different MC processes
 
@@ -33,9 +33,14 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
         print(__name__ + f'.read_multiple_MC: {processes[key]}')
 
-        datasets    = processes[key]['path']
-        xs          = processes[key]['xs']
-        model_param = processes[key]['model_param']
+        # --------------------
+
+        datasets     = processes[key]['path']
+        xs           = processes[key]['xs']
+        model_param  = processes[key]['model_param']
+        force_xs     = processes[key]['force_xs']
+
+        # --------------------
 
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
 
@@ -50,11 +55,47 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
         eff_acc     = N_after / N_before
 
-        print(__name__ + f'.read_multiple_MC: Process {key}: efficiency x acceptance = {eff_acc}')
+        print(__name__ + f'.read_multiple_MC: Process <{key}> | efficiency x acceptance = {eff_acc}')
 
         Y__         = class_id * np.ones(N_after, dtype=int)
-        W__         = np.ones(N_after, dtype=float) / N_after * (eff_acc * xs) # Sum over W yields = (eff_acc * xs)
+
+        # -------------------------------------------------
+        # Visible cross-section weights
+        if not force_xs:
+            W__ = (np.ones(N_after, dtype=float) / N_after) * (xs * eff_acc) # Sum over W yields --> (eff_acc * xs)
         
+        # Force mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants
+        # to have equal proportions for e.g. theory conditional MVA training.
+        # (then one uses the same xs value for each process in the steering .yaml file)
+        else:
+            W__ = (np.ones(N_after, dtype=float) / N_after) * xs # Sum over W yields --> xs
+
+        # -------------------------------------------------
+        # Add conditional (theory param) variables
+        if use_conditional:
+
+            print(__name__ + f'.read_multiple_MC: Adding conditional theory (model) parameters')
+            print(X__.shape)
+
+            for var in model_param.keys():
+
+                value = model_param[var]
+
+                # Pick random between [a,b]
+                if type(value) == list:
+                    col = value[0]  + (value[1] - value[0]) * np.random.rand(X__.shape[0], 1)
+                # Pick specific fixed value
+                else:
+                    if value is None:
+                        value = np.nan
+                    col = value  * np.ones((X__.shape[0], 1))                
+                
+                X__ = np.append(X__, col, axis=1)
+                ids.append(f'__model_{var}')
+        else:
+            print(__name__ + f'.read_multiple_MC: Not using conditional theory (model) parameters ')
+        # -------------------------------------------------
+
         # Concatenate processes
         if i == 0:
             X, Y, W = X__, Y__, W__

@@ -4,940 +4,206 @@
 #
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
+
 rootname: 'eid'
+rngseed: 123456                      # Fixed seed for training data mixing
 
-maxevents: 100000     # Maximum total number of events (per root file) to process
+# ----------------------------------------------------
+input_param: &INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
 
-eval_reweight: false  # Event-by-event re-weighting used in the evaluation phase
-rngseed: 123456       # Fixed seed for training data mixing
-
-num_classes: 2        # Number of classes in MVA
-signalclass: 1      
-tree_name:   'ntuplizer/tree'
-
-
-# Batched "deep" training
-batch_train_param:
-  blocksize: 150000   # Maximum number of events simultaneously in RAM
-  epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
-  #num_cpu: null      # Set null for auto, or an integer for manual.
-
-# ---------------------------------------------------------
-# ** Activate models here **
-# Give all models some unique identifier and label
-active_models:
-
-  - gnet3
-  - gnet2
-  - gnet0
-  - gnet1
+mva_param: &MVA_INPUT_PARAM
+  num_classes: 2                     # Number of classes in MVA
+  signalclass: 1                     # Signal class ID
   
-#  - dbnf0
-  - xgb0
-  - gxgb0
+  inputvar:         'CMSSW_MVA_SCALAR_VARS_ORIG'
+  inputvar_scalar:  null             # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
+  jagged_maxdim:    6
 
-#  - flr0
-#  - lgr0
-#  - dmx0
-#  - dmlp
-
-#  - cnn0
-
-##  - xtx0
-
-# ---------------------------------------------------------
-
-
-# Distillation training
-# -- the order must compatible with the causal order in active_models
-distillation:
-
-  # Big, sophisticated model
-  source:
-    #xgb0
-
-  # Simple, compressed models
-  drains:
-    # - xgb1
-    # - add more here
-
-
-inputvar: 'CMSSW_MVA_ID_ORIG'   # Input variables, implemented under mvavars.py
-
-targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
-filterfunc: 'filter_no_egamma'  # Training filtering, implemented under mcfilter.py
-cutfunc:    'cut_standard'      # Basic cuts,         implemented under cuts.py
-
-xcorr_flow: True                # Full N-point correlations computed between cuts
-
-frac: 0.9                       # Train/validate/test split fraction
-varnorm: 'zscore'               # Variable normalization: 'zscore', 'madscore', 'none'
-varnorm_tensor: 'zscore'        # Tensor variable normalization
-#varnorm_graph: 'none'          # Not implemented yet
-
-
-# ** Graph object construction **
-graph_param:
-  global_on: True
-  coord: 'pxpypze'              # 'ptetaphim', 'pxpypze'
-
-
-# ** Image tensor object construction **
-image_param:
-
-  # See the corresponding construction under common.py
-  channels: 2                 # 1,2,...
-
-  # bin-edges
+  varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
+  varnorm_tensor: 'zscore'           # Tensor variable normalization
+  #varnorm_graph: null               # Not implemented yet
   
+  # Graph object construction
+  graph_param:
+    global_on: True
+    coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
 
-  eta_bins: [-1.5 , -1.44915254, -1.39830508, -1.34745763, -1.29661017,
-       -1.24576271, -1.19491525, -1.1440678 , -1.09322034, -1.04237288,
-       -0.99152542, -0.94067797, -0.88983051, -0.83898305, -0.78813559,
-       -0.73728814, -0.68644068, -0.63559322, -0.58474576, -0.53389831,
-       -0.48305085, -0.43220339, -0.38135593, -0.33050847, -0.27966102,
-       -0.22881356, -0.1779661 , -0.12711864, -0.07627119, -0.02542373,
-        0.02542373,  0.07627119,  0.12711864,  0.1779661 ,  0.22881356,
-        0.27966102,  0.33050847,  0.38135593,  0.43220339,  0.48305085,
-        0.53389831,  0.58474576,  0.63559322,  0.68644068,  0.73728814,
-        0.78813559,  0.83898305,  0.88983051,  0.94067797,  0.99152542,
-        1.04237288,  1.09322034,  1.1440678 ,  1.19491525,  1.24576271,
-        1.29661017,  1.34745763,  1.39830508,  1.44915254,  1.5       ]
+  # ** Image tensor object construction **
+  image_param:
 
-  #eta_bins: [-1.5, -1.4, -1.3, -1.2, -1.1, -1. , -0.9, -0.8, -0.7, -0.6, -0.5,
-  #     -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,
-  #      0.7,  0.8,  0.9,  1. ,  1.1,  1.2,  1.3,  1.4,  1.5]
+    # See the corresponding construction under common.py
+    channels: 2                 # 1,2,...
+
+    # limited range, only [-0.5, 0.5] (values are re-centered)
+    eta_bins: [-0.5       , -0.48387097, -0.46774194, -0.4516129 , -0.43548387,
+       -0.41935484, -0.40322581, -0.38709677, -0.37096774, -0.35483871,
+       -0.33870968, -0.32258065, -0.30645161, -0.29032258, -0.27419355,
+       -0.25806452, -0.24193548, -0.22580645, -0.20967742, -0.19354839,
+       -0.17741935, -0.16129032, -0.14516129, -0.12903226, -0.11290323,
+       -0.09677419, -0.08064516, -0.06451613, -0.0483871 , -0.03225806,
+       -0.01612903,  0.        ,  0.01612903,  0.03225806,  0.0483871 ,
+        0.06451613,  0.08064516,  0.09677419,  0.11290323,  0.12903226,
+        0.14516129,  0.16129032,  0.17741935,  0.19354839,  0.20967742,
+        0.22580645,  0.24193548,  0.25806452,  0.27419355,  0.29032258,
+        0.30645161,  0.32258065,  0.33870968,  0.35483871,  0.37096774,
+        0.38709677,  0.40322581,  0.41935484,  0.43548387,  0.4516129 ,
+        0.46774194,  0.48387097,  0.5       ]
+    
+    # Limited range, only (-pi/2, pi/2) (values are re-centered)
+    phi_bins: [-1.57079633, -1.52012548, -1.46945463, -1.41878378, -1.36811293,
+       -1.31744208, -1.26677123, -1.21610038, -1.16542953, -1.11475868,
+       -1.06408783, -1.01341699, -0.96274614, -0.91207529, -0.86140444,
+       -0.81073359, -0.76006274, -0.70939189, -0.65872104, -0.60805019,
+       -0.55737934, -0.50670849, -0.45603764, -0.40536679, -0.35469594,
+       -0.3040251 , -0.25335425, -0.2026834 , -0.15201255, -0.1013417 ,
+       -0.05067085,  0.        ,  0.05067085,  0.1013417 ,  0.15201255,
+        0.2026834 ,  0.25335425,  0.3040251 ,  0.35469594,  0.40536679,
+        0.45603764,  0.50670849,  0.55737934,  0.60805019,  0.65872104,
+        0.70939189,  0.76006274,  0.81073359,  0.86140444,  0.91207529,
+        0.96274614,  1.01341699,  1.06408783,  1.11475868,  1.16542953,
+        1.21610038,  1.26677123,  1.31744208,  1.36811293,  1.41878378,
+        1.46945463,  1.52012548,  1.57079633]
+
+
+# ----------------------------------------------------
+genesis_runmode:
+
+  <<: *INPUT_PARAM
+
+  maxevents:  null
+  inputfiles: null #"mc_input.yml"
+  tree_name:  'ntuplizer/tree'
+
+  frac: 0.9                           # Train/validate/test split fraction
+  targetfunc: 'target_e'              # Training target,    implemented under mctargets.py
+  filterfunc: 'filter_no_egamma'      # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
+
+  xcorr_flow: True                    # Full N-point correlations computed between cuts
+
+  # Imputation
+  imputation_param:
+    active: true                      # True / False
+    var: 'CMSSW_MVA_SCALAR_VARS_ORIG' # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: [-999, -666, -10]         # Special values which indicate the need for imputation
+
+# ----------------------------------------------------
+train_runmode:
+
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
+
+  maxevents: null
   
-  #phi_bins: [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6]
-  
-  phi_bins: [-3.14159, -3.03509542, -2.92860085, -2.82210627, -2.71561169,
-       -2.60911712, -2.50262254, -2.39612797, -2.28963339, -2.18313881,
-       -2.07664424, -1.97014966, -1.86365508, -1.75716051, -1.65066593,
-       -1.54417136, -1.43767678, -1.3311822 , -1.22468763, -1.11819305,
-       -1.01169847, -0.9052039 , -0.79870932, -0.69221475, -0.58572017,
-       -0.47922559, -0.37273102, -0.26623644, -0.15974186, -0.05324729,
-        0.05324729,  0.15974186,  0.26623644,  0.37273102,  0.47922559,
-        0.58572017,  0.69221475,  0.79870932,  0.9052039 ,  1.01169847,
-        1.11819305,  1.22468763,  1.3311822 ,  1.43767678,  1.54417136,
-        1.65066593,  1.75716051,  1.86365508,  1.97014966,  2.07664424,
-        2.18313881,  2.28963339,  2.39612797,  2.50262254,  2.60911712,
-        2.71561169,  2.82210627,  2.92860085,  3.03509542,  3.14159   ]
-  
-  #phi_bins: [-3.14159   , -2.93215067, -2.72271133, -2.513272  , -2.30383267,
-  #     -2.09439333, -1.884954  , -1.67551467, -1.46607533, -1.256636  ,
-  #     -1.04719667, -0.83775733, -0.628318  , -0.41887867, -0.20943933,
-  #      0.        ,  0.20943933,  0.41887867,  0.628318  ,  0.83775733,
-  #      1.04719667,  1.256636  ,  1.46607533,  1.67551467,  1.884954  ,
-  #      2.09439333,  2.30383267,  2.513272  ,  2.72271133,  2.93215067,
-  #      3.14159   ]
+  input_tag: null
+  model_tag: null
+
+  ## Reweighting setup
+  reweight: true
+  reweight_param: &REWEIGHT_PARAM
+
+    maxevents: 100000             # Maximum number of events for the PDF construction
+    equal_frac: true              # Equalize integrated class fractions
+    differential: true            # Differential reweighting
+    # ---------------------
+    
+    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    # Note about asymmetry: Keep the reference class as 0 == background, because signal
+    # MC has much longer tail over pt. Thus, it is not possible to re-weight background
+    # to signal very easily, but it is possible to re-weight signal to background.
+    # This is seen by inspecting the re-weighted distributions with small and large statistics.
+
+    dimension: 'pseudo-2D'        # '2D', 'pseudo-2D', '1D'
+    pseudo_type: 'product'        # 'product', 'geometric_mean'
+
+    var_A:  'trk_pt'
+    var_B:  'trk_eta'
+
+    bins_A:  [0.0001, 50.0, 100] # Make sure the bounds cover the phase space
+    binmode_A:  'linear'         # 'log10' or 'linear' binning
+    
+    bins_B: [-3.1, 3.1, 100]     #
+    binmode_B: 'linear'
+    
+    # ! Variable, and binning min/max boundaries are both transformed !
+    transform_A: 'log10'         # 'log10', 'sqrt', 'square', null
+    transform_B: null
+    
+    max_reg: 1000.0              # Maximum weight cut-off regularization
 
 
-## Reweighting setup in the training phase
-reweight_param:
-
-  maxevents: 100000             # Maximum number of events for the PDF construction
-  equal_frac: true              # Equalize integrated class fractions
-  # ---------------------
-  
-  reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
-  # Note about asymmetry: Keep the reference class as 0 == background, because signal
-  # MC has much longer tail over pt. Thus, it is not possible to re-weight background
-  # to signal very easily, but it is possible to re-weight signal to background.
-  # This is seen by inspecting the re-weighted distributions with small and large statistics.
-
-  differential_reweight: true
-  dimension: 'pseudo-2D'        # '2D', 'pseudo-2D', '1D'
-  pseudo_type: 'product'        # 'product', 'geometric_mean'
-
-  var_A:  'trk_pt'
-  var_B:  'trk_eta'
-
-  bins_A:  [0.0001, 50.0, 100] # Make sure the bounds cover the phase space
-  binmode_A:  'linear'         # 'log10' or 'linear' binning
-  
-  bins_B: [-3.1, 3.1, 100]     #
-  binmode_B: 'linear'
-  
-  # ! Variable, and binning min/max boundaries are both transformed !
-  transform_A: 'log10'         # 'log10', 'sqrt', 'square', null
-  transform_B: null
-  
-  max_reg: 1000.0              # Maximum weight cut-off regularization
+  ## Outlier protection in the training
+  outlier_param:
+    algo: 'truncate'   # algorithm: 'truncate', null
+    qmin: 0.01         # in [0,100] 
+    qmax: 99.9         # in [0,100]
 
 
-# Imputation
-imputation_param:
-  active: true                 # True / False
-  var: 'CMSSW_MVA_ID_ORIG'     # Array of variables to be imputated
-  algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: 0                # For constant imputation
-  knn_k: 8                     # Number of nearest neighbours considered
-  values: [-999, -666, -10]    # Special values which indicate the need for imputation
+  # ** Activate models here **
+  # Give all models some unique identifier and label
+  models:  !include configs/eid/models.yml
+  active_models: &ACTIVE_MODELS
 
+    - xgb0
+    - gxgb0
 
-## Outlier protection in the training phase
-outlier_param:
-  algo: 'truncate'   # algorithm: 'truncate', 'none'
-  qmin: 0.01         # in [0,100] 
-  qmax: 99.9         # in [0,100]
+    - dbnf0
+    - gnet3
+    - gnet2
+  #  - gnet0
+  #  - gnet1
 
+  #  - flr0
+  #  - lgr0
+  #  - dmx0
+  #  - dmlp
 
-## Pure plotting setup
-plot_param:
-  basic:
-    active: true
-    nbins:  70
-  
-  contours: 
-    active: false
-  
-  ## Binned ROC plots can be 1D or 2D;
-  # use a running number __0, __1, ... as an identifier for new plots
-  plot_ROC_binned[0]:
-    var:   ['trk_pt']
-    edges: [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
+  #  - cnn0
 
-  plot_ROC_binned[1]:
-    var:   ['trk_eta', 'trk_pt']
-    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
-            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
-  
-  ## MVA output density (1D)
-  plot_MVA_output:
-    edges: 80
+  ##  - xtx0
 
-  ## MVA (output, external variable) density (2D)
-  #plot_COR[0]:
-  #  var:   ['']
-  #  edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},
-  #          {'nbin': 50, 'q': [0.0,  0.95], 'space': 'linear'}]
-  
-  #plot_COR[1]:
-  #  var:   ['.?hlt_pms2.?']
-  #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
-  #          {'nbin': 30, 'q': [0.0, 0.95],     'space': 'log10'}]
+  raytune: !include configs/eid/raytune.yml
 
+  # Distillation training
+  # -- the order must be compatible with the causal order in 'active_models'
+  distillation:
 
-# ========================================================================
-## Hyperparameter raytune setup
-# ========================================================================
-
-
-raytune_param:
-  #active:         ['xgb0'] # Add model identifiers here
-  active:         [null]
-  num_samples:    5
-  max_num_epochs: 50
-
-
-raytune_setup:
-
-  gnn_setup:
-    search_algo: 'HyperOpt'
-
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
+    # Big, sophisticated model
+    source:
+      #xgb0
       
-    param:
-      cdim:
-        type: "tune.choice"
-        value: [32, 64, 96, 128, 196, 256, 512, 1024]
+    # Simple, compressed models
+    drains:
+      #- xgb1
+      # - add more here
 
-      global_pool:
-        type: "tune.choice"
-        value: ['mean', 'max', 'add']
+  # Batched "deep" training
+  batch_train_param:
+    blocksize: 150000   # Maximum number of events simultaneously in RAM
+    epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
+    #num_cpu: null      # Set null for auto, or an integer for manual.
 
-    #  batch_size:
-    #    type: "tune.choice"
-    #    value: [16, 32, 64, 128]
+# ----------------------------------------------------
+eval_runmode:
 
-      lr:
-        type: "tune.loguniform"
-        value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
-    
-    #
-    #batch_size:
-    #  type: "tune.choice"
-    #  value: [32, 64, 128, 256]
-    #
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
 
-    # Add more steers here
-    # ...
+  maxevents: null
 
-  xgb_setup:
-    search_algo: 'HyperOpt'
+  input_tag: null
+  model_tag: null
 
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
+  reweight: true
+  reweight_param: *REWEIGHT_PARAM
 
-    param:
-      
-      num_boost_round:
-        type: "tune.randint"
-        value: [20, 120]
+  models:  !include configs/eid/models.yml
+  active_models: *ACTIVE_MODELS
 
-      learning_rate:
-        type: "tune.uniform"
-        value: [0.01, 0.6]
-      
-      ## Tree parameters
-      max_depth:
-        type:  "tune.choice"
-        value: [4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-
-      ## Regularization
-      reg_lambda: # Smoothness
-        type: "tune.uniform"
-        value: [0.0, 5.0]
-
-      reg_alpha: # Sparsity
-        type: "tune.uniform"
-        value: [0.0, 0.5]
-
-      ## Tree splitting
-      #min_child_weight:
-      #  type: "tune.uniform"
-      #  value: [0.1, 2.0]  # Between [0, inf] Default 1.0
-      
-      gamma:
-        type: "tune.uniform"
-        value: [0.0, 2.0]   # Between [0,inf] Default 1.0
-      
-      #max_delta_step:
-      #  type: "tune.uniform"
-      #  value: [0.0, 1.5]  # Between [0, inf] Default 0
-
-      #subsample:
-      #  type: "tune.uniform"
-      #  value: [0.5, 1]    # Between [0, 1] # Default 1
-
-      colsample_bytree:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bylevel:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-      colsample_bynode:
-        type: "tune.uniform"
-        value: [0.3, 1.0] # Between [0,1], default 1
-
-
-# ========================================================================
-## Classifier setup
-# ========================================================================
-
-# Dual graph + XGB network
-gxgb0_param:
-
-  train:   'graph_xgb'
-  predict: 'graph_xgb'
-  label:   'DGXGB'
-
-  # ** GRAPH NETWORK **
-  graph:
-    train:   'torch_graph'
-    predict: 'torch_graph'
-    label:   'GXGB-G'
-    raytune:  null
-
-    # Convolution model
-    conv_type:   'EdgeConv' # See models under icenet/deep/graph.py
-
-    # Model
-    model_param:
-      task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-      global_pool: 'mean'
-      z_dim: 196                # Convolution output dimension
-      
-      # Message passing parameters
-      conv_MLP_act: 'relu'
-      conv_MLP_bn: True
-      conv_aggr: 'max'
-      conv_knn: 8
-
-      fusion_MLP_act: 'relu'
-      fusion_MLP_bn: False
-
-      final_MLP_act: 'relu'
-      final_MLP_bn:  False
-    
-    # Optimization
-    opt_param:  
-      lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-      gamma: 2                  # focal_entropy exponent
-      temperature: 1            # logit norm temperature
-      
-      optimizer: 'Adam'
-      epochs: 150
-      batch_size: 64
-      lr: 1.0e-3
-      weight_decay:  0.00005     # L2-regularization
-
-    # Scheduler
-    scheduler_param:
-      step_size: 200
-      gamma: 0.1
-    
-    device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-    num_workers: 4
-    
-    # Read/Write of epochs
-    savemode: 'all'              # 'all', 'latest'
-    readmode: -1                 # -1 is the last saved epoch
-
-  # ** XGBOOST **
-  xgb:
-    train:   'xgb'
-    predict: 'xgb'
-    label:   'GXGB-XGB'
-    raytune:  null
-
-    # general parameters
-    model_param:
-      num_boost_round: 300    # number of epochs (equal to the number of trees!)
-      
-      booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-      tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-      
-      # booster parameters
-      learning_rate: 0.1
-      gamma: 0.0
-      max_depth: 10
-      min_child_weight: 1.0
-      max_delta_step: 1
-      subsample: 1
-
-      colsample_bytree:  1
-      colsample_bylevel: 1
-      colsample_bynode:  1
-      
-      reg_lambda: 2.0        # L2 regularization
-      reg_alpha: 0.0         # L1 regularization
-      
-      # learning task parameters
-      objective: 'multi:softprob'  # 'binary:logistic'     #
-      eval_metric: ['mlogloss']     # for evaluation
-
-    # Read/Write of epochs
-    savemode: 'all'                  # 'all', 'latest'
-    readmode: -1                     # -1 is the last saved epoch
-
-
-# Graph net
-gnet0_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'NNConv'
-  raytune:  'gnn_setup'
-
-  conv_type: 'NNConv'       # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
-    
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
-
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
-
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 64
-    lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet1_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'EdgeConv'
-  raytune:  'gnn_setup'
-
-  conv_type: 'EdgeConv'       # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
-    
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
-
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
-
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 64
-    lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet2_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'SuperEdgeConv'
-  raytune:  'gnn_setup'
-
-  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
-    
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
-
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
-
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 64
-    lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet3_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'DynamicEdgeConv'
-  raytune:  'gnn_setup'
-
-  conv_type: 'DynamicEdgeConv'       # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 196                # Convolution output dimension
-    
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
-    
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
-
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 64
-    lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Factorized Likelihood Ratio
-flr0_param:
-  train:   'flr'
-  predict: 'flr'
-  label:   'FLR'
-  raytune:  null
-
-  nbins: 60
-  qmin:  0.5 # in [0,100]
-  qmax: 99.5 # in [0,100]
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0_param:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB'
-  raytune:  'xgb_setup'
-
-  # general parameters
-  model_param:
-    num_boost_round: 300    # number of epochs (equal to the number of trees!)
-    
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
-    # booster parameters
-    learning_rate: 0.1
-    gamma: 0.0
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
-    
-    reg_lambda: 2.0       # L2 regularization
-    reg_alpha: 0.0        # L1 regularization
-    
-    # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']     # for evaluation
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep MLP
-dmlp_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'DMLP'
-  raytune:  null
-
-  # Model
-  conv_type: 'dmlp'
-  model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
-    
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-  
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr0_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1  
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Convolutional Neural Net + MAXOUT MLP
-cnn0_param:
-  train:   'torch_generic'
-  predict: 'torch_image_vector'
-  label:   'CNN+MAXO'
-  raytune:  null
-  
-  # Model
-  conv_type: 'cnn+maxo'
-  model_param:
-    dropout_cnn: 0.25
-    dropout_mlp: 0.5
-    mlp_dim: 64
-
-    # Set these according to the input matrix (could autodetect ...)
-    nchannels: 2
-    nrows:     59
-    ncols:     59
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    noise_reg: 0.0            # Noise regularization
-  
-    epochs: 100
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay: 0.00        # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-      
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XTX (hyperbinned) classifier
-xtx0_param:
-  train:   'xtx'
-  predict: 'xtx'
-  label:   'XTX'
-  raytune:  null
-
-  # Choose kinematic binning variables
-  binning:
-    var:   ['trk_eta', 'trk_pt']
-    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
-            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
-
-  # Model param
-  conv_type: 'maxo'
-  model_param:
-    num_units: 2
-    neurons:  20
-    dropout:  0.5
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'        # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
-    
-    epochs: 50
-    batch_size:  196
-    lr: 1.0e-3
-    weight_decay: 0.01        # L2-regularization
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep MAXOUT network
-dmx0_param:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'MAXO'
-  raytune:  null
-
-  # Model parameter
-  conv_type: 'maxo'
-  model_param:
-    num_units: 8
-    neurons:  50
-    dropout:  0.4
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'        # Adam, AdamW
-    noise_reg: 0.0            # Noise regularization
-
-    epochs: 50
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Deep Normalizing Flow
-dbnf0_param:
-  train:   'flow'
-  predict: 'torch_flow'
-  label:   'DBNF'
-  raytune:  null
-
-  # Gradient descent
-  opt_param:
-    epochs: 100
-    batch_size: 512           # Keep it high!
-    
-    optimizer: 'Adam'
-    lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
-    noise_reg: 0.001          # Noise regularization
-    polyak: 0.998
-    clip_norm: 0.1
-    start_epoch: 0
-
-  # Learning rate reduction on plateau
-  scheduler_param:  
-    factor:  0.1
-    patience: 20
-    cooldown: 10
-    min_lr: 0.0005
-    early_stopping: 100
-
-  # Model structure
-  model_param:  
-    flows: 10                 # number of flow blocks
-    layers: 0                 # intermediate layers in a flow block
-    hidden_dim: 10            # 
-    residual: 'gated'         # choises 'none', 'normal', 'gated'
-    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
-  
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
+# ----------------------------------------------------
+plot_param: !include configs/eid/plots.yml

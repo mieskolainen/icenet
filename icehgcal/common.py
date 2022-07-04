@@ -57,7 +57,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # -----------------------------------------------
 
     # ** Pick the variables **
-    ids = MVA_ID
+    ids = MVA_SCALAR_VARS
     
     param = {
         "entry_start": entry_start,
@@ -72,7 +72,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # *** BACKGROUND MC ***
 
-    filename = args["MC_input"]['background']
+    filename = args["input"]['class_0']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
     
     X_B, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
@@ -82,7 +82,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # =================================================================
     # *** SIGNAL MC ***
 
-    filename = args["MC_input"]['signal']
+    filename = args["input"]['class_1']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
     X_S, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
@@ -164,8 +164,8 @@ def splitfactor(x, y, w, ids, args):
     ### Pick kinematic variables out
     data_kin = None
     """
-    if KINEMATIC_ID is not None:
-        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+    if KINEMATIC_VARS is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_VARS)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)
@@ -180,17 +180,15 @@ def splitfactor(x, y, w, ids, args):
     data_tensor = None
     """
     if args['image_on']:
-        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
     """
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
-
-    if args['graph_on']:
-        
-        features   = globals()[args['inputvar']]
-        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    
+    features   = globals()[args['inputvar']]
+    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out

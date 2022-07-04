@@ -3,11 +3,11 @@
 
 # Use these to test that the (re-weight trained) classifier
 # is independent of these
-KINEMATIC_ID = [
+KINEMATIC_VARS = [
 
 ]
 
-MVA_ID = [
+MVA_SCALAR_VARS = [
   'candidate_energy',
   'candidate_px',
   'candidate_py',
@@ -16,8 +16,9 @@ MVA_ID = [
   'candidate_charge',
   'candidate_pdgId'
 ]
+
 """
-MVA_ID = [
+MVA_SCALAR_VARS = [
 
   'candidate_charge',
   'candidate_pdgId',

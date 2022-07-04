@@ -51,19 +51,33 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     }
 
     # =================================================================
-    # *** BACKGROUND MC ***
+    # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
 
-    proc = args["MC_input"]['background']
-    X_B, Y_B, W_B, VARS_B = iceroot.read_multiple_MC(class_id=0, process_func=process_root, processes=proc, root_path=root_path, param=param)
-
-
+    proc = args["input"]['class_1']
+    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1,
+        process_func=process_root, processes=proc, root_path=root_path, param=param, use_conditional=args['use_conditional'])
+    
+    
     # =================================================================
-    # *** SIGNAL MC ***
-
-    proc = args["MC_input"]['signal']
-    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1, process_func=process_root, processes=proc, root_path=root_path, param=param)
+    # *** BACKGROUND MC ***
+    
+    proc = args["input"]['class_0']
+    X_B, Y_B, W_B, VARS_B = iceroot.read_multiple_MC(class_id=0,
+        process_func=process_root, processes=proc, root_path=root_path, param=param, use_conditional=args['use_conditional'])
     
     
+    # =================================================================
+    # Sample conditional theory parameters for the background as they are distributed in signal sample
+    
+    if args['use_conditional']:    
+        for var in MODEL_VARS:
+            
+            print(__name__ + f'.load_root_file: Sampling theory conditional <{var}> for the background')
+            ind = VARS_B.index(var)
+            
+            # Random sample values as in the signal MC
+            X_B[:,ind] = np.random.choice(X_S[:,ind], size=X_B.shape[0], replace=True, p=W_S / np.sum(W_S))
+        
     # =================================================================
     # *** Finally combine ***
 
@@ -128,15 +142,14 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
-
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-
+    
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
     
-    if KINEMATIC_ID is not None:
-        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_ID)
+    if KINEMATIC_VARS is not None:
+        k_ind, k_vars   = io.pick_vars(data, KINEMATIC_VARS)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)
@@ -180,15 +193,14 @@ def splitfactor(x, y, w, ids, args):
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
 
-    if args['deps_on']:
-        data_deps = copy.deepcopy(data)
+    data_deps = copy.deepcopy(data)
 
-        M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
-        D = len(jagged_ind)            # Tuplet feature vector dimension
+    M = args['jagged_maxdim']      # Number of (jagged) tuplets per event
+    D = len(jagged_ind)            # Tuplet feature vector dimension
 
-        data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
-        data_deps.ids = all_jagged_vars
+    data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_ind):], M=M, D=D)
+    data_deps.ids = all_jagged_vars
     # --------------------------------------------------------------------------
-
-
+    
+    
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

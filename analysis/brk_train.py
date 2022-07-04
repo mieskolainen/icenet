@@ -51,17 +51,21 @@ from iceplot import iceplot
 # Main function
 #
 def main() :
+        
+    cli, cli_dict = process.read_cli()
+    runmode  = cli_dict['runmode']
     
-    args, cli = process.read_config(config_path='./configs/brk')
-    iodir = aux.makedir(f'./output/{args["rootname"]}/{cli.tag}/')
-    paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
+    args,cli = process.read_config(config_path='configs/brk', runmode=runmode)
+    iodir    = aux.makedir(f'output/{args["rootname"]}/{cli.tag}/')
+    paths    = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
 
     VARS = features.generate_feature_names(args['MAXT3'])
 
-    args['modeldir'] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}')
-    plotdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+    args['modeldir'] = aux.makedir(f'checkpoint/{args["rootname"]}/{args["config"]}')
+    plotdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
     
+
     # ========================================================================
     ### Event loop
     
@@ -81,8 +85,8 @@ def main() :
     prints.print_variables(X, VARS)    
     # =======================================================================
     
-    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
-    fig,ax    = plots.plot_correlations(X=X, netvars=VARS, targetdir=targetdir)    
+    #targetdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
+    #fig,ax    = plots.plot_correlations(X=X, netvars=VARS, targetdir=targetdir)    
     
     
     # ------------------------------------------------------------------------
@@ -140,19 +144,18 @@ def main() :
     # ====================================================================
     # Training
     print('<< TRAINING XGBOOST >>')
-    
-    if args['xgb_param']['active']:
-
-        label = 'xgb'
+    label = 'xgb'
+        
+    if label in args['active_models']:
 
         X_train, X_eval, Y_train, Y_eval = \
             sklearn.model_selection.train_test_split(X, Y_i, test_size=1-args['frac'], random_state=args['rngseed'])
 
-        if args['xgb_param']['model_param']['tree_method'] == 'auto':
-            args['xgb_param']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
+        if args['models'][label]['model_param']['tree_method'] == 'auto':
+            args['models'][label]['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
         
         # Update parameters
-        args['xgb_param']['model_param'].update({'num_class': C})
+        args['models'][label]['model_param'].update({'num_class': C})
         
         dtrain = xgboost.DMatrix(data = X_train, label = Y_train) #, weight = trn_weights)
         deval  = xgboost.DMatrix(data = X_eval , label = Y_eval)
@@ -160,28 +163,28 @@ def main() :
         evallist  = [(dtrain, 'train'), (deval, 'eval')]
         results   = dict()
 
-        num_boost_round = args['xgb_param']['num_boost_round']
-        del args['xgb_param']['num_boost_round']
+        num_boost_round = args['models'][label]['model_param']['num_boost_round']
+        del args['models'][label]['model_param']['num_boost_round']
 
-        xgb_model = xgboost.train(params=args['xgb_param']['model_param'], num_boost_round = num_boost_round,
+        xgb_model = xgboost.train(params=args['models'][label]['model_param'], num_boost_round = num_boost_round,
             dtrain=dtrain, evals=evallist, evals_result=results, verbose_eval=True)
         
         ## Save
-        pickle.dump(xgb_model, open(args['modeldir'] + '/XGB_model.dat', 'wb'))
-
+        pickle.dump(xgb_model, open(args['modeldir'] + f"/{args['models'][label]['label']}_model.dat", 'wb'))
+        
         # ================================================================
         losses   = results['train']['mlogloss']
         trn_aucs = results['train']['auc']
         val_aucs = results['eval']['auc']
 
         # Plot evolution
-        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        plotdir  = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         # Plot feature importance
         fig,ax = plots.plot_xgb_importance(model=xgb_model, dim=X_train.shape[1], tick_label=VARS)
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
+        targetdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train')
         plt.savefig(f'{targetdir}/{label}_importance.pdf', bbox_inches='tight'); plt.close()
         # ================================================================
     
@@ -206,23 +209,25 @@ def main() :
     # ====================================================================
     print('<< TRAINING DEEP MAXOUT >>')
     
-    if args['maxo_param']['active']:
+    label = 'maxo'
+    if label in args['active_models']:
         
         X_trn, X_val, Y_trn, Y_val = torch_split(x=X, y=Y_i, test_size=1 - args['frac'], random_state=args['rngseed'])
         args['num_classes'] = C
 
         model, train_loader, test_loader = \
             train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
-             trn_weights=trn_weights, val_weights=val_weights, param=args['maxo_param'], args=args)
+             trn_weights=trn_weights, val_weights=val_weights, param=args['models'][label], args=args)
 
-        model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                    args=args, param=args['maxo_param'])
+        model = train.torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                    args=args, param=args['models'][label])
 
 
     # ====================================================================
     print('<< TRAINING DEEP SETS >>')
 
-    if args['deps_param']['active']:
+    label = 'deps'
+    if label in args['active_models']:
 
         M    = args['MAXT3']                      # Number of triplets per event
         D    = features.getdimension()            # Triplet feature vector dimension
@@ -233,10 +238,10 @@ def main() :
 
         model, train_loader, test_loader = \
             train.torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=None, X_val_2D=None, \
-             trn_weights=trn_weights, val_weights=val_weights, param=args['deps_param'], args=args)
+             trn_weights=trn_weights, val_weights=val_weights, param=args['models'][label], args=args)
 
-        model = train.torch_train_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                    args=args, param=args['deps_param'])
+        model = train.torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                    args=args, param=args['models'][label])
 
     print('\n' + __name__+ ' DONE')
 

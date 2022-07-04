@@ -28,6 +28,8 @@ from   icenet.tools.icevec import vec4
 
 def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
     """
+    TRACKSTER LEVEL
+    
     Parse graph data to torch geometric format
     
     Args:
@@ -89,11 +91,8 @@ def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
         # --------------------------------------------
         
         # --------------------------------------------
-        # Training weights, note [] is important to have for right dimensions
-        if weights is not None:
-            w = torch.tensor([weights[ev]], dtype=torch.float)
-        else:
-            w = torch.tensor([1.0],  dtype=torch.float)
+        # Per edge training weights
+        w = torch.ones_like(y,  dtype=torch.float)
         # --------------------------------------------
         
         # Global features
@@ -107,6 +106,8 @@ def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
 
 def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
     """
+    EVENT LEVEL (PROCESSING CANDIDATES)
+    
     Jagged array data into pytorch-geometric style Data format array.
     
     Args:

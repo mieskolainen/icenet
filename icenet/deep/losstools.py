@@ -12,7 +12,11 @@ from icenet.tools import aux_torch
 
 def loss_wrapper(model, x, y, num_classes, weights, param):
     """
-    Wrapper function to call loss functions
+    A wrapper function to loss functions
+    
+    Note:
+        log-likelihood functions can be weighted linearly, due to
+        \\prod_i p_i(x_i; \\theta)**w_i ==\\log==> \\sum_i w_i \\log p_i(x_i; \\theta)
     """
     if   param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
@@ -35,17 +39,14 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
 
     elif param['lossfunc'] == 'VAE_background_only':
-        ind  = (y == 0) # Use only background to train
-
-        xhat = model.forward(x[ind, ...]) 
+        ind      = (y == 0) # Use only background to train
+        xhat, z, mu, std = model.forward(x=x[ind, ...])
+        log_loss = model.loss_kl_reco(x=x[ind, ...], xhat=xhat, z=z, mu=mu, std=std, beta=param['VAE_beta'])
         
-        MSE  = torch.sum((xhat - x[ind, ...])**2, dim=-1)
-        KL   = param['VAE_beta'] * torch.sum(model.encoder.kl_i, dim=-1)
-
         if weights is not None:
-            return ((MSE + KL)*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
+            return (log_loss*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
         else:
-            return (MSE + KL).mean(dim=0)
+            return log_loss.mean(dim=0)
     
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")

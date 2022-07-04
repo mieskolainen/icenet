@@ -139,8 +139,8 @@ def splitfactor(x, y, w, ids, args):
     ### Pick kinematic variables out
     data_kin = None
     
-    if KINEMATIC_ID is not None:
-        k_ind, k_vars = io.pick_vars(data, KINEMATIC_ID)
+    if KINEMATIC_VARS is not None:
+        k_ind, k_vars = io.pick_vars(data, KINEMATIC_VARS)
         
         data_kin     = copy.deepcopy(data)
         data_kin.x   = data.x[:, k_ind].astype(np.float)
@@ -153,19 +153,16 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ### Tensor representation
     data_tensor = None
-
-    if args['image_on']:
-        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
     
+    data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
+        
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
 
-    if args['graph_on']:
-        
-        features   = globals()[args['inputvar']]
-        data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-            features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    features   = globals()[args['inputvar']]
+    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
@@ -448,7 +445,7 @@ def load_root_file_multiprocess(procnumber, inputs, return_dict, library='np'):
     X_graph  = None
 
     if image_on:
-        X_tensor = graphio.parse_tensor_data(X=X, ids=ids, image_vars=globals()['CMSSW_MVA_ID_IMAGE'], args=args)
+        X_tensor = graphio.parse_tensor_data(X=X, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
 
     if graph_on:
         X_graph  = graphio.parse_graph_data_np(X=X, Y=Y, ids=ids, features=globals()[args['imputation_param']['var']])

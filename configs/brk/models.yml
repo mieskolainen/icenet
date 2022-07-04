@@ -1,0 +1,126 @@
+## Classifier setup
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb:
+  
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB'
+  raytune: null
+
+  # general parameters
+  model_param:
+
+    booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 300   # Number of epochs
+    tree_method: 'auto'    # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    
+    # booster parameters
+    learning_rate: 0.1
+    max_depth: 10
+    min_child_weight: 1.0
+    gamma: 0.0
+    max_delta_step: 0
+    subsample: 1.0
+    
+    colsample_bytree:  1
+    colsample_bylevel: 1
+    colsample_bynode:  1
+    
+    reg_lambda: 2.0       # L2 regularization
+    reg_alpha: 0.0        # L1 regularization
+    
+    # learning task parameters
+    objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
+    eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Deep MaxOut network
+maxo:
+  
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:  'MAXO'
+  raytune:  null
+
+  # Model parameters
+  conv_type: 'maxo'
+  model_param:
+    num_units: 12
+    neurons:  36
+    dropout:  0.5
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+
+    epochs:  200
+    batch_size:  256
+    lr: 1.0e-3
+    weight_decay: 0.01            # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Permutation Equivariant Network
+deps:
+  
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'DEPS'
+  raytune:  null
+
+  # Model parameters
+  conv_type: 'deps'
+  model_param:  
+    z_dim: 64                  # Latent dimension
+    pool: 'max'
+    dropout: 0.5
+    phi_layers: 3
+    rho_layers: 3
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
+    
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+    
+    epochs:  200
+    batch_size:  256
+    lr: 1.0e-3
+    weight_decay: 0.01         # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+    
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 1
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch

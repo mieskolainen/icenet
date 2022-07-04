@@ -1,373 +1,175 @@
-# HGCAL tune0.yml
-#
+# HGCAL TRACKSTER processing setup
+# 
 # General comments:
 #
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
+
 rootname: 'hgcal_trk'
+rngseed: 123456                      # Fixed seed for training data mixing
 
 # ----------------------------------------------------
-maxevents: 1000000   # Maximum total number of events (in total) to process per process
+input_param: &INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
 
-#MC_input:
-#  signal:
-#    'single_electron/*.root'
-#  
-#  background:
-#    'single_pion/*.root'
+mva_param: &MVA_INPUT_PARAM
+  num_classes: 2                     # Number of classes in MVA
+  signalclass: 1                     # Signal class ID
+  
+  inputvar:         'MVA_SCALAR_VARS'
+  inputvar_scalar:  null             # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
+  jagged_maxdim:    6
+  
+  varnorm: null                      # Variable normalization: 'zscore', 'madscore', null
+  #varnorm_tensor: 'zscore'          # Tensor variable normalization
+  #varnorm_graph: null               # Not implemented yet
+  
+  # Graph object construction
+  graph_param:
+    directed:  False
+    global_on: False
+    coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
+
+  # # ** Image tensor object construction **
+  # image_param:
+
+  #   # See the corresponding construction under common.py
+  #   channels: 2                 # 1,2,...
+
+  #   # bin-edges
+  #   eta_bins: []
+  #   phi_bins: []
+
 
 # ----------------------------------------------------
+genesis_runmode:
 
-eval_reweight: False  # Event-by-event re-weighting used in the evaluation phase (e.g. in ROCs will impact differential shapes, not fractions)
-rngseed: 123456       # Fixed seed for training data mixing
+  <<: *INPUT_PARAM
 
-num_classes: 2        # Number of classes in MVA
-signalclass: 1      
+  maxevents:  null
+  inputfiles: null
 
-#tree_name: 'ticlNtuplizer/candidates'
+  #input:
+  #  class_1:
+  #    'single_electron/*.root'
+  #  class_0:
+  #    'single_pion/*.root'
+  #
+  #tree_name: 'ticlNtuplizer/candidates'
 
+  frac: 0.9                           # Train/validate/test split fraction
+  targetfunc: null                    # Training target,    implemented under mctargets.py
+  filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
-## Batched "deep" training
-#batch_train_param:
-#  blocksize: 150000   # Maximum number of events simultaneously in RAM
-#  epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
-#  #num_cpu: null      # Set null for auto, or an integer for manual.
+  xcorr_flow: True                    # Full N-point correlations computed between cuts
 
-# ---------------------------------------------------------
-# ** Activate models here **
-# Give all models some unique identifier and label
-active_models:
+  # Imputation
+  imputation_param:
+    active: false                     # True / False
+    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: []                        # Special values which indicate the need for imputation
 
-  - gnet0
-  - gnet1
+# ----------------------------------------------------
+train_runmode:
 
-# ---------------------------------------------------------
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
 
-
-# Distillation training
-# -- the order must compatible with the causal order in active_models
-distillation:
-
-  # Big, sophisticated model
-  source:
-    #xgb0
-
-  # Simple, compressed models
-  drains:
-    # - xgb1
-    # - add more here
-
-
-inputvar: 'MVA_ID'              # Input variables, implemented under mvavars.py
-
-targetfunc: 'target_e'          # Training target,    implemented under mctargets.py
-filterfunc: 'filter_no_egamma'  # Training filtering, implemented under mcfilter.py
-cutfunc:    'cut_standard'      # Basic cuts,         implemented under cuts.py
-
-xcorr_flow: True                # Full N-point correlations computed between cuts
-
-frac: 0.9                       # Train/validate/test split fraction
-varnorm: 'none' #'zscore'       # Variable normalization: 'zscore', 'madscore', 'none'
-varnorm_tensor: 'zscore'        # Tensor variable normalization
-#varnorm_graph: 'none'          # Not implemented yet
-
-
-# ** Graph object construction **
-graph_param:
-  directed: False
-  global_on: False
-  coord: 'pxpypze'              # 'ptetaphim', 'pxpypze'
-
-
-# # ** Image tensor object construction **
-# image_param:
-
-#   # See the corresponding construction under common.py
-#   channels: 2                 # 1,2,...
-
-#   # bin-edges
+  maxevents: null
   
+  input_tag: null
+  model_tag: null
 
-#   eta_bins: [-1.5 , -1.44915254, -1.39830508, -1.34745763, -1.29661017,
-#        -1.24576271, -1.19491525, -1.1440678 , -1.09322034, -1.04237288,
-#        -0.99152542, -0.94067797, -0.88983051, -0.83898305, -0.78813559,
-#        -0.73728814, -0.68644068, -0.63559322, -0.58474576, -0.53389831,
-#        -0.48305085, -0.43220339, -0.38135593, -0.33050847, -0.27966102,
-#        -0.22881356, -0.1779661 , -0.12711864, -0.07627119, -0.02542373,
-#         0.02542373,  0.07627119,  0.12711864,  0.1779661 ,  0.22881356,
-#         0.27966102,  0.33050847,  0.38135593,  0.43220339,  0.48305085,
-#         0.53389831,  0.58474576,  0.63559322,  0.68644068,  0.73728814,
-#         0.78813559,  0.83898305,  0.88983051,  0.94067797,  0.99152542,
-#         1.04237288,  1.09322034,  1.1440678 ,  1.19491525,  1.24576271,
-#         1.29661017,  1.34745763,  1.39830508,  1.44915254,  1.5       ]
+  ## Reweighting setup
+  reweight: false
+  reweight_param: &REWEIGHT_PARAM
 
-#   #eta_bins: [-1.5, -1.4, -1.3, -1.2, -1.1, -1. , -0.9, -0.8, -0.7, -0.6, -0.5,
-#   #     -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,
-#   #      0.7,  0.8,  0.9,  1. ,  1.1,  1.2,  1.3,  1.4,  1.5]
-  
-#   #phi_bins: [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6]
-  
-#   phi_bins: [-3.14159, -3.03509542, -2.92860085, -2.82210627, -2.71561169,
-#        -2.60911712, -2.50262254, -2.39612797, -2.28963339, -2.18313881,
-#        -2.07664424, -1.97014966, -1.86365508, -1.75716051, -1.65066593,
-#        -1.54417136, -1.43767678, -1.3311822 , -1.22468763, -1.11819305,
-#        -1.01169847, -0.9052039 , -0.79870932, -0.69221475, -0.58572017,
-#        -0.47922559, -0.37273102, -0.26623644, -0.15974186, -0.05324729,
-#         0.05324729,  0.15974186,  0.26623644,  0.37273102,  0.47922559,
-#         0.58572017,  0.69221475,  0.79870932,  0.9052039 ,  1.01169847,
-#         1.11819305,  1.22468763,  1.3311822 ,  1.43767678,  1.54417136,
-#         1.65066593,  1.75716051,  1.86365508,  1.97014966,  2.07664424,
-#         2.18313881,  2.28963339,  2.39612797,  2.50262254,  2.60911712,
-#         2.71561169,  2.82210627,  2.92860085,  3.03509542,  3.14159   ]
-  
-#   #phi_bins: [-3.14159   , -2.93215067, -2.72271133, -2.513272  , -2.30383267,
-#   #     -2.09439333, -1.884954  , -1.67551467, -1.46607533, -1.256636  ,
-#   #     -1.04719667, -0.83775733, -0.628318  , -0.41887867, -0.20943933,
-#   #      0.        ,  0.20943933,  0.41887867,  0.628318  ,  0.83775733,
-#   #      1.04719667,  1.256636  ,  1.46607533,  1.67551467,  1.884954  ,
-#   #      2.09439333,  2.30383267,  2.513272  ,  2.72271133,  2.93215067,
-#   #      3.14159   ]
-
-
-## Reweighting setup in the training phase
-reweight_param:
-
-  maxevents: 100000             # Maximum number of events for the PDF construction
-  equal_frac: True              # Equalize integrated class fractions
-  # ---------------------
-  
-  reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
-  # Note about asymmetry: Keep the reference class as 0 == background, because signal
-  # MC has much longer tail over pt. Thus, it is not possible to re-weight background
-  # to signal very easily, but it is possible to re-weight signal to background.
-  # This is seen by inspecting the re-weighted distributions with small and large statistics.
-
-  differential_reweight: False
-  dimension: 'pseudo-2D'       # '2D', 'pseudo-2D', '1D'
-  pseudo_type: 'product'       # 'product', 'geometric_mean'
-
-  var_A:  'trk_pt'
-  var_B:  'trk_eta'
-
-  bins_A:  [0.0001, 50.0, 150] # Make sure the bounds cover the phase space
-  binmode_A:  'linear'         # 'log10' or 'linear' binning
-  
-  bins_B: [-3.1, 3.1, 150]     #
-  binmode_B: 'linear'
-  
-  # ! Variable, and binning min/max boundaries are both transformed !
-  transform_A: 'log10'         # 'log10', 'sqrt', 'square', null
-  transform_B: null
-  
-  max_reg: 1000.0              # Maximum weight cut-off regularization
-
-
-# Imputation
-imputation_param:
-  active: false                # True / False
-  var: 'MVA_ID'                # Array of variables to be imputated
-  algorithm: 'constant'        # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-  fill_value: 0                # For constant imputation
-  knn_k: 8                     # Number of nearest neighbours considered
-  values: [-999, -666, -10]    # Special values which indicate the need for imputation
-
-
-## Outlier protection in the training phase
-outlier_param:
-  algo: 'none' #'truncate'   # algorithm: 'truncate', 'none'
-  qmin: 0.01         # in [0,100] 
-  qmax: 99.9         # in [0,100]
-
-
-## Pure plotting setup
-plot_param:
-  basic:
-    active: true
-    nbins:  70
-  
-  contours: 
-    active: false
-  
-  ## Binned ROC plots can be 1D or 2D;
-  # use a running number __0, __1, ... as an identifier for new plots
-  
-  #plot_ROC_binned[0]:
-  #  var:   ['trk_pt']
-  #  edges: [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
-
-  #plot_ROC_binned[1]:
-  #  var:   ['trk_eta', 'trk_pt']
-  #  edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
-  #          [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
-  
-  ## MVA output density (1D)
-  plot_MVA_output:
-    edges: 80
-
-  ## MVA (output, external variable) density (2D)
-  #plot_COR[0]:
-  #  var:   ['']
-  #  edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},
-  #          {'nbin': 50, 'q': [0.0,  0.95], 'space': 'linear'}]
-  
-  #plot_COR[1]:
-  #  var:   ['.?hlt_pms2.?']
-  #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
-  #          {'nbin': 30, 'q': [0.0, 0.95],     'space': 'log10'}]
-
-
-# ========================================================================
-## Hyperparameter raytune setup
-# ========================================================================
-
-
-raytune_param:
-  #active:         ['xgb0'] # Add model identifiers here
-  active:         [null]
-  num_samples:    5
-  max_num_epochs: 50
-
-
-raytune_setup:
-
-  gnn_setup:
-    search_algo: 'HyperOpt'
-
-    search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
-    param:
-      cdim:
-        type: "tune.choice"
-        value: [32, 64, 96, 128, 196, 256, 512, 1024]
-
-      global_pool:
-        type: "tune.choice"
-        value: ['mean', 'max', 'add']
-
-    #  batch_size:
-    #    type: "tune.choice"
-    #    value: [16, 32, 64, 128]
-
-      lr:
-        type: "tune.loguniform"
-        value: [1.0E-5, 1.0E-1] # Careful with with .0E (otherwise -> string)
-
-    #
-    #batch_size:
-    #  type: "tune.choice"
-    #  value: [32, 64, 128, 256]
-    #
-
-    # Add more steers here
-    # ...
+    maxevents: 100000              # Maximum number of events for the PDF construction
+    equal_frac: false              # Equalize integrated class fractions
+    differential: false            # Differential reweighting
+    # ---------------------
     
+    reference_class: 0             # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    # Note about asymmetry: Keep the reference class as 0 == background, because signal
+    # MC has much longer tail over pt. Thus, it is not possible to re-weight background
+    # to signal very easily, but it is possible to re-weight signal to background.
+    # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-# ========================================================================
-## Classifier setup
-# ========================================================================
-
-# Graph net
-gnet0_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'EdgeConv'
-  raytune:  'gnn_setup'
-
-  conv_type:   'EdgeConv'       # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'edge_undirected'     # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 32                  # Convolution output dimension
+    dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
+    pseudo_type: 'product'         # 'product', 'geometric_mean'
     
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
+    var_A: 'x_hlt_pt'
+    var_B: 'x_hlt_eta'
 
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
-
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy_per_edge' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                           # focal_entropy exponent
-    temperature: 1                     # logit norm temperature
-
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay:  0.0      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-
-# Graph net
-gnet1_param:
-  train:    'torch_graph'
-  predict:  'torch_graph'
-  label:    'DynamicEdgeConv'
-  raytune:  'gnn_setup'
-
-  conv_type: 'DynamicEdgeConv'   # See models under icenet/deep/graph.py
-  
-  # Model
-  model_param:
-    task: 'edge_undirected'      # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 32                   # Convolution output dimension
+    bins_A:  [0.001, 100.0, 150]   # Make sure the bounds cover the phase space
+    binmode_A:  'linear'           # 'log10' or 'linear' binning
     
-    # Message passing parameters
-    conv_MLP_act: 'relu'
-    conv_MLP_bn: True
-    conv_aggr: 'max'
-    conv_knn: 8
+    bins_B: [-3.1, 3.1, 150]
+    binmode_B: 'linear'
+    
+    # ! Variable, and binning min/max boundaries are both transformed !
+    transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
+    transform_B: null
 
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    max_reg: 10000.0               # Maximum weight cut-off regularization
 
-    final_MLP_act: 'relu'
-    final_MLP_bn:  True
 
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy_per_edge' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                           # focal_entropy exponent
-    temperature: 1                     # logit norm temperature
+  ## Outlier protection in the training
+  outlier_param:
+    algo: null         # algorithm: 'truncate', null
+    qmin: 0.01         # in [0,100] 
+    qmax: 99.9         # in [0,100]
 
-    optimizer: 'Adam'
-    epochs: 150
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay:  0.0      # L2-regularization
 
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
+  # ** Activate models here **
+  # Give all models some unique identifier and label
+  models:  !include configs/hgcal/models_trk.yml
+  active_models: &ACTIVE_MODELS
+    - gnet0
+    - gnet1
+  
+  raytune: !include configs/hgcal/raytune.yml
+  
+  # Distillation training
+  # -- the order must be compatible with the causal order in 'active_models'
+  distillation:
 
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+    # Big, sophisticated model
+    source:
+      #xgb0
+      
+    # Simple, compressed models
+    drains:
+      #- xgb1
+      # - add more here
+  
+  # Batched "deep" training
+  batch_train_param:
+    blocksize: 150000   # Maximum number of events simultaneously in RAM
+    epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
+    #num_cpu: null      # Set null for auto, or an integer for manual.
 
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+# ----------------------------------------------------
+eval_runmode:
 
+  <<: *INPUT_PARAM
+  <<: *MVA_INPUT_PARAM
+  
+  maxevents: null
+
+  input_tag: null
+  model_tag: null
+
+  reweight: false
+  reweight_param: *REWEIGHT_PARAM
+
+  models:  !include configs/hgcal/models_trk.yml
+  active_models: *ACTIVE_MODELS
+
+# ----------------------------------------------------
+plot_param: !include configs/hgcal/plots_trk.yml

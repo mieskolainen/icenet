@@ -88,7 +88,10 @@ def compute_reweight(root_files, num_events, args):
 def main():
     
     ### Get input
-    args, cli  = process.read_config(config_path='./configs/eid')
+    cli, cli_dict  = process.read_cli()
+    runmode   = cli_dict['runmode']
+
+    args, cli  = process.read_config(config_path='./configs/eid', runmode=runmode)
     root_files = args['root_files']
     features   = globals()[args['inputvar']]
     
@@ -120,8 +123,8 @@ def main():
     for i in range(len(args['active_models'])):
 
         ID        = args['active_models'][i]
-        param[ID] = args[f'{ID}_param']
-
+        param[ID] = args['models'][ID]
+        
         if param[ID]['train'] == 'torch_graph':
             model[ID], device[ID], optimizer[ID], scheduler[ID] = get_model(gdata, args=args, param=param[ID])
     # -------------------------------------------------------------------------
