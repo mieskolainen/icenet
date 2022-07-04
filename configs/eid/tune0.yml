@@ -152,7 +152,7 @@ train_runmode:
     - xgb0
     - gxgb0
 
-    - dbnf0
+  #  - dbnf0
     - gnet3
     - gnet2
   #  - gnet0
