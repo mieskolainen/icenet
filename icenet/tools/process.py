@@ -338,7 +338,7 @@ def impute_datasets(data, args, features, imputer=None):
         # No imputation, but fix spurious NaN / Inf
         data.x[np.logical_not(np.isfinite(data.x))] = args['fill_value']
 
-    return data.x, imputer
+    return data, imputer
 
 
 def train_models(data_trn, data_val, args=None) :
