@@ -109,16 +109,16 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
 
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS)
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
     
     X   = X[ind]
     prints.printbar()
-
-
+    
+    
     # @@ Observable cut selections done here @@
     ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
 
     X   = X[ind]
@@ -141,7 +141,7 @@ def splitfactor(x, y, w, ids, args):
     """
     
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-
+    
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None

@@ -12,14 +12,25 @@ mva_param: &MVA_INPUT_PARAM
   signalclass: 1                     # Signal class ID
   
   inputvar:         'MVA_SCALAR_VARS'
-  inputvar_scalar:  null             # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
+  inputvar_scalar:  null              # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
   jagged_maxdim:    6
-
-  varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
-  #varnorm_tensor: 'zscore'          # Tensor variable normalization
-  #varnorm_graph: null               # Not implemented yet
   
+  varnorm: 'zscore'                   # Variable normalization: 'zscore', 'madscore', null
+  #varnorm_tensor: 'zscore'           # Tensor variable normalization
+  #varnorm_graph: null                # Not implemented yet
+  
+  frac: 0.9                           # Train/validate/test split fraction
+  
+  # Imputation
+  imputation_param:
+    active: true                      # True / False
+    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: []                        # Special values which indicate the need for imputation
+
   # # Graph object construction
   # graph_param:
   #   global_on: True
@@ -46,21 +57,12 @@ genesis_runmode:
   datafile:   'datadist.root'
   tree_name:  null                    # 'ntuplizer/tree'
 
-  frac: 0.9                           # Train/validate/test split fraction
   targetfunc: null                    # Training target,    implemented under mctargets.py
   filterfunc: 'filter_standard'       # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_fiducial'          # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
 
-  # Imputation
-  imputation_param:
-    active: true                      # True / False
-    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
-    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                     # For constant imputation
-    knn_k: 8                          # Number of nearest neighbours considered
-    values: []                        # Special values which indicate the need for imputation
 
 # ----------------------------------------------------
 train_runmode:

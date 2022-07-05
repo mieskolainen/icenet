@@ -69,18 +69,18 @@ def binengine(bindef, x):
         raise Exception(__name__ + f'.bin_processor: Unknown binning description in {bindef}')
 
 
-def plot_selection(X, ind, ids, args, label, varlist, density=True):
+def plot_selection(X, ind, ids, plotdir, label, varlist, density=True):
     """
     Plot selection before / after type histograms against all chosen variables
 
     Args:
-        X      : data array (N events x D dimensions)
-        ind    : boolean selection indices (N)
-        ids    : variable string array (D)
-        args   : plotting arguments
-        label  : a string label
-        varlist: a list of variables to be plotted (from ids)
-        density: normalize all histograms to unit density
+        X       : data array (N events x D dimensions)
+        ind     : boolean selection indices (N)
+        ids     : variable string array (D)
+        plotdir : plotting directory
+        label   : a string label
+        varlist : a list of variables to be plotted (from ids)
+        density : normalize all histograms to unit density
     """
 
     for var in tqdm(varlist):
@@ -118,9 +118,7 @@ def plot_selection(X, ind, ids, args, label, varlist, density=True):
         ax[1].hist(x=cbins, bins=bins, weights=counts2 / (counts1 + 1E-30), color=(1,0,0), alpha=0.5, label='ratio', **iceplot.hist_style_step)
 
         # Save it
-        targetdir = f'./figs/{args["rootname"]}/{args["config"]}/cuts/{label}'
-
-        os.makedirs(targetdir, exist_ok = True)
+        targetdir = aux.makedir(f'{plotdir}/cuts/{label}')
         fig.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
 
         ax[0].set_yscale('log')
@@ -162,7 +160,7 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     
     ax[0].plot(losses)
     ax[0].set_xlabel('k (epoch)')
-    ax[0].set_ylabel('train loss')
+    ax[0].set_ylabel('loss')
     ax[0].set_title(label, fontsize=10)
 
     ax[1].plot(trn_aucs)
@@ -351,8 +349,8 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     
     ax.set_yscale('log')
 
-    os.makedirs(f'{path}/{label}', exist_ok = True)
-    savepath = f'{path}/{label}/MVA_output.pdf'
+    outputdir = aux.makedir(f'{path}/{label}')
+    savepath  = f'{outputdir}/MVA_output.pdf'
     plt.savefig(savepath, bbox_inches='tight')
     print(__name__ + f'.density_MVA_wclass: Saving figure: {savepath}')
     plt.close()
@@ -416,8 +414,8 @@ def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
 
             # -----
 
-            os.makedirs(f'{path}/{label}', exist_ok = True)
-            savepath = f'{path}/{label}/{v}_class_{k}.pdf'
+            outputdir = aux.makedir(f'{path}/{label}')
+            savepath  = f'{outputdir}/{v}_class_{k}.pdf'
             plt.savefig(savepath, bbox_inches='tight')
             print(__name__ + f'.density_COR_wclass: Saving figure: {savepath}')
             plt.close()
@@ -464,8 +462,8 @@ def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [
         
         # -----
 
-        os.makedirs(f'{path}/{label}', exist_ok = True)
-        savepath = f'{path}/{label}/{v}.pdf'
+        outputdir = aux.makedir(f'{path}/{label}')
+        savepath = f'{outputdir}/{v}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_COR: Saving figure: {savepath}')
         plt.close()
@@ -777,39 +775,6 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             plt.savefig(filename + '__log.pdf', bbox_inches='tight')
 
         plt.close()
-
-
-def plothist1d(X, y, labels) :
-    """ Histogram observables in 1D
-    """
-
-    # Number of classes
-    C = len(np.unique(y))
-
-    classlegs = []
-    for k in range(C) :
-        classlegs.append('class ' + str(k))
-
-    # Over observables
-    for j in range(X.shape[1]) :
-
-        # Over classes
-        fig,ax = plt.subplots()
-        for k in range(C):
-
-            ind = (y == k)
-            x = X[ind,j]
-            edges = np.linspace(0, np.max(x), 100);
-
-            hI, bins, patches = plt.hist(x, edges,
-                density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-
-        plt.legend(classlegs)
-        plt.xlabel('x')
-        plt.ylabel('density')
-        plt.title(labels[j], fontsize=10)
-
-        plt.gca().set_yscale('log')
 
 
 def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'numpy', reso=50, npoints=400):

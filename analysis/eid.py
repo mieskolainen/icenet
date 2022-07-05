@@ -44,12 +44,12 @@ def main() :
   
   args, cli = process.read_config(config_path=f'configs/eid', runmode=runmode)
   
-  impute_vars = globals()[args['imputation_param']['var']] if runmode == 'genesis' else None
-  data = process.read_data(args=args, func_loader=common.load_root_file, impute_vars=impute_vars, runmode=runmode) 
+  X,Y,W,ids   = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
 
   if runmode == 'train' or runmode == 'eval':
-    data = process.process_data(args=args, data=data, func_factor=common.splitfactor, runmode=runmode)
-  
+    impute_vars = globals()[args['imputation_param']['var']]
+    data = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, impute_vars=impute_vars, runmode=runmode)
+
   if   runmode == 'train':
     prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
     process.make_plots(data=data['trn'], args=args)

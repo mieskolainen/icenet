@@ -43,6 +43,8 @@ mva_param: &MVA_INPUT_PARAM
   cutfunc:     null
   targetfunc:  null
 
+  frac: 0.9                 # Train/validate/test split fraction
+  
   varnorm: 'zscore'         # variable normalization: 'zscore', 'minmax', 'none'
 
 
@@ -53,7 +55,6 @@ genesis_runmode:
   
   inputmap: null
   maxevents: 1000
-  frac: 0.9                 # Train/validate/test split fraction
   
   VERBOSE: false
 

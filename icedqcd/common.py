@@ -52,7 +52,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
     # =================================================================
     # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
-    
+
     proc = args["input"]['class_1']
     X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
@@ -111,7 +111,7 @@ def process_root(X, ids, isMC, args, **extra):
 
     # @@ Filtering done here @@
     ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS)
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
     
     X   = X[ind]
@@ -120,7 +120,7 @@ def process_root(X, ids, isMC, args, **extra):
 
     # @@ Observable cut selections done here @@
     ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
 
     X   = X[ind]

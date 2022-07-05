@@ -43,16 +43,16 @@ def read_cli():
     parser = argparse.ArgumentParser()
     
     ## argparse.SUPPRESS removes argument from the namespace if not passed
-    parser.add_argument("--runmode",    type=str, default='null')
-    parser.add_argument("--config",     type=str, default='tune0')
-    parser.add_argument("--datapath",   type=str, default=".")
-    parser.add_argument("--datasets",   type=str, default="*.root")
-    parser.add_argument("--tag",        type=str, default='tag0')
+    parser.add_argument("--runmode",         type=str,  default='null')
+    parser.add_argument("--config",          type=str,  default='tune0.yml')
+    parser.add_argument("--datapath",        type=str,  default='.')
+    parser.add_argument("--datasets",        type=str,  default='*.root')
+    parser.add_argument("--tag",             type=str,  default='tag0')
 
-    parser.add_argument("--maxevents",       type=int, default=argparse.SUPPRESS)
-    parser.add_argument("--inputmap",        type=str, default=None)
-    parser.add_argument("--use_conditional", type=str, default=argparse.SUPPRESS)
-    parser.add_argument("--modeltag",        type=str, default='default')
+    parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--inputmap",        type=str,  default=None)
+    parser.add_argument("--use_conditional", type=bool, default=argparse.SUPPRESS)
+    parser.add_argument("--modeltag",        type=str,  default=None)
 
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -143,7 +143,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     print()
 
     # -------------------------------------------------------------------
-    ## Create a hash
+    ## Create a hash based on "rngseed", "maxevents", "genesis" and "inputmap" fields of yaml
 
     hash_args = {}
     hash_args.update(old_args['genesis_runmode']) # This first !
@@ -160,9 +160,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args["config"]     = cli_dict['config']
     args["modeltag"]   = cli_dict['modeltag']
 
-    args['datadir']    = aux.makedir(f'output/{args["rootname"]}/{cli_dict["config"]}')
-    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/{cli_dict["config"]}/{cli_dict["modeltag"]}')
-    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/{cli_dict["config"]}/inputmap_{cli_dict["inputmap"]}__modeltag_{cli_dict["modeltag"]}')
+    args['datadir']    = aux.makedir(f'output/{args["rootname"]}/')
+    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/config_[{cli_dict["config"]}]/modeltag_[{cli_dict["modeltag"]}]')
+    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/config_[{cli_dict["config"]}]/inputmap_[{cli_dict["inputmap"]}]__modeltag_[{cli_dict["modeltag"]}]')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
@@ -194,7 +194,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     return args, cli
 
 
-def read_data(args, func_loader, impute_vars, runmode):
+def read_data(args, func_loader, runmode):
     """
     Load input data
     
@@ -227,52 +227,53 @@ def read_data(args, func_loader, impute_vars, runmode):
                 if W is not None:
                     W = np.concatenate((W, W_), axis=0)
 
-        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
-
         with open(cache_filename, 'wb') as handle:
             print(__name__ + f'.read_data: saving to cache: "{cache_filename}"')
-            pickle.dump([trn, val, tst, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        if args['imputation_param']['active']:
-            trn, val, tst, imputer = impute_datasets(trn=trn, val=val, tst=tst, features=impute_vars, args=args['imputation_param'], imputer=None)
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+            pickle.dump([X, Y, W, ids, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open(cache_filename, 'rb') as handle:
             print(__name__ + f'.read_data: loading from cache: "{cache_filename}"')
-            trn, val, tst, genesis_args = pickle.load(handle)
+            X, Y, W, ids, genesis_args = pickle.load(handle)
 
             print(__name__ + f'.read_data: cached data was generated with arguments:')
             pprint(genesis_args)
 
-    return {'trn': trn, 'val': val, 'tst': tst}
+    return X, Y, W, ids
 
 
-def process_data(args, data, func_factor, runmode):
+def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
 
     # ----------------------------------------------------------
     # Pop out conditional variables if they exist
     if args['use_conditional'] == False:
-      for key in data.keys():
 
-        idx = []
-        for i in range(len(data[key].ids)):
-            if '__model' not in data[key].ids[i]:
-                idx.append(i)
+        index = []
+        for i in range(len(ids)):
+            if '__model' not in ids[i]:
+                index.append(i)
             else:
-                print(__name__ + f'.process_data: Removing conditional variable: <{data[key].ids[i]}>')
+                print(__name__ + f'.process_data: Removing conditional variable: <{ids[i]}>')
         
-        data[key].x   = data[key].x[:, np.array(idx, dtype=int)]
-        data[key].ids = [data[key].ids[j] for j in idx]
+        X   = X[:, np.array(index, dtype=int)]
+        ids = [ids[j] for j in index]
     # ----------------------------------------------------------
 
-    trn, val, tst = data['trn'], data['val'], data['tst']
+    # Split into training, validation, test
+    trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
     ### Split and factor data
     output = {}
     if   runmode == 'train':
 
-        ### Compute reweighting weights (before funcfactor because we need the variables !)
+        ## Imputate
+        if args['imputation_param']['active']:
+            trn, imputer = impute_datasets(data=trn, features=impute_vars, args=args['imputation_param'], imputer=None)
+            val, imputer = impute_datasets(data=val, features=impute_vars, args=args['imputation_param'], imputer=imputer)
+            
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+        
+        ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             trn.w, pdf = reweight.compute_ND_reweights(pdf=None, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
             val.w,_    = reweight.compute_ND_reweights(pdf=pdf,  x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
@@ -283,7 +284,13 @@ def process_data(args, data, func_factor, runmode):
 
     elif runmode == 'eval':
         
-        ### Compute reweighting weights (before funcfactor because we need the variables !)
+        ## Imputate
+        if args['imputation_param']['active']:
+
+            imputer = pickle.load(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            tst, _  = impute_datasets(data=tst, features=impute_vars, args=args['imputation_param'], imputer=imputer)
+
+        ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
@@ -291,6 +298,7 @@ def process_data(args, data, func_factor, runmode):
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
     return output
+
 
 def make_plots(data, args):
 
@@ -316,12 +324,12 @@ def make_plots(data, args):
 
 
 
-def impute_datasets(trn, val, tst, args, features, imputer=None):
+def impute_datasets(data, args, features, imputer=None):
     """
     Dataset imputation
 
     Args:
-        trn,val,tst: .x, .y, .w, .ids type object
+        data:        .x, .y, .w, .ids type object
         args:        imputer parameters
         features:    variables to impute (list)
         imputer:     imputer object (scikit-type)
@@ -330,37 +338,31 @@ def impute_datasets(trn, val, tst, args, features, imputer=None):
         imputed data
     """
 
-    imputer_trn = None
-
     if args['active']:
 
         special_values = args['values'] # possible special values
         print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
 
         # Choose active dimensions
-        dim = np.array([i for i in range(len(trn.ids)) if trn.ids[i] in features], dtype=int)
+        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
 
         # Parameters
         param = {
             "dim":        dim,
             "values":     special_values,
-            "labels":     trn.ids,
+            "labels":     data.ids,
             "algorithm":  args['algorithm'],
             "fill_value": args['fill_value'],
             "knn_k":      args['knn_k']
         }
         
-        trn.x, imputer_trn = io.impute_data(X=trn.x, imputer=imputer,     **param)
-        tst.x, _           = io.impute_data(X=tst.x, imputer=imputer_trn, **param)
-        val.x, _           = io.impute_data(X=val.x, imputer=imputer_trn, **param)
-        
+        data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
+
     else:
         # No imputation, but fix spurious NaN / Inf
-        trn.x[np.logical_not(np.isfinite(trn.x))] = 0
-        val.x[np.logical_not(np.isfinite(val.x))] = 0
-        tst.x[np.logical_not(np.isfinite(tst.x))] = 0
+        data.x[np.logical_not(np.isfinite(data.x))] = args['fill_value']
 
-    return trn, val, tst, imputer_trn
+    return data.x, imputer
 
 
 def train_models(data_trn, data_val, args=None) :
@@ -574,7 +576,7 @@ def evaluate_models(data=None, args=None):
     #mva_mstats = []
     #MVA_binned_mstats = []
     #MVA_binned_mlabel = []
-    
+
     ROC_binned_mstats = [list()] * len(args['active_models'])
     ROC_binned_mlabel = [list()] * len(args['active_models'])
 

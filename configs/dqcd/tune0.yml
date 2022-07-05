@@ -13,7 +13,18 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
   jagged_maxdim:    6
-
+  
+  frac: 0.8                          # Train/validate/test split fraction
+  
+  # Variable imputation
+  imputation_param:
+    active: false                    # True / False
+    var: 'MVA_SCALAR_VARS'           # Array of variables to be imputated
+    algorithm: 'constant'            # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                    # For constant imputation
+    knn_k: 8                         # Number of nearest neighbours considered
+    values: []                       # Special values which indicate the need for imputation
+                                     # if set empty [], only inf/nan are imputed
   varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'          # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
@@ -41,22 +52,11 @@ genesis_runmode:
   inputmap: "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
 
-  frac: 0.8                          # Train/validate/test split fraction
   targetfunc:  null                  # Training target,    implemented under mctargets.py
   filterfunc: 'filter_standard'      # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_fiducial'         # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                   # Full N-point correlations computed between cuts
-
-  # Variable imputation
-  imputation_param:
-    active: false                    # True / False
-    var: 'MVA_SCALAR_VARS'           # Array of variables to be imputated
-    algorithm: 'constant'            # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                    # For constant imputation
-    knn_k: 8                         # Number of nearest neighbours considered
-    values: []                       # Special values which indicate the need for imputation
-                                     # if set empty [], only inf/nan are imputed
 
 # ----------------------------------------------------
 train_runmode:
