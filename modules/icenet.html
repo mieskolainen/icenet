@@ -3037,7 +3037,7 @@ so we see that also integrated class fractions are equalized (or not)!</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.plot_selection">
-<span class="sig-name descname"><span class="pre">plot_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_selection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot selection before / after type histograms against all chosen variables</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3045,7 +3045,7 @@ so we see that also integrated class fractions are equalized (or not)!</p>
 <li><p><strong>X</strong> – data array (N events x D dimensions)</p></li>
 <li><p><strong>ind</strong> – boolean selection indices (N)</p></li>
 <li><p><strong>ids</strong> – variable string array (D)</p></li>
-<li><p><strong>args</strong> – plotting arguments</p></li>
+<li><p><strong>plotdir</strong> – plotting directory</p></li>
 <li><p><strong>label</strong> – a string label</p></li>
 <li><p><strong>varlist</strong> – a list of variables to be plotted (from ids)</p></li>
 <li><p><strong>density</strong> – normalize all histograms to unit density</p></li>
@@ -3094,12 +3094,6 @@ ax:  figure axis</p>
 <dt>Returns</dt><dd><p>fig, ax</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.plots.plothist1d">
-<span class="sig-name descname"><span class="pre">plothist1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plothist1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plothist1d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Histogram observables in 1D</p>
 </dd></dl>
 
 <dl class="py function">
@@ -3183,14 +3177,12 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.impute_datasets">
-<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dataset imputation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trn</strong> – .x, .y, .w, .ids type object</p></li>
-<li><p><strong>val</strong> – .x, .y, .w, .ids type object</p></li>
-<li><p><strong>tst</strong> – .x, .y, .w, .ids type object</p></li>
+<li><p><strong>data</strong> – .x, .y, .w, .ids type object</p></li>
 <li><p><strong>args</strong> – imputer parameters</p></li>
 <li><p><strong>features</strong> – variables to impute (list)</p></li>
 <li><p><strong>imputer</strong> – imputer object (scikit-type)</p></li>
@@ -3220,7 +3212,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.process_data">
-<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -3236,7 +3228,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load input data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -500,11 +500,11 @@
             <span class="n">imputer</span> <span class="o">=</span> <span class="n">KNNImputer</span><span class="p">(</span><span class="n">missing_values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">knn_k</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.impute_data: Unknown algorithm chosen&#39;</span><span class="p">)</span>
-
+    
     <span class="c1"># Fit and transform</span>
     <span class="n">imputer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">dim</span><span class="p">])</span>
     <span class="n">X</span><span class="p">[:,</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">dim</span><span class="p">])</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.impute_data: [done] </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">imputer</span></div>
 
