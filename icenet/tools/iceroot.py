@@ -14,7 +14,7 @@ from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
 
-def read_multiple_MC(process_func, processes, root_path, param, class_id, use_conditional):
+def read_multiple_MC(process_func, processes, root_path, param, class_id):
     """
     Loop over different MC processes
 
@@ -72,28 +72,25 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id, use_co
 
         # -------------------------------------------------
         # Add conditional (theory param) variables
-        if use_conditional:
+        
+        print(__name__ + f'.read_multiple_MC: Adding conditional theory (model) parameters')
+        print(X__.shape)
+        
+        for var in model_param.keys():
 
-            print(__name__ + f'.read_multiple_MC: Adding conditional theory (model) parameters')
-            print(X__.shape)
+            value = model_param[var]
 
-            for var in model_param.keys():
-
-                value = model_param[var]
-
-                # Pick random between [a,b]
-                if type(value) == list:
-                    col = value[0]  + (value[1] - value[0]) * np.random.rand(X__.shape[0], 1)
-                # Pick specific fixed value
-                else:
-                    if value is None:
-                        value = np.nan
-                    col = value  * np.ones((X__.shape[0], 1))                
-                
-                X__ = np.append(X__, col, axis=1)
-                ids.append(f'__model_{var}')
-        else:
-            print(__name__ + f'.read_multiple_MC: Not using conditional theory (model) parameters ')
+            # Pick random between [a,b]
+            if type(value) == list:
+                col = value[0]  + (value[1] - value[0]) * np.random.rand(X__.shape[0], 1)
+            # Pick specific fixed value
+            else:
+                if value is None:
+                    value = np.nan
+                col = value  * np.ones((X__.shape[0], 1))                
+            
+            X__ = np.append(X__, col, axis=1)
+            ids.append(f'__model_{var}')
         # -------------------------------------------------
 
         # Concatenate processes

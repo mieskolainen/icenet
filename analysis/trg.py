@@ -26,9 +26,10 @@ def main() :
   
   impute_vars = globals()[args['imputation_param']['var']] if runmode == 'genesis' else None
   data = process.read_data(args=args, func_loader=common.load_root_file, impute_vars=impute_vars, runmode=runmode) 
-
-  data = process.process_data(args=args, data=data, func_factor=common.splitfactor, runmode=runmode)
-
+  
+  if runmode == 'train' or runmode == 'eval':
+    data = process.process_data(args=args, data=data, func_factor=common.splitfactor, runmode=runmode)
+  
   if   runmode == 'train':
     prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
     process.make_plots(data=data['trn'], args=args)

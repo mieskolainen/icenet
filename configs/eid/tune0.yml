@@ -9,10 +9,8 @@ rootname: 'eid'
 rngseed: 123456                      # Fixed seed for training data mixing
 
 # ----------------------------------------------------
-input_param: &INPUT_PARAM
-  use_conditional: false             # Conditional (theory parametric) input
-
 mva_param: &MVA_INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
   num_classes: 2                     # Number of classes in MVA
   signalclass: 1                     # Signal class ID
   
@@ -70,10 +68,8 @@ mva_param: &MVA_INPUT_PARAM
 # ----------------------------------------------------
 genesis_runmode:
 
-  <<: *INPUT_PARAM
-
   maxevents:  null
-  inputfiles: null #"mc_input.yml"
+  inputmap: null #"mc_input.yml"
   tree_name:  'ntuplizer/tree'
 
   frac: 0.9                           # Train/validate/test split fraction
@@ -95,7 +91,6 @@ genesis_runmode:
 # ----------------------------------------------------
 train_runmode:
 
-  <<: *INPUT_PARAM
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
@@ -190,10 +185,9 @@ train_runmode:
 
 # ----------------------------------------------------
 eval_runmode:
-
-  <<: *INPUT_PARAM
+  
   <<: *MVA_INPUT_PARAM
-
+  
   maxevents: null
 
   input_tag: null

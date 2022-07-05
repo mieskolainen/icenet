@@ -51,7 +51,7 @@ genesis_runmode:
   <<: *INPUT_PARAM
   <<: *MVA_INPUT_PARAM
   
-  inputfiles: null
+  inputmap: null
   maxevents: 1000
   frac: 0.9                 # Train/validate/test split fraction
   

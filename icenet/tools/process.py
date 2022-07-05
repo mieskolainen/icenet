@@ -49,10 +49,10 @@ def read_cli():
     parser.add_argument("--datasets",   type=str, default="*.root")
     parser.add_argument("--tag",        type=str, default='tag0')
 
-    parser.add_argument("--maxevents",  type=int, default=argparse.SUPPRESS)
-    parser.add_argument("--inputfiles", type=str, default=argparse.SUPPRESS)
-    parser.add_argument("--input_tag",  type=str, default='input0')
-    parser.add_argument("--model_tag",  type=str, default='model0')
+    parser.add_argument("--maxevents",       type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--inputmap",        type=str, default=None)
+    parser.add_argument("--use_conditional", type=str, default=argparse.SUPPRESS)
+    parser.add_argument("--modeltag",        type=str, default='default')
 
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -88,15 +88,22 @@ def read_config(config_path='configs/xyz/', runmode='all'):
             print(exc)
     
 
-    ## Inputfiles .yaml
-    if args["genesis_runmode"]["inputfiles"] is not None:
-        with open(f'{config_path}/{args["genesis_runmode"]["inputfiles"]}', 'r') as f:
+    # -------------------------------------------------------------------
+    ## Inputmap .yml setup
+
+    if cli_dict['inputmap'] is not None:
+        args["genesis_runmode"]["inputmap"] = cli_dict['inputmap']        
+
+    if args["genesis_runmode"]["inputmap"] is not None:
+        file = args["genesis_runmode"]["inputmap"]
+
+        with open(f'{config_path}/{file}', 'r') as f:
             try:
-                inputfiles = yaml.load(f, Loader=yaml.FullLoader)
+                inputmap = yaml.load(f, Loader=yaml.FullLoader)
             except yaml.YAMLError as exc:
                 print(exc)
     else:
-        inputfiles = {}
+        inputmap = {}
     
     # -------------------------------------------------------------------
     # Mode setup
@@ -108,7 +115,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # -----------------------------------------------------
     if   runmode == 'genesis':
         new_args.update(args['genesis_runmode'])
-        new_args.update(inputfiles)
+        new_args.update(inputmap)
     elif runmode == 'train':
         new_args.update(args['train_runmode'])
         new_args['plot_param'] = args['plot_param']
@@ -142,7 +149,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     hash_args.update(old_args['genesis_runmode']) # This first !
     hash_args['rngseed']   = args['rngseed']
     hash_args['maxevents'] = args['maxevents']
-    hash_args.update(inputfiles)
+    hash_args.update(inputmap)
 
     args['__hash__'] = io.make_hash_sha256(hash_args)
 
@@ -151,8 +158,12 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Create new variables
 
     args["config"]     = cli_dict['config']
+    args["modeltag"]   = cli_dict['modeltag']
+
     args['datadir']    = aux.makedir(f'output/{args["rootname"]}/{cli_dict["config"]}')
-    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/{cli_dict["config"]}')
+    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/{cli_dict["config"]}/{cli_dict["modeltag"]}')
+    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/{cli_dict["config"]}/inputmap_{cli_dict["inputmap"]}__modeltag_{cli_dict["modeltag"]}')
+    
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
@@ -163,6 +174,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Create directories
     aux.makedir(args['datadir'])
     aux.makedir(args['modeldir'])
+    aux.makedir(args['plotdir'])
 
     # -------------------------------------------------------------------
     # Set random seeds for reproducability and train-validate-test splits
@@ -237,6 +249,22 @@ def read_data(args, func_loader, impute_vars, runmode):
 
 
 def process_data(args, data, func_factor, runmode):
+
+    # ----------------------------------------------------------
+    # Pop out conditional variables if they exist
+    if args['use_conditional'] == False:
+      for key in data.keys():
+
+        idx = []
+        for i in range(len(data[key].ids)):
+            if '__model' not in data[key].ids[i]:
+                idx.append(i)
+            else:
+                print(__name__ + f'.process_data: Removing conditional variable: <{data[key].ids[i]}>')
+        
+        data[key].x   = data[key].x[:, np.array(idx, dtype=int)]
+        data[key].ids = [data[key].ids[j] for j in idx]
+    # ----------------------------------------------------------
 
     trn, val, tst = data['trn'], data['val'], data['tst']
 
@@ -345,9 +373,6 @@ def train_models(data_trn, data_val, args=None) :
     Returns:
         Saves trained models to disk
     """
-    
-    args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
-
 
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
@@ -547,24 +572,20 @@ def evaluate_models(data=None, args=None):
     global ROC_binned_mlabel
 
     #mva_mstats = []
-    targetdir  = None
-
     #MVA_binned_mstats = []
     #MVA_binned_mlabel = []
-
+    
     ROC_binned_mstats = [list()] * len(args['active_models'])
     ROC_binned_mlabel = [list()] * len(args['active_models'])
 
     # -----------------------------
     # Prepare output folders
 
-    targetdir  = f'./figs/{args["rootname"]}/{args["config"]}/eval'
+    targetdir  = f'{args["plotdir"]}/eval'
 
     subdirs = ['', 'ROC', 'MVA', 'COR']
     for sd in subdirs:
         os.makedirs(targetdir + '/' + sd, exist_ok = True)
-    
-    args["modeldir"] = aux.makedir(f'./checkpoint/{args["rootname"]}/{args["config"]}/')
 
     # --------------------------------------------------------------------
     # Collect data

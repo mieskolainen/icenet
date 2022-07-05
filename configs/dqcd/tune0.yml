@@ -4,10 +4,8 @@ rootname: 'dqcd'
 rngseed: 123456                      # Fixed seed for training data mixing
 
 # ----------------------------------------------------
-input_param: &INPUT_PARAM
-  use_conditional: false             # Conditional (theory parametric) input
-
 mva_param: &MVA_INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
   num_classes: 2                     # Number of classes in MVA
   signalclass: 1                     # Signal class ID
   
@@ -38,11 +36,9 @@ mva_param: &MVA_INPUT_PARAM
 
 # ----------------------------------------------------
 genesis_runmode:
-
-  <<: *INPUT_PARAM
-
+  
   maxevents:  null
-  inputfiles: "mc_input.yml"
+  inputmap: "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
 
   frac: 0.8                          # Train/validate/test split fraction
@@ -65,7 +61,6 @@ genesis_runmode:
 # ----------------------------------------------------
 train_runmode:
 
-  <<: *INPUT_PARAM
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
@@ -159,8 +154,7 @@ train_runmode:
 
 # ----------------------------------------------------
 eval_runmode:
-
-  <<: *INPUT_PARAM
+  
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
