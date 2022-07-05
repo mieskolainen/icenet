@@ -466,11 +466,11 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
             imputer = KNNImputer(missing_values=np.nan, n_neighbors=knn_k)
         else:
             raise Exception(__name__ + '.impute_data: Unknown algorithm chosen')
-
+    
     # Fit and transform
     imputer.fit(X[:,dim])
     X[:,dim] = imputer.transform(X[:,dim])
-
+    
     print(__name__ + '.impute_data: [done] \n')
     return X, imputer
 

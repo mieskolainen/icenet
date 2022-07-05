@@ -49,12 +49,13 @@ def main() :
     
     runmode     = 'genesis'
     args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
-    impute_vars = globals()[args['imputation_param']['var']] if runmode == 'genesis' else None
-    data = process.read_data(args=args, func_loader=common.load_root_file, impute_vars=impute_vars, runmode=runmode) 
+    X,Y,W,ids   = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
     
     runmode     = 'train'
     args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
-    data = process.process_data(args=args, data=data, func_factor=common.splitfactor, runmode='train')
+    
+    impute_vars = globals()[args['imputation_param']['var']]
+    data        = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, impute_vars=impute_vars, runmode='train')
 
     # Pick them out
     data_tensor = data['trn']['data_tensor']

@@ -330,7 +330,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
         fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
         plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
 
@@ -531,15 +531,15 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     if not args['__raytune_running__']:
 
         # Plot evolution
-        plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
         fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param["label"])
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         ## Plot feature importance
         if plot_importance:
-
+            
             fig,ax = plots.plot_xgb_importance(model=model, dim=data_trn.x.shape[1], tick_label=data_trn.ids)
-            targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
+            targetdir = aux.makedir(f'{args["plotdir"]}/train/')
             plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
         ## Plot decision tree
@@ -548,7 +548,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         
         ## Plot contours
         if args['plot_param']['contours']['active']:
-            targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
+            targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
             plots.plot_decision_contour(lambda x : xgb_model.predict(x),
                 X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
 
@@ -682,7 +682,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         
     # ------------------------------------------------------------------------------
     # Plot evolution
-    plotdir  = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/')
+    plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
     fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
@@ -697,7 +697,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         ids.append(f'xgb[{i}]')
     
     fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
-    targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train')
+    targetdir = aux.makedir(f'{args["plotdir"]}/train/')
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
     
     ## Plot decision tree
@@ -706,7 +706,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     
     ### Plot contours
     if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{label}/')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{label}/')
         plots.plot_decision_contour(lambda x : xgb_model.predict(x),
             X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
     
@@ -735,7 +735,7 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     ### Plot contours (TOO SLOW!)
     """
     if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/train/2D_contours/{param["label"]}/')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
         plots.plot_decision_contour(lambda x : func_predict(x),
             X = data_trn.x, y = data_trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
     """

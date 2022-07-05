@@ -14,6 +14,6 @@ mkdir ./figs/eid/$CONFIG -p # for output ascii dump
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames
-python analysis/eid.py $MAX --inputfiles "null" --config tune0.yml --datapath $DATAPATH --datasets "output_*.root" --runmode genesis
-python analysis/eid.py $MAX --inputfiles "null" --config tune0.yml --datapath $DATAPATH --datasets "output_*.root" --runmode train
-python analysis/eid.py $MAX --inputfiles "null" --config tune0.yml --datapath $DATAPATH --datasets "output_*.root" --runmode eval
+python analysis/eid.py --runmode genesis $MAX --config tune0.yml --datapath $DATAPATH --datasets "output_*.root"
+python analysis/eid.py --runmode train   $MAX --config tune0.yml --datapath $DATAPATH --datasets "output_*.root"
+python analysis/eid.py --runmode eval    $MAX --config tune0.yml --datapath $DATAPATH --datasets "output_*.root"
