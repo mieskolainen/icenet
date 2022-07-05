@@ -86,10 +86,10 @@
 
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** SIGNAL MC *** (first signal, so we can use it&#39;s theory conditional parameters)</span>
-
+    
     <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span>
     <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">VARS_S</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">use_conditional</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">])</span>
+        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
     
     
     <span class="c1"># =================================================================</span>
@@ -97,21 +97,20 @@
     
     <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span>
     <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">VARS_B</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">use_conditional</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">])</span>
+        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
     
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># Sample conditional theory parameters for the background as they are distributed in signal sample</span>
-    
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]:</span>    
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">MODEL_VARS</span><span class="p">:</span>
-            
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Sampling theory conditional &lt;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&gt; for the background&#39;</span><span class="p">)</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">VARS_B</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-            
-            <span class="c1"># Random sample values as in the signal MC</span>
-            <span class="n">X_B</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">X_S</span><span class="p">[:,</span><span class="n">ind</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">X_B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">W_S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W_S</span><span class="p">))</span>
         
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">MODEL_VARS</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Sampling theory conditional &lt;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&gt; for the background&#39;</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">VARS_B</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        
+        <span class="c1"># Random sample values as in the signal MC</span>
+        <span class="n">X_B</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">X_S</span><span class="p">[:,</span><span class="n">ind</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">X_B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">W_S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W_S</span><span class="p">))</span>
+    
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** Finally combine ***</span>
 

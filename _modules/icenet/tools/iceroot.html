@@ -48,7 +48,7 @@
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
 
-<div class="viewcode-block" id="read_multiple_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_multiple_MC">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">processes</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">use_conditional</span><span class="p">):</span>
+<div class="viewcode-block" id="read_multiple_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_multiple_MC">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">processes</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loop over different MC processes</span>
 
@@ -106,28 +106,25 @@
 
         <span class="c1"># -------------------------------------------------</span>
         <span class="c1"># Add conditional (theory param) variables</span>
-        <span class="k">if</span> <span class="n">use_conditional</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-                <span class="n">value</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-
-                <span class="c1"># Pick random between [a,b]</span>
-                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
-                    <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="c1"># Pick specific fixed value</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-                    <span class="n">col</span> <span class="o">=</span> <span class="n">value</span>  <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>                
-                
-                <span class="n">X__</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X__</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;__model_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Not using conditional theory (model) parameters &#39;</span><span class="p">)</span>
+            <span class="c1"># Pick random between [a,b]</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Pick specific fixed value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span>  <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>                
+            
+            <span class="n">X__</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X__</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;__model_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="c1"># -------------------------------------------------</span>
 
         <span class="c1"># Concatenate processes</span>
