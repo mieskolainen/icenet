@@ -287,9 +287,9 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
         ## Imputate
         if args['imputation_param']['active']:
 
-            imputer = pickle.load(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
             tst, _  = impute_datasets(data=tst, features=impute_vars, args=args['imputation_param'], imputer=imputer)
-
+            
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
