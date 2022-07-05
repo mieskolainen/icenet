@@ -372,7 +372,7 @@
         <span class="c1"># No imputation, but fix spurious NaN / Inf</span>
         <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fill_value&#39;</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span></div>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">imputer</span></div>
 
 
 <div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">data_val</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
