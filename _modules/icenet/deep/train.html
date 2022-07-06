@@ -579,13 +579,6 @@
         <span class="c1">## Plot decision tree</span>
         <span class="c1">#xgboost.plot_tree(xgb_model, num_trees=2)</span>
         <span class="c1">#plt.savefig(&#39;{}/xgb_tree.pdf&#39;.format(targetdir), bbox_inches=&#39;tight&#39;); plt.close()        </span>
-        
-        <span class="c1">## Plot contours</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-            <span class="n">targetdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
-            <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">model</span>
 
     <span class="k">return</span> <span class="c1"># No return value for raytune</span></div>
@@ -735,14 +728,8 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_importance.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     
     <span class="c1">## Plot decision tree</span>
-    <span class="c1">#xgboost.plot_tree(xgb_model, num_trees=2)</span>
-    <span class="c1">#plt.savefig(&#39;{}/xgb_tree.pdf&#39;.format(targetdir), bbox_inches=&#39;tight&#39;); plt.close()</span>
-    
-    <span class="c1">### Plot contours</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-        <span class="n">targetdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/2D_contours/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
-        <span class="n">plots</span><span class="o">.</span><span class="n">plot_decision_contour</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">X_trn</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="s1">&#39;xgboost&#39;</span><span class="p">)</span>
+    <span class="c1"># xgboost.plot_tree(xgb_model, num_trees=2)</span>
+    <span class="c1"># plt.savefig(&#39;{}/xgb_tree.pdf&#39;.format(targetdir), bbox_inches=&#39;tight&#39;); plt.close()</span>
     
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -766,13 +753,6 @@
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">flr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">)</span>
 
-    <span class="c1">### Plot contours (TOO SLOW!)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    if args[&#39;plot_param&#39;][&#39;contours&#39;][&#39;active&#39;]:</span>
-<span class="sd">        targetdir = aux.makedir(f&#39;{args[&quot;plotdir&quot;]}/train/2D_contours/{param[&quot;label&quot;]}/&#39;)</span>
-<span class="sd">        plots.plot_decision_contour(lambda x : func_predict(x),</span>
-<span class="sd">            X = data_trn.x, y = data_trn.y, labels = data.ids, targetdir = targetdir, matrix = &#39;numpy&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">)</span></div>
 
 
