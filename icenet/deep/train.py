@@ -545,13 +545,6 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         ## Plot decision tree
         #xgboost.plot_tree(xgb_model, num_trees=2)
         #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
-        
-        ## Plot contours
-        if args['plot_param']['contours']['active']:
-            targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
-            plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-                X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
-
         return model
 
     return # No return value for raytune
@@ -701,14 +694,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
     
     ## Plot decision tree
-    #xgboost.plot_tree(xgb_model, num_trees=2)
-    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
-    
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
+    # xgboost.plot_tree(xgb_model, num_trees=2)
+    # plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
     
     return model
 
@@ -732,13 +719,6 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     def func_predict(X):
         return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
-    ### Plot contours (TOO SLOW!)
-    """
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
-        plots.plot_decision_contour(lambda x : func_predict(x),
-            X = data_trn.x, y = data_trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
-    """
     return (b_pdfs, s_pdfs)
 
 

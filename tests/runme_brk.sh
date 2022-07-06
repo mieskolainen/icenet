@@ -6,9 +6,9 @@
 
 CONFIG="tune0.yml"
 
-DATAPATH="./travis-stash/input/icebrk"
+DATAPATH="travis-stash/input/icebrk"
 
-mkdir ./figs/brk/$CONFIG -p # for output ascii dump
+mkdir "figs/brk/config_[$CONFIG]" -p # for output ascii dump
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

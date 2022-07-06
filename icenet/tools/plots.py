@@ -352,7 +352,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     outputdir = aux.makedir(f'{path}/{label}')
     savepath  = f'{outputdir}/MVA_output.pdf'
     plt.savefig(savepath, bbox_inches='tight')
-    print(__name__ + f'.density_MVA_wclass: Saving figure: {savepath}')
+    print(__name__ + f'.density_MVA_wclass: Saving figure to "{savepath}"')
     plt.close()
 
 
@@ -417,7 +417,7 @@ def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
             outputdir = aux.makedir(f'{path}/{label}')
             savepath  = f'{outputdir}/{v}_class_{k}.pdf'
             plt.savefig(savepath, bbox_inches='tight')
-            print(__name__ + f'.density_COR_wclass: Saving figure: {savepath}')
+            print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
             plt.close()
 
 
@@ -465,7 +465,7 @@ def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [
         outputdir = aux.makedir(f'{path}/{label}')
         savepath = f'{outputdir}/{v}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_COR: Saving figure: {savepath}')
+        print(__name__ + f'.density_COR: Saving figure to "{savepath}"')
         plt.close()
 
 
@@ -571,13 +571,13 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     return fig, (ax1,ax2)
 
 
-def plot_correlations(X, netvars, weights=None, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
+def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
     """
     Plot a cross-correlation matrix of vector data
     
     Args:
         X:                Data matrix (N x D)
-        netvars:          Variable names (list of length D)
+        ids:              Variable names (list of length D)
         classes:          Class label ids (list of length N)
         round_threshold:  Correlation matrix |C_ij| < threshold to set matrix elements to zero
         targetdir:        Output plot directory
@@ -614,8 +614,8 @@ def plot_correlations(X, netvars, weights=None, classes=None, round_threshold=0.
         figs[label], axs[label] = plt.subplots(1,1, figsize=(size,size))
 
         axs[label].imshow(C)
-        axs[label] = annotate_heatmap(X = C, ax = axs[label], xlabels = netvars,
-            ylabels = netvars, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
+        axs[label] = annotate_heatmap(X = C, ax = axs[label], xlabels = ids,
+            ylabels = ids, decimals = 0, x_rot = 90, y_rot = 0, color = "w")
         axs[label].set_title(f'{label}: linear correlation $\\in$ [-100,100]', fontsize=10)
         
         if colorbar:
@@ -623,7 +623,7 @@ def plot_correlations(X, netvars, weights=None, classes=None, round_threshold=0.
 
         if targetdir is not None:
             fname = targetdir + f'{label}_correlation_matrix.pdf'
-            print(__name__ + f'.plot_correlations: Saving figure to <{fname}>')
+            print(__name__ + f'.plot_correlations: Saving figure to "{fname}"')
             plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
 
     return figs, axs
@@ -777,15 +777,26 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
         plt.close()
 
 
-def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'numpy', reso=50, npoints=400):
-    """ Decision contour pairwise for each dimension,
-    other dimensions evaluated at zero=(0,0,...0)
+def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy', reso=50, npoints=400):
+    """
+    Classifier decision contour evaluated pairwise for each dimension,
+    other dimensions evaluated at zero=(0,0,...0) (thus z-normalized with 0-mean is suitable)
+    
+    Args:
+        pred_func:  prediction function handle
+        X:          input matrix
+        y:          class targets
+        ids:        variable label strings
+        targetdir:  output directory
+        transform:  'numpy', 'torch'
+        reso:       evaluation resolution
+        npoints:    number of points to draw
     """
     
-    print(__name__ + '.plot_decision_contour ...')
+    print(__name__ + f'.plot_contour_grid: Evaluating ...')
     MAXP = min(npoints, X.shape[0])
-    D = X.shape[1]
-    pad = 0.5
+    D    = X.shape[1]
+    pad  = 0.5
 
     for dim1 in tqdm(range(D)) :
         x_min, x_max = X[:, dim1].min() - pad, X[:, dim1].max() + pad
@@ -799,34 +810,38 @@ def plot_decision_contour(pred_func, X, y, labels, targetdir = '.', matrix = 'nu
             # Grid points
             PX,PY = np.meshgrid(np.linspace(x_min, x_max, reso), np.linspace(y_min, y_max, reso))
             
-            # Function values through 'pred_func' lambda            
+            # -------------------------------------
+            ## Evaluate function values
+
             Z = np.zeros((reso*reso, D))
             Z[:, dim1] = PX.ravel()
             Z[:, dim2] = PY.ravel()
 
-            signalclass = 1
-            if (matrix == 'torch'):
-                Z = pred_func(torch.tensor(Z, dtype=torch.float32))
-                Z = Z[:, signalclass].detach().numpy() # 2 output units
-            if (matrix == 'numpy'):
+            if   transform == 'torch':
+                Z = pred_func(torch.from_numpy(Z).type(torch.FloatTensor))
+            elif transform == 'numpy':
                 Z = pred_func(Z)
-            if (matrix == 'xgboost'):
-                Z = pred_func(xgboost.DMatrix(data = Z))
+            else:
+                raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {matrix}')
 
             Z = Z.reshape(PX.shape)
+
+            # --------------------------------------
+            ## Plot
+
             fig, axs = plt.subplots()
 
             # Contour
             cs = plt.contourf(PX, PY, Z, cmap = plt.cm.Spectral)
 
-            # Samples as dots
+            # Events as dots
             plt.scatter(X[0:MAXP, dim1], X[0:MAXP, dim2], c = y[0:MAXP], cmap = plt.cm.binary)
 
-            plt.xlabel('X[%d]' % dim1 + ' (%s)' % labels[dim1])
-            plt.ylabel('X[%d]' % dim2 + ' (%s)' % labels[dim2])
+            plt.xlabel(f'x[{dim1}] {ids[dim1]}')
+            plt.ylabel(f'x[{dim2}] {ids[dim2]}')
             plt.colorbar(cs, ticks = np.linspace(0.0, 1.0, 11))
             
-            plt.savefig(targetdir + str(dim1) + "_" + str(dim2) + ".pdf", bbox_inches='tight')
+            plt.savefig(targetdir + f'{dim1}_{dim2}.pdf', bbox_inches='tight')
             plt.close()
 
 
