@@ -188,7 +188,7 @@ def splitfactor(x, y, w, ids, args):
     
     features   = globals()[args['inputvar']]
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+        features=features, graph_param=args['graph_param'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out

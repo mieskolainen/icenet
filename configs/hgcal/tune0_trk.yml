@@ -25,7 +25,8 @@ mva_param: &MVA_INPUT_PARAM
   
   # Graph object construction
   graph_param:
-    directed:  False
+    self_loops: True
+    directed: False
     global_on: False
     coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
 

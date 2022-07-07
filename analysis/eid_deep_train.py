@@ -110,7 +110,7 @@ def main():
 
     gdata = {}
     gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, maxevents=1,
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+        features=features, graph_param=args['graph_param'])
     
     # =========================================================================
     ### Initialize all models
@@ -179,10 +179,10 @@ def main():
                     
                     gdata = {}
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, ids=ids, weights=trn_weights,
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                        features=features, graph_param=args['graph_param'])
 
                     gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=ids, weights=val_weights,
-                        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+                        features=features, graph_param=args['graph_param'])
                     
                     io.showmem()
 

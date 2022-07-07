@@ -104,24 +104,26 @@ def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
     return graph_dataset
 
 
-def parse_graph_data(X, ids, features, Y=None, weights=None, global_on=True, coord='ptetaphim', maxevents=None, EPS=1e-12):
+def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):
     """
     EVENT LEVEL (PROCESSING CANDIDATES)
     
     Jagged array data into pytorch-geometric style Data format array.
     
     Args:
-        X         :  Jagged array of variables
-        ids       :  Variable names as an array of strings
-        features  :  Array of active scalar feature strings
-        Y         :  Target class  array (if any, typically MC only)
-        weights   :  (Re-)weighting array (if any, typically MC only)
-        global_on :  Global features on / off
-        coord     :  Coordinates used for nodes ('ptetaphim', 'pxpypze')
-        
+        X          :  Jagged array of variables
+        ids        :  Variable names as an array of strings
+        features   :  Array of active global feature strings
+        graph_param:  Graph construction parameters dict
+        Y          :  Target class  array (if any, typically MC only)
+        weights    :  (Re-)weighting array (if any, typically MC only)
+    
     Returns:
         Array of pytorch-geometric Data objects
     """
+
+    global_on = graph_param['global_on']
+    coord     = graph_param['coord']
     
     num_node_features   = 4
     num_edge_features   = 4
