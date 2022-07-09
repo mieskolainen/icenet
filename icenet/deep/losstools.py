@@ -3,6 +3,8 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
+
+import torch_geometric
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -24,9 +26,26 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
     elif param['lossfunc'] == 'cross_entropy_per_edge':
+
+        # --------------------------------------------
+        # Synthetic negative edge sampling
+        if param['negative_sampling']:
+            
+            neg_edge_index  = torch_geometric.utils.negative_sampling(
+                edge_index      = x.edge_index,          num_nodes = x.x.shape[0],
+                num_neg_samples = x.edge_index.shape[1], method='sparse'
+            )
+            
+            # Construct new combined (artificial) graph
+            x.edge_index = torch.cat([x.edge_index, neg_edge_index], dim=-1).to(x.x.device)
+            x.y          = torch.cat([x.y, x.y.new_zeros(size=(neg_edge_index.shape[1],))], dim=0).to(x.x.device)
+
+            y            = x.y
+            weights      = None # TBD. Could re-compute a new set of edge weights 
+        # --------------------------------------------
+
         log_phat = model.softpredict(x)
-        y = y.type(torch.int64)
-        return F.nll_loss(log_phat, y)
+        return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
         
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
@@ -37,7 +56,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         log_phat = model.softpredict(x)
         y = y.type(torch.int64)
         return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
-
+        
     elif param['lossfunc'] == 'VAE_background_only':
         ind      = (y == 0) # Use only background to train
         xhat, z, mu, std = model.forward(x=x[ind, ...])

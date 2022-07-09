@@ -25,10 +25,11 @@ mva_param: &MVA_INPUT_PARAM
   
   # Graph object construction
   graph_param:
-    directed:  False
+    self_loops: False
+    directed: False
     global_on: False
-    coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
-
+    coord: 'pxpypze'                 # (Not relevant here)
+  
   # # ** Image tensor object construction **
   # image_param:
 
@@ -39,9 +40,22 @@ mva_param: &MVA_INPUT_PARAM
   #   eta_bins: []
   #   phi_bins: []
 
+  frac: 0.9                           # Train/validate/test split fraction
+  
+  # Imputation
+  imputation_param:
+    active: false                     # True / False
+    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: []                        # Special values which indicate the need for imputation
+
 
 # ----------------------------------------------------
 genesis_runmode:
+
+  <<: *MVA_INPUT_PARAM
 
   maxevents:  null
   inputmap: null
@@ -54,21 +68,12 @@ genesis_runmode:
   #
   #tree_name: 'ticlNtuplizer/candidates'
 
-  frac: 0.9                           # Train/validate/test split fraction
   targetfunc: null                    # Training target,    implemented under mctargets.py
   filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
 
-  # Imputation
-  imputation_param:
-    active: false                     # True / False
-    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
-    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                     # For constant imputation
-    knn_k: 8                          # Number of nearest neighbours considered
-    values: []                        # Special values which indicate the need for imputation
 
 # ----------------------------------------------------
 train_runmode:
@@ -85,7 +90,7 @@ train_runmode:
   reweight_param: &REWEIGHT_PARAM
 
     maxevents: 100000              # Maximum number of events for the PDF construction
-    equal_frac: false              # Equalize integrated class fractions
+    equal_frac: true               # Equalize integrated class fractions
     differential: false            # Differential reweighting
     # ---------------------
     

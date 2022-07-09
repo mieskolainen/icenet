@@ -32,6 +32,8 @@ mva_param: &MVA_INPUT_PARAM
   # Graph object construction
   graph_param:
     global_on: True
+    self_loops: True
+    directed: False
     coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
 
   # ** Image tensor object construction **

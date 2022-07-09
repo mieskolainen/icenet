@@ -35,7 +35,7 @@ gnet0:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 150
+    epochs: 80
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -89,7 +89,7 @@ gnet1:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 150
+    epochs: 80
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -143,7 +143,7 @@ gnet2:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 150
+    epochs: 80
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization

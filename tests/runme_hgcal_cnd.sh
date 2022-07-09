@@ -9,7 +9,7 @@ CONFIG="tune0_cnd.yml"
 #DATAPATH="./travis-stash/input/hgcal"
 DATAPATH="/home/user/travis-stash/input/icehgcal"
 
-mkdir ./figs/hgcal_cnd/$CONFIG -p # for output ascii dump
+mkdir "figs/hgcal_cnd/config_[$CONFIG]" -p # for output ascii dump
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

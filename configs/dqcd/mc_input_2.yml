@@ -22,7 +22,7 @@ input:
     #  isMC: true
 
     HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1:
-      path: 'HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+      path: 'HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
       xs: 1.0
       model_param:
         m:    10

@@ -66,10 +66,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     """
 
     # -------------------------------------------------------------------
-    ## Create folders
-    aux.makedir('tmp/')
-
-    # -------------------------------------------------------------------
     ## Parse command line arguments
     cli, cli_dict = read_cli()
 
@@ -160,7 +156,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args["config"]     = cli_dict['config']
     args["modeltag"]   = cli_dict['modeltag']
 
-    args['datadir']    = aux.makedir(f'output/{args["rootname"]}/')
+    args['datadir']    = aux.makedir(f'output/{args["rootname"]}')
     args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/config_[{cli_dict["config"]}]/modeltag_[{cli_dict["modeltag"]}]')
     args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/config_[{cli_dict["config"]}]/inputmap_[{cli_dict["inputmap"]}]__modeltag_[{cli_dict["modeltag"]}]')
     
@@ -172,6 +168,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     # -------------------------------------------------------------------
     ## Create directories
+    aux.makedir('tmp')
     aux.makedir(args['datadir'])
     aux.makedir(args['modeldir'])
     aux.makedir(args['plotdir'])
@@ -210,7 +207,7 @@ def read_data(args, func_loader, runmode):
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
-
+        
         if runmode != "genesis":
             raise Exception(__name__ + f'.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
 
@@ -228,15 +225,15 @@ def read_data(args, func_loader, runmode):
                     W = np.concatenate((W, W_), axis=0)
 
         with open(cache_filename, 'wb') as handle:
-            print(__name__ + f'.read_data: saving to cache: "{cache_filename}"')
+            cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
             pickle.dump([X, Y, W, ids, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open(cache_filename, 'rb') as handle:
-            print(__name__ + f'.read_data: loading from cache: "{cache_filename}"')
+            cprint(__name__ + f'.read_data: Loading from cache: "{cache_filename}"', 'yellow')
             X, Y, W, ids, genesis_args = pickle.load(handle)
 
-            print(__name__ + f'.read_data: cached data was generated with arguments:')
+            cprint(__name__ + f'.read_data: Cached data was generated with arguments:', 'yellow')
             pprint(genesis_args)
 
     return X, Y, W, ids
@@ -362,7 +359,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data_tensor'] = io.apply_zscore_tensor(data_val['data_tensor'], X_mu_tensor, X_std_tensor)
         
         # Save it for the evaluation
-        pickle.dump([X_mu_tensor, X_std_tensor], open(args["modeldir"] + '/zscore_tensor.dat', 'wb'))    
+        pickle.dump([X_mu_tensor, X_std_tensor], open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'))    
     
     # --------------------------------------------------------------------
 
@@ -385,7 +382,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_mu, X_std)
 
         # Save it for the evaluation
-        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.dat', 'wb'))
+        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.pkl', 'wb'))
         
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
@@ -397,7 +394,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_m, X_mad)
 
         # Save it for the evaluation
-        pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.dat', 'wb'))
+        pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'))
     
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
@@ -613,25 +610,25 @@ def evaluate_models(data=None, args=None):
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
 
             print('\nZ-score normalizing tensor variables ...')
-            X_mu_tensor, X_std_tensor = pickle.load(open(args["modeldir"] + '/zscore_tensor.dat', 'rb'))
+            X_mu_tensor, X_std_tensor = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
             X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
         
         ### Variable normalization
         if   args['varnorm'] == 'zscore':
 
             print('\nZ-score normalizing variables ...')
-            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.dat', 'rb'))
+            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
             X = io.apply_zscore(X, X_mu, X_std)
 
         elif args['varnorm'] == 'madscore':
 
             print('\nMAD-score normalizing variables ...')
-            X_m, X_mad = pickle.load(open(args["modeldir"] + '/madscore.dat', 'rb'))
+            X_m, X_mad = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
             X = io.apply_madscore(X, X_m, X_mad)
 
     except:
         cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
-        
+    
     # --------------------------------------------------------------------
     # For pytorch based
     if X is not None:
@@ -656,7 +653,44 @@ def evaluate_models(data=None, args=None):
         inputs = {'weights': weights, 'label': param['label'],
                  'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
         
-        if   param['predict'] == 'torch_graph':
+         
+        if   param['predict'] == 'xgb':
+            func_predict = predict.pred_xgb(args=args, param=param)
+        
+            if args['plot_param']['contours']['active']:
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+            
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
+
+        elif param['predict'] == 'torch_vector':
+            func_predict = predict.pred_torch_generic(args=args, param=param)
+
+            if args['plot_param']['contours']['active']:
+                targetdir = aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/')
+                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW, targetdir=targetdir, transform='torch')
+
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+
+        elif param['predict'] == 'torch_scalar':
+            func_predict = predict.pred_torch_scalar(args=args, param=param)
+
+            if args['plot_param']['contours']['active']:
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='torch', 
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+
+        elif param['predict'] == 'torch_flow':
+            func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
+
+            if args['plot_param']['contours']['active']:
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='torch', 
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
+
+        elif   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
 
             # Geometric type -> need to use batch loader, get each graph, node or edge prediction
@@ -668,14 +702,6 @@ def evaluate_models(data=None, args=None):
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph,    y = y, **inputs)
-            
-        elif param['predict'] == 'torch_vector':
-            func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
-
-        elif param['predict'] == 'torch_scalar':
-            func_predict = predict.pred_torch_scalar(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
         
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
@@ -697,18 +723,10 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_flr(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
             
-        elif param['predict'] == 'xgb':
-            func_predict = predict.pred_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
-
         #elif param['predict'] == 'xtx':
         # ...   
         #
         
-        elif param['predict'] == 'torch_flow':
-            func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
-            
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
@@ -716,7 +734,11 @@ def evaluate_models(data=None, args=None):
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
-                    
+
+            if args['plot_param']['contours']['active']:
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
@@ -741,7 +763,7 @@ def make_plots(data, args):
         
         ### Plot correlations
         targetdir = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, netvars=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
         
         ### Plot basic plots
         targetdir = aux.makedir(f'{args["plotdir"]}/train/1D_distributions/')
@@ -773,63 +795,68 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # --------------------------------------
     ### ROC, MVA binned plots
-    for i in range(100): # Loop over plot types
-        try:
-            var   = args['plot_param'][f'plot_ROC_binned[{i}]']['var']
-            edges = args['plot_param'][f'plot_ROC_binned[{i}]']['edges']
-        except:
-            break # No more this type of plots 
+    if args['plot_param']['ROC_binned']['active']:
 
-        ## 1D
-        if   len(var) == 1:
+        for i in range(100): # Loop over plot types
+            try:
+                var   = args['plot_param']['ROC_binned'][f'plot[{i}]']['var']
+                edges = args['plot_param']['ROC_binned'][f'plot[{i}]']['edges']
+            except:
+                break # No more this type of plots 
 
-            met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
+            ## 1D
+            if   len(var) == 1:
 
-            # Save for multiple comparison
-            ROC_binned_mstats[i].append(met_1D)
-            ROC_binned_mlabel[i].append(label_1D)
+                met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
+                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
 
-            # Plot this one
-            plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}]')
-            plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA_binned[{i}]')
+                # Save for multiple comparison
+                ROC_binned_mstats[i].append(met_1D)
+                ROC_binned_mlabel[i].append(label_1D)
 
-        ## 2D
-        elif len(var) == 2:
+                # Plot this one
+                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}]')
+                plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA_binned[{i}]')
 
-            fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
+            ## 2D
+            elif len(var) == 2:
 
-            plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}].pdf', bbox_inches='tight')
-            
-        else:
-            print(var)
-            raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
+                fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
+                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
+
+                plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}].pdf', bbox_inches='tight')
+                
+            else:
+                print(var)
+                raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
 
     # ----------------------------------------------------------------
     ### MVA  1D plot
-    hist_edges = args['plot_param'][f'MVA_output']['edges']
+    if args['plot_param']['MVA_output']['active']:
 
-    inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
-        'label': f'{label}', 'path': targetdir + '/MVA/'}
+        hist_edges = args['plot_param'][f'MVA_output']['edges']
 
-    plots.density_MVA_wclass(**inputs)
+        inputs = {'y_pred': y_pred, 'y': y, 'weights': weights, 'hist_edges': hist_edges, \
+            'label': f'{label}', 'path': targetdir + '/MVA/'}
+
+        plots.density_MVA_wclass(**inputs)
 
     # ----------------------------------------------------------------
     ### COR 2D plots
+    if args['plot_param']['MVA_2D']['active']:
 
-    for i in range(100): # Loop over plot types
-        try:
-            var   = args['plot_param'][f'plot_COR[{i}]']['var']
-            edges = args['plot_param'][f'plot_COR[{i}]']['edges']
-        except:
-            break # No more this type of plots 
+        for i in range(100): # Loop over plot types
+            try:
+                var   = args['plot_param']['MVA_2D'][f'plot[{i}]']['var']
+                edges = args['plot_param']['MVA_2D'][f'plot[{i}]']['edges']
+            except:
+                break # No more this type of plots 
 
-        inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
-            'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
+            inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
+                'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
 
-        plots.density_COR_wclass(y=y, **inputs)
-        #plots.density_COR(**inputs) 
+            plots.density_COR_wclass(y=y, **inputs)
+            #plots.density_COR(**inputs) 
 
     return True
 
@@ -850,34 +877,36 @@ def plot_XYZ_multiple_models(targetdir, args):
     #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/__ALL__') + '/MVA')
 
     ### Plot all binned ROC curves
-    for i in range(100):
-        try:
-            var   = args['plot_param'][f'plot_ROC_binned[{i}]']['var']
-            edges = args['plot_param'][f'plot_ROC_binned[{i}]']['edges']
-        except:
-            return # No more plots 
+    if args['plot_param']['ROC_binned']['active']:
 
-        if len(var) == 1:
+        for i in range(100):
+            try:
+                var   = args['plot_param']['ROC_binned'][f'plot[{i}]']['var']
+                edges = args['plot_param']['ROC_binned'][f'plot[{i}]']['edges']
+            except:
+                return # No more plots 
 
-            # Over different bins
-            for b in range(len(edges)-1):
+            if len(var) == 1:
 
-                # Over different models
-                xy,legs = [],[]
-                for k in range(len(ROC_binned_mstats[i])):
-                    xy.append(ROC_binned_mstats[i][k][b])
+                # Over different bins
+                for b in range(len(edges)-1):
 
-                    # Take label for the legend
-                    ID    = args['active_models'][k]
-                    label = args['models'][ID]['label']
-                    legs.append(label)
+                    # Over different models
+                    xy,legs = [],[]
+                    for k in range(len(ROC_binned_mstats[i])):
+                        xy.append(ROC_binned_mstats[i][k][b])
 
-                ### ROC
-                title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned[{i}]_bin[{b}]')
+                        # Take label for the legend
+                        ID    = args['active_models'][k]
+                        label = args['models'][ID]['label']
+                        legs.append(label)
 
-                ### MVA (not implemented)
-                #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]')
+                    ### ROC
+                    title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
+                    plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned[{i}]_bin[{b}]')
+
+                    ### MVA (not implemented)
+                    #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
+                    #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]')
 
     return True

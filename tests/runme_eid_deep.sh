@@ -9,7 +9,7 @@ DATAPATH="./travis-stash/input/iceid"
 #DATAPATH="/vols/cms/icenet/data/2020Oct16"
 #DATAPATH="/home/user/imperial_new_trees/2020Oct16"
 
-mkdir ./figs/eid/$CONFIG -p # for output ascii dump
+mkdir "figs/eid/config_[$CONFIG]" -p # for output ascii dump
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

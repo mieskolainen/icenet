@@ -10,12 +10,12 @@ CONFIG="tune0_trk.yml"
 DATAPATH="/home/user/travis-stash/input/icehgcal/close_by_double_pion"
 TAG='close_by_double_pion'
 
-mkdir ./figs/hgcal_trk/$CONFIG -p # for output ascii dump
+mkdir "figs/hgcal_trk/config_[$CONFIG]" -p # for output ascii dump
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames
 
-python analysis/hgcal_trk_preprocess.py --runmode all $MAX --config $CONFIG --tag $TAG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
-python analysis/hgcal_trk_train.py      --runmode all $MAX --config $CONFIG --tag $TAG --datapath "none"    --datasets "none" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
-python analysis/hgcal_trk_eval.py       --runmode all $MAX --config $CONFIG --tag $TAG --datapath "none"    --datasets "none" #| tee "./figs/hgcal/$CONFIG/eval_output.txt"
+python analysis/hgcal_trk.py --runmode genesis $MAX --config $CONFIG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
+python analysis/hgcal_trk.py --runmode train   $MAX --config $CONFIG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/train_output.txt"
+python analysis/hgcal_trk.py --runmode eval    $MAX --config $CONFIG --datapath $DATAPATH --datasets "ntuples*.root" #| tee "./figs/hgcal/$CONFIG/eval_output.txt"

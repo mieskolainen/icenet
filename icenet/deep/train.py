@@ -354,7 +354,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
         trained model
     """
     print(__name__ + f'.train_torch_graph: Training {param["label"]} classifier ...')
-
+    
     # Construct model
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
@@ -527,14 +527,15 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             pickle.dump(model, open(filename + '.dat', 'wb'))
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
-
+        
     if not args['__raytune_running__']:
-
+        
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param["label"])
+        fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+            trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
-
+        
         ## Plot feature importance
         if plot_importance:
             
@@ -545,13 +546,6 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         ## Plot decision tree
         #xgboost.plot_tree(xgb_model, num_trees=2)
         #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
-        
-        ## Plot contours
-        if args['plot_param']['contours']['active']:
-            targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
-            plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-                X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
-
         return model
 
     return # No return value for raytune
@@ -683,7 +677,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-    fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param['xgb']['label'])
+    fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+                    trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
@@ -701,14 +696,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
     
     ## Plot decision tree
-    #xgboost.plot_tree(xgb_model, num_trees=2)
-    #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
-    
-    ### Plot contours
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{label}/')
-        plots.plot_decision_contour(lambda x : xgb_model.predict(x),
-            X = X_trn, y = Y_trn, labels = data.ids, targetdir = targetdir, matrix = 'xgboost')
+    # xgboost.plot_tree(xgb_model, num_trees=2)
+    # plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
     
     return model
 
@@ -732,13 +721,6 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     def func_predict(X):
         return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
-    ### Plot contours (TOO SLOW!)
-    """
-    if args['plot_param']['contours']['active']:
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/2D_contours/{param["label"]}/')
-        plots.plot_decision_contour(lambda x : func_predict(x),
-            X = data_trn.x, y = data_trn.y, labels = data.ids, targetdir = targetdir, matrix = 'numpy')
-    """
     return (b_pdfs, s_pdfs)
 
 

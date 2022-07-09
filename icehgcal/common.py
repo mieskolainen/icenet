@@ -7,6 +7,8 @@ import copy
 import math
 import argparse
 import pprint
+from pprint import pprint
+
 import psutil
 import os
 import datetime
@@ -32,8 +34,8 @@ from icenet.tools import prints
 from icenet.tools import process
 from icenet.tools import iceroot
 
+from icehgcal import preprocess
 from icehgcal import graphio
-
 
 from configs.hgcal.mctargets import *
 from configs.hgcal.mcfilter  import *
@@ -41,6 +43,68 @@ from configs.hgcal.mcfilter  import *
 from configs.hgcal.mvavars import *
 from configs.hgcal.cuts import *
 
+
+def read_data_tracklet(args, runmode):
+
+    # Create trackster data
+    cache_filename = f'{args["datadir"]}/data_{args["__hash__"]}.pkl'
+
+    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
+
+        if runmode != "genesis":
+            raise Exception(__name__ + f'.read_data_tracklet: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
+        
+        data      = preprocess.event_loop(files=args['root_files'], graph_param=args['graph_param'], maxevents=args['maxevents']) 
+        X         = graphio.parse_graph_data_trackster(data=data, graph_param=args['graph_param'], weights=None)
+
+        # Pickle to disk
+        with open(cache_filename, "wb") as fp:
+            pickle.dump([X, args], fp)
+            cprint(__name__ + f'.read_data_tracklet: Saved output to cache: "{cache_filename}"', 'yellow')
+
+    else:
+        with open(cache_filename, 'rb') as handle:
+            cprint(__name__ + f'.read_data_tracklet: Loading from cache: "{cache_filename}"', 'yellow')
+            X, genesis_args = pickle.load(handle)
+
+            cprint(__name__ + f'.read_data_tracklet: Cached data was generated with arguments:', 'yellow')
+            pprint(genesis_args)
+
+    return X
+
+def process_tracklet_data(args, X):
+
+    ### Edge weight re-weighting
+    if args['reweight']:
+        if args['reweight_param']['equal_frac']:
+
+            print(__name__ + f'.process_tracklet_data: Computing binary edge ratio balancing re-weights ...')
+
+            # Count number of false/true edges
+            num = [0,0]
+            for i in tqdm(range(len(X))):
+                for j in range(len(X[i].y)):
+                    num[X[i].y[j]] += 1
+
+            # Re-weight
+            EQ = num[0]/num[1] if (args['reweight_param']['reference_class'] == 0) else num[1]/num[0]
+
+            print(__name__ + f'.process_tracklet_data: EQ = {EQ}')
+
+            # Apply weights
+            for i in tqdm(range(len(X))):
+                for j in range(len(X[i].y)):
+                    if X[i].y[j] != args['reweight_param']['reference_class']:
+                        X[i].w[j] *= EQ
+    
+    ### Split
+    X_trn, X_val, X_tst = io.split_data_simple(X=X, frac=args['frac'])
+    data = {}
+    data['trn'] = {'data': None, 'data_kin': None, 'data_deps': None, 'data_tensor': None, 'data_graph': X_trn}
+    data['val'] = {'data': None, 'data_kin': None, 'data_deps': None, 'data_tensor': None, 'data_graph': X_val}
+    data['tst'] = {'data': None, 'data_kin': None, 'data_deps': None, 'data_tensor': None, 'data_graph': X_tst}
+
+    return data
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
@@ -173,7 +237,7 @@ def splitfactor(x, y, w, ids, args):
     """
     # -------------------------------------------------------------------------
     ### DeepSets representation
-    data_deps = None
+    data_deps   = None
     
     # -------------------------------------------------------------------------
     ### Tensor representation
@@ -187,8 +251,8 @@ def splitfactor(x, y, w, ids, args):
     data_graph = None
     
     features   = globals()[args['inputvar']]
-    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-        features=features, global_on=args['graph_param']['global_on'], coord=args['graph_param']['coord'])
+    data_graph = graphio.parse_graph_data_candidate(X=data.x, Y=data.y, weights=data.w, ids=data.ids,
+        features=features, graph_param=args['graph_param'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out

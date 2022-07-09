@@ -85,8 +85,8 @@ def main() :
     prints.print_variables(X, VARS)    
     # =======================================================================
     
-    #targetdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
-    #fig,ax    = plots.plot_correlations(X=X, netvars=VARS, targetdir=targetdir)    
+    targetdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
+    fig,ax    = plots.plot_correlations(X=X, ids=VARS, targetdir=targetdir)    
     
     
     # ------------------------------------------------------------------------

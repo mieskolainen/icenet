@@ -132,3 +132,39 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
             n += 1
 
     return edge_attr
+
+
+def count_simple_edges(num_nodes, directed, self_loops):
+    """
+    Count number of edges in a (semi)-fully connected adjacency matrix
+    """
+    if   directed == False and self_loops == False:
+        return num_nodes**2 - num_nodes
+    elif directed == False and self_loops == True:
+        return num_nodes**2
+    elif directed == True  and self_loops == False:
+        return (num_nodes**2 - num_nodes) / 2
+    elif directed == True  and self_loops == True:
+        return (num_nodes**2 - num_nodes) / 2 + num_nodes
+
+@numba.njit
+def get_simple_edge_index(num_nodes, num_edges, directed, self_loops):
+
+    # Graph connectivity: (~ sparse adjacency matrix)
+    edge_index = np.zeros((2, num_edges))
+
+    n = 0
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+
+            if (i == j) and (self_loops == False):
+                continue
+
+            if (i < j)  and (directed == True):
+                continue
+
+            edge_index[0,n] = i
+            edge_index[1,n] = j
+            n += 1
+    
+    return edge_index
