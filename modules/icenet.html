@@ -44,6 +44,12 @@
 <section id="module-icenet.algo.analytic">
 <span id="icenet-algo-analytic"></span><h3>icenet.algo.analytic<a class="headerlink" href="#module-icenet.algo.analytic" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.algo.analytic.count_simple_edges">
+<span class="sig-name descname"><span class="pre">count_simple_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_loops</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#count_simple_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.count_simple_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count number of edges in a (semi)-fully connected adjacency matrix</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.algo.analytic.fox_wolfram_boost_inv">
 <span class="sig-name descname"><span class="pre">fox_wolfram_boost_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#fox_wolfram_boost_inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.fox_wolfram_boost_inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>arxiv.org/pdf/1508.03144, (Formula 5.6)</p>
@@ -67,6 +73,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.algo.analytic.get_Lorentz_edge_features">
 <span class="sig-name descname"><span class="pre">get_Lorentz_edge_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p4vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#get_Lorentz_edge_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.get_Lorentz_edge_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.algo.analytic.get_simple_edge_index">
+<span class="sig-name descname"><span class="pre">get_simple_edge_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_loops</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#get_simple_edge_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.get_simple_edge_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -2771,7 +2782,7 @@ newvars:     Chosen variables</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.split_data_simple">
 <span class="sig-name descname"><span class="pre">split_data_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data_simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data_simple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Split machine learning data into [A = train &amp; validation] + [B = test] sets</p>
+<dd><p>Split machine learning data into train, validation, test sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
