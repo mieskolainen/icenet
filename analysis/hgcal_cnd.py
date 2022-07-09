@@ -1,4 +1,4 @@
-# HGCAL [TRAINING] steering code
+# HGCAL "Candidate level study" steering code
 #
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk

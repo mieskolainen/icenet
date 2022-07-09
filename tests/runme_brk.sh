@@ -5,7 +5,6 @@
 # Run with: source runme.sh
 
 CONFIG="tune0.yml"
-
 DATAPATH="travis-stash/input/icebrk"
 
 mkdir "figs/brk/config_[$CONFIG]" -p # for output ascii dump

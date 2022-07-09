@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 
 @numba.jit
-def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, thresh=0.1, directed=False):
+def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, directed, self_loops, thresh=0.1):
     """
     
     Logic based on (but refined):
@@ -97,7 +97,7 @@ def create_trackster_data(files):
 
             # Associations
             associations.append(ass.arrays(["tsCLUE3D_recoToSim_CP", "tsCLUE3D_recoToSim_CP_score"]))
-
+            
             # Links
             graph.append(gra.arrays(["linked_inners"]))
 
@@ -112,7 +112,14 @@ def create_trackster_data(files):
     return {'df_calo': df_calo, 'df_track': df_track, 'df_ass': df_ass, 'df_gra': df_gra}
 
 
-def event_loop(files, maxevents=int(1E9), directed=False):
+def event_loop(files, graph_param, maxevents=int(1E9)):
+
+    #global_on  = graph_param['global_on']
+    #coord      = graph_param['coord']
+    directed   = graph_param['directed']
+    self_loops = graph_param['self_loops']
+
+    # --------------------------------------------
 
     # Create trackster data
     data  = create_trackster_data(files=files)
@@ -146,7 +153,7 @@ def event_loop(files, maxevents=int(1E9), directed=False):
         
         # Compute edge data and labels
         compute_edges(trk_data=trk_data, ass_data=ass_data, gra_data=gra_data,
-            node=node_, edge=edge_index_, edge_labels=edge_labels_, directed=directed)
+            node=node_, edge=edge_index_, edge_labels=edge_labels_, directed=directed, self_loops=self_loops)
         
         # Save event data
         x.append(x_)

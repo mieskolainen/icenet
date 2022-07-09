@@ -7,8 +7,8 @@
 # --------------------
 ## Process input
 
-DATAPATH="/home/user/travis-stash/input/icedqcd"
 CONFIG="tune0.yml"
+DATAPATH="/home/user/travis-stash/input/icedqcd"
 CMD="python analysis/dqcd.py"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

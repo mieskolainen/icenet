@@ -288,35 +288,26 @@ class IceXYW:
 
 
 def split_data_simple(X, frac):
-    """ Split machine learning data into [A = train & validation] + [B = test] sets
+    """ Split machine learning data into train, validation, test sets
     
     Args:
         X:         data matrix
         frac:      split fraction
     """
 
-    ### Permute events to have random mixing between classes (a must!)
-    #randi = np.random.permutation(len(X))
-    #X = X[randi]
-    # --------------------------------------------------------------------
-
     N     = len(X)
     N_A   = round(N * frac)
     N_B   = N - N_A
     
-    N_trn = round(N_A * frac)
-    N_val = N_A - N_trn
-    N_tst = N_B
+    N_trn = N_A
+    N_val = round(N_B / 2)
+    N_tst = N - N_trn - N_val
 
-    # A. Train
+    # Split
     X_trn = X[0:N_trn]
-
-    # A. Validation
     X_val = X[N_trn:N_trn + N_val]
-
-    # B. Test
-    X_tst = X[N - N_tst:N]
-
+    X_tst = X[N - N_tst:]
+    
     return X_trn, X_val, X_tst
 
 

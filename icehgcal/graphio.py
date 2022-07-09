@@ -26,26 +26,29 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
+def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e9)):
     """
     TRACKSTER LEVEL
     
     Parse graph data to torch geometric format
     
     Args:
-        data: awkward arra
+        data: awkward array
     """
+
+    global_on  = graph_param['global_on']
+    coord      = graph_param['coord']
+    directed   = graph_param['directed']
+    self_loops = graph_param['self_loops']
+
+    # --------------------------------------------------------------------
 
     event = 0
     print(data['x'][0])
     #print(data['edge_index'])
     #print(data['edge_labels'])
 
-    nevents = len(data['x'])
-    print(f'nevents = {nevents}')
-
-    nevents = np.min([nevents, maxevents])
-
+    nevents = np.min([len(data['x']), maxevents])
     graph_dataset = []
 
     ## For all events
@@ -73,14 +76,14 @@ def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
 
 
         # --------------------------------------------
-        ## ** Construct edge indices ** (TBD: how about self-connections and (un)-direction?)
+        ## ** Construct edge indices **
 
         edge_index = data['edge_index'][ev]
         
         # size: 2 x num_edges
         edge_index = torch.tensor(np.array(edge_index, dtype=int), dtype=torch.long)
         # --------------------------------------------
-
+        
         # --------------------------------------------
         ## ** Construct edge labels ** (training truth)
 
@@ -104,7 +107,7 @@ def parse_graph_data_trackster(data, weights=None, maxevents=int(1e9)):
     return graph_dataset
 
 
-def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):
+def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):
     """
     EVENT LEVEL (PROCESSING CANDIDATES)
     
@@ -122,18 +125,22 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         Array of pytorch-geometric Data objects
     """
 
-    global_on = graph_param['global_on']
-    coord     = graph_param['coord']
-    
+    global_on  = graph_param['global_on']
+    coord      = graph_param['coord']
+    directed   = graph_param['directed']
+    self_loops = graph_param['self_loops']
+
+    # --------------------------------------------------------------------
+
     num_node_features   = 4
     num_edge_features   = 4
     num_global_features = 0
     num_classes         = 2
     
     num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
-    dataset  = []
+    dataset    = []
     
-    print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
+    print(__name__ + f'.parse_graph_data_candidate: Converting {num_events} events into graphs ...')
     zerovec = vec4()
 
     # Collect feature indices
@@ -156,14 +163,10 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
     # Loop over events
     for i in tqdm(range(num_events)):
 
-        num_nodes = 1 + len(X[i, ind__candidate_energy]) # + 1 virtual node
-        num_edges = num_nodes**2                         # include self-connections
-        
-        # Construct 4-vector for the track, with pion mass
-        #p4track = vec4()
-        #p4track.setPtEtaPhiM(X[i, ind__trk_pt], X[i, ind__trk_eta], X[i, ind__trk_phi], 0.13957)
+        num_nodes = 1 + len(X[i, ind__candidate_energy]) # +1 for virtual node (empty data)
+        num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
 
-        # Construct 4-vector for each HGCAL candidate [@@ JAGGED @@]
+        # Construct 4-vector for each HGCAL candidate
         p4vec = []
         N_c = len(X[i, ind__candidate_energy])
         
@@ -178,7 +181,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
                 v = vec4()
                 v.setPxPyPzE(px, py, pz, energy)
 
-                p4vec.append( v )
+                p4vec.append(v)
         
         # Empty HGCAL cluster information
         else:
@@ -204,7 +207,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         #u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=None, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
@@ -212,7 +215,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
         
         ## Construct edge connectivity
-        edge_index = get_edge_index(num_nodes=num_nodes, num_edges=num_edges)
+        edge_index = analytic.get_simple_edge_index(num_nodes=num_nodes, num_edges=num_edges, self_loops=self_loops, directed=directed)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
 
         # Add this event
@@ -221,13 +224,12 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
-    print(__name__ + f'.parse_graph_data: Empty HGCAL cluster events: {num_empty_HGCAL} / {num_events} = {num_empty_HGCAL/num_events:0.5f} (using only global data u)')        
+    print(__name__ + f'.parse_graph_data_candidate: Empty HGCAL events: {num_empty_HGCAL} / {num_events} = {num_empty_HGCAL/num_events:0.5f} (using only global data u)')        
     
     return dataset
 
 
-
-def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coord):
+def get_node_features(p4vec, num_nodes, num_node_features, coord):
 
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features))
@@ -247,36 +249,6 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
                 x[i,2] = p4vec[i-1].pz
                 x[i,3] = p4vec[i-1].e
             else:
-                raise Exception(__name__ + f'parse_graph_data: Unknown coordinate representation')
-            
-            """
-            # other features
-            x[i,4] = p4track.deltaR(p4vec[i-1])
+                raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
 
-            try:
-                x[i,5] = X[ids.index('candidate_nhit')][i-1]
-            except:
-                continue
-                # Not able to read it (empty cluster data)
-            """
-            
     return x
-
-
-@numba.njit
-def get_edge_index(num_nodes, num_edges):
-
-    # Graph connectivity: (~ sparse adjacency matrix)
-    edge_index = np.zeros((2, num_edges))
-
-    n = 0
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-
-            # Full connectivity
-            edge_index[0,n] = i
-            edge_index[1,n] = j
-            n += 1
-    
-    return edge_index
-

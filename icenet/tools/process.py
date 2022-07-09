@@ -207,7 +207,7 @@ def read_data(args, func_loader, runmode):
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
-
+        
         if runmode != "genesis":
             raise Exception(__name__ + f'.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
 
@@ -225,15 +225,15 @@ def read_data(args, func_loader, runmode):
                     W = np.concatenate((W, W_), axis=0)
 
         with open(cache_filename, 'wb') as handle:
-            print(__name__ + f'.read_data: saving to cache: "{cache_filename}"')
+            cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
             pickle.dump([X, Y, W, ids, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open(cache_filename, 'rb') as handle:
-            print(__name__ + f'.read_data: loading from cache: "{cache_filename}"')
+            cprint(__name__ + f'.read_data: Loading from cache: "{cache_filename}"', 'yellow')
             X, Y, W, ids, genesis_args = pickle.load(handle)
 
-            print(__name__ + f'.read_data: cached data was generated with arguments:')
+            cprint(__name__ + f'.read_data: Cached data was generated with arguments:', 'yellow')
             pprint(genesis_args)
 
     return X, Y, W, ids

@@ -40,8 +40,8 @@ mva_param: &MVA_INPUT_PARAM
     global_on: False
     self_loops: True
     directed: False
-    coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
-
+    coord: 'pxpypze'                  # 'ptetaphim', 'pxpypze'
+  
   # # ** Image tensor object construction **
   # image_param:
 

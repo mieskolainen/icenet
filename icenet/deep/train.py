@@ -354,7 +354,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
         trained model
     """
     print(__name__ + f'.train_torch_graph: Training {param["label"]} classifier ...')
-
+    
     # Construct model
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
@@ -527,14 +527,15 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             pickle.dump(model, open(filename + '.dat', 'wb'))
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
-
+        
     if not args['__raytune_running__']:
-
+        
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param["label"])
+        fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+            trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
-
+        
         ## Plot feature importance
         if plot_importance:
             
@@ -676,7 +677,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-    fig,ax   = plots.plot_train_evolution(trn_losses, trn_aucs, val_aucs, param['xgb']['label'])
+    fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+                    trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
