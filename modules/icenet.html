@@ -1728,6 +1728,23 @@ returns the loss. Optional for most optimizers.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.ak2numpy">
+<span class="sig-name descname"><span class="pre">ak2numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#ak2numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.ak2numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unzip awkward array to numpy array per column (awkward Record)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – awkward array</p></li>
+<li><p><strong>fields</strong> – record field names to extract</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with columns ordered as ‘fields’ parameter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.arrays2matrix">
 <span class="sig-name descname"><span class="pre">arrays2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_binedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_binedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#arrays2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.arrays2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Array representation summed to matrix.</p>
@@ -1886,21 +1903,22 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.jagged2matrix">
-<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ak'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a “jagged” event container to a matrix (rows ~ event, columns ~ variables)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arr</strong> – Awkward array type input for N events</p></li>
-<li><p><strong>scalar_vars</strong> – Scalar variables to pick (strings for ‘ak’ and indices for ‘np’)</p></li>
-<li><p><strong>jagged_vars</strong> – Jagged variables to pick (as above)</p></li>
+<li><p><strong>scalar_vars</strong> – Scalar variables to pick (list of strings)</p></li>
+<li><p><strong>jagged_vars</strong> – Jagged variables to pick (list of strings)</p></li>
 <li><p><strong>jagged_maxdim</strong> – Maximum dimension per jagged variable (integer array)</p></li>
 <li><p><strong>library</strong> – Input type ‘ak’ or ‘np’</p></li>
 <li><p><strong>null_value</strong> – Default</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</p>
+<dd class="field-even"><p>Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
+jvname:        Jagged variable rootnames (e.g. [sv_chi2, jet_px, jet_py] gives [sv, jet])</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>mat</p>
@@ -1938,7 +1956,7 @@ useful e.g. for DeepSets and similar neural architectures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> – Input matrix (2-dim) (N x [MD])</p></li>
+<li><p><strong>X</strong> – Numpy input matrix (2-dim) (N x [MD])</p></li>
 <li><p><strong>M</strong> – Number of set elements</p></li>
 <li><p><strong>D</strong> – Feature dimension</p></li>
 <li><p><strong>order</strong> – Reshape direction</p></li>
@@ -2256,7 +2274,7 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>X, Y, W, ids</p>
+<dd class="field-even"><p>X, Y, W, ids   (awkward array format)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2736,7 +2754,7 @@ and values the memory used by the GPU.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – IceTriplet / IceXYW type object</p></li>
+<li><p><strong>data</strong> – IceXYW type object</p></li>
 <li><p><strong>set_of_vars</strong> – Variables to pick</p></li>
 </ul>
 </dd>
@@ -2763,8 +2781,8 @@ newvars:     Chosen variables</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.split_data">
-<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Split machine learning data into [A = train &amp; validation] + [B = test] sets</p>
+<span class="sig-name descname"><span class="pre">split_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split machine learning data into train, validation, test sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2781,7 +2799,7 @@ newvars:     Chosen variables</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.split_data_simple">
-<span class="sig-name descname"><span class="pre">split_data_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data_simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data_simple" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split_data_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#split_data_simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.split_data_simple" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split machine learning data into train, validation, test sets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3062,18 +3080,19 @@ so we see that also integrated class fractions are equalized (or not)!</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.plots.plot_selection">
-<span class="sig-name descname"><span class="pre">plot_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_selection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot selection before / after type histograms against all chosen variables</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – data array (N events x D dimensions)</p></li>
-<li><p><strong>ind</strong> – boolean selection indices (N)</p></li>
+<li><p><strong>mask</strong> – boolean selection indices (N)</p></li>
 <li><p><strong>ids</strong> – variable string array (D)</p></li>
 <li><p><strong>plotdir</strong> – plotting directory</p></li>
 <li><p><strong>label</strong> – a string label</p></li>
 <li><p><strong>varlist</strong> – a list of variables to be plotted (from ids)</p></li>
 <li><p><strong>density</strong> – normalize all histograms to unit density</p></li>
+<li><p><strong>library</strong> – ‘np’ or ‘ak’</p></li>
 </ul>
 </dd>
 </dl>

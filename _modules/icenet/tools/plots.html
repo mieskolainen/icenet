@@ -39,6 +39,7 @@
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -103,18 +104,19 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.bin_processor: Unknown binning description in </span><span class="si">{</span><span class="n">bindef</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="plot_selection"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_selection">[docs]</a><span class="k">def</span> <span class="nf">plot_selection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">plotdir</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_selection"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_selection">[docs]</a><span class="k">def</span> <span class="nf">plot_selection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">plotdir</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot selection before / after type histograms against all chosen variables</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        X       : data array (N events x D dimensions)</span>
-<span class="sd">        ind     : boolean selection indices (N)</span>
+<span class="sd">        mask    : boolean selection indices (N)</span>
 <span class="sd">        ids     : variable string array (D)</span>
 <span class="sd">        plotdir : plotting directory</span>
 <span class="sd">        label   : a string label</span>
 <span class="sd">        varlist : a list of variables to be plotted (from ids)</span>
 <span class="sd">        density : normalize all histograms to unit density</span>
+<span class="sd">        library : &#39;np&#39; or &#39;ak&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">varlist</span><span class="p">):</span>
@@ -123,8 +125,17 @@
             <span class="k">continue</span>
 
         <span class="c1"># Histogram (autobinning)</span>
-        <span class="n">counts1</span><span class="p">,</span> <span class="n">errs1</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)]),</span>   <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
-        <span class="n">counts2</span><span class="p">,</span> <span class="n">errs2</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)]),</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">library</span> <span class="o">==</span> <span class="s1">&#39;np&#39;</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)])</span>
+            <span class="n">after</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)])</span>
+        <span class="k">elif</span> <span class="n">library</span> <span class="o">==</span> <span class="s1">&#39;ak&#39;</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">[:][</span><span class="n">var</span><span class="p">])</span>
+            <span class="n">after</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="n">var</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Unknown library: </span><span class="si">{</span><span class="n">library</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">counts1</span><span class="p">,</span> <span class="n">errs1</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
+        <span class="n">counts2</span><span class="p">,</span> <span class="n">errs2</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">after</span><span class="p">,</span>  <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
         
         <span class="c1"># Plot</span>
         <span class="n">obs_x</span> <span class="o">=</span> <span class="p">{</span>
