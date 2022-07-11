@@ -6,12 +6,14 @@
 import argparse
 import yaml
 import numpy as np
+import awkward as ak
+import torch
+
 from termcolor import colored, cprint
 import os
 import copy
 import sys
 import pickle
-import torch
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
@@ -50,9 +52,11 @@ def read_cli():
     parser.add_argument("--tag",             type=str,  default='tag0')
 
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--use_cache",       type=int,  default=1)
     parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--use_conditional", type=bool, default=argparse.SUPPRESS)
     parser.add_argument("--modeltag",        type=str,  default=None)
+
 
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -163,7 +167,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
-    args['__use_cache__']       = True
+    args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
 
     # -------------------------------------------------------------------
@@ -219,10 +223,15 @@ def read_data(args, func_loader, runmode):
             if k == 0:
                 X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
             else:
-                X = np.concatenate((X, X_), axis=0)
-                Y = np.concatenate((Y, Y_), axis=0)
+                if   isinstance(X, np.ndarray):
+                    concat = np.concatenate
+                elif isinstance(X, ak.Array):
+                    concat = ak.concatenate
+                
+                X = concat((X, X_), axis=0)
+                Y = concat((Y, Y_), axis=0)
                 if W is not None:
-                    W = np.concatenate((W, W_), axis=0)
+                    W = concat((W, W_), axis=0)
 
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
@@ -245,17 +254,23 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
     # Pop out conditional variables if they exist
     if args['use_conditional'] == False:
 
-        index = []
+        index  = []
+        idxvar = []
         for i in range(len(ids)):
             if '__model' not in ids[i]:
                 index.append(i)
+                idxvar.append(ids[i])
             else:
-                print(__name__ + f'.process_data: Removing conditional variable: <{ids[i]}>')
-        
-        X   = X[:, np.array(index, dtype=int)]
+                print(__name__ + f'.process_data: Removing conditional variable "{ids[i]}"')
+
+        if   isinstance(X, np.ndarray):
+            X = X[:,np.array(index, dtype=int)]
+        elif isinstance(X, ak.Array):
+            X = X[idxvar]
+
         ids = [ids[j] for j in index]
     # ----------------------------------------------------------
-
+    
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
@@ -276,6 +291,7 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
             val.w,_    = reweight.compute_ND_reweights(pdf=pdf,  x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
             pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
         
+        # Compute different data representations
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
 
@@ -291,7 +307,8 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
-        
+
+        # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
     return output

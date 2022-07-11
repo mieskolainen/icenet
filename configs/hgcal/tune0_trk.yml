@@ -40,7 +40,7 @@ mva_param: &MVA_INPUT_PARAM
   #   eta_bins: []
   #   phi_bins: []
 
-  frac: 0.9                           # Train/validate/test split fraction
+  frac: 0.9                           # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:

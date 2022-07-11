@@ -5,6 +5,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import awkward as ak
 import torch
 import xgboost
 import os
@@ -69,18 +70,19 @@ def binengine(bindef, x):
         raise Exception(__name__ + f'.bin_processor: Unknown binning description in {bindef}')
 
 
-def plot_selection(X, ind, ids, plotdir, label, varlist, density=True):
+def plot_selection(X, mask, ids, plotdir, label, varlist, density=True, library='np'):
     """
     Plot selection before / after type histograms against all chosen variables
 
     Args:
         X       : data array (N events x D dimensions)
-        ind     : boolean selection indices (N)
+        mask    : boolean selection indices (N)
         ids     : variable string array (D)
         plotdir : plotting directory
         label   : a string label
         varlist : a list of variables to be plotted (from ids)
         density : normalize all histograms to unit density
+        library : 'np' or 'ak'
     """
 
     for var in tqdm(varlist):
@@ -89,8 +91,17 @@ def plot_selection(X, ind, ids, plotdir, label, varlist, density=True):
             continue
 
         # Histogram (autobinning)
-        counts1, errs1, bins, cbins = iceplot.hist(np.asarray(X[:, ids.index(var)]),   bins=100,  density=density)
-        counts2, errs2, bins, cbins = iceplot.hist(np.asarray(X[ind, ids.index(var)]), bins=bins, density=density)
+        if library == 'np':
+            before = np.asarray(X[:, ids.index(var)])
+            after  = np.asarray(X[mask, ids.index(var)])
+        elif library == 'ak':
+            before = ak.to_numpy(X[:][var])
+            after  = ak.to_numpy(X[mask][var])
+        else:
+            raise Error(__name__ + f'.Unknown library: {library}')
+
+        counts1, errs1, bins, cbins = iceplot.hist(before, bins=100,  density=density)
+        counts2, errs2, bins, cbins = iceplot.hist(after,  bins=bins, density=density)
         
         # Plot
         obs_x = {

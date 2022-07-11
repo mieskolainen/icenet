@@ -29,7 +29,7 @@ def test_jagged2matrix():
 	library = 'np'
 	max_num_elements = 100
 
-	X = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, entry_stop=max_num_elements, ids=ids, library=library)
+	X,ids = iceroot.load_tree(rootfile=f'{path}/{rootfile}', tree=key, entry_stop=max_num_elements, ids=ids, library=library)
 	
 	#pprint.pprint(X.keys())
 	#print(len(X))
@@ -38,7 +38,7 @@ def test_jagged2matrix():
 	scalar_vars   = ['nsv', 'nMuon', 'nJet']
 	jagged_vars   = ['sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_chi2']
 	jagged_maxdim = [3,3,3,3]
-
+	
 	mat = jagged2matrix(X, scalar_vars=scalar_vars, jagged_vars=jagged_vars, jagged_maxdim=jagged_maxdim)
 	print(mat)
 

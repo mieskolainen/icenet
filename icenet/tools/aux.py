@@ -5,6 +5,8 @@
 
 import math
 import numpy as np
+import awkward as ak
+
 import numba
 import copy
 from tqdm import tqdm
@@ -32,21 +34,37 @@ def parse_vars(items):
     return d
 
 
+def ak2numpy(x, fields, null_value=float(999.0)):
+    """
+    Unzip awkward array to numpy array per column (awkward Record)
+    
+    Args:
+        x:      awkward array
+        fields: record field names to extract
+    Returns:
+        numpy array with columns ordered as 'fields' parameter
+    """
+    out = null_value * np.ones((len(x), len(fields)), dtype=float)
+    for i in range(len(fields)):
+        out[:,i] = ak.flatten(ak.unzip(x[fields[i]]))
+    return out
+
 #@numba.njit
-def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(0.0), library='ak'):
+def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(999.0)):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
     Args:
         arr:           Awkward array type input for N events
-        scalar_vars:   Scalar variables to pick (strings for 'ak' and indices for 'np')
-        jagged_vars:   Jagged variables to pick (as above)
+        scalar_vars:   Scalar variables to pick (list of strings)
+        jagged_vars:   Jagged variables to pick (list of strings)
         jagged_maxdim: Maximum dimension per jagged variable (integer array)
         library:       Input type 'ak' or 'np'
         null_value:    Default
     
     Returns:
         mat:           Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
+        jvname:        Jagged variable rootnames (e.g. [sv_chi2, jet_px, jet_py] gives [sv, jet])
     """
 
     jagged_maxdim = np.asarray(jagged_maxdim, dtype=int)
@@ -59,46 +77,42 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
     
     print(__name__ + f'.jagged2matrix: Creating a matrix with dimension [{N} x {D}]')
 
-    mat = null_value * np.ones((N,D), dtype=float)
-
+    # Pre-processing of jagged vars
+    jvname = []
+    for j in range(len(jagged_vars)):
+        # Awkward groups jagged variables, e.g. 'sv_x' to sv.x
+        jvname.append(jagged_vars[j].split('_'))
+    
     # Loop over events
-    for i in range(N):
+    mat = null_value * np.ones((N,D), dtype=float)
+    
+    for ev in tqdm(range(N)):
 
         # First scalar vars
         k = 0
         for j in range(len(scalar_vars)):
-
-            if   library == 'ak':
-                x = arr[scalar_vars[j]][i]
-            elif library == 'np':
-                x = arr[i, scalar_vars[j]]
-
+            x = ak.to_numpy(arr[ev][scalar_vars[j]])
             if x is not []: # Check for empty
-                mat[i,k] = x
+                mat[ev,k] = x
             k += 1
 
         # Jagged vars
         for j in range(len(jagged_vars)):
 
-            d = jagged_maxdim[j]
-
-            if   library == 'ak':
-                x = arr[jagged_vars[j]][i,:]
-            elif library == 'np':
-                x = arr[i, jagged_vars[j]]
-
+            x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
+            d  = jagged_maxdim[j]
             d_this = len(x)
+
             if d_this > 0: # Check for empty
-
                 if d_this > d: # Over the maximum allowed
-                    mat[i, k:k+d] = x[0:d]
+                    mat[ev, k:k+d]      = x[0:d]
                 else:          # Less or equal than maximum allowed
-                    mat[i, k:k+d_this] = x
-
+                    mat[ev, k:k+d_this] = x
+            
             # Increase block counter
             k += d
 
-    return mat
+    return ak.Array(mat), jvname
 
 
 def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
@@ -259,10 +273,10 @@ def longvec2matrix(X, M, D, order='F'):
     useful e.g. for DeepSets and similar neural architectures.
     
     Args:
-        X:     Input matrix (2-dim) (N x [MD])
-        M:     Number of set elements
-        D:     Feature dimension
-        order: Reshape direction
+        X:        Numpy input matrix (2-dim) (N x [MD])
+        M:        Number of set elements
+        D:        Feature dimension
+        order:    Reshape direction
     
     Returns:
         Y:     Output matrix (3-dim) (N x M x D)

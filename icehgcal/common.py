@@ -186,23 +186,23 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids)
+    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids, library='np')
     
     """
     # @@ Filtering done here @@
-    ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
+    mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(mask)} events ', 'green')
     
-    X   = X[ind]
+    X   = X[mask]
     prints.printbar()
     
     # @@ Observable cut selections done here @@
-    ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
+    mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(mask)} events \n", 'green')
 
-    X   = X[ind]
+    X   = X[mask]
     io.showmem()
     prints.printbar()
     """

@@ -45,29 +45,68 @@ MODEL_VARS = [
 MVA_SCALAR_VARS += MODEL_VARS
 # -----------------------------------------
 
+MVA_CPF_VARS = [
+
+  'ncpf',
+
+  'cpf_px',
+  'cpf_py',
+  'cpf_pz',
+
+  'cpf_trackSip2dVal',
+  'cpf_trackSip2dSig',
+
+  'cpf_trackSip3dVal',
+  'cpf_trackSip3dSig',
+  
+  'cpf_matchedSV',
+
+  'cpf_jetIdx'
+]
+
+MVA_NPF_VARS = [
+  
+  'nnpf',
+
+  'npf_px',
+  'npf_py',
+  'npf_pz',
+
+  'npf_jetIdx'
+]
+
+MVA_PF_VARS = MVA_CPF_VARS + MVA_NPF_VARS
+
+# -----------------------------------------
+
 MVA_JAGGED_VARS = [
   
-  'Jet_chEmEF',
-  'Jet_chHEF',
   'Jet_eta',
-  'Jet_neEmEF',
-  'Jet_neHEF',
   'Jet_phi',
   'Jet_pt',
+  'Jet_mass',
+
+  'Jet_chEmEF',
+  'Jet_chHEF',
+  'Jet_neEmEF',
+  'Jet_neHEF',
   'Jet_nMuons',
 
-  'Muon_eta'
+  'Muon_eta',
   'Muon_phi',
   'Muon_pt',
+  'Muon_dxy',
+  'Muon_dz',
+  'Muon_charge',
 
+  'sv_deta',
+  'sv_dphi',
   'sv_dxy',
   'sv_dxysig',
-  'sv_dphi',
-  'sv_deta',
   'sv_deltaR',
-  'sv_chi2',
   'sv_d3d',
   'sv_d3dsig',
+  'sv_chi2',
   'sv_ntracks',
   'sv_ndof'
 ]
@@ -116,6 +155,7 @@ LOAD_VARS = [
 LOAD_VARS += KINEMATIC_VARS
 LOAD_VARS += MVA_SCALAR_VARS
 LOAD_VARS += MVA_JAGGED_VARS
+LOAD_VARS += MVA_PF_VARS
 
 LOAD_VARS += PLOT_VARS
 LOAD_VARS += TRIGGER_VARS

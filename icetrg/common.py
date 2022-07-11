@@ -77,13 +77,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
     X = np.concatenate((X_MC_e1, X_MC_e2, X_DATA), axis=0)
     Y = np.concatenate((Y_MC_e1, Y_MC_e2, Y_DATA), axis=0)
-
-
+    
     # ** Crucial -- randomize order to avoid problems with other functions **
-    arr  = np.arange(X.shape[0])
-    rind = np.random.shuffle(arr)
-
-    X    = X[rind, ...].squeeze() # Squeeze removes additional [] dimension
+    rind = np.random.permutation(len(X))
+    X    = X[rind].squeeze() # Squeeze removes additional [] dimension
     Y    = Y[rind].squeeze()
     
     # =================================================================
@@ -108,20 +105,20 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
     X,ids  = iceroot.events_to_jagged_numpy(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
 
     # @@ Filtering done here @@
-    ind = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS)
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(ind)} events ', 'green')
+    mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS)
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(mask)} events ', 'green')
     
-    X   = X[ind]
+    X   = X[mask]
     prints.printbar()
     
     
     # @@ Observable cut selections done here @@
-    ind = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, ind=ind, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(ind)} events \n", 'green')
+    mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(mask)} events \n", 'green')
 
-    X   = X[ind]
+    X   = X[mask]
     io.showmem()
     prints.printbar()
 

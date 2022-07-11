@@ -4,6 +4,7 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
+import awkward as ak
 import numpy as np
 import numba
 
@@ -12,7 +13,7 @@ from icenet.tools import stx
 
 def filter_nofilter(X, ids, isMC, xcorr_flow=False):
     """ All pass """
-    return np.ones(X.shape[0], dtype=np.bool_) # Note datatype np.bool_
+    return ak.Array(np.ones(X.shape[0], dtype=np.bool_)) # Note datatype np.bool_
 
 
 def filter_standard(X, ids, isMC, xcorr_flow=False):
@@ -24,15 +25,24 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
         isMC : MC or not
     
     Returns:
-    	ind  : Passing indices
+        Passing indices mask (N)
     """
 
-    cutlist = ['HLT_Mu9_IP6_part0 == 1 OR HLT_Mu9_IP6_part1 == 1 OR HLT_Mu9_IP6_part2 == 1 OR HLT_Mu9_IP6_part3 == 1 OR HLT_Mu9_IP6_part4 == 1']
-    
+    # Awkward type
+    mask    = (X['HLT_Mu9_IP6_part0'] == 1) | \
+              (X['HLT_Mu9_IP6_part1'] == 1) | \
+              (X['HLT_Mu9_IP6_part2'] == 1) | \
+              (X['HLT_Mu9_IP6_part3'] == 1) | \
+              (X['HLT_Mu9_IP6_part4'] == 1)
+
+    mask    = ak.to_numpy(mask)
+
+    # numpy type
+    # cutlist = ['HLT_Mu9_IP6_part0 == 1 OR HLT_Mu9_IP6_part1 == 1 OR HLT_Mu9_IP6_part2 == 1 OR HLT_Mu9_IP6_part3 == 1 OR HLT_Mu9_IP6_part4 == 1']    
     # Construct and apply
-    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
-    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    # cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    # mask         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
-    return ind
+    return mask
 
 # Add alternative filters here ...

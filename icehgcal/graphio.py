@@ -135,7 +135,6 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     num_node_features   = 4
     num_edge_features   = 4
     num_global_features = 0
-    num_classes         = 2
     
     num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
     dataset    = []
@@ -161,22 +160,22 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     num_empty_HGCAL = 0
 
     # Loop over events
-    for i in tqdm(range(num_events)):
+    for ev in tqdm(range(num_events)):
 
-        num_nodes = 1 + len(X[i, ind__candidate_energy]) # +1 for virtual node (empty data)
+        num_nodes = 1 + len(X[ev, ind__candidate_energy]) # +1 for virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
 
         # Construct 4-vector for each HGCAL candidate
         p4vec = []
-        N_c = len(X[i, ind__candidate_energy])
+        N_c = len(X[ev, ind__candidate_energy])
         
         if N_c > 0:
             for k in range(N_c): 
                 
-                energy = X[i, ind__candidate_energy][k]
-                px     = X[i, ind__candidate_px][k]
-                py     = X[i, ind__candidate_py][k]
-                pz     = X[i, ind__candidate_pz][k]
+                energy = X[ev, ind__candidate_energy][k]
+                px     = X[ev, ind__candidate_px][k]
+                py     = X[ev, ind__candidate_py][k]
+                pz     = X[ev, ind__candidate_pz][k]
                 
                 v = vec4()
                 v.setPxPyPzE(px, py, pz, energy)
@@ -193,18 +192,18 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
 
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
-            y = torch.tensor([Y[i]], dtype=torch.long)
+            y = torch.tensor([Y[ev]], dtype=torch.long)
         else:
             y = torch.tensor([0],    dtype=torch.long)
 
         # Training weights, note [] is important to have for right dimensions
         if weights is not None:
-            w = torch.tensor([weights[i]], dtype=torch.float)
+            w = torch.tensor([weights[ev]], dtype=torch.float)
         else:
             w = torch.tensor([1.0],  dtype=torch.float)
 
         ## Construct global feature vector
-        #u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
+        #u = torch.tensor(X[ev, feature_ind].tolist(), dtype=torch.float)
         
         ## Construct node features
         x = get_node_features(p4vec=p4vec, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
