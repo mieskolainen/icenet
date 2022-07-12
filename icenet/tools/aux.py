@@ -60,19 +60,17 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, n
         jagged_vars:   Jagged variables to pick (list of strings)
         jagged_maxdim: Maximum dimension per jagged variable (integer array)
         jagged_totdim: Total dimension of jagged
-        library:       Input type 'ak' or 'np'
-        null_value:    Default
+        null_value:    Default value for empty ([]) jagged entries
     
     Returns:
         mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
     """
 
-    jagged_maxdim = np.asarray(jagged_maxdim, dtype=int)
-
-    N   = int(len(arr))
-    D   = int(len(scalar_vars)) + int(jagged_totdim)
-    
-    print(__name__ + f'.jagged2matrix: Creating a matrix with dimension [{N} x {D}]')
+    N   = len(arr)
+    D_S = len(scalar_vars)
+    D   = D_S + int(jagged_totdim)
+     
+    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}]')
 
     # Pre-processing of jagged vars
     jvname = []
@@ -81,17 +79,17 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, n
         jvname.append(jagged_vars[j].split('_'))
     
     # Loop over events
-    mat = null_value * np.ones((N,D), dtype=float)
-    
-    for ev in tqdm(range(N)):
+    mat = np.full((N,D), null_value)
 
-        # First scalar vars
-        k = 0
-        for j in range(len(scalar_vars)):
-            mat[ev,k] = ak.to_numpy(arr[ev][scalar_vars[j]])
-            k += 1
+    ## Pure scalar vars
+    for j in range(D_S):
+        mat[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]]))
+
+    ## Jagged vars
+    for ev in tqdm(range(N)):
         
-        # Then jagged vars (can be empty)
+        k = D_S
+
         for j in range(len(jagged_vars)):
 
             x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
