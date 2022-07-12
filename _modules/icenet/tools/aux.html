@@ -84,7 +84,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 <span class="c1">#@numba.njit</span>
-<div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">jagged_maxdim</span><span class="o">=</span><span class="p">[],</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">999.0</span><span class="p">)):</span>
+<div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span> <span class="n">jagged_totdim</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
 <span class="sd">    </span>
@@ -93,21 +93,18 @@
 <span class="sd">        scalar_vars:   Scalar variables to pick (list of strings)</span>
 <span class="sd">        jagged_vars:   Jagged variables to pick (list of strings)</span>
 <span class="sd">        jagged_maxdim: Maximum dimension per jagged variable (integer array)</span>
+<span class="sd">        jagged_totdim: Total dimension of jagged</span>
 <span class="sd">        library:       Input type &#39;ak&#39; or &#39;np&#39;</span>
 <span class="sd">        null_value:    Default</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        mat:           Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</span>
-<span class="sd">        jvname:        Jagged variable rootnames (e.g. [sv_chi2, jet_px, jet_py] gives [sv, jet])</span>
+<span class="sd">        mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">jagged_maxdim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Error: len(jagged_vars) != len(jagged_maxdim)&#39;</span><span class="p">)</span>
-
     <span class="n">N</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
-    <span class="n">D</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">)))</span>
+    <span class="n">D</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">))</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">jagged_totdim</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimension [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 
@@ -125,28 +122,21 @@
         <span class="c1"># First scalar vars</span>
         <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)):</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
-            <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">[]:</span> <span class="c1"># Check for empty</span>
-                <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
             <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="c1"># Jagged vars</span>
+        
+        <span class="c1"># Then jagged vars (can be empty)</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
 
             <span class="n">x</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
-            <span class="n">d</span>  <span class="o">=</span> <span class="n">jagged_maxdim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">d_this</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">d_this</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Check for empty</span>
-                <span class="k">if</span> <span class="n">d_this</span> <span class="o">&gt;</span> <span class="n">d</span><span class="p">:</span> <span class="c1"># Over the maximum allowed</span>
-                    <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d</span><span class="p">]</span>      <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">d</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>          <span class="c1"># Less or equal than maximum allowed</span>
-                    <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d_this</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">d_this</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">jagged_maxdim</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d_this</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">d_this</span><span class="p">]</span>
             
             <span class="c1"># Increase block counter</span>
-            <span class="n">k</span> <span class="o">+=</span> <span class="n">d</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="n">jagged_maxdim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="n">jvname</span></div>
+    <span class="k">return</span> <span class="n">mat</span></div>
 
 
 <div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
@@ -313,11 +303,7 @@
 <span class="sd">        order:    Reshape direction</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Y:     Output matrix (3-dim) (N x M x D)</span>
-<span class="sd">    </span>
-<span class="sd">    Examples:</span>
-<span class="sd">        X = [number of samples N ] x [feature vectors of size M x D] --&gt;</span>
-<span class="sd">        Y = [number of samples N ] x [number of set elements M] x [vector dimension D]</span>
+<span class="sd">        Output matrix (3-dim) (N x M x D)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>

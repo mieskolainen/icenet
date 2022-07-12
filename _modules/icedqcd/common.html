@@ -201,40 +201,44 @@
     <span class="c1">## Turn jagged data to &quot;long-vector&quot; matrix representation</span>
 
     <span class="c1">### Pick active scalar variables out</span>
-    <span class="n">scalar_vars</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]]</span>
-    <span class="n">jagged_vars</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_jagged&#39;</span><span class="p">]]</span>
-    
-    <span class="n">jagged_maxdim</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">scalar_vars</span>   <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]]</span>
+    <span class="n">jagged_vars</span>   <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_jagged&#39;</span><span class="p">]]</span>
     
     <span class="c1"># Create tuplet expanded jagged variable names</span>
     <span class="n">all_jagged_vars</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">jagged_maxdim</span>   <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">jagged_totdim</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+
+        <span class="n">sf</span>             <span class="o">=</span> <span class="n">jagged_vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">thisdim</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">][</span><span class="n">sf</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">jagged_totdim</span> <span class="o">+=</span> <span class="n">thisdim</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">thisdim</span><span class="p">):</span>
             <span class="n">all_jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="p">)</span>
+            <span class="n">jagged_maxdim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisdim</span><span class="p">)</span>
 
     <span class="c1"># Update representation</span>
     <span class="n">arg</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;scalar_vars&#39;</span>  <span class="p">:</span>  <span class="n">scalar_vars</span><span class="p">,</span>
-        <span class="s1">&#39;jagged_vars&#39;</span>  <span class="p">:</span>  <span class="n">jagged_vars</span><span class="p">,</span>
-        <span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">:</span>  <span class="n">jagged_maxdim</span>
+        <span class="s1">&#39;scalar_vars&#39;</span>  <span class="p">:</span> <span class="n">scalar_vars</span><span class="p">,</span>
+        <span class="s1">&#39;jagged_vars&#39;</span>  <span class="p">:</span> <span class="n">jagged_vars</span><span class="p">,</span>
+        <span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">:</span> <span class="n">jagged_maxdim</span><span class="p">,</span>
+        <span class="s1">&#39;jagged_totdim&#39;</span><span class="p">:</span> <span class="n">jagged_totdim</span>
     <span class="p">}</span>
-    <span class="n">mat</span><span class="p">,</span> <span class="n">jagged_rootnames</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+    <span class="n">mat</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
 
     <span class="n">data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
-
+    
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># Create DeepSet style representation from the &quot;long-vector&quot; content</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">jagged_rootnames</span><span class="p">)</span>
-
-    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)</span>       <span class="c1"># Number of (jagged) variables per event</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">]</span>  <span class="c1"># Tuplet feature vector dimension</span>
-
+    
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)</span>              <span class="c1"># Number of (jagged) variables per event</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">][</span><span class="s1">&#39;sv&#39;</span><span class="p">]</span>   <span class="c1"># Tuplet feature vector dimension</span>
     <span class="n">data_deps</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">):],</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
     <span class="n">data_deps</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">data_deps</span><span class="o">.</span><span class="n">y</span>
     <span class="n">data_deps</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">all_jagged_vars</span>

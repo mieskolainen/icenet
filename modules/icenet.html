@@ -1903,7 +1903,7 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.jagged2matrix">
-<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_totdim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a “jagged” event container to a matrix (rows ~ event, columns ~ variables)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1912,13 +1912,13 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 <li><p><strong>scalar_vars</strong> – Scalar variables to pick (list of strings)</p></li>
 <li><p><strong>jagged_vars</strong> – Jagged variables to pick (list of strings)</p></li>
 <li><p><strong>jagged_maxdim</strong> – Maximum dimension per jagged variable (integer array)</p></li>
+<li><p><strong>jagged_totdim</strong> – Total dimension of jagged</p></li>
 <li><p><strong>library</strong> – Input type ‘ak’ or ‘np’</p></li>
 <li><p><strong>null_value</strong> – Default</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
-jvname:        Jagged variable rootnames (e.g. [sv_chi2, jet_px, jet_py] gives [sv, jet])</p>
+<dd class="field-even"><p>Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>mat</p>
@@ -1965,13 +1965,7 @@ useful e.g. for DeepSets and similar neural architectures.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Output matrix (3-dim) (N x M x D)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Y</p>
-</dd>
 </dl>
-<p class="rubric">Examples</p>
-<p>X = [number of samples N ] x [feature vectors of size M x D] –&gt;
-Y = [number of samples N ] x [number of set elements M] x [vector dimension D]</p>
 </dd></dl>
 
 <dl class="py function">
