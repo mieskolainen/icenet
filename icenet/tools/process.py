@@ -350,11 +350,11 @@ def impute_datasets(data, args, features=None, imputer=None):
         }
         
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
-
+        
     else:
-        # No imputation, but fix spurious NaN / Inf
+        # No other imputation, but fix spurious NaN / Inf
         data.x[np.logical_not(np.isfinite(data.x))] = args['fill_value']
-
+    
     return data, imputer
 
 

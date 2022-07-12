@@ -31,9 +31,9 @@ def cut_fiducial(X, xcorr_flow=False):
     # Create cut strings
     names = ['O.nsv >= 1',
              'ak.sum(O.sv.dxysig >= 5, -1)',
-             'ak.sum(O.Jet.pt > 40.0,  -1)',
-             'ak.sum(np.abs(O.Jet.eta) < 2.0, -1)']
-
+             'ak.sum(O.Jet.pt > 10,    -1)',
+             'ak.sum(np.abs(O.Jet.eta) < 2.5, -1)']
+    
     # Evaluate columnar cuts; Compute cutflow
     cuts  = [eval(names[i], globals()) for i in range(len(names))]
     mask  = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
