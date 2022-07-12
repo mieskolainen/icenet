@@ -94,19 +94,17 @@
 <span class="sd">        jagged_vars:   Jagged variables to pick (list of strings)</span>
 <span class="sd">        jagged_maxdim: Maximum dimension per jagged variable (integer array)</span>
 <span class="sd">        jagged_totdim: Total dimension of jagged</span>
-<span class="sd">        library:       Input type &#39;ak&#39; or &#39;np&#39;</span>
-<span class="sd">        null_value:    Default</span>
+<span class="sd">        null_value:    Default value for empty ([]) jagged entries</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">jagged_maxdim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">jagged_maxdim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="n">N</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
-    <span class="n">D</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">))</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">jagged_totdim</span><span class="p">)</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimension [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+    <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">D_S</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span>
+    <span class="n">D</span>   <span class="o">=</span> <span class="n">D_S</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">jagged_totdim</span><span class="p">)</span>
+     
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 
     <span class="c1"># Pre-processing of jagged vars</span>
     <span class="n">jvname</span> <span class="o">=</span> <span class="p">[]</span>
@@ -115,17 +113,17 @@
         <span class="n">jvname</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span>
     
     <span class="c1"># Loop over events</span>
-    <span class="n">mat</span> <span class="o">=</span> <span class="n">null_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    
-    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">)</span>
 
-        <span class="c1"># First scalar vars</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)):</span>
-            <span class="n">mat</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
-            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1">## Pure scalar vars</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D_S</span><span class="p">):</span>
+        <span class="n">mat</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]]))</span>
+
+    <span class="c1">## Jagged vars</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
         
-        <span class="c1"># Then jagged vars (can be empty)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">D_S</span>
+
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
 
             <span class="n">x</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
