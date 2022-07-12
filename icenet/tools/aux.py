@@ -80,7 +80,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, n
     
     # Loop over events
     mat = np.full((N,D), null_value)
-
+    
     ## Pure scalar vars
     for j in range(D_S):
         mat[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]]))
