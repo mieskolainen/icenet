@@ -34,11 +34,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
-        root_path : paths to root files
+        root_path: paths to root files
     
     Returns:
-        X,Y       : input, output matrices
-        ids       : variable names
+        X,Y      : data matrices
+        ids      : variable names
     """
 
     # -----------------------------------------------
@@ -106,19 +106,19 @@ def process_root(X, ids, isMC, args, **extra):
     FILTERFUNC = globals()[args['filterfunc']]
 
     # @@ Filtering done here @@
-    mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    mask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f})', 'green')
     
-    X   = X[mask]
+    X = X[mask]
     prints.printbar()
 
     # @@ Observable cut selections done here @@
-    mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    mask = CUTFUNC(X=X, xcorr_flow=args['xcorr_flow'])
     plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f}) \n", 'green')
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f}) \n", 'green')
 
-    X   = X[mask]
+    X = X[mask]
     io.showmem()
     prints.printbar()
 
@@ -181,7 +181,7 @@ def splitfactor(x, y, w, ids, args):
         jagged_totdim += thisdim
 
         for j in range(thisdim):
-            all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
+            all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
             jagged_maxdim.append(thisdim)
 
     # Update representation
@@ -189,7 +189,8 @@ def splitfactor(x, y, w, ids, args):
         'scalar_vars'  : scalar_vars,
         'jagged_vars'  : jagged_vars,
         'jagged_maxdim': jagged_maxdim,
-        'jagged_totdim': jagged_totdim
+        'jagged_totdim': jagged_totdim,
+        'null_value'   : args['imputation_param']['fill_value']
     }
     mat      = aux.jagged2matrix(data.x, **arg)
 
@@ -197,12 +198,12 @@ def splitfactor(x, y, w, ids, args):
     data.y   = ak.to_numpy(data.y)
     data.ids = scalar_vars + all_jagged_vars
     # --------------------------------------------------------------------------
-    
+
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
     data_deps = copy.deepcopy(data)
-    
+
     M = len(jagged_vars)              # Number of (jagged) variables per event
     D = args['jagged_maxdim']['sv']   # Tuplet feature vector dimension
     data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_vars):], M=M, D=D)

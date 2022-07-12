@@ -18,13 +18,13 @@ path     = '/home/user/travis-stash/input/icedqcd'
 datasets = 'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
 key      = 'Events;1'
 
-ids = ['nsv', 'sv_.*', 'cpf_.*']
+ids = ['nsv', 'sv_.*', 'cpf_.*', 'Jet_.*']
 
 #ids = ['nsv', 'sv_deltaR', 'sv_mass']
 #ids = ['sv_ptrel', 'sv_deta', 'sv_dphi', 'sv_deltaR', 'sv_mass', 'sv_chi2']
 #ids = None
 
-entry_stop = 2010
+entry_stop = 1000
 rootfile   = io.glob_expand_files(datasets=datasets, datapath=path)
 
 for library in ['ak']:
@@ -33,18 +33,28 @@ for library in ['ak']:
 	out,ids = iceroot.load_tree(rootfile=rootfile, tree=key, entry_stop=entry_stop, ids=ids, library=library)
 	elapsed = time.time() - t
 
+
+	#print(ak.fields(out.nsv))
+	#count   = (np.isfinite(out['sv']['dxysig']))
+
+	#print(count)
+	#exit()
+
+
 	print(f'Opening with <{library}> took: {elapsed} sec')
 	
 	print(len(out))
 	print(out)
 
-	N = 5
+	N = 20
 
 	# Add in a new record
 	out['__model_m'] = ak.Array(np.random.rand(len(out)))
 	print(len(out))
 	print(out)
 	
+	#out = out[:, out.cpf.jetIdx > 0]
+
 	print(ak.fields(out))
 	
 	def loop(X):
@@ -80,12 +90,29 @@ for library in ['ak']:
 	print(f'{len(out)}')
 	
 	#X_list  = out[:N].tolist()
-
 	loop(X)
+
 
 	print(f'---------------------------------------------------')
-	print(f'Testing nested object property based selection (not correct)')
-	X.sv = X.sv[len(X.sv) < 2] #['mass'] >= 2.0
+	print(f'Testing nested object property based selection')
+
+	# Put a requirement on the objects
+	cut_str = ['X.nsv >= 1',
+			   'ak.sum(X.sv.dxysig >= 5,        -1)',
+			   'ak.sum(X.Jet.pt    > 40.0,      -1)',
+			   'ak.sum(np.abs(X.Jet.eta) < 2.0, -1)']
+
+	cuts = []
+	for i in range(len(cut_str)):
+		cuts.append(eval(cut_str[i]))
+		print(f'cuts[{i}] = {cuts[i]}')
 	
-	loop(X)
+	mask = masks[0]
+	for i in range(1, len(masks)):
+		mask = mask & masks[i]
+
+	Y = X[mask]
+	
+	print(Y)
+	print(len(Y))
 

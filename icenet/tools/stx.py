@@ -51,7 +51,7 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
         ind = np.logical_and(ind, cut[i])
-        print(f'cut[{i}][{names[i]:>25}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
+        print(f'cut[{i}][{names[i]:>35}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:

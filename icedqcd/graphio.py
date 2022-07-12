@@ -124,7 +124,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
-    print(__name__ + f'.parse_graph_data_candidate: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
+    print(__name__ + f'.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
     
     return dataset
 

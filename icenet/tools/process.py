@@ -278,13 +278,6 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
     output = {}
     if   runmode == 'train':
 
-        ## Imputate
-        if args['imputation_param']['active']:
-            trn, imputer = impute_datasets(data=trn, features=impute_vars, args=args['imputation_param'], imputer=None)
-            val, imputer = impute_datasets(data=val, features=impute_vars, args=args['imputation_param'], imputer=imputer)
-            
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
-        
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             trn.w, pdf = reweight.compute_ND_reweights(pdf=None, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
@@ -295,14 +288,15 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
 
-    elif runmode == 'eval':
-        
         ## Imputate
         if args['imputation_param']['active']:
-
-            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
-            tst, _  = impute_datasets(data=tst, features=impute_vars, args=args['imputation_param'], imputer=imputer)
+            output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
+            output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+
+    elif runmode == 'eval':
+        
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
@@ -311,22 +305,31 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
         # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
+        ## Imputate
+        if args['imputation_param']['active']:
+
+            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
+    
     return output
 
 
-def impute_datasets(data, args, features, imputer=None):
+def impute_datasets(data, args, features=None, imputer=None):
     """
     Dataset imputation
 
     Args:
         data:        .x, .y, .w, .ids type object
         args:        imputer parameters
-        features:    variables to impute (list)
+        features:    variables to impute (list), if None, then all are considered
         imputer:     imputer object (scikit-type)
 
     Return:
         imputed data
     """
+
+    if features is None:
+        features = data.ids
 
     if args['active']:
 
