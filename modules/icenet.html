@@ -3214,14 +3214,14 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.impute_datasets">
-<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dataset imputation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – .x, .y, .w, .ids type object</p></li>
 <li><p><strong>args</strong> – imputer parameters</p></li>
-<li><p><strong>features</strong> – variables to impute (list)</p></li>
+<li><p><strong>features</strong> – variables to impute (list), if None, then all are considered</p></li>
 <li><p><strong>imputer</strong> – imputer object (scikit-type)</p></li>
 </ul>
 </dd>

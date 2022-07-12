@@ -114,7 +114,7 @@
     
     <span class="c1"># Loop over events</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">)</span>
-
+    
     <span class="c1">## Pure scalar vars</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D_S</span><span class="p">):</span>
         <span class="n">mat</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]]))</span>
