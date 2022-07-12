@@ -12,8 +12,16 @@ mva_param: &MVA_INPUT_PARAM
   inputvar:         null
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
-  jagged_maxdim:    6
-  
+
+  # Needs to be alphabetical
+  jagged_maxdim:
+    
+    Jet:   10
+    Muon:  10
+    sv:    10
+    cpf:   10
+    npf:   10
+
   frac: 0.5                          # Train vs validate/test split fraction
   
   # Variable imputation
@@ -86,24 +94,24 @@ train_runmode:
     
     # ---------------------
     # Differential parameters
+    
+    # dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
+    # pseudo_type: 'product'         # 'product', 'geometric_mean'
+    
+    # var_A: 'x_hlt_pt'
+    # var_B: 'x_hlt_eta'
 
-    dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product'         # 'product', 'geometric_mean'
+    # bins_A:  [0.0001, 100.0, 150]  # Make sure the bounds cover the phase space
+    # binmode_A:  'linear'           # 'log10' or 'linear' binning
     
-    var_A: 'x_hlt_pt'
-    var_B: 'x_hlt_eta'
-
-    bins_A:  [0.0001, 100.0, 150]  # Make sure the bounds cover the phase space
-    binmode_A:  'linear'           # 'log10' or 'linear' binning
+    # bins_B: [-3.1, 3.1, 150]
+    # binmode_B: 'linear'
     
-    bins_B: [-3.1, 3.1, 150]
-    binmode_B: 'linear'
+    # # ! Variable, and binning min/max boundaries are both transformed !
+    # transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
+    # transform_B: null
     
-    # ! Variable, and binning min/max boundaries are both transformed !
-    transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
-    transform_B: null
-    
-    max_reg: 10000.0               # Maximum weight cut-off regularization
+    # max_reg: 10000.0               # Maximum weight cut-off regularization
 
 
   ## Outlier protection in the training

@@ -50,7 +50,7 @@ def ak2numpy(x, fields, null_value=float(999.0)):
     return out
 
 #@numba.njit
-def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_value=float(999.0)):
+def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, null_value=float(-999.0)):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
@@ -59,21 +59,18 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
         scalar_vars:   Scalar variables to pick (list of strings)
         jagged_vars:   Jagged variables to pick (list of strings)
         jagged_maxdim: Maximum dimension per jagged variable (integer array)
+        jagged_totdim: Total dimension of jagged
         library:       Input type 'ak' or 'np'
         null_value:    Default
     
     Returns:
-        mat:           Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
-        jvname:        Jagged variable rootnames (e.g. [sv_chi2, jet_px, jet_py] gives [sv, jet])
+        mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
     """
 
     jagged_maxdim = np.asarray(jagged_maxdim, dtype=int)
 
-    if len(jagged_vars) != len(jagged_maxdim):
-        raise Exception(__name__ + f'.jagged2matrix: Error: len(jagged_vars) != len(jagged_maxdim)')
-
     N   = int(len(arr))
-    D   = int(len(scalar_vars) + np.sum(np.array(jagged_maxdim)))
+    D   = int(len(scalar_vars)) + int(jagged_totdim)
     
     print(__name__ + f'.jagged2matrix: Creating a matrix with dimension [{N} x {D}]')
 
@@ -91,28 +88,21 @@ def jagged2matrix(arr, scalar_vars=[], jagged_vars=[], jagged_maxdim=[], null_va
         # First scalar vars
         k = 0
         for j in range(len(scalar_vars)):
-            x = ak.to_numpy(arr[ev][scalar_vars[j]])
-            if x is not []: # Check for empty
-                mat[ev,k] = x
+            mat[ev,k] = ak.to_numpy(arr[ev][scalar_vars[j]])
             k += 1
-
-        # Jagged vars
+        
+        # Then jagged vars (can be empty)
         for j in range(len(jagged_vars)):
 
             x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
-            d  = jagged_maxdim[j]
-            d_this = len(x)
-
-            if d_this > 0: # Check for empty
-                if d_this > d: # Over the maximum allowed
-                    mat[ev, k:k+d]      = x[0:d]
-                else:          # Less or equal than maximum allowed
-                    mat[ev, k:k+d_this] = x
+            if len(x) > 0:
+                d_this = np.min([len(x), jagged_maxdim[j]])
+                mat[ev, k:k+d_this] = x[0:d_this]
             
             # Increase block counter
-            k += d
+            k += jagged_maxdim[j]
 
-    return ak.Array(mat), jvname
+    return mat
 
 
 def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
@@ -279,11 +269,7 @@ def longvec2matrix(X, M, D, order='F'):
         order:    Reshape direction
     
     Returns:
-        Y:     Output matrix (3-dim) (N x M x D)
-    
-    Examples:
-        X = [number of samples N ] x [feature vectors of size M x D] -->
-        Y = [number of samples N ] x [number of set elements M] x [vector dimension D]
+        Output matrix (3-dim) (N x M x D)
     """
 
     Y = np.zeros((X.shape[0], M, D))

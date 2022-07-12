@@ -47,8 +47,6 @@ MVA_SCALAR_VARS += MODEL_VARS
 
 MVA_CPF_VARS = [
 
-  'ncpf',
-
   'cpf_px',
   'cpf_py',
   'cpf_pz',
@@ -60,14 +58,11 @@ MVA_CPF_VARS = [
   'cpf_trackSip3dSig',
   
   'cpf_matchedSV',
-
   'cpf_jetIdx'
 ]
 
 MVA_NPF_VARS = [
   
-  'nnpf',
-
   'npf_px',
   'npf_py',
   'npf_pz',
@@ -111,6 +106,9 @@ MVA_JAGGED_VARS = [
   'sv_ndof'
 ]
 
+# -----------------------------------------
+MVA_JAGGED_VARS += MVA_PF_VARS
+# -----------------------------------------
 
 PLOT_VARS = [
   'nJet',

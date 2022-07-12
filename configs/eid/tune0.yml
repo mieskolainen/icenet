@@ -180,7 +180,7 @@ train_runmode:
     drains:
       #- xgb1
       # - add more here
-
+  
   # Batched "deep" training
   batch_train_param:
     blocksize: 150000   # Maximum number of events simultaneously in RAM

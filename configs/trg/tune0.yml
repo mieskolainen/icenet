@@ -176,4 +176,3 @@ eval_runmode:
 # ----------------------------------------------------
 plot_param: !include configs/trg/plots.yml
 
-

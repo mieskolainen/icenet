@@ -167,40 +167,44 @@ def splitfactor(x, y, w, ids, args):
     ## Turn jagged data to "long-vector" matrix representation
 
     ### Pick active scalar variables out
-    scalar_vars = globals()[args['inputvar_scalar']]
-    jagged_vars = globals()[args['inputvar_jagged']]
-    
-    jagged_maxdim = args['jagged_maxdim']*np.ones(len(jagged_vars), dtype=int)
+    scalar_vars   = globals()[args['inputvar_scalar']]
+    jagged_vars   = globals()[args['inputvar_jagged']]
     
     # Create tuplet expanded jagged variable names
     all_jagged_vars = []
+    jagged_maxdim   = []
+    jagged_totdim   = int(0)
     for i in range(len(jagged_vars)):
-        for j in range(jagged_maxdim[i]):
+
+        sf             = jagged_vars[i].split('_')
+        thisdim        = int(args['jagged_maxdim'][sf[0]])
+        jagged_totdim += thisdim
+
+        for j in range(thisdim):
             all_jagged_vars.append( f'{jagged_vars[i]}[{j}]' )
+            jagged_maxdim.append(thisdim)
 
     # Update representation
     arg = {
-        'scalar_vars'  :  scalar_vars,
-        'jagged_vars'  :  jagged_vars,
-        'jagged_maxdim':  jagged_maxdim
+        'scalar_vars'  : scalar_vars,
+        'jagged_vars'  : jagged_vars,
+        'jagged_maxdim': jagged_maxdim,
+        'jagged_totdim': jagged_totdim
     }
-    mat, jagged_rootnames = aux.jagged2matrix(data.x, **arg)
+    mat      = aux.jagged2matrix(data.x, **arg)
 
     data.x   = ak.to_numpy(mat)
     data.y   = ak.to_numpy(data.y)
     data.ids = scalar_vars + all_jagged_vars
     # --------------------------------------------------------------------------
-
+    
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
     data_deps = copy.deepcopy(data)
-
-    print(jagged_rootnames)
-
-    M = len(jagged_vars)       # Number of (jagged) variables per event
-    D = args['jagged_maxdim']  # Tuplet feature vector dimension
-
+    
+    M = len(jagged_vars)              # Number of (jagged) variables per event
+    D = args['jagged_maxdim']['sv']   # Tuplet feature vector dimension
     data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_vars):], M=M, D=D)
     data_deps.y   = data_deps.y
     data_deps.ids = all_jagged_vars
