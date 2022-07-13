@@ -431,8 +431,7 @@ def train_models(data_trn, data_val, args=None) :
         pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'))
     
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
-
-
+        
     # Loop over active models
     for i in range(len(args['active_models'])):
 
