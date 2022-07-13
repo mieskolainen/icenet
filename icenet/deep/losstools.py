@@ -22,7 +22,6 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
     """
     if   param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
-        y = y.type(torch.int64)
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
     elif param['lossfunc'] == 'cross_entropy_per_edge':
@@ -49,12 +48,10 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
-        y = y.type(torch.int64)
         return multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
-        y = y.type(torch.int64)
         return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
     elif param['lossfunc'] == 'VAE_background_only':
@@ -136,7 +133,7 @@ def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
 
     # Protection
     loss = - y*torch.log(phat + EPS) * w
-
+    
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:

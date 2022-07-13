@@ -49,7 +49,7 @@ mva_param: &MVA_INPUT_PARAM
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
     fill_value: 0                     # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
-    values: []                        # Special values which indicate the need for imputation
+    values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
 
 
 # ----------------------------------------------------

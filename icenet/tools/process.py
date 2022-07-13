@@ -9,6 +9,7 @@ import numpy as np
 import awkward as ak
 import torch
 
+from importlib import import_module
 from termcolor import colored, cprint
 import os
 import copy
@@ -248,7 +249,7 @@ def read_data(args, func_loader, runmode):
     return X, Y, W, ids
 
 
-def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
+def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
 
     # ----------------------------------------------------------
     # Pop out conditional variables if they exist
@@ -274,6 +275,17 @@ def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
+    # ----------------------------------------
+    if args['imputation_param']['active']:
+        module = import_module(mvavars, 'configs.subpkg')
+
+        var    = args['imputation_param']['var']
+        if var is not None:
+            impute_vars = getattr(module, var)
+        else:
+            impute_vars = None
+    # ----------------------------------------
+    
     ### Split and factor data
     output = {}
     if   runmode == 'train':
@@ -331,13 +343,13 @@ def impute_datasets(data, args, features=None, imputer=None):
     if features is None:
         features = data.ids
 
-    if args['active']:
+    # Choose active dimensions
+    dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
+
+    if args['values'] is not None:
 
         special_values = args['values'] # possible special values
-        print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
-
-        # Choose active dimensions
-        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
+        cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
 
         # Parameters
         param = {
@@ -350,11 +362,13 @@ def impute_datasets(data, args, features=None, imputer=None):
         }
         
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
-        
+
     else:
+        cprint(__name__ + f'.impute_datasets: Imputing data for Inf/Nan in variables {features}', 'yellow')
+
         # No other imputation, but fix spurious NaN / Inf
-        data.x[np.logical_not(np.isfinite(data.x))] = args['fill_value']
-    
+        data.x[np.logical_not(np.isfinite(data.x[:, dim]))] = args['fill_value']
+
     return data, imputer
 
 
