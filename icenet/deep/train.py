@@ -645,14 +645,14 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
 
     # ---------------------------------------
     # Update the parameters
-    model_param = copy.deepcopy(param['model_param'])
+    model_param = copy.deepcopy(param['xgb']['model_param'])
     
     if 'multi' in model_param['objective']:
         model_param.update({'num_class': args['num_classes']})
 
     del model_param['num_boost_round']
     # ---------------------------------------
-
+    
     # Boosting iterations
     max_num_epochs = param['xgb']['model_param']['num_boost_round']
     for epoch in range(max_num_epochs):
