@@ -549,9 +549,11 @@ def train_models(data_trn, data_val, args=None) :
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
             if   param['train'] == 'xgb':
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
-                if len(y_soft.shape) > 1:
-                    y_soft = y_soft[:, args['signalclass']]
+                if 'multi' in args['models'][ID]['model_param']:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
+                else:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
+            
             elif param['train'] == 'torch_graph':
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
