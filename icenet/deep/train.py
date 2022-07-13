@@ -725,7 +725,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
     targetdir = aux.makedir(f'{args["plotdir"]}/train/')
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
-
+    
     ## Plot decision trees
     try:
         model.feature_names = ids
