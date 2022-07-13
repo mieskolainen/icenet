@@ -554,7 +554,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             fig,ax = plots.plot_xgb_importance(model=model, dim=data_trn.x.shape[1], tick_label=data_trn.ids)
             targetdir = aux.makedir(f'{args["plotdir"]}/train/')
             plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
-
+        
         ## Plot decision trees
         try:
             model.feature_names = data_trn.ids
@@ -562,9 +562,10 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
                 xgboost.plot_tree(model, num_trees=i)
                 path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
                 plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
-            model.feature_names = None # Set original default ones
         except:
             print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+        
+        model.feature_names = None # Set original default ones
 
         return model
 
@@ -733,9 +734,10 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
             xgboost.plot_tree(model, num_trees=i)
             path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
             plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
-        model.feature_names = None # Set original default ones
     except:
         print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+    
+    model.feature_names = None # Set original default ones
 
     return model
 
