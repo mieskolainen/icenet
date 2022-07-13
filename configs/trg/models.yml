@@ -105,9 +105,9 @@ xgb0:
     reg_alpha: 0.05          # L1 regularization
     
     # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']    # for evaluation
-
+    objective: 'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+  
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
@@ -128,6 +128,7 @@ xgb1:
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
     learning_rate: 0.1
     gamma: 0.63
     max_depth: 10
@@ -143,8 +144,8 @@ xgb1:
     reg_alpha: 0.35        # L1 regularization
     
     # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']     # for evaluation
+    objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
   
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

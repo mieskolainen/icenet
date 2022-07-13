@@ -465,8 +465,8 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
     dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
-    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,                               weight = w_val)
-    
+    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,  weight = w_val)
+
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
 
@@ -476,10 +476,15 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     trn_aucs   = []
     val_aucs   = []
 
+    # ---------------------------------------
     # Update the parameters
     model_param = copy.deepcopy(param['model_param'])
-    model_param.update({'num_class': args['num_classes']})
+    
+    if 'multi' in model_param['objective']:
+        model_param.update({'num_class': args['num_classes']})
+
     del model_param['num_boost_round']
+    # ---------------------------------------
 
     # Boosting iterations
     max_num_epochs = param['model_param']['num_boost_round']
@@ -501,17 +506,23 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         model = xgboost.train(**a)
 
         # AUC
-        pred    = model.predict(dtrain)[:, args['signalclass']]
+        if 'multi' in model_param['objective']:
+            pred    = model.predict(dtrain)[:, args['signalclass']]
+        else:
+            pred    = model.predict(dtrain)
         metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
-        pred    = model.predict(deval)[:, args['signalclass']]
+        if 'multi' in model_param['objective']:
+            pred    = model.predict(deval)[:, args['signalclass']]
+        else:
+            pred    = model.predict(deval)
         metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
         # Loss
-        trn_losses.append(results['train']['mlogloss'][0])
-        val_losses.append(results['eval']['mlogloss'][0])
+        trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
+        val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
         
         print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
@@ -632,10 +643,15 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     trn_aucs   = []
     val_aucs   = []
 
+    # ---------------------------------------
     # Update the parameters
-    model_param = copy.deepcopy(param['xgb']['model_param'])
-    model_param.update({'num_class': args['num_classes']})
+    model_param = copy.deepcopy(param['model_param'])
+    
+    if 'multi' in model_param['objective']:
+        model_param.update({'num_class': args['num_classes']})
+
     del model_param['num_boost_round']
+    # ---------------------------------------
 
     # Boosting iterations
     max_num_epochs = param['xgb']['model_param']['num_boost_round']
@@ -657,17 +673,23 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         model = xgboost.train(**a)
         
         # AUC
-        pred    = model.predict(dtrain)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
+        if 'multi' in model_param['objective']:
+            pred    = model.predict(dtrain)[:, args['signalclass']]
+        else:
+            pred    = model.predict(dtrain)
+        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
-        pred    = model.predict(deval)[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
+        if 'multi' in model_param['objective']:
+            pred    = model.predict(deval)[:, args['signalclass']]
+        else:
+            pred    = model.predict(deval)
+        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
-        
+
         # Loss
-        trn_losses.append(results['train']['mlogloss'][0])
-        val_losses.append(results['eval']['mlogloss'][0])
+        trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
+        val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
 
         ## Save
         pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))

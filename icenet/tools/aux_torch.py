@@ -13,10 +13,9 @@ def weight2onehot(weights, y, num_classes):
     Weights into one-hot encoding
 
     Args:
-        weights   : array of weights (torch type)
-        y         : targets (torch type)
+        weights     : array of weights (torch type)
+        y           : targets (torch type)
         num_classes : number of classes
-
     """
     one_hot_weights = torch.zeros((len(weights), num_classes)).to(weights.device)
     for i in range(num_classes):

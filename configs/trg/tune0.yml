@@ -20,7 +20,7 @@ mva_param: &MVA_INPUT_PARAM
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
-  frac: 0.9                           # Train vs validate/test split fraction
+  frac: 0.7                           # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:

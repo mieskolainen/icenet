@@ -449,9 +449,10 @@ def train_models(data_trn, data_val, args=None) :
                       'param':    param}
             
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
+
             
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
@@ -468,6 +469,7 @@ def train_models(data_trn, data_val, args=None) :
             #### Add distillation, if turned on
             if args['distillation']['drains'] is not None:
                 if ID in args['distillation']['drains']:
+                    cprint(__name__ + f'.train_models: Setting soft distillation target for <{param["train"]}>', 'yellow')
                     inputs['y_soft'] = y_soft
             
             if ID in args['raytune']['param']['active']:
@@ -489,9 +491,9 @@ def train_models(data_trn, data_val, args=None) :
                       'param':       param}
             
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
 
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
@@ -512,9 +514,9 @@ def train_models(data_trn, data_val, args=None) :
                       'param': param}
 
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
             
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
@@ -541,13 +543,13 @@ def train_models(data_trn, data_val, args=None) :
         # --------------------------------------------------------
         # If distillation
         if ID == args['distillation']['source']:
-            print(__name__ + '.train.models: Computing distillation soft targets ...')
+            cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ...', 'yellow')
             
             if args['num_classes'] != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
             if   param['train'] == 'xgb':
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
+                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
             elif param['train'] == 'torch_graph':
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
@@ -701,8 +703,8 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                targetdir = aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/')
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW, targetdir=targetdir, transform='torch')
+                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW,
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
 
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
 
@@ -876,7 +878,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         plots.density_MVA_wclass(**inputs)
 
     # ----------------------------------------------------------------
-    ### COR 2D plots
+    ### MVA 2D plots
     if args['plot_param']['MVA_2D']['active']:
 
         for i in range(100): # Loop over plot types

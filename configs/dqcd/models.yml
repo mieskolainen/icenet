@@ -99,8 +99,8 @@ lgr0:
     
     optimizer: 'AdamW'
     clip_norm: 0.1
-
-    epochs: 50
+    
+    epochs: 150
     batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001       # L2-regularization
