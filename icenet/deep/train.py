@@ -7,6 +7,7 @@ import math
 import numpy as np
 import torch
 import torch_geometric
+from tqdm import tqdm
 
 import argparse
 import pprint
@@ -554,9 +555,17 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             targetdir = aux.makedir(f'{args["plotdir"]}/train/')
             plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
 
-        ## Plot decision tree
-        #xgboost.plot_tree(xgb_model, num_trees=2)
-        #plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()        
+        ## Plot decision trees
+        try:
+            model.feature_names = data_trn.ids
+            for i in tqdm(range(max_num_epochs)):
+                xgboost.plot_tree(model, num_trees=i)
+                path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
+                plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
+            model.feature_names = None # Set original default ones
+        except:
+            print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+
         return model
 
     return # No return value for raytune
@@ -652,7 +661,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
 
     del model_param['num_boost_round']
     # ---------------------------------------
-    
+
     # Boosting iterations
     max_num_epochs = param['xgb']['model_param']['num_boost_round']
     for epoch in range(max_num_epochs):
@@ -716,11 +725,18 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
     targetdir = aux.makedir(f'{args["plotdir"]}/train/')
     plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
-    
-    ## Plot decision tree
-    # xgboost.plot_tree(xgb_model, num_trees=2)
-    # plt.savefig('{}/xgb_tree.pdf'.format(targetdir), bbox_inches='tight'); plt.close()
-    
+
+    ## Plot decision trees
+    try:
+        model.feature_names = ids
+        for i in tqdm(range(max_num_epochs)):
+            xgboost.plot_tree(model, num_trees=i)
+            path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
+            plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
+        model.feature_names = None # Set original default ones
+    except:
+        print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+
     return model
 
 

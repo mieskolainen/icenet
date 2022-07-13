@@ -876,10 +876,10 @@ def plot_xgb_importance(model, dim, tick_label=None, importance_type='gain'):
     
     for i in range(dim): # try, except needed because xgb does Not return it for all of them
         try:
-            yy[i] = fscores['f' + str(i)]
+            yy[i] = fscores[f'f{i}']
         except:
             yy[i] = 0.0
-
+    
     fig,ax = plt.subplots(figsize=(1.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
     plt.barh(xx, yy, align='center', height=0.5, tick_label=tick_label)
     plt.xlabel(f'F-score ({importance_type})')

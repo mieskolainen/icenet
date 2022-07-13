@@ -22,6 +22,9 @@ jobs:
       # conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
       # conda install -c conda-forge cudatoolkit-dev
       
+      # Install conda packages
+      # conda install python-graphviz
+      
       - name: Install pip-requirements
         run: |
           pip install -r requirements-github-actions-1.txt
