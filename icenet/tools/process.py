@@ -550,6 +550,8 @@ def train_models(data_trn, data_val, args=None) :
             
             if   param['train'] == 'xgb':
                 y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
+                if len(y_soft.shape) > 1:
+                    y_soft = y_soft[:, args['signalclass']]
             elif param['train'] == 'torch_graph':
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
