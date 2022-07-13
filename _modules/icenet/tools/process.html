@@ -43,6 +43,7 @@
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -282,7 +283,7 @@
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span></div>
 
 
-<div class="viewcode-block" id="process_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_data">[docs]</a><span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">impute_vars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<div class="viewcode-block" id="process_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_data">[docs]</a><span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 
     <span class="c1"># ----------------------------------------------------------</span>
     <span class="c1"># Pop out conditional variables if they exist</span>
@@ -308,6 +309,17 @@
     <span class="c1"># Split into training, validation, test</span>
     <span class="n">trn</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tst</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;frac&#39;</span><span class="p">])</span>
 
+    <span class="c1"># ----------------------------------------</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">mvavars</span><span class="p">,</span> <span class="s1">&#39;configs.subpkg&#39;</span><span class="p">)</span>
+
+        <span class="n">var</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">impute_vars</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">impute_vars</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># ----------------------------------------</span>
+    
     <span class="c1">### Split and factor data</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span>   <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
@@ -365,13 +377,13 @@
     <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">features</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="c1"># Choose active dimensions</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">features</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="n">special_values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="c1"># possible special values</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.impute_datasets: Imputing data for special values </span><span class="si">{</span><span class="n">special_values</span><span class="si">}</span><span class="s1"> for variables in &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Choose active dimensions</span>
-        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">features</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.impute_datasets: Imputing data for special values </span><span class="si">{</span><span class="n">special_values</span><span class="si">}</span><span class="s1"> in variables </span><span class="si">{</span><span class="n">features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
         <span class="c1"># Parameters</span>
         <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
@@ -384,11 +396,13 @@
         <span class="p">}</span>
         
         <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">impute_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        
+
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.impute_datasets: Imputing data for Inf/Nan in variables </span><span class="si">{</span><span class="n">features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+
         <span class="c1"># No other imputation, but fix spurious NaN / Inf</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">))]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fill_value&#39;</span><span class="p">]</span>
-    
+        <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]))]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fill_value&#39;</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">imputer</span></div>
 
 
