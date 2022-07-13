@@ -686,14 +686,14 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
             pred    = model.predict(dtrain)[:, args['signalclass']]
         else:
             pred    = model.predict(dtrain)
-        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
         if 'multi' in model_param['objective']:
             pred    = model.predict(deval)[:, args['signalclass']]
         else:
             pred    = model.predict(deval)
-        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
         # Loss
