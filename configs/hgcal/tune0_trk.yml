@@ -25,10 +25,11 @@ mva_param: &MVA_INPUT_PARAM
   
   # Graph object construction
   graph_param:
-    self_loops: False
-    directed: False
-    global_on: False
-    coord: 'pxpypze'                 # (Not relevant here)
+    thresh:     0.1                  # CLUE3D Reco-to-Sim matching threshold
+    self_loops: True                 # Often good for GNN-message passing (but rememb. that in evaluation, can increase AUC artificially ~ within self-loop fraction of all edges)
+    directed:   False
+  #  global_on: False                # Not active
+  #  coord: 'pxpypze'                # NA
   
   # # ** Image tensor object construction **
   # image_param:
@@ -128,6 +129,7 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     - gnet0
     - gnet1
+    - gnet2
   
   raytune: !include configs/hgcal/raytune.yml
   

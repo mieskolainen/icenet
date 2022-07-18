@@ -301,15 +301,15 @@ def split_data_simple(X, frac, permute=True):
     """ Split machine learning data into train, validation, test sets
     
     Args:
-        X:         data matrix
+        X:         data as a list of event objects (such as torch geometric Data)
         frac:      split fraction
     """
 
-    ### Permute events to have random mixing between classes
+    ### Permute events to have random mixing between events
     if permute:
-        randi = np.random.permutation(len(X))
-        X = X[randi]
-
+        randi = np.random.permutation(len(X)).tolist()
+        X = [X[i] for i in randi]
+    
     N     = len(X)
     N_A   = round(N * frac)
     N_B   = N - N_A

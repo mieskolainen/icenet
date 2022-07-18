@@ -15,6 +15,7 @@ from termcolor import colored, cprint
 
 import torch
 from   torch_geometric.data import Data
+import torch_geometric.transforms as T
 
 import multiprocessing
 from   torch.utils.data import dataloader
@@ -36,8 +37,8 @@ def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e
         data: awkward array
     """
 
-    global_on  = graph_param['global_on']
-    coord      = graph_param['coord']
+    #global_on  = graph_param['global_on']
+    #coord      = graph_param['coord']
     directed   = graph_param['directed']
     self_loops = graph_param['self_loops']
 
@@ -93,18 +94,37 @@ def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e
         y = torch.tensor(np.array(y, dtype=int), dtype=torch.long)
         # --------------------------------------------
         
-        # --------------------------------------------
-        # Per edge training weights
-        w = torch.ones_like(y,  dtype=torch.float)
-        # --------------------------------------------
-        
-        # Global features
+        # Global features (not active)
         u = torch.tensor([], dtype=torch.float)
+
+        # Edge weights
+        w = torch.ones_like(y, dtype=torch.float)
         
         
-        graph_dataset.append(Data(x=x, edge_index=edge_index, edge_attr=None, y=y, w=w, u=u))
+        # Create graph
+        graph = Data(x=x, edge_index=edge_index, edge_attr=None, y=y, w=w, u=u)
+        
+        # Add also edge attributes
+        graph.edge_attr = compute_edge_attr(graph)
+        
+        
+        graph_dataset.append(graph)
 
     return graph_dataset
+
+
+def compute_edge_attr(data):
+
+    num_edges = data.edge_index.shape[1]
+    edge_attr = torch.zeros((num_edges, 1), dtype=torch.float)
+
+    for n in range(num_edges):
+        i,j = data.edge_index[0,n], data.edge_index[1,n]
+
+        # L2-distance
+        edge_attr[n,0] = torch.sqrt(torch.sum((data.x[i,0:3] - data.x[j,0:3]) ** 2))
+
+    return edge_attr
 
 
 def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):

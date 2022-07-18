@@ -41,7 +41,6 @@ import numpy as np
 # iceid
 import iceid
 from iceid import common
-from configs.eid.mvavars import *
 
 # Main function
 #

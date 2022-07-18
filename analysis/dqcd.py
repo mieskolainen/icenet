@@ -24,7 +24,7 @@ def main() :
   
   args, cli = process.read_config(config_path=f'configs/dqcd', runmode=runmode)
   X,Y,W,ids = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
-
+  
   if runmode == 'train' or runmode == 'eval':
     data = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, mvavars='configs.dqcd.mvavars', runmode=runmode)
   
