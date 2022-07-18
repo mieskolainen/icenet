@@ -452,13 +452,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">)</span>
 
         <span class="c1"># 2-point (node) probability computation function (edge level inference)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_directed&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_asymmetric&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                     <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
                     <span class="c1">#nn.Dropout(0.5),</span>
                     <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
                     <span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_undirected&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_symmetric&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                     <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
                     <span class="c1">#nn.Dropout(0.5),</span>
@@ -477,17 +477,17 @@
 <span class="sd">        we can learn (in principle) a directed or undirected edge (adjacency) behavior.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="c1"># Not permutation symmetric under i &lt;-&gt; j</span>
-        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_directed&#39;</span><span class="p">:</span>
+        <span class="c1"># Not permutation symmetric under i &lt;-&gt; j exchange</span>
+        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_asymmetric&#39;</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">...</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         
-        <span class="c1"># Permutation symmetric under i &lt;-&gt; j</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_undirected&#39;</span><span class="p">:</span>
+        <span class="c1"># Permutation symmetric under i &lt;-&gt; j exchange</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_symmetric&#39;</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
-
-
+    
+    
 <div class="viewcode-block" id="GNNGeneric.GINE_helper"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINE_helper">[docs]</a>    <span class="k">def</span> <span class="nf">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        GINEConv requires node features and edge features with the same dimension.</span>
