@@ -109,7 +109,10 @@ def pred_graph_xgb(args, param, device='cpu'):
             x_tot[i,0:dim1] = conv_x[i,:]  # Convoluted features
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
-        return xgb_model.predict(xgboost.DMatrix(data=x_tot))[:, args['signalclass']]
+        if 'multi' in param['xgb']['model_param']['objective']:
+            return xgb_model.predict(xgboost.DMatrix(data = x_tot))[:,args['signalclass']]
+        else:
+            return xgb_model.predict(xgboost.DMatrix(data = x_tot)) 
 
     return func_predict
 
@@ -187,15 +190,18 @@ def pred_xtx(args, param):
 '''
 
 def pred_xgb(args, param):
-
+    
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
 
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        return xgb_model.predict(xgboost.DMatrix(data = x))[:,args['signalclass']]
-    
+        if 'multi' in param['model_param']['objective']:
+            return xgb_model.predict(xgboost.DMatrix(data = x))[:,args['signalclass']]
+        else:
+            return xgb_model.predict(xgboost.DMatrix(data = x))   
+
     return func_predict
 
 

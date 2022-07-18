@@ -100,7 +100,7 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
     n = 0
     for i in range(num_nodes):
         for j in range(num_nodes):
-
+            
             # Compute only non-zero
             if (i > 0 and j > 0) and (j > i):
 
@@ -117,7 +117,7 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
                 edge_attr[n,1] = (p4_i + p4_j).m2  # Mandelstam s-like
                 edge_attr[n,2] = (p4_i - p4_j).m2  # Mandelstam t-like
                 edge_attr[n,3] = p4_i.dot4(p4_j)   # 4-dot
-
+                
             indexlist[i,j] = n
             n += 1
 

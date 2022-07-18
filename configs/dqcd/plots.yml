@@ -1,5 +1,5 @@
 basic:
-  active: true
+  active: false
   nbins:  70
 
 contours:
@@ -7,8 +7,8 @@ contours:
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
-  active: true
-
+  active: false
+  
   plot[0]:
     var:   ['ChsMET_pt']
     edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]

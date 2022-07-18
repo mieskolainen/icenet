@@ -14,7 +14,7 @@ cuts     = 'gen_e1_l1_dr < 0.2 AND gen_e2_l1_dr < 0.2 AND e1_l1_pt >=6 AND e2_l1
 for key in ['tree;1', 'tree;2']:
 	
 	print(key)
-	X,ids = iceroot.load_tree(rootfile=rootfile, tree=key)
+	X,ids = iceroot.load_tree(rootfile=rootfile, tree=key, library='np')
 	X = icemap(X,ids)
 
 	y1 = X[cuts]
@@ -26,10 +26,10 @@ for key in ['tree;1', 'tree;2']:
 	print('')
 	
 
-Y    = iceroot.load_tree(rootfile=rootfile, tree="tree")
-X    = icemap(Y) 
-x    = X[cuts]
-pms2 = x['e1_hlt_pms2']
+tuplet = iceroot.load_tree(rootfile=rootfile, tree="tree")
+X      = icemap(tuplet) 
+x      = X[cuts]
+pms2   = x['e1_hlt_pms2']
 
 for i in range(len(pms2)):
 	print(f'{pms2[i]:.5f}')

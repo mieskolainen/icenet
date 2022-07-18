@@ -4,6 +4,8 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
+import awkward as ak
+
 import numba
 import copy
 import torch
@@ -14,6 +16,7 @@ import sys
 
 from termcolor import colored, cprint
 
+# MVA imputation
 from sklearn.impute import KNNImputer
 from sklearn.impute import SimpleImputer
 
@@ -141,7 +144,7 @@ def process_memory_use():
     Return system memory (RAM) used by the process in GB.
     """
     pid = os.getpid()
-    py = psutil.Process(pid)
+    py  = psutil.Process(pid)
     return py.memory_info()[0]/2.**30
 
 
@@ -202,7 +205,7 @@ def pick_vars(data, set_of_vars):
     """ Choose the active set of input variables.
 
     Args:
-        data:        IceTriplet / IceXYW type object
+        data:        IceXYW type object
         set_of_vars: Variables to pick
     Returns:
         newind:      Chosen indices
@@ -227,12 +230,19 @@ class IceXYW:
     """
     
     # constructor
-    def __init__(self, x = np.array([]), y = np.array([]), w = None, ids=None):
-
+    def __init__(self, x = np.array([]), y = np.array([]), w = None, ids = None):
+        
         self.x = x
         self.y = y
         self.w = w
         self.ids = ids
+
+        if   isinstance(x, np.ndarray):
+            self.concat = np.concatenate
+        elif isinstance(x, ak.Array):
+            self.concat = ak.concatenate
+        else:
+            raise Error(__name__ + f'.IceXYW.__init__: Unknown input array type')
 
     # + operator
     def __add__(self, other):
@@ -240,10 +250,10 @@ class IceXYW:
         if (len(self.x) == 0): # still empty
             return other
 
-        x = np.concatenate((self.x, other.x), axis=0)
-        y = np.concatenate((self.y, other.y), axis=0)
+        x = self.concat((self.x, other.x), axis=0)
+        y = self.concat((self.y, other.y), axis=0)
         if self.w is not None:
-            w = np.concatenate((self.w, other.w), axis=0)
+            w = self.concat((self.w, other.w), axis=0)
 
         return IceXYW(x, y, w)
 
@@ -253,10 +263,10 @@ class IceXYW:
         if (len(self.x) == 0): # still empty
             return other
 
-        self.x = np.concatenate((self.x, other.x), axis=0)
-        self.y = np.concatenate((self.y, other.y), axis=0)
+        self.x = self.concat((self.x, other.x), axis=0)
+        self.y = self.concat((self.y, other.y), axis=0)
         if self.w is not None:
-            self.w = np.concatenate((self.w, other.w), axis=0)
+            self.w = self.concat((self.w, other.w), axis=0)
 
         return self
 
@@ -287,14 +297,19 @@ class IceXYW:
         return self
 
 
-def split_data_simple(X, frac):
+def split_data_simple(X, frac, permute=True):
     """ Split machine learning data into train, validation, test sets
     
     Args:
-        X:         data matrix
+        X:         data as a list of event objects (such as torch geometric Data)
         frac:      split fraction
     """
 
+    ### Permute events to have random mixing between events
+    if permute:
+        randi = np.random.permutation(len(X)).tolist()
+        X = [X[i] for i in randi]
+    
     N     = len(X)
     N_A   = round(N * frac)
     N_B   = N - N_A
@@ -308,11 +323,13 @@ def split_data_simple(X, frac):
     X_val = X[N_trn:N_trn + N_val]
     X_tst = X[N - N_tst:]
     
+    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
+    
     return X_trn, X_val, X_tst
 
 
-def split_data(X, Y, W, ids, frac):
-    """ Split machine learning data into [A = train & validation] + [B = test] sets
+def split_data(X, Y, W, ids, frac, permute=True):
+    """ Split machine learning data into train, validation, test sets
     
     Args:
         X:         data matrix
@@ -323,24 +340,25 @@ def split_data(X, Y, W, ids, frac):
         rngseed:   random seed
     """
 
-    ### Permute events to have random mixing between classes (a must!)
-    randi = np.random.permutation(X.shape[0])
-    X = X[randi]
-    Y = Y[randi]
-    if W is not None:
-        W = W[randi]
-
+    ### Permute events to have random mixing between classes
+    if permute:
+        randi = np.random.permutation(len(X))
+        X = X[randi]
+        Y = Y[randi]
+        if W is not None:
+            W = W[randi]
+    
     # --------------------------------------------------------------------
 
-    N     = X.shape[0]
+    N     = len(X)
     N_A   = round(N * frac)
     N_B   = N - N_A
     
-    N_trn = round(N_A * frac)
-    N_val = N_A - N_trn
-    N_tst = N_B
+    N_trn = N_A
+    N_val = round(N_B / 2)
+    N_tst = N - N_trn - N_val
 
-    # A. Train
+    # 1. Train
     X_trn = X[0:N_trn]
     Y_trn = Y[0:N_trn]
     if W is not None:
@@ -348,7 +366,7 @@ def split_data(X, Y, W, ids, frac):
     else:
         W_trn = None
 
-    # A. Validation
+    # 2. Validation
     X_val = X[N_trn:N_trn + N_val]
     Y_val = Y[N_trn:N_trn + N_val]
     if W is not None:
@@ -356,11 +374,11 @@ def split_data(X, Y, W, ids, frac):
     else:
         W_val = None
 
-    # B. Test
-    X_tst = X[N - N_tst:N]
-    Y_tst = Y[N - N_tst:N]
+    # 3. Test
+    X_tst = X[N - N_tst:]
+    Y_tst = Y[N - N_tst:]
     if W is not None:
-        W_tst = W[N - N_tst:N]
+        W_tst = W[N - N_tst:]
     else:
         W_tst = None
 
@@ -371,13 +389,7 @@ def split_data(X, Y, W, ids, frac):
     tst = IceXYW(x = X_tst, y = Y_tst, w=W_tst, ids=ids)
     # --------------------------------------------------------
     
-    print(__name__ + ".split_data: fractions [train: {:0.3f}, validate: {:0.3f}, test: {:0.3f}]".
-        format(X_trn.shape[0]/ N, X_val.shape[0]/ N, X_tst.shape[0] / N))
-
-    # Finally, re-permutate once more (needed if class-wise selection was done)
-    trn = trn.permute(np.random.permutation(trn.x.shape[0]))
-    val = val.permute(np.random.permutation(val.x.shape[0]))
-    tst = tst.permute(np.random.permutation(tst.x.shape[0]))
+    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
     
     return trn, val, tst
 

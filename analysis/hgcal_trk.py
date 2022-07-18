@@ -16,7 +16,6 @@ from icenet.tools import io
 
 # icehgcal
 from icehgcal import common
-from configs.hgcal.mvavars import *
 
 # Main function
 #

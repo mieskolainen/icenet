@@ -26,21 +26,21 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-# Torch conversion
-def graph2torch(X):
+# # Torch conversion
+# def graph2torch(X):
 
-    # Turn into torch geometric Data object
-    Y = np.zeros(len(X), dtype=object)
-    for i in range(len(X)):
-
-        d = X[i]
-        Y[i] = Data(x=torch.tensor(d['x'], dtype=torch.float),
-                    edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
-                    edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
-                    y=torch.tensor(d['y'], dtype=torch.long),
-                    w=torch.tensor(d['w'], dtype=torch.float),
-                    u=torch.tensor(d['u'], dtype=torch.float))
-    return Y
+#     # Turn into torch geometric Data object
+#     Y = np.zeros(len(X), dtype=object)
+#     for i in range(len(X)):
+        
+#         d = X[i]
+#         Y[i] = Data(x=torch.tensor(d['x'], dtype=torch.float),
+#                     edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
+#                     edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
+#                     y=torch.tensor(d['y'], dtype=torch.long),
+#                     w=torch.tensor(d['w'], dtype=torch.float),
+#                     u=torch.tensor(d['u'], dtype=torch.float))
+#     return Y
 
 
 def parse_tensor_data(X, ids, image_vars, args):
@@ -110,8 +110,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
     
     num_node_features = 6
     num_edge_features = 4
-    num_classes       = 2
-
+    
     num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
     dataset  = []
 
@@ -135,30 +134,30 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
     num_empty_ECAL = 0
 
     # Loop over events
-    for i in tqdm(range(num_events)):
+    for ev in tqdm(range(num_events)):
 
-        num_nodes = 1 + len(X[i, ind__image_clu_eta]) # +1 for the virtual node (empty data)
+        num_nodes = 1 + len(X[ev, ind__image_clu_eta]) # +1 for the virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
 
         # Construct 4-vector for the track, with pion mass
         p4track = vec4()
-        p4track.setPtEtaPhiM(X[i, ind__trk_pt], X[i, ind__trk_eta], X[i, ind__trk_phi], M_PION)
+        p4track.setPtEtaPhiM(X[ev, ind__trk_pt], X[ev, ind__trk_eta], X[ev, ind__trk_phi], M_PION)
 
-        # Construct 4-vector for each ECAL cluster [@@ JAGGED @@]
+        # Construct 4-vector for each ECAL cluster
         p4vec = []
-        N_c = len(X[i, ind__image_clu_e])
+        N_c = len(X[ev, ind__image_clu_e])
         
         if N_c > 0:
             for k in range(N_c): 
                 
-                pt    = X[i, ind__image_clu_e][k] / np.cosh(X[i, ind__image_clu_eta][k]) # Massless approx.
-                eta   = X[i, ind__image_clu_eta][k]
-                phi   = X[i, ind__image_clu_phi][k]
+                pt    = X[ev, ind__image_clu_e][k] / np.cosh(X[ev, ind__image_clu_eta][k]) # Massless approx.
+                eta   = X[ev, ind__image_clu_eta][k]
+                phi   = X[ev, ind__image_clu_phi][k]
 
                 v = vec4()
                 v.setPtEtaPhiM(pt, eta, phi, 0)
 
-                p4vec.append( v )
+                p4vec.append(v)
 
         # Empty ECAL cluster information
         else:
@@ -170,21 +169,18 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
 
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:
-            y = torch.tensor([Y[i]], dtype=torch.long)
+            y = torch.tensor([Y[ev]], dtype=torch.long)
         else:
             y = torch.tensor([0],    dtype=torch.long)
 
         # Training weights, note [] is important to have for right dimensions
         if weights is not None:
-            w = torch.tensor([weights[i]], dtype=torch.float)
+            w = torch.tensor([weights[ev]], dtype=torch.float)
         else:
             w = torch.tensor([1.0],  dtype=torch.float)
 
-        ## Construct global feature vector
-        u = torch.tensor(X[i, feature_ind].tolist(), dtype=torch.float)
-        
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[i], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[ev], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
@@ -195,9 +191,11 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         edge_index = analytic.get_simple_edge_index(num_nodes=num_nodes, num_edges=num_edges, self_loops=self_loops, directed=directed)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
         
-        # Add this event
+        ## Construct global feature vector
         if global_on == False: # Null the global features
             u = torch.tensor([], dtype=torch.float)
+        else:
+            u = torch.tensor(X[ev, feature_ind].tolist(), dtype=torch.float)
         
         dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     

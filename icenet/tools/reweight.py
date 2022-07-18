@@ -1,8 +1,10 @@
 # Event sample re-weighting tools
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
+import awkward as ak
+
 import numba
 import matplotlib.pyplot as plt
 from termcolor import colored, cprint
@@ -26,8 +28,14 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     Returns:
         weights: 1D-array of re-weights
     """
+    use_ak = True if isinstance(x, ak.Array) else False
 
     num_classes = len(np.unique(y))
+
+    if use_ak:
+        y = copy.deepcopy(ak.to_numpy(y).astype(int))
+        w = copy.deepcopy(ak.to_numpy(w).astype(float))
+
     args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
     ### Construct parameter names
@@ -44,10 +52,13 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
         
         print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
         
-        ### Re-weighting variables
+        ### Collect re-weighting variables
         RV = {}
         for var in paramdict.keys():
-            RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
+            if use_ak:
+                RV[var] = ak.to_numpy(x[var]).astype(np.float)
+            else:
+                RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
 
         ### Pre-transform
         for var in paramdict.keys():
@@ -180,7 +191,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     # No differential re-weighting    
     else:
         print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y)")
-        weights_doublet = np.zeros((x.shape[0], num_classes))
+        weights_doublet = np.zeros((len(x), num_classes))
 
         for c in range(num_classes):
             sample_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights
@@ -202,7 +213,10 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     
     print(__name__ + f'.compute_ND_reweights: Output with sum[y == c]: {frac} | sum[weights[y == c]]: {sums}')
     
-    return weights, pdf
+    if use_ak:
+        return ak.Array(weights), pdf
+    else:
+        return weights, pdf
 
 
 def reweightcoeff1D(X, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1e-12) :
@@ -298,7 +312,6 @@ def pdf_2D_hist(X_A, X_B, w, binedges_A, binedges_B):
     return pdf
 
 
-@numba.njit
 def balanceweights(weights_doublet, reference_class, y, EPS=1e-12):
     """ Balance N-class weights to sum to equal counts.
     
@@ -309,10 +322,10 @@ def balanceweights(weights_doublet, reference_class, y, EPS=1e-12):
     Returns:
         weights doublet with new weights per event
     """
-    N = weights_doublet.shape[1]
+    num_classes = weights_doublet.shape[1]
     ref_sum = np.sum(weights_doublet[(y == reference_class), reference_class])
 
-    for i in range(N):
+    for i in range(num_classes):
         if i is not reference_class:
             EQ = ref_sum / (np.sum(weights_doublet[y == i, i]) + EPS)
             weights_doublet[y == i, i] *= EQ

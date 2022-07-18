@@ -12,19 +12,27 @@ mva_param: &MVA_INPUT_PARAM
   inputvar:         null
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
-  jagged_maxdim:    6
-  
-  frac: 0.8                          # Train/validate/test split fraction
+
+  # Needs to be alphabetical
+  jagged_maxdim:
+    
+    Jet:   10
+    Muon:  10
+    sv:    10
+    cpf:   10
+    npf:   10
+
+  frac: 0.5                          # Train vs validate/test split fraction
   
   # Variable imputation
   imputation_param:
-    active: false                    # True / False
-    var: 'MVA_SCALAR_VARS'           # Array of variables to be imputated
+    active: true                     # True / False
+    var: null                        # Array of variables to be imputated, if null, then all
     algorithm: 'constant'            # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                    # For constant imputation
+    fill_value: -999.0               # For constant imputation
     knn_k: 8                         # Number of nearest neighbours considered
-    values: []                       # Special values which indicate the need for imputation
-                                     # if set empty [], only inf/nan are imputed
+    values: null                     # Special values which indicate the need for imputation, if null, then only Inf/Nan
+
   varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'          # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
@@ -86,24 +94,24 @@ train_runmode:
     
     # ---------------------
     # Differential parameters
+    
+    # dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
+    # pseudo_type: 'product'         # 'product', 'geometric_mean'
+    
+    # var_A: 'x_hlt_pt'
+    # var_B: 'x_hlt_eta'
 
-    dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product'         # 'product', 'geometric_mean'
+    # bins_A:  [0.0001, 100.0, 150]  # Make sure the bounds cover the phase space
+    # binmode_A:  'linear'           # 'log10' or 'linear' binning
     
-    var_A: 'x_hlt_pt'
-    var_B: 'x_hlt_eta'
-
-    bins_A:  [0.0001, 100.0, 150]  # Make sure the bounds cover the phase space
-    binmode_A:  'linear'           # 'log10' or 'linear' binning
+    # bins_B: [-3.1, 3.1, 150]
+    # binmode_B: 'linear'
     
-    bins_B: [-3.1, 3.1, 150]
-    binmode_B: 'linear'
+    # # ! Variable, and binning min/max boundaries are both transformed !
+    # transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
+    # transform_B: null
     
-    # ! Variable, and binning min/max boundaries are both transformed !
-    transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
-    transform_B: null
-    
-    max_reg: 10000.0               # Maximum weight cut-off regularization
+    # max_reg: 10000.0               # Maximum weight cut-off regularization
 
 
   ## Outlier protection in the training
@@ -117,22 +125,27 @@ train_runmode:
   # Give all models some unique identifier and label
   models:  !include configs/dqcd/models.yml
   active_models: &ACTIVE_MODELS
-    - xgb0  
+    
+    #- gnet1
+    #- gnet2
+    #- gnet3
+    
+    - xgb0
     #- dbnf0
     - vae0
     - deps
     - lgr0
-
+    
     #- xgb1
     #- dmlp
     #- dmx0
     #- dmx1
-
+    
     - cut0
     - cut1
     - cut2
     - cutset0
-
+  
   raytune: !include configs/dqcd/raytune.yml
 
   # Distillation training

@@ -23,9 +23,9 @@ def filter_charged(X, ids, xcorr_flow=False):
 
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
-    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
-    return ind
+    return mask
 
 
 def filter_no_egamma(X, ids, xcorr_flow=False):
@@ -34,7 +34,7 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     	X    : Data matrix (N events x D dimensions)
     	ids : Variable name list (D)
     Returns:
-    	ind  : Passing indices list
+        Passing indices mask (N)
     """
     
     # Fiducial cuts for the tag-side muon trigger object
@@ -49,9 +49,9 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
-    ind         = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
 
-    return ind
+    return mask
 
 
 # Add alternative filters here ...

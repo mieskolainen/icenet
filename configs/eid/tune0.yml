@@ -23,7 +23,7 @@ mva_param: &MVA_INPUT_PARAM
   varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
   
-  frac: 0.9                           # Train/validate/test split fraction
+  frac: 0.9                          # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:
@@ -32,7 +32,7 @@ mva_param: &MVA_INPUT_PARAM
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
     fill_value: 0                     # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
-    values: [-999, -666, -10]         # Special values which indicate the need for imputation
+    values: [-999, -666, -10]         # Special values which indicate the need for imputation, if null, then only Inf/Nan are imputed
   
   # Graph object construction
   graph_param:
@@ -180,7 +180,7 @@ train_runmode:
     drains:
       #- xgb1
       # - add more here
-
+  
   # Batched "deep" training
   batch_train_param:
     blocksize: 150000   # Maximum number of events simultaneously in RAM

@@ -6,12 +6,15 @@
 import argparse
 import yaml
 import numpy as np
+import awkward as ak
+import torch
+
+from importlib import import_module
 from termcolor import colored, cprint
 import os
 import copy
 import sys
 import pickle
-import torch
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
@@ -50,9 +53,11 @@ def read_cli():
     parser.add_argument("--tag",             type=str,  default='tag0')
 
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--use_cache",       type=int,  default=1)
     parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--use_conditional", type=bool, default=argparse.SUPPRESS)
     parser.add_argument("--modeltag",        type=str,  default=None)
+
 
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -163,7 +168,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
-    args['__use_cache__']       = True
+    args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
 
     # -------------------------------------------------------------------
@@ -219,10 +224,15 @@ def read_data(args, func_loader, runmode):
             if k == 0:
                 X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
             else:
-                X = np.concatenate((X, X_), axis=0)
-                Y = np.concatenate((Y, Y_), axis=0)
+                if   isinstance(X, np.ndarray):
+                    concat = np.concatenate
+                elif isinstance(X, ak.Array):
+                    concat = ak.concatenate
+                
+                X = concat((X, X_), axis=0)
+                Y = concat((Y, Y_), axis=0)
                 if W is not None:
-                    W = np.concatenate((W, W_), axis=0)
+                    W = concat((W, W_), axis=0)
 
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
@@ -239,85 +249,107 @@ def read_data(args, func_loader, runmode):
     return X, Y, W, ids
 
 
-def process_data(args, X, Y, W, ids, func_factor, impute_vars, runmode):
+def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
 
     # ----------------------------------------------------------
     # Pop out conditional variables if they exist
     if args['use_conditional'] == False:
 
-        index = []
+        index  = []
+        idxvar = []
         for i in range(len(ids)):
             if '__model' not in ids[i]:
                 index.append(i)
+                idxvar.append(ids[i])
             else:
-                print(__name__ + f'.process_data: Removing conditional variable: <{ids[i]}>')
-        
-        X   = X[:, np.array(index, dtype=int)]
+                print(__name__ + f'.process_data: Removing conditional variable "{ids[i]}"')
+
+        if   isinstance(X, np.ndarray):
+            X = X[:,np.array(index, dtype=int)]
+        elif isinstance(X, ak.Array):
+            X = X[idxvar]
+
         ids = [ids[j] for j in index]
     # ----------------------------------------------------------
-
+    
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
 
+    # ----------------------------------------
+    if args['imputation_param']['active']:
+        module = import_module(mvavars, 'configs.subpkg')
+
+        var    = args['imputation_param']['var']
+        if var is not None:
+            impute_vars = getattr(module, var)
+        else:
+            impute_vars = None
+    # ----------------------------------------
+    
     ### Split and factor data
     output = {}
     if   runmode == 'train':
 
-        ## Imputate
-        if args['imputation_param']['active']:
-            trn, imputer = impute_datasets(data=trn, features=impute_vars, args=args['imputation_param'], imputer=None)
-            val, imputer = impute_datasets(data=val, features=impute_vars, args=args['imputation_param'], imputer=imputer)
-            
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
-        
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             trn.w, pdf = reweight.compute_ND_reweights(pdf=None, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
             val.w,_    = reweight.compute_ND_reweights(pdf=pdf,  x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
             pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
         
+        # Compute different data representations
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
 
-    elif runmode == 'eval':
-        
         ## Imputate
         if args['imputation_param']['active']:
-
-            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
-            tst, _  = impute_datasets(data=tst, features=impute_vars, args=args['imputation_param'], imputer=imputer)
+            output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
+            output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+
+    elif runmode == 'eval':
+        
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
-        
+
+        # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
 
+        ## Imputate
+        if args['imputation_param']['active']:
+
+            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
+    
     return output
 
 
-def impute_datasets(data, args, features, imputer=None):
+def impute_datasets(data, args, features=None, imputer=None):
     """
     Dataset imputation
 
     Args:
         data:        .x, .y, .w, .ids type object
         args:        imputer parameters
-        features:    variables to impute (list)
+        features:    variables to impute (list), if None, then all are considered
         imputer:     imputer object (scikit-type)
 
     Return:
         imputed data
     """
 
-    if args['active']:
+    if features is None:
+        features = data.ids
+
+    # Choose active dimensions
+    dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
+
+    if args['values'] is not None:
 
         special_values = args['values'] # possible special values
-        print(__name__ + f'.impute_datasets: Imputing data for special values {special_values} for variables in <{args["var"]}>')
-
-        # Choose active dimensions
-        dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
+        cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
 
         # Parameters
         param = {
@@ -332,8 +364,10 @@ def impute_datasets(data, args, features, imputer=None):
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
 
     else:
-        # No imputation, but fix spurious NaN / Inf
-        data.x[np.logical_not(np.isfinite(data.x))] = args['fill_value']
+        cprint(__name__ + f'.impute_datasets: Imputing data for Inf/Nan in variables {features}', 'yellow')
+
+        # No other imputation, but fix spurious NaN / Inf
+        data.x[np.logical_not(np.isfinite(data.x[:, dim]))] = args['fill_value']
 
     return data, imputer
 
@@ -397,8 +431,7 @@ def train_models(data_trn, data_val, args=None) :
         pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'))
     
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
-
-
+        
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -415,9 +448,10 @@ def train_models(data_trn, data_val, args=None) :
                       'param':    param}
             
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
+
             
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
@@ -434,6 +468,7 @@ def train_models(data_trn, data_val, args=None) :
             #### Add distillation, if turned on
             if args['distillation']['drains'] is not None:
                 if ID in args['distillation']['drains']:
+                    cprint(__name__ + f'.train_models: Setting soft distillation target for <{param["train"]}>', 'yellow')
                     inputs['y_soft'] = y_soft
             
             if ID in args['raytune']['param']['active']:
@@ -455,9 +490,9 @@ def train_models(data_trn, data_val, args=None) :
                       'param':       param}
             
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
 
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
@@ -478,9 +513,9 @@ def train_models(data_trn, data_val, args=None) :
                       'param': param}
 
             #### Add distillation, if turned on
-            #if args['distillation']['drains'] is not None:
-            #    if ID in args['distillation']['drains']:
-            #        inputs['y_soft'] = y_soft
+            if args['distillation']['drains'] is not None:
+                if ID in args['distillation']['drains']:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
             
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
@@ -507,13 +542,17 @@ def train_models(data_trn, data_val, args=None) :
         # --------------------------------------------------------
         # If distillation
         if ID == args['distillation']['source']:
-            print(__name__ + '.train.models: Computing distillation soft targets ...')
+            cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
             
             if args['num_classes'] != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
             if   param['train'] == 'xgb':
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
+                if 'multi' in args['models'][ID]['model_param']:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
+                else:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
+
             elif param['train'] == 'torch_graph':
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
@@ -667,8 +706,8 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                targetdir = aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/')
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW, targetdir=targetdir, transform='torch')
+                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW,
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
 
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
 
@@ -842,7 +881,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         plots.density_MVA_wclass(**inputs)
 
     # ----------------------------------------------------------------
-    ### COR 2D plots
+    ### MVA 2D plots
     if args['plot_param']['MVA_2D']['active']:
 
         for i in range(100): # Loop over plot types

@@ -14,40 +14,55 @@ from tqdm import tqdm
 
 
 @numba.jit
-def compute_edges(trk_data, ass_data, gra_data, node, edge, edge_labels, directed, self_loops, thresh=0.1):
+def compute_edges(trk_data, ass_data, gra_data, edge_index, edge_labels, edge_qualities, graph_param):
     """
-    
     Logic based on (but refined):
     https://github.com/Abhirikshma/HackathonLinking/blob/master/firstModelAndTraining.ipynb
     
     Returns:
         node, edge, edge_labels
-    
     """
+
+    # From yaml file
+    thresh     = graph_param['thresh']
+    directed   = graph_param['directed']
+    self_loops = graph_param['self_loops']
+    
+    # Each trackster ~ node in the ML-graph
     for i in range(trk_data.NTracksters):
 
-        node.append(i)
-        qualities  = ass_data.tsCLUE3D_recoToSim_CP_score[i]
-        best_sts_i = ass_data.tsCLUE3D_recoToSim_CP[i][ak.argmin(qualities)]
-        best_sts_i = best_sts_i if qualities[best_sts_i] < thresh else -1
+        qualities_i = ass_data.tsCLUE3D_recoToSim_CP_score[i]
+        best_sts_i  = ass_data.tsCLUE3D_recoToSim_CP[i][ak.argmin(qualities_i)]
+        OK_i        = True if qualities_i[best_sts_i] < thresh else False
 
         for j in gra_data.linked_inners[i]:
 
-            edge.append([j,i])
+            qualities_j = ass_data.tsCLUE3D_recoToSim_CP_score[j]
+            best_sts_j  = ass_data.tsCLUE3D_recoToSim_CP[j][ak.argmin(qualities_j)]
+            OK_j        = True if qualities_j[best_sts_j] < thresh else False
 
-            qualities  = ass_data.tsCLUE3D_recoToSim_CP_score[j]
-            best_sts_j = ass_data.tsCLUE3D_recoToSim_CP[j][ak.argmin(qualities)]
-            best_sts_j = best_sts_j if qualities[best_sts_j] < thresh else -1
-
-            if (best_sts_i == best_sts_j) and (best_sts_i != -1):
+            # -----------------------------
+            ## Create ML-graph data
+            if (best_sts_i == best_sts_j) and (OK_i and OK_j):
                 edge_labels.append(1)
             else:
                 edge_labels.append(0)
 
+            edge_index.append([i,j])
+            edge_qualities.append([qualities_i[best_sts_i], qualities_j[best_sts_j]])
+
             # If we want undirected graph
-            if not directed:
-                edge.append([i,j])
+            if directed:
                 edge_labels.append(edge_labels[-1])
+                edge_index.append([j,i])
+                edge_qualities.append([qualities_j[best_sts_j], qualities_i[best_sts_i]])
+            # -----------------------------
+
+        # If we want self-loops
+        if self_loops:
+            edge_labels.append(1)
+            edge_index.append([i,i])
+            edge_qualities.append([qualities_i[best_sts_i], qualities_i[best_sts_i]])
 
 
 def create_trackster_data(files):
@@ -114,19 +129,15 @@ def create_trackster_data(files):
 
 def event_loop(files, graph_param, maxevents=int(1E9)):
 
-    #global_on  = graph_param['global_on']
-    #coord      = graph_param['coord']
-    directed   = graph_param['directed']
-    self_loops = graph_param['self_loops']
-
     # --------------------------------------------
 
     # Create trackster data
     data  = create_trackster_data(files=files)
 
-    x           = []
-    edge_index  = []
-    edge_labels = []
+    x              = []
+    edge_index     = []
+    edge_labels    = []
+    edge_qualities = []
 
     N = np.min([maxevents, len(data['df_track'])])
 
@@ -147,17 +158,18 @@ def event_loop(files, graph_param, maxevents=int(1E9)):
                      'EV3':           trk_data.EV3
         })
 
-        node_        = []
-        edge_index_  = []
-        edge_labels_ = []
-        
+        edge_index_     = []
+        edge_labels_    = []
+        edge_qualities_ = []
+
         # Compute edge data and labels
         compute_edges(trk_data=trk_data, ass_data=ass_data, gra_data=gra_data,
-            node=node_, edge=edge_index_, edge_labels=edge_labels_, directed=directed, self_loops=self_loops)
+            edge_index=edge_index_, edge_labels=edge_labels_, edge_qualities=edge_qualities_, graph_param=graph_param)
         
         # Save event data
         x.append(x_)
-        edge_index.append(np.array(edge_index_).T)
         edge_labels.append(edge_labels_)
+        edge_index.append(np.array(edge_index_).T)
+        edge_qualities.append(np.array(edge_qualities_).T)
     
-    return {'x': x, 'edge_index': edge_index, 'edge_labels': edge_labels}
+    return {'x': x, 'edge_index': edge_index, 'edge_labels': edge_labels, 'edge_qualities': edge_qualities}

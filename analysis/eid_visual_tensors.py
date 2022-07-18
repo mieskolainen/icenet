@@ -41,7 +41,6 @@ import numpy as np
 # iceid
 import iceid
 from iceid import common
-from configs.eid.mvavars import *
 
 # Main function
 #
@@ -54,9 +53,8 @@ def main() :
     runmode     = 'train'
     args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
     
-    impute_vars = globals()[args['imputation_param']['var']]
-    data        = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, impute_vars=impute_vars, runmode='train')
-
+    data        = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
+    
     # Pick them out
     data_tensor = data['trn']['data_tensor']
     data_kin    = data['trn']['data_kin']

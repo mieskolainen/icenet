@@ -99,8 +99,8 @@ lgr0:
     
     optimizer: 'AdamW'
     clip_norm: 0.1
-
-    epochs: 50
+    
+    epochs: 150
     batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001       # L2-regularization
@@ -343,3 +343,164 @@ dbnf0:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
+
+# Graph net
+gnet1:
+  train:    'torch_graph'
+  predict:  'torch_graph'
+  label:    'EdgeConv'
+  raytune:  'gnn_setup'
+
+  conv_type: 'EdgeConv'       # See models under icenet/deep/graph.py
+  
+  # Model
+  model_param:
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    global_pool: 'mean'
+    z_dim: 64                 # Convolution output dimension
+    
+    # Message passing parameters
+    conv_MLP_act: 'relu'
+    conv_MLP_bn: True
+    conv_aggr: 'max'
+    conv_knn: 8
+
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 0.1
+
+    epochs: 150
+    batch_size: 64
+    lr: 1.0e-3
+    weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+
+# Graph net
+gnet2:
+  train:    'torch_graph'
+  predict:  'torch_graph'
+  label:    'SuperEdgeConv'
+  raytune:  'gnn_setup'
+
+  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  
+  # Model
+  model_param:
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    global_pool: 'mean'
+    z_dim: 64                 # Convolution output dimension
+    
+    # Message passing parameters
+    conv_MLP_act: 'relu'
+    conv_MLP_bn: True
+    conv_aggr: 'max'
+    conv_knn: 8
+
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 0.1
+
+    epochs: 150
+    batch_size: 64
+    lr: 1.0e-3
+    weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+
+# Graph net
+gnet3:
+  train:    'torch_graph'
+  predict:  'torch_graph'
+  label:    'DynamicEdgeConv'
+  raytune:  'gnn_setup'
+
+  conv_type: 'DynamicEdgeConv'       # See models under icenet/deep/graph.py
+  
+  # Model
+  model_param:
+    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    global_pool: 'mean'
+    z_dim: 64                 # Convolution output dimension
+    
+    # Message passing parameters
+    conv_MLP_act: 'relu'
+    conv_MLP_bn: True
+    conv_aggr: 'max'
+    conv_knn: 8
+    
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: True
+
+    final_MLP_act: 'relu'
+    final_MLP_bn:  True
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 0.1
+
+    epochs: 150
+    batch_size: 64
+    lr: 1.0e-3
+    weight_decay:  0.00005      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'             # 'all', 'latest'
+  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch

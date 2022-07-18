@@ -26,7 +26,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
     
     Returns:
-        X, Y, W, ids
+        X, Y, W, ids   (awkward array format)
     """
 
     for i,key in enumerate(processes):
@@ -45,36 +45,36 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
 
         # Load file
-        X__,ids     = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
-                        entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='np')
-        N_before    = X__.shape[0]
+        X__, ids    = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
+                        entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='ak')
+        
+        N_before    = len(X__)
         
         # Apply selections
         X__,ids     = process_func(X=X__, ids=ids, **param)
-        N_after     = X__.shape[0]
+        N_after     = len(X__)
 
         eff_acc     = N_after / N_before
 
-        print(__name__ + f'.read_multiple_MC: Process <{key}> | efficiency x acceptance = {eff_acc}')
+        print(__name__ + f'.read_multiple_MC: Process <{key}> | efficiency x acceptance = {eff_acc:0.6f}')
 
-        Y__         = class_id * np.ones(N_after, dtype=int)
+        Y__         = class_id * ak.Array(np.ones(N_after, dtype=int))
 
         # -------------------------------------------------
         # Visible cross-section weights
         if not force_xs:
-            W__ = (np.ones(N_after, dtype=float) / N_after) * (xs * eff_acc) # Sum over W yields --> (eff_acc * xs)
+            W__ = (ak.Array(np.ones(N_after, dtype=float)) / N_after) * (xs * eff_acc) # Sum over W yields --> (eff_acc * xs)
         
         # Force mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants
         # to have equal proportions for e.g. theory conditional MVA training.
         # (then one uses the same xs value for each process in the steering .yaml file)
         else:
-            W__ = (np.ones(N_after, dtype=float) / N_after) * xs # Sum over W yields --> xs
+            W__ = (ak.Array(np.ones(N_after, dtype=float)) / N_after) * xs # Sum over W yields --> xs
 
         # -------------------------------------------------
         # Add conditional (theory param) variables
         
         print(__name__ + f'.read_multiple_MC: Adding conditional theory (model) parameters')
-        print(X__.shape)
         
         for var in model_param.keys():
 
@@ -82,25 +82,27 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
             # Pick random between [a,b]
             if type(value) == list:
-                col = value[0]  + (value[1] - value[0]) * np.random.rand(X__.shape[0], 1)
+                col = value[0]  + (value[1] - value[0]) * ak.Array(np.random.rand(len(X__), 1))
             # Pick specific fixed value
             else:
                 if value is None:
                     value = np.nan
-                col = value  * np.ones((X__.shape[0], 1))                
+                col = value  * ak.Array(np.ones((len(X__), 1)).astype(float))         
             
-            X__ = np.append(X__, col, axis=1)
-            ids.append(f'__model_{var}')
+            # Create new 'record' (column) to ak-array
+            col_name      = f'__model_{var}'
+            X__[col_name] = col
+            ids.append(col_name)
         # -------------------------------------------------
 
         # Concatenate processes
         if i == 0:
             X, Y, W = X__, Y__, W__
         else:
-            X = np.concatenate((X, X__), axis=0)
-            Y = np.concatenate((Y, Y__), axis=0)
-            W = np.concatenate((W, W__), axis=0)
-        
+            X = ak.concatenate((X, X__), axis=0)
+            Y = ak.concatenate((Y, Y__), axis=0)
+            W = ak.concatenate((W, W__), axis=0)
+    
     return X,Y,W,ids
 
 
@@ -253,8 +255,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
                 print(__name__ + f'.load_tree: Maximum event count {entry_stop} reached')
                 break
 
-        return X
-
+        return X, ak.fields(X)
+        
     else:
         raise Exception(__name__ + f'.load_tree: Unknown library support')
 
