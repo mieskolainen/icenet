@@ -41,6 +41,7 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#folder-structure" id="id1">Folder structure</a></p></li>
 <li><p><a class="reference internal" href="#algorithms-packages-included" id="id2">Algorithms/packages included</a></p></li>
+<li><p><a class="reference internal" href="#training-methodologies-included" id="id3">Training methodologies included</a></p></li>
 </ul>
 </div>
 <section id="folder-structure">
@@ -53,6 +54,7 @@
 -icebrk       B/R(K) functions
 -icedqcd      DQCD functions
 -icefit       Fitting and statistics functions
+-icehgcal     HGCAL functions
 -iceid        Electron ID functions
 -icenet       Deep learning classes &amp; functions
 -iceplot      Plotting tools
@@ -65,15 +67,25 @@
 </section>
 <section id="algorithms-packages-included">
 <h2><a class="toc-backref" href="#id2">Algorithms/packages included</a><a class="headerlink" href="#algorithms-packages-included" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1. Factorized (dim-by-dim) likelihoods &amp; ratios using histograms [numpy]
-2. Gradient boosted decision trees [xgboost]
-3. Multinomial Logistic Regression [pytorch]
-4. MAXOUT multilayer feedforward network [pytorch]
-5. Deep Normalizing Flow (BNAF) based likelihoods &amp; ratios [pytorch]
-6. Permutation Equivariant Networks [pytorch]
-7. CNN Networks [pytorch]
-8. Graph Neural Nets [pytorch-geometric]
-9. ...
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.  Factorized (dim-by-dim) likelihoods &amp; ratios using histograms [numpy]
+2.  Gradient boosted decision trees [xgboost]
+3.  Multinomial Logistic Regression [pytorch]
+4.  MAXOUT multilayer feedforward network [pytorch]
+5.  Deep Normalizing Flow (BNAF) based likelihoods &amp; ratios [pytorch]
+6.  Permutation Equivariant Networks [pytorch]
+7.  CNN Networks [pytorch]
+8.  Graph Neural Nets (graph-, node-, edge-level inference) [pytorch-geometric]
+9.  Variational autoencoders [pytorch]
+10. Neural mutual information estimator [pytorch]
+11. ...
+</pre></div>
+</div>
+</section>
+<section id="training-methodologies-included">
+<h2><a class="toc-backref" href="#id3">Training methodologies included</a><a class="headerlink" href="#training-methodologies-included" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1. Model distillation
+2. Deep domain adaptation (via gradient reversal)
+3. ...
 </pre></div>
 </div>
 </section>
