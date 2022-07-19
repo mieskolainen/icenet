@@ -23,7 +23,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
 
     # --------------------------------------------
     # Synthetic negative edge sampling
-    if ('per_edge' in param['lossfunc']) and param['negative_sampling']:
+    if ('negative_sampling' in param) and param['negative_sampling']:
         
         neg_edge_index  = torch_geometric.utils.negative_sampling(
             edge_index      = x.edge_index,          num_nodes = x.x.shape[0],
@@ -38,9 +38,15 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         weights      = None # TBD. Could re-compute a new set of edge weights 
     # --------------------------------------------
 
-    if   param['lossfunc'] == 'cross_entropy':
+    if  param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
-        return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
+                 
+        if num_classes > 2:
+            return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
+        
+        # This can handle scalar y values in [0,1]
+        else:
+            return binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
 
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
@@ -48,17 +54,13 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
 
         log_phat    = F.log_softmax(x,    dim=-1)
         log_phat_DA = F.log_softmax(x_DA, dim=-1)
-        
+
         # https://arxiv.org/abs/1409.7495
         CE    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
         
         return CE, CE_DA
 
-    elif param['lossfunc'] == 'cross_entropy_per_edge':
-        log_phat = model.softpredict(x)
-        return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
-        
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         return multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
@@ -79,6 +81,26 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
     
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
+
+
+def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
+    """ 
+    Per instance weighted binary cross entropy loss (y can be a scalar between [0,1])
+    (negative log-likelihood)
+    
+    Numerically more stable version.
+    """
+    if weights is None:
+        w = 1.0
+    else:
+        w = weights
+    
+    loss = - w * (y*log_phat_1 + (1 - y) * log_phat_0)
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 
 def logsumexp(x, dim=-1):

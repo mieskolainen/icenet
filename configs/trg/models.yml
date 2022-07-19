@@ -108,6 +108,8 @@ xgb0:
     objective: 'binary:logistic' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']     # for evaluation, 'mlogloss'
   
+  plot_trees: False
+  
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
@@ -146,6 +148,8 @@ xgb1:
     # learning task parameters
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+  
+  plot_trees: True
   
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'

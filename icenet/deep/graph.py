@@ -496,7 +496,7 @@ class GNNGeneric(torch.nn.Module):
             edge_attr = data.edge_attr
 
         return x, edge_attr
-
+        
     def forward_with_DA(self, data):
         """
         Forward call with Domain Adaptation
@@ -506,7 +506,7 @@ class GNNGeneric(torch.nn.Module):
         
         x     = self.DA_grad_reverse(x)
         x_DA  = self.DA_MLP_net(x=x)           # Domain adaptation (source, target) discriminator net
-        
+
         return x_out, x_DA
 
     def forward(self, data, conv_only=False):
@@ -515,7 +515,7 @@ class GNNGeneric(torch.nn.Module):
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
-        ## Apply message passing layers
+        ## Apply GNN message passing layers
         x = self.conv(data)
 
         ## Global node feature pooling (to handle graph level classification)
@@ -530,7 +530,7 @@ class GNNGeneric(torch.nn.Module):
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
             else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
+                raise Exception(__name__ + f'.forward: Unknown global_pool <{self.global_pool}>')
         
         # ===========================================
         if conv_only: # Return convolution part
@@ -553,7 +553,7 @@ class GNNGeneric(torch.nn.Module):
             x = torch.cat((x, u), 1)
 
         ## Final MLP map
-
+        
         # Edge level inference
         if 'edge' in self.task:
             x = self.forward_2pt(x, data.edge_index)

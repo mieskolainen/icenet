@@ -67,12 +67,14 @@ xgb0:
     colsample_bylevel: 0.6
     colsample_bynode:  0.8
     
-    reg_lambda: 4.8       # L2 regularization
-    reg_alpha: 0.05        # L1 regularization
+    reg_lambda: 4.8               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']    # for evaluation
+    objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']      # for evaluation, 'mlogloss'
+
+  plot_trees: False
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
@@ -490,7 +492,7 @@ gnet3:
     # Domain adaptation
     DA_active: False
     # ...
-    
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

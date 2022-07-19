@@ -680,11 +680,14 @@ class Metric:
         self.tpr = None
         self.thresholds = None
         
+        # Make sure they are binary (cannot handle continuous values)
+        y_true_ = np.round(y_true)
+        
         if  num_classes == 2:
-            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
-            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
+            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true_, y_score=y_pred, sample_weight=weights)
+            self.auc = metrics.roc_auc_score(y_true=y_true_,  y_score=y_pred, sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true_, y_pred=np.round(y_pred), sample_weight=weights)
         else:
-            self.auc = metrics.roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=None, \
+            self.auc = metrics.roc_auc_score(y_true=y_true_, y_score=y_pred, sample_weight=None, \
                         average="weighted", multi_class='ovo', labels=np.arange(num_classes))
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
+            self.acc = metrics.accuracy_score(y_true=y_true_, y_pred=y_pred.argmax(axis=1), sample_weight=weights)

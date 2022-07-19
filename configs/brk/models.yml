@@ -34,7 +34,9 @@ xgb:
     # learning task parameters
     objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
     eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
-
+    
+  plot_trees: False
+  
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch

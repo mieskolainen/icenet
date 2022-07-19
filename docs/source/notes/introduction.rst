@@ -52,4 +52,5 @@ Training methodologies included
 
 	1. Model distillation
 	2. Deep domain adaptation (via gradient reversal)
-	3. ...
+	3. Automated hyperparameter tuning (via raytune)
+	4. ...
