@@ -48,7 +48,8 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
 
         log_phat    = F.log_softmax(x,    dim=-1)
         log_phat_DA = F.log_softmax(x_DA, dim=-1)
-
+        
+        # https://arxiv.org/abs/1409.7495
         CE    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
         

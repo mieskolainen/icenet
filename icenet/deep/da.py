@@ -21,7 +21,7 @@ class GradientReversalFunction(Function):
               GradientReversal(alpha=1.0)
         )
     """
-
+    
     @staticmethod
     def forward(ctx, x, alpha):
         ctx.alpha = alpha
