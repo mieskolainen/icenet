@@ -536,15 +536,16 @@
 <span class="sd">        Forward call with Domain Adaptation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_grad_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         
         <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span> <span class="c1"># GNN-convolution to final inference net</span>
+        
+        <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_grad_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x_DA</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_net</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>                            <span class="c1"># Domain adaptation (source, target) discriminator net</span>
         
         <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">x_DA</span></div>
-        
+
 <div class="viewcode-block" id="GNNGeneric.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;batch&#39;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">))</span>
