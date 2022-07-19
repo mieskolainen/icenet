@@ -536,11 +536,11 @@
 <span class="sd">        Forward call with Domain Adaptation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span> <span class="c1"># GNN-convolution to final inference net</span>
+        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span> <span class="c1"># GNN-convolution to final inference net</span>
         
         <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_grad_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">x_DA</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_net</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>                            <span class="c1"># Domain adaptation (source, target) discriminator net</span>
-
+        <span class="n">x_DA</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_net</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>           <span class="c1"># Domain adaptation (source, target) discriminator net</span>
+        
         <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">x_DA</span></div>
 
 <div class="viewcode-block" id="GNNGeneric.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -572,11 +572,11 @@
         <span class="c1"># ===========================================</span>
 
         <span class="c1"># Final inference net</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.inference"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric.inference"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Final inference network forward call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -590,7 +590,7 @@
 
         <span class="c1"># Edge level inference</span>
         <span class="k">if</span> <span class="s1">&#39;edge&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_2pt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_2pt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
 
         <span class="c1"># Node or graph level inference</span>
         <span class="k">else</span><span class="p">:</span>
