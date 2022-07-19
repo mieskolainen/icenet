@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from icenet.tools import aux_torch
 
 
-def loss_wrapper(model, x, y, num_classes, weights, param):
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None):
     """
     A wrapper function to loss functions
     
@@ -20,29 +20,41 @@ def loss_wrapper(model, x, y, num_classes, weights, param):
         log-likelihood functions can be weighted linearly, due to
         \\prod_i p_i(x_i; \\theta)**w_i ==\\log==> \\sum_i w_i \\log p_i(x_i; \\theta)
     """
+
+    # --------------------------------------------
+    # Synthetic negative edge sampling
+    if ('per_edge' in param['lossfunc']) and param['negative_sampling']:
+        
+        neg_edge_index  = torch_geometric.utils.negative_sampling(
+            edge_index      = x.edge_index,          num_nodes = x.x.shape[0],
+            num_neg_samples = x.edge_index.shape[1], method='sparse'
+        )
+        
+        # Construct new combined (artificial) graph
+        x.edge_index = torch.cat([x.edge_index, neg_edge_index], dim=-1).to(x.x.device)
+        x.y          = torch.cat([x.y, x.y.new_zeros(size=(neg_edge_index.shape[1],))], dim=0).to(x.x.device)
+
+        y            = x.y
+        weights      = None # TBD. Could re-compute a new set of edge weights 
+    # --------------------------------------------
+
     if   param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
+    elif param['lossfunc'] == 'cross_entropy_with_DA':
+
+        x, x_DA     = model.forward_with_DA(x)
+
+        log_phat    = F.log_softmax(x,    dim=-1)
+        log_phat_DA = F.log_softmax(x_DA, dim=-1)
+
+        CE    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
+        CE_DA = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
+        
+        return CE, CE_DA
+
     elif param['lossfunc'] == 'cross_entropy_per_edge':
-
-        # --------------------------------------------
-        # Synthetic negative edge sampling
-        if param['negative_sampling']:
-            
-            neg_edge_index  = torch_geometric.utils.negative_sampling(
-                edge_index      = x.edge_index,          num_nodes = x.x.shape[0],
-                num_neg_samples = x.edge_index.shape[1], method='sparse'
-            )
-            
-            # Construct new combined (artificial) graph
-            x.edge_index = torch.cat([x.edge_index, neg_edge_index], dim=-1).to(x.x.device)
-            x.y          = torch.cat([x.y, x.y.new_zeros(size=(neg_edge_index.shape[1],))], dim=0).to(x.x.device)
-
-            y            = x.y
-            weights      = None # TBD. Could re-compute a new set of edge weights 
-        # --------------------------------------------
-
         log_phat = model.softpredict(x)
         return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
         

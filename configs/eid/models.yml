@@ -34,6 +34,10 @@ gxgb0:
       final_MLP_act: 'relu'
       final_MLP_bn:  False
     
+      # Domain adaptation
+      DA_active: False
+      # ...
+
     # Optimization
     opt_param:  
       lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -125,6 +129,10 @@ gnet0:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -178,6 +186,10 @@ gnet1:
 
     final_MLP_act: 'relu'
     final_MLP_bn:  True
+
+    # Domain adaptation
+    DA_active: False
+    # ...
 
   # Optimization
   opt_param:  
@@ -233,6 +245,10 @@ gnet2:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -286,6 +302,10 @@ gnet3:
 
     final_MLP_act: 'relu'
     final_MLP_bn:  True
+
+    # Domain adaptation
+    DA_active: False
+    # ...
 
   # Optimization
   opt_param:  
@@ -478,14 +498,14 @@ cnn0:
     epochs: 100
     batch_size: 128
     lr: 1.0e-3
-    weight_decay: 0.00        # L2-regularization
+    weight_decay: 0.00         # L2-regularization
 
   # Scheduler
   scheduler_param:
     step_size: 200
     gamma: 0.1
       
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs

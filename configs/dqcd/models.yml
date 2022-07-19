@@ -136,7 +136,7 @@ deps:
     dropout: 0.1
     phi_layers: 3
     rho_layers: 3
-    
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -371,6 +371,10 @@ gnet1:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -424,6 +428,10 @@ gnet2:
 
     final_MLP_act: 'relu'
     final_MLP_bn:  True
+    
+    # Domain adaptation
+    DA_active: False
+    # ...
 
   # Optimization
   opt_param:  
@@ -479,6 +487,10 @@ gnet3:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+    
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

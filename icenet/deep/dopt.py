@@ -80,11 +80,15 @@ def weights_init_normal(m):
 
 class Dataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, Y, W):
+    def __init__(self, X, Y, W, Y_DA=None, W_DA=None):
         """ Initialization """
         self.x = X
         self.y = Y
         self.w = W
+
+        if Y_DA is not None:
+            self.y_DA = Y_DA
+            self.w_DA = W_DA
 
     def __len__(self):
         """ Return the total number of samples """
@@ -94,18 +98,28 @@ class Dataset(torch.utils.data.Dataset):
         """ Generates one sample of data """
 
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
-        return {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
+        out = {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
+        if self.y_DA is None:
+            return out
+        else:
+            out['y_DA'] = self.y_DA[index, ...]
+            out['w_DA'] = self.w_DA[index, ...]
+            return out
 
 class DualDataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, U, Y, W):
+    def __init__(self, X, U, Y, W, Y_DA=None, W_DA=None):
         """ Initialization """
         self.x = X  # e.g. image tensors
         self.u = U  # e.g. global features 
         
         self.y = Y
         self.w = W
+
+        if Y_DA is not None:
+            self.y_DA = Y_DA
+            self.w_DA = W_DA
     
     def __len__(self):
         """ Return the total number of samples """
@@ -115,8 +129,14 @@ class DualDataset(torch.utils.data.Dataset):
         """ Generates one sample of data """
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
 
-        return {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
+        out = {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
+        if self.y_DA is None:
+            return out
+        else:
+            out['y_DA'] = self.y_DA[index, ...]
+            out['w_DA'] = self.w_DA[index, ...]
+            return out
 
 def dict_batch_to_cuda(batch, device):
     """
@@ -143,6 +163,13 @@ def batch2tensor(batch, device):
         w = batch['w']
         y = batch['y']
 
+        try:
+            y_DA = batch['y_DA']
+            w_DA = batch['w_DA']
+            return x,y,w, y_DA, w_DA
+        except:
+            return x,y,w
+
     # Pytorch geometric type
     else:
         batch = batch.to(device)
@@ -150,7 +177,12 @@ def batch2tensor(batch, device):
         y = batch.y
         w = batch.w
 
-    return x,y,w
+        try:
+            y_DA = batch.y_DA
+            w_DA = batch.w_DA
+            return x,y,w, y_DA, w_DA
+        except:
+            return x,y,w
 
 
 def train(model, loader, optimizer, device, opt_param):
@@ -168,18 +200,24 @@ def train(model, loader, optimizer, device, opt_param):
         trained model (return implicit via input arguments)
     """
     model.train()
-    
-    total_loss = 0
+
+    DA_active  = True if (hasattr(model, 'DA_active') and model.DA_active) else False
+    total_loss    = 0
+    total_loss_DA = 0
     n = 0
+
     for i, batch in enumerate(loader):
 
-        x,y,w   = batch2tensor(batch, device)
-
         optimizer.zero_grad() # !
-        
-        # Compute loss
-        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param)
-        
+
+        if DA_active:  
+            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+            l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA)
+            loss   = l + l_DA
+        else:
+            x,y,w  = batch2tensor(batch, device)
+            loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param)  
+
         # Propagate gradients 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
@@ -187,12 +225,19 @@ def train(model, loader, optimizer, device, opt_param):
         
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
+            if DA_active: total_loss_DA += l_DA.item()
+
             n += 1 # Losses are already mean aggregated, so add 1 per batch
         else:
             total_loss += loss.item() * batch.num_graphs # torch-geometric
+            if DA_active: total_loss_DA += l_DA.item() * batch.num_graphs
+            
             n += batch.num_graphs
 
-    return total_loss / n
+    if DA_active:
+        return total_loss / n, total_loss_DA / n
+    else:
+        return total_loss / n
 
 
 def test(model, loader, optimizer, device):
@@ -210,15 +255,19 @@ def test(model, loader, optimizer, device):
     """
 
     model.eval()
+    DA_active  = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
     accsum = 0
     aucsum = 0
     k = 0
 
     for i, batch in enumerate(loader):
-        
-        x,y,w = batch2tensor(batch, device)
 
+        if DA_active:
+            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+        else:
+            x,y,w           = batch2tensor(batch, device)
+        
         with torch.no_grad():
             pred = model.softpredict(x)
         
