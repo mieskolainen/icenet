@@ -502,11 +502,11 @@ class GNNGeneric(torch.nn.Module):
         Forward call with Domain Adaptation
         """
         x     = self.forward(data, conv_only=True)
-        x_out = self.inference(x=x, edge_index=data.edge_index) # GNN-convolution to final inference net
+        x_out = self.inference(x=x, data=data) # GNN-convolution to final inference net
         
         x     = self.DA_grad_reverse(x)
-        x_DA  = self.DA_MLP_net(x=x)                            # Domain adaptation (source, target) discriminator net
-
+        x_DA  = self.DA_MLP_net(x=x)           # Domain adaptation (source, target) discriminator net
+        
         return x_out, x_DA
 
     def forward(self, data, conv_only=False):
@@ -538,11 +538,11 @@ class GNNGeneric(torch.nn.Module):
         # ===========================================
 
         # Final inference net
-        x = self.inference(x=x, edge_index=data.edge_index)
+        x = self.inference(x=x, data=data)
 
         return x
 
-    def inference(self, x, edge_index):
+    def inference(self, x, data):
         """
         Final inference network forward call
         """
@@ -556,7 +556,7 @@ class GNNGeneric(torch.nn.Module):
 
         # Edge level inference
         if 'edge' in self.task:
-            x = self.forward_2pt(x, edge_index)
+            x = self.forward_2pt(x, data.edge_index)
 
         # Node or graph level inference
         else:
