@@ -502,12 +502,11 @@ class GNNGeneric(torch.nn.Module):
         Forward call with Domain Adaptation
         """
         x     = self.forward(data, conv_only=True)
-        
         x_out = self.inference(x=x, edge_index=data.edge_index) # GNN-convolution to final inference net
         
         x     = self.DA_grad_reverse(x)
         x_DA  = self.DA_MLP_net(x=x)                            # Domain adaptation (source, target) discriminator net
-        
+
         return x_out, x_DA
 
     def forward(self, data, conv_only=False):

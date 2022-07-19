@@ -86,9 +86,8 @@ class Dataset(torch.utils.data.Dataset):
         self.y = Y
         self.w = W
 
-        if Y_DA is not None:
-            self.y_DA = Y_DA
-            self.w_DA = W_DA
+        self.y_DA = Y_DA  # Domain adaptation
+        self.w_DA = W_DA
 
     def __len__(self):
         """ Return the total number of samples """
@@ -117,9 +116,8 @@ class DualDataset(torch.utils.data.Dataset):
         self.y = Y
         self.w = W
 
-        if Y_DA is not None:
-            self.y_DA = Y_DA
-            self.w_DA = W_DA
+        self.y_DA = Y_DA  # Domain adaptation
+        self.w_DA = W_DA
     
     def __len__(self):
         """ Return the total number of samples """
