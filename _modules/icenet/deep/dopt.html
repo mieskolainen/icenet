@@ -120,9 +120,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">Y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">W</span>
 
-        <span class="k">if</span> <span class="n">Y_DA</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_DA</span> <span class="o">=</span> <span class="n">Y_DA</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">w_DA</span> <span class="o">=</span> <span class="n">W_DA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_DA</span> <span class="o">=</span> <span class="n">Y_DA</span>  <span class="c1"># Domain adaptation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w_DA</span> <span class="o">=</span> <span class="n">W_DA</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
@@ -151,9 +150,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">Y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">W</span>
 
-        <span class="k">if</span> <span class="n">Y_DA</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_DA</span> <span class="o">=</span> <span class="n">Y_DA</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">w_DA</span> <span class="o">=</span> <span class="n">W_DA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_DA</span> <span class="o">=</span> <span class="n">Y_DA</span>  <span class="c1"># Domain adaptation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w_DA</span> <span class="o">=</span> <span class="n">W_DA</span>
     
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
