@@ -431,7 +431,19 @@ def train_models(data_trn, data_val, args=None) :
         pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'))
     
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
-        
+
+
+    def set_distillation_drain(ID, param, inputs, dtype='torch'):
+        if args['distillation']['drains'] is not None:
+            if ID in args['distillation']['drains']:
+                cprint(__name__ + f'.train_models: Creating soft distillation drain for the model <{ID}>', 'yellow')
+                
+                # By default to torch
+                inputs['y_soft'] = torch.tensor(y_soft, dtype=torch.float)
+
+                if dtype == 'numpy':
+                    inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()
+
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -447,12 +459,8 @@ def train_models(data_trn, data_val, args=None) :
                       'args':     args,
                       'param':    param}
             
-            #### Add distillation, if turned on
-            if args['distillation']['drains'] is not None:
-                if ID in args['distillation']['drains']:
-                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
+            set_distillation_drain(ID=ID, param=param, inputs=inputs)
 
-            
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
             else:
@@ -465,11 +473,7 @@ def train_models(data_trn, data_val, args=None) :
                       'args':     args,
                       'param':    param}
             
-            #### Add distillation, if turned on
-            if args['distillation']['drains'] is not None:
-                if ID in args['distillation']['drains']:
-                    cprint(__name__ + f'.train_models: Setting soft distillation target for <{param["train"]}>', 'yellow')
-                    inputs['y_soft'] = y_soft
+            set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
             
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
@@ -489,10 +493,7 @@ def train_models(data_trn, data_val, args=None) :
                       'args':        args,
                       'param':       param}
             
-            #### Add distillation, if turned on
-            if args['distillation']['drains'] is not None:
-                if ID in args['distillation']['drains']:
-                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
+            set_distillation_drain(ID=ID, param=param, inputs=inputs)
 
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
@@ -512,19 +513,20 @@ def train_models(data_trn, data_val, args=None) :
                       'args':  args,
                       'param': param}
 
-            #### Add distillation, if turned on
-            if args['distillation']['drains'] is not None:
-                if ID in args['distillation']['drains']:
-                    raise Exception(__name__ + f".train_models: Unsupported distillation drain <{param['train']}>")
-            
+            set_distillation_drain(ID=ID, param=param, inputs=inputs)
+
             if ID in args['raytune']['param']['active']:
                 model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
             else:
                 model = train.train_torch_generic(**inputs)
 
         elif param['train'] == 'graph_xgb':
+
+            inputs = {'y_soft': None}
+            set_distillation_drain(ID=ID, param=param, inputs=inputs)
+
             train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
-                trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param)  
+                trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'])  
         
         elif param['train'] == 'flr':
             train.train_flr(data_trn=data_trn['data'], args=args, param=param)
@@ -542,18 +544,20 @@ def train_models(data_trn, data_val, args=None) :
         # --------------------------------------------------------
         # If distillation
         if ID == args['distillation']['source']:
-            cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
             
             if args['num_classes'] != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
             if   param['train'] == 'xgb':
-                if 'multi' in args['models'][ID]['model_param']:
+                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
+                
+                if 'multi' in args['models'][ID]['model_param']['objective']:
                     y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
                 else:
                     y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
 
-            elif param['train'] == 'torch_graph':
+            elif 'torch_' in param['train']:
+                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
                 raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")

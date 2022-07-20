@@ -159,7 +159,7 @@ train_runmode:
 
   #  - flr0
   #  - lgr0
-  #  - dmx0
+    - dmx0
   #  - dmlp
 
   #  - cnn0
@@ -174,11 +174,13 @@ train_runmode:
 
     # Big, sophisticated model
     source:
-      #xgb0
+      xgb0
       
     # Simple, compressed models
     drains:
-      #- xgb1
+      - gxgb0
+      - gnet3
+      - dmx0
       # - add more here
   
   # Batched "deep" training

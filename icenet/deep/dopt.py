@@ -80,11 +80,14 @@ def weights_init_normal(m):
 
 class Dataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, Y, W):
+    def __init__(self, X, Y, W, Y_DA=None, W_DA=None):
         """ Initialization """
         self.x = X
         self.y = Y
         self.w = W
+
+        self.y_DA = Y_DA  # Domain adaptation
+        self.w_DA = W_DA
 
     def __len__(self):
         """ Return the total number of samples """
@@ -94,18 +97,27 @@ class Dataset(torch.utils.data.Dataset):
         """ Generates one sample of data """
 
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
-        return {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
+        out = {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
+        if self.y_DA is None:
+            return out
+        else:
+            out['y_DA'] = self.y_DA[index, ...]
+            out['w_DA'] = self.w_DA[index, ...]
+            return out
 
 class DualDataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, U, Y, W):
+    def __init__(self, X, U, Y, W, Y_DA=None, W_DA=None):
         """ Initialization """
         self.x = X  # e.g. image tensors
         self.u = U  # e.g. global features 
         
         self.y = Y
         self.w = W
+
+        self.y_DA = Y_DA  # Domain adaptation
+        self.w_DA = W_DA
     
     def __len__(self):
         """ Return the total number of samples """
@@ -115,8 +127,14 @@ class DualDataset(torch.utils.data.Dataset):
         """ Generates one sample of data """
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
 
-        return {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
+        out = {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
+        if self.y_DA is None:
+            return out
+        else:
+            out['y_DA'] = self.y_DA[index, ...]
+            out['w_DA'] = self.w_DA[index, ...]
+            return out
 
 def dict_batch_to_cuda(batch, device):
     """
@@ -143,6 +161,13 @@ def batch2tensor(batch, device):
         w = batch['w']
         y = batch['y']
 
+        try:
+            y_DA = batch['y_DA']
+            w_DA = batch['w_DA']
+            return x,y,w, y_DA, w_DA
+        except:
+            return x,y,w
+
     # Pytorch geometric type
     else:
         batch = batch.to(device)
@@ -150,10 +175,59 @@ def batch2tensor(batch, device):
         y = batch.y
         w = batch.w
 
-    return x,y,w
+        try:
+            y_DA = batch.y_DA
+            w_DA = batch.w_DA
+            return x,y,w, y_DA, w_DA
+        except:
+            return x,y,w
 
 
-def train(model, loader, optimizer, device, opt_param):
+
+
+import numpy as np
+import torch
+import torch.nn as nn
+EPS = 1e-9
+
+
+def grad_norm(module):
+    parameters = module.parameters()
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+
+    total_norm = 0
+    for p in parameters:
+        param_norm = p.grad.data.norm(2)
+        total_norm = param_norm.item() ** 2
+    total_norm = total_norm ** (1. / 2)
+    return total_norm
+
+
+def adaptive_gradient_clipping_(generator_module: nn.Module, mi_module: nn.Module):
+    """
+    Clips the gradient according to the min norm of the generator and mi estimator
+    Arguments:
+        generator_module -- nn.Module 
+        mi_module -- nn.Module
+    """
+    norm_generator = grad_norm(generator_module)
+    norm_estimator = grad_norm(mi_module)
+
+    min_norm = np.minimum(norm_generator, norm_estimator)
+
+    parameters = list(
+        filter(lambda p: p.grad is not None, mi_module.parameters()))
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+
+    for p in parameters:
+        p.grad.data.mul_(min_norm/(norm_estimator + EPS))
+
+
+def train(model, loader, optimizer, device, opt_param, MI=None):
     """
     Pytorch based training routine.
     
@@ -168,31 +242,57 @@ def train(model, loader, optimizer, device, opt_param):
         trained model (return implicit via input arguments)
     """
     model.train()
-    
-    total_loss = 0
+
+    DA_active     = True if (hasattr(model, 'DA_active') and model.DA_active) else False
+    total_loss    = 0
+    total_loss_DA = 0
     n = 0
+
     for i, batch in enumerate(loader):
 
-        x,y,w   = batch2tensor(batch, device)
-
         optimizer.zero_grad() # !
+
+        if DA_active:  
+            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+            l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
+            loss   = l + l_DA
+        else:
+            x,y,w  = batch2tensor(batch, device)
+            loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
+
+
+        # Propagate gradients        
+        loss.backward(retain_graph=True)
+
+        if MI is not None:
+            MI['loss'].backward(retain_graph=True)
         
-        # Compute loss
-        loss    = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param)
-        
-        # Propagate gradients 
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
+        if MI is not None:
+            adaptive_gradient_clipping_(model, MI['model'])
+        else:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
+
+        if MI is not None:
+            MI['optimizer'].step()
+
         optimizer.step()
-        
+
+
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
+            if DA_active: total_loss_DA += l_DA.item()
+
             n += 1 # Losses are already mean aggregated, so add 1 per batch
         else:
             total_loss += loss.item() * batch.num_graphs # torch-geometric
+            if DA_active: total_loss_DA += l_DA.item() * batch.num_graphs
+            
             n += batch.num_graphs
 
-    return total_loss / n
+    if DA_active:
+        return total_loss / n, total_loss_DA / n
+    else:
+        return total_loss / n
 
 
 def test(model, loader, optimizer, device):
@@ -210,15 +310,19 @@ def test(model, loader, optimizer, device):
     """
 
     model.eval()
+    DA_active  = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
     accsum = 0
     aucsum = 0
     k = 0
 
     for i, batch in enumerate(loader):
-        
-        x,y,w = batch2tensor(batch, device)
 
+        if DA_active:
+            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+        else:
+            x,y,w           = batch2tensor(batch, device)
+        
         with torch.no_grad():
             pred = model.softpredict(x)
         

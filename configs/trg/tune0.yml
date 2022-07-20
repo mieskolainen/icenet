@@ -122,10 +122,10 @@ train_runmode:
   models:  !include configs/trg/models.yml
   active_models: &ACTIVE_MODELS
 
+    - lgr0
     - xgb0
     - xgb1
-    - lgr0
-
+    
     - cut0
     - cut1
     - cut2

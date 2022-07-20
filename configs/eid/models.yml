@@ -34,6 +34,10 @@ gxgb0:
       final_MLP_act: 'relu'
       final_MLP_bn:  False
     
+      # Domain adaptation
+      DA_active: False
+      # ...
+
     # Optimization
     opt_param:  
       lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -69,7 +73,7 @@ gxgb0:
 
     # general parameters
     model_param:
-      num_boost_round: 300    # number of epochs (equal to the number of trees!)
+      num_boost_round: 100    # number of epochs (equal to the number of trees!)
       
       booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
       tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
@@ -90,9 +94,11 @@ gxgb0:
       reg_alpha: 0.0         # L1 regularization
       
       # learning task parameters
-      objective: 'multi:softprob'  # 'binary:logistic'     #
-      eval_metric: ['mlogloss']     # for evaluation
+      objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+      eval_metric: ['logloss']     # for evaluation, 'mlogloss'
 
+    plot_trees: False
+    
     # Read/Write of epochs
     savemode: 'all'                  # 'all', 'latest'
     readmode: -1                     # -1 is the last saved epoch
@@ -124,6 +130,10 @@ gnet0:
 
     final_MLP_act: 'relu'
     final_MLP_bn:  True
+
+    # Domain adaptation
+    DA_active: False
+    # ...
 
   # Optimization
   opt_param:  
@@ -179,6 +189,10 @@ gnet1:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -232,6 +246,10 @@ gnet2:
 
     final_MLP_act: 'relu'
     final_MLP_bn:  True
+
+    # Domain adaptation
+    DA_active: False
+    # ...
 
   # Optimization
   opt_param:  
@@ -287,6 +305,10 @@ gnet3:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -336,7 +358,7 @@ xgb0:
 
   # general parameters
   model_param:
-    num_boost_round: 300    # number of epochs (equal to the number of trees!)
+    num_boost_round: 100    # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
@@ -357,8 +379,10 @@ xgb0:
     reg_alpha: 0.0        # L1 regularization
     
     # learning task parameters
-    objective: 'multi:softprob'  # 'binary:logistic'     #
-    eval_metric: ['mlogloss']     # for evaluation
+    objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+
+  plot_trees: False
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
@@ -478,14 +502,14 @@ cnn0:
     epochs: 100
     batch_size: 128
     lr: 1.0e-3
-    weight_decay: 0.00        # L2-regularization
+    weight_decay: 0.00         # L2-regularization
 
   # Scheduler
   scheduler_param:
     step_size: 200
     gamma: 0.1
       
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs

@@ -19,6 +19,7 @@ from   torch_geometric.nn import MessagePassing
 
 from torch_scatter import scatter_add, scatter_max, scatter_mean
 
+from icenet.deep.da import GradientReversal
 
 from icenet.deep.pgraph import *
 from icenet.deep import dopt
@@ -279,7 +280,15 @@ class GNNGeneric(torch.nn.Module):
         fusion_MLP_bn  = True,
 
         final_MLP_act  = 'relu',
-        final_MLP_bn   =  True):
+        final_MLP_bn   =  True,
+
+        DA_active      = False,
+        DA_alpha       = 1.0,
+        DA_MLP         = [128, 64],
+        DA_MLP_act     = 'relu',
+        DA_MLP_bn      = True,
+        DA_MLP_dropout = 0.0
+        ):
 
         super(GNNGeneric, self).__init__()
         
@@ -292,8 +301,16 @@ class GNNGeneric(torch.nn.Module):
 
         self.z_dim = z_dim  # latent dimension
 
-        self.task        = task          # 'node', 'edge', 'graph'
-        self.global_pool = global_pool   # 's2s', 'max', 'mean', 'add'
+        self.task           = task           # 'node', 'edge', 'graph'
+        self.global_pool    = global_pool    # 's2s', 'max', 'mean', 'add'
+
+
+        self.DA_active      = DA_active      # Domain adaptation (True, False)
+        self.DA_alpha       = DA_alpha 
+        self.DA_MLP         = DA_MLP
+        self.DA_MLP_act     = DA_MLP_act
+        self.DA_MLP_bn      = DA_MLP_bn
+        self.DA_MLP_dropout = DA_MLP_dropout
 
 
         # SuperEdgeConv,   https://arxiv.org/abs/xyz
@@ -434,6 +451,14 @@ class GNNGeneric(torch.nn.Module):
             raise Exception(__name__ + f'.GraphNetGeneric: Unknown task = {task} parameter')
         # ----------------------------------------------------
 
+        ### Domain adaptation via gradient reversal
+        if self.DA_active:
+            self.DA_grad_reverse  = GradientReversal(self.DA_alpha)
+            self.DA_MLP_net       = MLP([self.c_dim] + self.MLP_dim + [2],
+                activation=self.DA_MLP_act, batch_norm=self.DA_MLP_bn, dropout=self.DA_MLP_dropout)
+
+        # ----------------------------------------------------
+
 
     def forward_2pt(self, z, edge_index):
         """
@@ -452,8 +477,8 @@ class GNNGeneric(torch.nn.Module):
             X = z[edge_index[0], ...] * z[edge_index[1], ...]
 
         return self.mlp_final(X)
-    
-    
+
+
     def GINE_helper(data):
         """
         GINEConv requires node features and edge features with the same dimension.
@@ -471,7 +496,18 @@ class GNNGeneric(torch.nn.Module):
             edge_attr = data.edge_attr
 
         return x, edge_attr
+        
+    def forward_with_DA(self, data):
+        """
+        Forward call with Domain Adaptation
+        """
+        x     = self.forward(data, conv_only=True)
+        x_out = self.inference(x=x, data=data) # GNN-convolution to final inference net
+        
+        x     = self.DA_grad_reverse(x)
+        x_DA  = self.DA_MLP_net(x=x)           # Domain adaptation (source, target) discriminator net
 
+        return x_out, x_DA
 
     def forward(self, data, conv_only=False):
 
@@ -479,7 +515,7 @@ class GNNGeneric(torch.nn.Module):
             # Create virtual null batch if singlet graph input
             setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
         
-        ## Apply message passing layers
+        ## Apply GNN message passing layers
         x = self.conv(data)
 
         ## Global node feature pooling (to handle graph level classification)
@@ -494,12 +530,22 @@ class GNNGeneric(torch.nn.Module):
             elif self.global_pool == 'mean':
                 x = global_mean_pool(x, data.batch)
             else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
+                raise Exception(__name__ + f'.forward: Unknown global_pool <{self.global_pool}>')
         
         # ===========================================
         if conv_only: # Return convolution part
             return x
         # ===========================================
+
+        # Final inference net
+        x = self.inference(x=x, data=data)
+
+        return x
+
+    def inference(self, x, data):
+        """
+        Final inference network forward call
+        """
 
         ## Global features concatenated
         if self.u_dim > 0:
@@ -507,7 +553,7 @@ class GNNGeneric(torch.nn.Module):
             x = torch.cat((x, u), 1)
 
         ## Final MLP map
-
+        
         # Edge level inference
         if 'edge' in self.task:
             x = self.forward_2pt(x, data.edge_index)

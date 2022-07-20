@@ -17,14 +17,15 @@ import torch.autograd as autograd
 
 from tqdm import tqdm
 
+from icenet.deep.da import GradientReversal
 
 class MINENet(nn.Module):
     """
     MINE network object
     """
     def __init__(self, input_size=2, hidden_dim=128, noise_std=0.025):
-        super().__init__()
-
+        super(MINENet, self).__init__()
+        
         self.fc1 = nn.Linear(input_size, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, 1)
@@ -40,21 +41,20 @@ class MINENet(nn.Module):
         nn.init.constant_(self.fc3.bias, 0)
 
 
-    def forward(self, input):
-        output = F.relu(self.fc1(input))
-        output = F.relu(self.fc2(output))
-        output = self.fc3(output)
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        
+        return x
 
-        return output
 
-
-def train_mine(joint, marginal, w, net, opt, ma_eT, alpha=0.01, loss='MINE_EMA'):
+def train_mine(joint, marginal, w, net, ma_eT, alpha=0.01, losstype='MINE_EMA'):
     """
     Args:
         joint, marginal : input data
         w     : input data weights
         net   : network object
-        opt   : optimizer object
     
     Note that bias corrected loss is used only for the gradient descent,
     MI value is calculated without it.
@@ -65,6 +65,7 @@ def train_mine(joint, marginal, w, net, opt, ma_eT, alpha=0.01, loss='MINE_EMA')
                sup E_{P_{XZ}} [T_\\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])
     """
     
+    # Use the network
     T, eT = net(joint), torch.exp(net(marginal))
 
     # Apply event weights
@@ -77,25 +78,21 @@ def train_mine(joint, marginal, w, net, opt, ma_eT, alpha=0.01, loss='MINE_EMA')
 
     # Unbiased estimate via exponentially moving average (FIR filter)
     # https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
-    if   loss == 'MINE_EMA':
+    if   losstype == 'MINE_EMA':
 
         ma_eT = alpha*torch.sum(eT) + (1 - alpha)*ma_eT
-        l  = -(torch.sum(T) - (1/torch.sum(ma_eT)).detach()*torch.sum(eT))
+        loss  = -(torch.sum(T) - (1/torch.sum(ma_eT)).detach()*torch.sum(eT))
 
     # (Slightly) biased gradient based directly on the local MI value
-    elif loss == 'MINE':
-        l  = -MI_lb
+    elif losstype == 'MINE':
+        loss  = -MI_lb
     else:
         raise Exception(__name__ + ".train_mine: Unknown loss chosen")
 
-    opt.zero_grad()
-    autograd.backward(l)
-    opt.step()
-
-    return MI_lb, ma_eT
+    return MI_lb, ma_eT, loss
 
 
-def sample_batch(X, Z, weights, batch_size):
+def sample_batch(X, Z, weights, batch_size, dtype='numpy'):
     """
     Sample batches of data, either from the joint or marginals
     
@@ -108,17 +105,24 @@ def sample_batch(X, Z, weights, batch_size):
     Returns:
         joint, marginal batches with size (N x [dim[X] + dim[Z]])
     """
+    if batch_size is None:
+        batch_size = X.shape[0]
+
     index    = np.random.choice(range(X.shape[0]), size=batch_size, replace=False)
     random   = np.random.choice(range(Z.shape[0]), size=batch_size, replace=False)
 
     # XZ and X(*)Z
-    joint    = np.concatenate([X[index,:],  Z[index,:]], axis=1)
-    marginal = np.concatenate([X[index,:], Z[random,:]], axis=1)
+    if dtype == 'numpy':
+        joint    = np.concatenate([X[index,...],  Z[index,...]], axis=1)
+        marginal = np.concatenate([X[index,...], Z[random,...]], axis=1)
+    else:
+        joint    = torch.cat((X[index,...],  Z[index,...]), dim=1)
+        marginal = torch.cat((X[index,...], Z[random,...]), dim=1)
 
     return joint, marginal, weights[index]
 
 
-def train(X, Z, weights, net, opt, batch_size, num_iter, alpha, loss):
+def train(X, Z, weights, net, opt, batch_size, num_iter, alpha, losstype):
     """
     Train the network estimator
 
@@ -148,10 +152,14 @@ def train(X, Z, weights, net, opt, batch_size, num_iter, alpha, loss):
             joint    = joint.cuda()
             marginal = marginal.cuda()
             w        = w.cuda()
+        
+        # Call it
+        MI_lb, ma_eT, l = train_mine(joint=joint, marginal=marginal, w=w, net=net, ma_eT=ma_eT, alpha=alpha, losstype=losstype)
 
-        # Train
-        MI_lb, ma_eT = train_mine(joint=joint, marginal=marginal, w=w, \
-            net=net, opt=opt, ma_eT=ma_eT, alpha=alpha, loss=loss)
+        # Step gradient descent
+        opt.zero_grad()
+        autograd.backward(l)
+        opt.step()
 
         result.append(MI_lb.detach().cpu().numpy())
 
@@ -159,7 +167,7 @@ def train(X, Z, weights, net, opt, batch_size, num_iter, alpha, loss):
 
 
 def estimate(X, Z, weights=None, batch_size=100, num_iter=int(1e3), lr=1e-3, hidden_dim=96, \
-    loss='MINE_EMA', alpha=0.01, window=200, use_cuda=True, return_full=False):
+    losstype='MINE_EMA', alpha=0.01, window=200, use_cuda=True, return_full=False):
     """
     Accurate Mutual Information Estimate via Neural Network
     
@@ -193,12 +201,13 @@ def estimate(X, Z, weights=None, batch_size=100, num_iter=int(1e3), lr=1e-3, hid
     # Create network
     input_size = X.shape[1] + Z.shape[1]
     net     = MINENet(input_size=input_size, hidden_dim=hidden_dim)
+    net.train() #!
 
     if torch.cuda.is_available() and use_cuda:
         net = net.cuda()
 
     opt     = optim.Adam(net.parameters(), lr=lr)
-    result  = train(X=X, Z=Z, weights=weights, net=net, opt=opt, batch_size=batch_size, num_iter=num_iter, alpha=alpha, loss=loss)
+    result  = train(X=X, Z=Z, weights=weights, net=net, opt=opt, batch_size=batch_size, num_iter=num_iter, alpha=alpha, losstype=losstype)
 
     if not return_full:
 

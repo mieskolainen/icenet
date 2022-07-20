@@ -25,9 +25,13 @@ gnet0:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy_per_edge' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'cross_entropy'          # cross_entropy, focal_entropy, logit_norm_cross_entropy
     negative_sampling: False           # Synthetic negative edge sampling (in edge classification)
     
     gamma: 2                           # focal_entropy exponent
@@ -80,9 +84,13 @@ gnet1:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+    
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy_per_edge' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'cross_entropy'          # cross_entropy, focal_entropy, logit_norm_cross_entropy
     negative_sampling: False           # Synthetic negative edge sampling (in edge classification)
     
     gamma: 2                           # focal_entropy exponent
@@ -136,9 +144,13 @@ gnet2:
     final_MLP_act: 'relu'
     final_MLP_bn:  True
 
+    # Domain adaptation
+    DA_active: False
+    # ...
+
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy_per_edge' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'cross_entropy'          # cross_entropy, focal_entropy, logit_norm_cross_entropy
     negative_sampling: False           # Synthetic negative edge sampling (in edge classification)
     
     gamma: 2                           # focal_entropy exponent
