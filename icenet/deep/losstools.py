@@ -10,7 +10,6 @@ import torch
 import torch.nn.functional as F
 
 from icenet.tools import aux_torch
-
 from icefit import mine
 
 
@@ -88,20 +87,20 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
     # Neural Mutual Information regularization
     if MI is not None:
 
-        X = x[:, MI['x_index']]
-        Z = log_phat[:, MI['y_index']]
+        X = x[:, MI['x_index']]                   # Classifier input
+        Z = torch.exp(log_phat[:, MI['y_index']]) # Classifier output
         
         joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, dtype='torch')
         MI_lb, MI['ma_eT'], loss_MI = mine.train_mine(joint=joint, marginal=marginal, w=w,
                             net=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
-        
+
         MI['loss']  = loss_MI # Used by the MI-net torch optimizer
         MI['MI_lb'] = MI_lb   # For diagnostics
 
         # Add to the total loss
         loss = loss + MI['beta'] * MI_lb
     # -----------------------------------------------------
-    
+
     return loss
 
 

@@ -54,11 +54,6 @@ from icenet.optim import adamax
 from icenet.optim import scheduler
 
 
-# iceid
-from iceid import common
-from iceid import graphio
-
-
 from termcolor import colored, cprint
 
 
@@ -347,7 +342,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             loss_terms = f'tot loss: {loss:.4f}, loss_DA: {loss_DA:.4f}'
         else:
             loss_terms = f'tot loss: {loss:.4f}'
-        
+
         print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, {loss_terms} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
             print(__name__ + f'.torch_loop: MI loss = {MI["loss"]:0.4f} | MI_lb value = {MI["MI_lb"]:0.4f}')
