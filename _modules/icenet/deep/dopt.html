@@ -196,7 +196,8 @@
         <span class="k">if</span> <span class="n">MI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
-        <span class="c1">## Clip gradients for stability</span>
+        <span class="c1">## Gradient norm-clipping for stability</span>
+        <span class="c1"># For details: http://proceedings.mlr.press/v28/pascanu13.pdf</span>
         <span class="k">if</span> <span class="n">MI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">deeptools</span><span class="o">.</span><span class="n">adaptive_gradient_clipping_</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
