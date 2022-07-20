@@ -183,7 +183,51 @@ def batch2tensor(batch, device):
             return x,y,w
 
 
-def train(model, loader, optimizer, device, opt_param):
+
+
+import numpy as np
+import torch
+import torch.nn as nn
+EPS = 1e-9
+
+
+def grad_norm(module):
+    parameters = module.parameters()
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+
+    total_norm = 0
+    for p in parameters:
+        param_norm = p.grad.data.norm(2)
+        total_norm = param_norm.item() ** 2
+    total_norm = total_norm ** (1. / 2)
+    return total_norm
+
+
+def adaptive_gradient_clipping_(generator_module: nn.Module, mi_module: nn.Module):
+    """
+    Clips the gradient according to the min norm of the generator and mi estimator
+    Arguments:
+        generator_module -- nn.Module 
+        mi_module -- nn.Module
+    """
+    norm_generator = grad_norm(generator_module)
+    norm_estimator = grad_norm(mi_module)
+
+    min_norm = np.minimum(norm_generator, norm_estimator)
+
+    parameters = list(
+        filter(lambda p: p.grad is not None, mi_module.parameters()))
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+
+    for p in parameters:
+        p.grad.data.mul_(min_norm/(norm_estimator + EPS))
+
+
+def train(model, loader, optimizer, device, opt_param, MI=None):
     """
     Pytorch based training routine.
     
@@ -199,7 +243,7 @@ def train(model, loader, optimizer, device, opt_param):
     """
     model.train()
 
-    DA_active  = True if (hasattr(model, 'DA_active') and model.DA_active) else False
+    DA_active     = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     total_loss    = 0
     total_loss_DA = 0
     n = 0
@@ -210,17 +254,30 @@ def train(model, loader, optimizer, device, opt_param):
 
         if DA_active:  
             x,y,w,y_DA,w_DA = batch2tensor(batch, device)
-            l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA)
+            l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
             loss   = l + l_DA
         else:
             x,y,w  = batch2tensor(batch, device)
-            loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param)  
+            loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
-        # Propagate gradients 
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
-        optimizer.step()
+
+        # Propagate gradients        
+        loss.backward(retain_graph=True)
+
+        if MI is not None:
+            MI['loss'].backward(retain_graph=True)
         
+        if MI is not None:
+            adaptive_gradient_clipping_(model, MI['model'])
+        else:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
+
+        if MI is not None:
+            MI['optimizer'].step()
+
+        optimizer.step()
+
+
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
             if DA_active: total_loss_DA += l_DA.item()

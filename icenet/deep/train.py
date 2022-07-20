@@ -44,6 +44,7 @@ from icenet.deep  import maxo
 from icenet.deep  import dmlp
 from icenet.deep  import dbnf
 from icenet.deep  import vae
+from icefit import mine
 
 from icenet.deep  import cnn
 from icenet.deep  import graph
@@ -269,7 +270,7 @@ def raytune_main(inputs, train_func=None):
     return best_trained_model
 
 
-def torch_loop(model, train_loader, test_loader, args, param, config={}, save_period=5):
+def torch_loop(model, train_loader, test_loader, args, param, config={}, save_period=1):
     """
     Main training loop for all torch based models
     """
@@ -305,9 +306,26 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     
     cprint(__name__ + f'.torch_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
+    # --------------------------------------------------------------------
+    ## Mutual information regularization
+    if 'MI_reg_param' in param:
+
+        # Create network and set parameters
+        MI = param['MI_reg_param']
+        
+        MI_model         = mine.MINENet(input_size = len(MI['y_index']) + len(MI['x_index']), hidden_dim=MI['hidden_dim'])
+        MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
+        MI_model.train() # !
+
+        MI['model']      = MI_model
+        MI['optimizer']  = torch.optim.Adam(MI_model.parameters(), lr=MI['lr'], weight_decay=MI['weight_decay'])
+    else:
+        MI = None
+    # --------------------------------------------------------------------
+
     for epoch in range(opt_param['epochs']):
 
-        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param)
+        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
         if DA_active:
             loss    = loss[0]
@@ -326,12 +344,14 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         val_aucs.append(validate_auc)
 
         if DA_active:
-            loss_terms = f'loss: {loss:.4f}, loss_DA: {loss_DA:.4f}'
+            loss_terms = f'tot loss: {loss:.4f}, loss_DA: {loss_DA:.4f}'
         else:
-            loss_terms = f'loss: {loss:.4f}'        
-
-        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, {loss_terms} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+            loss_terms = f'tot loss: {loss:.4f}'
         
+        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, {loss_terms} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        if MI is not None:
+            print(__name__ + f'.torch_loop: MI loss = {MI["loss"]:0.4f} | MI_lb value = {MI["MI_lb"]:0.4f}')
+
         # Update scheduler
         scheduler.step()
         

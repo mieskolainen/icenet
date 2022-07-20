@@ -31,7 +31,7 @@ class GradientReversalFunction(Function):
     def backward(ctx, grads):
         alpha = ctx.alpha
         alpha = grads.new_tensor(alpha)
-        dx = -alpha_ * grads
+        dx = -alpha * grads
         return dx, None
 
 class GradientReversal(torch.nn.Module):

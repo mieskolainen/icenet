@@ -11,8 +11,10 @@ import torch.nn.functional as F
 
 from icenet.tools import aux_torch
 
+from icefit import mine
 
-def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None):
+
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None):
     """
     A wrapper function to loss functions
     
@@ -42,11 +44,11 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         log_phat = model.softpredict(x)
                  
         if num_classes > 2:
-            return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
+            loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
         
         # This can handle scalar y values in [0,1]
         else:
-            return binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
+            loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
 
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
@@ -59,15 +61,15 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         CE    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
         
-        return CE, CE_DA
+        loss = (CE, CE_DA)
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
-        return multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
+        loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
-        return multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
+        loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
     elif param['lossfunc'] == 'VAE_background_only':
         ind      = (y == 0) # Use only background to train
@@ -75,12 +77,32 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         log_loss = model.loss_kl_reco(x=x[ind, ...], xhat=xhat, z=z, mu=mu, std=std, beta=param['VAE_beta'])
         
         if weights is not None:
-            return (log_loss*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
+            loss = (log_loss*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
         else:
-            return log_loss.mean(dim=0)
-    
+            loss = log_loss.mean(dim=0)
+
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
+
+    # -----------------------------------------------------
+    # Neural Mutual Information regularization
+    if MI is not None:
+
+        X = x[:, MI['x_index']]
+        Z = log_phat[:, MI['y_index']]
+        
+        joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, dtype='torch')
+        MI_lb, MI['ma_eT'], loss_MI = mine.train_mine(joint=joint, marginal=marginal, w=w,
+                            net=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+        
+        MI['loss']  = loss_MI # Used by the MI-net torch optimizer
+        MI['MI_lb'] = MI_lb   # For diagnostics
+
+        # Add to the total loss
+        loss = loss + MI['beta'] * MI_lb
+    # -----------------------------------------------------
+    
+    return loss
 
 
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
@@ -94,7 +116,7 @@ def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
         w = 1.0
     else:
         w = weights
-    
+
     loss = - w * (y*log_phat_1 + (1 - y) * log_phat_0)
 
     if weights is not None:

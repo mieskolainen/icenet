@@ -38,7 +38,7 @@ Algorithms/packages included
 	3.  Multinomial Logistic Regression [pytorch]
 	4.  MAXOUT multilayer feedforward network [pytorch]
 	5.  Deep Normalizing Flow (BNAF) based likelihoods & ratios [pytorch]
-	6.  Permutation Equivariant Networks [pytorch]
+	6.  Permutation Equivariant Networks (DeepSets) [pytorch]
 	7.  CNN Networks [pytorch]
 	8.  Graph Neural Nets (graph-, node-, edge-level inference) [pytorch-geometric]
 	9.  Variational autoencoders [pytorch]
@@ -49,8 +49,9 @@ Algorithms/packages included
 Training methodologies included
 -----------------------------
 .. code-block:: none
-
+	
 	1. Model distillation
-	2. Deep domain adaptation (via gradient reversal)
-	3. Automated hyperparameter tuning (via raytune)
-	4. ...
+	2. Conditional (parametric) classifiers
+	3. Deep domain adaptation (via gradient reversal)
+	4. Automated hyperparameter tuning (via raytune)
+	5. ...
