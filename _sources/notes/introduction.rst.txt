@@ -54,4 +54,6 @@ Training methodologies included
 	2. Conditional (parametric) classifiers
 	3. Deep domain adaptation (via gradient reversal)
 	4. Automated hyperparameter tuning (via raytune)
-	5. ...
+	5. Algorithmically [de]correlated (regulated) networks
+	6. ...
+
