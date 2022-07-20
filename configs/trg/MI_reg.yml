@@ -4,7 +4,7 @@ losstype: 'MINE_EMA'     # 'MINE' or 'MINE_EMA'
 alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
 ma_eT:  1.0              #  EMA starting value
 
-beta:   -0.99             #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+beta:   0.99             #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
 x_index: [0]             #  Variable indices (can contain several)
 y_index: [1]
 
