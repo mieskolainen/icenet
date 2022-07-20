@@ -88,11 +88,6 @@
 <span class="kn">from</span> <span class="nn">icenet.optim</span> <span class="kn">import</span> <span class="n">scheduler</span>
 
 
-<span class="c1"># iceid</span>
-<span class="kn">from</span> <span class="nn">iceid</span> <span class="kn">import</span> <span class="n">common</span>
-<span class="kn">from</span> <span class="nn">iceid</span> <span class="kn">import</span> <span class="n">graphio</span>
-
-
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
 
@@ -381,7 +376,7 @@
             <span class="n">loss_terms</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;tot loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">, loss_DA: </span><span class="si">{</span><span class="n">loss_DA</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss_terms</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;tot loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span>
-        
+
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.torch_loop: Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">opt_param</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">loss_terms</span><span class="si">}</span><span class="s1"> | Train: </span><span class="si">{</span><span class="n">train_acc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (acc), </span><span class="si">{</span><span class="n">train_auc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (AUC) | Validate: </span><span class="si">{</span><span class="n">validate_acc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (acc), </span><span class="si">{</span><span class="n">validate_auc</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> (AUC) | lr = </span><span class="si">{</span><span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">MI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.torch_loop: MI loss = </span><span class="si">{</span><span class="n">MI</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1"> | MI_lb value = </span><span class="si">{</span><span class="n">MI</span><span class="p">[</span><span class="s2">&quot;MI_lb&quot;</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
