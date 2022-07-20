@@ -3,79 +3,19 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-import torch
-import uproot
 import numpy as np
-import sklearn
-import psutil
 from termcolor import colored,cprint
 
-from matplotlib import pyplot as plt
-import pdb
-from tqdm import tqdm, trange
-
-import torch.optim as optim
-from   torch.autograd import Variable
-import torch.autograd as autograd
+import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 
 from icenet.deep import losstools
-from icenet.deep.tempscale import ModelWithTemperature
-
+from icenet.deep import deeptools
 from icenet.tools import aux
 from icenet.tools import aux_torch
 from icenet.tools import io
-from icefit import mine
 
 from ray import tune
-
-
-init_funcs = {
-    1: lambda x: torch.nn.init.normal_(x, mean=0.0, std=1.0),  # bias terms
-    2: lambda x: torch.nn.init.xavier_normal_(x,   gain=1.0),  # weight terms
-    3: lambda x: torch.nn.init.xavier_uniform_(x,  gain=1.0),  # conv1D filter
-    4: lambda x: torch.nn.init.xavier_uniform_(x,  gain=1.0),  # conv2D filter
-    "default": lambda x: torch.nn.init.constant(x, 1.0),       # others
-}
-
-
-def weights_init_all(model, init_funcs):
-    """
-    Examples:
-        model = MyNet()
-        weights_init_all(model, init_funcs)
-    """
-    for p in model.parameters():
-        init_func = init_funcs.get(len(p.shape), init_funcs["default"])
-        init_func(p)
-
-
-def weights_init_uniform_rule(m):
-    """ Initializes module weights from uniform [-a,a]
-    """
-    classname = m.__class__.__name__
-
-    # Linear layers
-    if classname.find('Linear') != -1:
-        n = m.in_features
-        y = 1.0/np.sqrt(n)
-        m.weight.data.uniform_(-y, y)
-        m.bias.data.fill_(0)
-
-
-def weights_init_normal(m):
-    """ Initializes module weights from normal distribution
-    with a rule sigma ~ 1/sqrt(n)
-    """
-    classname = m.__class__.__name__
-    
-    # Linear layers
-    if classname.find('Linear') != -1:
-        y = m.in_features
-        m.weight.data.normal_(0.0, 1/np.sqrt(y))
-        m.bias.data.fill_(0)
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -145,7 +85,6 @@ def dict_batch_to_cuda(batch, device):
 
     return batch
 
-
 def batch2tensor(batch, device):
     """
     Transform batch objects to a correct device
@@ -182,51 +121,6 @@ def batch2tensor(batch, device):
         except:
             return x,y,w
 
-
-
-
-import numpy as np
-import torch
-import torch.nn as nn
-EPS = 1e-9
-
-
-def grad_norm(module):
-    parameters = module.parameters()
-    if isinstance(parameters, torch.Tensor):
-        parameters = [parameters]
-
-    parameters = list(filter(lambda p: p.grad is not None, parameters))
-
-    total_norm = 0
-    for p in parameters:
-        param_norm = p.grad.data.norm(2)
-        total_norm = param_norm.item() ** 2
-    total_norm = total_norm ** (1. / 2)
-    return total_norm
-
-
-def adaptive_gradient_clipping_(generator_module: nn.Module, mi_module: nn.Module):
-    """
-    Clips the gradient according to the min norm of the generator and mi estimator
-    Arguments:
-        generator_module -- nn.Module 
-        mi_module -- nn.Module
-    """
-    norm_generator = grad_norm(generator_module)
-    norm_estimator = grad_norm(mi_module)
-
-    min_norm = np.minimum(norm_generator, norm_estimator)
-
-    parameters = list(
-        filter(lambda p: p.grad is not None, mi_module.parameters()))
-    if isinstance(parameters, torch.Tensor):
-        parameters = [parameters]
-
-    for p in parameters:
-        p.grad.data.mul_(min_norm/(norm_estimator + EPS))
-
-
 def train(model, loader, optimizer, device, opt_param, MI=None):
     """
     Pytorch based training routine.
@@ -250,7 +144,10 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
     for i, batch in enumerate(loader):
 
+        ## Clear gradients
         optimizer.zero_grad() # !
+        if MI is not None:
+            MI['optimizer'].zero_grad() # !
 
         if DA_active:  
             x,y,w,y_DA,w_DA = batch2tensor(batch, device)
@@ -260,24 +157,23 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             x,y,w  = batch2tensor(batch, device)
             loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
-
-        # Propagate gradients        
+        ## Propagate gradients        
         loss.backward(retain_graph=True)
-
         if MI is not None:
             MI['loss'].backward(retain_graph=True)
         
+        ## Clip gradients for stability
         if MI is not None:
-            adaptive_gradient_clipping_(model, MI['model'])
+            deeptools.adaptive_gradient_clipping_(model, MI['model'])
         else:
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
-
+            
+        ## Step optimizer
+        optimizer.step()
         if MI is not None:
             MI['optimizer'].step()
-
-        optimizer.step()
-
-
+        
+        ## Aggregate total losses
         if type(batch) is dict: # DualDataset or Dataset
             total_loss += loss.item()
             if DA_active: total_loss_DA += l_DA.item()
@@ -382,35 +278,3 @@ def model_to_cuda(model, device_type='auto'):
         print('')
 
     return model, device
-
-
-"""
-def train_loop():
-
-    ### Weight initialization
-    #print(__name__ + f'.train: Weight initialization')
-    #model.apply(weights_init_normal_rule)
-    
-    # Class fractions
-    frac = [sum(Y_trn.cpu().numpy() == i) / Y_trn.cpu().numpy().size for i in range(model.C)]
-    
-    # ------------------------------------------------------------
-    # Mutual information regularization for the output independence w.r.t the target variable
-    
-    if param['opt_param']['MI_reg_on'] == True:
-
-        # Input variables, make output orthogonal with respect to 'ortho' variable
-        x1 = log_phat
-        x2 = batch_x['ortho']
-
-        MI, MI_err = mine.estimate(X=x1, Z=x2, num_iter=2000, loss=method)
-
-        # Adaptive gradient clipping
-        # ...
-
-        # Add to the loss
-        loss += param['opt_param']['MI_reg_beta'] * MI
-    
-    if clip_gradients:
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # Clip gradient for NaN problems
-"""
