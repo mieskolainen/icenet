@@ -185,7 +185,7 @@ lgr0:
     step_size: 200
     gamma: 0.1
 
-  # Mutual Information regularization
+  # Mutual Information regularization (comment out if not used)
   MI_reg_param: !include configs/trg/MI_reg.yml
   
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'

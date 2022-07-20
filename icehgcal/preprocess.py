@@ -35,6 +35,7 @@ def compute_edges(trk_data, ass_data, gra_data, edge_index, edge_labels, edge_qu
         best_sts_i  = ass_data.tsCLUE3D_recoToSim_CP[i][ak.argmin(qualities_i)]
         OK_i        = True if qualities_i[best_sts_i] < thresh else False
 
+        # Found within (eta,phi) window, presumably
         for j in gra_data.linked_inners[i]:
 
             qualities_j = ass_data.tsCLUE3D_recoToSim_CP_score[j]
@@ -43,6 +44,8 @@ def compute_edges(trk_data, ass_data, gra_data, edge_index, edge_labels, edge_qu
 
             # -----------------------------
             ## Create ML-graph data
+            
+             # ** MC truth **
             if (best_sts_i == best_sts_j) and (OK_i and OK_j):
                 edge_labels.append(1)
             else:
@@ -50,7 +53,7 @@ def compute_edges(trk_data, ass_data, gra_data, edge_index, edge_labels, edge_qu
 
             edge_index.append([i,j])
             edge_qualities.append([qualities_i[best_sts_i], qualities_j[best_sts_j]])
-
+            
             # If we want undirected graph
             if directed:
                 edge_labels.append(edge_labels[-1])
