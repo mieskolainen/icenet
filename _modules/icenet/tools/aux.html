@@ -667,13 +667,13 @@
         <span class="c1"># Invalid input</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: only one class present in y_true, cannot evaluate metrics (return -1)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: only one class present cannot evaluate metrics (return -1)&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
+            
             <span class="bp">self</span><span class="o">.</span><span class="n">mva_bins</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mva_hist</span> <span class="o">=</span> <span class="p">[]</span>
 

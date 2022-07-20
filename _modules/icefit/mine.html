@@ -51,14 +51,15 @@
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="kn">from</span> <span class="nn">icenet.deep.da</span> <span class="kn">import</span> <span class="n">GradientReversal</span>
 
 <div class="viewcode-block" id="MINENet"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.MINENet">[docs]</a><span class="k">class</span> <span class="nc">MINENet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    MINE network object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">noise_std</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
+        <span class="nb">super</span><span class="p">(</span><span class="n">MINENet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -74,21 +75,20 @@
         <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">constant_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MINENet.forward"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.MINENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="nb">input</span><span class="p">))</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<div class="viewcode-block" id="MINENet.forward"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.MINENet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">x</span></div></div>
 
-        <span class="k">return</span> <span class="n">output</span></div></div>
 
-
-<div class="viewcode-block" id="train_mine"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.train_mine">[docs]</a><span class="k">def</span> <span class="nf">train_mine</span><span class="p">(</span><span class="n">joint</span><span class="p">,</span> <span class="n">marginal</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">ma_eT</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;MINE_EMA&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="train_mine"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.train_mine">[docs]</a><span class="k">def</span> <span class="nf">train_mine</span><span class="p">(</span><span class="n">joint</span><span class="p">,</span> <span class="n">marginal</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">ma_eT</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="s1">&#39;MINE_EMA&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        joint, marginal : input data</span>
 <span class="sd">        w     : input data weights</span>
 <span class="sd">        net   : network object</span>
-<span class="sd">        opt   : optimizer object</span>
 <span class="sd">    </span>
 <span class="sd">    Note that bias corrected loss is used only for the gradient descent,</span>
 <span class="sd">    MI value is calculated without it.</span>
@@ -99,6 +99,7 @@
 <span class="sd">               sup E_{P_{XZ}} [T_\\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
+    <span class="c1"># Use the network</span>
     <span class="n">T</span><span class="p">,</span> <span class="n">eT</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">joint</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="n">marginal</span><span class="p">))</span>
 
     <span class="c1"># Apply event weights</span>
@@ -111,25 +112,21 @@
 
     <span class="c1"># Unbiased estimate via exponentially moving average (FIR filter)</span>
     <span class="c1"># https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average</span>
-    <span class="k">if</span>   <span class="n">loss</span> <span class="o">==</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">:</span>
+    <span class="k">if</span>   <span class="n">losstype</span> <span class="o">==</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">:</span>
 
         <span class="n">ma_eT</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eT</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">ma_eT</span>
-        <span class="n">l</span>  <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ma_eT</span><span class="p">))</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eT</span><span class="p">))</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ma_eT</span><span class="p">))</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eT</span><span class="p">))</span>
 
     <span class="c1"># (Slightly) biased gradient based directly on the local MI value</span>
-    <span class="k">elif</span> <span class="n">loss</span> <span class="o">==</span> <span class="s1">&#39;MINE&#39;</span><span class="p">:</span>
-        <span class="n">l</span>  <span class="o">=</span> <span class="o">-</span><span class="n">MI_lb</span>
+    <span class="k">elif</span> <span class="n">losstype</span> <span class="o">==</span> <span class="s1">&#39;MINE&#39;</span><span class="p">:</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="o">-</span><span class="n">MI_lb</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;.train_mine: Unknown loss chosen&quot;</span><span class="p">)</span>
 
-    <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-    <span class="n">autograd</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-    <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">MI_lb</span><span class="p">,</span> <span class="n">ma_eT</span></div>
+    <span class="k">return</span> <span class="n">MI_lb</span><span class="p">,</span> <span class="n">ma_eT</span><span class="p">,</span> <span class="n">loss</span></div>
 
 
-<div class="viewcode-block" id="sample_batch"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.sample_batch">[docs]</a><span class="k">def</span> <span class="nf">sample_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+<div class="viewcode-block" id="sample_batch"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.sample_batch">[docs]</a><span class="k">def</span> <span class="nf">sample_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sample batches of data, either from the joint or marginals</span>
 <span class="sd">    </span>
@@ -142,17 +139,24 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        joint, marginal batches with size (N x [dim[X] + dim[Z]])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="n">index</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">random</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># XZ and X(*)Z</span>
-    <span class="n">joint</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,:],</span>  <span class="n">Z</span><span class="p">[</span><span class="n">index</span><span class="p">,:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">marginal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,:],</span> <span class="n">Z</span><span class="p">[</span><span class="n">random</span><span class="p">,:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
+        <span class="n">joint</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>  <span class="n">Z</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">marginal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">random</span><span class="p">,</span><span class="o">...</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">joint</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>  <span class="n">Z</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">marginal</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">random</span><span class="p">,</span><span class="o">...</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">joint</span><span class="p">,</span> <span class="n">marginal</span><span class="p">,</span> <span class="n">weights</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">num_iter</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">num_iter</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">losstype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train the network estimator</span>
 
@@ -182,10 +186,14 @@
             <span class="n">joint</span>    <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
             <span class="n">marginal</span> <span class="o">=</span> <span class="n">marginal</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
             <span class="n">w</span>        <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        
+        <span class="c1"># Call it</span>
+        <span class="n">MI_lb</span><span class="p">,</span> <span class="n">ma_eT</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">train_mine</span><span class="p">(</span><span class="n">joint</span><span class="o">=</span><span class="n">joint</span><span class="p">,</span> <span class="n">marginal</span><span class="o">=</span><span class="n">marginal</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">ma_eT</span><span class="o">=</span><span class="n">ma_eT</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
 
-        <span class="c1"># Train</span>
-        <span class="n">MI_lb</span><span class="p">,</span> <span class="n">ma_eT</span> <span class="o">=</span> <span class="n">train_mine</span><span class="p">(</span><span class="n">joint</span><span class="o">=</span><span class="n">joint</span><span class="p">,</span> <span class="n">marginal</span><span class="o">=</span><span class="n">marginal</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> \
-            <span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">ma_eT</span><span class="o">=</span><span class="n">ma_eT</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">)</span>
+        <span class="c1"># Step gradient descent</span>
+        <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">autograd</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MI_lb</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
 
@@ -193,7 +201,7 @@
 
 
 <div class="viewcode-block" id="estimate"><a class="viewcode-back" href="../../modules/icefit.html#icefit.mine.estimate">[docs]</a><span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span> \
-    <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;MINE_EMA&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">use_cuda</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">losstype</span><span class="o">=</span><span class="s1">&#39;MINE_EMA&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">use_cuda</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Accurate Mutual Information Estimate via Neural Network</span>
 <span class="sd">    </span>
@@ -227,12 +235,13 @@
     <span class="c1"># Create network</span>
     <span class="n">input_size</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">net</span>     <span class="o">=</span> <span class="n">MINENet</span><span class="p">(</span><span class="n">input_size</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">)</span>
+    <span class="n">net</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="c1">#!</span>
 
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">use_cuda</span><span class="p">:</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
 
     <span class="n">opt</span>     <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
-    <span class="n">result</span>  <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="n">num_iter</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">)</span>
+    <span class="n">result</span>  <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="n">num_iter</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">return_full</span><span class="p">:</span>
 
