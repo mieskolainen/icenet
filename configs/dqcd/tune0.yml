@@ -129,11 +129,12 @@ train_runmode:
     #- gnet1
     #- gnet2
     #- gnet3
-    
+
+    - dmlp
+    - deps
+    - vae0    
     - xgb0
     #- dbnf0
-    - vae0
-    - deps
     - lgr0
     
     #- xgb1

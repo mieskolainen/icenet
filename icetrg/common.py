@@ -159,6 +159,11 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     data_graph  = None
 
+    # -------------------------------------------------------------------------
+    # Mutual information regularization targets
+    MI_ind, MI_vars = io.pick_vars(data, globals()['MI_VARS'])
+    data_MI = data.x[:, MI_ind].astype(np.float)
+    
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
     s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
@@ -166,4 +171,5 @@ def splitfactor(x, y, w, ids, args):
     data.x   = data.x[:, s_ind].astype(np.float)
     data.ids = s_vars
     
-    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+    
+    return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
