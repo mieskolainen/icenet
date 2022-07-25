@@ -64,11 +64,11 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
     MI value is calculated without it.
     
     MINE:
-
-    MI_lb    : mutual information lower bound ("neural information measure")
-               sup E_{P_{XZ}} [T_\\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])
-    """
     
+    MI_lb    : mutual information lower bound ("neural information measure")
+               sup E_{P_{XZ}} [T_theta] - log(E_{P_X otimes P_Z}[exp(T_theta)])
+    """
+        
     MI_lb, T, eT = apply_mine(model=model, joint=joint, marginal=marginal, w=w)
     
     
@@ -218,7 +218,7 @@ def estimate(X, Z, weights=None, epochs=100, alpha=0.01, losstype='MINE_EMA', ba
     opt           = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     result,ma_eT  = train_loop(X=X, Z=Z, weights=weights, model=model, opt=opt, batch_size=batch_size,
         epochs=epochs, alpha=alpha, losstype=losstype, ma_eT=ma_eT, device=device)
-    
+
     if return_model_only:
         return model
 
