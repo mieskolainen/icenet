@@ -121,9 +121,9 @@ train_runmode:
   models:  !include configs/trg/models.yml
   active_models: &ACTIVE_MODELS
     
-    #- xgb_MI_max
-    #- xgb_MI_min
-    #- xgb0
+    - xgb_MI_max
+    - xgb_MI_min
+    - xgb0
     
     - dmlp_MI_min
     - dmlp_MI_max
