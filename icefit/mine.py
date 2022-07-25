@@ -62,13 +62,12 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
     
     Note that bias corrected loss is used only for the gradient descent,
     MI value is calculated without it.
-    
-    MINE:
-    
-    MI_lb    : mutual information lower bound ("neural information measure")
-               sup E_{P_{XZ}} [T_theta] - log(E_{P_X otimes P_Z}[exp(T_theta)])
+
+    Notes:
+        MI_lb is mutual information lower bound ("neural information measure")
+        sup E_{P_{XZ}} [T_theta] - log(E_{P_X otimes P_Z}[exp(T_theta)])
     """
-        
+    
     MI_lb, T, eT = apply_mine(model=model, joint=joint, marginal=marginal, w=w)
     
     
