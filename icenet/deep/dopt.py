@@ -20,7 +20,7 @@ from ray import tune
 
 class Dataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, Y, W, Y_DA=None, W_DA=None):
+    def __init__(self, X, Y, W, Y_DA=None, W_DA=None, X_MI=None):
         """ Initialization """
         self.x = X
         self.y = Y
@@ -28,6 +28,8 @@ class Dataset(torch.utils.data.Dataset):
 
         self.y_DA = Y_DA  # Domain adaptation
         self.w_DA = W_DA
+
+        self.x_MI = X_MI  # MI reg
 
     def __len__(self):
         """ Return the total number of samples """
@@ -39,16 +41,18 @@ class Dataset(torch.utils.data.Dataset):
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
         out = {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
-        if self.y_DA is None:
-            return out
-        else:
+        if self.y_DA is not None:
             out['y_DA'] = self.y_DA[index, ...]
             out['w_DA'] = self.w_DA[index, ...]
-            return out
+
+        if self.x_MI is not None:
+            out['x_MI'] = self.x_MI[index, ...]
+
+        return out
 
 class DualDataset(torch.utils.data.Dataset):
 
-    def __init__(self, X, U, Y, W, Y_DA=None, W_DA=None):
+    def __init__(self, X, U, Y, W, Y_DA=None, W_DA=None, X_MI=None):
         """ Initialization """
         self.x = X  # e.g. image tensors
         self.u = U  # e.g. global features 
@@ -59,6 +63,8 @@ class DualDataset(torch.utils.data.Dataset):
         self.y_DA = Y_DA  # Domain adaptation
         self.w_DA = W_DA
     
+        self.x_MI = X_MI  # MI reg
+
     def __len__(self):
         """ Return the total number of samples """
         return self.y.shape[0]
@@ -69,12 +75,14 @@ class DualDataset(torch.utils.data.Dataset):
 
         out = {'x': self.x[index,...], 'u': self.u[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
 
-        if self.y_DA is None:
-            return out
-        else:
+        if self.y_DA is not None:
             out['y_DA'] = self.y_DA[index, ...]
             out['w_DA'] = self.w_DA[index, ...]
-            return out
+        
+        if self.x_MI is not None:
+            out['x_MI'] = self.x_MI[index, ...]
+
+        return out
 
 def dict_batch_to_cuda(batch, device):
     """
@@ -93,33 +101,12 @@ def batch2tensor(batch, device):
     # Dataset or Dualdataset
     if type(batch) is dict:
         batch = dict_batch_to_cuda(batch, device)
-        if 'u' in batch.keys():
-            x = {'x': batch['x'], 'u': batch['u']}
-        else:
-            x = batch['x']
-        w = batch['w']
-        y = batch['y']
-
-        try:
-            y_DA = batch['y_DA']
-            w_DA = batch['w_DA']
-            return x,y,w, y_DA, w_DA
-        except:
-            return x,y,w
+        return batch
 
     # Pytorch geometric type
     else:
         batch = batch.to(device)
-        x = batch # this contains all graph (node and edge) information
-        y = batch.y
-        w = batch.w
-
-        try:
-            y_DA = batch.y_DA
-            w_DA = batch.w_DA
-            return x,y,w, y_DA, w_DA
-        except:
-            return x,y,w
+        return batch
 
 def train(model, loader, optimizer, device, opt_param, MI=None):
     """
@@ -138,6 +125,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     model.train()
 
     DA_active     = True if (hasattr(model, 'DA_active') and model.DA_active) else False
+    MI_active     = True if MI is not None else False
+
     total_loss    = 0
     total_loss_DA = 0
     n = 0
@@ -149,12 +138,25 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         if MI is not None:
             MI['optimizer'].zero_grad() # !
 
-        if DA_active:  
-            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+        batch_ = batch2tensor(batch, device)
+
+        if type(batch_) is dict:
+            x,y,w = batch_['x'], batch_['y'], batch_['w']
+            if DA_active:
+                y_DA,w_DA = batch_['y_DA'], batch_['w_DA']
+            if MI_active:
+                MI['x'] = batch_['x_MI']
+        else:
+            x,y,w = batch_, batch_.y, batch_.w
+            if DA_active:
+                y_DA,w_DA = batch_.y_DA, batch_.w_DA
+            if MI_active:
+                MI['x'] = batch_.x_MI    
+
+        if DA_active:
             l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
             loss   = l + l_DA
         else:
-            x,y,w  = batch2tensor(batch, device)
             loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
         ## Propagate gradients        
@@ -215,11 +217,13 @@ def test(model, loader, optimizer, device):
 
     for i, batch in enumerate(loader):
 
-        if DA_active:
-            x,y,w,y_DA,w_DA = batch2tensor(batch, device)
+        batch_ = batch2tensor(batch, device)
+
+        if type(batch_) is dict:
+            x,y,w = batch_['x'], batch_['y'], batch_['w']
         else:
-            x,y,w           = batch2tensor(batch, device)
-        
+            x,y,w = batch_, batch_.y, batch_.w
+
         with torch.no_grad():
             pred = model.softpredict(x)
         
@@ -254,7 +258,7 @@ def model_to_cuda(model, device_type='auto'):
         else:
             device = torch.device('cpu:0')
     else:
-        device = param['device']
+        device = device_type
 
     model = model.to(device, non_blocking=True)
 
@@ -272,7 +276,7 @@ def model_to_cuda(model, device_type='auto'):
 
     print(__name__ + f'.model_to_cuda: Computing device <{device}> chosen')
     
-    if GPU_chosen:
+    if torch.cuda.is_available():
         used  = io.get_gpu_memory_map()[0]
         total = io.torch_cuda_total_memory(device)
         cprint(__name__ + f'.model_to_cuda: device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')

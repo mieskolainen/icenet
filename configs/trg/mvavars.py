@@ -9,7 +9,8 @@ KINEMATIC_GEN_VARS = [
 
 KINEMATIC_VARS = [
   'x_hlt_pt',
-  'x_hlt_eta'
+  'x_hlt_eta',
+  'x_hlt_trkValidHits'
 ]
 
 MVA_SCALAR_VARS = [
@@ -18,8 +19,13 @@ MVA_SCALAR_VARS = [
   'x_hlt_trkDEtaSeed',
   'x_hlt_trkDPhi',
   'x_hlt_trkChi2',
-  'x_hlt_trkValidHits',
+  #'x_hlt_trkValidHits',
   'x_hlt_trkNrLayerIT'
+]
+
+# Mutual information regularization targets
+MI_VARS = [
+  'x_hlt_trkValidHits'
 ]
 
 # Variables we use with name replacement, need to be found in both MC and DATA

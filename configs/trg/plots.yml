@@ -29,8 +29,8 @@ MVA_2D:
 
   plot[0]:
     var:   ['']
-    edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
-            {'nbin': 50, 'q': [0.0, 0.95],  'space': 'log10'}]
+    edges: [{'nbin': 50, 'q': [0.001, 0.999], 'space': 'linear'},
+            {'nbin': 50, 'q': [0.0, 0.95],    'space': 'linear'}]
     
   #plot[1]:
   #  var:   ['.?hlt_pms2.?']
