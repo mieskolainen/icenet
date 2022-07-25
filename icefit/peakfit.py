@@ -47,7 +47,7 @@ import sys
 sys.path.append(".")
 
 from iceplot import iceplot
-import statstools
+import icefit.statstools as statstools
 
 # numpy
 import numpy as onp # original numpy
