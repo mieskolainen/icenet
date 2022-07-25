@@ -46,7 +46,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
             Z = torch.exp(log_phat[:, MI['y_index']])  # Classifier output
             l = MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)
         return l
-        
+
     if  param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
         
@@ -121,11 +121,11 @@ def MI_loss(X, Z, weights, MI, y):
     #    ind = (y != -1) # All classes
     #else:
     #    ind = (y == c)
-    
+
     joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, device=X.device)
     MI_lb, MI['ma_eT'], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
-                        net=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
-
+                        model=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+    
     MI['loss']  = loss_MI # Used by the MI-net torch optimizer
     MI['MI_lb'] = MI_lb   # For diagnostics
             
