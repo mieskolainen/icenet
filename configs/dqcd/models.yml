@@ -325,11 +325,11 @@ vae0:
     
     encoder_act: 'relu'
     encoder_bn: False
-    encoder_dropout: 0.0
+    encoder_dropout: 0.05
 
     decoder_act: 'tanh'
     decoder_bn: False
-    decoder_dropout: 0.0
+    decoder_dropout: 0.05
 
     reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
     kl_prob:   'Gaussian'           # 'Gaussian'
@@ -356,7 +356,7 @@ vae0:
   #  x_dim: 12
   #  y_index: "param['model_param']['latent_dim']"
   #  <<: *MI_REG_PARAM
-  
+
   # Scheduler
   scheduler_param:
     step_size: 200

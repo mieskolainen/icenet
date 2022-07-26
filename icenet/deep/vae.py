@@ -112,12 +112,12 @@ class VAE(nn.Module):
         if   self.anomaly_score == 'RECO':
 
             score = self.log_pxz(x=x, xhat=xhat)
-            return 1/(1 + torch.exp(1/score))
+            return 1/(1 + torch.exp(-1/score))
             
         elif self.anomaly_score == 'KL_RECO':
 
             score = self.loss_kl_reco(x=x, xhat=xhat, z=z, mu=mu, std=std)
-            return 1/(1 + torch.exp(-1/score))
+            return 1/(1 + torch.exp(1/score))
         
         else:
             raise Exception(__name__ + f'.softpredict: Unknown <anomaly_score> = {self.anomaly_score} selected.')

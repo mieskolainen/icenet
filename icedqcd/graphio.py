@@ -118,11 +118,11 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         else:
             u_mat = null_value * np.zeros(len(features))
             for j in range(len(features)):
-                x = ak.to_numpy(X[ev][features[j]])
-                if x is not []: u_mat[j] = x
+                xx = ak.to_numpy(X[ev][features[j]])
+                if xx is not []: u_mat[j] = xx
             u = torch.tensor(u_mat, dtype=torch.float)
-        
-        dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
+
+        dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
     print(__name__ + f'.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
     

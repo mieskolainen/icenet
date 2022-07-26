@@ -197,7 +197,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         else:
             u = torch.tensor(X[ev, feature_ind].tolist(), dtype=torch.float)
         
-        dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
+        dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
     print(__name__ + f'.parse_graph_data: Empty ECAL events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
     
