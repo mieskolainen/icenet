@@ -352,7 +352,7 @@ gnet3:
 
 
 # Factorized Likelihood Ratio
-flr0_param:
+flr0:
   train:   'flr'
   predict: 'flr'
   label:   'FLR'
