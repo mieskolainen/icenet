@@ -120,15 +120,15 @@ train_runmode:
   # Give all models some unique identifier and label
   models:  !include configs/hnl/models.yml
   active_models: &ACTIVE_MODELS
+
+    - dmlp_MI_max    
+    - dmlp_MI_min
+    - dmlp0
     
     - xgb_MI_max
     - xgb_MI_min
     - xgb0
-    
-    - dmlp_MI_min
-    - dmlp_MI_max
-    - dmlp0
-    
+
     #- lgr_MI_min
     #- lgr_MI_max
     #- lgr0

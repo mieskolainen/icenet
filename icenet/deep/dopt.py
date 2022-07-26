@@ -17,6 +17,7 @@ from icenet.tools import io
 
 from ray import tune
 
+import gc
 
 class Dataset(torch.utils.data.Dataset):
 
@@ -196,7 +197,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             if DA_active: total_loss_DA += l_DA.item() * batch.num_graphs
             
             n += batch.num_graphs
-
+    
     if DA_active:
         return total_loss / n, total_loss_DA / n
     else:
@@ -256,7 +257,7 @@ def test(model, loader, optimizer, device):
             aucsum += (metrics.auc * N)
             accsum += (metrics.acc * N)
             k += N
-    
+
     if k > 0:
         return accsum / k, aucsum / k
     else:
