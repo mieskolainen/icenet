@@ -417,7 +417,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             # Compute Pearson correlation coefficient
             from icefit import cortools
             cc,cc_err,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
-            
+
             # Neural Mutual Information
             from icefit import mine
             MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
@@ -439,7 +439,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 plt.ylabel(f'{v}')
                 rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
                 MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                
+
                 print(rho_value)
                 print(MI_value)
                 plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
@@ -876,7 +876,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             plt.close()
 
 
-def plot_xgb_importance(model, dim, tick_label=None, importance_type='gain'):
+def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, sort=True):
     """
     Plot XGBoost model feature importance
     
@@ -891,17 +891,30 @@ def plot_xgb_importance(model, dim, tick_label=None, importance_type='gain'):
     """
     fscores = model.get_score(importance_type=importance_type)
     
-    xx = np.arange(dim)
-    yy = np.zeros(dim)
-    
-    for i in range(dim): # try, except needed because xgb does Not return it for all of them
+    dim    = len(tick_label) 
+    xx     = np.arange(dim)
+    yy     = np.zeros(dim)
+    labels = []
+
+    # Try, Except needed because xgb does Not return (always) for all of them
+    for i in range(dim):
         try:
-            yy[i] = fscores[f'f{i}']
+            yy[i] = fscores[f'f{i}'] # Feature name 'f{i}''
         except:
             yy[i] = 0.0
-    
+
+        labels.append(f'{tick_label[i]} [{i}]')
+
+    # Sort them
+    if sort:
+        s_ind  = np.array(np.argsort(yy), dtype=int)
+        yy     = yy[s_ind]
+        labels = [labels[i] for i in s_ind]
+
+    # Plot
     fig,ax = plt.subplots(figsize=(1.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
-    plt.barh(xx, yy, align='center', height=0.5, tick_label=tick_label)
+    plt.barh(xx, yy, align='center', height=0.5, tick_label=labels)
     plt.xlabel(f'F-score ({importance_type})')
+    plt.title(f'[{label}]')
     
     return fig, ax
