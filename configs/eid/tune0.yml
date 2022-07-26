@@ -157,11 +157,11 @@ train_runmode:
     #- gnet2
     #- gnet3
     
-    - flr0
-    - lgr0
-    - dmx0
-    - dmlp
-
+    #- flr0
+    #- lgr0
+    #- dmx0
+    #- dmlp
+    
     - cnn0
 
   ##  - xtx0
