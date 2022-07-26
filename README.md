@@ -35,7 +35,7 @@ If you use this work in your research (especially if you find algorithms or idea
   title  = "icenet",
   year   = "2022",
   url    = "https://github.com/mieskolainen/icenet",
-  note   = "[Online code; accessed XX-YY-2022]"
+  note   = "[Online; accessed XX-YY-2022]"
 }
 ```
 
