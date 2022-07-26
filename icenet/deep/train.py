@@ -461,11 +461,9 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
                 y_soft=y_soft, Y_trn_DA=Y_trn_DA, trn_weights_DA=trn_weights_DA, Y_val_DA=Y_val_DA, val_weights_DA=val_weights_DA,
                 data_trn_MI=data_trn_MI, data_val_MI=data_val_MI)
     
-    # Set MI-regularization X-dimension
     if 'MI_reg_param' in param:
-        if 'x_dim' not in param['MI_reg_param']:
-            param['MI_reg_param']['x_dim'] = data_trn_MI.shape[1]
-    
+        param['MI_reg_param']['x_dim'] = data_trn_MI.shape[1]
+
     return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 

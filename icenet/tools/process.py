@@ -443,7 +443,7 @@ def train_models(data_trn, data_val, args=None) :
                 
                 if dtype == 'numpy':
                     inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()
-    
+
     # Loop over active models
     for i in range(len(args['active_models'])):
 

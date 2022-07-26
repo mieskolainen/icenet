@@ -8,7 +8,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  1.0              #  EMA starting value
   
-  y_index: [1]
+  #y_index: [1]
   
   epochs: 20
   batch_size: 512
@@ -351,12 +351,11 @@ vae0:
     weight_decay: 0.00001       # L2-regularization
 
   # Mutual information regularization
-  #MI_reg_param:
-  #  beta: 0.99                  # Positive for minimizing
-  #  x_dim: 12
-  #  y_index: "param['model_param']['latent_dim']"
-  #  <<: *MI_REG_PARAM
-  
+  MI_reg_param:
+    beta: 0.99                  # Positive for minimizing
+    y_index: "param['model_param']['latent_dim']"
+    <<: *MI_REG_PARAM
+
   # Scheduler
   scheduler_param:
     step_size: 200
