@@ -196,9 +196,9 @@ dmlp0:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: False
-    dropout: 0.01
-  
+    batch_norm: True
+    dropout: 0.0
+    
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -209,7 +209,7 @@ dmlp0:
     clip_norm: 0.1
     
     epochs: 50
-    batch_size: 128
+    batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
@@ -237,8 +237,8 @@ dmlp_MI_min:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: False
-    dropout: 0.01
+    batch_norm: True
+    dropout: 0.0
     
   # Optimization
   opt_param:  
@@ -250,7 +250,7 @@ dmlp_MI_min:
     clip_norm: 0.1
     
     epochs: 50
-    batch_size: 128
+    batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
@@ -283,8 +283,8 @@ dmlp_MI_max:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: False
-    dropout: 0.01
+    batch_norm: True
+    dropout: 0.0
     
   # Optimization
   opt_param:  
@@ -296,7 +296,7 @@ dmlp_MI_max:
     clip_norm: 0.1
     
     epochs: 50
-    batch_size: 128
+    batch_size: 196
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 

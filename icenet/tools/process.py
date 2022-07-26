@@ -532,8 +532,7 @@ def train_models(data_trn, data_val, args=None) :
             set_distillation_drain(ID=ID, param=param, inputs=inputs)
 
             train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
-                trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
-                feature_names=data_trn['data'].ids)  
+                trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'])  
         
         elif param['train'] == 'flr':
             train.train_flr(data_trn=data_trn['data'], args=args, param=param)
@@ -558,8 +557,10 @@ def train_models(data_trn, data_val, args=None) :
             if   param['train'] == 'xgb':
                 cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
                 
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
-                if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
+                if 'multi' in args['models'][ID]['model_param']['objective']:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))[:, args['signalclass']]
+                else:
+                    y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
 
             elif 'torch_' in param['train']:
                 cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
@@ -626,7 +627,6 @@ def evaluate_models(data=None, args=None):
         args['features'] = data['data'].ids
 
         X        = copy.deepcopy(data['data'].x)
-        ids      = data['data'].ids
 
         X_RAW    = data['data'].x
         ids_RAW  = data['data'].ids
@@ -706,12 +706,13 @@ def evaluate_models(data=None, args=None):
         
         inputs = {'weights': weights, 'label': param['label'],
                  'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
-
+        
+         
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
         
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
             plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
@@ -720,7 +721,7 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_xgb_logistic(args=args, param=param)
             
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
             plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
@@ -729,7 +730,7 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids,
+                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids_RAW,
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
 
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
@@ -738,7 +739,7 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_torch_scalar(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
@@ -747,7 +748,7 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
@@ -783,7 +784,7 @@ def evaluate_models(data=None, args=None):
             
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
             
         #elif param['predict'] == 'xtx':
         # ...   

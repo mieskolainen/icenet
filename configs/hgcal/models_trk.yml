@@ -16,17 +16,14 @@ gnet0:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_bn: True
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  False
-    final_MLP_dropout: 0.01
+    final_MLP_bn:  True
 
     # Domain adaptation
     DA_active: False
@@ -78,17 +75,14 @@ gnet1:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_bn: True
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  False
-    final_MLP_dropout: 0.01
+    final_MLP_bn:  True
 
     # Domain adaptation
     DA_active: False
@@ -141,17 +135,14 @@ gnet2:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_bn: True
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  False
-    final_MLP_dropout: 0.01
+    final_MLP_bn:  True
 
     # Domain adaptation
     DA_active: False

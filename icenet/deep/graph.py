@@ -267,31 +267,27 @@ class GNNGeneric(torch.nn.Module):
         return x
 
     def __init__(self, d_dim, c_dim, u_dim=0, e_dim=None, z_dim=96,
-        conv_type        = 'EdgeConv',
-        task             = 'node',
-        global_pool      = 'mean',
+        conv_type      = 'EdgeConv',
+        task           = 'node',
+        global_pool    = 'mean',
         
-        conv_MLP_act     = 'relu',
-        conv_MLP_bn      = True,
-        conv_MLP_dropout = 0.0,
-        conv_aggr        = 'max',
-        conv_knn         = 8,
-        
-        fusion_MLP_act     = 'relu',
-        fusion_MLP_bn      = False,
-        fusion_MLP_dropout = 0.0,
+        conv_MLP_act   = 'relu',
+        conv_MLP_bn    = True,
+        conv_aggr      = 'max',
+        conv_knn       = 8,
 
-        final_MLP_act      = 'relu',
-        final_MLP_bn       = False,
-        final_MLP_dropout  = 0.0,
+        fusion_MLP_act = 'relu',
+        fusion_MLP_bn  = True,
 
-        DA_active        = False,
-        DA_alpha         = 1.0,
-        DA_MLP           = [128, 64],
+        final_MLP_act  = 'relu',
+        final_MLP_bn   =  True,
 
-        DA_MLP_act       = 'relu',
-        DA_MLP_bn        = False,
-        DA_MLP_dropout   = 0.0
+        DA_active      = False,
+        DA_alpha       = 1.0,
+        DA_MLP         = [128, 64],
+        DA_MLP_act     = 'relu',
+        DA_MLP_bn      = True,
+        DA_MLP_dropout = 0.0
         ):
 
         super(GNNGeneric, self).__init__()
@@ -319,46 +315,34 @@ class GNNGeneric(torch.nn.Module):
 
         # SuperEdgeConv,   https://arxiv.org/abs/xyz
         if   conv_type == 'SuperEdgeConv':
-            self.conv1 = SuperEdgeConv(MLP_ALL_ACT([2 * self.d_dim + self.e_dim, 32, 32],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.conv2 = SuperEdgeConv(MLP_ALL_ACT([2 * 32 + self.e_dim, 64],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.conv1 = SuperEdgeConv(MLP_ALL_ACT([2 * self.d_dim + self.e_dim, 32, 32], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = SuperEdgeConv(MLP_ALL_ACT([2 * 32 + self.e_dim, 64], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.SuperEdgeConv_
 
         # EdgeConv,        https://arxiv.org/abs/1801.07829
         elif conv_type == 'EdgeConv':
-            self.conv1 = EdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.conv2 = EdgeConv(MLP_ALL_ACT([2 * 32, 64],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.conv1 = EdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = EdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.EdgeConv_
 
         # DynamicEdgeConv, https://arxiv.org/abs/1801.07829
         elif conv_type == 'DynamicEdgeConv':
-            self.conv1 = DynamicEdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), k=conv_knn, aggr=conv_aggr)
-            self.conv2 = DynamicEdgeConv(MLP_ALL_ACT([2 * 32, 64],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), k=conv_knn, aggr=conv_aggr)
-            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.conv1 = DynamicEdgeConv(MLP_ALL_ACT([2 * self.d_dim, 32, 32], activation=conv_MLP_act), k=conv_knn, aggr=conv_aggr)
+            self.conv2 = DynamicEdgeConv(MLP_ALL_ACT([2 * 32, 64], activation=conv_MLP_act), k=conv_knn, aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([32 + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.DynamicEdgeConv_
 
         # NNConv,          https://arxiv.org/abs/1704.01212
         # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
         elif conv_type == 'NNConv':
-            self.conv1 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.conv2 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2],
-                activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout), aggr=conv_aggr)
-            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.conv1 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2], activation=conv_MLP_act), aggr=conv_aggr)
+            self.conv2 = NNConv(in_channels=self.d_dim, out_channels=self.d_dim, nn=MLP_ALL_ACT([self.e_dim, self.d_dim**2], activation=conv_MLP_act), aggr=conv_aggr)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.NNConv_
 
@@ -369,8 +353,7 @@ class GNNGeneric(torch.nn.Module):
 
             self.conv1 = GATConv(self.d_dim, self.d_dim, heads=2, dropout=dropout)
             self.conv2 = GATConv(self.d_dim * 2, self.d_dim, heads=1, concat=False, dropout=dropout)
-            self.lin1  = MLP_ALL_ACT([self.d_dim*2 + self.d_dim, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim*2 + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.GATConv_
 
@@ -379,8 +362,7 @@ class GNNGeneric(torch.nn.Module):
 
             self.conv1 = SplineConv(self.d_dim, self.d_dim, dim=self.e_dim, degree=1, kernel_size=3),
             self.conv2 = SplineConv(self.d_dim, self.d_dim, dim=self.e_dim, degree=1, kernel_size=5),
-            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
 
             self.conv  = self.SplineConv_
 
@@ -388,8 +370,7 @@ class GNNGeneric(torch.nn.Module):
         elif conv_type == 'SAGEConv':
             self.conv1 = SAGEConv(self.d_dim, self.d_dim)
             self.conv2 = SAGEConv(self.d_dim, self.d_dim)
-            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
             
             self.conv  = self.SAGEConv_
 
@@ -399,8 +380,7 @@ class GNNGeneric(torch.nn.Module):
 
             self.conv1 = SGConv(self.d_dim, self.d_dim, K, cached=False)
             self.conv2 = SGConv(self.d_dim, self.d_dim, K, cached=False)
-            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + self.d_dim, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
             
             self.conv  = self.SGConv_
             
@@ -408,8 +388,7 @@ class GNNGeneric(torch.nn.Module):
         elif conv_type == 'GINEConv':
             self.conv1 = GINEConv(MLP([self.d_dim, self.d_dim])),
             self.conv2 = GINEConv(MLP([self.d_dim, 64]))
-            self.lin1  = MLP_ALL_ACT([self.d_dim + 64, self.z_dim],
-                activation=fusion_MLP_act, batch_norm=fusion_MLP_bn, dropout=fusion_MLP_dropout)
+            self.lin1  = MLP_ALL_ACT([self.d_dim + 64, self.z_dim], activation=fusion_MLP_act, batch_norm=fusion_MLP_bn)
            
             self.conv  = self.GINEConv_
 
@@ -453,23 +432,20 @@ class GNNGeneric(torch.nn.Module):
 
         # Node level or graph level inference
         if self.task == 'node' or self.task == 'graph':
-            self.mlp_final = MLP([self.z_dim, self.z_dim, self.c_dim],
-                activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout)
+            self.mlp_final = MLP([self.z_dim, self.z_dim, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn)
 
         # 2-point (node) probability computation function (edge level inference)
         elif self.task == 'edge_asymmetric':
             self.mlp_final = nn.Sequential(
-                    MLP_ALL_ACT([2 * self.z_dim, self.z_dim//2],
-                        activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout),
-                    MLP([self.z_dim//2, self.c_dim],
-                        activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout),
+                    MLP_ALL_ACT([2 * self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    #nn.Dropout(0.5),
+                    MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
                     )
         elif self.task == 'edge_symmetric':
             self.mlp_final = nn.Sequential(
-                    MLP_ALL_ACT([self.z_dim, self.z_dim//2],
-                        activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout),
-                    MLP([self.z_dim//2, self.c_dim],
-                        activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout),
+                    MLP_ALL_ACT([self.z_dim, self.z_dim//2], activation=final_MLP_act, batch_norm=final_MLP_bn),
+                    #nn.Dropout(0.5),
+                    MLP([self.z_dim//2, self.c_dim], activation=final_MLP_act, batch_norm=final_MLP_bn),
                     )
         else:
             raise Exception(__name__ + f'.GraphNetGeneric: Unknown task = {task} parameter')

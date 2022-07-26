@@ -8,7 +8,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-def MLP(layers, activation='relu', batch_norm=False, dropout=0.0):
+def MLP(layers, activation='relu', batch_norm=True, dropout=0.0):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     
@@ -49,7 +49,7 @@ def MLP(layers, activation='relu', batch_norm=False, dropout=0.0):
         )
 
 
-def MLP_ALL_ACT(layers, activation='relu', batch_norm=False, dropout=0.0):
+def MLP_ALL_ACT(layers, activation='relu', batch_norm=True, dropout=0.0):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     

@@ -172,8 +172,8 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
     ax[0].plot(losses)
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('loss')
-    ax[0].set_title(f'[{label}]', fontsize=10)
-    
+    ax[0].set_title(label, fontsize=10)
+
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
     ax[1].legend(['train','validation'])
@@ -576,31 +576,26 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     # Plot re-weighting results
     fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
 
-    num_classes = len(np.unique(y))
-    legends = []
-
     for i in range(2):
         ax = ax1 if i == 0 else ax2
 
         # Loop over classes
-        for c in range(num_classes) :
+        for c in range(2) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, density = False,
                 histtype = 'step', fill = False, linewidth = 1.5)
-            legends.append(f'$\\mathcal{C} = {c}$')
 
         # Loop over classes
-        for c in range(num_classes) :
+        for c in range(2) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
                 histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
-            legends.append(f'$\\mathcal{C} = {c}$ (weighted)')
-
+        
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
 
     ax1.set_title(title, fontsize=10)
-    ax1.legend(legends)
+    ax1.legend(['class 0','class 1', 'class 0 (w)','class 1 (w)'])
     ax2.set_yscale('log')
     plt.tight_layout()
 
@@ -829,7 +824,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
         npoints:    number of points to draw
     """
     
-    print(__name__ + f'.plot_contour_grid: Evaluating, X.shape = {X.shape}...')
+    print(__name__ + f'.plot_contour_grid: Evaluating ...')
     MAXP = min(npoints, X.shape[0])
     D    = X.shape[1]
     pad  = 0.5
@@ -849,14 +844,14 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             # -------------------------------------
             ## Evaluate function values
 
-            XX = np.zeros((reso*reso, D))
-            XX[:, dim1] = PX.ravel()
-            XX[:, dim2] = PY.ravel()
+            Z = np.zeros((reso*reso, D))
+            Z[:, dim1] = PX.ravel()
+            Z[:, dim2] = PY.ravel()
 
             if   transform == 'torch':
-                Z = pred_func(torch.from_numpy(XX).type(torch.FloatTensor))
+                Z = pred_func(torch.from_numpy(Z).type(torch.FloatTensor))
             elif transform == 'numpy':
-                Z = pred_func(XX)
+                Z = pred_func(Z)
             else:
                 raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {matrix}')
 
