@@ -149,14 +149,14 @@ train_runmode:
   active_models: &ACTIVE_MODELS
 
     - xgb0
-    #- gxgb0
+    - gxgb0
 
-    #- dbnf0
-    #- gnet0
-    #- gnet1
-    #- gnet2
-    #- gnet3
-    
+    - dbnf0
+    - gnet0
+    - gnet1
+    - gnet2
+    - gnet3
+      
     - flr0
     - lgr0
     - dmx0
@@ -175,7 +175,7 @@ train_runmode:
     # Big, sophisticated model
     source:
       xgb0
-    
+      
     # Simple, compressed models
     drains:
       - gxgb0

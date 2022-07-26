@@ -440,7 +440,7 @@ def train_models(data_trn, data_val, args=None) :
                 
                 # By default to torch
                 inputs['y_soft'] = torch.tensor(y_soft, dtype=torch.float)
-                
+
                 if dtype == 'numpy':
                     inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()
 
