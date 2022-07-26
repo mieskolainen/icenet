@@ -560,12 +560,12 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
             X     = torch.Tensor(MI_x).to(preds.device)
             Z     = preds
             model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind], return_model_only=True, device=X.device, **MI_reg_param)
-
+            
             # ------------------------------------------------------------
             # Now apply the MI estimator to the sample.
             MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
             # ------------------------------------------------------------
-
+            
             MI_loss += MI_reg_param['beta'] * MI_lb
     else:
         MI_loss = 0.0
@@ -738,10 +738,9 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         ## Plot feature importance
         if plot_importance:
             
-            for sort in [True, False]:
-                fig,ax = plots.plot_xgb_importance(model=model, tick_label=data_trn.ids, label=param["label"], sort=sort)
-                targetdir = aux.makedir(f'{args["plotdir"]}/train/')
-                plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
+            fig,ax = plots.plot_xgb_importance(model=model, dim=data_trn.x.shape[1], tick_label=data_trn.ids)
+            targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+            plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
@@ -914,11 +913,10 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     for i in range(len(data_trn[0].u)): # Xgboost features
         ids.append(f'xgb[{i}]')
     
-    for sort in [True, False]:
-        fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/')
-        plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
-        
+    fig,ax = plots.plot_xgb_importance(model=model, dim=x_trn.shape[1], tick_label=ids)
+    targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+    plt.savefig(f'{targetdir}/{param["label"]}_importance.pdf', bbox_inches='tight'); plt.close()
+    
     ## Plot decision trees
     if ('plot_trees' in param['xgb']) and param['xgb']['plot_trees']:
         try:
