@@ -411,8 +411,8 @@ dmlp0:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
+    batch_norm: False
+    dropout: 0.01
     
   # Optimization
   opt_param:  
@@ -452,8 +452,8 @@ dmlp_MI_min:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
+    batch_norm: False
+    dropout: 0.01
     
   # Optimization
   opt_param:  
@@ -498,8 +498,8 @@ dmlp_MI_max:
   model_param:
     mlp_dim: [64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
+    batch_norm: False
+    dropout: 0.01
     
   # Optimization
   opt_param:  

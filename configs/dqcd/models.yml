@@ -258,7 +258,7 @@ dmlp:
   model_param:
     mlp_dim: [64, 64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: True
+    batch_norm: False
     dropout: 0.1
   
   # Optimization
@@ -303,8 +303,11 @@ vae0:
     
     encoder_act: 'relu'
     encoder_bn: False
+    encoder_dropout: 0.0
+
     decoder_act: 'tanh'
     decoder_bn: False
+    decoder_dropout: 0.0
 
     reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
     kl_prob:   'Gaussian'           # 'Gaussian'
@@ -332,7 +335,6 @@ vae0:
     ma_eT:  1.0                 #  EMA starting value
 
     beta:  -0.99                #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
-    x_index: null               #  Variable indices [] (several), int (all, dimension), or None
     y_index: "param['model_param']['latent_dim']"
 
     hidden_dim: 64
@@ -416,14 +418,17 @@ gnet1:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
 
     # Domain adaptation
     DA_active: False
@@ -474,14 +479,17 @@ gnet2:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
     
     # Domain adaptation
     DA_active: False
@@ -532,14 +540,17 @@ gnet3:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
-    
+
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
 
     # Domain adaptation
     DA_active: False

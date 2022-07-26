@@ -61,11 +61,9 @@ def pred_cut(args, param):
     
     return func_predict
 
-
 def pred_cutset(args, param):
 
     print(__name__ + f'.pred_cutset: Evaluate <{param["label"]}> fixed cutset model ...')
-
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
     
@@ -77,7 +75,6 @@ def pred_cutset(args, param):
         return y.astype(float)
     
     return func_predict
-
 
 def pred_graph_xgb(args, param, device='cpu'):
     
@@ -112,21 +109,18 @@ def pred_graph_xgb(args, param, device='cpu'):
             x_tot[i,0:dim1] = conv_x[i,:]  # Convoluted features
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
-        if 'multi' in param['xgb']['model_param']['objective']:
-            return xgb_model.predict(xgboost.DMatrix(data = x_tot))[:,args['signalclass']]
-        else:
-            return xgb_model.predict(xgboost.DMatrix(data = x_tot)) 
-
+        pred = xgb_model.predict(xgboost.DMatrix(data = x_tot))
+        if len(pred) > 1: pred = pred[:, args['signalclass']]
+        return pred
+    
     return func_predict
-
 
 def pred_torch_graph(args, param):
 
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
-    
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
-    model.eval() # Turn on eval mode!
+    model.eval() # ! Turn on eval mode!
 
     def func_predict(x):
 
@@ -142,14 +136,12 @@ def pred_torch_graph(args, param):
     
     return func_predict
 
-
 def pred_torch_generic(args, param):
     
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
-    
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
-    model.eval() # Turn on eval mode!
+    model.eval() # ! Turn on eval mode!
     
     def func_predict(x):
 
@@ -164,14 +156,12 @@ def pred_torch_generic(args, param):
     
     return func_predict
 
-
 def pred_torch_scalar(args, param):
     
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
-    
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = dopt.model_to_cuda(model, device_type=param['device'])
-    model.eval() # Turn on eval mode!
+    model.eval() # ! Turn on eval mode!
     
     def func_predict(x):
         
@@ -195,32 +185,39 @@ def pred_xtx(args, param):
 def pred_xgb(args, param):
     
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
-
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        if 'multi' in param['model_param']['objective']:
-            return xgb_model.predict(xgboost.DMatrix(data = x))[:,args['signalclass']]
-        else:
-            return xgb_model.predict(xgboost.DMatrix(data = x))   
+        pred = xgb_model.predict(xgboost.DMatrix(data = x))
+        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
+        return pred
 
     return func_predict
 
+def pred_xgb_scalar(args, param):
+    
+    print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
+    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
+    xgb_model = pickle.load(open(filename, 'rb'))
+    
+    def func_predict(x):
+        pred = xgb_model.predict(xgboost.DMatrix(data = x))
+        return pred
+    
+    return func_predict
 
 def pred_xgb_logistic(args, param):
     
     print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
-
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        # Sigmoid function    
+        # Apply sigmoid function    
         return 1 / (1 + np.exp(- xgb_model.predict(xgboost.DMatrix(data = x))))
     
     return func_predict
-
 
 def pred_flow(args, param, n_dims):
 
@@ -245,9 +242,9 @@ def pred_flr(args, param):
 
     print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
 
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_' + str(0) + '_.dat', 'rb'))
+    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_0_.dat', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
-        
+    
     return func_predict
 

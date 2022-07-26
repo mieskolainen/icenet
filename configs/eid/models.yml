@@ -14,26 +14,29 @@ gxgb0:
     raytune:  null
 
     # Convolution model
-    conv_type:   'EdgeConv' # See models under icenet/deep/graph.py
+    conv_type:   'SuperEdgeConv' # See models under icenet/deep/graph.py
 
     # Model
     model_param:
-      task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+      task: 'graph'             # 'graph', 'node', 'edge_symmetric', 'edge_asymmetric' (level of inference)
       global_pool: 'mean'
       z_dim: 196                # Convolution output dimension
       
       # Message passing parameters
       conv_MLP_act: 'relu'
       conv_MLP_bn: True
+      conv_MLP_dropout: 0.01
       conv_aggr: 'max'
       conv_knn: 8
 
       fusion_MLP_act: 'relu'
       fusion_MLP_bn: False
+      fusion_MLP_dropout: 0.01
 
       final_MLP_act: 'relu'
       final_MLP_bn:  False
-    
+      final_MLP_dropout: 0.01
+      
       # Domain adaptation
       DA_active: False
       # ...
@@ -94,8 +97,8 @@ gxgb0:
       reg_alpha: 0.0         # L1 regularization
       
       # learning task parameters
-      objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
-      eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+      objective:  'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
+      eval_metric: ['logloss']       # for evaluation, 'mlogloss'
 
     plot_trees: False
     
@@ -122,14 +125,17 @@ gnet0:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.0
 
     # Domain adaptation
     DA_active: False
@@ -180,14 +186,17 @@ gnet1:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
 
     # Domain adaptation
     DA_active: False
@@ -238,14 +247,17 @@ gnet2:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
 
     # Domain adaptation
     DA_active: False
@@ -296,14 +308,17 @@ gnet3:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
+    conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
-    
-    fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
 
+    fusion_MLP_act: 'relu'
+    fusion_MLP_bn: False
+    fusion_MLP_dropout: 0.01
+    
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
+    final_MLP_dropout: 0.01
 
     # Domain adaptation
     DA_active: False
@@ -401,8 +416,8 @@ dmlp:
   model_param:
     mlp_dim: [64, 64, 64]     # hidden layer dimensions
     activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
+    batch_norm: False
+    dropout: 0.01
     
   # Optimization
   opt_param:  
@@ -481,8 +496,8 @@ cnn0:
   # Model
   conv_type: 'cnn+maxo'
   model_param:
-    dropout_cnn: 0.25
-    dropout_mlp: 0.5
+    dropout_cnn: 0.1
+    dropout_mlp: 0.1
     mlp_dim: 64
 
     # Set these according to the input matrix (could autodetect ...)
@@ -571,7 +586,7 @@ dmx0:
   model_param:
     num_units: 8
     neurons:  50
-    dropout:  0.4
+    dropout:  0.01
 
   # Optimization
   opt_param:  
