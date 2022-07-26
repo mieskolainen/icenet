@@ -110,26 +110,34 @@ def MI_loss(X, Z, weights, MI, y):
     """
     Neural Mutual Information regularization
     """
+    if len(MI['classes']) != 1:
+        # To extend this, we should have separate MI nets/models for each class
+        raise Exception(__name__ + f'.MI_loss: Support currently for one class only (or all inclusive with = [None])')
+
     if weights is not None:
         weights = weights / torch.sum(weights)
+    else:
+        weights = torch.ones(len(X)).to(X.device)
 
     MI['model'] = MI['model'].to(X.device) #!
-
-    #for c in MI['classes']:
-    #
-    #if c == None:
-    #    ind = (y != -1) # All classes
-    #else:
-    #    ind = (y == c)
-
-    joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, device=X.device)
-    MI_lb, MI['ma_eT'], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
-                        model=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+    MI['loss']  = 0
+    MI['MI_lb'] = 0
     
-    MI['loss']  = loss_MI # Used by the MI-net torch optimizer
-    MI['MI_lb'] = MI_lb   # For diagnostics
-            
-    return MI['beta'] * MI_lb
+    for c in MI['classes']:
+    
+        if c == None:
+            ind = (y != -1) # All classes
+        else:
+            ind = (y == c)
+
+        joint, marginal, w          = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
+        MI_lb, MI['ma_eT'], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
+                                            model=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+        
+        MI['loss']  = MI['loss']  + loss_MI  # Used by the MI-net torch optimizer
+        MI['MI_lb'] = MI['MI_lb'] + MI_lb    # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
+    
+    return MI['beta'] * MI['MI_lb'] 
 
 
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
