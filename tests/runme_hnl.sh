@@ -5,9 +5,7 @@
 # Run with: source runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="/home/user/travis-stash/input/icehnl"
-#DATAPATH="/vols/cms/mmieskol/HLT_electron_data/22112021"
-#DATAPATH="/home/user/HLT_electron_data/22112021"
+DATAPATH="./travis-stash/input/icehnl"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
