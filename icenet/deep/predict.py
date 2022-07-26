@@ -241,8 +241,8 @@ def pred_flow(args, param, n_dims):
 def pred_flr(args, param):
 
     print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
-
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{label}_0_.dat', 'rb'))
+    
+    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0_.dat', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     
