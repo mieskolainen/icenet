@@ -905,7 +905,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         plots.density_MVA_wclass(**inputs)
 
     # ----------------------------------------------------------------
-    ### MVA 2D correlation plots
+    ### MVA 2D plots
     if args['plot_param']['MVA_2D']['active']:
 
         for i in range(100): # Loop over plot types
@@ -914,14 +914,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 edges = args['plot_param']['MVA_2D'][f'plot[{i}]']['edges']
             except:
                 break # No more this type of plots 
-            
-            # Pick chosen variables based on regular expressions
-            from icenet.tools import iceroot
-            var_names = iceroot.process_regexp_ids(all_ids=ids_RAW, ids=var)
-            pick_ind  = np.array(np.where(np.isin(ids_RAW, var_names))[0], dtype=int)
-            
-            inputs = {'y_pred': y_pred, 'weights': weights, 'X': X_RAW[:, pick_ind],
-                'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(), \
+
+            inputs = {'y_pred': y_pred, 'weights': weights, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW, \
                 'label': f'{label}', 'hist_edges': edges, 'path': targetdir + '/COR/'}
 
             plots.density_COR_wclass(y=y, **inputs)

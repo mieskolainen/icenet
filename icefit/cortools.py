@@ -205,7 +205,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     Returns:
         mutual information
     """
-    rho,_,_ = pearson_corr(x,y)
+    rho,_ = pearson_corr(x,y)
 
     def autobinwrap(data):
         if   automethod == 'Scott2D':
@@ -244,21 +244,17 @@ def gaussian_mutual_information(rho):
     return -0.5*np.log(1-rho**2)
 
 
-def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
+def pearson_corr(x, y, weights = None):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
     
     Args:
-        x,y        : arrays of values
-        weights    : possible event weights
-        alpha      : confidence interval [alpha/2, 1-alpha/2] level 
-        n_bootstrap: number of bootstrap samples
+        x,y     : arrays of values
+        weights : possible event weights
     Returns: 
-        correlation coefficient [-1,1], confidence interval, p-value
+        correlation coefficient [-1,1], p-value
     """
-    def prc_CI(x, alpha):
-        return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
 
     if len(x) != len(y):
         raise Exception('pearson_corr: x and y with different size.')
@@ -277,39 +273,22 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     x_ = x.astype(dtype) - np.sum(w*x, dtype=dtype)
     y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
 
-    # Obtain estimates and sample uncertainty via bootstrap
-    r_values = np.zeros(n_bootstrap)
-
-    for i in range(n_bootstrap):
-
-        # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
-        if i == 0:
-            ind = np.arange(len(w))
-
-        w_ = w[ind] / np.sum(w[ind])
-
-        # corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}
-        denom = np.sum(w_*(x_[ind]**2))*np.sum(w_*(y_[ind]**2))
-        if denom > 0:
-            r = np.sum(w_*x_[ind]*y_[ind]) / np.sqrt(denom)
-        else:
-            r = 0
-        
-        # Safety
-        r = np.clip(r, -1.0, 1.0)
-        
-        r_values[i] = r
-
-    r     = r_values[0]       # The non-bootstrapped value
-    r_err = prc_CI(r_values, alpha)
-
+    # corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}
+    denom = np.sum(w*(x_**2))*np.sum(w*(y_**2))
+    if denom > 0:
+        r = np.sum(w*x_*y_) / np.sqrt(denom)
+    else:
+        r = 0
+    
+    # Safety
+    r = np.clip(r, -1.0, 1.0)
+    
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
     prob = 2*dist.cdf(-abs(r))
 
-    return r, r_err, prob
+    return r, prob
 
 
 def optbins(x, maxM=150, mode="nbins", alpha=0.025):
@@ -410,9 +389,9 @@ def test_gaussian():
     #Gaussian unit test of the estimators.
     """
     import pytest
-    
+
     EPS = 0.3
-    
+
     ## Create synthetic Gaussian data
     for N in [int(1e3), int(1e4)]:
 
@@ -432,7 +411,7 @@ def test_gaussian():
             # ---------------------------------------------------------------
 
             # Linear correlation
-            r,r_err,prob = pearson_corr(x=x1, y=x2)
+            r,prob = pearson_corr(x=x1, y=x2)
             assert  r == pytest.approx(rho, abs=EPS)
             print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
 
@@ -440,21 +419,21 @@ def test_gaussian():
             MI_REF = gaussian_mutual_information(rho)
             print(f'Gaussian exact MI = {MI_REF:.3f}')
 
-            # MI with different histogram autobinnings
+            # MI with different autobinnings
             automethod = ['Scott2D', 'Hacine2D']
-            
+
             for method in automethod:
                 MI     = mutual_information(x=x1, y=x2, automethod=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Histogram     MI = {MI:.3f} ({method})')
+                print(f'Numerical      MI = {MI:.3f} ({method})')
 
             # Neural MI
             neuromethod = ['MINE', 'MINE_EMA']
-            
+
             for losstype in neuromethod:
 
                 # Test with 2D vectors
-                MI,MI_err  = mine.estimate(X=x1, Z=x2, losstype=losstype)
+                MI,MI_err  = mine.estimate(X=x1, Z=x2, num_iter=2000, losstype=losstype)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural         MI = {MI:.3f} +- {MI_err:.3f} ({losstype})')
             
@@ -474,7 +453,7 @@ def test_constant():
     x1 = np.ones(100)
     x2 = np.ones(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r,prob    = pearson_corr(x=x1, y=x2)
     assert   r == pytest.approx(1, abs=EPS)
 
     MI        = mutual_information(x=x1, y=x2)
@@ -487,7 +466,7 @@ def test_constant():
     ### Other zeros    
     x2 = np.zeros(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r,prob    = pearson_corr(x=x1, y=x2)
     assert   r == pytest.approx(0, abs=EPS)
 
     MI        = mutual_information(x=x1, y=x2)

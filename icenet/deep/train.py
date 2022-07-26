@@ -561,11 +561,11 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
             Z     = preds
             model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind], return_model_only=True, device=X.device, **MI_reg_param)
             
-            # ------------------------------------------------------------
-            # Now apply the MI estimator to the sample.
-            MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
-            # ------------------------------------------------------------
-            
+            # Now apply the MI estimators to the full sample. No Z.detach() here, because we need the gradients !
+            model.eval() # !
+            joint, marginal, w = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
+            MI_lb, T, eT       = mine.apply_mine(model=model, joint=joint, marginal=marginal, w=w)
+
             MI_loss += MI_reg_param['beta'] * MI_lb
     else:
         MI_loss = 0.0
@@ -650,7 +650,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             import icenet.deep.autogradxgb as autogradxgb
 
             strs   = model_param['objective'].split(':')
-            device = 'cuda:0' if torch.cuda.is_available() else 'cpu:0'
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
             if strs[1] == 'binary_cross_entropy_with_MI':
 
@@ -780,8 +780,8 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # --------------------------------------------------------------------
     ### Train GNN
     graph_model = train_torch_graph(data_trn=data_trn, data_val=data_val, args=args, param=param['graph'], y_soft=y_soft)
-    graph_model = graph_model.to('cpu:0')    
-    
+    graph_model = graph_model.to('cpu')    
+
     ### Find out the latent space dimension -------
     Z = 0
     for i in range(len(data_trn)):

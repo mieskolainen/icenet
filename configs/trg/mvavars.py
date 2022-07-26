@@ -53,4 +53,4 @@ PLOT_VARS = [
 
 # Variables we read out from the root files (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']
-LOAD_VARS = ['.*'] # all
+LOAD_VARS = ['.'] # all

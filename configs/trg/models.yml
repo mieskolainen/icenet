@@ -11,10 +11,10 @@ MI_REG_PARAM: &MI_REG_PARAM
   y_index: [1]
   
   epochs: 20
-  batch_size: 256
+  batch_size: 512
   lr: 1.0e-3
   weight_decay: 0.0
-  
+
   mlp_dim: [64, 64]
   dropout: 0.01
   noise_std: 0.025

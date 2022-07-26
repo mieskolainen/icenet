@@ -48,14 +48,11 @@ def pred_cut(args, param):
 
     # Get feature name variables
     index = args['features'].index(param['variable'])
-    
+
     def func_predict(x):
         # Squeeze the values via tanh() from R -> [-1,1]
-        if   param['transform'] == 'tanh':
+        if param['transform'] == 'tanh':
             return np.tanh(param['sign'] * x[...,index])
-        # Transform via sigmoid from R -> [0,1]
-        elif param['transform'] == 'sigmoid':
-            return 1 / (1 + np.exp(param['sign'] * x[...,index]))
         else:
             return param['sign'] * x[...,index]
     
@@ -80,7 +77,7 @@ def pred_cutset(args, param):
 
 
 def pred_graph_xgb(args, param, device='cpu'):
-    
+
     print(__name__ + f'.pred_graph_xgb: Evaluate <{param["label"]}> model ...')
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \

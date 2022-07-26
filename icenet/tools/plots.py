@@ -356,19 +356,18 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
-    plt.title(f'[{label}]', fontsize=10)
+    plt.title(label, fontsize=10)
     
-    for scale in ['linear', 'log']:
-        ax.set_yscale(scale)
-        outputdir = aux.makedir(f'{path}/{label}')
-        savepath  = f'{outputdir}/MVA_output__{scale}.pdf'
-        plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_MVA_wclass: Saving figure to "{savepath}"')
+    ax.set_yscale('log')
 
+    outputdir = aux.makedir(f'{path}/{label}')
+    savepath  = f'{outputdir}/MVA_output.pdf'
+    plt.savefig(savepath, bbox_inches='tight')
+    print(__name__ + f'.density_MVA_wclass: Saving figure to "{savepath}"')
     plt.close()
 
 
-def density_COR_wclass(y_pred, y, X, ids, label, \
+def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
     weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
     
     """
@@ -377,8 +376,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
     Args:
         y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
-        X           :  Variables to be plotted
-        ids         :  Identifiers of the variables in X
+        X_RAW       :  Variables to be plotted
+        ids_RAW     :  Identifiers of the variables in X_RAW
         label       :  Label of the MVA model (string)
         weights     :  Sample weights
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
@@ -408,58 +407,43 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         w = weights[ind] if weights is not None else None
 
         # Loop over variables
-        for v in ids:
+        for v in ids_RAW:
+
+            fig,ax = plt.subplots()
 
             # Plot 2D
             xx   = y_pred[ind]
-            yy   = X[ind, ids.index(v)]
+            yy   = X_RAW[ind, ids_RAW.index(v)]
+            
+            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
+            h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
             
             # Compute Pearson correlation coefficient
             from icefit import cortools
-            cc,cc_err,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
+            cc = cortools.pearson_corr(x=xx, y=yy, weights=w)[0]
+
+            fig.colorbar(im)
+            plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
+            plt.ylabel(f'{v}')
+            plt.title(f'{label} | class = {k} | $\\rho_{{XY}} = {cc:0.3f}$', fontsize=10)
             
-            # Neural Mutual Information
-            from icefit import mine
-            MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
+            # -----
 
-            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
-
-            for scale in ['linear', 'log']: 
-
-                fig,ax = plt.subplots()
-
-                if scale == 'log':
-                    import matplotlib as mpl
-                    h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
-                else:
-                    h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
-                
-                fig.colorbar(im)
-                plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
-                plt.ylabel(f'{v}')
-                rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
-                MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                
-                print(rho_value)
-                print(MI_value)
-                plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
-                # -----
-
-                outputdir = aux.makedir(f'{path}/{label}')
-                savepath  = f'{outputdir}/{v}_class_{k}__{scale}.pdf'
-                plt.savefig(savepath, bbox_inches='tight')
-                print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
-                plt.close()
+            outputdir = aux.makedir(f'{path}/{label}')
+            savepath  = f'{outputdir}/{v}_class_{k}.pdf'
+            plt.savefig(savepath, bbox_inches='tight')
+            print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
+            plt.close()
 
 
-def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+def density_COR(y_pred, X_RAW, ids_RAW, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
     """
     Evaluate the 2D-density of the MVA algorithm output vs other variables.
     
     Args:
         y_pred      :  MVA algorithm output
-        X           :  Variables to be plotted
-        ids         :  Identifiers of the variables in X
+        X_RAW       :  Variables to be plotted
+        ids_RAW     :  Identifiers of the variables in X_RAW
         label       :  Label of the MVA model (string)
         weights     :  Sample weights
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
@@ -473,15 +457,15 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
-    
+
     # Loop over variables
-    for v in ids:
+    for v in ids_RAW:
 
         fig,ax = plt.subplots()
 
         # Plot 2D
         xx   = y_pred
-        yy   = X[:, ids.index(v)]
+        yy   = X_RAW[:, ids_RAW.index(v)]
         
         bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
         h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=weights, cmap=plt.get_cmap(cmap))

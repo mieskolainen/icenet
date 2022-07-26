@@ -1,6 +1,6 @@
 # Minimal "ABCD" estimator and its confidence intervals
 #
-# Run tests with: pytest icefit/abcd.py -rP
+# Run tests with: pytest ./icefit/abcd.py -rP
 #
 # m.mieskolainen@imperial.ac.uk, 2021
 
@@ -15,14 +15,13 @@ def ABCD_eq(b,c,d):
     """
     Basic estimator formula for count in 'A' (signal domain)
     
-    Independent (X,Y) gives us the definition A = B x C / D
+    DEFINITION: A = B x C / D
     
-    Y 
     ^
     |C | A
     |-----
     |D | B
-    0------> X
+    0------>
     """
     return b * c / d
 

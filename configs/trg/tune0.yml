@@ -3,13 +3,13 @@
 # -------------------------------------------------------------------
 
 rootname: 'trg'
-rngseed: 123456                       # Fixed seed for training data mixing
+rngseed: 123456                      # Fixed seed for training data mixing
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
-  use_conditional: false              # Conditional (theory parametric) input
-  num_classes: 2                      # Number of classes in MVA
-  signalclass: 1                      # Signal class ID
+  use_conditional: false             # Conditional (theory parametric) input
+  num_classes: 2                     # Number of classes in MVA
+  signalclass: 1                     # Signal class ID
   
   inputvar:         'MVA_SCALAR_VARS'
   inputvar_scalar:  null              # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py

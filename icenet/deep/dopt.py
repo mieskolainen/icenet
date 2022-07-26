@@ -261,7 +261,7 @@ def model_to_cuda(model, device_type='auto'):
         device = device_type
 
     model = model.to(device, non_blocking=True)
-    
+
     # Try special map (.to() does not map all variables)
     try:
         model = model.to_device(device=device)
@@ -276,7 +276,7 @@ def model_to_cuda(model, device_type='auto'):
 
     print(__name__ + f'.model_to_cuda: Computing device <{device}> chosen')
     
-    if GPU_chosen:
+    if torch.cuda.is_available():
         used  = io.get_gpu_memory_map()[0]
         total = io.torch_cuda_total_memory(device)
         cprint(__name__ + f'.model_to_cuda: device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')
