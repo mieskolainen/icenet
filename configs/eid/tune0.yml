@@ -151,18 +151,18 @@ train_runmode:
     - xgb0
     - gxgb0
 
-  #  - dbnf0
-    - gnet3
+    - dbnf0
+    - gnet0
+    - gnet1
     - gnet2
-  #  - gnet0
-  #  - gnet1
-
-  #  - flr0
-  #  - lgr0
+    - gnet3
+      
+    - flr0
+    - lgr0
     - dmx0
-  #  - dmlp
+    - dmlp
 
-  #  - cnn0
+    - cnn0
 
   ##  - xtx0
 

@@ -559,10 +559,15 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
 
             X     = torch.Tensor(MI_x).to(preds.device)
             Z     = preds
-            model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind], return_model_only=True, device=X.device, **MI_reg_param)
+
+            # We need .detach() here for Z!
+            model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
+                return_model_only=True, device=X.device, **MI_reg_param)
 
             # ------------------------------------------------------------
-            # Now apply the MI estimator to the sample.
+            # Now apply the MI estimator to the sample
+
+            # No .detach() here, we need the gradients for Z!
             MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
             # ------------------------------------------------------------
 
@@ -688,17 +693,13 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         model = xgboost.train(**a)
 
         # ------- AUC values ------
-        if 'multi' in model_param['objective']:
-            pred    = model.predict(dtrain)[:, args['signalclass']]
-        else:
-            pred    = model.predict(dtrain)
+        pred    = model.predict(dtrain)
+        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
         
-        if 'multi' in model_param['objective']:
-            pred    = model.predict(deval)[:, args['signalclass']]
-        else:
-            pred    = model.predict(deval)
+        pred    = model.predict(deval)
+        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
         # -------------------------
@@ -763,10 +764,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     return # No return value for raytune
 
 
-def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None, args=None, y_soft=None, param=None):
+def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None,
+    args=None, y_soft=None, param=None, feature_names=None):
     """
     Train graph model + xgb hybrid model
-
+    
     Args:
         See other train_*
 
@@ -874,17 +876,13 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         model = xgboost.train(**a)
         
         # AUC
-        if 'multi' in model_param['objective']:
-            pred    = model.predict(dtrain)[:, args['signalclass']]
-        else:
-            pred    = model.predict(dtrain)
+        pred    = model.predict(dtrain)
+        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
-        
-        if 'multi' in model_param['objective']:
-            pred    = model.predict(deval)[:, args['signalclass']]
-        else:
-            pred    = model.predict(deval)
+
+        pred    = model.predict(deval)
+        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
@@ -896,7 +894,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
         pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))
         
         print(__name__ + f'.train_graph_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
-        
+    
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
@@ -907,12 +905,12 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # -------------------------------------------
     ## Plot feature importance
 
-    # Create feature names
+    # Create all feature names
     ids = []
-    for i in range(Z):                  # Graph-net latent features
-        ids.append(f'gnn[{i}]')
-    for i in range(len(data_trn[0].u)): # Xgboost features
-        ids.append(f'xgb[{i}]')
+    for i in range(Z):                  # Graph-net latent dimension Z (message passing output) features
+        ids.append(f'conv_Z_{i}')
+    for i in range(len(data_trn[0].u)): # Xgboost high-level features
+        ids.append(feature_names[i])
     
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
