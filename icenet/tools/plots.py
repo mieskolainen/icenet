@@ -426,29 +426,34 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
             for scale in ['linear', 'log']: 
 
-                fig,ax = plt.subplots()
-
-                if scale == 'log':
-                    import matplotlib as mpl
-                    h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
-                else:
-                    h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
-                
-                fig.colorbar(im)
-                plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
-                plt.ylabel(f'{v}')
-                rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
-                #MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                MI_value = ''
-
-                plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
-                # -----
-
+                fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}/{label}')
                 savepath  = f'{outputdir}/{v}_class_{k}__{scale}.pdf'
-                plt.savefig(savepath, bbox_inches='tight')
-                print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
-                plt.close()
+                
+                try:
+
+                    if scale == 'log':
+                        import matplotlib as mpl
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
+                    else:
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
+                    
+                    fig.colorbar(im)
+                    plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
+                    plt.ylabel(f'{v}')
+                    rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
+                    #MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
+                    MI_value = ''
+
+                    plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
+                    # -----
+
+                    plt.savefig(savepath, bbox_inches='tight')
+                    print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
+                    plt.close()
+
+                except:
+                    print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
 
 
 def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
@@ -594,10 +599,10 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
             ax.hist(X[y == c], bins, weights = w, density = False,
                 histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
             legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
-        
+
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
-    
+
     ax1.set_title(title, fontsize=10)
     ax1.legend(legends)
     ax2.set_yscale('log')
