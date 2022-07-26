@@ -4,7 +4,8 @@
 #
 # Use adaptive gradient clipping when using MINE as a regulator cost.
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2021
+
 
 import numpy as np
 
@@ -14,46 +15,41 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.autograd as autograd
 
-from icenet.deep.dmlp import MLP
+from tqdm import tqdm
+
+from icenet.deep.da import GradientReversal
 
 class MINENet(nn.Module):
     """
     MINE network object
     """
-    def __init__(self, input_size=2, mlp_dim=[128, 128], activation='relu', dropout=0.01, noise_std=0.025, **args):
+    def __init__(self, input_size=2, hidden_dim=128, noise_std=0.025):
         super(MINENet, self).__init__()
         
-        def init_weights(m):
-            if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, std=noise_std)
-                nn.init.constant_(m.bias, 0)
+        self.fc1 = nn.Linear(input_size, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc3 = nn.Linear(hidden_dim, 1)
 
-        self.mlp = MLP([input_size] + mlp_dim + [1], activation=activation, dropout=dropout, batch_norm=False)
+        # Noise initialization
+        nn.init.normal_(self.fc1.weight, std=noise_std)
+        nn.init.constant_(self.fc1.bias, 0)
         
-        # Special initialize with noise
-        self.mlp.apply(init_weights)
+        nn.init.normal_(self.fc2.weight, std=noise_std)
+        nn.init.constant_(self.fc2.bias, 0)
+        
+        nn.init.normal_(self.fc3.weight, std=noise_std)
+        nn.init.constant_(self.fc3.bias, 0)
+
 
     def forward(self, x):
-        return self.mlp(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        
+        return x
 
 
-def apply_mine(model, joint, marginal, w):
-    """
-    Apply MINE model equations
-    """
-
-    w     = w / w.sum() / len(w)
-
-    # Use the network, apply weights
-    T, eT = w * model(joint), w * torch.exp(model(marginal))
-
-    # MI lower bound
-    MI_lb = torch.sum(T) - torch.log(torch.sum(eT))
-
-    return MI_lb, T, eT
-
-
-def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EMA'):
+def train_mine(joint, marginal, w, net, ma_eT, alpha=0.01, losstype='MINE_EMA'):
     """
     Args:
         joint, marginal : input data
@@ -69,9 +65,17 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
                sup E_{P_{XZ}} [T_\\theta] - log(E_{P_X \\otimes P_Z}[exp(T_\\theta)])
     """
     
-    MI_lb, T, eT = apply_mine(model=model, joint=joint, marginal=marginal, w=w)
-    
-    
+    # Use the network
+    T, eT = net(joint), torch.exp(net(marginal))
+
+    # Apply event weights
+    w   = w / w.sum() / len(w)
+    T   = w*T
+    eT  = w*eT
+
+    # MI lower bound
+    MI_lb = torch.sum(T) - torch.log(torch.sum(eT))
+
     # Unbiased estimate via exponentially moving average (FIR filter)
     # https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     if   losstype == 'MINE_EMA':
@@ -83,12 +87,12 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
     elif losstype == 'MINE':
         loss  = -MI_lb
     else:
-        raise Exception(__name__ + ".compute_mine: Unknown loss chosen")
+        raise Exception(__name__ + ".train_mine: Unknown loss chosen")
 
     return MI_lb, ma_eT, loss
 
 
-def sample_batch(X, Z, weights, batch_size, device='cpu'):
+def sample_batch(X, Z, weights, batch_size, dtype='numpy'):
     """
     Sample batches of data, either from the joint or marginals
     
@@ -101,39 +105,24 @@ def sample_batch(X, Z, weights, batch_size, device='cpu'):
     Returns:
         joint, marginal batches with size (N x [dim[X] + dim[Z]])
     """
-
     if batch_size is None:
         batch_size = X.shape[0]
-
-    if batch_size > X.shape[0]:
-        batch_size = X.shape[0]
-    
-    if weights is None:
-        weights = torch.ones(batch_size)
-
-    # Padd outer [] dimensions if dim 1 inputs
-    if len(X.shape) == 1:
-        X = X[..., None]
-    if len(Z.shape) == 1:
-        Z = Z[..., None]
 
     index    = np.random.choice(range(X.shape[0]), size=batch_size, replace=False)
     random   = np.random.choice(range(Z.shape[0]), size=batch_size, replace=False)
 
     # XZ and X(*)Z
-    if type(X) is np.ndarray:
-        joint    = torch.Tensor(np.concatenate([X[index,...],  Z[index,...]], axis=1)).to(device)
-        marginal = torch.Tensor(np.concatenate([X[index,...], Z[random,...]], axis=1)).to(device)
-        w        = torch.Tensor(weights[index]).to(device)
+    if dtype == 'numpy':
+        joint    = np.concatenate([X[index,...],  Z[index,...]], axis=1)
+        marginal = np.concatenate([X[index,...], Z[random,...]], axis=1)
     else:
-        joint    = torch.cat((X[index,...],  Z[index,...]), dim=1).to(device)
-        marginal = torch.cat((X[index,...], Z[random,...]), dim=1).to(device)
-        w        = weights[index].to(device)
+        joint    = torch.cat((X[index,...],  Z[index,...]), dim=1)
+        marginal = torch.cat((X[index,...], Z[random,...]), dim=1)
 
-    return joint, marginal, w
+    return joint, marginal, weights[index]
 
 
-def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, ma_eT, device='cpu'):
+def train(X, Z, weights, net, opt, batch_size, num_iter, alpha, losstype):
     """
     Train the network estimator
 
@@ -143,33 +132,42 @@ def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, m
     Returns:
         mutual information estimates per iteration
     """
-    num_iter = int(np.ceil(X.shape[0] / batch_size) * epochs)
-    result   = torch.Tensor(np.zeros(num_iter, dtype=float)).to(device)
+    result = []
+    ma_eT  = 1.0
+    
+    if weights is None:
+        weights = np.ones(X.shape[0])
 
-    model.train() #!
-
-    for i in range(num_iter):
+    for i in tqdm(range(num_iter)):
 
         # Sample input
-        joint, marginal, w = sample_batch(X=X, Z=Z, weights=weights, batch_size=batch_size, device=device)
+        joint, marginal, w = sample_batch(X=X, Z=Z, weights=weights, batch_size=batch_size)
 
+        # Create torch variables
+        joint    = torch.FloatTensor(joint)
+        marginal = torch.FloatTensor(marginal)
+        w        = torch.FloatTensor(w)
+
+        if next(net.parameters()).is_cuda:
+            joint    = joint.cuda()
+            marginal = marginal.cuda()
+            w        = w.cuda()
+        
         # Call it
-        opt.zero_grad()
-
-        MI_lb, ma_eT, loss = compute_mine(joint=joint, marginal=marginal, w=w, model=model, ma_eT=ma_eT, alpha=alpha, losstype=losstype)
+        MI_lb, ma_eT, l = train_mine(joint=joint, marginal=marginal, w=w, net=net, ma_eT=ma_eT, alpha=alpha, losstype=losstype)
 
         # Step gradient descent
-        autograd.backward(loss)
+        opt.zero_grad()
+        autograd.backward(l)
         opt.step()
 
-        result[i] = MI_lb
+        result.append(MI_lb.detach().cpu().numpy())
 
-    return result, ma_eT
+    return result
 
 
-def estimate(X, Z, weights=None, epochs=100, alpha=0.01, losstype='MINE_EMA', batch_size=256, lr=1e-3, weight_decay=0.0,
-    mlp_dim=[64, 64], dropout=0.01, activation='relu', noise_std=0.025, ma_eT=1.0,
-    window_size=0.2, return_full=False, device='cpu', return_model_only=False, **args):
+def estimate(X, Z, weights=None, batch_size=100, num_iter=int(1e3), lr=1e-3, hidden_dim=96, \
+    losstype='MINE_EMA', alpha=0.01, window=200, use_cuda=True, return_full=False):
     """
     Accurate Mutual Information Estimate via Neural Network
     
@@ -178,64 +176,50 @@ def estimate(X, Z, weights=None, epochs=100, alpha=0.01, losstype='MINE_EMA', ba
         or just scalar variables.
     
     Args:
-        X          : input data variable 1 (N x dim1) (either torch or numpy arrays)
+        X          : input data variable 1 (N x dim1)
         Z          : input data variable 2 (N x dim2)
         weights    : input data weights (N) (set None if no weights)
     
     Params:
-        batch_size  : optimization loop batch size
-        num_iter    : number of iterations
-        lr          : learning rate
-        hidden_dim  : network hidden dimension
-        loss        : estimator loss 'MINE_EMA' (default, unbiased), 'MINE'
-        alpha       : exponentially moving average parameter
-        window _size: iterations (tail) window size for the final estimate
+        batch_size : optimization loop batch size
+        num_iter   : number of iterations
+        lr         : learning rate
+        hidden_dim : network hidden dimension
+        loss       : estimator loss 'MINE_EMA' (default, unbiased), 'MINE'
+        alpha      : exponentially moving average parameter
+        window     : iterations (tail) window size for the final estimate
     
     Return:
         mutual information estimate, its uncertainty
     """
 
-    # Padd outer [] dimensions if dim 1 inputs
     if len(X.shape) == 1:
         X = X[..., None]
     if len(Z.shape) == 1:
         Z = Z[..., None]
 
-    if weights is None:
-        if type(X) is np.ndarray:
-            weights = np.ones(X.shape[0])
-        else:
-            weights = torch.Tensor(np.ones(X.shape[0])).to(device)
-
     # Create network
     input_size = X.shape[1] + Z.shape[1]
-    model = MINENet(input_size=input_size,  mlp_dim=mlp_dim, dropout=dropout, activation=activation, noise_std=noise_std)
+    net     = MINENet(input_size=input_size, hidden_dim=hidden_dim)
+    net.train() #!
 
-    # Transfer to CPU / GPU
-    import icenet.deep.dopt as dopt
-    model, device = dopt.model_to_cuda(model=model, device_type=device)
+    if torch.cuda.is_available() and use_cuda:
+        net = net.cuda()
 
-    opt           = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    result,ma_eT  = train_loop(X=X, Z=Z, weights=weights, model=model, opt=opt, batch_size=batch_size,
-        epochs=epochs, alpha=alpha, losstype=losstype, ma_eT=ma_eT, device=device)
-    
-    if return_model_only:
-        return model
+    opt     = optim.Adam(net.parameters(), lr=lr)
+    result  = train(X=X, Z=Z, weights=weights, net=net, opt=opt, batch_size=batch_size, num_iter=num_iter, alpha=alpha, losstype=losstype)
 
     if not return_full:
 
         # Take estimate from the tail
-        N   = int(window_size * epochs)
-        mu  = torch.mean(result[-N:])
-        err = torch.std(result[-N:]) / np.sqrt(N) # standard error on the mean
+        mu  = np.mean(result[-window:])
+        err = np.std(result[-window:]) / np.sqrt(window) # standard error on mean
 
-        if type(X) is np.ndarray:
-            return mu.detach().cpu().numpy(), err.detach().cpu().numpy()
-        else:
-            return mu, err
+        if not np.isfinite(mu):
+            mu  = 0
+            err = 0
+
+        return mu,err
+
     else:
-
-        if type(X) is np.ndarray:
-            return result.detach().cpu().nympy()
-        else:
-            return result
+        return result

@@ -110,7 +110,7 @@ class VAE(nn.Module):
         if   self.anomaly_score == 'RECO':
 
             score = self.log_pxz(x=x, xhat=xhat)
-            return torch.tanh(1/score)
+            return 1 - torch.tanh(1/score)
 
         elif self.anomaly_score == 'KL_RECO':
 

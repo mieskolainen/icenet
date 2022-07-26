@@ -141,19 +141,6 @@ def splitfactor(x, y, w, ids, args):
     data.y = ak.to_numpy(data.y)
     data.w = ak.to_numpy(data.w)
 
-    ### Pick active scalar variables out
-    scalar_vars   = globals()[args['inputvar_scalar']]
-    jagged_vars   = globals()[args['inputvar_jagged']]
-
-    ### ** Remove conditional variables **
-    if args['use_conditional'] == False:
-        for var in globals()['MODEL_VARS']:
-            try:
-                scalar_vars.remove(var)
-                print(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars')
-            except:
-                continue
-
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
@@ -178,6 +165,10 @@ def splitfactor(x, y, w, ids, args):
 
     # -------------------------------------------------------------------------
     ## Turn jagged data to "long-vector" matrix representation
+
+    ### Pick active scalar variables out
+    scalar_vars   = globals()[args['inputvar_scalar']]
+    jagged_vars   = globals()[args['inputvar_jagged']]
     
     # Create tuplet expanded jagged variable names
     all_jagged_vars = []

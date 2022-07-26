@@ -1,16 +1,13 @@
-classes: [0]             #  Which classes to use in the regularization
+# Mutual information regularization
 
 losstype: 'MINE_EMA'     # 'MINE' or 'MINE_EMA'
 alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
 ma_eT:  1.0              #  EMA starting value
 
+beta:   0.99             #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
 x_index: [0]             #  Variable indices (can contain several)
 y_index: [1]
 
-num_iter: 1000
-
-mlp_dim: [64, 64]
-dropout: 0.01
-noise_std: 0.025
+hidden_dim: 64
 lr: 1.0e-3
-weight_decay: 1.0e-5
+weight_decay: 0.0

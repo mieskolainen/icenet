@@ -39,25 +39,15 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         weights      = None # TBD. Could re-compute a new set of edge weights 
     # --------------------------------------------
 
-    def MI_helper(log_phat):
-        l = 0
-        if MI is not None:
-            X = MI['x'].float()
-            Z = torch.exp(log_phat[:, MI['y_index']])  # Classifier output
-            l = MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)
-        return l
-        
     if  param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
-        
+                 
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
         
         # This can handle scalar y values in [0,1]
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
-
-        loss += MI_helper(log_phat)
 
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
@@ -67,69 +57,51 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         log_phat_DA = F.log_softmax(x_DA, dim=-1)
 
         # https://arxiv.org/abs/1409.7495
-        CE_loss    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
-        CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
-        loss = (CE_loss, CE_DA_loss)
-
-        loss[0] += MI_helper(log_phat)
+        CE    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
+        CE_DA = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
+        
+        loss = (CE, CE_DA)
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss += MI_helper(log_phat)
-
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss += MI_helper(log_phat)
-
     elif param['lossfunc'] == 'VAE_background_only':
-        B_ind    = (y == 0) # Use only background to train
-        xhat, z, mu, std = model.forward(x=x[B_ind, ...])
-        log_loss = model.loss_kl_reco(x=x[B_ind, ...], xhat=xhat, z=z, mu=mu, std=std, beta=param['VAE_beta'])
+        ind      = (y == 0) # Use only background to train
+        xhat, z, mu, std = model.forward(x=x[ind, ...])
+        log_loss = model.loss_kl_reco(x=x[ind, ...], xhat=xhat, z=z, mu=mu, std=std, beta=param['VAE_beta'])
         
         if weights is not None:
-            loss = (log_loss*weights[B_ind]).sum(dim=0) / torch.sum(weights[B_ind])
+            loss = (log_loss*weights[ind]).sum(dim=0) / torch.sum(weights[ind])
         else:
             loss = log_loss.mean(dim=0)
-
-        if MI is not None:
-            X    = x[B_ind, ...]  # Classifier input
-            Z    = z              # Latent space representation
-            loss += MI_loss(X=X, Z=Z, weights=weights[B_ind], MI=MI)
 
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 
+    # -----------------------------------------------------
+    # Neural Mutual Information regularization
+    if MI is not None:
+
+        X = x[:, MI['x_index']]                   # Classifier input
+        Z = torch.exp(log_phat[:, MI['y_index']]) # Classifier output
+        
+        joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, dtype='torch')
+        MI_lb, MI['ma_eT'], loss_MI = mine.train_mine(joint=joint, marginal=marginal, w=w,
+                            net=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+
+        MI['loss']  = loss_MI # Used by the MI-net torch optimizer
+        MI['MI_lb'] = MI_lb   # For diagnostics
+
+        # Add to the total loss
+        loss = loss + MI['beta'] * MI_lb
+    # -----------------------------------------------------
+
     return loss
-
-
-def MI_loss(X, Z, weights, MI, y):
-    """
-    Neural Mutual Information regularization
-    """
-    if weights is not None:
-        weights = weights / torch.sum(weights)
-
-    MI['model'] = MI['model'].to(X.device) #!
-
-    #for c in MI['classes']:
-    #
-    #if c == None:
-    #    ind = (y != -1) # All classes
-    #else:
-    #    ind = (y == c)
-    
-    joint, marginal, w          = mine.sample_batch(X=X, Z=Z, weights=weights, batch_size=None, device=X.device)
-    MI_lb, MI['ma_eT'], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
-                        net=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
-
-    MI['loss']  = loss_MI # Used by the MI-net torch optimizer
-    MI['MI_lb'] = MI_lb   # For diagnostics
-            
-    return MI['beta'] * MI_lb
 
 
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
@@ -177,7 +149,7 @@ def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1
     """
     https://arxiv.org/abs/2205.09310
     """
-    norms = torch.norm(logit, p=2, dim=-1, keepdim=True)+EPS
+    norms = torch.norm(logit, p=2, dim=-1, keepdim=True) + EPS
     logit_norm = torch.div(logit, norms) / t
     log_phat = F.log_softmax(logit_norm, dim=-1) # Numerically more stable than pure softmax
 
@@ -216,7 +188,7 @@ def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
     y = F.one_hot(y, num_classes)
 
     # Protection
-    loss = - y*torch.log(phat +  EPS) * w
+    loss = - y*torch.log(phat + EPS) * w
     
     if weights is not None:
         return loss.sum() / torch.sum(weights)
@@ -269,7 +241,6 @@ def log_sum_exp(x):
     y = b + torch.log(torch.exp(x - b.unsqueeze(dim=1).expand_as(x)).sum(1))
     # y.size() = [N, ], no need to squeeze()
     return y
-
 
 class _ECELoss(nn.Module):
     """

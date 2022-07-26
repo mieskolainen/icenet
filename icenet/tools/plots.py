@@ -418,15 +418,11 @@ def density_COR_wclass(y_pred, y, X_RAW, ids_RAW, label, \
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
             h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
             
-            # Compute Pearson correlation coefficient
-            from icefit import cortools
-            cc = cortools.pearson_corr(x=xx, y=yy, weights=w)[0]
-
             fig.colorbar(im)
             plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
             plt.ylabel(f'{v}')
-            plt.title(f'{label} | class = {k} | $\\rho_{{XY}} = {cc:0.3f}$', fontsize=10)
-            
+            plt.title(f'{label} | class = {k}', fontsize=10)
+
             # -----
 
             outputdir = aux.makedir(f'{path}/{label}')

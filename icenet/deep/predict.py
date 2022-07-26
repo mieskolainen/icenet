@@ -205,20 +205,6 @@ def pred_xgb(args, param):
     return func_predict
 
 
-def pred_xgb_logistic(args, param):
-    
-    print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
-
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    xgb_model = pickle.load(open(filename, 'rb'))
-    
-    def func_predict(x):
-        # Sigmoid function    
-        return 1 / (1 + np.exp(- xgb_model.predict(xgboost.DMatrix(data = x))))
-    
-    return func_predict
-
-
 def pred_flow(args, param, n_dims):
 
     print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')

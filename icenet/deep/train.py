@@ -34,10 +34,8 @@ from icenet.tools import aux_torch
 
 from icenet.tools import plots
 from icenet.tools import prints
+
 from icenet.deep  import dopt
-
-
-#from icenet.deep  import dev_dndt
 from icenet.deep  import deps
 from icenet.algo  import flr
 from icenet.deep  import bnaf
@@ -76,8 +74,6 @@ def getgenericmodel(conv_type, netparam):
         model = mlgr.MLGR(**netparam)
     elif conv_type == 'dmlp':
         model = dmlp.DMLP(**netparam)
-    #elif conv_type == 'dndt':
-    #    model = dev_dndt.DNDT(**netparam)
     elif conv_type == 'deps':
         model = deps.DEPS(**netparam)
     elif conv_type == 'maxo':
@@ -310,20 +306,9 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     if 'MI_reg_param' in param:
 
         # Create network and set parameters
-        MI         = param['MI_reg_param']
-        input_size = param['MI_reg_param']['x_dim']
-
-        index      = MI['y_index']
-        if   index is None:
-            input_size += model.C
-        elif type(index) is str:
-            input_size += eval(index)
-        elif type(index) is list:
-            input_size += len(index)
-
-        print(input_size)
-
-        MI_model         = mine.MINENet(input_size=input_size, **MI)
+        MI = param['MI_reg_param']
+        
+        MI_model         = mine.MINENet(input_size = len(MI['y_index']) + len(MI['x_index']), hidden_dim=MI['hidden_dim'])
         MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
         MI_model.train() # !
 
@@ -333,7 +318,6 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         MI = None
     # --------------------------------------------------------------------
 
-    # Training loop
     for epoch in range(opt_param['epochs']):
 
         loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
@@ -376,14 +360,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-    
-
-    # Remove model
-    if MI is not None:
-        del MI['model']
-        del MI['optimizer']
-
-
+        
     if not args['__raytune_running__']:
         
         # Plot evolution
@@ -442,8 +419,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
 
 def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     trn_weights=None, val_weights=None, X_trn_2D=None, X_val_2D=None, args=None, param=None, 
-    Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, 
-    data_trn_MI=None, data_val_MI=None, config={}):
+    Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, config={}):
     """
     Train generic neural model [R^d x (2D) -> output]
     
@@ -458,19 +434,14 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     model, train_loader, test_loader = \
         torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
                 trn_weights=trn_weights, val_weights=val_weights, param=param, args=args, config=config, \
-                y_soft=y_soft, Y_trn_DA=Y_trn_DA, trn_weights_DA=trn_weights_DA, Y_val_DA=Y_val_DA, val_weights_DA=val_weights_DA,
-                data_trn_MI=data_trn_MI, data_val_MI=data_val_MI)
+                y_soft=y_soft, Y_trn_DA=Y_trn_DA, trn_weights_DA=trn_weights_DA, Y_val_DA=Y_val_DA, val_weights_DA=val_weights_DA)
     
-    if 'MI_reg_param' in param:
-        param['MI_reg_param']['x_dim'] = data_trn_MI.shape[1]
-
     return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
 
 
 def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights, val_weights, param, args, 
-    Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, 
-    data_trn_MI=None, data_val_MI=None, config={}):
+    Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, config={}):
     """
     Torch model and data loader constructor
 
@@ -492,11 +463,11 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
 
     ### Generators
     if (X_trn_2D is not None) and ('cnn' in conv_type):
-        training_set   = dopt.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = dopt.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA)
+        validation_set = dopt.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA)
     else:
-        training_set   = dopt.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = dopt.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA)
+        validation_set = dopt.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
@@ -514,72 +485,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     return model, train_loader, test_loader
 
 
-def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-30):
-    """
-    Custom binary cross entropy loss with mutual information regularization
-    """
-    global MI_x
-    global MI_reg_param
-    
-    if weights is None:
-        w = 1.0
-    else:
-        w = weights / torch.sum(weights)
-    
-    ## Squared hinge-loss type
-    #targets = 2 * targets - 1
-    #classifier_loss = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
-    #classifier_loss = classifier_loss.sum()
-    
-    ## Sigmoid link function
-    phat = 1 / (1 + torch.exp(-preds))
-    
-    ## Classifier binary Cross Entropy
-    classifier_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
-    classifier_loss  = classifier_loss.sum()
-    
-    #lossfunc = torch.nn.BCELoss(weight=w, reduction='sum')
-    #classifier_loss = lossfunc(phat, targets)
-
-    ## Domain Adaptation
-    # [reservation] ...
-
-    ## Regularization
-    if np.abs(MI_reg_param['beta']) > 0.0:
-
-        MI_loss = 0
-
-        # Loop over chosen classes
-        for c in MI_reg_param['classes']:
-
-            if c == None:
-                ind = (targets != -1) # All classes
-            else:
-                ind = (targets == c)
-
-            X     = torch.Tensor(MI_x).to(preds.device)
-            Z     = preds
-            model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind], return_model_only=True, device=X.device, **MI_reg_param)
-            
-            # Now apply the MI estimators to the full sample. No Z.detach() here, because we need the gradients !
-            model.eval() # !
-            joint, marginal, w = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
-            MI_lb, T, eT       = mine.apply_mine(model=model, joint=joint, marginal=marginal, w=w)
-
-            MI_loss += MI_reg_param['beta'] * MI_lb
-    else:
-        MI_loss = 0.0
-    
-    ## Total
-    total_loss = classifier_loss + MI_loss
-    cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb:0.4f}', 'yellow')
-
-    # Scale finally to the total number of events (to conform with xgboost internal convention)
-    return total_loss * len(preds)
-
-
-def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True,
-    data_trn_MI=None, data_val_MI=None):
+def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True):
     """
     Train XGBoost model
     
@@ -589,10 +495,6 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     Returns:
         trained model
     """
-
-    global MI_x
-    global MI_reg_param
-
 
     if param['model_param']['tree_method'] == 'auto':
         param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
@@ -638,48 +540,12 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
         results = dict()
         
-        a = {'params':          copy.deepcopy(model_param),
+        a = {'params':          model_param,
              'dtrain':          dtrain,
              'num_boost_round': 1,
              'evals':           evallist,
              'evals_result':    results,
              'verbose_eval':    False}
-
-        # == Custom loss ==
-        if 'custom' in model_param['objective']:
-            import icenet.deep.autogradxgb as autogradxgb
-
-            strs   = model_param['objective'].split(':')
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-            if strs[1] == 'binary_cross_entropy_with_MI':
-
-                MI_reg_param  = param['MI_reg_param']
-
-                # Mutual Information regularization target (can be internal or external)
-                MI_x = copy.deepcopy(data_trn_MI)
-
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, skip_hessian=True, device=device)
-                a['params']['disable_default_eval_metric'] = 1
-
-                def eval_obj(mode='train'):
-                    global MI_x #!
-                    obj = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, mode='eval', device=device)
-                    
-                    if mode == 'train':
-                        MI_x = copy.deepcopy(data_trn_MI)
-                        loss = obj(preds=model.predict(dtrain), targets=dtrain)[1] / len(MI_x)
-                    elif mode == 'eval':
-                        MI_x = copy.deepcopy(data_val_MI)
-                        loss = obj(preds=model.predict(deval), targets=deval)[1] / len(MI_x)
-                    return loss
-            else:
-                raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]}')
-
-            #!
-            del a['params']['eval_metric']
-            del a['params']['objective']
-        # -----------------
 
         if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
@@ -687,7 +553,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         # Train it
         model = xgboost.train(**a)
 
-        # ------- AUC values ------
+        # AUC
         if 'multi' in model_param['objective']:
             pred    = model.predict(dtrain)[:, args['signalclass']]
         else:
@@ -701,17 +567,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             pred    = model.predict(deval)
         metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
-        # -------------------------
 
-        # ------ Loss values ------
-        if 'custom' in model_param['objective']:
-            trn_losses.append(0)#eval_obj('train'))
-            val_losses.append(0)#eval_obj('eval'))
-        else:
-            trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
-            val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
-        # -------------------------
-
+        # Loss
+        trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
+        val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
+        
         print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if args['__raytune_running__']:

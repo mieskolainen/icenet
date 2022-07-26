@@ -468,12 +468,10 @@ def train_models(data_trn, data_val, args=None) :
         
         elif param['train'] == 'xgb':
 
-            inputs = {'data_trn':    data_trn['data'],
-                      'data_val':    data_val['data'],
-                      'args':        args,
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
-                      'param':       param}
+            inputs = {'data_trn': data_trn['data'],
+                      'data_val': data_val['data'],
+                      'args':     args,
+                      'param':    param}
             
             set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
             
@@ -492,8 +490,6 @@ def train_models(data_trn, data_val, args=None) :
                       'X_val_2D':    None,
                       'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
                       'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
                       'args':        args,
                       'param':       param}
             
@@ -514,8 +510,6 @@ def train_models(data_trn, data_val, args=None) :
                       'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'], dtype=torch.float),
                       'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
                       'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
                       'args':  args,
                       'param': param}
 
@@ -627,13 +621,8 @@ def evaluate_models(data=None, args=None):
         args['features'] = data['data'].ids
 
         X        = copy.deepcopy(data['data'].x)
-
         X_RAW    = data['data'].x
         ids_RAW  = data['data'].ids
-
-        # Add kinematic variables
-        X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
-        ids_RAW  = ids_RAW + data['data_kin'].ids
 
         y        = data['data'].y
         weights  = data['data'].w
@@ -711,15 +700,6 @@ def evaluate_models(data=None, args=None):
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
         
-            if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
-            
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
-
-        elif param['predict'] == 'xgb_logistic':
-            func_predict = predict.pred_xgb_logistic(args=args, param=param)
-            
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
