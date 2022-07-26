@@ -28,7 +28,7 @@ MVA_2D:
   active: false
   
   plot[0]:
-    var:   ['']
+    var:   ['.*'] # RegExp supported
     edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
             {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
 

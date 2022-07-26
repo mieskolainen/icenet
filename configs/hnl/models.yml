@@ -11,10 +11,10 @@ MI_REG_PARAM: &MI_REG_PARAM
   y_index: [1]
   
   epochs: 20
-  batch_size: 256
+  batch_size: 512
   lr: 1.0e-3
   weight_decay: 0.0
-  
+
   mlp_dim: [64, 64]
   dropout: 0.01
   noise_std: 0.025
@@ -46,57 +46,9 @@ cutset0:
 cut0:
   train:    'cut'
   predict:  'cut'
-  label:    'hlt_pms2 x (-1)'
-  variable: 'x_hlt_pms2'
+  label:    '(-1) x nominal_m_llj'
+  variable: 'nominal_m_llj'
   sign: -1
-  transform: null
-
-cut1:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_invEInvP x (-1)'
-  variable: 'x_hlt_invEInvP'
-  sign: -1
-  transform: 'tanh'
-
-cut2:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkDEtaSeed x (-1)'
-  variable: 'x_hlt_trkDEtaSeed'
-  sign: -1
-  transform: 'tanh'
-
-cut3:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkDPhi x (-1)'
-  variable: 'x_hlt_trkDPhi'
-  sign: -1
-  transform: 'tanh'
-
-cut4:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkChi2 x (-1)'
-  variable: 'x_hlt_trkChi2'
-  sign: -1
-  transform: 'tanh'
-
-cut5:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkValidHits'
-  variable: 'x_hlt_trkValidHits'
-  sign: 1
-  transform: null
-
-cut6:
-  train:    'cut'
-  predict:  'cut'
-  label:    'hlt_trkNrLayerIT'
-  variable: 'x_hlt_trkNrLayerIT'
-  sign: 1
   transform: null
 
 
@@ -230,173 +182,6 @@ xgb_MI_max:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb1:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB_tiny'
-  raytune: 'xgb_trial_1'
-  
-  # booster parameters
-  model_param:
-    num_boost_round: 2      # number of epochs (equal to the number of trees!)
-    
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
-    learning_rate: 0.1
-    gamma: 0.63
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.8
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.95
-    
-    reg_lambda: 1.37       # L2 regularization
-    reg_alpha: 0.35        # L1 regularization
-    
-    # learning task parameters
-    objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
-  
-  plot_trees: True
-  
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr0:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'AdamW'
-    clip_norm: 0.1
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-  
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
-  readmode: -1                  # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr_MI_min:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR_MI_min'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'AdamW'
-    clip_norm: 0.1
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  # Mutual Information regularization (comment out if not used)
-  MI_reg_param:
-    beta:   0.99                # Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
-    <<: *MI_REG_PARAM
-
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
-  readmode: -1                  # -1 is the last saved epoch
-
-
-# Logistic Regression (convex model = global optimum guarantee)
-lgr_MI_max:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'LGR_MI_max'
-  raytune:  null
-
-  # Model param
-  conv_type: 'lgr'
-  model_param:
-    null
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'AdamW'
-    clip_norm: 0.1
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  # Mutual Information regularization (comment out if not used)
-  MI_reg_param:
-    beta:   -0.99               #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
-    <<: *MI_REG_PARAM
-
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
-  readmode: -1                  # -1 is the last saved epoch
 
 
 # Deep MLP
