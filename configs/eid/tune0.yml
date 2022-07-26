@@ -149,23 +149,22 @@ train_runmode:
   active_models: &ACTIVE_MODELS
 
     - xgb0
-    #- gxgb0
+    - gxgb0
 
     #- dbnf0
-    #- gnet0
+    - gnet0
     #- gnet1
     #- gnet2
     #- gnet3
     
-    #- flr0
-    #- lgr0
-    #- dmx0
-    #- dmlp
-    
+    - flr0
+    - lgr0
+    - dmx0
+    - dmlp
     - cnn0
-
+  
   ##  - xtx0
-
+  
   raytune: !include configs/eid/raytune.yml
 
   # Distillation training
