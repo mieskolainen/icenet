@@ -597,7 +597,7 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
         
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
-    
+
     ax1.set_title(title, fontsize=10)
     ax1.legend(legends)
     ax2.set_yscale('log')
