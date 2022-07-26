@@ -7,7 +7,7 @@ contours:
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
-  active: true
+  active: false
 
   plot[0]:
     var:   ['x_hlt_pt']
@@ -26,13 +26,13 @@ MVA_output:
 ## (MVA output x external variable) density (2D)
 MVA_2D:
   active: true
-
+  
   plot[0]:
-    var:   ['.*'] # RegExp supported
+    var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.001, 0.999], 'space': 'linear'},
             {'nbin': 50, 'q': [0.0, 0.95],    'space': 'linear'}]
   
   #plot[1]:
-  #  var:   ['.?hlt_pms2.?']
+  #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]

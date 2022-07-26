@@ -14,7 +14,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.autograd as autograd
 
+
+from icenet.tools import aux
 from icenet.deep.dmlp import MLP
+from tqdm import tqdm
 
 class MINENet(nn.Module):
     """
@@ -34,23 +37,56 @@ class MINENet(nn.Module):
         self.mlp.apply(init_weights)
 
     def forward(self, x):
-        return self.mlp(x)
+        return self.mlp(x).squeeze()
 
 
-def apply_mine(model, joint, marginal, w):
+def apply_in_batches(X, Z, model, weights=None, batch_size=4096):
     """
-    Apply MINE model equations
+    Compute Mutual Information estimate in batches (exact same result but memory friendly)
+    for a pre-trained model (trained using the same statistics as X and Z follow)
+    
+    Args:
+        X:        variable 
+        Z:        variable 
+        weights:  weights
+        model:    MINE model
+
+    Returns:
+        MI estimate
     """
+    model.eval() # !
 
-    w     = w / w.sum() / len(w)
+    if weights is None:
+        weights = torch.ones(len(X)).float().to(X.device)
 
-    # Use the network, apply weights
-    T, eT = w * model(joint), w * torch.exp(model(marginal))
+    # Normalize
+    weights   = (weights / torch.sum(weights)).squeeze()
 
-    # MI lower bound
-    MI_lb = torch.sum(T) - torch.log(torch.sum(eT))
+    # -----------------------
+    # Compute blocks
+    N_batches = int(np.ceil(len(X) / batch_size))
+    batch_ind = aux.split_start_end(range(len(X)), N_batches)
+    # -----------------------
 
-    return MI_lb, T, eT
+    sum_T  = 0.0
+    sum_eT = 0.0
+
+    for b in range(N_batches):
+        ind    = np.arange(batch_ind[b][0], batch_ind[b][1]+1)
+
+        joint, marginal, w = sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
+
+        # Use the network, apply weights
+        T, eT  = w * model(joint), w * torch.exp(model(marginal))
+
+        # Sum local batch values
+        sum_T  = sum_T  + torch.sum(T)
+        sum_eT = sum_eT + torch.sum(eT)
+
+    # MI lower bound (Donsker-Varadhan representation)
+    MI_lb = sum_T - torch.log(sum_eT)
+
+    return MI_lb
 
 
 def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EMA'):
@@ -67,16 +103,22 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
         MI_lb is mutual information lower bound ("neural information measure")
         sup E_{P_{XZ}} [T_theta] - log(E_{P_X otimes P_Z}[exp(T_theta)])
     """
-    
-    MI_lb, T, eT = apply_mine(model=model, joint=joint, marginal=marginal, w=w)
-    
-    
+
+    # Normalize
+    w     = (w / torch.sum(w)).squeeze()
+
+    # Use the network, apply weights
+    T, eT = w * model(joint), w * torch.exp(model(marginal))
+
+    # MI lower bound (Donsker-Varadhan representation)
+    MI_lb = torch.sum(T) - torch.log(torch.sum(eT))
+
+
     # Unbiased estimate via exponentially moving average (FIR filter)
     # https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     if   losstype == 'MINE_EMA':
-
         ma_eT = alpha*torch.sum(eT) + (1 - alpha)*ma_eT
-        loss  = -(torch.sum(T) - (1/torch.sum(ma_eT)).detach()*torch.sum(eT))
+        loss  = -(torch.sum(T) - torch.sum(eT) / torch.sum(ma_eT).detach())
 
     # (Slightly) biased gradient based directly on the local MI value
     elif losstype == 'MINE':
@@ -87,7 +129,7 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
     return MI_lb, ma_eT, loss
 
 
-def sample_batch(X, Z, weights, batch_size, device='cpu'):
+def sample_batch(X, Z, weights, batch_size=None, device='cpu:0'):
     """
     Sample batches of data, either from the joint or marginals
     
@@ -108,7 +150,7 @@ def sample_batch(X, Z, weights, batch_size, device='cpu'):
         batch_size = X.shape[0]
     
     if weights is None:
-        weights = torch.ones(batch_size)
+        weights = torch.ones(batch_size).float()
 
     # Padd outer [] dimensions if dim 1 inputs
     if len(X.shape) == 1:
@@ -132,7 +174,7 @@ def sample_batch(X, Z, weights, batch_size, device='cpu'):
     return joint, marginal, w
 
 
-def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, ma_eT, device='cpu'):
+def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, ma_eT, device='cpu:0'):
     """
     Train the network estimator
 
@@ -147,7 +189,7 @@ def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, m
 
     model.train() #!
 
-    for i in range(num_iter):
+    for i in tqdm(range(num_iter)):
 
         # Sample input
         joint, marginal, w = sample_batch(X=X, Z=Z, weights=weights, batch_size=batch_size, device=device)
@@ -166,9 +208,9 @@ def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, m
     return result, ma_eT
 
 
-def estimate(X, Z, weights=None, epochs=100, alpha=0.01, losstype='MINE_EMA', batch_size=256, lr=1e-3, weight_decay=0.0,
+def estimate(X, Z, weights=None, epochs=50, alpha=0.01, losstype='MINE_EMA', batch_size=256, lr=1e-3, weight_decay=0.0,
     mlp_dim=[64, 64], dropout=0.01, activation='relu', noise_std=0.025, ma_eT=1.0,
-    window_size=0.2, return_full=False, device='cpu', return_model_only=False, **args):
+    window_size=0.2, return_full=False, device=None, return_model_only=False, **args):
     """
     Accurate Mutual Information Estimate via Neural Network
     
@@ -204,16 +246,17 @@ def estimate(X, Z, weights=None, epochs=100, alpha=0.01, losstype='MINE_EMA', ba
         if type(X) is np.ndarray:
             weights = np.ones(X.shape[0])
         else:
-            weights = torch.Tensor(np.ones(X.shape[0])).to(device)
+            weights = torch.Tensor(np.ones(X.shape[0])).float().to(device)
 
     # Create network
     input_size = X.shape[1] + Z.shape[1]
     model = MINENet(input_size=input_size,  mlp_dim=mlp_dim, dropout=dropout, activation=activation, noise_std=noise_std)
 
     # Transfer to CPU / GPU
-    import icenet.deep.dopt as dopt
-    model, device = dopt.model_to_cuda(model=model, device_type=device)
+    if device is None:
+        device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
+    model         = model.to(device)
     opt           = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     result,ma_eT  = train_loop(X=X, Z=Z, weights=weights, model=model, opt=opt, batch_size=batch_size,
         epochs=epochs, alpha=alpha, losstype=losstype, ma_eT=ma_eT, device=device)
