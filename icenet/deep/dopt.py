@@ -140,27 +140,18 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
         batch_ = batch2tensor(batch, device)
 
-        # -----------------------------------------
-        # Torch models
         if type(batch_) is dict:
             x,y,w = batch_['x'], batch_['y'], batch_['w']
-            
-            if 'u' in batch_: # Dual input models
-                x = {'x': batch_['x'], 'u': batch_['u']}
-
             if DA_active:
                 y_DA,w_DA = batch_['y_DA'], batch_['w_DA']
             if MI_active:
                 MI['x'] = batch_['x_MI']
-
-        # Torch-geometric models
         else:
             x,y,w = batch_, batch_.y, batch_.w
             if DA_active:
                 y_DA,w_DA = batch_.y_DA, batch_.w_DA
             if MI_active:
-                MI['x'] = batch_.x_MI
-        # -----------------------------------------
+                MI['x'] = batch_.x_MI    
 
         if DA_active:
             l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
@@ -227,20 +218,12 @@ def test(model, loader, optimizer, device):
     for i, batch in enumerate(loader):
 
         batch_ = batch2tensor(batch, device)
-        
-        # -----------------------------------------
-        # Torch models
+
         if type(batch_) is dict:
             x,y,w = batch_['x'], batch_['y'], batch_['w']
-
-            if 'u' in batch_: # Dual models
-                x = {'x': batch_['x'], 'u': batch_['u']}
-
-        # Torch-geometric
         else:
             x,y,w = batch_, batch_.y, batch_.w
-        # -----------------------------------------
-        
+
         with torch.no_grad():
             pred = model.softpredict(x)
         
