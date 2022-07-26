@@ -110,7 +110,7 @@ def pred_graph_xgb(args, param, device='cpu'):
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
         pred = xgb_model.predict(xgboost.DMatrix(data = x_tot))
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
+        if len(pred) > 1: pred = pred[:, args['signalclass']]
         return pred
     
     return func_predict

@@ -429,7 +429,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}/{label}')
                 savepath  = f'{outputdir}/{v}_class_{k}__{scale}.pdf'
-
+                
                 try:
 
                     if scale == 'log':
@@ -451,8 +451,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     plt.savefig(savepath, bbox_inches='tight')
                     print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
                     plt.close()
-                    
-                except: # Matplotlib LogNorm() can be buggy
+
+                except:
                     print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
 
 

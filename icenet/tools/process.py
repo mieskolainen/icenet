@@ -447,10 +447,6 @@ def train_models(data_trn, data_val, args=None) :
     # Loop over active models
     for i in range(len(args['active_models'])):
 
-        # Collect garbage
-        import gc
-        gc.collect()
-        
         ID    = args['active_models'][i]
         param = args['models'][ID]
         print(f'Training <{ID}> | {param} \n')
