@@ -332,7 +332,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     else:
         MI = None
     # --------------------------------------------------------------------
-
+    
     # Training loop
     for epoch in range(opt_param['epochs']):
 
@@ -416,7 +416,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_graph: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_torch_graph: Training <{param["label"]}> classifier ...')
     
     # Construct model
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
@@ -453,7 +453,7 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_generic: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_torch_generic: Training <{param["label"]}> classifier ...')
 
     model, train_loader, test_loader = \
         torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
@@ -604,7 +604,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     if param['model_param']['tree_method'] == 'auto':
         param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
-    print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     if config is not {}:
@@ -780,7 +780,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     if param['xgb']['model_param']['tree_method'] == 'auto':
         param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
     
-    print(__name__ + f'.train_graph_xgb: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_graph_xgb: Training <{param["label"]}> classifier ...')
 
     # --------------------------------------------------------------------
     ### Train GNN
@@ -947,7 +947,7 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     Returns:
         trained model
     """
-    print(__name__ + f'.train_flr: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
 
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
@@ -973,7 +973,7 @@ def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
     # Set input dimensions
     param['model_param']['n_dims'] = data_trn.x.shape[1]
 
-    print(__name__ + f'.train_flow: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_flow: Training <{param["label"]}> classifier ...')
     
     for classid in range(args['num_classes']):
         param['model'] = 'class_' + str(classid)

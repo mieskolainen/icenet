@@ -636,10 +636,10 @@ def evaluate_models(data=None, args=None):
         ids_RAW  = data['data'].ids
 
         # Add extra variables
-        if 'data_kin' in data:
+        if data['data_kin'] is not None:
             X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
             ids_RAW  = ids_RAW + data['data_kin'].ids
-
+        
         y        = data['data'].y
         weights  = data['data'].w
 

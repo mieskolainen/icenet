@@ -17,8 +17,6 @@ from icenet.tools import io
 
 from ray import tune
 
-import gc
-
 class Dataset(torch.utils.data.Dataset):
 
     def __init__(self, X, Y, W, Y_DA=None, W_DA=None, X_MI=None):
@@ -172,7 +170,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         ## Propagate gradients        
         loss.backward(retain_graph=True)
         if MI is not None:
-            MI['loss'].backward(retain_graph=True)
+            MI['loss'].backward() # no retain_graph=True here, will overflow memory
         
         ## Gradient norm-clipping for stability
         # For details: http://proceedings.mlr.press/v28/pascanu13.pdf
