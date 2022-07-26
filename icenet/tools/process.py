@@ -635,9 +635,10 @@ def evaluate_models(data=None, args=None):
         X_RAW    = data['data'].x
         ids_RAW  = data['data'].ids
 
-        # Add kinematic variables
-        X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
-        ids_RAW  = ids_RAW + data['data_kin'].ids
+        # Add extra variables
+        if 'data_kin' in data:
+            X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
+            ids_RAW  = ids_RAW + data['data_kin'].ids
 
         y        = data['data'].y
         weights  = data['data'].w
