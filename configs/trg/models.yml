@@ -142,6 +142,98 @@ xgb0:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb_MI_min:
+  train:   'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+  label:   'XGB_MI_min'
+  raytune:  xgb_trial_0
+
+  # booster parameters
+  model_param:
+    num_boost_round: 56       # number of epochs (equal to the number of trees!)
+  
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+    # booster parameters
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8          # L2 regularization
+    reg_alpha: 0.05          # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  MI_reg_param:
+    beta: 0.99          # Positive for minimizing
+    <<: *MI_REG_PARAM
+  
+  plot_trees: False
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb_MI_max:
+  train:   'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+  label:   'XGB_MI_max'
+  raytune:  xgb_trial_0
+
+  # booster parameters
+  model_param:
+    num_boost_round: 56       # number of epochs (equal to the number of trees!)
+  
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+
+    # booster parameters
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8          # L2 regularization
+    reg_alpha: 0.05          # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  MI_reg_param:
+    beta: -0.99       # Negative for maximizing MI
+    <<: *MI_REG_PARAM
+
+  plot_trees: False
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb1:
   train:   'xgb'
   predict: 'xgb'
@@ -219,6 +311,94 @@ lgr0:
   readmode: -1                  # -1 is the last saved epoch
 
 
+# Logistic Regression (convex model = global optimum guarantee)
+lgr_MI_min:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'LGR_MI_min'
+  raytune:  null
+
+  # Model param
+  conv_type: 'lgr'
+  model_param:
+    null
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+    
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  # Mutual Information regularization (comment out if not used)
+  MI_reg_param:
+    beta:   0.99                # Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    <<: *MI_REG_PARAM
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
+# Logistic Regression (convex model = global optimum guarantee)
+lgr_MI_max:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'LGR_MI_max'
+  raytune:  null
+
+  # Model param
+  conv_type: 'lgr'
+  model_param:
+    null
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+    
+    optimizer: 'AdamW'
+    clip_norm: 0.1
+    
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001       # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  # Mutual Information regularization (comment out if not used)
+  MI_reg_param:
+    beta:   -0.99               #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    <<: *MI_REG_PARAM
+
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'               # 'all', 'latest'
+  readmode: -1                  # -1 is the last saved epoch
+
+
 # Deep MLP
 dmlp0:
   train:   'torch_generic'
@@ -252,6 +432,98 @@ dmlp0:
   scheduler_param:
     step_size: 200
     gamma: 0.1
+
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+# Deep MLP
+dmlp_MI_min:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'DMLP_MI_min'
+  raytune:  null
+
+  # Model
+  conv_type: 'dmlp'
+  model_param:
+    mlp_dim: [64, 64]     # hidden layer dimensions
+    activation: 'relu'
+    batch_norm: False
+    dropout: 0.01
+    
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 0.1
+    
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+  
+  # Mutual Information regularization (comment out if not used)
+  MI_reg_param:
+    beta:   0.99               #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    <<: *MI_REG_PARAM
+
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+# Deep MLP
+dmlp_MI_max:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'DMLP_MI_max'
+  raytune:  null
+
+  # Model
+  conv_type: 'dmlp'
+  model_param:
+    mlp_dim: [64, 64]     # hidden layer dimensions
+    activation: 'relu'
+    batch_norm: False
+    dropout: 0.01
+    
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                  # focal_entropy exponent
+    temperature: 1            # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 0.1
+    
+    epochs: 50
+    batch_size: 196
+    lr: 1.0e-3
+    weight_decay: 0.00001      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+  
+  # Mutual Information regularization (comment out if not used)
+  MI_reg_param:
+    beta:  -0.99             #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4

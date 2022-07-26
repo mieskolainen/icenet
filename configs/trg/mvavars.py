@@ -19,7 +19,7 @@ MVA_SCALAR_VARS = [
   'x_hlt_trkDEtaSeed',
   'x_hlt_trkDPhi',
   'x_hlt_trkChi2',
-  'x_hlt_trkValidHits',
+  #'x_hlt_trkValidHits',
   'x_hlt_trkNrLayerIT'
 ]
 

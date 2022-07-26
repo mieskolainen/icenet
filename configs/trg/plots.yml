@@ -1,5 +1,5 @@
 basic:
-  active: true
+  active: false
   nbins:  70
 
 contours: 

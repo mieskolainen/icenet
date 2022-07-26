@@ -1,6 +1,6 @@
 # Plotting functions
 # 
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2021
 # m.mieskolainen@imperial.ac.uk
 
 import matplotlib.pyplot as plt
@@ -16,7 +16,6 @@ from iceplot import iceplot
 from icefit import statstools
 from icenet.tools import aux
 from icenet.tools import process
-from icefit import cortools
 
 
 def binengine(bindef, x):
@@ -338,9 +337,9 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
 
     # Over classes
     fig,ax = plt.subplots()
@@ -398,9 +397,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
+        classlegs = [f'class {k}, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
 
     # Over classes
     for k in range(C):
@@ -416,11 +415,12 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             yy   = X[ind, ids.index(v)]
             
             # Compute Pearson correlation coefficient
+            from icefit import cortools
             cc,cc_err,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
 
             # Neural Mutual Information
-            #from icefit import mine
-            #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
+            from icefit import mine
+            MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
 
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
@@ -438,9 +438,10 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
                 plt.ylabel(f'{v}')
                 rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
-                #MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                MI_value = ''
+                MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
 
+                print(rho_value)
+                print(MI_value)
                 plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
                 # -----
 
@@ -586,15 +587,15 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
             w = weights[y == c]
             ax.hist(X[y == c], bins, density = False,
                 histtype = 'step', fill = False, linewidth = 1.5)
-            legends.append(f'$\\mathcal{{C}} = {c}$')
+            legends.append(f'$\\mathcal{C} = {c}$')
 
         # Loop over classes
         for c in range(num_classes) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
                 histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
-            legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
-        
+            legends.append(f'$\\mathcal{C} = {c}$ (weighted)')
+
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
 
