@@ -162,8 +162,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         if MI is not None:
             MI['loss'].backward(retain_graph=True)
         
-        ## Gradient norm-clipping for stability
-        # For details: http://proceedings.mlr.press/v28/pascanu13.pdf
+        ## Clip gradients for stability
         if MI is not None:
             deeptools.adaptive_gradient_clipping_(model, MI['model'])
         else:

@@ -187,56 +187,10 @@ lgr0:
 
   # Mutual Information regularization (comment out if not used)
   MI_reg_param: !include configs/trg/MI_reg.yml
-
+  
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
   savemode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
-
-
-# Deep MLP
-dmlp:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'DMLP'
-  raytune:  null
-
-  # Model
-  conv_type: 'dmlp'
-  model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    activation: 'relu'
-    batch_norm: True
-    dropout: 0.0
-    
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'
-    clip_norm: 0.1
-    
-    epochs: 50
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.00001      # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-  
-  # Mutual Information regularization (comment out if not used)
-  MI_reg_param: !include configs/trg/MI_reg.yml
-  
-  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
