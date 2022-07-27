@@ -816,13 +816,13 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     ## Evaluate GNN output
 
     graph_model.eval() # ! important
-
+    
     x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
     x_val = np.zeros((len(data_val), Z + len(data_val[0].u)))
 
     y_trn = np.zeros(len(data_trn))
     y_val = np.zeros(len(data_val))
-
+    
     for i in range(x_trn.shape[0]):
 
         xconv = graph_model.forward(data=data_trn[i], conv_only=True).detach().numpy()
@@ -908,7 +908,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+    fig,ax   = plots.plot_train_evolution(losses={'train': trn_losses, 'validate': val_losses},
                     trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
