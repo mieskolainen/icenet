@@ -4,6 +4,7 @@
 
 rootname: 'hnl'
 rngseed: 123456                       # Fixed seed for training data mixing
+mvavars: 'mvavars.py'
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
@@ -123,10 +124,11 @@ train_runmode:
 
     #- xgb_MI_min_max
     - xgb0_red
-    - xgb_MI_max
-    - xgb_MI_min
+    #- xgb_MI_max
+    #- xgb_MI_min
     - xgb0
-    
+
+    #- dmlp0_red
     #- dmlp_MI_min_max
     #- dmlp_MI_max
     #- dmlp_MI_min

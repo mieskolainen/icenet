@@ -35,8 +35,19 @@ import base64
 
 import yaml
 
+def make_hash_sha256_file(filename):
+    """
+    Create SHA256 hash from a file
+    """
+    h  = hashlib.sha256()
+    b  = bytearray(128*1024)
+    mv = memoryview(b)
+    with open(filename, 'rb', buffering=0) as f:
+        while n := f.readinto(mv):
+            h.update(mv[:n])
+    return h.hexdigest()
 
-def make_hash_sha256(o):
+def make_hash_sha256_object(o):
     """
     Create SHA256 hash from an object
 

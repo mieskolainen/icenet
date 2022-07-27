@@ -55,23 +55,6 @@ from icenet.optim import adam
 from icenet.optim import adamax
 from icenet.optim import scheduler
 
-def red(X, ids, param, mode='X'):
-    if 'only_MVA_vars' in param:
-        index = []
-        for var in param['only_MVA_vars']:
-            index.append(ids.index(var))
-        if mode == 'X':
-            return X[:, np.array(index, dtype=int)]
-        else:
-            return param['only_MVA_vars']
-    else:
-        if mode == 'X':
-            return X
-        else:
-            return ids
-
-from termcolor import colored, cprint
-
 
 # Raytuning
 from ray import tune
@@ -493,7 +476,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
 
     if trn_weights is None: trn_weights = torch.tensor(np.ones(Y_trn.shape[0]), dtype=torch.float)
     if val_weights is None: val_weights = torch.tensor(np.ones(Y_val.shape[0]), dtype=torch.float)
-
+    
     ### Generators
     if (X_trn_2D is not None) and ('cnn' in conv_type):
         training_set   = dopt.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
@@ -636,8 +619,8 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    dtrain    = xgboost.DMatrix(data = red(data_trn.x, data_trn.ids, param, 'X'), label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
-    deval     = xgboost.DMatrix(data = red(data_val.x, data_val.ids, param, 'X'), label = data_val.y,  weight = w_val)
+    dtrain    = xgboost.DMatrix(data = aux.red(data_trn.x, data_trn.ids, param, 'X'), label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
+    deval     = xgboost.DMatrix(data = aux.red(data_val.x, data_val.ids, param, 'X'), label = data_val.y,  weight = w_val)
 
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
@@ -763,7 +746,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         ## Plot feature importance
         if plot_importance:
             for sort in [True, False]:
-                fig,ax = plots.plot_xgb_importance(model=model, tick_label=red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
+                fig,ax = plots.plot_xgb_importance(model=model, tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
                 targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
                 plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
         
@@ -771,7 +754,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
-                model.feature_names = red(data_trn.x, data_trn.ids, param, 'ids')
+                model.feature_names = aux.red(data_trn.x, data_trn.ids, param, 'ids')
                 for i in tqdm(range(max_num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso

@@ -131,7 +131,7 @@ xgb0:
     
     # learning task parameters
     objective: 'binary:logistic'          # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']              # for evaluation, 'error' (for custom losses), 'logloss', 'mlogloss'
+    eval_metric: ['logloss']              # for evaluation, 'logloss', 'mlogloss'
   
   plot_trees: False
   

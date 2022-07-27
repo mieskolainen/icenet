@@ -11,6 +11,7 @@ import numba
 import copy
 from tqdm import tqdm
 import os
+from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
@@ -19,6 +20,33 @@ import scipy.special as special
 
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
+
+
+def red(X, ids, param, mode='X', tag='reduced_MVA_vars'):
+    """
+    Reduce the input set variables of X
+        
+    Args:
+        X:     data matrix
+        ids:   names of columns
+        param: parameter dictionary (from yaml)
+        mode:  return mode 'X' or 'ids'
+        tag:   yaml file
+    """
+    if tag in param:
+        index = []
+        for var in param[tag]:
+            index.append(ids.index(var))
+        if mode == 'X':
+            cprint(__name__ + f'.red: Reducing input variables to a set: {param[tag]}', 'red')
+            return X[:, np.array(index, dtype=int)]
+        else:
+            return param[tag]
+    else:
+        if mode == 'X':
+            return X
+        else:
+            return ids
 
 
 def parse_vars(items):

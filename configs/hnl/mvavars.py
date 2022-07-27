@@ -47,12 +47,7 @@ ALL_MVA_VARS = [
 
   # HNL jet
   'hnlJet_nominal_pt',
-  'hnlJet_nominal_eta',
-
-  'tagger_score',
-  'hnlJet_nominal_llpdnnx_ratio_LLP_Q',
-  'hnlJet_nominal_llpdnnx_ratio_LLP_QMU',
-  'hnlJet_nominal_llpdnnx_ratio_LLP_QE'
+  'hnlJet_nominal_eta'
 ]
 
 
