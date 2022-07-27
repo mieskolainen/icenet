@@ -131,6 +131,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
     n_batches = 0
 
+    total_MI_network_loss  = 0
+
     for i, batch in enumerate(loader):
 
         ## Clear gradients
@@ -166,7 +168,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         #    loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
         #    loss       = l + l_DA
         #else:
-        
+
         loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
         ## Create combined loss
@@ -195,6 +197,10 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         ## Aggregate losses
         total_loss = total_loss + loss.item()
 
+        ## For diagnostics
+        if MI is not None:
+            total_MI_network_loss += MI['network_loss'].item()
+
         for key in loss_tuple.keys():
             if key in component_losses:
                 component_losses[key] += loss_tuple[key].item()
@@ -211,14 +217,14 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         n_batches += 1
     
     if MI is not None:
-        MI['network_loss'] /= n_batches
-
+        MI['network_loss'] = total_MI_network_loss / n_batches
+        
         for k in range(len(MI['classes'])):
             MI['MI_lb'][k] /= n_batches
-    
+
     for key in component_losses.keys():
         component_losses[key] /= n_batches
-    
+
     return {'sum': total_loss / n_batches, **component_losses}
 
 
