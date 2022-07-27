@@ -129,9 +129,9 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     total_loss       = 0
     component_losses = {}
     total_MI_network_loss  = 0
-    
+
     n_batches = 0
-    
+
     for i, batch in enumerate(loader):
 
         ## Clear gradients
