@@ -143,9 +143,9 @@ xgb_MI_min:
 xgb_MI_min_max:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'XGB_MI_min/max'
+  label:   'XGB_MI_min-max'
   raytune:  xgb_trial_0
-  
+
   # booster parameters
   model_param:
     num_boost_round: 56       # number of epochs (equal to the number of trees!)
@@ -322,9 +322,9 @@ dmlp_MI_min:
 dmlp_MI_min_max:
   train:   'torch_generic'
   predict: 'torch_vector'
-  label:   'DMLP_MI_min/max'
+  label:   'DMLP_MI_min-max'
   raytune:  null
-
+  
   # Model
   conv_type: 'dmlp'
   model_param:
