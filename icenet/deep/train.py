@@ -586,11 +586,11 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         MI_lb_values.append(np.round(MI_lb.item(), 4))
 
         k += 1
-
+    
     ## Total
     total_loss = classifier_loss + MI_loss
     cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
-    
+
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
 

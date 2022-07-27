@@ -128,11 +128,10 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
     total_loss       = 0
     component_losses = {}
-
-    n_batches = 0
-
     total_MI_network_loss  = 0
-
+    
+    n_batches = 0
+    
     for i, batch in enumerate(loader):
 
         ## Clear gradients
@@ -207,18 +206,11 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             else:
                 component_losses[key]  = loss_tuple[key].item()
 
-        #if type(batch) is dict: # DualDataset or Dataset
-        #    total_loss += loss.item()
-        #    n += 1 # Losses are already mean aggregated, so add 1 per batch
-        #else:
-        #    total_loss += loss.item() * batch.num_graphs # torch-geometric
-        #    n += batch.num_graphs
-
         n_batches += 1
     
     if MI is not None:
         MI['network_loss'] = total_MI_network_loss / n_batches
-        
+
         for k in range(len(MI['classes'])):
             MI['MI_lb'][k] /= n_batches
 
