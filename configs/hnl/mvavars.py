@@ -47,8 +47,14 @@ ALL_MVA_VARS = [
 
   # HNL jet
   'hnlJet_nominal_pt',
-  'hnlJet_nominal_eta'
+  'hnlJet_nominal_eta',
+
+  'tagger_score',
+  'hnlJet_nominal_llpdnnx_ratio_LLP_Q',
+  'hnlJet_nominal_llpdnnx_ratio_LLP_QMU',
+  'hnlJet_nominal_llpdnnx_ratio_LLP_QE'
 ]
+
 
 TECHNO_VARS = [
   'label',
@@ -67,6 +73,9 @@ MI_VARS = [
 ]
 
 PLOT_VARS = [
+  'genweight',
+  'event_weight',
+  'tagger_score'
 ]
 
 # Variables we read out from the root files (regular expressions supported here)

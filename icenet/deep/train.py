@@ -55,6 +55,20 @@ from icenet.optim import adam
 from icenet.optim import adamax
 from icenet.optim import scheduler
 
+def red(X, ids, param, mode='X'):
+    if 'only_MVA_vars' in param:
+        index = []
+        for var in param['only_MVA_vars']:
+            index.append(ids.index(var))
+        if mode == 'X':
+            return X[:, np.array(index, dtype=int)]
+        else:
+            return param['only_MVA_vars']
+    else:
+        if mode == 'X':
+            return X
+        else:
+            return ids
 
 from termcolor import colored, cprint
 
@@ -622,8 +636,8 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
-    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,  weight = w_val)
+    dtrain    = xgboost.DMatrix(data = red(data_trn.x, data_trn.ids, param, 'X'), label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
+    deval     = xgboost.DMatrix(data = red(data_val.x, data_val.ids, param, 'X'), label = data_val.y,  weight = w_val)
 
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
@@ -748,17 +762,16 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         
         ## Plot feature importance
         if plot_importance:
-            
             for sort in [True, False]:
-                fig,ax = plots.plot_xgb_importance(model=model, tick_label=data_trn.ids, label=param["label"], sort=sort)
+                fig,ax = plots.plot_xgb_importance(model=model, tick_label=red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
                 targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
                 plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
-                
+        
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
-                model.feature_names = data_trn.ids
+                model.feature_names = red(data_trn.x, data_trn.ids, param, 'ids')
                 for i in tqdm(range(max_num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
@@ -908,7 +921,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses={'train': trn_losses, 'validate': val_losses},
+    fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                     trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     

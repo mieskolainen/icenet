@@ -1,6 +1,3 @@
-# HLT-MVA variables. Use here only variables available in real data.
-
-
 # Variables we read out from the root files (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']
 #LOAD_VARS = ['.*'] # all

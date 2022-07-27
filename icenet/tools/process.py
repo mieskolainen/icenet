@@ -574,6 +574,20 @@ def train_models(data_trn, data_val, args=None) :
 
     return
 
+def red(X, ids, param, mode='X'):
+    if 'only_MVA_vars' in param:
+        index = []
+        for var in param['only_MVA_vars']:
+            index.append(ids.index(var))
+        if mode == 'X':
+            return X[:, np.array(index, dtype=int)]
+        else:
+            return param['only_MVA_vars']
+    else:
+        if mode == 'X':
+            return X
+        else:
+            return ids
 
 def evaluate_models(data=None, args=None):
     """
@@ -639,7 +653,7 @@ def evaluate_models(data=None, args=None):
         if data['data_kin'] is not None:
             X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
             ids_RAW  = ids_RAW + data['data_kin'].ids
-        
+
         y        = data['data'].y
         weights  = data['data'].w
 
@@ -703,6 +717,7 @@ def evaluate_models(data=None, args=None):
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
+
     for i in range(len(args['active_models'])):
         
         ID    = args['active_models'][i]
@@ -714,48 +729,47 @@ def evaluate_models(data=None, args=None):
 
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
-        
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=red(X,ids,param,'X'), y=y, ids=red(X,ids,param,'ids'), transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'xgb_logistic':
             func_predict = predict.pred_xgb_logistic(args=args, param=param)
             
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=red(X,ids,param,'X'), y=y, ids=red(X,ids,param,'ids'), transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids,
+                plots.plot_contour_grid(pred_func=func_predict, X=red(X_ptr,ids,param,'X'), y=y, ids=red(X_ptr,ids,param,'ids'),
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_scalar':
             func_predict = predict.pred_torch_scalar(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=red(X_ptr,ids,param,'X'), y=y, ids=red(X_ptr,ids,param,'ids'), transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=red(X_ptr,ids,param,'X'), y=y, ids=red(X_ptr,ids,param,'ids'), transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
@@ -764,11 +778,11 @@ def evaluate_models(data=None, args=None):
             import torch_geometric
             loader  = torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False)
             for batch in loader: # Only one big batch
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y = batch.to('cpu').y.detach().cpu().numpy(), **inputs)
+                plot_XYZ_wrap(func_predict = func_predict, x_input=X_graph, y = batch.to('cpu').y.detach().cpu().numpy(), **inputs)
         
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph,    y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y = y, **inputs)
         
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
@@ -788,7 +802,7 @@ def evaluate_models(data=None, args=None):
             
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=red(X,ids,param,'X'), y = y, **inputs)
             
         #elif param['predict'] == 'xtx':
         # ...   

@@ -1,4 +1,3 @@
-# HLT-MVA variables. Use here only variables available in real data.
 
 KINEMATIC_GEN_VARS = [
   'gen_pt',
@@ -13,6 +12,7 @@ KINEMATIC_VARS = [
   'x_hlt_trkValidHits'
 ]
 
+# Use here only variables available in real data.
 MVA_SCALAR_VARS = [
   'x_hlt_pms2',
   'x_hlt_invEInvP',

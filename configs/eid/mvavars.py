@@ -1,5 +1,3 @@
-# MVA variables.
-
 KINEMATIC_VARS = [
   'trk_pt',
   'trk_eta',

@@ -16,7 +16,7 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
   jagged_maxdim:    6
   
-  varnorm: 'zscore'                   # Variable normalization: 'zscore', 'madscore', null
+  varnorm: null #'zscore'                   # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
@@ -122,15 +122,16 @@ train_runmode:
   active_models: &ACTIVE_MODELS
 
     #- xgb_MI_min_max
+    - xgb0_red
     - xgb_MI_max
     - xgb_MI_min
     - xgb0
     
     #- dmlp_MI_min_max
-    - dmlp_MI_max
-    - dmlp_MI_min
-    - dmlp0
-    
+    #- dmlp_MI_max
+    #- dmlp_MI_min
+    #- dmlp0
+
     #- lgr_MI_min
     #- lgr_MI_max
     #- lgr0
