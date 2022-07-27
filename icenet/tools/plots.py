@@ -155,12 +155,12 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     return fig,ax,c
 
 
-def plot_train_evolution(losses, trn_aucs, val_aucs, label):
+def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     """ Training evolution plots.
 
     Args:
-        losses:   loss values
-        trn_aucs: training matrices
+        losses:   loss values in a dictionary
+        trn_aucs: training metrics
         val_aucs: validation metrics
     
     Returns:
@@ -168,29 +168,32 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
         ax:  figure axis
     """
     
-    fig,ax = plt.subplots(1,2,figsize=(8,6))
+    fig,ax = plt.subplots(1,2, figsize=(10, 7.5))
     
-    ax[0].plot(losses)
+    for key in losses.keys():
+        if (key == 'sum') and (len(losses.keys()) == 2):
+            continue # Do not plot sum if only one loss term
+        ax[0].plot(losses[key], label=key)
+    
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('loss')
+    ax[0].legend(fontsize=8)
     ax[0].set_title(f'[{label}]', fontsize=10)
     
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
-    ax[1].legend(['train','validation'])
+    ax[1].legend(['train','validation'], fontsize=8)
     ax[1].set_xlabel('k (epoch)')
     ax[1].set_ylabel('AUC')
     ax[1].grid(True)
     
-    ratio = 1.0
-    ax[0].set_aspect(1.0/ax[0].get_data_ratio()*ratio)
+    ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
 
     for i in [1]:
         ax[1].set_ylim([0.5, 1.0])
-        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*ratio)
+        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)
 
     return fig,ax
-
 
 def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['trk_pt', 'trk_eta']):
     """

@@ -254,7 +254,7 @@ dmlp0:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 50
+    epochs: 100
     batch_size: 128
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
@@ -295,7 +295,7 @@ dmlp_MI_min:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 50
+    epochs: 100
     batch_size: 128
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
@@ -342,7 +342,7 @@ dmlp_MI_min_max:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 50
+    epochs: 100
     batch_size: 128
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
@@ -389,7 +389,7 @@ dmlp_MI_max:
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 50
+    epochs: 100
     batch_size: 128
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization

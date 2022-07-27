@@ -276,7 +276,6 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
 
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
-    losses    = []
     trn_aucs  = []
     val_aucs  = []
     
@@ -340,31 +339,30 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     # --------------------------------------------------------------------
 
     # Training loop
+    loss_history = {}
+
     for epoch in range(opt_param['epochs']):
 
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
 
-        loss_dict = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
+        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
         if (epoch % save_period) == 0:
             train_acc, train_auc       = dopt.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
             validate_acc, validate_auc = dopt.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
         ## Save values
-        losses.append(loss_dict['sum'])
+        dopt.trackloss(loss=loss, loss_history=loss_history)
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
-        ## Print out
-        loss_terms = '| '
-        for key in loss_dict: loss_terms += f'{key}: {loss_dict[key]:0.3f} | '
-
-        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Losses: {loss_terms} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        print(__name__)
+        print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {dopt.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
-            print(__name__ + f'.torch_loop: MI network_loss = {MI["network_loss"]:0.4f}')
+            print(f'.torch_loop: MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
-                print(__name__ + f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
+                print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
 
         # Update scheduler
         scheduler.step()
@@ -379,26 +377,13 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-    
-
-    # Remove model
-    if MI is not None:
-        del MI['model']
-        del MI['optimizer']
-
 
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+        fig,ax   = plots.plot_train_evolution_multi(loss_history, trn_aucs, val_aucs, param['label'])
         plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
-
-        # Plot evolution for Domain Adaptation loss
-        if DA_active:
-            plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-            fig,ax   = plots.plot_train_evolution(losses_DA, trn_aucs, val_aucs, param['label'])
-            plt.savefig(f"{plotdir}/{param['label']}_evolution_DA.pdf", bbox_inches='tight'); plt.close()
 
         return model
 
@@ -525,9 +510,10 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     """
     global MI_x
     global MI_reg_param
+    global loss_history
     
     if weights is None:
-        w = 1.0
+        w = torch.ones(len(preds)).to(preds.device)
     else:
         w = weights / torch.sum(weights)
     
@@ -540,8 +526,8 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     phat = 1 / (1 + torch.exp(-preds))
     
     ## Classifier binary Cross Entropy
-    classifier_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
-    classifier_loss  = classifier_loss.sum()
+    CE_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
+    CE_loss  = CE_loss.sum()
     
     #lossfunc = torch.nn.BCELoss(weight=w, reduction='sum')
     #classifier_loss = lossfunc(phat, targets)
@@ -586,10 +572,13 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         MI_lb_values.append(np.round(MI_lb.item(), 4))
 
         k += 1
-    
+
     ## Total
-    total_loss = classifier_loss + MI_loss
-    cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
+    total_loss = CE_loss + MI_loss
+    cprint(f'Total_loss = {total_loss:0.4f} | CE_loss = {CE_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
+
+    loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI, $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
+    dopt.trackloss(loss=loss, loss_history=loss_history)
 
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
@@ -611,7 +600,9 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
         global MI_x
         global MI_reg_param
+        global loss_history
 
+        loss_history  = {}
         MI_reg_param  = copy.deepcopy(param['MI_reg_param']) #! important
     # ---------------------------------------------------
 
@@ -745,9 +736,14 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
-            trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+
+        if 'custom' not in model_param['objective']:
+            fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
+                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        else:
+            fig,ax   = plots.plot_train_evolution_multi(losses=loss_history,
+                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])    
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot feature importance
@@ -755,9 +751,9 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             
             for sort in [True, False]:
                 fig,ax = plots.plot_xgb_importance(model=model, tick_label=data_trn.ids, label=param["label"], sort=sort)
-                targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+                targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
                 plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
-        
+                
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
             try:
@@ -928,7 +924,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
         plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
         
     ## Plot decision trees

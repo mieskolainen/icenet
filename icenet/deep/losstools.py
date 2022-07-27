@@ -43,7 +43,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         if MI is not None:
             X = MI['x'].float()
             Z = torch.exp(log_phat[:, MI['y_index']])  # Classifier output
-            return {'MI': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
+            return {f'MI, $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
         else:
             return {}
 
@@ -57,7 +57,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
 
-        loss  = {'main': loss, **MI_helper(log_phat)}
+        loss  = {'CE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
@@ -70,19 +70,19 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         CE_loss    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
 
-        loss  = {'main': CE_loss, 'DA': CE_DA_loss, **MI_helper(log_phat)}
+        loss  = {'CE': CE_loss, 'DA': CE_DA_loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss  = {'main': loss, **MI_helper(log_phat)}
+        loss  = {'LNCE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'focal_entropy':
         log_phat = model.softpredict(x)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss  = {'main': loss, **MI_helper(log_phat)}
+        loss  = {'FE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'VAE_background_only':
         B_ind    = (y == 0) # Use only background to train
@@ -94,7 +94,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = log_loss.mean(dim=0)
 
-        loss  = {'main': loss, **MI_helper(log_phat)}
+        loss  = {'KL_RECO': loss, **MI_helper(log_phat)}
 
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")

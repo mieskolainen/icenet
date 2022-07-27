@@ -107,6 +107,19 @@ def batch2tensor(batch, device):
         batch = batch.to(device)
         return batch
 
+def printloss(loss, precision=5):
+    out = ''
+    for key in loss.keys():
+        out += f'{key}: {np.round(loss[key], precision)}, '
+    return out
+
+def trackloss(loss, loss_history):
+    for key in loss.keys():
+        if key not in loss_history:
+            loss_history[key] = []
+        else:
+            loss_history[key].append(loss[key])
+
 def train(model, loader, optimizer, device, opt_param, MI=None):
     """
     Pytorch based training routine.

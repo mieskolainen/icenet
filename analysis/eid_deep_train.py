@@ -195,7 +195,7 @@ def main():
                     test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss             = deep.dopt.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
+                    loss         = deep.dopt.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Evaluate
                     trn_acc, trn_AUC = deep.dopt.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
@@ -204,8 +204,8 @@ def main():
                     scheduler[ID].step()
                     
                     print(f"[epoch: {epoch+1:03d}/{N_epochs:03d} | file: {f+1}/{len(root_files)} | block: {block+1}/{N_blocks} | "
-                        f"train loss: {loss:.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC) | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | lr = {scheduler[ID].get_last_lr()}")
-        
+                        f"train loss: {deep.dopt.printloss(loss):.4f} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC) | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | lr = {scheduler[ID].get_last_lr()}")
+                    
         ## Save each model per global epoch
         for ID in model.keys():
             checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
