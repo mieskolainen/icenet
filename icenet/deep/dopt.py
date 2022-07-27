@@ -126,9 +126,10 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     DA_active     = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     MI_active     = True if MI is not None else False
 
-    total_loss    = 0
-    total_loss_DA = 0
-    n = 0
+    total_loss       = 0
+    component_losses = {}
+
+    n_batches = 0
 
     for i, batch in enumerate(loader):
 
@@ -147,59 +148,78 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             if 'u' in batch_: # Dual input models
                 x = {'x': batch_['x'], 'u': batch_['u']}
 
-            if DA_active:
-                y_DA,w_DA = batch_['y_DA'], batch_['w_DA']
+            #if DA_active:
+            #    y_DA,w_DA = batch_['y_DA'], batch_['w_DA']
             if MI_active:
                 MI['x'] = batch_['x_MI']
 
         # Torch-geometric models
         else:
             x,y,w = batch_, batch_.y, batch_.w
-            if DA_active:
-                y_DA,w_DA = batch_.y_DA, batch_.w_DA
+            #if DA_active:
+            #    y_DA,w_DA = batch_.y_DA, batch_.w_DA
             if MI_active:
                 MI['x'] = batch_.x_MI
         # -----------------------------------------
 
-        if DA_active:
-            l,l_DA = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
-            loss   = l + l_DA
-        else:
-            loss   = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
+        #if DA_active:
+        #    loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
+        #    loss       = l + l_DA
+        #else:
+        
+        loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
+
+        ## Create combined loss
+        loss = 0
+        for key in loss_tuple.keys():
+            loss = loss + loss_tuple[key]
 
         ## Propagate gradients        
         loss.backward(retain_graph=True)
         if MI is not None:
-            MI['loss'].backward() # no retain_graph=True here, will overflow memory
+            MI['network_loss'].backward() # no retain_graph=True here, will overflow memory
         
         ## Gradient norm-clipping for stability
         # For details: http://proceedings.mlr.press/v28/pascanu13.pdf
         if MI is not None:
-            deeptools.adaptive_gradient_clipping_(model, MI['model'])
+            for k in range(len(MI['classes'])):
+                deeptools.adaptive_gradient_clipping_(model, MI['model'][k])
         else:
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt_param['clip_norm'])
-            
+        
         ## Step optimizer
         optimizer.step()
         if MI is not None:
             MI['optimizer'].step()
         
-        ## Aggregate total losses
-        if type(batch) is dict: # DualDataset or Dataset
-            total_loss += loss.item()
-            if DA_active: total_loss_DA += l_DA.item()
+        ## Aggregate losses
+        total_loss = total_loss + loss.item()
 
-            n += 1 # Losses are already mean aggregated, so add 1 per batch
-        else:
-            total_loss += loss.item() * batch.num_graphs # torch-geometric
-            if DA_active: total_loss_DA += l_DA.item() * batch.num_graphs
-            
-            n += batch.num_graphs
+        for key in loss_tuple.keys():
+            if key in component_losses:
+                component_losses[key] += loss_tuple[key].item()
+            else:
+                component_losses[key]  = loss_tuple[key].item()
+
+        #if type(batch) is dict: # DualDataset or Dataset
+        #    total_loss += loss.item()
+        #    n += 1 # Losses are already mean aggregated, so add 1 per batch
+        #else:
+        #    total_loss += loss.item() * batch.num_graphs # torch-geometric
+        #    n += batch.num_graphs
+
+        n_batches += 1
     
-    if DA_active:
-        return total_loss / n, total_loss_DA / n
-    else:
-        return total_loss / n
+    if MI is not None:
+        MI['network_loss'] /= n_batches
+
+        for k in range(len(MI['classes'])):
+            MI['MI_lb'][k] /= n_batches
+    
+    for key in component_losses.keys():
+        component_losses[key] /= n_batches
+    
+    return {'sum': total_loss / n_batches, **component_losses}
 
 
 def test(model, loader, optimizer, device):

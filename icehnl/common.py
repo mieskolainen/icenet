@@ -1,4 +1,4 @@
-# Common input & data reading routines for the HNL studies
+# Common input & data reading routines for the HNL analysis
 # 
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
@@ -22,8 +22,8 @@ from icenet.tools import iceroot
 
 # GLOBALS
 from configs.hnl.mvavars import *
-from configs.hnl.cuts import *
-from configs.hnl.filter import *
+#from configs.hnl.cuts import *
+#from configs.hnl.filter import *
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
@@ -67,7 +67,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # Apply maxevents cutoff
     maxevents = np.min([args['maxevents'], len(X)])
     X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
-
+    
     return X, Y, W, ids
 
 

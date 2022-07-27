@@ -277,7 +277,6 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
     losses    = []
-    losses_DA = []
     trn_aucs  = []
     val_aucs  = []
     
@@ -310,7 +309,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     if 'MI_reg_param' in param:
 
         # Create network and set parameters
-        MI         = param['MI_reg_param']
+        MI         = copy.deepcopy(param['MI_reg_param']) # ! important
         input_size = param['MI_reg_param']['x_dim']
 
         index      = MI['y_index']
@@ -321,47 +320,51 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         elif type(index) is list:
             input_size += len(index)
 
-        print(input_size)
+        MI['model']     = []
+        MI['MI_lb']     = []
 
-        MI_model         = mine.MINENet(input_size=input_size, **MI)
-        MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
-        MI_model.train() # !
+        for k in range(len(MI['classes'])):
+            MI_model         = mine.MINENet(input_size=input_size, **MI)
+            MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
+            MI_model.train() # !
 
-        MI['model']      = MI_model
-        MI['optimizer']  = torch.optim.Adam(MI_model.parameters(), lr=MI['lr'], weight_decay=MI['weight_decay'])
+            MI['model'].append(MI_model)
+
+        all_parameters = list()
+        for k in range(len(MI['classes'])):
+            all_parameters += list(MI['model'][k].parameters())
+
+        MI['optimizer'] = torch.optim.Adam(all_parameters, lr=MI['lr'], weight_decay=MI['weight_decay'])
     else:
         MI = None
     # --------------------------------------------------------------------
-    
+
     # Training loop
     for epoch in range(opt_param['epochs']):
 
-        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
+        if MI is not None: # Reset diagnostics
+            MI['MI_lb'] = np.zeros(len(MI['classes']))
 
-        if DA_active:
-            loss    = loss[0]
-            loss_DA = loss[1]
-        else:
-            loss_DA = 0
+        loss_dict = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
         if (epoch % save_period) == 0:
             train_acc, train_auc       = dopt.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
             validate_acc, validate_auc = dopt.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
-        # Push
-        losses.append(loss)
-        losses_DA.append(loss_DA)
+        ## Save values
+        losses.append(loss_dict['sum'])
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
-        if DA_active:
-            loss_terms = f'tot loss: {loss:.4f}, loss_DA: {loss_DA:.4f}'
-        else:
-            loss_terms = f'tot loss: {loss:.4f}'
+        ## Print out
+        loss_terms = '| '
+        for key in loss_dict: loss_terms += f'{key}: {loss_dict[key]:0.3f} | '
 
-        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, {loss_terms} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Losses: {loss_terms} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
-            print(__name__ + f'.torch_loop: MI loss = {MI["loss"]:0.4f} | MI_lb value = {MI["MI_lb"]:0.4f}')
+            print(__name__ + f'.torch_loop: MI network_loss = {MI["network_loss"]:0.4f}')
+            for k in range(len(MI['classes'])):
+                print(__name__ + f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
 
         # Update scheduler
         scheduler.step()
@@ -547,40 +550,47 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     # [reservation] ...
 
     ## Regularization
-    if np.abs(MI_reg_param['beta']) > 0.0:
 
-        MI_loss = 0
+    # Loop over chosen classes
+    k       = 0
+    MI_loss = 0
+    MI_lb_values = []
 
-        # Loop over chosen classes
-        for c in MI_reg_param['classes']:
+    for c in MI_reg_param['classes']:
 
-            if c == None:
-                ind = (targets != -1) # All classes
-            else:
-                ind = (targets == c)
+        # -----------
+        reg_param = copy.deepcopy(MI_reg_param)
+        reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
+        # -----------
 
-            X     = torch.Tensor(MI_x).to(preds.device)
-            Z     = preds
+        if c == None:
+            ind = (targets != -1) # All classes
+        else:
+            ind = (targets == c)
 
-            # We need .detach() here for Z!
-            model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
-                return_model_only=True, device=X.device, **MI_reg_param)
+        X     = torch.Tensor(MI_x).to(preds.device)
+        Z     = preds
+        
+        # We need .detach() here for Z!
+        model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
+            return_model_only=True, device=X.device, **reg_param)
 
-            # ------------------------------------------------------------
-            # Now apply the MI estimator to the sample
+        # ------------------------------------------------------------
+        # Now apply the MI estimator to the sample
 
-            # No .detach() here, we need the gradients for Z!
-            MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
-            # ------------------------------------------------------------
+        # No .detach() here, we need the gradients for Z!
+        MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
+        # ------------------------------------------------------------
 
-            MI_loss += MI_reg_param['beta'] * MI_lb
-    else:
-        MI_loss = 0.0
-    
+        MI_loss = MI_loss + MI_reg_param['beta'][k] * MI_lb
+        MI_lb_values.append(np.round(MI_lb.item(), 4))
+
+        k += 1
+
     ## Total
     total_loss = classifier_loss + MI_loss
-    cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb:0.4f}', 'yellow')
-
+    cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
+    
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
 
@@ -597,9 +607,13 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         trained model
     """
 
-    global MI_x
-    global MI_reg_param
+    if 'MI_reg_param' in param:
 
+        global MI_x
+        global MI_reg_param
+
+        MI_reg_param  = copy.deepcopy(param['MI_reg_param']) #! important
+    # ---------------------------------------------------
 
     if param['model_param']['tree_method'] == 'auto':
         param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
@@ -661,13 +675,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
             if strs[1] == 'binary_cross_entropy_with_MI':
 
-                MI_reg_param  = param['MI_reg_param']
-
-                # Mutual Information regularization target (can be internal or external)
-                MI_x = copy.deepcopy(data_trn_MI)
-
                 a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, skip_hessian=True, device=device)
                 a['params']['disable_default_eval_metric'] = 1
+
+                # ! Important to have here because we modify it in the eval below
+                MI_x = copy.deepcopy(data_trn_MI)
 
                 def eval_obj(mode='train'):
                     global MI_x #!
