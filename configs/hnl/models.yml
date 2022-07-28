@@ -4,7 +4,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
 
-  losstype: 'MINE'         # 'MINE' or 'MINE_EMA'
+  losstype: 'MINE_EMA'     # 'MINE' or 'MINE_EMA'
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
   
@@ -349,7 +349,7 @@ dmlp_MI_min:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta: [0.99]         #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    beta: [0.99]               #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

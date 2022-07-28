@@ -115,30 +115,6 @@ def MI_loss(X, Z, weights, MI, y):
     else:
         weights = torch.ones(len(X)).to(X.device)
 
-    """
-    k = 0
-    MI['loss'] = 0
-    for c in MI['classes']:
-        
-        MI['MI_lb'][k] = 0
-
-        if c == None:
-            ind = (y != -1) # All classes
-        else:
-            ind = (y == c)
-
-        joint, marginal, w             = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
-        MI_lb, MI['ma_eT'][k], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
-                                            model=MI['model'][k], ma_eT=MI['ma_eT'][k], alpha=MI['alpha'], losstype=MI['losstype'])
-        
-        MI['loss']     = MI['loss'] + MI['beta'][k]*loss_MI  # Used by the MI-net torch optimizer
-        MI['MI_lb'][k] = MI['MI_lb'][k] + MI_lb              # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
-
-        k += 1
-    
-    return MI['beta'][0] * MI['MI_lb'][0]
-    """
-
     loss = 0
     MI['network_loss'] = 0
 
@@ -160,9 +136,9 @@ def MI_loss(X, Z, weights, MI, y):
         # Used by the MI-net torch optimizer
         MI['network_loss'] = MI['network_loss'] + loss_MI
 
-        # For diagnostics  
-        MI['MI_lb'][k]     = MI['MI_lb'][k] + MI_lb.item()
-
+        # ** For diagnostics ** 
+        MI['MI_lb'][k]     = MI_lb.item()
+    
     # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
     return loss
 

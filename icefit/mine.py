@@ -106,7 +106,7 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
 
     # Normalize
     w     = (w / torch.sum(w)).squeeze()
-
+    
     # Use the network, apply weights
     T, eT = w * model(joint), w * torch.exp(model(marginal))
 

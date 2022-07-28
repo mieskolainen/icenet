@@ -136,21 +136,21 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     """
     model.train()
 
-    DA_active     = True if (hasattr(model, 'DA_active') and model.DA_active) else False
-    MI_active     = True if MI is not None else False
+    DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
-    total_loss       = 0
     component_losses = {}
-    total_MI_network_loss  = 0
+    total_loss       = 0
+    n_batches        = 0
 
-    n_batches = 0
+    # --------------------------------------------------------------------
+    ## First step: Main network training
+
+    # At this stage, we evaluate MI models !!
+    if MI is not None:
+        for k in range(len(MI['model'])):
+            MI['model'][k].eval()
 
     for i, batch in enumerate(loader):
-
-        ## Clear gradients
-        optimizer.zero_grad() # !
-        if MI is not None:
-            MI['optimizer'].zero_grad() # !
 
         batch_ = batch2tensor(batch, device)
 
@@ -164,7 +164,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
             #if DA_active:
             #    y_DA,w_DA = batch_['y_DA'], batch_['w_DA']
-            if MI_active:
+            if MI is not None:
                 MI['x'] = batch_['x_MI']
 
         # Torch-geometric models
@@ -172,7 +172,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             x,y,w = batch_, batch_.y, batch_.w
             #if DA_active:
             #    y_DA,w_DA = batch_.y_DA, batch_.w_DA
-            if MI_active:
+            if MI is not None:
                 MI['x'] = batch_.x_MI
         # -----------------------------------------
 
@@ -181,6 +181,9 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         #    loss       = l + l_DA
         #else:
 
+        # Clear gradients
+        optimizer.zero_grad() # !
+        
         loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
         ## Create combined loss
@@ -188,10 +191,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         for key in loss_tuple.keys():
             loss = loss + loss_tuple[key]
 
-        ## Propagate gradients        
-        loss.backward(retain_graph=True)
-        if MI is not None:
-            MI['network_loss'].backward() # no retain_graph=True here, will overflow memory
+        ## Propagate gradients
+        loss.backward(retain_graph=False)
         
         ## Gradient norm-clipping for stability
         # For details: http://proceedings.mlr.press/v28/pascanu13.pdf
@@ -203,15 +204,9 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         
         ## Step optimizer
         optimizer.step()
-        if MI is not None:
-            MI['optimizer'].step()
         
         ## Aggregate losses
         total_loss = total_loss + loss.item()
-
-        ## For diagnostics
-        if MI is not None:
-            total_MI_network_loss += MI['network_loss'].item()
 
         for key in loss_tuple.keys():
             if key in component_losses:
@@ -220,13 +215,60 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
                 component_losses[key]  = loss_tuple[key].item()
 
         n_batches += 1
-    
+
+    # --------------------------------------------------------------------
+    ## Second (possible) step: MI network training
+
     if MI is not None:
+
+        # At this stage, we train MI model(s)
+        for k in range(len(MI['classes'])):
+            MI['model'][k].train()
+
+        n_batches             = 0
+        total_MI_network_loss = 0
+
+        MI_lb = np.zeros(len(MI['classes']))
+
+        for i, batch in enumerate(loader):
+
+            batch_ = batch2tensor(batch, device)
+
+            # -----------------------------------------
+            if type(batch_) is dict:
+                x,y,w = batch_['x'], batch_['y'], batch_['w']
+                
+                if 'u' in batch_: # Dual input models
+                    x = {'x': batch_['x'], 'u': batch_['u']}
+            # Torch-geometric models
+            else:
+                x,y,w   = batch_, batch_.y, batch_.w
+
+            MI['x'] = batch_['x_MI']
+            # -----------------------------------------
+
+            MI['optimizer'].zero_grad() # !
+
+            loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
+
+            MI['network_loss'].backward()
+            MI['optimizer'].step()
+
+            # Accumulate for diagnostics
+            total_MI_network_loss += MI['network_loss'].item()
+            for k in range(len(MI['classes'])):
+                MI_lb[k] += MI['MI_lb'][k]
+
+            n_batches += 1
+        
         MI['network_loss'] = total_MI_network_loss / n_batches
+        MI['MI_lb']        = MI_lb / n_batches
 
         for k in range(len(MI['classes'])):
             MI['MI_lb'][k] /= n_batches
+            MI['model'][k].eval() # Back to eval default
 
+    # Mean
     for key in component_losses.keys():
         component_losses[key] /= n_batches
 
@@ -248,6 +290,7 @@ def test(model, loader, optimizer, device):
     """
 
     model.eval()
+
     DA_active  = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
     accsum = 0

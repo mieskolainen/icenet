@@ -117,7 +117,7 @@ def splitfactor(x, y, w, ids, args):
 
     # -------------------------------------------------------------------------
     data_graph  = None
-
+    
     # -------------------------------------------------------------------------
     # Mutual information regularization targets
     MI_ind, MI_vars = io.pick_vars(data, globals()['MI_VARS'])
