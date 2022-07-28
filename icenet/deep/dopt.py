@@ -134,7 +134,6 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     Returns
         trained model (return implicit via input arguments)
     """
-    model.train() #!
 
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
@@ -144,7 +143,9 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
     # --------------------------------------------------------------------
     ## First step: Main network training
-
+    
+    model.train() #!
+    
     # At this stage, we evaluate MI models !!
     if MI is not None:
         for k in range(len(MI['model'])):
@@ -267,7 +268,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
         for k in range(len(MI['classes'])):
             MI['model'][k].eval() #!
-    
+
     # Mean
     for key in component_losses.keys():
         component_losses[key] /= n_batches
