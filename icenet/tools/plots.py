@@ -584,19 +584,19 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
 
     num_classes = len(np.unique(y))
-    legends = []
-
+    legends     = []
+    
+    # loop over [linear, log]
     for i in range(2):
         ax = ax1 if i == 0 else ax2
 
-        # Loop over classes
+        # [raw histograms]  Loop over classes
         for c in range(num_classes) :
-            w = weights[y == c]
             ax.hist(X[y == c], bins, density = False,
                 histtype = 'step', fill = False, linewidth = 1.5)
             legends.append(f'$\\mathcal{{C}} = {c}$')
 
-        # Loop over classes
+        # [weights applied] Loop over classes
         for c in range(num_classes) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,

@@ -1,13 +1,15 @@
 
 KINEMATIC_GEN_VARS = [
+
 ]
 
-# Kinematic etc. variables
+# Kinematic etc.  variables
 KINEMATIC_VARS = [
   'tagger_score',
   'hnlJet_nominal_llpdnnx_ratio_LLP_Q',
   'hnlJet_nominal_llpdnnx_ratio_LLP_QMU',
-  'hnlJet_nominal_llpdnnx_ratio_LLP_QE'
+  'hnlJet_nominal_llpdnnx_ratio_LLP_QE',
+  'event_weight'
 ]
 
 ALL_MVA_VARS = [
@@ -59,6 +61,7 @@ TECHNO_VARS = [
   'tagger_score'
 ]
 
+
 # Use here only variables available in real data
 MVA_SCALAR_VARS = ALL_MVA_VARS
 
@@ -72,6 +75,7 @@ PLOT_VARS = [
   'event_weight',
   'tagger_score'
 ]
+
 
 # Variables we read out from the root files (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']

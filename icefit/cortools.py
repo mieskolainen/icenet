@@ -456,7 +456,7 @@ def test_gaussian():
                 # Test with 2D vectors
                 MI,MI_err  = mine.estimate(X=x1, Z=x2, losstype=losstype)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Neural         MI = {MI:.3f} +- {MI_err:.3f} ({losstype})')
+                print(f'Neural        MI = {MI:.3f} +- {MI_err:.3f} ({losstype})')
             
             print('')
 

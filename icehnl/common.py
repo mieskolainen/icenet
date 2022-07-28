@@ -56,7 +56,20 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
     X   = frame[ids].to_numpy()
     W   = frame['event_weight'].to_numpy()
-    Y   = frame['label'].to_numpy()
+    Y   = frame['label'].to_numpy().astype(int)
+
+    ## Print some diagnostics
+    label_type = frame['label_type'].to_numpy().astype(int)
+    
+    for c in np.unique(Y):
+        print(__name__ + f'.load_root_file: class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
+        print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
+    
+    # 'label_type' has values:
+    #   hnl          = 1
+    #   wjets_label  = 2
+    #   dyjets_label = 3
+    #   ttbar_label  = 4
 
     # ** Crucial -- randomize order to avoid problems with other functions **
     rind = np.random.permutation(len(X))

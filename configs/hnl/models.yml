@@ -6,7 +6,7 @@ MI_REG_PARAM: &MI_REG_PARAM
 
   losstype: 'MINE_EMA'     # 'MINE' or 'MINE_EMA'
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [1.0]       #  EMA starting value
+  ma_eT:  [null]           #  EMA tracking values
   
   y_index: [1]
   
