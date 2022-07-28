@@ -228,7 +228,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         n_batches    = 0
         network_loss = 0
         MI_lb = np.zeros(len(MI['classes']))
-        
+
         for i, batch in enumerate(loader):
 
             batch_ = batch2tensor(batch, device)
@@ -260,7 +260,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
             n_batches += 1
 
-        MI['network_loss'] = total_MI_network_loss / n_batches
+        MI['network_loss'] = network_loss / n_batches
         MI['MI_lb']        = MI_lb / n_batches
 
         for k in range(len(MI['classes'])):
