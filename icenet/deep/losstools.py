@@ -46,7 +46,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
             return {f'MI x $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
         else:
             return {}
-        
+    
     if  param['lossfunc'] == 'cross_entropy':
         log_phat = model.softpredict(x)
         
