@@ -149,7 +149,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     if MI is not None:
         for k in range(len(MI['model'])):
             MI['model'][k].eval()
-
+    
     for i, batch in enumerate(loader):
 
         batch_ = batch2tensor(batch, device)

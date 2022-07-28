@@ -357,10 +357,10 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         print(__name__)
         print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {dopt.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
-            print(f'.torch_loop: MI network_loss = {MI["network_loss"]:0.4f} (~ constant)')
+            print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f} (~ constant)')
             for k in range(len(MI['classes'])):
                 print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
-        
+
         # Update scheduler
         scheduler.step()
         
