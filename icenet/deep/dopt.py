@@ -134,7 +134,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     Returns
         trained model (return implicit via input arguments)
     """
-    model.train()
+    model.train() #!
 
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
 
@@ -149,7 +149,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     if MI is not None:
         for k in range(len(MI['model'])):
             MI['model'][k].eval()
-    
+
     for i, batch in enumerate(loader):
 
         batch_ = batch2tensor(batch, device)
@@ -216,6 +216,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
         n_batches += 1
 
+    model.eval() #!
+
     # --------------------------------------------------------------------
     ## Second (possible) step: MI network training
 
@@ -223,7 +225,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
 
         # At this stage, we train MI model(s)
         for k in range(len(MI['classes'])):
-            MI['model'][k].train()
+            MI['model'][k].train() #!
 
         n_batches    = 0
         network_loss = 0
@@ -264,8 +266,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         MI['MI_lb']        = MI_lb / n_batches
 
         for k in range(len(MI['classes'])):
-            MI['model'][k].eval() # Back to eval default
-
+            MI['model'][k].eval() #!
+    
     # Mean
     for key in component_losses.keys():
         component_losses[key] /= n_batches
