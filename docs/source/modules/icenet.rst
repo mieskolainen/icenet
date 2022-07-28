@@ -77,10 +77,10 @@ icenet.deep.dmlp
     :undoc-members:
 
 
-icenet.deep.dopt
+icenet.deep.optimize
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: icenet.deep.dopt
+.. automodule:: icenet.deep.optimize
     :members:
     :undoc-members:
 

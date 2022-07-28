@@ -34,7 +34,7 @@ from icenet.tools import aux_torch
 
 from icenet.tools import plots
 from icenet.tools import prints
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 
 
 #from icenet.deep  import dev_dndt
@@ -277,7 +277,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     val_aucs  = []
     
     # Transfer to CPU / GPU
-    model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
+    model, device = optimize.model_to_cuda(model=model, device_type=param['device'])
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
@@ -321,7 +321,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
 
         for k in range(len(MI['classes'])):
             MI_model         = mine.MINENet(input_size=input_size, **MI)
-            MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
+            MI_model, device = optimize.model_to_cuda(model=MI_model, device_type=param['device'])
             MI_model.train() # !
 
             MI['model'].append(MI_model)
@@ -343,19 +343,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
 
-        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
+        loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
         if (epoch % save_period) == 0:
-            train_acc, train_auc       = dopt.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
-            validate_acc, validate_auc = dopt.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
+            train_acc, train_auc       = optimize.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
+            validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
         ## Save values
-        dopt.trackloss(loss=loss, loss_history=loss_history)
+        optimize.trackloss(loss=loss, loss_history=loss_history)
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
         print(__name__)
-        print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {dopt.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {optimize.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
             print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f} (~ constant)')
             for k in range(len(MI['classes'])):
@@ -479,11 +479,11 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     
     ### Generators
     if (X_trn_2D is not None) and ('cnn' in conv_type):
-        training_set   = dopt.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = optimize.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
+        validation_set = optimize.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
     else:
-        training_set   = dopt.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = optimize.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
+        validation_set = optimize.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
@@ -575,7 +575,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     cprint(f'Total_loss = {total_loss:0.4f} | CE_loss = {CE_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
 
     loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI, $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
-    dopt.trackloss(loss=loss, loss_history=loss_history)
+    optimize.trackloss(loss=loss, loss_history=loss_history)
 
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)

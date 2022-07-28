@@ -84,7 +84,7 @@ class GCN(nn.Module):
         y = F.dropout(y, self.dropout, training=self.training)
         y = self.gc2(y, adj_matrix)
         
-        if self.training:
-            return F.log_softmax(y, dim=-1) # Numerically more stable
-        else:
-            return F.softmax(y, dim=-1)
+        #if self.training:
+        #    return F.log_softmax(y, dim=-1) # Numerically more stable
+        #else:
+        return F.softmax(y, dim=-1)

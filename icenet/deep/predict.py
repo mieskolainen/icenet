@@ -36,7 +36,7 @@ from icenet.tools import plots
 
 from icenet.algo  import flr
 from icenet.deep  import bnaf
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 from icenet.deep  import dbnf
 from icenet.deep  import mlgr
 from icenet.deep  import maxo
@@ -119,7 +119,7 @@ def pred_torch_graph(args, param):
 
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = dopt.model_to_cuda(model, device_type=param['device'])
+    model, device = optimize.model_to_cuda(model, device_type=param['device'])
     model.eval() # ! Turn on eval mode!
 
     def func_predict(x):
@@ -140,7 +140,7 @@ def pred_torch_generic(args, param):
     
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = dopt.model_to_cuda(model, device_type=param['device'])
+    model, device = optimize.model_to_cuda(model, device_type=param['device'])
     model.eval() # ! Turn on eval mode!
     
     def func_predict(x):
@@ -160,7 +160,7 @@ def pred_torch_scalar(args, param):
     
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = dopt.model_to_cuda(model, device_type=param['device'])
+    model, device = optimize.model_to_cuda(model, device_type=param['device'])
     model.eval() # ! Turn on eval mode!
     
     def func_predict(x):

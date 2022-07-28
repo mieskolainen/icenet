@@ -29,7 +29,7 @@ from icenet.tools import plots
 from icenet.tools import prints
 
 from icenet.algo  import flr
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 from icenet.deep  import bnaf
 from icenet.deep  import dbnf
 from icenet.deep  import deps

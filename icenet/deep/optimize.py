@@ -145,7 +145,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     ## First step: Main network training
     
     model.train() #!
-    
+
     # At this stage, we evaluate MI models !!
     if MI is not None:
         for k in range(len(MI['model'])):
@@ -216,12 +216,12 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
                 component_losses[key]  = loss_tuple[key].item()
 
         n_batches += 1
-
+    
     model.eval() #!
 
     # --------------------------------------------------------------------
     ## Second (possible) step: MI network training
-
+    
     if MI is not None:
 
         # At this stage, we train MI model(s)

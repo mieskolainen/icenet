@@ -57,10 +57,10 @@ class MAXOUT(nn.Module):
     def softpredict(self, x) :
         """ Softmax probability
         """
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
+        #if self.training:
+        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        #else:
+        return F.softmax(self.forward(x), dim=-1)
     
     def binarypredict(self, x) :
         """ Return max probability class.

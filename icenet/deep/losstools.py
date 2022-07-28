@@ -13,7 +13,7 @@ from icenet.tools import aux_torch
 from icefit import mine
 
 
-def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None):
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None, EPS=1e-20):
     """
     A wrapper function to loss functions
     
@@ -38,7 +38,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         y            = x.y
         weights      = None # TBD. Could re-compute a new set of edge weights 
     # --------------------------------------------
-
+    
     def MI_helper(log_phat):
         if MI is not None:
             X = MI['x'].float()
@@ -46,9 +46,9 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
             return {f'MI x $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
         else:
             return {}
-    
+
     if  param['lossfunc'] == 'cross_entropy':
-        log_phat = model.softpredict(x)
+        log_phat = torch.log(model.softpredict(x) + EPS)
         
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
@@ -79,7 +79,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         loss  = {'LNCE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'focal_entropy':
-        log_phat = model.softpredict(x)
+        log_phat = torch.log(model.softpredict(x) + EPS)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
         loss  = {'FE': loss, **MI_helper(log_phat)}
