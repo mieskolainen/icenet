@@ -199,7 +199,7 @@ lgr0:
     temperature: 1            # logit norm temperature
     
     optimizer: 'AdamW'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
     batch_size: 196
@@ -241,7 +241,7 @@ dmlp0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
     batch_size: 196

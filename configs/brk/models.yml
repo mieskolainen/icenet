@@ -64,7 +64,7 @@ maxo:
     temperature: 1            # logit norm temperature
 
     optimizer: 'AdamW'
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs:  200
     batch_size:  256
@@ -108,7 +108,7 @@ deps:
     temperature: 1             # logit norm temperature
     
     optimizer: 'AdamW'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs:  200
     batch_size:  256

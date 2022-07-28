@@ -48,7 +48,7 @@ gxgb0:
       temperature: 1            # logit norm temperature
       
       optimizer: 'Adam'
-      clip_norm: 0.1
+      clip_norm: 1.0
 
       epochs: 150
       batch_size: 64
@@ -148,7 +148,7 @@ gnet0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 150
     batch_size: 64
@@ -209,7 +209,7 @@ gnet1:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 150
     batch_size: 64
@@ -270,7 +270,7 @@ gnet2:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 150
     batch_size: 64
@@ -331,7 +331,7 @@ gnet3:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 150
     batch_size: 64
@@ -426,7 +426,7 @@ dmlp:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
     batch_size: 196
@@ -466,7 +466,7 @@ lgr0:
 
     optimizer: 'Adam'
 
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 50
     batch_size: 196
@@ -512,7 +512,7 @@ cnn0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 100
     batch_size: 128
@@ -559,7 +559,7 @@ xtx0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'        # Adam, AdamW
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 50
     batch_size:  196
@@ -595,7 +595,7 @@ dmx0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'        # Adam, AdamW
-    clip_norm: 0.1
+    clip_norm: 1.0
 
     epochs: 50
     batch_size: 128

@@ -254,7 +254,7 @@ dmlp0:
     temperature: 1             # logit norm temperature
     
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 100
     batch_size: 128
@@ -304,7 +304,7 @@ dmlp0_red:
     temperature: 1             # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 20
     batch_size: 128
@@ -345,7 +345,7 @@ dmlp_MI_min:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 100
     batch_size: 128
@@ -392,7 +392,7 @@ dmlp_MI_max:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 100
     batch_size: 128
