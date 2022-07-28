@@ -260,12 +260,11 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
                 MI_lb[k] += MI['MI_lb'][k]
 
             n_batches += 1
-        
+
         MI['network_loss'] = total_MI_network_loss / n_batches
         MI['MI_lb']        = MI_lb / n_batches
 
         for k in range(len(MI['classes'])):
-            MI['MI_lb'][k] /= n_batches
             MI['model'][k].eval() # Back to eval default
 
     # Mean
