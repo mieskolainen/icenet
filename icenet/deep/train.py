@@ -360,7 +360,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             print(f'.torch_loop: MI network_loss = {MI["network_loss"]:0.4f} (~ constant)')
             for k in range(len(MI['classes'])):
                 print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
-
+        
         # Update scheduler
         scheduler.step()
         
