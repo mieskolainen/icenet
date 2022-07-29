@@ -651,15 +651,17 @@ class Metric:
             weights = np.sum(weights, axis=1)
         
         # Check numerical validity
+        """
         if (np.squeeze(y_pred).ndim > 1):
             ok = np.isfinite(np.sum(y_pred,axis=1))
         else:
             ok = np.isfinite(y_pred)
-
+        
         y_true = y_true[ok]
         y_pred = y_pred[ok]
         if weights is not None:
             weights = weights[ok]
+        """
         
         # Invalid input
         if len(np.unique(y_true)) <= 1:

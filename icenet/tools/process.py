@@ -336,13 +336,13 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
-
+        
         # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
-
+        
         ## Imputate
         if args['imputation_param']['active']:
-
+            
             imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
     
@@ -370,7 +370,7 @@ def impute_datasets(data, args, features=None, imputer=None):
     dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
 
     if args['values'] is not None:
-
+        
         special_values = args['values'] # possible special values
         cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
 
