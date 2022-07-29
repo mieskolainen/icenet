@@ -297,7 +297,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
     
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
-
+    
     # ----------------------------------------
     if args['imputation_param']['active']:
         module = import_module(mvavars, 'configs.subpkg')
@@ -322,13 +322,13 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
         # Compute different data representations
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
-
+        
         ## Imputate
         if args['imputation_param']['active']:
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer.pkl', 'wb'))
 
     elif runmode == 'eval':
         
@@ -343,7 +343,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
         ## Imputate
         if args['imputation_param']['active']:
 
-            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
     
     return output
