@@ -23,9 +23,9 @@ $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_m_10_ctau
 # --------------------
 ## Train models
 
-#$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_all.yml                       --modeltag vector_all --use_conditional 1
-#$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_m_10_ctau_10_xiO_1_xiL_1.yml  --modeltag vector_m_10_ctau_10_xiO_1_xiL_1
-#$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_m_10_ctau_100_xiO_1_xiL_1.yml --modeltag vector_m_10_ctau_100_xiO_1_xiL_1
+$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_all.yml                       --modeltag vector_all --use_conditional 1
+$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_m_10_ctau_10_xiO_1_xiL_1.yml  --modeltag vector_m_10_ctau_10_xiO_1_xiL_1
+$CMD $MAX --runmode train --config $CONFIG --inputmap mc_map__vector_m_10_ctau_100_xiO_1_xiL_1.yml --modeltag vector_m_10_ctau_100_xiO_1_xiL_1
 
 
 # --------------------
