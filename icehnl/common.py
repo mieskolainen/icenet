@@ -65,6 +65,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
         print(__name__ + f'.load_root_file: class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
         print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
     
+    ## ** Set all weights to one **
+    W   = np.ones(len(W))
+    
     # 'label_type' has values:
     #   hnl          = 1
     #   wjets_label  = 2
