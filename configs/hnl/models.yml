@@ -219,7 +219,7 @@ xgb_MI_max:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: [-5.0]       # Negative for maximizing MI
+    beta: [-2.0]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
   plot_trees: False
@@ -351,9 +351,9 @@ dmlp_MI_min:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta: [2.0]               #  Positive for minimizing MI between (x,y), Negative for Maximizing
+    beta: [0.99]               #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
-  
+
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
@@ -398,7 +398,7 @@ dmlp_MI_max:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta:  [-5.0]      #  Positive for minimizing MI between (x,y), Negative for Maximizing
+    beta:  [-2.0]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

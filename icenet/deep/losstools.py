@@ -132,7 +132,7 @@ def MI_loss(X, Z, weights, MI, y):
         
         # Used by the total optimizer
         loss  = loss + MI['beta'][k] * MI_lb
-
+        
         # Used by the MI-net torch optimizer
         MI['network_loss'] = MI['network_loss'] + loss_MI
 

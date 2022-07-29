@@ -2,8 +2,10 @@
 #
 # https://arxiv.org/abs/1801.04062
 #
-# Use adaptive gradient clipping when using MINE as a regulator cost.
-#
+# Use adaptive gradient clipping (see icenet/deep/deeptools.py)
+# when using MINE as a regulator cost and maximizing MI (it has no strict upper bound).
+# The minimum MI is bounded by zero, to remind.
+# 
 # m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
