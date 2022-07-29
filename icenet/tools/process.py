@@ -122,8 +122,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     else:
         inputmap = {}
     
-    print(inputmap)
-
     # -------------------------------------------------------------------
     # Mode setup
 
@@ -163,8 +161,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     # -------------------------------------------------------------------
     ## Create a hash based on "rngseed", "maxevents", "genesis" and "inputmap" fields of yaml
-
-
+    
     hash_args = {}
 
     mvavars_path = f'{config_path}/mvavars.py'
@@ -215,7 +212,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # ------------------------------------------------
     print(__name__ + f'.read_config: Created arguments dictionary with runmode = <{runmode}> :')    
     # ------------------------------------------------
-
+    
     return args, cli
 
 

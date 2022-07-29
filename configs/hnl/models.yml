@@ -351,7 +351,7 @@ dmlp_MI_min:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta: [0.99]               #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
+    beta: [2.0]               #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
