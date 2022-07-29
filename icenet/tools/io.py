@@ -13,6 +13,7 @@ import os
 import psutil
 import subprocess
 import sys
+import re
 
 from termcolor import colored, cprint
 
@@ -27,7 +28,6 @@ from sklearn.impute import IterativeImputer
 from glob import glob
 from braceexpand import braceexpand
 import copy
-
 
 import hashlib
 import base64
@@ -97,14 +97,41 @@ def glob_expand_files(datasets, datapath):
         files: full filenames including the path
     """
     print("")
+    print("Supported: ")
     print(" Try 'filename_*' ")
-    print(" Try 'filename_[0-99]' ")
     print(" Try 'filename_0' ")
+    print(" Try 'filename_[0-99]' ")
     print(" Try 'filename_{0,3,4}' ")
-    print(" Google <glob wildcards> and brace expansion.")
+    print(" Google <glob wildcards> and brace expansion (be careful, do not use [,] brackets in your filenames)")
     print("")
     
     datasets = list(braceexpand(datasets))
+    #print(__name__ + f'.glob_expand_files: After braceexpand: {datasets}')
+
+    if (len(datasets) == 1) and ('[' in datasets[0]) and (']' in datasets[0]):
+
+        print(__name__ + f'.glob_expand_files: Parsing of range [first-last] ...')
+
+        res   = re.findall(r'\[.*?\]', datasets[0])[0]
+        temp  = res[1:-1]
+
+        numbers = temp.split('-')        
+        first   = int(numbers[0])
+        last    = int(numbers[1])
+
+        print(__name__ + f'.glob_expand_files: Obtained range of files: [{first}, {last}]')
+
+        # Split and add
+        parts = datasets[0].split(res)
+        datasets[0] = parts[0] + '{'
+        for i in range(first, last+1):
+            datasets[0] += f'{i}'
+            if i != last:
+                datasets[0] += ','
+        datasets[0] += '}' + parts[1]
+
+        datasets = list(braceexpand(datasets[0]))
+        #print(__name__ + f'.glob_expand_files: After expanding the range: {datasets}')
 
     # Parse input files into a list
     files = list()
@@ -113,6 +140,8 @@ def glob_expand_files(datasets, datapath):
         if filepath != []:
             for i in range(len(filepath)):
                 files.append(filepath[i])
+
+    #print(__name__ + f'.glob_expand_files: After glob: {files}')
 
     if files == []:
        files = [datapath]
