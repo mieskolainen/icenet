@@ -425,6 +425,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
 
+            # Histogram MI
+            MI   = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', minbins=20, normalized=None)
+
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
             for scale in ['linear', 'log']: 
@@ -445,9 +448,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
                     plt.ylabel(f'{v}')
                     rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
-                    #MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                    MI_value = ''
-
+                    MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.3f}$' #' \\pm {MI_err:0.3f}$'
+                    
                     plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
                     # -----
 

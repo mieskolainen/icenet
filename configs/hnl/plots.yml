@@ -29,9 +29,9 @@ MVA_2D:
     
   plot[0]:
     var:   ['tagger_score']
-    edges: [{'nbin': 50, 'q': [0.001, 0.999], 'space': 'linear'},
-            {'nbin': 50, 'q': [0.0, 0.95],    'space': 'linear'}]
-    
+    edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
+            {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},

@@ -557,10 +557,10 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         # We need .detach() here for Z!
         model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
             return_model_only=True, device=X.device, **reg_param)
-
+        
         # ------------------------------------------------------------
         # Now apply the MI estimator to the sample
-
+        
         # No .detach() here, we need the gradients for Z!
         MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
         # ------------------------------------------------------------
