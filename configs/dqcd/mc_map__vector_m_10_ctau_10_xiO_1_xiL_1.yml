@@ -1,0 +1,10 @@
+includes:
+- !include include/vector.yml
+
+input:
+  class_0: !include include/QCD.yml
+  
+  class_1:
+    proc: *HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1
+
+  

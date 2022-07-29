@@ -4,7 +4,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 import argparse
-import yaml
 import numpy as np
 import awkward as ak
 import torch
@@ -18,7 +17,8 @@ import pickle
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
-    
+
+
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
@@ -78,6 +78,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Read yaml configuration
 
     # This allows to use "!include foo.yaml" syntax
+    import yaml
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="")
 
     args = {}
@@ -85,12 +86,17 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     with open(f'{config_path}/{config_yaml_file}', 'r') as f:
         try:
             args = yaml.load(f, Loader=yaml.FullLoader)
+
+            if 'includes' in args:
+                del args['args'] # ! crucial
+
         except yaml.YAMLError as exc:
             print(exc)
-    
+            exit()
 
     # -------------------------------------------------------------------
     ## Inputmap .yml setup
+
 
     if cli_dict['inputmap'] is not None:
         args["genesis_runmode"]["inputmap"] = cli_dict['inputmap']        
@@ -98,14 +104,26 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     if args["genesis_runmode"]["inputmap"] is not None:
         file = args["genesis_runmode"]["inputmap"]
 
+        ## ** Special YAML loader here **
+        from libs.ccorp.ruamel.yaml.include import YAML
+        yaml = YAML()
+        yaml.allow_duplicate_keys = True
+
         with open(f'{config_path}/{file}', 'r') as f:
             try:
-                inputmap = yaml.load(f, Loader=yaml.FullLoader)
+                inputmap = yaml.load(f)
+
+                if 'includes' in inputmap:
+                    del inputmap['includes'] # ! crucial
+
             except yaml.YAMLError as exc:
-                print(exc)
+                print(f'yaml.YAMLError: {exc}')
+                exit()
     else:
         inputmap = {}
     
+    print(inputmap)
+
     # -------------------------------------------------------------------
     # Mode setup
 
@@ -139,7 +157,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Commandline override of yaml variables
     for key in cli_dict.keys():
         if key in args:
-            cprint(__name__ + f'.read_config: Override {config_yaml_file} input with --{key} {cli_dict[key]}', 'red')
+            cprint(__name__ + f'.read_config: {config_yaml_file} <{key}> default value cli-override with <{cli_dict[key]}>', 'red')
             args[key] = cli_dict[key]
     print()
 

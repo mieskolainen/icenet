@@ -195,7 +195,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         ## Propagate gradients
         loss.backward(retain_graph=False)
         
-        ## Gradient norm-clipping for stability
+        ## Gradient norm-clipping for stability if maximizing MI (unbounded)
         # For details: http://proceedings.mlr.press/v28/pascanu13.pdf
         if MI is not None:
             for k in range(len(MI['classes'])):
@@ -216,12 +216,12 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
                 component_losses[key]  = loss_tuple[key].item()
 
         n_batches += 1
-    
+
     model.eval() #!
 
     # --------------------------------------------------------------------
     ## Second (possible) step: MI network training
-    
+
     if MI is not None:
 
         # At this stage, we train MI model(s)

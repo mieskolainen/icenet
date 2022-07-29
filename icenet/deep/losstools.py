@@ -94,8 +94,8 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = log_loss.mean(dim=0)
 
-        loss  = {'KL_RECO': loss, **MI_helper(log_phat)}
-
+        loss  = {'KL_RECO': loss}
+        
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 

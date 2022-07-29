@@ -65,7 +65,7 @@ xgb0:
   # booster parameters
   model_param:
     num_boost_round: 30       # number of epochs (equal to the number of trees!)
-  
+    
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
@@ -101,17 +101,17 @@ xgb0_red:
   predict: 'xgb'
   label:   'XGB(m_llj)'
   raytune:  xgb_trial_0
-
+  
   # Train model with these variables only
   reduced_MVA_vars: ['nominal_m_llj']
-
+  
   # booster parameters
   model_param:
     num_boost_round: 10       # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
-
+    
     learning_rate: 0.1
     gamma: 1.67
     max_depth: 8
