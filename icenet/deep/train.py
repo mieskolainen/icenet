@@ -357,7 +357,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         print(__name__)
         print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {optimize.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
-            print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f} (~ constant)')
+            print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
                 print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
 
@@ -570,13 +570,13 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
 
         k += 1
 
-    ## Total
+    ## Total loss
     total_loss = CE_loss + MI_loss
-    cprint(f'Total_loss = {total_loss:0.4f} | CE_loss = {CE_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
-
-    loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI, $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
+    cprint(f'Loss: Total = {total_loss:0.4f} | CE = {CE_loss:0.4f} | MI x beta {reg_param["beta"]} = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
+    
+    loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI x $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
     optimize.trackloss(loss=loss, loss_history=loss_history)
-
+    
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
 
