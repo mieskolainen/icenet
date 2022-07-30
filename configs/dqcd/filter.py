@@ -1,5 +1,5 @@
-# Data filtering rules
-#
+# Data filtering / triggering rules
+# 
 # Note! Physics observable (fiducial / kinematic) cuts are defined in cuts.py, not here.
 #
 # m.mieskolainen@imperial.ac.uk, 2022

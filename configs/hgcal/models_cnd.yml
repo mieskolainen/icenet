@@ -40,7 +40,7 @@ gnet0:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 80
     batch_size: 64
@@ -101,7 +101,7 @@ gnet1:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 80
     batch_size: 64
@@ -162,7 +162,7 @@ gnet2:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 80
     batch_size: 64

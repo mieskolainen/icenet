@@ -22,7 +22,7 @@ from torch_scatter import scatter_add, scatter_max, scatter_mean
 from icenet.deep.da import GradientReversal
 
 from icenet.deep.pgraph import *
-from icenet.deep import dopt
+from icenet.deep import optimize
 from icenet.deep.dmlp import MLP, MLP_ALL_ACT
 
 from icenet.tools import aux
@@ -67,93 +67,6 @@ class SuperEdgeConv(MessagePassing):
     def __repr__(self):
         return '{}(nn={})'.format(self.__class__.__name__, self.nn)
 
-
-"""
-# NNConv based graph net
-#
-# https://arxiv.org/abs/1704.01212
-#
-class NNNet(torch.nn.Module):
-    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=1, z_dim=196, task='graph', conv_aggr='max', global_pool='mean'):
-        super(NNNet, self).__init__()
-
-        self.D = d_dim  # node feature dimension
-        self.E = e_dim  # edge feature dimension
-        self.G = u_dim  # global feature dimension
-        self.C = c_dim  # number output classes
-        
-        self.cdim = cdim  # latent dimension
-
-        self.task        = task
-        self.global_pool = global_pool
-
-        # Convolution layers
-        # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]
-        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)
-        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)
-        
-        # "Fusion" layer taking in conv layer outputs
-        self.lin1  = MLP([D+D, self.cdim])
-
-        # Set2Set pooling operation produces always output with 2 x input dimension
-        # => use linear layer to project down
-        if self.global_pool == 's2s':
-            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)
-            self.S2Slin  = Linear(2*self.cdim, self.cdim)
-
-        if (self.G > 0):
-            self.Z = self.cdim + self.G
-        else:
-            self.Z = self.cdim
-        
-        # Final layers concatenating everything
-        self.mlp1  = MLP([self.Z, self.Z, self.C])
-
-
-    def forward(self, data, conv_only=False):
-
-        if not hasattr(data,'batch') or data.batch is None:
-            # Create virtual null batch if singlet graph input
-            setattr(data, 'batch', torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))
-
-        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)
-        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)
-        x  = self.lin1(torch.cat([x1, x2], dim=1))
-
-        # ** Global pooling **
-        if self.task == 'graph':
-            if self.global_pool == 's2s':
-                x = self.S2Spool(x, data.batch)
-                x = self.S2Slin(x)
-            elif self.global_pool == 'max':
-                x = global_max_pool(x, data.batch)
-            elif self.global_pool == 'add':
-                x = global_add_pool(x, data.batch)
-            elif self.global_pool == 'mean':
-                x = global_mean_pool(x, data.batch)
-            else:
-                raise Exception(__name__ + f': Unknown global_pool <{self.global_pool}>')
-
-        if conv_only: # Return convolution part
-            return x
-
-        # Global features concatenated
-        if self.G > 0:
-            u = data.u.view(-1, self.G)
-            x = torch.cat([x, u], 1)
-
-        # Final layers
-        x = self.mlp1(x)
-
-        return x
-    
-    # Returns softmax probability
-    def softpredict(self,x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-"""
 
 class GNNGeneric(torch.nn.Module):
     """
@@ -590,9 +503,7 @@ class GNNGeneric(torch.nn.Module):
 
     # Returns softmax probability
     def softpredict(self,x):
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
-
-
+        #if self.training:
+        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        #else:
+        return F.softmax(self.forward(x), dim=-1)

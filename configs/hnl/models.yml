@@ -4,18 +4,20 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
 
-  losstype: 'MINE_EMA'     # 'MINE' or 'MINE_EMA'
+  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY'
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  1.0              #  EMA starting value
+  ma_eT:  [null]           #  EMA tracking values
   
   y_index: [1]
   
   epochs: 20
   batch_size: 512
   lr: 1.0e-3
-  weight_decay: 0.0
+  weight_decay: 0.00001
+  clip_norm: 1.0
 
-  mlp_dim: [64, 64]
+  mlp_dim: [128, 128]
+  batch_norm: False
   dropout: 0.01
   noise_std: 0.025
   activation: 'relu'
@@ -46,7 +48,7 @@ cutset0:
 cut0:
   train:    'cut'
   predict:  'cut'
-  label:    '(-1) x nominal_m_llj'
+  label:    '(-1) x m_llj'
   variable: 'nominal_m_llj'
   sign: -1
   transform: null
@@ -62,14 +64,57 @@ xgb0:
 
   # booster parameters
   model_param:
-    num_boost_round: 56       # number of epochs (equal to the number of trees!)
-  
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
+    
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     learning_rate: 0.1
     gamma: 1.67
-    max_depth: 10
+    max_depth: 8
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 4.8            # L2 regularization
+    reg_alpha: 0.05            # L1 regularization
+    
+    # learning task parameters
+    objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']                        # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  plot_trees: False
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb0_red:
+  train:   'xgb'
+  predict: 'xgb'
+  label:   'XGB(m_llj)'
+  raytune:  xgb_trial_0
+  
+  # Train model with these variables only
+  reduced_MVA_vars: ['nominal_m_llj']
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 10       # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 8
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
@@ -83,7 +128,7 @@ xgb0:
     
     # learning task parameters
     objective: 'binary:logistic'          # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']              # for evaluation, 'error' (for custom losses), 'logloss', 'mlogloss'
+    eval_metric: ['logloss']              # for evaluation, 'logloss', 'mlogloss'
   
   plot_trees: False
   
@@ -102,15 +147,15 @@ xgb_MI_min:
 
   # booster parameters
   model_param:
-    num_boost_round: 56       # number of epochs (equal to the number of trees!)
-  
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
+    
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     # booster parameters
     learning_rate: 0.1
     gamma: 1.67
-    max_depth: 10
+    max_depth: 8
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
@@ -128,7 +173,7 @@ xgb_MI_min:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
 
   MI_reg_param:
-    beta: 0.99          # Positive for minimizing
+    beta: [2.0]                # Positive for minimizing
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -148,7 +193,7 @@ xgb_MI_max:
 
   # booster parameters
   model_param:
-    num_boost_round: 56       # number of epochs (equal to the number of trees!)
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
   
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
@@ -156,7 +201,7 @@ xgb_MI_max:
     # booster parameters
     learning_rate: 0.1
     gamma: 1.67
-    max_depth: 10
+    max_depth: 8
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
@@ -174,7 +219,7 @@ xgb_MI_max:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: -0.99       # Negative for maximizing MI
+    beta: [-0.99]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
   plot_trees: False
@@ -190,26 +235,71 @@ dmlp0:
   predict: 'torch_vector'
   label:   'DMLP'
   raytune:  null
-
+  
   # Model
   conv_type: 'dmlp'
   model_param:
-    mlp_dim: [64, 64]     # hidden layer dimensions
+    mlp_dim: [32, 32]     # hidden layer dimensions
     activation: 'relu'
     batch_norm: False
     dropout: 0.01
   
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
+    
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
-    batch_size: 128
+    batch_size: 256
+    lr: 1.0e-3
+    weight_decay: 0.00001      # L2-regularization
+
+  # Scheduler
+  scheduler_param:
+    step_size: 200
+    gamma: 0.1
+
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# Deep MLP
+dmlp0_red:
+  train:   'torch_generic'
+  predict: 'torch_vector'
+  label:   'DMLP(m_llj)'
+  raytune:  null
+
+  # Train model with these variables only
+  reduced_MVA_vars: ['nominal_m_llj']
+
+  # Model
+  conv_type: 'dmlp'
+  model_param:
+    mlp_dim: [32, 32]     # hidden layer dimensions
+    activation: 'relu'
+    batch_norm: False
+    dropout: 0.01
+  
+  # Optimization
+  opt_param:  
+    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                   # focal_entropy exponent
+    temperature: 1             # logit norm temperature
+
+    optimizer: 'Adam'
+    clip_norm: 1.0
+    
+    epochs: 20
+    batch_size: 256
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
@@ -235,7 +325,7 @@ dmlp_MI_min:
   # Model
   conv_type: 'dmlp'
   model_param:
-    mlp_dim: [64, 64]     # hidden layer dimensions
+    mlp_dim: [32, 32]     # hidden layer dimensions
     activation: 'relu'
     batch_norm: False
     dropout: 0.01
@@ -247,10 +337,10 @@ dmlp_MI_min:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
-    batch_size: 128
+    batch_size: 256
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
@@ -261,15 +351,16 @@ dmlp_MI_min:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta:   0.99               #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    beta: [2.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
-
+  
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
+
 
 # Deep MLP
 dmlp_MI_max:
@@ -281,11 +372,11 @@ dmlp_MI_max:
   # Model
   conv_type: 'dmlp'
   model_param:
-    mlp_dim: [64, 64]     # hidden layer dimensions
+    mlp_dim: [32, 32]     # hidden layer dimensions
     activation: 'relu'
     batch_norm: False
     dropout: 0.01
-    
+  
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -293,10 +384,10 @@ dmlp_MI_max:
     temperature: 1            # logit norm temperature
 
     optimizer: 'Adam'
-    clip_norm: 0.1
+    clip_norm: 1.0
     
     epochs: 50
-    batch_size: 128
+    batch_size: 256
     lr: 1.0e-3
     weight_decay: 0.00001      # L2-regularization
 
@@ -307,7 +398,7 @@ dmlp_MI_max:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta:  -0.99             #  Positive for minimizing MI between (x,y), Negative for Maximizing (keep abs(beta) < 1)
+    beta:  [-0.99]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

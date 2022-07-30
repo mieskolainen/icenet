@@ -29,7 +29,7 @@ from icenet.tools import plots
 from icenet.tools import prints
 
 from icenet.algo  import flr
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 from icenet.deep  import bnaf
 from icenet.deep  import dbnf
 from icenet.deep  import deps
@@ -176,10 +176,10 @@ def main() :
         losses   = results['train']['mlogloss']
         trn_aucs = results['train']['auc']
         val_aucs = results['eval']['auc']
-
+        
         # Plot evolution
         plotdir  = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, label)
+        fig,ax   = plots.plot_train_evolution_multi({'train': losses}, trn_aucs, val_aucs, label)
         plt.savefig(f'{plotdir}/{label}_evolution.pdf', bbox_inches='tight'); plt.close()
 
         # Plot feature importance

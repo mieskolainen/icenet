@@ -2,8 +2,10 @@
 #
 # https://arxiv.org/abs/1801.04062
 #
-# Use adaptive gradient clipping when using MINE as a regulator cost.
-#
+# Use adaptive gradient clipping (see icenet/deep/deeptools.py)
+# when using MINE as a regulator cost and maximizing MI (it has no strict upper bound).
+# The minimum MI is bounded by zero, to remind.
+# 
 # m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
@@ -14,10 +16,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.autograd as autograd
 
-
 from icenet.tools import aux
 from icenet.deep.dmlp import MLP
 from tqdm import tqdm
+
 
 class MINENet(nn.Module):
     """
@@ -40,7 +42,7 @@ class MINENet(nn.Module):
         return self.mlp(x).squeeze()
 
 
-def apply_in_batches(X, Z, model, weights=None, batch_size=4096):
+def apply_in_batches(X, Z, model, losstype, weights=None, batch_size=4096):
     """
     Compute Mutual Information estimate in batches (exact same result but memory friendly)
     for a pre-trained model (trained using the same statistics as X and Z follow)
@@ -68,26 +70,39 @@ def apply_in_batches(X, Z, model, weights=None, batch_size=4096):
     batch_ind = aux.split_start_end(range(len(X)), N_batches)
     # -----------------------
 
-    sum_T  = 0.0
-    sum_eT = 0.0
+    sum_T     = 0.0
+    sum_eT    = 0.0
+    sum_MI_lb = 0.0
 
     for b in range(N_batches):
         ind    = np.arange(batch_ind[b][0], batch_ind[b][1]+1)
 
         joint, marginal, w = sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
 
-        # Use the network, apply weights
-        T, eT  = w * model(joint), w * torch.exp(model(marginal))
+        if losstype == 'MINE_EMA' or losstype == 'MINE':
 
-        # Sum local batch values
-        sum_T  = sum_T  + torch.sum(T)
-        sum_eT = sum_eT + torch.sum(eT)
+            # Use the network, apply weights
+            T, eT  = w * model(joint), w * torch.exp(model(marginal))
 
-    # MI lower bound (Donsker-Varadhan representation)
-    MI_lb = sum_T - torch.log(sum_eT)
+            # Sum local batch values
+            sum_T  = sum_T  + torch.sum(T)
+            sum_eT = sum_eT + torch.sum(eT)
+
+        elif losstype == 'DENSITY':
+
+            pred_1    = torch.sigmoid(model(joint))
+            sum_MI_lb = sum_MI_lb + torch.sum(w * torch.log(pred_1 / (1 - pred_1))) 
+        else:
+            raise Exception(__name__ + ".apply_in_batches: Unknown losstype chosen")
+
+    if   (losstype == 'MINE_EMA') or (losstype == 'MINE'):
+        MI_lb = sum_T - torch.log(sum_eT)
+    elif losstype == 'DENSITY':
+        MI_lb = sum_MI_lb
+    else:
+        raise Exception(__name__ + ".apply_in_batches: Unknown losstype chosen")
 
     return MI_lb
-
 
 def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EMA'):
     """
@@ -103,28 +118,49 @@ def compute_mine(joint, marginal, w, model, ma_eT, alpha=0.01, losstype='MINE_EM
         MI_lb is mutual information lower bound ("neural information measure")
         sup E_{P_{XZ}} [T_theta] - log(E_{P_X otimes P_Z}[exp(T_theta)])
     """
-
     # Normalize
     w     = (w / torch.sum(w)).squeeze()
+    
+    if losstype == 'MINE_EMA' or losstype == 'MINE':
 
-    # Use the network, apply weights
-    T, eT = w * model(joint), w * torch.exp(model(marginal))
+        # Use the network, apply weights
+        T, eT = w * model(joint), w * torch.exp(model(marginal))
 
-    # MI lower bound (Donsker-Varadhan representation)
-    MI_lb = torch.sum(T) - torch.log(torch.sum(eT))
+        # MI lower bound (Donsker-Varadhan representation)
+        MI_lb  = torch.sum(T) - torch.log(torch.sum(eT))
 
-
-    # Unbiased estimate via exponentially moving average (FIR filter)
+    # Unbiased (see orig. paper) estimate via exponentially moving average (FIR filter)
     # https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     if   losstype == 'MINE_EMA':
-        ma_eT = alpha*torch.sum(eT) + (1 - alpha)*ma_eT
-        loss  = -(torch.sum(T) - torch.sum(eT) / torch.sum(ma_eT).detach())
-
+        if ma_eT == None: ma_eT = torch.sum(eT).item() # First call
+        
+        ma_eT  = (1 - alpha)*torch.sum(eT) + alpha*ma_eT
+        loss   = -(torch.sum(T) - torch.sum(eT) / torch.sum(ma_eT).detach())
+        
     # (Slightly) biased gradient based directly on the local MI value
     elif losstype == 'MINE':
-        loss  = -MI_lb
+        loss   = -MI_lb
+
+    # Density ratio trick based
+    elif losstype == 'DENSITY':
+        EPS    = 1e-20
+
+        pred_1 = torch.sigmoid(model(joint))
+        pred_0 = torch.sigmoid(model(marginal))
+
+        # Concatenate
+        pred   = torch.cat((pred_1, pred_0), dim=0)
+        true   = torch.cat((torch.ones_like(pred_1), torch.zeros_like(pred_0)), dim=0)
+        ww     = torch.cat((w,w), dim=0); ww = ww / torch.sum(ww)
+
+        ## Binary Cross Entropy
+        loss   = - ww * (true*torch.log(pred + EPS) + (1-true)*(torch.log(1 - pred + EPS)))
+        loss   = loss.sum()
+
+        # Density (likelihood) ratio trick based
+        MI_lb  = torch.sum(w * torch.log(pred_1 / (1 - pred_1)))
     else:
-        raise Exception(__name__ + ".compute_mine: Unknown loss chosen")
+        raise Exception(__name__ + ".compute_mine: Unknown losstype chosen")
 
     return MI_lb, ma_eT, loss
 
@@ -174,7 +210,7 @@ def sample_batch(X, Z, weights, batch_size=None, device='cpu:0'):
     return joint, marginal, w
 
 
-def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, ma_eT, device='cpu:0'):
+def train_loop(X, Z, weights, model, opt, clip_norm, batch_size, epochs, alpha, losstype, device='cpu:0'):
     """
     Train the network estimator
 
@@ -189,6 +225,8 @@ def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, m
 
     model.train() #!
 
+    ma_eT = None
+
     for i in tqdm(range(num_iter)):
 
         # Sample input
@@ -198,18 +236,20 @@ def train_loop(X, Z, weights, model, opt, batch_size, epochs, alpha, losstype, m
         opt.zero_grad()
 
         MI_lb, ma_eT, loss = compute_mine(joint=joint, marginal=marginal, w=w, model=model, ma_eT=ma_eT, alpha=alpha, losstype=losstype)
-
+        
         # Step gradient descent
         autograd.backward(loss)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
         opt.step()
 
         result[i] = MI_lb
 
-    return result, ma_eT
+    return result
 
 
-def estimate(X, Z, weights=None, epochs=50, alpha=0.01, losstype='MINE_EMA', batch_size=256, lr=1e-3, weight_decay=0.0,
-    mlp_dim=[64, 64], dropout=0.01, activation='relu', noise_std=0.025, ma_eT=1.0,
+def estimate(X, Z, weights=None, epochs=50, alpha=0.01, losstype='MINE_EMA',
+    batch_size=256, lr=1e-3, weight_decay=0.0, clip_norm=1.0, 
+    mlp_dim=[128, 128], dropout=0.01, activation='relu', noise_std=0.025,
     window_size=0.2, return_full=False, device=None, return_model_only=False, **args):
     """
     Accurate Mutual Information Estimate via Neural Network
@@ -256,10 +296,10 @@ def estimate(X, Z, weights=None, epochs=50, alpha=0.01, losstype='MINE_EMA', bat
     if device is None:
         device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
-    model         = model.to(device)
-    opt           = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    result,ma_eT  = train_loop(X=X, Z=Z, weights=weights, model=model, opt=opt, batch_size=batch_size,
-        epochs=epochs, alpha=alpha, losstype=losstype, ma_eT=ma_eT, device=device)
+    model  = model.to(device)
+    opt    = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    result = train_loop(X=X, Z=Z, weights=weights, model=model, opt=opt, batch_size=batch_size,
+        epochs=epochs, clip_norm=clip_norm, alpha=alpha, losstype=losstype, device=device)
 
     if return_model_only:
         return model

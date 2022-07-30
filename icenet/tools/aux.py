@@ -11,6 +11,7 @@ import numba
 import copy
 from tqdm import tqdm
 import os
+from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
@@ -19,6 +20,33 @@ import scipy.special as special
 
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
+
+
+def red(X, ids, param, mode='X', tag='reduced_MVA_vars'):
+    """
+    Reduce the input set variables of X
+        
+    Args:
+        X:     data matrix
+        ids:   names of columns
+        param: parameter dictionary (from yaml)
+        mode:  return mode 'X' or 'ids'
+        tag:   yaml file
+    """
+    if tag in param:
+        index = []
+        for var in param[tag]:
+            index.append(ids.index(var))
+        if mode == 'X':
+            cprint(__name__ + f'.red: Reducing input variables to a set: {param[tag]}', 'red')
+            return X[:, np.array(index, dtype=int)]
+        else:
+            return param[tag]
+    else:
+        if mode == 'X':
+            return X
+        else:
+            return ids
 
 
 def parse_vars(items):
@@ -623,15 +651,17 @@ class Metric:
             weights = np.sum(weights, axis=1)
         
         # Check numerical validity
+        """
         if (np.squeeze(y_pred).ndim > 1):
             ok = np.isfinite(np.sum(y_pred,axis=1))
         else:
             ok = np.isfinite(y_pred)
-
+        
         y_true = y_true[ok]
         y_pred = y_pred[ok]
         if weights is not None:
             weights = weights[ok]
+        """
         
         # Invalid input
         if len(np.unique(y_true)) <= 1:

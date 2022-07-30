@@ -26,7 +26,7 @@ from icenet.tools import aux
 from icenet.tools import aux_torch
 from icenet.tools import io
 from icenet.tools import prints
-from icenet.deep import dopt
+from icenet.deep import optimize
 
 # icebrk
 from icebrk import common
@@ -66,7 +66,7 @@ def main() :
     ### DEEPSETS
     DEPS_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['models']['deps']['label'], epoch=args['models']['deps']['readmode'])
 
-    DEPS_model, device = dopt.model_to_cuda(DEPS_model, device_type=args['models']['deps']['device'])
+    DEPS_model, device = optimize.model_to_cuda(DEPS_model, device_type=args['models']['deps']['device'])
     DEPS_model.eval() # Turn on eval mode!
 
     def func_predict_A(X):
@@ -85,7 +85,7 @@ def main() :
     ### MAXOUT
     MAXO_model = aux_torch.load_torch_checkpoint(path=modeldir, label=args['models']['maxo']['label'], epoch=args['models']['maxo']['readmode'])
     
-    MAXO_model, device = dopt.model_to_cuda(MAXO_model, device_type=args['models']['maxo']['device'])
+    MAXO_model, device = optimize.model_to_cuda(MAXO_model, device_type=args['models']['maxo']['device'])
     MAXO_model.eval() # Turn on eval mode!
     
     def func_predict_B(X):

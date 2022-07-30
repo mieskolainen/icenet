@@ -13,7 +13,7 @@ from icenet.tools import aux_torch
 from icefit import mine
 
 
-def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None):
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None, EPS=1e-20):
     """
     A wrapper function to loss functions
     
@@ -38,17 +38,17 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         y            = x.y
         weights      = None # TBD. Could re-compute a new set of edge weights 
     # --------------------------------------------
-
+    
     def MI_helper(log_phat):
-        l = 0
         if MI is not None:
             X = MI['x'].float()
             Z = torch.exp(log_phat[:, MI['y_index']])  # Classifier output
-            l = MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)
-        return l
+            return {f'MI x $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
+        else:
+            return {}
 
     if  param['lossfunc'] == 'cross_entropy':
-        log_phat = model.softpredict(x)
+        log_phat = torch.log(model.softpredict(x) + EPS)
         
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
@@ -57,7 +57,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
 
-        loss += MI_helper(log_phat)
+        loss  = {'CE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
@@ -69,21 +69,20 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         # https://arxiv.org/abs/1409.7495
         CE_loss    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
-        loss = (CE_loss, CE_DA_loss)
 
-        loss[0] += MI_helper(log_phat)
+        loss  = {'CE': CE_loss, 'DA': CE_DA_loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss += MI_helper(log_phat)
+        loss  = {'LNCE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'focal_entropy':
-        log_phat = model.softpredict(x)
+        log_phat = torch.log(model.softpredict(x) + EPS)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss += MI_helper(log_phat)
+        loss  = {'FE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'VAE_background_only':
         B_ind    = (y == 0) # Use only background to train
@@ -95,11 +94,8 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = log_loss.mean(dim=0)
 
-        if MI is not None:
-            X    = x[B_ind, ...]  # Classifier input
-            Z    = z              # Latent space representation
-            loss += MI_loss(X=X, Z=Z, weights=weights[B_ind], MI=MI)
-
+        loss  = {'KL_RECO': loss}
+        
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 
@@ -110,34 +106,41 @@ def MI_loss(X, Z, weights, MI, y):
     """
     Neural Mutual Information regularization
     """
-    if len(MI['classes']) != 1:
-        # To extend this, we should have separate MI nets/models for each class
-        raise Exception(__name__ + f'.MI_loss: Support currently for one class only (or all inclusive with = [None])')
+    #if len(MI['classes']) != 1:
+    #    # To extend this, we should have separate MI nets/models for each class
+    #    raise Exception(__name__ + f'.MI_loss: Support currently for one class only (or all inclusive with = [None])')
 
     if weights is not None:
         weights = weights / torch.sum(weights)
     else:
         weights = torch.ones(len(X)).to(X.device)
 
-    MI['model'] = MI['model'].to(X.device) #!
-    MI['loss']  = 0
-    MI['MI_lb'] = 0
-    
-    for c in MI['classes']:
-    
+    loss = 0
+    MI['network_loss'] = 0
+
+    for k in range(len(MI['classes'])):
+        c = MI['classes'][k]
+
         if c == None:
             ind = (y != -1) # All classes
         else:
             ind = (y == c)
 
-        joint, marginal, w          = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
-        MI_lb, MI['ma_eT'], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
-                                            model=MI['model'], ma_eT=MI['ma_eT'], alpha=MI['alpha'], losstype=MI['losstype'])
+        joint, marginal, w             = mine.sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
+        MI_lb, MI['ma_eT'][k], loss_MI = mine.compute_mine(joint=joint, marginal=marginal, w=w,
+                                            model=MI['model'][k], ma_eT=MI['ma_eT'][k], alpha=MI['alpha'], losstype=MI['losstype'])
         
-        MI['loss']  = MI['loss']  + loss_MI  # Used by the MI-net torch optimizer
-        MI['MI_lb'] = MI['MI_lb'] + MI_lb    # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
-    
-    return MI['beta'] * MI['MI_lb'] 
+        # Used by the total optimizer
+        loss  = loss + MI['beta'][k] * MI_lb
+        
+        # Used by the MI-net torch optimizer
+        MI['network_loss'] = MI['network_loss'] + loss_MI
+
+        # ** For diagnostics ** 
+        MI['MI_lb'][k]     = MI_lb.item()
+
+    # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
+    return loss
 
 
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):

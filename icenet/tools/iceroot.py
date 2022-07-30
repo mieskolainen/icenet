@@ -1,6 +1,6 @@
 # ROOT file processing tools
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
 import uproot
@@ -34,7 +34,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         print(__name__ + f'.read_multiple_MC: {processes[key]}')
 
         # --------------------
-
+        
         datasets     = processes[key]['path']
         xs           = processes[key]['xs']
         model_param  = processes[key]['model_param']

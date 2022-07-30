@@ -4,7 +4,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 import argparse
-import yaml
 import numpy as np
 import awkward as ak
 import torch
@@ -18,7 +17,8 @@ import pickle
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
-    
+
+
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
@@ -78,6 +78,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Read yaml configuration
 
     # This allows to use "!include foo.yaml" syntax
+    import yaml
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir="")
 
     args = {}
@@ -85,12 +86,17 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     with open(f'{config_path}/{config_yaml_file}', 'r') as f:
         try:
             args = yaml.load(f, Loader=yaml.FullLoader)
+
+            if 'includes' in args:
+                del args['args'] # ! crucial
+
         except yaml.YAMLError as exc:
             print(exc)
-    
+            exit()
 
     # -------------------------------------------------------------------
     ## Inputmap .yml setup
+
 
     if cli_dict['inputmap'] is not None:
         args["genesis_runmode"]["inputmap"] = cli_dict['inputmap']        
@@ -98,11 +104,21 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     if args["genesis_runmode"]["inputmap"] is not None:
         file = args["genesis_runmode"]["inputmap"]
 
+        ## ** Special YAML loader here **
+        from libs.ccorp.ruamel.yaml.include import YAML
+        yaml = YAML()
+        yaml.allow_duplicate_keys = True
+
         with open(f'{config_path}/{file}', 'r') as f:
             try:
-                inputmap = yaml.load(f, Loader=yaml.FullLoader)
+                inputmap = yaml.load(f)
+
+                if 'includes' in inputmap:
+                    del inputmap['includes'] # ! crucial
+
             except yaml.YAMLError as exc:
-                print(exc)
+                print(f'yaml.YAMLError: {exc}')
+                exit()
     else:
         inputmap = {}
     
@@ -139,20 +155,25 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Commandline override of yaml variables
     for key in cli_dict.keys():
         if key in args:
-            cprint(__name__ + f'.read_config: Override {config_yaml_file} input with --{key} {cli_dict[key]}', 'red')
+            cprint(__name__ + f'.read_config: {config_yaml_file} <{key}> default value cli-override with <{cli_dict[key]}>', 'red')
             args[key] = cli_dict[key]
     print()
 
     # -------------------------------------------------------------------
     ## Create a hash based on "rngseed", "maxevents", "genesis" and "inputmap" fields of yaml
-
+    
     hash_args = {}
+
+    mvavars_path = f'{config_path}/mvavars.py'
+    if os.path.exists(mvavars_path):
+        hash_args['__hash__mvavars.py'] = io.make_hash_sha256_file(mvavars_path)
+    
     hash_args.update(old_args['genesis_runmode']) # This first !
     hash_args['rngseed']   = args['rngseed']
     hash_args['maxevents'] = args['maxevents']
     hash_args.update(inputmap)
 
-    args['__hash__'] = io.make_hash_sha256(hash_args)
+    args['__hash__'] = io.make_hash_sha256_object(hash_args)
 
 
     # -------------------------------------------------------------------
@@ -190,9 +211,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     # ------------------------------------------------
     print(__name__ + f'.read_config: Created arguments dictionary with runmode = <{runmode}> :')    
-    pprint(args)
     # ------------------------------------------------
-
+    
     return args, cli
 
 
@@ -274,7 +294,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
     
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
-
+    
     # ----------------------------------------
     if args['imputation_param']['active']:
         module = import_module(mvavars, 'configs.subpkg')
@@ -299,13 +319,13 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
         # Compute different data representations
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
-
+        
         ## Imputate
         if args['imputation_param']['active']:
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'wb'))
+            pickle.dump(imputer, open(args["modeldir"] + f'/imputer.pkl', 'wb'))
 
     elif runmode == 'eval':
         
@@ -313,14 +333,14 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
-
+        
         # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
-
+        
         ## Imputate
         if args['imputation_param']['active']:
-
-            imputer = pickle.load(open(args["modeldir"] + f'/imputer_{args["__hash__"]}.pkl', 'rb'))
+            
+            imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
     
     return output
@@ -347,7 +367,7 @@ def impute_datasets(data, args, features=None, imputer=None):
     dim = np.array([i for i in range(len(data.ids)) if data.ids[i] in features], dtype=int)
 
     if args['values'] is not None:
-
+        
         special_values = args['values'] # possible special values
         cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
 
@@ -510,9 +530,9 @@ def train_models(data_trn, data_val, args=None) :
 
         elif param['train'] == 'torch_generic':
             
-            inputs = {'X_trn':       torch.tensor(data_trn['data'].x, dtype=torch.float),
+            inputs = {'X_trn':       torch.tensor(aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), dtype=torch.float),
                       'Y_trn':       torch.tensor(data_trn['data'].y, dtype=torch.long),
-                      'X_val':       torch.tensor(data_val['data'].x, dtype=torch.float),
+                      'X_val':       torch.tensor(aux.red(data_val['data'].x, data_val['data'].ids, param, 'X'), dtype=torch.float),
                       'Y_val':       torch.tensor(data_val['data'].y, dtype=torch.long),
                       'X_trn_2D':    None if data_trn['data_tensor'] is None else torch.tensor(data_trn['data_tensor'], dtype=torch.float),
                       'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'], dtype=torch.float),
@@ -635,9 +655,10 @@ def evaluate_models(data=None, args=None):
         X_RAW    = data['data'].x
         ids_RAW  = data['data'].ids
 
-        # Add kinematic variables
-        X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
-        ids_RAW  = ids_RAW + data['data_kin'].ids
+        # Add extra variables
+        if data['data_kin'] is not None:
+            X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
+            ids_RAW  = ids_RAW + data['data_kin'].ids
 
         y        = data['data'].y
         weights  = data['data'].w
@@ -702,6 +723,7 @@ def evaluate_models(data=None, args=None):
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
+
     for i in range(len(args['active_models'])):
         
         ID    = args['active_models'][i]
@@ -713,48 +735,47 @@ def evaluate_models(data=None, args=None):
 
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param)
-        
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'xgb_logistic':
             func_predict = predict.pred_xgb_logistic(args=args, param=param)
             
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='numpy', 
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
             
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids,
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'),
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_scalar':
             func_predict = predict.pred_torch_scalar(args=args, param=param)
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr,      y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'torch_flow':
             func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
 
             if args['plot_param']['contours']['active']:
-                plots.plot_contour_grid(pred_func=func_predict, X=X, y=y, ids=ids, transform='torch', 
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
 
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_ptr, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
         elif   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
@@ -763,19 +784,19 @@ def evaluate_models(data=None, args=None):
             import torch_geometric
             loader  = torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False)
             for batch in loader: # Only one big batch
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y = batch.to('cpu').y.detach().cpu().numpy(), **inputs)
+                plot_XYZ_wrap(func_predict = func_predict, x_input=X_graph, y=batch.to('cpu').y.detach().cpu().numpy(), **inputs)
         
         elif param['predict'] == 'graph_xgb':
             func_predict = predict.pred_graph_xgb(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph,    y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y=y, **inputs)
         
         elif param['predict'] == 'torch_deps':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr, y=y, **inputs)
 
         elif param['predict'] == 'torch_image':
             func_predict = predict.pred_torch_generic(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr,   y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr, y=y, **inputs)
             
         elif param['predict'] == 'torch_image_vector':
             func_predict = predict.pred_torch_generic(args=args, param=param)
@@ -783,11 +804,11 @@ def evaluate_models(data=None, args=None):
             X_dual      = {}
             X_dual['x'] = X_2D_ptr # image tensors
             X_dual['u'] = X_ptr    # global features
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, y=y, **inputs)
             
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, y = y, **inputs)
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y = y, **inputs)
             
         #elif param['predict'] == 'xtx':
         # ...   
@@ -917,7 +938,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 edges = args['plot_param']['MVA_2D'][f'plot[{i}]']['edges']
             except:
                 break # No more this type of plots 
-            
+                
             # Pick chosen variables based on regular expressions
             from icenet.tools import iceroot
             var_names = iceroot.process_regexp_ids(all_ids=ids_RAW, ids=var)

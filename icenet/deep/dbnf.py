@@ -22,7 +22,7 @@ from tqdm import tqdm
 from torch.utils import data
 
 
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 
 from . bnaf import *
 from icenet.tools import aux
@@ -127,7 +127,7 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
     """
     label = param['label']
 
-    model, device = dopt.model_to_cuda(model, param['device'])
+    model, device = optimize.model_to_cuda(model, param['device'])
 
     # TensorboardX
     if param['tensorboard']:

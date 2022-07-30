@@ -102,7 +102,7 @@ def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e
         
         
         # Create graph
-        graph = Data(x=x, edge_index=edge_index, edge_attr=None, y=y, w=w, u=u)
+        graph = Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=None, y=y, w=w, u=u)
         
         # Add also edge attributes
         graph.edge_attr = compute_edge_attr(graph)
@@ -241,7 +241,7 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
         if global_on == False: # Null the global features
             u = torch.tensor(np.zeros(num_global_features), dtype=torch.float)
         
-        dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
+        dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
     print(__name__ + f'.parse_graph_data_candidate: Empty HGCAL events: {num_empty_HGCAL} / {num_events} = {num_empty_HGCAL/num_events:0.5f} (using only global data u)')        
     

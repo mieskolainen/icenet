@@ -1,6 +1,3 @@
-# HLT-MVA variables. Use here only variables available in real data.
-
-
 # Variables we read out from the root files (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']
 #LOAD_VARS = ['.*'] # all
@@ -45,6 +42,7 @@ MODEL_VARS = [
 MVA_SCALAR_VARS += MODEL_VARS
 # -----------------------------------------
 
+# Charged particle flow
 MVA_CPF_VARS = [
 
   'cpf_px',
@@ -61,6 +59,7 @@ MVA_CPF_VARS = [
   'cpf_jetIdx'
 ]
 
+# Neutral particle flow
 MVA_NPF_VARS = [
   
   'npf_px',
@@ -74,8 +73,8 @@ MVA_PF_VARS = MVA_CPF_VARS + MVA_NPF_VARS
 
 # -----------------------------------------
 
-MVA_JAGGED_VARS = [
-  
+# Jet variables
+MVA_JET_VARS = [
   'Jet_eta',
   'Jet_phi',
   'Jet_pt',
@@ -86,14 +85,22 @@ MVA_JAGGED_VARS = [
   'Jet_neEmEF',
   'Jet_neHEF',
   'Jet_nMuons',
+]
 
+# Muon variables
+MVA_MUON_VARS = [
   'Muon_eta',
   'Muon_phi',
   'Muon_pt',
+
   'Muon_dxy',
   'Muon_dz',
   'Muon_charge',
+]
 
+# Secondary vertex variables
+MVA_SV_VARS = [
+  'sv_mass',
   'sv_deta',
   'sv_dphi',
   'sv_dxy',
@@ -106,8 +113,7 @@ MVA_JAGGED_VARS = [
   'sv_ndof'
 ]
 
-# -----------------------------------------
-MVA_JAGGED_VARS += MVA_PF_VARS
+MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_SV_VARS + MVA_PF_VARS
 # -----------------------------------------
 
 PLOT_VARS = [

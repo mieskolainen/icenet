@@ -34,7 +34,7 @@ from icenet.tools import aux_torch
 
 from icenet.tools import plots
 from icenet.tools import prints
-from icenet.deep  import dopt
+from icenet.deep  import optimize
 
 
 #from icenet.deep  import dev_dndt
@@ -54,9 +54,6 @@ from icenet.deep  import graph
 from icenet.optim import adam
 from icenet.optim import adamax
 from icenet.optim import scheduler
-
-
-from termcolor import colored, cprint
 
 
 # Raytuning
@@ -276,13 +273,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
 
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
-    losses    = []
-    losses_DA = []
     trn_aucs  = []
     val_aucs  = []
     
     # Transfer to CPU / GPU
-    model, device = dopt.model_to_cuda(model=model, device_type=param['device'])
+    model, device = optimize.model_to_cuda(model=model, device_type=param['device'])
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
@@ -310,7 +305,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     if 'MI_reg_param' in param:
 
         # Create network and set parameters
-        MI         = param['MI_reg_param']
+        MI         = copy.deepcopy(param['MI_reg_param']) # ! important
         input_size = param['MI_reg_param']['x_dim']
 
         index      = MI['y_index']
@@ -321,47 +316,50 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
         elif type(index) is list:
             input_size += len(index)
 
-        print(input_size)
+        MI['model']     = []
+        MI['MI_lb']     = []
 
-        MI_model         = mine.MINENet(input_size=input_size, **MI)
-        MI_model, device = dopt.model_to_cuda(model=MI_model, device_type=param['device'])
-        MI_model.train() # !
+        for k in range(len(MI['classes'])):
+            MI_model         = mine.MINENet(input_size=input_size, **MI)
+            MI_model, device = optimize.model_to_cuda(model=MI_model, device_type=param['device'])
+            MI_model.train() # !
 
-        MI['model']      = MI_model
-        MI['optimizer']  = torch.optim.Adam(MI_model.parameters(), lr=MI['lr'], weight_decay=MI['weight_decay'])
+            MI['model'].append(MI_model)
+
+        all_parameters = list()
+        for k in range(len(MI['classes'])):
+            all_parameters += list(MI['model'][k].parameters())
+
+        MI['optimizer'] = torch.optim.Adam(all_parameters, lr=MI['lr'], weight_decay=MI['weight_decay'])
     else:
         MI = None
     # --------------------------------------------------------------------
 
     # Training loop
+    loss_history = {}
+
     for epoch in range(opt_param['epochs']):
 
-        loss = dopt.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
+        if MI is not None: # Reset diagnostics
+            MI['MI_lb'] = np.zeros(len(MI['classes']))
 
-        if DA_active:
-            loss    = loss[0]
-            loss_DA = loss[1]
-        else:
-            loss_DA = 0
+        loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
         if (epoch % save_period) == 0:
-            train_acc, train_auc       = dopt.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
-            validate_acc, validate_auc = dopt.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
+            train_acc, train_auc       = optimize.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
+            validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
-        # Push
-        losses.append(loss)
-        losses_DA.append(loss_DA)
+        ## Save values
+        optimize.trackloss(loss=loss, loss_history=loss_history)
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
 
-        if DA_active:
-            loss_terms = f'tot loss: {loss:.4f}, loss_DA: {loss_DA:.4f}'
-        else:
-            loss_terms = f'tot loss: {loss:.4f}'
-
-        print(__name__ + f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d}, {loss_terms} | Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        print(__name__)
+        print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {optimize.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
         if MI is not None:
-            print(__name__ + f'.torch_loop: MI loss = {MI["loss"]:0.4f} | MI_lb value = {MI["MI_lb"]:0.4f}')
+            print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
+            for k in range(len(MI['classes'])):
+                print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
 
         # Update scheduler
         scheduler.step()
@@ -376,26 +374,13 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-    
-
-    # Remove model
-    if MI is not None:
-        del MI['model']
-        del MI['optimizer']
-
 
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses, trn_aucs, val_aucs, param['label'])
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+        fig,ax   = plots.plot_train_evolution_multi(loss_history, trn_aucs, val_aucs, param['label'])
         plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
-
-        # Plot evolution for Domain Adaptation loss
-        if DA_active:
-            plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-            fig,ax   = plots.plot_train_evolution(losses_DA, trn_aucs, val_aucs, param['label'])
-            plt.savefig(f"{plotdir}/{param['label']}_evolution_DA.pdf", bbox_inches='tight'); plt.close()
 
         return model
 
@@ -416,7 +401,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_graph: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_torch_graph: Training <{param["label"]}> classifier ...')
     
     # Construct model
     netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
@@ -453,7 +438,7 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_generic: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_torch_generic: Training <{param["label"]}> classifier ...')
 
     model, train_loader, test_loader = \
         torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
@@ -491,14 +476,14 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
 
     if trn_weights is None: trn_weights = torch.tensor(np.ones(Y_trn.shape[0]), dtype=torch.float)
     if val_weights is None: val_weights = torch.tensor(np.ones(Y_val.shape[0]), dtype=torch.float)
-
+    
     ### Generators
     if (X_trn_2D is not None) and ('cnn' in conv_type):
-        training_set   = dopt.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = optimize.DualDataset(X=X_trn_2D, U=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
+        validation_set = optimize.DualDataset(X=X_val_2D, U=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
     else:
-        training_set   = dopt.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
-        validation_set = dopt.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
+        training_set   = optimize.Dataset(X=X_trn, Y=Y_trn if y_soft is None else y_soft, W=trn_weights, Y_DA=Y_trn_DA, W_DA=trn_weights_DA, X_MI=data_trn_MI)
+        validation_set = optimize.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
@@ -522,9 +507,10 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     """
     global MI_x
     global MI_reg_param
+    global loss_history
     
     if weights is None:
-        w = 1.0
+        w = torch.ones(len(preds)).to(preds.device)
     else:
         w = weights / torch.sum(weights)
     
@@ -537,8 +523,8 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     phat = 1 / (1 + torch.exp(-preds))
     
     ## Classifier binary Cross Entropy
-    classifier_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
-    classifier_loss  = classifier_loss.sum()
+    CE_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
+    CE_loss  = CE_loss.sum()
     
     #lossfunc = torch.nn.BCELoss(weight=w, reduction='sum')
     #classifier_loss = lossfunc(phat, targets)
@@ -547,40 +533,50 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     # [reservation] ...
 
     ## Regularization
-    if np.abs(MI_reg_param['beta']) > 0.0:
 
-        MI_loss = 0
+    # Loop over chosen classes
+    k       = 0
+    MI_loss = 0
+    MI_lb_values = []
 
-        # Loop over chosen classes
-        for c in MI_reg_param['classes']:
+    for c in MI_reg_param['classes']:
 
-            if c == None:
-                ind = (targets != -1) # All classes
-            else:
-                ind = (targets == c)
+        # -----------
+        reg_param = copy.deepcopy(MI_reg_param)
+        reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
+        # -----------
 
-            X     = torch.Tensor(MI_x).to(preds.device)
-            Z     = preds
+        if c == None:
+            ind = (targets != -1) # All classes
+        else:
+            ind = (targets == c)
 
-            # We need .detach() here for Z!
-            model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
-                return_model_only=True, device=X.device, **MI_reg_param)
+        X     = torch.Tensor(MI_x).to(preds.device)
+        Z     = preds
+        
+        # We need .detach() here for Z!
+        model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
+            return_model_only=True, device=X.device, **reg_param)
+        
+        # ------------------------------------------------------------
+        # Now apply the MI estimator to the sample
+        
+        # No .detach() here, we need the gradients for Z!
+        MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model, losstype=reg_param['losstype'])
+        # ------------------------------------------------------------
+        
+        MI_loss = MI_loss + MI_reg_param['beta'][k] * MI_lb
+        MI_lb_values.append(np.round(MI_lb.item(), 4))
 
-            # ------------------------------------------------------------
-            # Now apply the MI estimator to the sample
+        k += 1
 
-            # No .detach() here, we need the gradients for Z!
-            MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model)
-            # ------------------------------------------------------------
-
-            MI_loss += MI_reg_param['beta'] * MI_lb
-    else:
-        MI_loss = 0.0
+    ## Total loss
+    total_loss = CE_loss + MI_loss
+    cprint(f'Loss: Total = {total_loss:0.4f} | CE = {CE_loss:0.4f} | MI x beta {reg_param["beta"]} = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
     
-    ## Total
-    total_loss = classifier_loss + MI_loss
-    cprint(f'Total_loss = {total_loss:0.4f} | classifier_loss = {classifier_loss:0.4f} | MI_loss = {MI_loss:0.4f} | MI_lb = {MI_lb:0.4f}', 'yellow')
-
+    loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI x $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
+    optimize.trackloss(loss=loss, loss_history=loss_history)
+    
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
 
@@ -597,14 +593,20 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         trained model
     """
 
-    global MI_x
-    global MI_reg_param
+    if 'MI_reg_param' in param:
 
+        global MI_x
+        global MI_reg_param
+        global loss_history
+
+        loss_history  = {}
+        MI_reg_param  = copy.deepcopy(param['MI_reg_param']) #! important
+    # ---------------------------------------------------
 
     if param['model_param']['tree_method'] == 'auto':
         param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
 
-    print(__name__ + f'.train_xgb: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     if config is not {}:
@@ -617,8 +619,8 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    dtrain    = xgboost.DMatrix(data = data_trn.x, label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
-    deval     = xgboost.DMatrix(data = data_val.x, label = data_val.y,  weight = w_val)
+    dtrain    = xgboost.DMatrix(data = aux.red(data_trn.x, data_trn.ids, param, 'X'), label = data_trn.y if y_soft is None else y_soft, weight = w_trn)
+    deval     = xgboost.DMatrix(data = aux.red(data_val.x, data_val.ids, param, 'X'), label = data_val.y,  weight = w_val)
 
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
@@ -661,13 +663,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
             if strs[1] == 'binary_cross_entropy_with_MI':
 
-                MI_reg_param  = param['MI_reg_param']
-
-                # Mutual Information regularization target (can be internal or external)
-                MI_x = copy.deepcopy(data_trn_MI)
-
                 a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, skip_hessian=True, device=device)
                 a['params']['disable_default_eval_metric'] = 1
+
+                # ! Important to have here because we modify it in the eval below
+                MI_x = copy.deepcopy(data_trn_MI)
 
                 def eval_obj(mode='train'):
                     global MI_x #!
@@ -733,24 +733,28 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
-            trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+
+        if 'custom' not in model_param['objective']:
+            fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
+                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        else:
+            fig,ax   = plots.plot_train_evolution_multi(losses=loss_history,
+                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])    
         plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot feature importance
         if plot_importance:
-            
             for sort in [True, False]:
-                fig,ax = plots.plot_xgb_importance(model=model, tick_label=data_trn.ids, label=param["label"], sort=sort)
-                targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+                fig,ax = plots.plot_xgb_importance(model=model, tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
+                targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
                 plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
-                model.feature_names = data_trn.ids
+                model.feature_names = aux.red(data_trn.x, data_trn.ids, param, 'ids')
                 for i in tqdm(range(max_num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
@@ -780,7 +784,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     if param['xgb']['model_param']['tree_method'] == 'auto':
         param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
     
-    print(__name__ + f'.train_graph_xgb: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_graph_xgb: Training <{param["label"]}> classifier ...')
 
     # --------------------------------------------------------------------
     ### Train GNN
@@ -808,13 +812,13 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     ## Evaluate GNN output
 
     graph_model.eval() # ! important
-
+    
     x_trn = np.zeros((len(data_trn), Z + len(data_trn[0].u)))
     x_val = np.zeros((len(data_val), Z + len(data_val[0].u)))
 
     y_trn = np.zeros(len(data_trn))
     y_val = np.zeros(len(data_val))
-
+    
     for i in range(x_trn.shape[0]):
 
         xconv = graph_model.forward(data=data_trn[i], conv_only=True).detach().numpy()
@@ -900,7 +904,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     # ------------------------------------------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
-    fig,ax   = plots.plot_train_evolution(losses=np.array([trn_losses, val_losses]).T,
+    fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                     trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
     
@@ -916,7 +920,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
         plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
         
     ## Plot decision trees
@@ -947,7 +951,7 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     Returns:
         trained model
     """
-    print(__name__ + f'.train_flr: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
 
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
@@ -973,7 +977,7 @@ def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
     # Set input dimensions
     param['model_param']['n_dims'] = data_trn.x.shape[1]
 
-    print(__name__ + f'.train_flow: Training {param["label"]} classifier ...')
+    print(__name__ + f'.train_flow: Training <{param["label"]}> classifier ...')
     
     for classid in range(args['num_classes']):
         param['model'] = 'class_' + str(classid)

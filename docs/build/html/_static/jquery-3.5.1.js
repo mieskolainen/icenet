@@ -1315,7 +1315,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	if ( ( support.qsa = rnative.test( document.querySelectorAll ) ) ) {
 
 		// Build QSA regex
-		// Regex strategy adopted from Diego Perini
+		// Regex strategy aoptimizeed from Diego Perini
 		assert( function( el ) {
 
 			var input;
@@ -3652,7 +3652,7 @@ function Thrower( ex ) {
 	throw ex;
 }
 
-function adoptValue( value, resolve, reject, noValue ) {
+function aoptimizeValue( value, resolve, reject, noValue ) {
 	var method;
 
 	try {
@@ -4011,9 +4011,9 @@ jQuery.extend( {
 				};
 			};
 
-		// Single- and empty arguments are adopted like Promise.resolve
+		// Single- and empty arguments are aoptimizeed like Promise.resolve
 		if ( remaining <= 1 ) {
-			adoptValue( singleValue, master.done( updateFunc( i ) ).resolve, master.reject,
+			aoptimizeValue( singleValue, master.done( updateFunc( i ) ).resolve, master.reject,
 				!remaining );
 
 			// Use .then() to unwrap secondary thenables (cf. gh-3000)
@@ -4026,7 +4026,7 @@ jQuery.extend( {
 
 		// Multiple arguments are aggregated like Promise.all array elements
 		while ( i-- ) {
-			adoptValue( resolveValues[ i ], updateFunc( i ), master.reject );
+			aoptimizeValue( resolveValues[ i ], updateFunc( i ), master.reject );
 		}
 
 		return master.promise();

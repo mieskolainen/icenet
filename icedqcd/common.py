@@ -211,6 +211,10 @@ def splitfactor(x, y, w, ids, args):
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
+    
+    """
+    ## ** TBD. This should be generalized to handle multiple different length sets **
+    
     data_deps = copy.deepcopy(data)
 
     M = len(jagged_vars)              # Number of (jagged) variables per event
@@ -218,6 +222,7 @@ def splitfactor(x, y, w, ids, args):
     data_deps.x   = aux.longvec2matrix(X=data.x[:, len(scalar_vars):], M=M, D=D)
     data_deps.y   = data_deps.y
     data_deps.ids = all_jagged_vars
+    """
     # --------------------------------------------------------------------------
     
     

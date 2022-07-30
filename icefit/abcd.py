@@ -43,10 +43,7 @@ def ABCD_err(b,c,d, method='errorprop', N=int(1e5), alpha=0.32, lrange=5):
     Returns:
         confidence interval array (lower,upper)
     """
-
-    def prc_CI(x, alpha):
-        return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
-
+    
     # Analytical error propagation (1st order Taylor expansion)
     if   method == 'errorprop':
         sigma = np.sqrt( (c/d)**2 * b + (b*c/d**2)**2 * d + (b/d)**2 * c)

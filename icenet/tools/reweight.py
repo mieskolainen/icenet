@@ -201,17 +201,17 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     if (args['equal_frac'] == True):
         cprint(__name__ + f'.Compute_ND_reweights: Equalizing class fractions', 'green')
         weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
-    
+
     ### Finally map back to 1D-array
     weights = np.sum(weights_doublet, axis=1)
-    
+
     ### Compute the sum of weights per class for the output print
     frac = np.zeros(num_classes)
     sums = np.zeros(num_classes)
     for c in range(num_classes):
         frac[c], sums[c] = np.sum(y == c), np.sum(weights[y == c])
     
-    print(__name__ + f'.compute_ND_reweights: Output with sum[y == c]: {frac} | sum[weights[y == c]]: {sums}')
+    print(__name__ + f'.compute_ND_reweights: Output sum[y == c] = {frac} || sum[weights[y == c]] = {sums}')
     
     if use_ak:
         return ak.Array(weights), pdf

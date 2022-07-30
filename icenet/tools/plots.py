@@ -155,12 +155,12 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     return fig,ax,c
 
 
-def plot_train_evolution(losses, trn_aucs, val_aucs, label):
+def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     """ Training evolution plots.
 
     Args:
-        losses:   loss values
-        trn_aucs: training matrices
+        losses:   loss values in a dictionary
+        trn_aucs: training metrics
         val_aucs: validation metrics
     
     Returns:
@@ -168,29 +168,32 @@ def plot_train_evolution(losses, trn_aucs, val_aucs, label):
         ax:  figure axis
     """
     
-    fig,ax = plt.subplots(1,2,figsize=(8,6))
+    fig,ax = plt.subplots(1,2, figsize=(10, 7.5))
     
-    ax[0].plot(losses)
+    for key in losses.keys():
+        if (key == 'sum') and (len(losses.keys()) == 2):
+            continue # Do not plot sum if only one loss term
+        ax[0].plot(losses[key], label=key)
+    
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('loss')
+    ax[0].legend(fontsize=8)
     ax[0].set_title(f'[{label}]', fontsize=10)
     
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
-    ax[1].legend(['train','validation'])
+    ax[1].legend(['train','validation'], fontsize=8)
     ax[1].set_xlabel('k (epoch)')
     ax[1].set_ylabel('AUC')
     ax[1].grid(True)
     
-    ratio = 1.0
-    ax[0].set_aspect(1.0/ax[0].get_data_ratio()*ratio)
+    ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
 
     for i in [1]:
         ax[1].set_ylim([0.5, 1.0])
-        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*ratio)
+        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)
 
     return fig,ax
-
 
 def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['trk_pt', 'trk_eta']):
     """
@@ -422,6 +425,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
 
+            # Histogram MI
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', minbins=20, normalized=None)
+
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
             for scale in ['linear', 'log']: 
@@ -431,7 +437,6 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 savepath  = f'{outputdir}/{v}_class_{k}__{scale}.pdf'
 
                 try:
-
                     if scale == 'log':
                         import matplotlib as mpl
                         h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
@@ -442,9 +447,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
                     plt.ylabel(f'{v}')
                     rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
-                    #MI_value  = f'$\\mathcal{{I}}_{{XY}} = {MI:0.2f} \\pm {MI_err:0.2f}$'
-                    MI_value = ''
-
+                    MI_value  = f'$\\mathcal{{I}}_{{XY}} = ({MI_CI[0]:0.3f}, {MI_CI[1]:0.3f})$'
+                    
                     plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
                     # -----
 
@@ -581,19 +585,19 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
     fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
 
     num_classes = len(np.unique(y))
-    legends = []
-
+    legends     = []
+    
+    # loop over [linear, log]
     for i in range(2):
         ax = ax1 if i == 0 else ax2
 
-        # Loop over classes
+        # [raw histograms]  Loop over classes
         for c in range(num_classes) :
-            w = weights[y == c]
             ax.hist(X[y == c], bins, density = False,
                 histtype = 'step', fill = False, linewidth = 1.5)
             legends.append(f'$\\mathcal{{C}} = {c}$')
 
-        # Loop over classes
+        # [weights applied] Loop over classes
         for c in range(num_classes) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,

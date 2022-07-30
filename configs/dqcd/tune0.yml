@@ -17,11 +17,11 @@ mva_param: &MVA_INPUT_PARAM
   jagged_maxdim:
     
     Jet:   10
-    Muon:  10
-    sv:    10
-    cpf:   10
+    Muon:  8
+    sv:    6
+    cpf:   20
     npf:   10
-
+  
   frac: 0.5                          # Train vs validate/test split fraction
   
   # Variable imputation
@@ -131,12 +131,12 @@ train_runmode:
     #- gnet3
 
     - xgb0
-    
-    #- dmlp
-    #- deps
-    - vae0    
-    #- dbnf0
+    - dmlp
     - lgr0
+
+    #- deps
+    #- vae0    
+    #- dbnf0
     
     #- xgb1
     #- dmlp

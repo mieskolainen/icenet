@@ -3,7 +3,6 @@
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
 
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -125,10 +124,10 @@ class CNN_MAXO(nn.Module):
 
     # Returns softmax probability
     def softpredict(self, x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
+        #if self.training:
+        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        #else:
+        return F.softmax(self.forward(x), dim=-1)
 
 
 class CNN(nn.Module):
@@ -197,7 +196,7 @@ class CNN(nn.Module):
 
     # Returns softmax probability
     def softpredict(self, x) :
-        if self.training:
-            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        else:
-            return F.softmax(self.forward(x), dim=-1)
+        #if self.training:
+        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
+        #else:
+        return F.softmax(self.forward(x), dim=-1)
