@@ -9,6 +9,7 @@ import awkward as ak
 import torch
 import xgboost
 import os
+import gc
 
 from tqdm import tqdm
 
@@ -135,7 +136,11 @@ def plot_selection(X, mask, ids, plotdir, label, varlist, density=True, library=
 
         ax[0].set_yscale('log')
         fig.savefig(f'{targetdir}/{var}__log.pdf', bbox_inches='tight')
+        
+        # --------        
+        fig.clf()
         plt.close()
+        gc.collect()
 
 
 def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3), grid_on=False):
@@ -369,7 +374,10 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_MVA_wclass: Saving figure to "{savepath}"')
 
+    # --------        
+    fig.clf()
     plt.close()
+    gc.collect()
 
 
 def density_COR_wclass(y_pred, y, X, ids, label, \
@@ -394,7 +402,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
     """
 
     # Number of classes
-    C         = len(np.unique(y))
+    C = len(np.unique(y))
 
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
@@ -407,7 +415,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
     # Over classes
     for k in range(C):
-        
+            
         ind = (y == k)
         w = weights[ind] if weights is not None else None
 
@@ -426,7 +434,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
 
             # Histogram MI
-            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', minbins=20, normalized=None)
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', normalized=None)
 
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
@@ -454,7 +462,11 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
                     plt.savefig(savepath, bbox_inches='tight')
                     print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
+                    
+                    # -----                    
+                    fig.clf()
                     plt.close()
+                    gc.collect()
                     
                 except: # Matplotlib LogNorm() can be buggy
                     print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
@@ -505,8 +517,12 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         savepath = f'{outputdir}/{v}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_COR: Saving figure to "{savepath}"')
-        plt.close()
 
+        # -----                    
+        fig.clf()
+        plt.close()
+        gc.collect()
+        
 
 def annotate_heatmap(X, ax, xlabels, ylabels, x_rot = 90, y_rot = 0, decimals = 1, color = "w"):
     """ Add text annotations to a matrix heatmap plot
@@ -571,10 +587,14 @@ def plotvars(X, y, ids, weights, nbins = 70, title = '', targetdir = '.'):
 def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot a single variable.
     """
-    bins = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
-    plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
+    bins     = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
+    fig, axs = plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
     plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
+
+    # -----                    
+    fig.clf()
     plt.close()
+    gc.collect()
 
 
 def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
@@ -818,7 +838,10 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
                 #ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
             plt.savefig(filename + '__log.pdf', bbox_inches='tight')
 
+        # --------        
+        fig.clf()
         plt.close()
+        gc.collect()
 
 
 def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy', reso=50, npoints=400):
@@ -886,7 +909,11 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             plt.colorbar(cs, ticks = np.linspace(0.0, 1.0, 11))
             
             plt.savefig(targetdir + f'{dim1}_{dim2}.pdf', bbox_inches='tight')
+            
+            # --------        
+            fig.clf()
             plt.close()
+            gc.collect()
 
 
 def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, sort=True):

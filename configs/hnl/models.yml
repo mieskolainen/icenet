@@ -153,7 +153,7 @@ xgb_MI_min:
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     # booster parameters
-    learning_rate: 0.1
+    learning_rate: 0.05
     gamma: 1.67
     max_depth: 8
     min_child_weight: 1.0
@@ -171,9 +171,9 @@ xgb_MI_min:
     #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
     objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
+  
   MI_reg_param:
-    beta: [2.0]                # Positive for minimizing
+    beta: [4.0]                # Positive for minimizing
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -199,7 +199,7 @@ xgb_MI_max:
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
     # booster parameters
-    learning_rate: 0.1
+    learning_rate: 0.05
     gamma: 1.67
     max_depth: 8
     min_child_weight: 1.0
@@ -219,7 +219,7 @@ xgb_MI_max:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: [-0.99]       # Negative for maximizing MI
+    beta: [-4.0]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
   plot_trees: False
@@ -255,7 +255,7 @@ dmlp0:
     
     epochs: 50
     batch_size: 256
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
@@ -298,9 +298,9 @@ dmlp0_red:
     optimizer: 'Adam'
     clip_norm: 1.0
     
-    epochs: 20
+    epochs: 50
     batch_size: 256
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
@@ -341,7 +341,7 @@ dmlp_MI_min:
     
     epochs: 50
     batch_size: 256
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
@@ -350,8 +350,9 @@ dmlp_MI_min:
     gamma: 0.1
   
   # Mutual Information regularization (comment out if not used)
+  # Remember to use small enough learning rate in the total loss optimizer!
   MI_reg_param:
-    beta: [2.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
+    beta: [2.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing
     <<: *MI_REG_PARAM
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -388,7 +389,7 @@ dmlp_MI_max:
     
     epochs: 50
     batch_size: 256
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay: 0.00001      # L2-regularization
 
   # Scheduler
@@ -397,6 +398,7 @@ dmlp_MI_max:
     gamma: 0.1
   
   # Mutual Information regularization (comment out if not used)
+  # Remember to use small enough learning rate in the total loss optimizer!
   MI_reg_param:
     beta:  [-0.99]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM

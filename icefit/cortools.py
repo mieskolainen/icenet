@@ -186,8 +186,8 @@ def I_score(C, normalized=None, EPS=1E-15):
 
 
 def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
-    alpha=0.32, n_bootstrap=1000,
-    automethod='Scott2D', minbins=4, outlier=0.01, ):
+    alpha=0.32, n_bootstrap=300,
+    automethod='Scott2D', minbins=4, maxbins=100, outlier=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -224,7 +224,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
-        NB = int(np.maximum(minbins, NB))
+        NB = int(np.minimum(np.maximum(NB, minbins), maxbins))
         return np.linspace(np.percentile(data, outlier/2*100), np.percentile(data, 100*(1-outlier/2)), NB + 1)
 
     if bins_x is None:
