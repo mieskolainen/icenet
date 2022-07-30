@@ -254,6 +254,8 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, MI=MI)  
 
             MI['network_loss'].backward()
+            for k in range(len(MI['classes'])):
+                torch.nn.utils.clip_grad_norm_(MI['model'][k].parameters(), MI['clip_norm'])
             MI['optimizer'].step()
 
             # Accumulate for diagnostics

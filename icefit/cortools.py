@@ -14,9 +14,10 @@ import scipy.stats as stats
 # Needed for tests only
 import pandas as pd
 
-
 from icefit import mine
 
+def prc_CI(x, alpha):
+    return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
 
 def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     """
@@ -184,50 +185,72 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None, automethod='Scott2D', minbins=4, alpha=0.01):
+def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
+    alpha=0.32, n_bootstrap=1000,
+    automethod='Scott2D', minbins=4, outlier=0.01, ):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
     Args:
         x          : array of values
         y          : array of values
-        w          : weights (default None)
+        weights    : weights (default None)
         bins_x     : x binning array  If None, then automatic.
         bins_y     : y binning array.
         normalized : normalize the mutual information (see I_score() function)
+        n_bootstrap: number of bootstrap evaluations
+        alpha      : bootstrap confidence interval
     
     Autobinning args:    
         automethod : 'Hacine2D', 'Scott2D'
         minbins    : minimum number of bins per dimension
-        alpha      : outlier protection percentile
-        gamma      : FD ad-hoc scale parameter
+        outlier    : outlier protection percentile
     
     Returns:
-        mutual information
+        mutual information, uncertainty
     """
     rho,_,_ = pearson_corr(x,y)
 
+    if weights is None:
+        w = np.ones(len(x), dtype=float)
+    else:
+        w = weights
+
     def autobinwrap(data):
         if   automethod == 'Scott2D':
-            NB = scott_bin(x=data,rho=rho, mode='nbins',alpha=alpha)
+            NB = scott_bin(x=data,rho=rho, mode='nbins', alpha=outlier)
         elif automethod == 'Hacine2D':
-            NB = hacine_joint_entropy_bin(x=data, rho=rho, mode='nbins', alpha=alpha)
+            NB = hacine_joint_entropy_bin(x=data, rho=rho, mode='nbins', alpha=outlier)
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
         NB = int(np.maximum(minbins, NB))
-        return np.linspace(np.percentile(data, alpha/2*100), np.percentile(data, 100*(1-alpha/2)), NB + 1)
+        return np.linspace(np.percentile(data, outlier/2*100), np.percentile(data, 100*(1-outlier/2)), NB + 1)
 
     if bins_x is None:
         bins_x = autobinwrap(x)
     if bins_y is None:
         bins_y = autobinwrap(y)
 
-    XY = np.histogram2d(x=x, y=y, bins=[bins_x,bins_y], weights=weights)[0]
-    XY[XY < 0] = 0 # Entropy defined only for positive definite
-    mi = I_score(C=XY, normalized=normalized)
+    MI_values = np.zeros(n_bootstrap)
+
+    for i in range(n_bootstrap):
+
+        # Random values by sampling with replacement
+        ind = np.random.randint(len(w)-1, size=len(w))
+        if i == 0:
+            ind = np.arange(len(w))
+
+        w_ = w[ind] / np.sum(w[ind])
+
+        XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x,bins_y], weights=w_)[0]
+        XY[XY < 0] = 0 # Entropy defined only for positive definite
+        MI_values[i] = I_score(C=XY, normalized=normalized)
     
-    return mi
+    MI     = MI_values[0]       # The non-bootstrapped value
+    MI_err = prc_CI(MI_values, alpha)
+
+    return MI, MI_err
 
 
 def gaussian_mutual_information(rho):
@@ -243,7 +266,6 @@ def gaussian_mutual_information(rho):
     """
     return -0.5*np.log(1-rho**2)
 
-
 def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     """
     Pearson Correlation Coefficient
@@ -257,8 +279,6 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     Returns: 
         correlation coefficient [-1,1], confidence interval, p-value
     """
-    def prc_CI(x, alpha):
-        return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
 
     if len(x) != len(y):
         raise Exception('pearson_corr: x and y with different size.')
@@ -444,19 +464,19 @@ def test_gaussian():
             automethod = ['Scott2D', 'Hacine2D']
             
             for method in automethod:
-                MI     = mutual_information(x=x1, y=x2, automethod=method)
+                MI, MI_err = mutual_information(x=x1, y=x2, automethod=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Histogram     MI = {MI:.3f} ({method})')
+                print(f'Histogram     MI = {MI:0.3f}, CI = {MI_err} ({method})')
 
             # Neural MI
-            neuromethod = ['MINE', 'MINE_EMA']
+            neuromethod = ['MINE', 'MINE_EMA', 'DENSITY']
             
             for losstype in neuromethod:
 
                 # Test with 2D vectors
                 MI,MI_err  = mine.estimate(X=x1, Z=x2, losstype=losstype)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Neural        MI = {MI:.3f} +- {MI_err:.3f} ({losstype})')
+                print(f'Neural        MI = {MI:0.3f} +- {MI_err:0.3f} ({losstype})')
             
             print('')
 
@@ -477,7 +497,7 @@ def test_constant():
     r,r_err,prob    = pearson_corr(x=x1, y=x2)
     assert   r == pytest.approx(1, abs=EPS)
 
-    MI        = mutual_information(x=x1, y=x2)
+    MI,_      = mutual_information(x=x1, y=x2)
     assert  MI == pytest.approx(0, abs=EPS)
 
     MI_mine,_ = mine.estimate(X=x1, Z=x2)
@@ -490,7 +510,7 @@ def test_constant():
     r,r_err,prob    = pearson_corr(x=x1, y=x2)
     assert   r == pytest.approx(0, abs=EPS)
 
-    MI        = mutual_information(x=x1, y=x2)
+    MI,_      = mutual_information(x=x1, y=x2)
     assert  MI == pytest.approx(0, abs=EPS)
 
     MI_mine,_ = mine.estimate(X=x1, Z=x2)

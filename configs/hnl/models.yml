@@ -4,7 +4,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
 
-  losstype: 'MINE'         # 'MINE' or 'MINE_EMA'
+  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY'
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
   
@@ -16,7 +16,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   weight_decay: 0.00001
   clip_norm: 1.0
 
-  mlp_dim: [32, 32]
+  mlp_dim: [128, 128]
   batch_norm: False
   dropout: 0.01
   noise_std: 0.025
@@ -64,7 +64,7 @@ xgb0:
 
   # booster parameters
   model_param:
-    num_boost_round: 30       # number of epochs (equal to the number of trees!)
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
@@ -147,8 +147,8 @@ xgb_MI_min:
 
   # booster parameters
   model_param:
-    num_boost_round: 30       # number of epochs (equal to the number of trees!)
-  
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
+    
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
 
@@ -193,7 +193,7 @@ xgb_MI_max:
 
   # booster parameters
   model_param:
-    num_boost_round: 30       # number of epochs (equal to the number of trees!)
+    num_boost_round: 50       # number of epochs (equal to the number of trees!)
   
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
@@ -219,7 +219,7 @@ xgb_MI_max:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: [-2.0]       # Negative for maximizing MI
+    beta: [-0.99]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
   plot_trees: False
@@ -351,7 +351,7 @@ dmlp_MI_min:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta: [2.0]               #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
+    beta: [2.0]                #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -376,7 +376,7 @@ dmlp_MI_max:
     activation: 'relu'
     batch_norm: False
     dropout: 0.01
-    
+  
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -398,7 +398,7 @@ dmlp_MI_max:
   
   # Mutual Information regularization (comment out if not used)
   MI_reg_param:
-    beta:  [-2.0]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
+    beta:  [-0.99]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
