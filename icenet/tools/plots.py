@@ -412,7 +412,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
     else:
         classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
-
+    
     # Over classes
     for k in range(C):
             

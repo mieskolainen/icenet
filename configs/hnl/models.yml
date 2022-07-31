@@ -354,7 +354,7 @@ dmlp_MI_min:
   # Mutual Information regularization (comment out if not used)
   # Remember to use small enough learning rate in the total loss optimizer!
   MI_reg_param:
-    beta: [2.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing
+    beta: [4.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing
     <<: *MI_REG_PARAM
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

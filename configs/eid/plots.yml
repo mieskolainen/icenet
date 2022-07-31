@@ -5,6 +5,9 @@ basic:
 contours: 
   active: true
 
+ROC:
+  active: true
+
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: true
@@ -26,7 +29,7 @@ MVA_output:
 ## MVA (output, external variable) density (2D)
 MVA_2D:
   active: true
-
+  
   plot[0]:
     var:   ['.*'] # RegExp supported
     edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},

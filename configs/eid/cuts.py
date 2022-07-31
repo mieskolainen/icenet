@@ -28,8 +28,8 @@ def cut_standard(X, ids, xcorr_flow=False):
     MAXETA  = 1.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
-    #                              also ABS__, POW2__, SQRT__, INV__)
-    cutlist = [f'has_gsf     == True' ,
+    #                              also ABS__, POW2__, SQRT__, INV__, BOOL__)
+    cutlist = [f'BOOL__has_gsf == True' ,
                f'gsf_pt       > {MINPT}',
                f'ABS__trk_eta < {MAXETA}']
     

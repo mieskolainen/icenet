@@ -53,7 +53,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
         frame = pickle.load(f)
 
     ids = frame.keys()
-
+    print(ids)
+    
     X   = frame[ids].to_numpy()
     W   = frame['event_weight'].to_numpy()
     Y   = frame['label'].to_numpy().astype(int)

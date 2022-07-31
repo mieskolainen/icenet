@@ -34,8 +34,9 @@ def main() :
     process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
   elif runmode == 'eval':
+    prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
     process.evaluate_models(data=data['tst'], args=args)
-
+  
   print(__name__ + ' [done]')
 
 if __name__ == '__main__' :

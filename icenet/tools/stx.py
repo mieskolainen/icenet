@@ -33,16 +33,46 @@ def construct_columnar_cuts(X, ids, cutlist):
 
     return cuts,names
 
+
+def powerset_cutmask(cut):
+    """ Generate powerset 2**|cuts| masks
+    
+    Args:
+        cut : list of pre-calculated cuts, each list element is a boolean array
+    Returns:
+        (2**|cuts| x num_events) sized boolean mask matrix
+    """
+
+    num_events = len(cut[0])
+    BMAT       = aux.generatebinary(len(cut))
+    powerset   = np.zeros((BMAT.shape[0], num_events), dtype=bool)
+
+    # Loop over each event
+    for i in range(num_events):
+
+        # Loop over each boolean combination
+        for j in range(BMAT.shape[0]):
+
+            # Loop over each individual cut mask
+            result = np.zeros(BMAT.shape[1])
+            for k in range(BMAT.shape[1]):
+                result[k] = (cut[k][i] == BMAT[j,k])
+
+            powerset[j,i] = np.all(result)
+
+    return powerset
+
 def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     """ Apply cutflow
 
     Args:
-        cut        : list of pre-calculated cuts, each list element is a boolean array
-        names      : list of names (description of each cut, for printout only)
-        xcorr_flow : compute full N-point correlations
+        cut             : list of pre-calculated cuts, each list element is a boolean array
+        names           : list of names (description of each cut, for printout only)
+        xcorr_flow      : compute full N-point correlations
+        return_powerset : return each of 2**|cuts| as a separate boolean mask vector
     
     Returns:
-        ind        : list of indices, 1 = pass, 0 = fail
+        ind             : list of indices, 1 = pass, 0 = fail
     """
     print(__name__ + '.apply_cutflow: \n')
     
@@ -290,9 +320,11 @@ def eval_boolean_exptree(root, X, ids):
             f = lambda x : np.sqrt(x)
         elif func_name == 'INV':
             f = lambda x : 1.0/x
+        elif func_name == 'BOOL':
+            f = lambda x : x.astype(bool)
         else:
             raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
-
+        
         print(f'eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
     # -------------------------------------------------
 

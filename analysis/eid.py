@@ -62,7 +62,8 @@ def main() :
     process.roc_mstats.append(met_elemva)
     process.roc_labels.append('elemva15')
     # ----------------------------
-
+    
+    prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
     process.evaluate_models(data=data['tst'], args=args)
 
   print(__name__ + ' [done]')

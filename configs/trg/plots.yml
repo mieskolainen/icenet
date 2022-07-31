@@ -5,6 +5,9 @@ basic:
 contours: 
   active: false
 
+ROC:
+  active: true
+
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: true
