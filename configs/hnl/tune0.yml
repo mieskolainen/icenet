@@ -122,15 +122,15 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     
     #- dmlp_MI_max
+    - dmlp0_red
     - dmlp_MI_min
     - dmlp0
-    - dmlp0_red
 
     #- xgb_MI_max
+    - xgb0_red
     - xgb_MI_min
     - xgb0
-    - xgb0_red
-
+    
     #- lgr_MI_min
     #- lgr_MI_max
     #- lgr0

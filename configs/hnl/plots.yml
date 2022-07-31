@@ -31,6 +31,21 @@ MVA_2D:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
+
+  plot[1]:
+    var:   ['tagger_score']
+    edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
+            {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
+    
+    # This goes through all the combinations
+    # [0, 0, 0]
+    # [0, 0, 1]
+    # ...
+    # [1, 1, 1]
+    cartesian_filter:
+      [{name: 'isEle',  var: 'leadingLeptons_isElectron',    eval: '== True'},
+       {name: 'isEle',  var: 'subleadingLeptons_isElectron', eval: '== True'},
+       {name: 'isOS',   var: 'dilepton_charge',              eval: '== 0'}]
   
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported

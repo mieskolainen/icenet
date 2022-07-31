@@ -6,6 +6,7 @@
 import math
 import numpy as np
 import awkward as ak
+import re
 
 import numba
 import copy
@@ -22,31 +23,77 @@ import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
 
-def red(X, ids, param, mode='X', tag='reduced_MVA_vars'):
+def red(X, ids, param, mode='X', exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
     """
     Reduce the input set variables of X
-        
+     
     Args:
-        X:     data matrix
-        ids:   names of columns
-        param: parameter dictionary (from yaml)
-        mode:  return mode 'X' or 'ids'
-        tag:   yaml file
+        X:           data matrix
+        ids:         names of columns
+        param:       parameter dictionary (from yaml)
+        mode:        return mode 'X' or 'ids'
+        exclude_tag: key in param
+        include_tag: key in param
     """
-    if tag in param:
-        index = []
-        for var in param[tag]:
-            index.append(ids.index(var))
-        if mode == 'X':
-            cprint(__name__ + f'.red: Reducing input variables to a set: {param[tag]}', 'red')
-            return X[:, np.array(index, dtype=int)]
-        else:
-            return param[tag]
+    mask = np.ones(len(ids), dtype=np.bool_)
+
+    for boolean in [0,1]:
+
+        tag = exclude_tag if boolean == 0 else include_tag
+
+        if tag in param:
+            # Compile regexp
+            var_names = process_regexp_ids(all_ids=ids, ids=param[tag])
+            
+            # Boolean flag each variable found
+            for var in var_names:
+                for i in range(len(ids)):
+                    if ids[i] == var:
+                        mask[i] = boolean
+    
+    # Variable set is reduced
+    if np.sum(mask) != len(ids):
+        cprint(__name__ + f'.red: Using reduced set of variables: {np.array(ids)[mask].tolist()}', 'red')
     else:
-        if mode == 'X':
-            return X
-        else:
-            return ids
+        cprint(__name__ + f'.red: Using full set of input variables', 'red')
+    
+    if mode == 'X':
+        return X[:, mask]
+    else:
+        return np.array(ids)[mask].tolist()
+
+
+def process_regexp_ids(all_ids, ids=None):
+    """
+    Process regular expressions for variable names
+
+    Args:
+        all_ids: all keys in a tree
+        ids:     keys to pick, if None, use all keys
+
+    Returns:
+        ids matching regular expressions
+    """
+
+    if ids is None:
+        load_ids = all_ids
+    else:
+        load_ids = []
+        chosen   = np.zeros(len(all_ids))
+
+        # Loop over our input
+        for string in ids:
+
+            # Compile regular expression
+            reg = re.compile(string)
+            
+            # Loop over all keys in the tree
+            for i in range(len(all_ids)):
+                if re.fullmatch(reg, all_ids[i]) and not chosen[i]:
+                    load_ids.append(all_ids[i])
+                    chosen[i] = 1
+
+    return load_ids
 
 
 def parse_vars(items):

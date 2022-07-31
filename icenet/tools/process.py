@@ -938,10 +938,9 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 edges = args['plot_param']['MVA_2D'][f'plot[{i}]']['edges']
             except:
                 break # No more this type of plots 
-                
+            
             # Pick chosen variables based on regular expressions
-            from icenet.tools import iceroot
-            var_names = iceroot.process_regexp_ids(all_ids=ids_RAW, ids=var)
+            var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=var)
             pick_ind  = np.array(np.where(np.isin(ids_RAW, var_names))[0], dtype=int)
             
             inputs = {'y_pred': y_pred, 'weights': weights, 'X': X_RAW[:, pick_ind],

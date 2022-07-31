@@ -102,8 +102,9 @@ xgb0_red:
   label:   'XGB(m_llj)'
   raytune:  xgb_trial_0
   
-  # Train model with these variables only
-  reduced_MVA_vars: ['nominal_m_llj']
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['nominal_m_llj']
   
   # booster parameters
   model_param:
@@ -278,8 +279,9 @@ dmlp0_red:
   label:   'DMLP(m_llj)'
   raytune:  null
 
-  # Train model with these variables only
-  reduced_MVA_vars: ['nominal_m_llj']
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['nominal_m_llj']
 
   # Model
   conv_type: 'dmlp'
