@@ -101,8 +101,8 @@ def print_parallel_cutflow(cut, names, EPS=1E-12):
     Print boolean combination cutflow statistics
     
     Args:
-        cut             : list of pre-calculated cuts, each list element is a boolean array
-        names           : list of names (description of each cut, for printout only)
+        cut   : list of pre-calculated cuts, each list element is a boolean array with size of num of events
+        names : list of names (description of each cut, for printout only)
     """
     print('\n')
     print(__name__ + '.print_parallel_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
@@ -470,7 +470,7 @@ def test_powerset():
     # 5 101
     # 6 110
     # 7 111
-    
+
     reference = np.array(
         [[False, False, False,  True, False],
          [False, False, False, False,  True],
