@@ -23,6 +23,7 @@ import icenet.deep.train as train
 import icenet.deep.predict as predict
 
 
+from icenet.tools import stx
 from icenet.tools import io
 from icenet.tools import prints
 from icenet.tools import aux
@@ -1021,9 +1022,9 @@ def filter_constructor(filters, X_RAW, ids_RAW):
     textlist = [filters[k]['text'] for k in range(len(filters))]
 
     # Construct cuts and apply
-    from icenet.tools import stx
     cuts, names   = stx.construct_columnar_cuts(X=X_RAW, ids=ids_RAW, cutlist=cutlist)
-    _ = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=True) # For print
+    stx.print_parallel_cutflow(cut=cuts, names=names)
+    
     mask_powerset = stx.powerset_cutmask(cut=cuts)
     BMAT          = aux.generatebinary(len(cuts))
 

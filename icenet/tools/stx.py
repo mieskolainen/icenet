@@ -42,29 +42,32 @@ def powerset_cutmask(cut):
     Returns:
         (2**|cuts| x num_events) sized boolean mask matrix
     """
+    print(cut)
 
     num_events = len(cut[0])
-    BMAT       = aux.generatebinary(len(cut))
-    powerset   = np.zeros((BMAT.shape[0], num_events), dtype=bool)
+    num_cuts   = len(cut)
+    BMAT       = aux.generatebinary(num_cuts)
 
-    # Loop over each event
-    for i in range(num_events):
+    power      = BMAT.shape[0]
+    powerset   = np.zeros((power, num_events), dtype=bool)
 
-        # Loop over each boolean combination
-        for j in range(BMAT.shape[0]):
-
-            # Loop over each individual cut mask
-            result = np.zeros(BMAT.shape[1])
-            for k in range(BMAT.shape[1]):
-                result[k] = (cut[k][i] == BMAT[j,k])
-
-            powerset[j,i] = np.all(result)
+    # Loop over each boolean
+    # [0,0,..0], [0,0,...,1] ... [1,1,..., 1] cut set combination
+    for i in range(power):
+    
+        # Loop over each event
+        for evt in range(num_events):
+            
+            # Loop over each individual cut result
+            result = np.array([(cut[k][evt] == BMAT[i,k]) for k in range(num_cuts)], dtype=bool)
+            powerset[i, evt] = np.all(result)
 
     return powerset
 
+
 def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     """ Apply cutflow
-
+    
     Args:
         cut             : list of pre-calculated cuts, each list element is a boolean array
         names           : list of names (description of each cut, for printout only)
@@ -76,29 +79,42 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     """
     print(__name__ + '.apply_cutflow: \n')
     
-    # Print out "serial flow"
+    # Apply cuts in series
     N   = len(cut[0])
     ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
         ind = np.logical_and(ind, cut[i])
+
+        # Print out "serial flow"
         print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:
-        print('\n')
-        print(__name__ + '.apply_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
-        vec = np.zeros((len(cut[0]), len(cut)))
-        for j in range(vec.shape[1]):
-            vec[:,j] = np.array(cut[j])
-
-        intmat = aux.binaryvec2int(vec)
-        BMAT   = aux.generatebinary(vec.shape[1])
-        print(f'Boolean combinations for {names}: \n')
-        for i in range(BMAT.shape[0]):
-            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
-        print('\n')
+        print_parallel_cutflow(cut=cut, names=names)
     
     return ind
+
+
+def print_parallel_cutflow(cut, names, EPS=1E-12):
+    """
+    Print boolean combination cutflow results
+    
+    Args:
+        cut             : list of pre-calculated cuts, each list element is a boolean array
+        names           : list of names (description of each cut, for printout only)
+    """
+    print('\n')
+    print(__name__ + '.print_parallel_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
+    vec = np.zeros((len(cut[0]), len(cut)))
+    for j in range(vec.shape[1]):
+        vec[:,j] = np.array(cut[j])
+
+    intmat = aux.binaryvec2int(vec)
+    BMAT   = aux.generatebinary(vec.shape[1])
+    print(f'Number of boolean combinations for {names}: \n')
+    for i in range(BMAT.shape[0]):
+        print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
+    print('\n')
 
 
 def parse_boolean_exptree(instring):
@@ -325,7 +341,7 @@ def eval_boolean_exptree(root, X, ids):
         else:
             raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
         
-        print(f'eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
+        print(__name__ + f'.eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
     # -------------------------------------------------
 
     # Middle binary operators g(x,y)
