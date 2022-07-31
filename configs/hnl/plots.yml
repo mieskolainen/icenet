@@ -11,7 +11,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     [{text: 'l1_e', cut: 'BOOL__leadingLeptons_isElectron == True'},
      {text: 'l2_e', cut: 'BOOL__subleadingLeptons_isElectron == True'},
      {text: 'Q',    cut: 'dilepton_charge > 0'}]
-     
+    
     # dilepton_charge should have 3 distinct values, dataframe seems not to have atm
     # [fix tbd --> change to individual lepton charges, also]
     # -- = -2

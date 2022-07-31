@@ -30,7 +30,7 @@ def construct_columnar_cuts(X, ids, cutlist):
 
         cuts.append(output)
         names.append(expr)
-
+    
     return cuts,names
 
 
@@ -40,7 +40,7 @@ def powerset_cutmask(cut):
     Args:
         cut : list of pre-calculated cuts, each list element is a boolean array
     Returns:
-        (2**|cuts| x num_events) sized boolean mask matrix
+        mask: (2**|cuts| x num_events) sized boolean mask matrix
     """
     print(cut)
 
