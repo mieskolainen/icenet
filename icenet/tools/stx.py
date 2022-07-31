@@ -87,7 +87,7 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
         mask = np.logical_and(mask, cut[i])
 
         # Print out "serial flow"
-        print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
+        print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(mask):>10}/{N} = {np.sum(mask)/(N+EPS):0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:
