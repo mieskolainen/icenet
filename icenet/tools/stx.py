@@ -57,7 +57,7 @@ def powerset_cutmask(cut):
     
         # Loop over each event
         for evt in range(num_events):
-            
+
             # Loop over each individual cut result
             result = np.array([(cut[k][evt] == BMAT[i,k]) for k in range(num_cuts)], dtype=bool)
             powerset[i, evt] = np.all(result)
@@ -75,15 +75,16 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
         return_powerset : return each of 2**|cuts| as a separate boolean mask vector
     
     Returns:
-        ind             : list of indices, 1 = pass, 0 = fail
+        mask            : boolean mask of size number of events (1 = pass, 0 = fail)
     """
     print(__name__ + '.apply_cutflow: \n')
     
+    N    = len(cut[0])
+    mask = np.ones(N, dtype=bool)
+
     # Apply cuts in series
-    N   = len(cut[0])
-    ind = np.ones(N, dtype=np.uint8)
     for i in range(len(cut)):
-        ind = np.logical_and(ind, cut[i])
+        mask = np.logical_and(mask, cut[i])
 
         # Print out "serial flow"
         print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
@@ -92,12 +93,12 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     if xcorr_flow:
         print_parallel_cutflow(cut=cut, names=names)
     
-    return ind
+    return mask
 
 
 def print_parallel_cutflow(cut, names, EPS=1E-12):
     """
-    Print boolean combination cutflow results
+    Print boolean combination cutflow statistics
     
     Args:
         cut             : list of pre-calculated cuts, each list element is a boolean array
