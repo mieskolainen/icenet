@@ -385,7 +385,6 @@ def eval_boolean_syntax(expr, X, ids):
 
     return output
 
-
 def test_syntax_tree_parsing():
     """
     Unit tests
@@ -453,3 +452,33 @@ def test_syntax_tree_flip():
             output.append(eval_boolean_exptree(root=treeobj, X=X, ids=ids))
 
         assert np.all(output[0] == output[1])
+
+
+def test_powerset():
+
+    cut = [np.array([True, True, False, False, False]),
+           np.array([True, False, True, False, False]),
+           np.array([True, False, True, False, True])]
+
+    maskmatrix = powerset_cutmask(cut)
+
+    # 0 000
+    # 1 001
+    # 2 010
+    # 3 011
+    # 4 100
+    # 5 101
+    # 6 110
+    # 7 111
+    
+    reference = np.array(
+        [[False, False, False,  True, False],
+         [False, False, False, False,  True],
+         [False, False, False, False, False],
+         [False, False,  True, False, False],
+         [False,  True, False, False, False],
+         [False, False, False, False, False],
+         [False, False, False, False, False],
+         [ True, False, False, False, False]])
+
+    assert np.all(maskmatrix == reference)
