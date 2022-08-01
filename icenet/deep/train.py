@@ -374,13 +374,13 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-
+    
     if not args['__raytune_running__']:
         
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
         fig,ax   = plots.plot_train_evolution_multi(loss_history, trn_aucs, val_aucs, param['label'])
-        plt.savefig(f"{plotdir}/{param['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
+        plt.savefig(f"{plotdir}/{param['label']}--evolution.pdf", bbox_inches='tight'); plt.close()
 
         return model
 
@@ -741,14 +741,14 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         else:
             fig,ax   = plots.plot_train_evolution_multi(losses=loss_history,
                 trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])    
-        plt.savefig(f'{plotdir}/{param["label"]}_evolution.pdf', bbox_inches='tight'); plt.close()
+        plt.savefig(f'{plotdir}/{param["label"]}--evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot feature importance
         if plot_importance:
             for sort in [True, False]:
                 fig,ax = plots.plot_xgb_importance(model=model, tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
                 targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
-                plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
+                plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
@@ -759,7 +759,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
                     path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
-                    plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
+                    plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
             except:
                 print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
             
@@ -906,7 +906,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
     fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                     trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
-    plt.savefig(f"{plotdir}/{param['xgb']['label']}_evolution.pdf", bbox_inches='tight'); plt.close()
+    plt.savefig(f"{plotdir}/{param['xgb']['label']}--evolution.pdf", bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
     ## Plot feature importance
@@ -921,7 +921,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
         targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
-        plt.savefig(f'{targetdir}/{param["label"]}_importance_sort_{sort}.pdf', bbox_inches='tight'); plt.close()
+        plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
         
     ## Plot decision trees
     if ('plot_trees' in param['xgb']) and param['xgb']['plot_trees']:
@@ -932,7 +932,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
                 xgboost.plot_tree(model, num_trees=i)
                 fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
                 path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
-                plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
+                plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
         except:
             print(__name__ + f'.train_graph_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
         

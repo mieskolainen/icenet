@@ -8,17 +8,18 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     # ...
     # [1, 1, ..., 1]
 
-    [{text: 'l1_e', cut: 'BOOL__leadingLeptons_isElectron == True'},
-     {text: 'l2_e', cut: 'BOOL__subleadingLeptons_isElectron == True'},
-     {text: 'QS',   cut: 'dilepton_charge > 0'},
-     {text: 'iso',  cut: 'nominal_dR_l2j > 0.4'}]
+    # Latex description is for boolean [0,1] per cut
+    [{latex: ['$e',  '$\mu'], cut: 'BOOL__leadingLeptons_isElectron == True'},
+     {latex: ['e',   '\mu'],  cut: 'BOOL__subleadingLeptons_isElectron == True'},
+     {latex: ['SS',  'OS'],   cut: 'dilepton_charge > 0'},
+     {latex: ['iso$','mrg$'], cut: 'nominal_dR_l2j > 0.4'}]
 
-    # note: dilepton_charge can have 3 distinct values, dataframe seems not to have atm
-    # [change MVA input  to individual lepton charges]
-    # -- = -2
-    # -+ =  0
-    # +- =  0
-    # ++ =  2
+    # note: dilepton_charge can have 3 distinct values, we use these here only
+    # (check the dataframe definition of dilepton_charge +-1 !)
+    # -- = -2 -> SS
+    # -+ =  0 -> OS
+    # +- =  0 -> OS
+    # ++ =  2 -> SS
 # -----------------------------------------------------------------------
 
 basic:
@@ -53,10 +54,10 @@ MVA_output:
   powerset_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
-# Powerset can be applied only per one plot[x] identifier
+# Powerset can be applied only per one plot[i] identifier!
 MVA_2D:
   active: true
-
+  
   plot[0]:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
@@ -68,7 +69,7 @@ MVA_2D:
     # Powerset correlation plot parameters
     xlim:
       # For each class [[lower, upper], ... [lower, upper]
-      pearson: [[-0.1, 0.35], [-0.1, 0.35]]
+      pearson: [[-0.15, 0.35], [-0.15, 0.35]]
       MI: [[0.0, 0.1], [0.0, 0.1]]
     # -----------------------------
   

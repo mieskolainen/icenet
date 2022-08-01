@@ -137,7 +137,7 @@ def plot_selection(X, mask, ids, plotdir, label, varlist, density=True, library=
         fig.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
 
         ax[0].set_yscale('log')
-        fig.savefig(f'{targetdir}/{var}__log.pdf', bbox_inches='tight')
+        fig.savefig(f'{targetdir}/{var}--log.pdf', bbox_inches='tight')
         
         # --------        
         fig.clf()
@@ -369,7 +369,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_ed
     for scale in ['linear', 'log']:
         ax.set_yscale(scale)
         outputdir = aux.makedir(f'{path}/{label}')
-        savepath  = f'{outputdir}/MVA_output__{scale}.pdf'
+        savepath  = f'{outputdir}/MVA-output--{scale}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_MVA_wclass: Save: "{savepath}"')
     
@@ -392,19 +392,19 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
         plots saved to a directory
     """
 
-    ## Find all observables
-    all_obs = []
+    ## Find all variables
+    all_var = []
     for model in corr_mstats.keys():
         for category in corr_mstats[model].keys():
             for class_ind in range(num_classes):
-                for obs in corr_mstats[model][category][class_ind].keys():
-                    all_obs.append(obs)
+                for var in corr_mstats[model][category][class_ind].keys():
+                    all_var.append(var)
 
-    all_obs = set(all_obs) # Reduce to a set (values appear only once)
+    all_var = set(all_var) # Reduce to a set (values appear only once)
 
 
-    ## Over all observables
-    for obs in all_obs:
+    ## Over all variables
+    for var in all_var:
 
         # Over classes
         for class_ind in range(num_classes):
@@ -428,9 +428,9 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                         x = corr_mstats[model][categories[i]][class_ind]
 
                         if x is not {}: # We have some stats
-                            values[i] = x[obs][f'{stats}']
-                            lower[i]  = x[obs][f'{stats}_CI'][0]
-                            upper[i]  = x[obs][f'{stats}_CI'][1]
+                            values[i] = x[var][f'{stats}']
+                            lower[i]  = x[var][f'{stats}_CI'][0]
+                            upper[i]  = x[var][f'{stats}_CI'][1]
 
                     lower            = np.abs(values - np.array(lower))
                     upper            = np.abs(np.array(upper) - values)
@@ -445,7 +445,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
 
                     title = f'$\\mathcal{{C}} = {class_ind}$'
                     plt.title(title)
-                    plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {obs}) (68CL)')
+                    plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {var}) (68CL)')
 
                     ax.set_xlim(xlim[stats][class_ind])
                     ax.set_yticks(np.arange(len(values)))
@@ -454,7 +454,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                 ax.invert_yaxis()    
                 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                 filename = aux.makedir(targetdir + f'/COR/')
-                plt.savefig(filename + f'all_categories__obs_{obs}__stats_{stats}__class_{class_ind}.pdf',
+                plt.savefig(filename + f'var-{var}--stats_{stats}--class-{class_ind}.pdf',
                     bbox_inches='tight')
                 plt.close()
 
@@ -504,11 +504,10 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             continue
 
         # Loop over variables
-        for v in ids:
+        for var in ids:
 
-            # Plot 2D
-            xx   = y_pred[ind]
-            yy   = X[ind, ids.index(v)]
+            xx = y_pred[ind]
+            yy = X[ind, ids.index(var)]
 
             # Compute Pearson correlation coefficient
             cc,cc_CI,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
@@ -521,11 +520,11 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', normalized=None)
 
             # Save output
-            output[k][v] = {}
-            output[k][v]['pearson']    = cc
-            output[k][v]['pearson_CI'] = cc_CI
-            output[k][v]['MI']         = MI
-            output[k][v]['MI_CI']      = MI_CI
+            output[k][var] = {}
+            output[k][var]['pearson']    = cc
+            output[k][var]['pearson_CI'] = cc_CI
+            output[k][var]['MI']         = MI
+            output[k][var]['MI_CI']      = MI_CI
 
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
@@ -533,7 +532,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
                 fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}/{label}')
-                savepath  = f'{outputdir}/{v}_class_{k}__{scale}.pdf'
+                savepath  = f'{outputdir}/var-{var}--class-{k}--{scale}.pdf'
 
                 try:
                     if scale == 'log':
@@ -544,7 +543,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     
                     fig.colorbar(im)
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
-                    plt.ylabel(f'{v}')
+                    plt.ylabel(f'{var}')
                     rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_CI[0]:0.2f}}}^{{+{cc_CI[1]-cc:0.2f}}}$'
                     MI_value  = f'$\\mathcal{{I}}_{{XY}} = ({MI_CI[0]:0.3f}, {MI_CI[1]:0.3f})$'
                     
@@ -557,8 +556,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----                    
                     fig.clf()
                     plt.close()
-                    #gc.collect()
-                    
+                    gc.collect()
+                
                 except: # Matplotlib LogNorm() can be buggy
                     print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
     pprint(output)
@@ -589,26 +588,26 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         weights = np.sum(weights, axis=1)
     
     # Loop over variables
-    for v in ids:
+    for var in ids:
 
         fig,ax = plt.subplots()
 
         # Plot 2D
         xx   = y_pred
-        yy   = X[:, ids.index(v)]
+        yy   = X[:, ids.index(var)]
         
         bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
         h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=weights, cmap=plt.get_cmap(cmap))
         
         fig.colorbar(im)
         plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
-        plt.ylabel(f'{v}')
+        plt.ylabel(f'{var}')
         plt.title(f'{label}', fontsize=10)
         
         # -----
 
         outputdir = aux.makedir(f'{path}/{label}')
-        savepath = f'{outputdir}/{v}.pdf'
+        savepath = f'{outputdir}/var-{var}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_COR: Save: "{savepath}"')
 
@@ -683,7 +682,7 @@ def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """
     bins     = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
     fig, axs = plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
-    plt.savefig(f'{targetdir}/{var}.pdf', bbox_inches='tight')
+    plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
 
     # -----                    
     fig.clf()
@@ -780,7 +779,7 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
             cb = plt.colorbar()
 
         if targetdir is not None:
-            fname = targetdir + f'{label}_correlation_matrix.pdf'
+            fname = targetdir + f'{label}-correlation-matrix.pdf'
             print(__name__ + f'.plot_correlations: Save: "{fname}"')
             plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
 
@@ -859,7 +858,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
             plt.gca().set_xscale('log')
             ax.set_aspect(1.0 / ax.get_data_ratio() * 0.75)
-            plt.savefig(filename + '__log.pdf', bbox_inches='tight')
+            plt.savefig(filename + '--log.pdf', bbox_inches='tight')
 
         plt.close()
 
@@ -934,7 +933,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
                 plt.sca(ax[c])
                 plt.gca().set_yscale('log')
                 #ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
-            plt.savefig(filename + '__log.pdf', bbox_inches='tight')
+            plt.savefig(filename + '--log.pdf', bbox_inches='tight')
 
         # --------        
         fig.clf()
@@ -1006,7 +1005,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             plt.ylabel(f'x[{dim2}] {ids[dim2]}')
             plt.colorbar(cs, ticks = np.linspace(0.0, 1.0, 11))
             
-            plt.savefig(targetdir + f'{dim1}_{dim2}.pdf', bbox_inches='tight')
+            plt.savefig(targetdir + f'{dim1}-{dim2}.pdf', bbox_inches='tight')
             
             # --------        
             fig.clf()

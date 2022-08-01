@@ -185,15 +185,15 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args["modeltag"]   = cli_dict['modeltag']
 
     args['datadir']    = aux.makedir(f'output/{args["rootname"]}')
-    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/config_[{cli_dict["config"]}]/modeltag_[{cli_dict["modeltag"]}]')
-    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/config_[{cli_dict["config"]}]/inputmap_[{cli_dict["inputmap"]}]__modeltag_[{cli_dict["modeltag"]}]')
+    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
+    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
 
     # Technical
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
-
+    
     # -------------------------------------------------------------------
     ## Create directories
     aux.makedir('tmp')
@@ -1036,8 +1036,8 @@ def filter_constructor(filters, X_RAW, ids_RAW):
     Returns:
         mask matrix, mask text labels
     """
-    cutlist  = [filters[k]['cut']  for k in range(len(filters))]
-    textlist = [filters[k]['text'] for k in range(len(filters))]
+    cutlist  = [filters[k]['cut']   for k in range(len(filters))]
+    textlist = [filters[k]['latex'] for k in range(len(filters))]
 
     # Construct cuts and apply
     cuts, names   = stx.construct_columnar_cuts(X=X_RAW, ids=ids_RAW, cutlist=cutlist)
@@ -1046,9 +1046,21 @@ def filter_constructor(filters, X_RAW, ids_RAW):
     mask_powerset = stx.powerset_cutmask(cut=cuts)
     BMAT          = aux.generatebinary(len(cuts))
 
+    print(textlist)
+
     # Loop over all powerset 2**|cuts| masked selections
-    text_powerset = [f"{textlist}={BMAT[m,:]}" for m in range(mask_powerset.shape[0])]
-    
+    # Create a description latex str
+    text_powerset = []
+    for i in range(BMAT.shape[0]):
+        string = ''
+        for j in range(BMAT.shape[1]):
+            bit = BMAT[i,j] # 0 or 1
+            string += f'{textlist[j][bit]}'
+            if j != BMAT.shape[1] - 1:
+                string += ' '
+        string += f' {BMAT[i,:]}'
+        text_powerset.append(string)
+
     return mask_powerset, text_powerset
 
 

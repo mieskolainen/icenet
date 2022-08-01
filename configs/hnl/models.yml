@@ -96,7 +96,7 @@ xgb0:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0_red:
+xgb0-red:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB(m_llj)'
@@ -140,10 +140,10 @@ xgb0_red:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_MI_min:
+xgb-MI-min:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'XGB_MI_min'
+  label:   'XGB-MI-min'
   raytune:  xgb_trial_0
 
   # booster parameters
@@ -186,10 +186,10 @@ xgb_MI_min:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_MI_max:
+xgb-MI-max:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'XGB_MI_max'
+  label:   'XGB-MI-max'
   raytune:  xgb_trial_0
 
   # booster parameters
@@ -273,7 +273,7 @@ dmlp0:
 
 
 # Deep MLP
-dmlp0_red:
+dmlp0-red:
   train:   'torch_generic'
   predict: 'torch_vector'
   label:   'DMLP(m_llj)'
@@ -318,10 +318,10 @@ dmlp0_red:
   readmode: -1                 # -1 is the last saved epoch
 
 # Deep MLP
-dmlp_MI_min:
+dmlp-MI-min:
   train:   'torch_generic'
   predict: 'torch_vector'
-  label:   'DMLP_MI_min'
+  label:   'DMLP-MI-min'
   raytune:  null
 
   # Model
@@ -366,10 +366,10 @@ dmlp_MI_min:
 
 
 # Deep MLP
-dmlp_MI_max:
+dmlp-MI-max:
   train:   'torch_generic'
   predict: 'torch_vector'
-  label:   'DMLP_MI_max'
+  label:   'DMLP-MI-max'
   raytune:  null
 
   # Model
