@@ -368,7 +368,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_ed
     
     for scale in ['linear', 'log']:
         ax.set_yscale(scale)
-        outputdir = aux.makedir(f'{path}/{label}')
+        outputdir = aux.makedir(f'{path}')
         savepath  = f'{outputdir}/MVA-output--{scale}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
         print(__name__ + f'.density_MVA_wclass: Save: "{savepath}"')

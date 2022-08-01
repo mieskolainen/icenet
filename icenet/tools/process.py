@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 # ******** GLOBALS *********
 roc_mstats        = []
 roc_labels        = []
+roc_paths         = []
 corr_mstats       = []
 ROC_binned_mstats = []
 ROC_binned_mlabel = []
@@ -193,7 +194,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # Technical
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
-    
+
     # -------------------------------------------------------------------
     ## Create directories
     aux.makedir('tmp')
@@ -620,6 +621,7 @@ def evaluate_models(data=None, args=None):
     global corr_mstats
     roc_mstats  = {}
     roc_labels  = {}
+    roc_paths   = {}
     corr_mstats = {}
 
     global ROC_binned_mstats
@@ -873,6 +875,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     global roc_mstats
     global roc_labels
+    global roc_paths
+
     global corr_mstats
 
     global ROC_binned_mstats
@@ -886,28 +890,30 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     if args['plot_param']['ROC']['active']:
 
-        def plot_helper(mask, sublabel="inclusive"):
+        def plot_helper(mask, sublabel, pathlabel):
             metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask], weights=weights[mask])
 
             if sublabel not in roc_mstats:
                 roc_mstats[sublabel] = []
                 roc_labels[sublabel] = []
+                roc_paths[sublabel]  = []
 
             roc_mstats[sublabel].append(metric)
             roc_labels[sublabel].append(label)
+            roc_paths[sublabel].append(pathlabel)
         
         # ** All inclusive **
         mask      = np.ones(len(y_pred), dtype=bool)
-        plot_helper(mask=mask, sublabel="inclusive")
+        plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
         # ** Powerset filtered **
         if 'powerset_filter' in args['plot_param']['ROC']:
 
             filters = args['plot_param']['ROC']['powerset_filter']
-            mask_powerset, text_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
+            mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
-                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m])
+                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
 
     # --------------------------------------
     ### ROC binned plots (no powerset selection supported here)
@@ -934,8 +940,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 ROC_binned_mlabel[i].append(label_1D)
 
                 # Plot this one
-                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}]')
-                plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA_binned[{i}]')
+                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}]')
+                plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA-binned[{i}]')
 
             ## 2D
             elif len(var) == 2:
@@ -943,7 +949,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
 
-                plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC_binned[{i}].pdf', bbox_inches='tight')
+                plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}].pdf', bbox_inches='tight')
                 
             else:
                 print(var)
@@ -953,31 +959,31 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     ### MVA-output 1D-plot
     if args['plot_param']['MVA_output']['active']:
 
-        def plot_helper(mask, sublabel="inclusive"):
+        def plot_helper(mask, sublabel, pathlabel):
             hist_edges = args['plot_param'][f'MVA_output']['edges']
             inputs = {'y_pred': y_pred[mask], 'y': y[mask], 'weights': weights[mask], 'num_classes': args['num_classes'],
-                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': targetdir + '/MVA'}
+                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': targetdir + '/MVA/' + {pathlabel}}
 
             plots.density_MVA_wclass(**inputs)
 
         # ** All inclusive **
         mask  = np.ones(len(y_pred), dtype=bool)
-        plot_helper(mask=mask, sublabel="inclusive")
+        plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
         # ** Powerset filtered **
         if 'powerset_filter' in args['plot_param']['MVA_output']:
 
             filters = args['plot_param']['MVA_output']['powerset_filter']
-            mask_powerset, text_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
+            mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
-                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m])
+                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
 
     # ----------------------------------------------------------------
     ### MVA-output 2D correlation plots
     if args['plot_param']['MVA_2D']['active']:
 
-        def plot_helper(mask, pick_ind, sublabel="inclusive", savestats=False):
+        def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
 
             # Two step
             XX = X_RAW[mask, ...]
@@ -986,7 +992,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             inputs = {'y_pred': y_pred[mask], 'weights': weights[mask], 'X': XX,
                 'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
                 'num_classes': args['num_classes'],
-                'label': f'{label}/{sublabel}', 'hist_edges': edges, 'path': targetdir + f'/COR'}
+                'label': f'{label}/{sublabel}', 'hist_edges': edges, 'path': targetdir + f'/COR/{pathlabel}'}
 
             output = plots.density_COR_wclass(y=y[mask], **inputs)
             #plots.density_COR(**inputs)
@@ -1016,15 +1022,15 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             # ** Powerset filtered **
             if 'powerset_filter' in args['plot_param']['MVA_2D'][pid]:
 
-                plot_helper(mask=mask, pick_ind=pick_ind, sublabel="inclusive", savestats=True)
+                plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=True)
 
                 filters = args['plot_param']['MVA_2D'][pid]['powerset_filter']
-                mask_powerset, text_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
+                mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
 
                 for m in range(mask_powerset.shape[0]):
-                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], savestats=True)
+                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], pathlabel=path_powerset[m], savestats=True)
             else:
-                plot_helper(mask=mask, pick_ind=pick_ind, sublabel="inclusive", savestats=False)                
+                plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False)                
 
     return True
 
@@ -1049,8 +1055,9 @@ def filter_constructor(filters, X_RAW, ids_RAW):
     print(textlist)
 
     # Loop over all powerset 2**|cuts| masked selections
-    # Create a description latex str
+    # Create a description latex strings and savepath strings
     text_powerset = []
+    path_powerset = []
     for i in range(BMAT.shape[0]):
         string = ''
         for j in range(BMAT.shape[1]):
@@ -1059,15 +1066,18 @@ def filter_constructor(filters, X_RAW, ids_RAW):
             if j != BMAT.shape[1] - 1:
                 string += ' '
         string += f' {BMAT[i,:]}'
-        text_powerset.append(string)
 
-    return mask_powerset, text_powerset
+        text_powerset.append(string)
+        path_powerset.append((f'{BMAT[i,:]}').replace(' ', ''))
+
+    return mask_powerset, text_powerset, path_powerset
 
 
 def plot_XYZ_multiple_models(targetdir, args):
 
     global roc_mstats
     global roc_labels
+    global roc_paths
     global ROC_binned_mstats
 
     # ===================================================================
@@ -1101,9 +1111,10 @@ def plot_XYZ_multiple_models(targetdir, args):
     # Direct collect:  Plot all models per powerset category
     for powerset_key in roc_mstats.keys():
 
+        path_label = roc_paths[powerset_key]
         plots.ROC_plot(roc_mstats[powerset_key], roc_labels[powerset_key],
-            title=f'category: {powerset_key}', filename=aux.makedir(targetdir + f'/ROC/__ALL__/{powerset_key}') + '/ROC_all_models')
-
+            title=f'category: {powerset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
+    
     # Inverse collect: Plot all powerset categories ROCs per model
     dummy = 0 # We have the same number of powerset (category) entries for each model, pick the first
     for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
@@ -1113,10 +1124,10 @@ def plot_XYZ_multiple_models(targetdir, args):
         model_label = roc_labels[list(roc_labels)[dummy]][model_index]
 
         plots.ROC_plot(rocs_, labels_,
-            title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC_all_categories')
+            title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
 
     ### Plot all MVA outputs (not implemented)
-    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/__ALL__') + '/MVA')
+    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
 
     ### Plot all binned ROC curves
     if args['plot_param']['ROC_binned']['active']:
@@ -1147,10 +1158,10 @@ def plot_XYZ_multiple_models(targetdir, args):
 
                     ### ROC
                     title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                    plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/__ALL__/ROC_binned[{i}]_bin[{b}]')
+                    plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/--ALL--/ROC-binned[{i}]-bin[{b}]')
 
                     ### MVA (not implemented)
                     #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                    #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/__ALL__/MVA_binned[{i}]_bin[{b}]')
+                    #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/--ALL--/MVA-binned[{i}]-bin[{b}]')
 
     return True
