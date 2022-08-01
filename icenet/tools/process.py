@@ -618,6 +618,7 @@ def evaluate_models(data=None, args=None):
 
     global roc_mstats
     global roc_labels
+    global roc_paths
     global corr_mstats
     roc_mstats  = {}
     roc_labels  = {}
