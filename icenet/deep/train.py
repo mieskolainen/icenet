@@ -374,7 +374,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-    
+
     if not args['__raytune_running__']:
         
         # Plot evolution
@@ -747,7 +747,7 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         if plot_importance:
             for sort in [True, False]:
                 fig,ax = plots.plot_xgb_importance(model=model, tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
-                targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
+                targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
                 plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot decision trees
@@ -920,7 +920,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgb_importance')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
         plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
         
     ## Plot decision trees

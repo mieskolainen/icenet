@@ -746,7 +746,7 @@ def evaluate_models(data=None, args=None):
             func_predict = predict.pred_xgb(args=args, param=param)
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
             
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
 
@@ -755,7 +755,7 @@ def evaluate_models(data=None, args=None):
             
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
             
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
 
@@ -764,7 +764,7 @@ def evaluate_models(data=None, args=None):
 
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'),
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'), transform='torch')
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'), transform='torch')
 
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
@@ -773,7 +773,7 @@ def evaluate_models(data=None, args=None):
 
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
@@ -782,7 +782,7 @@ def evaluate_models(data=None, args=None):
 
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
 
@@ -833,7 +833,7 @@ def evaluate_models(data=None, args=None):
 
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
-                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D_contours/{param["label"]}/'))
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
@@ -851,7 +851,7 @@ def make_plots(data, args):
 
         ###
         if data['data_kin'] is not None:
-            targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D_kinematic/')
+            targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')
             for k in data['data_kin'].ids:
                 plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
                     y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
@@ -862,7 +862,7 @@ def make_plots(data, args):
         fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
         
         ### Plot basic plots
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/1D_distributions/')
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/1D-distributions/')
         plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
             targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
 
@@ -1114,7 +1114,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         path_label = roc_paths[powerset_key]
         plots.ROC_plot(roc_mstats[powerset_key], roc_labels[powerset_key],
             title=f'category: {powerset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
-    
+
     # Inverse collect: Plot all powerset categories ROCs per model
     dummy = 0 # We have the same number of powerset (category) entries for each model, pick the first
     for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
