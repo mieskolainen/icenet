@@ -12,8 +12,8 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
      {text: 'l2_e', cut: 'BOOL__subleadingLeptons_isElectron == True'},
      {text: 'QS',   cut: 'dilepton_charge > 0'},
      {text: 'iso',  cut: 'nominal_dR_l2j > 0.4'}]
-    
-    # note: dilepton_charge should have 3 distinct values, dataframe seems not to have atm
+
+    # note: dilepton_charge can have 3 distinct values, dataframe seems not to have atm
     # [change MVA input  to individual lepton charges]
     # -- = -2
     # -+ =  0
@@ -30,9 +30,10 @@ contours:
 
 ROC:
   active: true
-  #powerset_filter: *FINAL_STATE_FILTER
+  powerset_filter: *FINAL_STATE_FILTER
 
-## Binned ROC plots can be 1D or 2D
+
+## Binned ROC plots can be 1D or 2D (powerset filtering not supported here)
 ROC_binned:
   active: false
 
@@ -49,10 +50,10 @@ ROC_binned:
 MVA_output:
   active: true
   edges: 80
-
-  #powerset_filter: *FINAL_STATE_FILTER
+  powerset_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
+# Powerset can be applied only per one plot[x] identifier
 MVA_2D:
   active: true
 

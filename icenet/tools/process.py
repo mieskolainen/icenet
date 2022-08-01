@@ -877,7 +877,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     global ROC_binned_mstats
     global ROC_binned_mlabel
-    
+
     # ** Compute predictions once and for all here **
     y_pred = func_predict(x_input)
 
@@ -1070,7 +1070,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         for i in range(100): # Loop over plot indexes
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:
-                if 'powerset_filter' in args['plot_param']['MVA_2D']:
+                if 'powerset_filter' in args['plot_param']['MVA_2D'][pid]:
 
                     xlim = args['plot_param']['MVA_2D'][pid]['xlim']
                     plots.plot_correlation_comparison(corr_mstats=corr_mstats, 
@@ -1084,6 +1084,8 @@ def plot_XYZ_multiple_models(targetdir, args):
     # -------------------------------------------------------------------
     ### Plot all ROC curves
 
+    pprint(roc_mstats)
+    
     # Direct collect:  Plot all models per powerset category
     for powerset_key in roc_mstats.keys():
 
@@ -1109,13 +1111,13 @@ def plot_XYZ_multiple_models(targetdir, args):
 
         for i in range(100):
             pid = f'plot[{i}]'
-            
+
             if pid in args['plot_param']['ROC_binned']:
                 var   = args['plot_param']['ROC_binned'][pid]['var']
                 edges = args['plot_param']['ROC_binned'][pid]['edges']
             else:
                 break # No more plots 
-            
+
             if len(var) == 1:
 
                 # Over different bins
