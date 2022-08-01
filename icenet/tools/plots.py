@@ -531,9 +531,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             for scale in ['linear', 'log']: 
 
                 fig,ax    = plt.subplots()
-                outputdir = aux.makedir(f'{path}/{label}')
+                outputdir = aux.makedir(f'{path}')
                 savepath  = f'{outputdir}/var-{var}--class-{k}--{scale}.pdf'
-
+                
                 try:
                     if scale == 'log':
                         import matplotlib as mpl

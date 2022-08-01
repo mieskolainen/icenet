@@ -963,7 +963,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         def plot_helper(mask, sublabel, pathlabel):
             hist_edges = args['plot_param'][f'MVA_output']['edges']
             inputs = {'y_pred': y_pred[mask], 'y': y[mask], 'weights': weights[mask], 'num_classes': args['num_classes'],
-                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': targetdir + '/MVA/' + {pathlabel}}
+                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': f'{targetdir}/MVA/{label}/{pathlabel}'}
 
             plots.density_MVA_wclass(**inputs)
 
@@ -993,7 +993,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             inputs = {'y_pred': y_pred[mask], 'weights': weights[mask], 'X': XX,
                 'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
                 'num_classes': args['num_classes'],
-                'label': f'{label}/{sublabel}', 'hist_edges': edges, 'path': targetdir + f'/COR/{pathlabel}'}
+                'label': f'{label}/{sublabel}', 'hist_edges': edges, 'path': f'{targetdir}/COR/{label}/{pathlabel}'}
 
             output = plots.density_COR_wclass(y=y[mask], **inputs)
             #plots.density_COR(**inputs)
@@ -1029,7 +1029,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
 
                 for m in range(mask_powerset.shape[0]):
-                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], pathlabel=path_powerset[m], savestats=True)
+                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m],
+                        pathlabel=path_powerset[m], savestats=True)
             else:
                 plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False)                
 
