@@ -446,12 +446,12 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     title = f'$\\mathcal{{C}} = {class_ind}$'
                     plt.title(title)
                     plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {obs}) (68CL)')
-                    ax.invert_yaxis()
 
                     ax.set_xlim(xlim[stats][class_ind])
                     ax.set_yticks(np.arange(len(values)))
                     ax.set_yticklabels(categories)
-
+                
+                ax.invert_yaxis()    
                 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                 filename = aux.makedir(targetdir + f'/COR/')
                 plt.savefig(filename + f'all_categories__obs_{obs}__stats_{stats}__class_{class_ind}.pdf',
@@ -841,7 +841,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         # Shift legend outside the figure axes
         if len(metrics) > 6:
             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        
+
         if k == 0: # Linear-Linear
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
