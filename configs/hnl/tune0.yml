@@ -124,15 +124,15 @@ train_runmode:
     #- dmlp_MI_max
     - dmlp0
     - dmlp0_red
-    #- dmlp_MI_min
+    - dmlp_MI_min
 
     #- xgb_MI_max
-    #- xgb0
-    #- xgb0_red
-    #- xgb_MI_min
+    - xgb0
+    - xgb0_red
+    - xgb_MI_min
     
-    #- cut0
-
+    - cut0
+    
     #- lgr_MI_min
     #- lgr_MI_max
     #- lgr0
