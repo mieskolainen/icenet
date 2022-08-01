@@ -3,17 +3,18 @@
 
 FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     # This goes through all the combinations
-    # [0, 0, 0]
-    # [0, 0, 1]
+    # [0, 0, ..., 0]
+    # [0, 0, ..., 1]
     # ...
-    # [1, 1, 1]
+    # [1, 1, ..., 1]
 
     [{text: 'l1_e', cut: 'BOOL__leadingLeptons_isElectron == True'},
      {text: 'l2_e', cut: 'BOOL__subleadingLeptons_isElectron == True'},
-     {text: 'Q',    cut: 'dilepton_charge > 0'}]
-
-    # dilepton_charge should have 3 distinct values, dataframe seems not to have atm
-    # [fix tbd --> change to individual lepton charges, also]
+     {text: 'QS',   cut: 'dilepton_charge > 0'},
+     {text: 'iso',  cut: 'nominal_dR_l2j > 0.4'}]
+    
+    # note: dilepton_charge should have 3 distinct values, dataframe seems not to have atm
+    # [change MVA input  to individual lepton charges]
     # -- = -2
     # -+ =  0
     # +- =  0
@@ -69,7 +70,7 @@ MVA_2D:
       pearson: [[-0.05, 0.2], [-0.05, 0.3]]
       MI: [[0.0, 0.08], [0.0, 0.08]]
     # -----------------------------
-  
+
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},

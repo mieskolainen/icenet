@@ -877,7 +877,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     global ROC_binned_mstats
     global ROC_binned_mlabel
-
+    
     # ** Compute predictions once and for all here **
     y_pred = func_predict(x_input)
 
