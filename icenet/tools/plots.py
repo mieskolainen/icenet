@@ -438,7 +438,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
 
                     # Vertical line at zero
                     plt.plot(np.zeros(len(values)), np.arange(len(values)), color=np.ones(3)*0.5, label=None)
-                    
+
                     ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
                     plt.errorbar(values, np.arange(len(values)), xerr=asymmetric_error,
                         fmt='s', capsize=5.0, label=model)
@@ -838,6 +838,10 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
         ax.set_title(title, fontsize=10)
 
+        # Shift legend outside the figure axes
+        if len(metrics) > 6:
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        
         if k == 0: # Linear-Linear
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
