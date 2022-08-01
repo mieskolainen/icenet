@@ -371,8 +371,8 @@ def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_ed
         outputdir = aux.makedir(f'{path}/{label}')
         savepath  = f'{outputdir}/MVA_output__{scale}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_MVA_wclass: Saving figure to "{savepath}"')
-
+        print(__name__ + f'.density_MVA_wclass: Save: "{savepath}"')
+    
     # --------        
     fig.clf()
     plt.close()
@@ -552,7 +552,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----
 
                     plt.savefig(savepath, bbox_inches='tight')
-                    print(__name__ + f'.density_COR_wclass: Saving figure to "{savepath}"')
+                    print(__name__ + f'.density_COR_wclass: Save: "{savepath}"')
                     
                     # -----                    
                     fig.clf()
@@ -610,7 +610,7 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         outputdir = aux.makedir(f'{path}/{label}')
         savepath = f'{outputdir}/{v}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_COR: Saving figure to "{savepath}"')
+        print(__name__ + f'.density_COR: Save: "{savepath}"')
 
         # -----                    
         fig.clf()
@@ -781,7 +781,7 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
 
         if targetdir is not None:
             fname = targetdir + f'{label}_correlation_matrix.pdf'
-            print(__name__ + f'.plot_correlations: Saving figure to "{fname}"')
+            print(__name__ + f'.plot_correlations: Save: "{fname}"')
             plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
 
     return figs, axs
