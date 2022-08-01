@@ -68,10 +68,10 @@ MVA_2D:
     # Powerset correlation plot parameters
     xlim:
       # For each class [[lower, upper], ... [lower, upper]
-      pearson: [[-0.05, 0.2], [-0.05, 0.3]]
-      MI: [[0.0, 0.08], [0.0, 0.08]]
+      pearson: [[-0.1, 0.35], [-0.1, 0.35]]
+      MI: [[0.0, 0.1], [0.0, 0.1]]
     # -----------------------------
-
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
