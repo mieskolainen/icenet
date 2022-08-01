@@ -119,7 +119,7 @@ xgb0_red:
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
-
+    
     colsample_bytree:  0.86
     colsample_bylevel: 0.6
     colsample_bynode:  0.8

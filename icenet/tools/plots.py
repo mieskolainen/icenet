@@ -10,6 +10,8 @@ import torch
 import xgboost
 import os
 import gc
+from pprint import pprint
+import copy
 
 from tqdm import tqdm
 
@@ -323,7 +325,7 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
     return METS, LABELS
 
 
-def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
+def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_edges=80, path=''):
     """
     Evaluate MVA output (1D) density per class.
     
@@ -337,23 +339,20 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     Returns:
         Plot pdf saved directly
     """
-
-    # Number of classes
-    C         = len(np.unique(y))
     
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(num_classes)]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(num_classes)]
 
     # Over classes
     fig,ax = plt.subplots()
     
-    for k in range(C):
+    for k in range(num_classes):
         ind = (y == k)
 
         w = weights[ind] if weights is not None else None
@@ -365,7 +364,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
-    plt.title(f'[{label}]', fontsize=10)
+    plt.title(f'{label}', fontsize=9)
     
     for scale in ['linear', 'log']:
         ax.set_yscale(scale)
@@ -380,8 +379,88 @@ def density_MVA_wclass(y_pred, y, label, weights=None, hist_edges=80, path=''):
     gc.collect()
 
 
+def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
+    """
+    Plot collected correlation metrics from density_COR_wclass()
+    
+    Args:
+        corr_mstats: statistics dictionary
+        num_classes: number of classes
+        targetdir:   output directory
+        xlim:        plot limits dictionary per class
+    Returns:
+        plots saved to a directory
+    """
+
+    ## Find all observables
+    all_obs = []
+    for model in corr_mstats.keys():
+        for category in corr_mstats[model].keys():
+            for class_ind in range(num_classes):
+                for obs in corr_mstats[model][category][class_ind].keys():
+                    all_obs.append(obs)
+
+    all_obs = set(all_obs) # Reduce to a set (values appear only once)
+
+
+    ## Over all observables
+    for obs in all_obs:
+
+        # Over classes
+        for class_ind in range(num_classes):
+
+            # Over different statistical metrics
+            for stats in ['pearson', 'MI']:
+
+                fig,ax = plt.subplots()
+                
+                # Per model        
+                for model in corr_mstats.keys():
+
+                    categories = list(corr_mstats[model].keys())
+
+                    values = np.nan * np.ones(len(categories))
+                    lower  = np.nan * np.ones(len(categories))
+                    upper  = np.nan * np.ones(len(categories))
+
+                    # Over each powerset category
+                    for i in range(len(categories)):
+                        x = corr_mstats[model][categories[i]][class_ind]
+
+                        if x is not {}: # We have some stats
+                            values[i] = x[obs][f'{stats}']
+                            lower[i]  = x[obs][f'{stats}_CI'][0]
+                            upper[i]  = x[obs][f'{stats}_CI'][1]
+
+                    lower            = np.abs(values - np.array(lower))
+                    upper            = np.abs(np.array(upper) - values)
+                    asymmetric_error = np.array(list(zip(lower, upper))).T
+
+                    # Vertical line at zero
+                    plt.plot(np.zeros(len(values)), np.arange(len(values)), color=np.ones(3)*0.5, label=None)
+                    
+                    ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
+                    plt.errorbar(values, np.arange(len(values)), xerr=asymmetric_error,
+                        fmt='s', capsize=5.0, label=model)
+
+                    title = f'$\\mathcal{{C}} = {class_ind}$'
+                    plt.title(title)
+                    plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {obs}) (68CL)')
+                    ax.invert_yaxis()
+
+                    ax.set_xlim(xlim[stats][class_ind])
+                    ax.set_yticks(np.arange(len(values)))
+                    ax.set_yticklabels(categories)
+
+                plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                filename = aux.makedir(targetdir + f'/COR/')
+                plt.savefig(filename + f'all_categories__obs_{obs}__stats_{stats}__class_{class_ind}.pdf',
+                    bbox_inches='tight')
+                plt.close()
+
+
 def density_COR_wclass(y_pred, y, X, ids, label, \
-    weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+    weights=None, num_classes=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
     
     """
     Evaluate the 2D-density of the MVA algorithm output vs other variables per class.
@@ -396,28 +475,33 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
         path        :  Save path
         cmap        :  Color map
-    
+        
     Returns:
-        Plot pdf saved directly
+        correlation values in a dictionary (per variable, per class)
+        plots are saved directly
     """
-
-    # Number of classes
-    C = len(np.unique(y))
 
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(C)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(num_classes)]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(C)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(num_classes)]
     
+    output = np.array([None]*num_classes, dtype=np.object_)
+
     # Over classes
-    for k in range(C):
-            
+    for k in np.arange(num_classes):
+        
+        output[k] = {}
         ind = (y == k)
         w = weights[ind] if weights is not None else None
+
+        if np.sum(ind) == 0:
+            print(__name__ + f'.density_COR_wclass: No samples for class {k} -- continue')
+            continue
 
         # Loop over variables
         for v in ids:
@@ -425,9 +509,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             # Plot 2D
             xx   = y_pred[ind]
             yy   = X[ind, ids.index(v)]
-            
+
             # Compute Pearson correlation coefficient
-            cc,cc_err,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
+            cc,cc_CI,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
 
             # Neural Mutual Information
             #from icefit import mine
@@ -435,6 +519,13 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
             # Histogram MI
             MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', normalized=None)
+
+            # Save output
+            output[k][v] = {}
+            output[k][v]['pearson']    = cc
+            output[k][v]['pearson_CI'] = cc_CI
+            output[k][v]['MI']         = MI
+            output[k][v]['MI_CI']      = MI_CI
 
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
@@ -454,10 +545,10 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     fig.colorbar(im)
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
                     plt.ylabel(f'{v}')
-                    rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_err[0]:0.2f}}}^{{+{cc_err[1]-cc:0.2f}}}$'
+                    rho_value = f'$\\rho_{{XY}} = {cc:0.2f}_{{-{cc-cc_CI[0]:0.2f}}}^{{+{cc_CI[1]-cc:0.2f}}}$'
                     MI_value  = f'$\\mathcal{{I}}_{{XY}} = ({MI_CI[0]:0.3f}, {MI_CI[1]:0.3f})$'
                     
-                    plt.title(f'[{label}] | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=10)
+                    plt.title(f'{label} | $\\mathcal{{C}} = {k}$ | {rho_value} | {MI_value}', fontsize=9)
                     # -----
 
                     plt.savefig(savepath, bbox_inches='tight')
@@ -466,10 +557,13 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----                    
                     fig.clf()
                     plt.close()
-                    gc.collect()
+                    #gc.collect()
                     
                 except: # Matplotlib LogNorm() can be buggy
                     print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
+    pprint(output)
+
+    return output
 
 
 def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):

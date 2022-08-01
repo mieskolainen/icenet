@@ -11,7 +11,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     [{text: 'l1_e', cut: 'BOOL__leadingLeptons_isElectron == True'},
      {text: 'l2_e', cut: 'BOOL__subleadingLeptons_isElectron == True'},
      {text: 'Q',    cut: 'dilepton_charge > 0'}]
-    
+
     # dilepton_charge should have 3 distinct values, dataframe seems not to have atm
     # [fix tbd --> change to individual lepton charges, also]
     # -- = -2
@@ -29,7 +29,7 @@ contours:
 
 ROC:
   active: true
-  powerset_filter: *FINAL_STATE_FILTER
+  #powerset_filter: *FINAL_STATE_FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
@@ -49,12 +49,12 @@ MVA_output:
   active: true
   edges: 80
 
-  powerset_filter: *FINAL_STATE_FILTER
+  #powerset_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
 MVA_2D:
   active: true
-    
+
   plot[0]:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
@@ -62,6 +62,14 @@ MVA_2D:
 
     powerset_filter: *FINAL_STATE_FILTER
 
+    # -----------------------------
+    # Powerset correlation plot parameters
+    xlim:
+      # For each class [[lower, upper], ... [lower, upper]
+      pearson: [[-0.05, 0.2], [-0.05, 0.3]]
+      MI: [[0.0, 0.08], [0.0, 0.08]]
+    # -----------------------------
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
