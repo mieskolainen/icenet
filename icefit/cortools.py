@@ -154,27 +154,26 @@ def I_score(C, normalized=None, EPS=1E-15):
     Returns:
         mutual information score
     """
-    nX, nY = np.nonzero(C)
+    # Make sure it is positive definite
+    C[C < 0] = 0
 
-    # Joint density
-    P_ij   = C[nX, nY] / np.sum(C.flatten())
+    # Joint 2D-density
+    P_ij   = C / np.sum(C.flatten())
 
-    # Marginal densities
-    Pi     = np.ravel(np.sum(C,axis=1))
-    Pi     = Pi / np.sum(Pi)
-    Pj     = np.ravel(np.sum(C,axis=0))
-    Pj     = Pj / np.sum(Pj)
-
-    # Factorized 1D x 1D density
-    Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
-    Pi_Pj = Pi_Pj / np.sum(Pi_Pj)
+    # Marginal densities by summing over the other dimension
+    P_i    = np.sum(C, axis=1); P_i /= np.sum(P_i)
+    P_j    = np.sum(C, axis=0); P_j /= np.sum(P_j)
+    
+    # Factorized (1D) x (1D) density
+    Pi_Pj  = np.outer(P_i, P_j)
+    Pi_Pj /= np.sum(Pi_Pj.flatten())
 
     # Choose non-zero
     ind = (P_ij > EPS) & (Pi_Pj > EPS)
 
     # Mutual Information Definition
-    I = np.sum(P_ij[ind] * np.log(P_ij[ind] / Pi_Pj[ind]))
-    I = np.clip(I, 0.0, None)
+    I   = np.sum(P_ij[ind] * np.log(P_ij[ind] / Pi_Pj[ind]))
+    I   = np.clip(I, 0.0, None)
 
     # Normalization
     if   normalized == None:
@@ -200,7 +199,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_x     : x binning array  If None, then automatic.
         bins_y     : y binning array.
         normalized : normalize the mutual information (see I_score() function)
-        n_bootstrap: number of bootstrap evaluations
+        n_bootstrap: number of "empirical bootstrap" samples
         alpha      : bootstrap confidence interval
     
     Autobinning args:    
@@ -209,7 +208,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         outlier    : outlier protection percentile
     
     Returns:
-        mutual information, uncertainty
+        mutual information, confidence interval
     """
     x = np.asarray(x, dtype=float) # Require float for precision
     y = np.asarray(y, dtype=float)
@@ -240,7 +239,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     if bins_y is None:
         bins_y = autobinwrap(y)
 
-    MI_values = np.zeros(n_bootstrap)
+    r_star = np.zeros(n_bootstrap)
 
     for i in range(n_bootstrap):
 
@@ -250,14 +249,18 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
             ind = np.arange(len(w))
         w_ = w[ind] / np.sum(w[ind])
 
-        XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x, bins_y], weights=w_)[0]
-        XY[XY < 0] = 0 # Entropy defined only for positive definite
-        MI_values[i] = I_score(C=XY, normalized=normalized)
-    
-    MI     = MI_values[0]       # The non-bootstrapped value
-    MI_err = prc_CI(MI_values, alpha)
+        h2d = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x, bins_y], weights=w_)[0]
 
-    return MI, MI_err
+        # Compute MI
+        r_star[i] = I_score(C=h2d, normalized=normalized)
+    
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
+
+    # "Empirical bootstrap" CI
+    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
+
+    return r, r_CI
 
 def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     """
@@ -277,7 +280,7 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     w = weights / np.sum(weights) 
 
     # Obtain estimates and sample uncertainty via bootstrap
-    r_values = np.zeros(n_bootstrap)
+    r_star = np.zeros(n_bootstrap)
 
     for i in range(n_bootstrap):
 
@@ -288,15 +291,17 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
 
         w_ = w[ind] / np.sum(w[ind])
 
-        # Compute
-        r  = dcor.distance_correlation(x[ind], y[ind])
-        
-        r_values[i] = r
+        # Compute [T.B.D. add weighted version]
+        r_star[i] = dcor.distance_correlation(x[ind], y[ind])
 
-    r     = r_values[0]       # The non-bootstrapped value
-    r_err = prc_CI(r_values, alpha)    
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
 
-    return r, r_err
+    # "Empirical bootstrap" CI
+    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
+    
+    return r, r_CI
+
 
 def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
     """
@@ -307,7 +312,7 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
         x,y        : arrays of values
         weights    : possible event weights
         alpha      : confidence interval [alpha/2, 1-alpha/2] level 
-        n_bootstrap: number of bootstrap samples
+        n_bootstrap: number of "empirical bootstrap" samples
     Returns: 
         correlation coefficient [-1,1], confidence interval, p-value
     """
@@ -329,7 +334,7 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
     y_ = y - np.sum(w*y)
 
     # Obtain estimates and sample uncertainty via bootstrap
-    r_values = np.zeros(n_bootstrap)
+    r_star = np.zeros(n_bootstrap)
 
     # See: Efron, B. (1988). "Bootstrap confidence intervals:
     #      Good or bad?" Psychological Bulletin, 104, 293-296.
@@ -350,19 +355,21 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
             r = 0
         
         # Safety
-        r = np.clip(r, -1.0, 1.0)
-        
-        r_values[i] = r
+        r_star[i] = np.clip(r, -1.0, 1.0)
 
-    r     = r_values[0]       # The non-bootstrapped value
-    r_err = prc_CI(r_values, alpha)
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
+
+    # "Empirical bootstrap" CI
+    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
 
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
     prob = 2*dist.cdf(-abs(r))
 
-    return r, r_err, prob
+    return r, r_CI, prob
+
 
 def gaussian_mutual_information(rho):
     """
