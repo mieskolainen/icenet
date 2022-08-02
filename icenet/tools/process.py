@@ -982,26 +982,6 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     ### MVA-output 2D correlation plots
     if args['plot_param']['MVA_2D']['active']:
 
-        def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
-
-            # Two step
-            XX = X_RAW[mask, ...]
-            XX = XX[:, pick_ind]
-
-            inputs = {'y_pred': y_pred[mask], 'weights': weights[mask], 'X': XX,
-                'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
-                'num_classes': args['num_classes'],
-                'label': f'{label}/{sublabel}', 'hist_edges': edges, 'path': f'{targetdir}/COR/{label}/{pathlabel}'}
-
-            output = plots.density_COR_wclass(y=y[mask], **inputs)
-            #plots.density_COR(**inputs)
-
-            # Save output
-            if savestats:
-                if label not in corr_mstats.keys():
-                    corr_mstats[label] = {}
-                corr_mstats[label][sublabel] = output
-
         for i in range(100): # Loop over plot types
             
             pid = f'plot[{i}]'
@@ -1009,7 +989,28 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 var   = args['plot_param']['MVA_2D'][pid]['var']
                 edges = args['plot_param']['MVA_2D'][pid]['edges']
             else:
-                break # No more this type of plots 
+                break # No more this type of plots
+
+            def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
+
+                # Two step
+                XX = X_RAW[mask, ...]
+                XX = XX[:, pick_ind]
+                
+                inputs = {'y_pred': y_pred[mask], 'weights': weights[mask], 'X': XX,
+                    'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
+                    'num_classes': args['num_classes'],
+                    'label': f'{label}/{sublabel}', 'hist_edges': edges,
+                    'path': f'{targetdir}/COR/{label}/{pathlabel}'}
+                
+                output = plots.density_COR_wclass(y=y[mask], **inputs)
+                #plots.density_COR(**inputs)
+
+                # Save output
+                if savestats:
+                    if label not in corr_mstats.keys():
+                        corr_mstats[label] = {}
+                    corr_mstats[label][sublabel] = output
 
             # Pick chosen variables based on regular expressions
             var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=var)

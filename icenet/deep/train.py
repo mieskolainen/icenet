@@ -582,7 +582,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
                 cat_ww       = np.sqrt(np.sum(mm_)) # Relative error N/sqrt(N)=sqrt(N) weights based on Poisson stats
                 MI_loss_this = MI_loss_this + MI_reg_param['beta'][k] * MI_lb * cat_ww
                 total_ww    += cat_ww
-
+            
             MI_lb_values.append(np.round(MI_lb.item(), 4))
 
         # Finally add this to the total loss

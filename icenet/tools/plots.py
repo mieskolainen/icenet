@@ -410,7 +410,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
         for class_ind in range(num_classes):
 
             # Over different statistical metrics
-            for stats in ['pearson', 'disco', 'MI']:
+            for stats in ['pearson', 'abs_pearson', 'disco', 'MI']:
 
                 fig,ax = plt.subplots()
                 
@@ -518,29 +518,37 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             yy = X[ind, ids.index(var)]
 
             # Compute Pearson correlation coefficient
-            cc,cc_CI,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
+            cc,cc_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=w)
+
+            # Compute Absolute Pearson correlation coefficient
+            cc_abs,cc_abs_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=w, return_abs=True)
 
             # Distance correlation
             disco,disco_CI   = cortools.distance_corr(x=xx, y=yy, weights=w)
 
-            # Neural Mutual Information
+            # Neural Mutual Information [cannot use, unreliable to compute for small samples]
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
-
-            # Histogram MI
-            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
+            #MI_CI = np.array([MI-MI_err, MI+MI_err])
             
+            # Histogram MI
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, minbins=20, maxbins=20)
+
             # Save output
             output[k][var] = {}
+
             output[k][var]['pearson']    = cc
             output[k][var]['pearson_CI'] = cc_CI
+            
+            output[k][var]['abs_pearson']    = cc_abs
+            output[k][var]['abs_pearson_CI'] = cc_abs_CI
 
             output[k][var]['disco']      = disco
             output[k][var]['disco_CI']   = disco_CI
             
             output[k][var]['MI']         = MI
             output[k][var]['MI_CI']      = MI_CI
-            
+
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
             for scale in ['linear', 'log']: 

@@ -192,6 +192,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
+    
     Args:
         x          : array of values
         y          : array of values
@@ -199,7 +200,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_x     : x binning array  If None, then automatic.
         bins_y     : y binning array.
         normalized : normalize the mutual information (see I_score() function)
-        n_bootstrap: number of "empirical bootstrap" samples
+        n_bootstrap: number of percentile bootstrap samples
         alpha      : bootstrap confidence interval
     
     Autobinning args:    
@@ -257,8 +258,8 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     # The non-bootstrapped value (original sample based)
     r    = r_star[0] 
 
-    # "Empirical bootstrap" CI
-    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
 
     return r, r_CI
 
@@ -297,13 +298,13 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     # The non-bootstrapped value (original sample based)
     r    = r_star[0] 
 
-    # "Empirical bootstrap" CI
-    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
     
     return r, r_CI
 
 
-def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
+def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=300):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
@@ -311,8 +312,9 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
     Args:
         x,y        : arrays of values
         weights    : possible event weights
+        return_abs : return absolute value
         alpha      : confidence interval [alpha/2, 1-alpha/2] level 
-        n_bootstrap: number of "empirical bootstrap" samples
+        n_bootstrap: number of percentile bootstrap samples
     Returns: 
         correlation coefficient [-1,1], confidence interval, p-value
     """
@@ -355,14 +357,19 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
             r = 0
         
         # Safety
-        r_star[i] = np.clip(r, -1.0, 1.0)
+        r = np.clip(r, -1.0, 1.0)
+
+        # if we want absolute value
+        if return_abs: r = np.abs(r)
+
+        r_star[i] = r
 
     # The non-bootstrapped value (original sample based)
     r    = r_star[0] 
 
-    # "Empirical bootstrap" CI
-    r_CI = np.flip(r - prc_CI(r_star - r, alpha))
-
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
+    
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
@@ -504,9 +511,9 @@ def test_gaussian():
             # ---------------------------------------------------------------
 
             # Linear correlation
-            r,r_err,prob = pearson_corr(x=x1, y=x2)
+            r,r_CI,prob = pearson_corr(x=x1, y=x2)
             assert  r == pytest.approx(rho, abs=EPS)
-            print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
+            print(f'pearson_corr = {r:.3f}, CI = {r_CI}, p-value = {prob:0.3E}')
 
             # MI Reference (exact analytic)
             MI_REF = gaussian_mutual_information(rho)
@@ -516,9 +523,9 @@ def test_gaussian():
             automethod = ['Scott2D', 'Hacine2D']
             
             for method in automethod:
-                MI, MI_err = mutual_information(x=x1, y=x2, automethod=method)
+                MI, MI_CI = mutual_information(x=x1, y=x2, automethod=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Histogram     MI = {MI:0.3f}, CI = {MI_err} ({method})')
+                print(f'Histogram     MI = {MI:0.3f}, CI = {MI_CI} ({method})')
 
             # Neural MI
             neuromethod = ['MINE', 'MINE_EMA', 'DENSITY']
@@ -546,26 +553,26 @@ def test_constant():
     x1 = np.ones(100)
     x2 = np.ones(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r  = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(1, abs=EPS)
 
-    MI,_      = mutual_information(x=x1, y=x2)
+    MI = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
-    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    MI_mine = mine.estimate(X=x1, Z=x2)[0]
     assert  MI_mine == pytest.approx(0, abs=EPS)
 
 
     ### Other zeros    
     x2 = np.zeros(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r  = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(0, abs=EPS)
 
-    MI,_      = mutual_information(x=x1, y=x2)
+    MI = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
-    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    MI_mine = mine.estimate(X=x1, Z=x2)[0]
     assert  MI_mine == pytest.approx(0, abs=EPS)
 
 
