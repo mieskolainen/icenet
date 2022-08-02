@@ -424,10 +424,6 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     upper  = np.nan * np.ones(len(categories))
 
                     ## Over each powerset category
-
-                    # Collect average value over powerset categories
-                    val_sum, err_sum, val_n = 0,0,0
-
                     for i in range(len(categories)):
                         x = corr_mstats[model][categories[i]][class_ind]
 
@@ -435,10 +431,6 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                             values[i] = x[var][f'{stats}']
                             lower[i]  = x[var][f'{stats}_CI'][0]
                             upper[i]  = x[var][f'{stats}_CI'][1]
-
-                            if categories[i] != 'inclusive':
-                                val_sum += values[i]
-                                val_n   += 1
 
                     error = (upper - lower)/2 # Simple symmetric errors
                     #lower = np.abs(values - np.array(lower))
@@ -449,8 +441,9 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     plt.plot(np.zeros(len(values)), np.arange(len(values)), color=np.ones(3)*0.5, label=None)
 
                     ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
+                    legend_label = f'{model} [{np.median(values):0.3f}]'
                     plt.errorbar(values, np.arange(len(values)), xerr=error,
-                        fmt='s', capsize=5.0, label=f'{model} [{val_sum/val_n:0.3f} +- {0.0}]')
+                        fmt='s', capsize=5.0, label=legend_label)
 
                     title = f'$\\mathcal{{C}} = {class_ind}$'
                     plt.title(title)
@@ -534,7 +527,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
             # Histogram MI
             MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
-            
+
             # Save output
             output[k][var] = {}
 
