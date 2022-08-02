@@ -28,6 +28,7 @@ import xgboost
 from matplotlib import pyplot as plt
 
 # icenet
+from icenet.tools import stx
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import aux_torch
@@ -536,7 +537,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
 
     # Loop over chosen classes
     k       = 0
-    MI_loss = 0
+    MI_loss = torch.tensor(0.0).to(preds.device)
     MI_lb_values = []
 
     for c in MI_reg_param['classes']:
@@ -546,33 +547,53 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
         # -----------
 
-        if c == None:
-            ind = (targets != -1) # All classes
-        else:
-            ind = (targets == c)
+        # Pick class indices
+        cind  = (targets != None) if c == None else (targets == c)
 
-        X     = torch.Tensor(MI_x).to(preds.device)
-        Z     = preds
-        
-        # We need .detach() here for Z!
-        model = mine.estimate(X=X[ind], Z=Z[ind].detach(), weights=weights[ind],
-            return_model_only=True, device=X.device, **reg_param)
-        
-        # ------------------------------------------------------------
-        # Now apply the MI estimator to the sample
-        
-        # No .detach() here, we need the gradients for Z!
-        MI_lb = mine.apply_in_batches(X=X[ind], Z=Z[ind], weights=weights[ind], model=model, losstype=reg_param['losstype'])
-        # ------------------------------------------------------------
-        
-        MI_loss = MI_loss + MI_reg_param['beta'][k] * MI_lb
-        MI_lb_values.append(np.round(MI_lb.item(), 4))
+        X     = torch.Tensor(MI_x).to(preds.device)[cind]
+        Z     = preds[cind]
+        W     = weights[cind]
+
+        ### Now loop over all powerset categories
+        mask  = reg_param['evt_mask'][c]
+        N_cat = mask.shape[0]
+
+        MI_loss_this = torch.tensor(0.0).to(preds.device)
+        MI_lb        = torch.tensor(0.0).to(preds.device)
+        total_ww     = 0.0
+
+        for m in range(N_cat):
+
+            mm_ = mask[m,:] # Pick index mask
+            
+            if np.sum(mm_) > 100: # Minimum number of events cutoff
+
+                # We need .detach() here for Z!
+                model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
+                    return_model_only=True, device=X.device, **reg_param)
+                
+                # ------------------------------------------------------------
+                # Now apply the MI estimator to the sample
+                
+                # No .detach() here, we need the gradients for Z!
+                MI_lb = mine.apply_in_batches(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model, losstype=reg_param['losstype'])
+                # ------------------------------------------------------------
+                
+                cat_ww = 1.0 / np.sum(mm_) # Inverse Poisson variance sqrt[N]**2 weight
+                MI_loss_this = MI_loss_this + MI_reg_param['beta'][k] * MI_lb * cat_ww
+                total_ww += cat_ww
+
+            MI_lb_values.append(np.round(MI_lb.item(), 4))
+
+        # Finally add this to the total loss
+        MI_loss = MI_loss + MI_loss_this / total_ww
 
         k += 1
 
     ## Total loss
     total_loss = CE_loss + MI_loss
-    cprint(f'Loss: Total = {total_loss:0.4f} | CE = {CE_loss:0.4f} | MI x beta {reg_param["beta"]} = {MI_loss:0.4f} | MI_lb = {MI_lb_values}', 'yellow')
+    cprint(f'Loss: Total = {total_loss:0.4f} | CE = {CE_loss:0.4f} | MI x beta {reg_param["beta"]} = {MI_loss:0.4f}', 'yellow')
+    cprint(f'MI_lb = {MI_lb_values}', 'yellow')
     
     loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI x $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
     optimize.trackloss(loss=loss, loss_history=loss_history)
@@ -601,6 +622,25 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
 
         loss_history  = {}
         MI_reg_param  = copy.deepcopy(param['MI_reg_param']) #! important
+
+        # ---------------------------------------------------
+        # Create powerset masks
+        MI_reg_param['evt_mask'] = [None]*len(MI_reg_param['classes'])
+
+        for c in MI_reg_param['classes']:
+            cind = (data_trn.y != None) if c == None else (data_trn.y == c)
+
+            # Per powerset category
+            if 'powerset_filter' in MI_reg_param:
+                mask, text, path = stx.filter_constructor(
+                    filters=MI_reg_param['powerset_filter'], X=data_trn.x[cind,...], ids=data_trn.ids)
+            # All inclusive
+            else:
+                mask = np.ones((1, len(data_trn.x[cind,...])), dtype=int)
+            
+            # Save the mask
+            MI_reg_param['evt_mask'][c] = copy.deepcopy(mask)
+
     # ---------------------------------------------------
 
     if param['model_param']['tree_method'] == 'auto':

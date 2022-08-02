@@ -911,8 +911,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         if 'powerset_filter' in args['plot_param']['ROC']:
 
             filters = args['plot_param']['ROC']['powerset_filter']
-            mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
-
+            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
+            
             for m in range(mask_powerset.shape[0]):
                 plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
 
@@ -975,7 +975,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         if 'powerset_filter' in args['plot_param']['MVA_output']:
 
             filters = args['plot_param']['MVA_output']['powerset_filter']
-            mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
+            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
                 plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
@@ -1026,7 +1026,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=True)
 
                 filters = args['plot_param']['MVA_2D'][pid]['powerset_filter']
-                mask_powerset, text_powerset, path_powerset = filter_constructor(filters=filters, X_RAW=X_RAW, ids_RAW=ids_RAW)
+                mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
                 for m in range(mask_powerset.shape[0]):
                     plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m],
@@ -1035,44 +1035,6 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False)                
 
     return True
-
-
-def filter_constructor(filters, X_RAW, ids_RAW):
-    """
-    Powerset filter constructor
-
-    Returns:
-        mask matrix, mask text labels
-    """
-    cutlist  = [filters[k]['cut']   for k in range(len(filters))]
-    textlist = [filters[k]['latex'] for k in range(len(filters))]
-
-    # Construct cuts and apply
-    cuts, names   = stx.construct_columnar_cuts(X=X_RAW, ids=ids_RAW, cutlist=cutlist)
-    stx.print_parallel_cutflow(cut=cuts, names=names)
-    
-    mask_powerset = stx.powerset_cutmask(cut=cuts)
-    BMAT          = aux.generatebinary(len(cuts))
-
-    print(textlist)
-
-    # Loop over all powerset 2**|cuts| masked selections
-    # Create a description latex strings and savepath strings
-    text_powerset = []
-    path_powerset = []
-    for i in range(BMAT.shape[0]):
-        string = ''
-        for j in range(BMAT.shape[1]):
-            bit = BMAT[i,j] # 0 or 1
-            string += f'{textlist[j][bit]}'
-            if j != BMAT.shape[1] - 1:
-                string += ' '
-        string += f' {BMAT[i,:]}'
-
-        text_powerset.append(string)
-        path_powerset.append((f'{BMAT[i,:]}').replace(' ', ''))
-
-    return mask_powerset, text_powerset, path_powerset
 
 
 def plot_XYZ_multiple_models(targetdir, args):
@@ -1110,15 +1072,17 @@ def plot_XYZ_multiple_models(targetdir, args):
 
     pprint(roc_mstats)
     
+    # We have the same number of powerset (category) entries for each model, pick the first
+    dummy = 0
+
     # Direct collect:  Plot all models per powerset category
     for powerset_key in roc_mstats.keys():
 
-        path_label = roc_paths[powerset_key]
+        path_label = roc_paths[powerset_key][dummy]
         plots.ROC_plot(roc_mstats[powerset_key], roc_labels[powerset_key],
             title=f'category: {powerset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
 
     # Inverse collect: Plot all powerset categories ROCs per model
-    dummy = 0 # We have the same number of powerset (category) entries for each model, pick the first
     for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
         
         rocs_       = [roc_mstats[powerset_key][model_index] for powerset_key in roc_mstats.keys()]

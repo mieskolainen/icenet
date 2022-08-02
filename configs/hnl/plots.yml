@@ -1,19 +1,17 @@
-# -----------------------------------------------------------------------
-# Filters
-
 FINAL_STATE_FILTER: &FINAL_STATE_FILTER
+
     # This goes through all the combinations
     # [0, 0, ..., 0]
     # [0, 0, ..., 1]
     # ...
     # [1, 1, ..., 1]
-
+    
     # Latex description is for boolean [0,1] per cut
     [{latex: ['$e',  '$\mu'], cut: 'BOOL__leadingLeptons_isElectron == True'},
      {latex: ['e',   '\mu'],  cut: 'BOOL__subleadingLeptons_isElectron == True'},
      {latex: ['SS',  'OS'],   cut: 'dilepton_charge > 0'},
-     {latex: ['iso$','mrg$'], cut: 'nominal_dR_l2j > 0.4'}]
-
+     {latex: ['iso$','mer$'], cut: 'nominal_dR_l2j > 0.4'}]
+    
     # note: dilepton_charge can have 3 distinct values, we use these here only
     # (check the dataframe definition of dilepton_charge +-1 !)
     # -- = -2 -> SS
@@ -57,7 +55,7 @@ MVA_output:
 # Powerset can be applied only per one plot[i] identifier!
 MVA_2D:
   active: true
-  
+
   plot[0]:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
@@ -70,7 +68,7 @@ MVA_2D:
     xlim:
       # For each class [[lower, upper], ... [lower, upper]
       pearson: [[-0.15, 0.35], [-0.15, 0.35]]
-      MI: [[0.0, 0.1], [0.0, 0.1]]
+      MI: [[0.0, 0.15], [0.0, 0.15]]
     # -----------------------------
   
   #plot[1]:

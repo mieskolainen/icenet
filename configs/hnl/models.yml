@@ -1,3 +1,25 @@
+FINAL_STATE_FILTER: &FINAL_STATE_FILTER
+
+    # This goes through all the combinations
+    # [0, 0, ..., 0]
+    # [0, 0, ..., 1]
+    # ...
+    # [1, 1, ..., 1]
+    
+    # Latex description is for boolean [0,1] per cut
+    [{latex: ['$e',  '$\mu'], cut: 'BOOL__leadingLeptons_isElectron == True'},
+     {latex: ['e',   '\mu'],  cut: 'BOOL__subleadingLeptons_isElectron == True'},
+     {latex: ['SS',  'OS'],   cut: 'dilepton_charge > 0'},
+     {latex: ['iso$','mer$'], cut: 'nominal_dR_l2j > 0.4'}]
+    
+    # note: dilepton_charge can have 3 distinct values, we use these here only
+    # (check the dataframe definition of dilepton_charge +-1 !)
+    # -- = -2 -> SS
+    # -+ =  0 -> OS
+    # +- =  0 -> OS
+    # ++ =  2 -> SS
+# -----------------------------------------------------------------------
+
 # -----------------------------------------------
 # ** Mutual Information regularization **
 MI_REG_PARAM: &MI_REG_PARAM
@@ -10,17 +32,20 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   y_index: [1]
   
-  epochs: 20
-  batch_size: 512
+  epochs: 50
+  batch_size: 256
   lr: 1.0e-3
   weight_decay: 0.00001
   clip_norm: 1.0
-
+  
   mlp_dim: [128, 128]
   batch_norm: False
   dropout: 0.01
   noise_std: 0.025
   activation: 'relu'
+
+  powerset_filter: *FINAL_STATE_FILTER
+
 # -----------------------------------------------
 
 

@@ -7,6 +7,45 @@ import numpy as np
 
 from icenet.tools import aux
 
+
+def filter_constructor(filters, X, ids):
+    """
+    Powerset filter constructor
+    
+    Returns:
+        mask matrix, mask text labels
+    """
+    cutlist  = [filters[k]['cut']   for k in range(len(filters))]
+    textlist = [filters[k]['latex'] for k in range(len(filters))]
+
+    # Construct cuts and apply
+    cuts, names   = construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    print_parallel_cutflow(cut=cuts, names=names)
+    
+    mask_powerset = powerset_cutmask(cut=cuts)
+    BMAT          = aux.generatebinary(len(cuts))
+
+    print(textlist)
+
+    # Loop over all powerset 2**|cuts| masked selections
+    # Create a description latex strings and savepath strings
+    text_powerset = []
+    path_powerset = []
+    for i in range(BMAT.shape[0]):
+        string = ''
+        for j in range(BMAT.shape[1]):
+            bit = BMAT[i,j] # 0 or 1
+            string += f'{textlist[j][bit]}'
+            if j != BMAT.shape[1] - 1:
+                string += ' '
+        string += f' {BMAT[i,:]}'
+
+        text_powerset.append(string)
+        path_powerset.append((f'{BMAT[i,:]}').replace(' ', ''))
+
+    return mask_powerset, text_powerset, path_powerset
+
+
 def construct_columnar_cuts(X, ids, cutlist):
     """
     Construct cuts and corresponding names.
