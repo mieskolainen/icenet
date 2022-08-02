@@ -67,7 +67,7 @@ MVA_2D:
     # Powerset correlation plot parameters
     xlim:
       # For each class [[lower, upper], ... [lower, upper]
-      pearson: [[-0.15, 0.35], [-0.15, 0.35]]
+      pearson: [[-0.15, 0.30], [-0.15, 0.30]]
       MI: [[0.0, 0.15], [0.0, 0.15]]
     # -----------------------------
   

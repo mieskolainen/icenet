@@ -565,7 +565,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         for m in range(N_cat):
 
             mm_ = mask[m,:] # Pick index mask
-            
+
             if np.sum(mm_) > 100: # Minimum number of events cutoff
 
                 # We need .detach() here for Z!
@@ -579,9 +579,9 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
                 MI_lb = mine.apply_in_batches(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model, losstype=reg_param['losstype'])
                 # ------------------------------------------------------------
                 
-                cat_ww = 1.0 / np.sum(mm_) # Inverse Poisson variance sqrt[N]**2 weight
+                cat_ww       = np.sqrt(np.sum(mm_)) # Relative error N/sqrt(N)=sqrt(N) weights based on Poisson stats
                 MI_loss_this = MI_loss_this + MI_reg_param['beta'][k] * MI_lb * cat_ww
-                total_ww += cat_ww
+                total_ww    += cat_ww
 
             MI_lb_values.append(np.round(MI_lb.item(), 4))
 
