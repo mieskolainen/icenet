@@ -61,7 +61,7 @@ MVA_2D:
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
 
     powerset_filter: *FINAL_STATE_FILTER
-
+    
     # -----------------------------
     # Powerset correlation plot parameters
     xlim:
