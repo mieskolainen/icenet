@@ -410,11 +410,11 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
         for class_ind in range(num_classes):
 
             # Over different statistical metrics
-            for stats in ['pearson', 'MI']:
+            for stats in ['pearson', 'disco', 'MI']:
 
                 fig,ax = plt.subplots()
                 
-                # Per model        
+                # Per model
                 for model in corr_mstats.keys():
 
                     categories = list(corr_mstats[model].keys())
@@ -423,7 +423,11 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     lower  = np.nan * np.ones(len(categories))
                     upper  = np.nan * np.ones(len(categories))
 
-                    # Over each powerset category
+                    ## Over each powerset category
+
+                    # Collect average value over powerset categories
+                    val_sum, err_sum, val_n = 0,0,0
+
                     for i in range(len(categories)):
                         x = corr_mstats[model][categories[i]][class_ind]
 
@@ -431,6 +435,10 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                             values[i] = x[var][f'{stats}']
                             lower[i]  = x[var][f'{stats}_CI'][0]
                             upper[i]  = x[var][f'{stats}_CI'][1]
+
+                            if categories[i] != 'inclusive':
+                                val_sum += values[i]
+                                val_n   += 1
 
                     lower            = np.abs(values - np.array(lower))
                     upper            = np.abs(np.array(upper) - values)
@@ -441,8 +449,8 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
 
                     ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
                     plt.errorbar(values, np.arange(len(values)), xerr=asymmetric_error,
-                        fmt='s', capsize=5.0, label=model)
-
+                        fmt='s', capsize=5.0, label=f'{model} [{val_sum/val_n:0.3f} +- {0.0}]')
+                    
                     title = f'$\\mathcal{{C}} = {class_ind}$'
                     plt.title(title)
                     plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {var}) (68CL)')
@@ -454,7 +462,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                 ax.invert_yaxis()    
                 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                 filename = aux.makedir(targetdir + f'/COR/')
-                plt.savefig(filename + f'var-{var}--stats_{stats}--class-{class_ind}.pdf',
+                plt.savefig(filename + f'var-{var}--stats-{stats}--class-{class_ind}.pdf',
                     bbox_inches='tight')
                 plt.close()
 
@@ -512,6 +520,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             # Compute Pearson correlation coefficient
             cc,cc_CI,p_value = cortools.pearson_corr(x=xx, y=yy, weights=w)
 
+            # Distance correlation
+            disco,disco_CI   = cortools.distance_corr(x=xx, y=yy, weights=w)
+
             # Neural Mutual Information
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
@@ -523,6 +534,10 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             output[k][var] = {}
             output[k][var]['pearson']    = cc
             output[k][var]['pearson_CI'] = cc_CI
+
+            output[k][var]['disco']      = disco
+            output[k][var]['disco_CI']   = disco_CI
+            
             output[k][var]['MI']         = MI
             output[k][var]['MI_CI']      = MI_CI
 
@@ -533,7 +548,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}')
                 savepath  = f'{outputdir}/var-{var}--class-{k}--{scale}.pdf'
-                
+
                 try:
                     if scale == 'log':
                         import matplotlib as mpl

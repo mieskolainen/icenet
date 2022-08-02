@@ -912,7 +912,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
             filters = args['plot_param']['ROC']['powerset_filter']
             mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
-            
+
             for m in range(mask_powerset.shape[0]):
                 plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
 
@@ -946,10 +946,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
             ## 2D
             elif len(var) == 2:
-
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
                     VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
-
                 plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}].pdf', bbox_inches='tight')
                 
             else:

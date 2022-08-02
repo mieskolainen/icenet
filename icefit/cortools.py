@@ -10,6 +10,7 @@ import copy
 import scipy
 import scipy.special as special
 import scipy.stats as stats
+import dcor
 
 # Needed for tests only
 import pandas as pd
@@ -153,19 +154,16 @@ def I_score(C, normalized=None, EPS=1E-15):
     Returns:
         mutual information score
     """
-    def Pnorm(x):
-        return np.maximum(x / np.sum(x.flatten()), EPS)
-
     nX, nY   = np.nonzero(C)
     Pi       = np.ravel(np.sum(C,axis=1))
     Pj       = np.ravel(np.sum(C,axis=0))
     
-    # Joint 2D
-    P_ij     = Pnorm(C[nX, nY]).astype(np.float64)
+    # Joint 2D density
+    P_ij     = C[nX, nY] / np.sum(C)
     
-    # Factorized 1D x 1D
+    # Factorized 1D x 1D density
     Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
-    Pi_Pj = Pi_Pj / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
+    Pi_Pj = Pi_Pj / np.sum(Pi_Pj)
 
     # Choose non-zero
     ind = (P_ij > EPS) & (Pi_Pj > EPS)
@@ -209,22 +207,28 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     Returns:
         mutual information, uncertainty
     """
-    rho,_,_ = pearson_corr(x,y)
+    x = np.asarray(x, dtype=float) # Require float for precision
+    y = np.asarray(y, dtype=float)
 
     if weights is None:
-        w = np.ones(len(x), dtype=float)
-    else:
-        w = weights
+        weights = np.ones(len(x), dtype=float)
+
+    # Normalize to sum to one
+    w = weights / np.sum(weights) 
+
+    # For autobinning methods
+    rho,_,_ = pearson_corr(x=x,y=y, weights=weights)
 
     def autobinwrap(data):
         if   automethod == 'Scott2D':
-            NB = scott_bin(x=data,rho=rho, mode='nbins', alpha=outlier)
+            NB = scott_bin(x=data, rho=rho, mode='nbins', alpha=outlier)
         elif automethod == 'Hacine2D':
             NB = hacine_joint_entropy_bin(x=data, rho=rho, mode='nbins', alpha=outlier)
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
         NB = int(np.minimum(np.maximum(NB, minbins), maxbins))
+
         return np.linspace(np.percentile(data, outlier/2*100), np.percentile(data, 100*(1-outlier/2)), NB + 1)
 
     if bins_x is None:
@@ -243,7 +247,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
 
         w_ = w[ind] / np.sum(w[ind])
 
-        XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x,bins_y], weights=w_)[0]
+        XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x, bins_y], weights=w_)[0]
         XY[XY < 0] = 0 # Entropy defined only for positive definite
         MI_values[i] = I_score(C=XY, normalized=normalized)
     
@@ -252,21 +256,46 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
 
     return MI, MI_err
 
-
-def gaussian_mutual_information(rho):
+def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     """
-    Analytical 2D-Gaussian mutual information
-    using a correlation coefficient rho.
-    
-    I(X1,X2) = H(X1) + H(X2) - H(X1,X2)
-    Args:
-        rho : correlation coefficient between (-1,1)
-    Returns:
-        mutual information
+    Distance correlation
     """
-    return -0.5*np.log(1-rho**2)
 
-def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
+    if len(x) != len(y):
+        raise Exception('pearson_corr: x and y with different size.')
+
+    x = np.asarray(x, dtype=float) # Require float for precision
+    y = np.asarray(y, dtype=float)
+
+    if weights is None:
+        weights = np.ones(len(x), dtype=float)
+
+    # Normalize to sum to one
+    w = weights / np.sum(weights) 
+
+    # Obtain estimates and sample uncertainty via bootstrap
+    r_values = np.zeros(n_bootstrap)
+
+    for i in range(n_bootstrap):
+
+        # Random values by sampling with replacement
+        ind = np.random.randint(len(w)-1, size=len(w))
+        if i == 0:
+            ind = np.arange(len(w))
+
+        w_ = w[ind] / np.sum(w[ind])
+
+        # Compute
+        r  = dcor.distance_correlation(x[ind], y[ind])
+        
+        r_values[i] = r
+
+    r     = r_values[0]       # The non-bootstrapped value
+    r_err = prc_CI(r_values, alpha)    
+
+    return r, r_err
+
+def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
@@ -283,12 +312,11 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     if len(x) != len(y):
         raise Exception('pearson_corr: x and y with different size.')
 
-    x     = np.asarray(x)
-    y     = np.asarray(y)
-    dtype = type(1.0 + x[0] + y[0]) # Should be at least float64
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
 
     if weights is None:
-        weights = np.ones(len(x), dtype=dtype)
+        weights = np.ones(len(x), dtype=float)
 
     # Normalize to sum to one
     w = weights / np.sum(weights) 
@@ -300,6 +328,8 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     # Obtain estimates and sample uncertainty via bootstrap
     r_values = np.zeros(n_bootstrap)
 
+    # See: Efron, B. (1988). "Bootstrap confidence intervals:
+    #      Good or bad?" Psychological Bulletin, 104, 293-296.
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
@@ -331,6 +361,18 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
 
     return r, r_err, prob
 
+def gaussian_mutual_information(rho):
+    """
+    Analytical 2D-Gaussian mutual information
+    using a correlation coefficient rho.
+    
+    I(X1,X2) = H(X1) + H(X2) - H(X1,X2)
+    Args:
+        rho : correlation coefficient between (-1,1)
+    Returns:
+        mutual information
+    """
+    return -0.5*np.log(1-rho**2)
 
 def optbins(x, maxM=150, mode="nbins", alpha=0.025):
     """

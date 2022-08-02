@@ -7,13 +7,12 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     # [1, 1, ..., 1]
     
     # Latex description is for boolean [0,1] per cut
-    [{latex: ['$e',  '$\mu'], cut: 'BOOL__leadingLeptons_isElectron == True'},
-     {latex: ['e',   '\mu'],  cut: 'BOOL__subleadingLeptons_isElectron == True'},
-     {latex: ['SS',  'OS'],   cut: 'dilepton_charge > 0'},
-     {latex: ['iso$','mer$'], cut: 'nominal_dR_l2j > 0.4'}]
+    [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
+     {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
+     {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
+     {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
     
-    # note: dilepton_charge can have 3 distinct values, we use these here only
-    # (check the dataframe definition of dilepton_charge +-1 !)
+    # note: dataframe has SS for dilepton_charge == 1, OS for == -1
     # -- = -2 -> SS
     # -+ =  0 -> OS
     # +- =  0 -> OS
