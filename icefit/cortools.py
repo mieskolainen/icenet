@@ -138,10 +138,10 @@ def H_score(p, EPS=1E-15):
         entropy
     """
     # Make sure it is normalized
-    p_ = (p[p > EPS]/np.sum(p[p > EPS])).astype(np.float64)
+    ind = (p > EPS)
+    p_  = (p[ind]/np.sum(p[ind])).astype(np.float64)
 
     return -np.sum(p_*np.log(p_))
-
 
 def I_score(C, normalized=None, EPS=1E-15):
     """
@@ -154,13 +154,17 @@ def I_score(C, normalized=None, EPS=1E-15):
     Returns:
         mutual information score
     """
-    nX, nY   = np.nonzero(C)
-    Pi       = np.ravel(np.sum(C,axis=1))
-    Pj       = np.ravel(np.sum(C,axis=0))
-    
-    # Joint 2D density
-    P_ij     = C[nX, nY] / np.sum(C)
-    
+    nX, nY = np.nonzero(C)
+
+    # Joint density
+    P_ij   = C[nX, nY] / np.sum(C.flatten())
+
+    # Marginal densities
+    Pi     = np.ravel(np.sum(C,axis=1))
+    Pi     = Pi / np.sum(Pi)
+    Pj     = np.ravel(np.sum(C,axis=0))
+    Pj     = Pj / np.sum(Pj)
+
     # Factorized 1D x 1D density
     Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
     Pi_Pj = Pi_Pj / np.sum(Pi_Pj)
@@ -168,8 +172,8 @@ def I_score(C, normalized=None, EPS=1E-15):
     # Choose non-zero
     ind = (P_ij > EPS) & (Pi_Pj > EPS)
 
-    # Definition
-    I = np.sum(P_ij[ind] * (np.log(P_ij[ind]) - np.log(Pi_Pj[ind]) ))
+    # Mutual Information Definition
+    I = np.sum(P_ij[ind] * np.log(P_ij[ind] / Pi_Pj[ind]))
     I = np.clip(I, 0.0, None)
 
     # Normalization
@@ -185,7 +189,7 @@ def I_score(C, normalized=None, EPS=1E-15):
 
 def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
     alpha=0.32, n_bootstrap=300,
-    automethod='Scott2D', minbins=4, maxbins=100, outlier=0.01):
+    automethod='Scott2D', minbins=10, maxbins=100, outlier=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -244,7 +248,6 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         ind = np.random.randint(len(w)-1, size=len(w))
         if i == 0:
             ind = np.arange(len(w))
-
         w_ = w[ind] / np.sum(w[ind])
 
         XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x, bins_y], weights=w_)[0]
@@ -321,9 +324,9 @@ def pearson_corr(x, y, weights=None, alpha=0.32, n_bootstrap=300):
     # Normalize to sum to one
     w = weights / np.sum(weights) 
 
-    # Astype guarantees precision. Loss of precision might happen here.
-    x_ = x.astype(dtype) - np.sum(w*x, dtype=dtype)
-    y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
+    # Loss of precision might happen here.
+    x_ = x - np.sum(w*x)
+    y_ = y - np.sum(w*y)
 
     # Obtain estimates and sample uncertainty via bootstrap
     r_values = np.zeros(n_bootstrap)

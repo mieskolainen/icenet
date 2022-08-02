@@ -450,7 +450,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
                     plt.errorbar(values, np.arange(len(values)), xerr=asymmetric_error,
                         fmt='s', capsize=5.0, label=f'{model} [{val_sum/val_n:0.3f} +- {0.0}]')
-                    
+
                     title = f'$\\mathcal{{C}} = {class_ind}$'
                     plt.title(title)
                     plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {var}) (68CL)')
@@ -528,8 +528,8 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
 
             # Histogram MI
-            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D', normalized=None)
-
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
+            
             # Save output
             output[k][var] = {}
             output[k][var]['pearson']    = cc
@@ -540,7 +540,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             
             output[k][var]['MI']         = MI
             output[k][var]['MI_CI']      = MI_CI
-
+            
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
             for scale in ['linear', 'log']: 
