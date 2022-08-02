@@ -59,7 +59,7 @@ MVA_2D:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
-    
+
     powerset_filter: *FINAL_STATE_FILTER
 
     # -----------------------------
@@ -67,9 +67,9 @@ MVA_2D:
     xlim:
       # For each class [[lower, upper], ... [lower, upper]
       pearson:     [[-0.15, 0.30], [-0.15, 0.30]]
-      abs_pearson: [[0.0, 0.30], [0.0, 0.30]]
-      disco:       [[0.0, 0.30], [0.0, 0.30]]
-      MI:          [[0.0, 0.10], [0.0, 0.10]]
+      abs_pearson: [[0.0, 0.30],   [0.0, 0.30]]
+      disco:       [[0.0, 0.30],   [0.0, 0.30]]
+      MI:          [[0.0, 0.15],   [0.0, 0.15]]
     # -----------------------------
   
   #plot[1]:

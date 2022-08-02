@@ -440,15 +440,16 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                                 val_sum += values[i]
                                 val_n   += 1
 
-                    lower            = np.abs(values - np.array(lower))
-                    upper            = np.abs(np.array(upper) - values)
-                    asymmetric_error = np.array(list(zip(lower, upper))).T
+                    error = (upper - lower)/2 # Simple symmetric errors
+                    #lower = np.abs(values - np.array(lower))
+                    #upper = np.abs(values - np.array(upper))
+                    #asymmetric_error = np.array(list(zip(lower, upper))).T
 
                     # Vertical line at zero
                     plt.plot(np.zeros(len(values)), np.arange(len(values)), color=np.ones(3)*0.5, label=None)
 
                     ## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis
-                    plt.errorbar(values, np.arange(len(values)), xerr=asymmetric_error,
+                    plt.errorbar(values, np.arange(len(values)), xerr=error,
                         fmt='s', capsize=5.0, label=f'{model} [{val_sum/val_n:0.3f} +- {0.0}]')
 
                     title = f'$\\mathcal{{C}} = {class_ind}$'
@@ -530,10 +531,10 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
             #MI_CI = np.array([MI-MI_err, MI+MI_err])
-            
-            # Histogram MI
-            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, minbins=20, maxbins=20)
 
+            # Histogram MI
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
+            
             # Save output
             output[k][var] = {}
 
@@ -543,11 +544,11 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             output[k][var]['abs_pearson']    = cc_abs
             output[k][var]['abs_pearson_CI'] = cc_abs_CI
 
-            output[k][var]['disco']      = disco
-            output[k][var]['disco_CI']   = disco_CI
+            output[k][var]['disco']    = disco
+            output[k][var]['disco_CI'] = disco_CI
             
-            output[k][var]['MI']         = MI
-            output[k][var]['MI_CI']      = MI_CI
+            output[k][var]['MI']       = MI
+            output[k][var]['MI_CI']    = MI_CI
 
             bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 

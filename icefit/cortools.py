@@ -188,7 +188,7 @@ def I_score(C, normalized=None, EPS=1E-15):
 
 def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
     alpha=0.32, n_bootstrap=300,
-    automethod='Scott2D', minbins=10, maxbins=100, outlier=0.01):
+    automethod='Scott2D', minbins=5, maxbins=100, outlier=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -369,7 +369,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
 
     # Percentile bootstrap based CI
     r_CI = prc_CI(r_star, alpha)
-    
+
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
