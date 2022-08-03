@@ -7,6 +7,45 @@ import numpy as np
 
 from icenet.tools import aux
 
+
+def filter_constructor(filters, X, ids):
+    """
+    Powerset filter constructor
+    
+    Returns:
+        mask matrix, mask text labels
+    """
+    cutlist  = [filters[k]['cut']   for k in range(len(filters))]
+    textlist = [filters[k]['latex'] for k in range(len(filters))]
+
+    # Construct cuts and apply
+    cuts, names   = construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    print_parallel_cutflow(cut=cuts, names=names)
+    
+    mask_powerset = powerset_cutmask(cut=cuts)
+    BMAT          = aux.generatebinary(len(cuts))
+
+    print(textlist)
+
+    # Loop over all powerset 2**|cuts| masked selections
+    # Create a description latex strings and savepath strings
+    text_powerset = []
+    path_powerset = []
+    for i in range(BMAT.shape[0]):
+        string = ''
+        for j in range(BMAT.shape[1]):
+            bit = BMAT[i,j] # 0 or 1
+            string += f'{textlist[j][bit]}'
+            if j != BMAT.shape[1] - 1:
+                string += ' '
+        string += f' {BMAT[i,:]}'
+
+        text_powerset.append(string)
+        path_powerset.append((f'{BMAT[i,:]}').replace(' ', ''))
+
+    return mask_powerset, text_powerset, path_powerset
+
+
 def construct_columnar_cuts(X, ids, cutlist):
     """
     Construct cuts and corresponding names.
@@ -30,45 +69,92 @@ def construct_columnar_cuts(X, ids, cutlist):
 
         cuts.append(output)
         names.append(expr)
-
+    
     return cuts,names
+
+
+def powerset_cutmask(cut):
+    """ Generate powerset 2**|cuts| masks
+    
+    Args:
+        cut : list of pre-calculated cuts, each list element is a boolean array
+    Returns:
+        mask: (2**|cuts| x num_events) sized boolean mask matrix
+    """
+    print(cut)
+
+    num_events = len(cut[0])
+    num_cuts   = len(cut)
+    BMAT       = aux.generatebinary(num_cuts)
+
+    power      = BMAT.shape[0]
+    powerset   = np.zeros((power, num_events), dtype=bool)
+
+    # Loop over each boolean
+    # [0,0,..0], [0,0,...,1] ... [1,1,..., 1] cut set combination
+    for i in range(power):
+    
+        # Loop over each event
+        for evt in range(num_events):
+
+            # Loop over each individual cut result
+            result = np.array([(cut[k][evt] == BMAT[i,k]) for k in range(num_cuts)], dtype=bool)
+            powerset[i, evt] = np.all(result)
+
+    return powerset
+
 
 def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     """ Apply cutflow
-
+    
     Args:
-        cut        : list of pre-calculated cuts, each list element is a boolean array
-        names      : list of names (description of each cut, for printout only)
-        xcorr_flow : compute full N-point correlations
+        cut             : list of pre-calculated cuts, each list element is a boolean array
+        names           : list of names (description of each cut, for printout only)
+        xcorr_flow      : compute full N-point correlations
+        return_powerset : return each of 2**|cuts| as a separate boolean mask vector
     
     Returns:
-        ind        : list of indices, 1 = pass, 0 = fail
+        mask            : boolean mask of size number of events (1 = pass, 0 = fail)
     """
     print(__name__ + '.apply_cutflow: \n')
     
-    # Print out "serial flow"
-    N   = len(cut[0])
-    ind = np.ones(N, dtype=np.uint8)
+    N    = len(cut[0])
+    mask = np.ones(N, dtype=bool)
+
+    # Apply cuts in series
     for i in range(len(cut)):
-        ind = np.logical_and(ind, cut[i])
-        print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(ind):>10}/{N} = {np.sum(ind)/(N+EPS):0.4f}')
+        mask = np.logical_and(mask, cut[i])
+
+        # Print out "serial flow"
+        print(f'cut[{i}][{names[i]:>50}]: pass {np.sum(cut[i]):>10}/{N} = {np.sum(cut[i])/(N+EPS):.4f} | total = {np.sum(mask):>10}/{N} = {np.sum(mask)/(N+EPS):0.4f}')
     
     # Print out "parallel flow"
     if xcorr_flow:
-        print('\n')
-        print(__name__ + '.apply_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
-        vec = np.zeros((len(cut[0]), len(cut)))
-        for j in range(vec.shape[1]):
-            vec[:,j] = np.array(cut[j])
-
-        intmat = aux.binaryvec2int(vec)
-        BMAT   = aux.generatebinary(vec.shape[1])
-        print(f'Boolean combinations for {names}: \n')
-        for i in range(BMAT.shape[0]):
-            print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
-        print('\n')
+        print_parallel_cutflow(cut=cut, names=names)
     
-    return ind
+    return mask
+
+
+def print_parallel_cutflow(cut, names, EPS=1E-12):
+    """
+    Print boolean combination cutflow statistics
+    
+    Args:
+        cut   : list of pre-calculated cuts, each list element is a boolean array with size of num of events
+        names : list of names (description of each cut, for printout only)
+    """
+    print('\n')
+    print(__name__ + '.print_parallel_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
+    vec = np.zeros((len(cut[0]), len(cut)))
+    for j in range(vec.shape[1]):
+        vec[:,j] = np.array(cut[j])
+
+    intmat = aux.binaryvec2int(vec)
+    BMAT   = aux.generatebinary(vec.shape[1])
+    print(f'Number of boolean combinations for {names}: \n')
+    for i in range(BMAT.shape[0]):
+        print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
+    print('\n')
 
 
 def parse_boolean_exptree(instring):
@@ -290,10 +376,12 @@ def eval_boolean_exptree(root, X, ids):
             f = lambda x : np.sqrt(x)
         elif func_name == 'INV':
             f = lambda x : 1.0/x
+        elif func_name == 'BOOL':
+            f = lambda x : x.astype(bool)
         else:
             raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
-
-        print(f'eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
+        
+        print(__name__ + f'.eval_boolean_exptree: Operator f={func_name}() chosen for "{ids[ind]}"')
     # -------------------------------------------------
 
     # Middle binary operators g(x,y)
@@ -335,7 +423,6 @@ def eval_boolean_syntax(expr, X, ids):
     output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
     return output
-
 
 def test_syntax_tree_parsing():
     """
@@ -404,3 +491,33 @@ def test_syntax_tree_flip():
             output.append(eval_boolean_exptree(root=treeobj, X=X, ids=ids))
 
         assert np.all(output[0] == output[1])
+
+
+def test_powerset():
+
+    cut = [np.array([True, True, False, False, False]),
+           np.array([True, False, True, False, False]),
+           np.array([True, False, True, False, True])]
+
+    maskmatrix = powerset_cutmask(cut)
+
+    # 0 000
+    # 1 001
+    # 2 010
+    # 3 011
+    # 4 100
+    # 5 101
+    # 6 110
+    # 7 111
+
+    reference = np.array(
+        [[False, False, False,  True, False],
+         [False, False, False, False,  True],
+         [False, False, False, False, False],
+         [False, False,  True, False, False],
+         [False,  True, False, False, False],
+         [False, False, False, False, False],
+         [False, False, False, False, False],
+         [ True, False, False, False, False]])
+
+    assert np.all(maskmatrix == reference)

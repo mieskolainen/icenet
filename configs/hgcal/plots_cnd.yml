@@ -9,6 +9,9 @@ MVA_output:
   active: true
   edges: 80
 
+ROC:
+  active: true
+
 ROC_binned:
   active: false
 

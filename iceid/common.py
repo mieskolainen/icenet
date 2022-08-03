@@ -68,11 +68,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     isMC   = bool(events.arrays('is_mc')[0]['is_mc'])
 
     # --------------------------------------------------------------
-    load_ids = iceroot.process_regexp_ids(ids=ids, all_ids=events.keys())
+    load_ids = aux.process_regexp_ids(ids=ids, all_ids=events.keys())
     X,ids    = iceroot.events_to_jagged_numpy(events=events, ids=load_ids, entry_start=entry_start, entry_stop=entry_stop)
     Y = None
     # --------------------------------------------------------------
-
+    
     print(__name__ + f'.load_root_file: X.shape = {X.shape}')
     io.showmem()
     prints.printbar()

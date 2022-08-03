@@ -72,7 +72,7 @@ def ABCD_err(b,c,d, method='errorprop', N=int(1e5), alpha=0.32, lrange=5):
         # Generate bootstrap samples
         A_new    = np.zeros(N)
         for i in range(N):
-            ind      = np.random.randint(len(data)-1, size=len(data))
+            ind      = np.random.choice(range(len(data)), size=len(data), replace=True)
             bs       = data[ind]
             A_new[i] = ABCD_eq(b=np.sum(bs==T[0]), c=np.sum(bs==T[1]), d=np.sum(bs==T[2]))
 
@@ -176,17 +176,13 @@ def test_abcd():
     print(f'')
     print(f'CONFIDENCE INTERVAL on A (alpha = {alpha:0.2f})')
     
-    
     methods = ['errorprop', 'poisson_prc', 'bootstrap_prc', 'likelihood']
     for method in methods:
-
+        
         CI = ABCD_err(b=B, c=C, d=D, method=method, alpha=alpha)
         print(f'  {method:15s}  CI = [{CI[0]:0.2f}, {CI[1]:0.2f}]')
-
+        
         # Test
         assert  5  == pytest.approx(CI[0], abs=EPS)
         assert  15 == pytest.approx(CI[1], abs=EPS)
-
-
-
 

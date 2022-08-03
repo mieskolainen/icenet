@@ -1,3 +1,24 @@
+FINAL_STATE_FILTER: &FINAL_STATE_FILTER
+
+    # This goes through all the combinations
+    # [0, 0, ..., 0]
+    # [0, 0, ..., 1]
+    # ...
+    # [1, 1, ..., 1]
+    
+    # Latex description is for boolean [0,1] per cut
+    [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
+     {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
+     {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
+     {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
+    
+    # note: dataframe has SS for dilepton_charge == 1, OS for == -1
+    # -- = -2 -> SS
+    # -+ =  0 -> OS
+    # +- =  0 -> OS
+    # ++ =  2 -> SS
+# -----------------------------------------------------------------------
+
 # -----------------------------------------------
 # ** Mutual Information regularization **
 MI_REG_PARAM: &MI_REG_PARAM
@@ -10,17 +31,20 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   y_index: [1]
   
-  epochs: 20
+  epochs: 30
   batch_size: 512
   lr: 1.0e-3
   weight_decay: 0.00001
   clip_norm: 1.0
-
+  
   mlp_dim: [128, 128]
   batch_norm: False
   dropout: 0.01
   noise_std: 0.025
   activation: 'relu'
+
+  powerset_filter: *FINAL_STATE_FILTER
+
 # -----------------------------------------------
 
 
@@ -96,14 +120,15 @@ xgb0:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0_red:
+xgb0-red:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB(m_llj)'
   raytune:  xgb_trial_0
   
-  # Train model with these variables only
-  reduced_MVA_vars: ['nominal_m_llj']
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['nominal_m_llj']
   
   # booster parameters
   model_param:
@@ -118,7 +143,7 @@ xgb0_red:
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
-
+    
     colsample_bytree:  0.86
     colsample_bylevel: 0.6
     colsample_bynode:  0.8
@@ -139,10 +164,10 @@ xgb0_red:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_MI_min:
+xgb-MI-min:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'XGB_MI_min'
+  label:   'XGB-MI-min'
   raytune:  xgb_trial_0
 
   # booster parameters
@@ -173,7 +198,7 @@ xgb_MI_min:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: [4.0]                # Positive for minimizing
+    beta: [2.0]                # Positive for minimizing
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -185,10 +210,10 @@ xgb_MI_min:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb_MI_max:
+xgb-MI-max:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'XGB_MI_max'
+  label:   'XGB-MI-max'
   raytune:  xgb_trial_0
 
   # booster parameters
@@ -219,7 +244,7 @@ xgb_MI_max:
     eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   MI_reg_param:
-    beta: [-4.0]       # Negative for maximizing MI
+    beta: [-2.0]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
   plot_trees: False
@@ -272,14 +297,15 @@ dmlp0:
 
 
 # Deep MLP
-dmlp0_red:
+dmlp0-red:
   train:   'torch_generic'
   predict: 'torch_vector'
   label:   'DMLP(m_llj)'
   raytune:  null
 
-  # Train model with these variables only
-  reduced_MVA_vars: ['nominal_m_llj']
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['nominal_m_llj']
 
   # Model
   conv_type: 'dmlp'
@@ -316,10 +342,10 @@ dmlp0_red:
   readmode: -1                 # -1 is the last saved epoch
 
 # Deep MLP
-dmlp_MI_min:
+dmlp-MI-min:
   train:   'torch_generic'
   predict: 'torch_vector'
-  label:   'DMLP_MI_min'
+  label:   'DMLP-MI-min'
   raytune:  null
 
   # Model
@@ -352,7 +378,7 @@ dmlp_MI_min:
   # Mutual Information regularization (comment out if not used)
   # Remember to use small enough learning rate in the total loss optimizer!
   MI_reg_param:
-    beta: [2.0]                # Positive for minimizing MI between (x,y), Negative for Maximizing
+    beta: [0.99]               # Positive for minimizing MI between (x,y), Negative for Maximizing
     <<: *MI_REG_PARAM
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -364,10 +390,10 @@ dmlp_MI_min:
 
 
 # Deep MLP
-dmlp_MI_max:
+dmlp-MI-max:
   train:   'torch_generic'
   predict: 'torch_vector'
-  label:   'DMLP_MI_max'
+  label:   'DMLP-MI-max'
   raytune:  null
 
   # Model

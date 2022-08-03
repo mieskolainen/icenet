@@ -1,3 +1,24 @@
+FINAL_STATE_FILTER: &FINAL_STATE_FILTER
+
+    # This goes through all the combinations
+    # [0, 0, ..., 0]
+    # [0, 0, ..., 1]
+    # ...
+    # [1, 1, ..., 1]
+    
+    # Latex description is for boolean [0,1] per cut
+    [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
+     {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
+     {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
+     {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
+    
+    # note: dataframe has SS for dilepton_charge == 1, OS for == -1
+    # -- = -2 -> SS
+    # -+ =  0 -> OS
+    # +- =  0 -> OS
+    # ++ =  2 -> SS
+# -----------------------------------------------------------------------
+
 basic:
   active: false
   nbins:  70
@@ -5,7 +26,12 @@ basic:
 contours:
   active: false
 
-## Binned ROC plots can be 1D or 2D
+ROC:
+  active: true
+  powerset_filter: *FINAL_STATE_FILTER
+
+
+## Binned ROC plots can be 1D or 2D (powerset filtering not supported here)
 ROC_binned:
   active: false
 
@@ -22,15 +48,29 @@ ROC_binned:
 MVA_output:
   active: true
   edges: 80
+  #powerset_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
+# Powerset can be applied only per one plot[i] identifier!
 MVA_2D:
   active: true
-    
+
   plot[0]:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
+
+    powerset_filter: *FINAL_STATE_FILTER
+    
+    # -----------------------------
+    # Powerset correlation plot parameters
+    xlim:
+      # For each class [[lower, upper], ... [lower, upper]
+      pearson:     [[-0.15, 0.30], [-0.15, 0.30]]
+      abs_pearson: [[0.0, 0.30],   [0.0, 0.30]]
+      disco:       [[0.0, 0.30],   [0.0, 0.30]]
+      MI:          [[0.0, 0.12],   [0.0, 0.12]]
+    # -----------------------------
   
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported

@@ -10,6 +10,7 @@ from termcolor import colored, cprint
 import re
 
 from icenet.tools import io
+from icenet.tools import aux
 from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
@@ -201,7 +202,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     all_ids = events.keys()
     #events.close() # This will cause memmap problems
     
-    load_ids = process_regexp_ids(ids=ids, all_ids=all_ids)
+    load_ids = aux.process_regexp_ids(ids=ids, all_ids=all_ids)
 
     print(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n')
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
@@ -259,36 +260,3 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
         
     else:
         raise Exception(__name__ + f'.load_tree: Unknown library support')
-
-
-def process_regexp_ids(all_ids, ids=None):
-    """
-    Process regular expressions for variable names
-
-    Args:
-        all_ids: all keys in a tree
-        ids:     keys to pick, if None, use all keys
-
-    Returns:
-        ids matching regular expressions
-    """
-
-    if ids is None:
-        load_ids = all_ids
-    else:
-        load_ids = []
-        chosen   = np.zeros(len(all_ids))
-
-        # Loop over our input
-        for string in ids:
-
-            # Compile regular expression
-            reg = re.compile(string)
-            
-            # Loop over all keys in the tree
-            for i in range(len(all_ids)):
-                if re.fullmatch(reg, all_ids[i]) and not chosen[i]:
-                    load_ids.append(all_ids[i])
-                    chosen[i] = 1
-
-    return load_ids

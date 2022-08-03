@@ -17,10 +17,10 @@ def filter_nofilter(X, ids, xcorr_flow=False):
 
 def filter_charged(X, ids, xcorr_flow=False):
     """ Only generator level charged """
-
+    
     # Define cuts
-    cutlist = [f'ABS__gen_charge == 1']
-
+    cutlist = [f'ABS__gen_charge > 0.5']
+    
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
     mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
@@ -42,8 +42,8 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     MAXETA  = 2.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
-    #                              also ABS__, POW2__, SQRT__, INV__)
-    cutlist = [f'is_egamma   == False' ,
+    #                              also ABS__, POW2__, SQRT__, INV__, BOOL__)
+    cutlist = [f'BOOL__is_egamma == False' ,
                f'tag_pt       > {MINPT}',
                f'ABS__tag_eta < {MAXETA}']
     

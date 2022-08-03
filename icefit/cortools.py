@@ -10,6 +10,7 @@ import copy
 import scipy
 import scipy.special as special
 import scipy.stats as stats
+import dcor
 
 # Needed for tests only
 import pandas as pd
@@ -137,10 +138,10 @@ def H_score(p, EPS=1E-15):
         entropy
     """
     # Make sure it is normalized
-    p_ = (p[p > EPS]/np.sum(p[p > EPS])).astype(np.float64)
+    ind = (p > EPS)
+    p_  = (p[ind]/np.sum(p[ind])).astype(np.float64)
 
     return -np.sum(p_*np.log(p_))
-
 
 def I_score(C, normalized=None, EPS=1E-15):
     """
@@ -153,26 +154,26 @@ def I_score(C, normalized=None, EPS=1E-15):
     Returns:
         mutual information score
     """
-    def Pnorm(x):
-        return np.maximum(x / np.sum(x.flatten()), EPS)
+    # Make sure it is positive definite
+    C[C < 0] = 0
 
-    nX, nY   = np.nonzero(C)
-    Pi       = np.ravel(np.sum(C,axis=1))
-    Pj       = np.ravel(np.sum(C,axis=0))
+    # Joint 2D-density
+    P_ij   = C / np.sum(C.flatten())
+
+    # Marginal densities by summing over the other dimension
+    P_i    = np.sum(C, axis=1); P_i /= np.sum(P_i)
+    P_j    = np.sum(C, axis=0); P_j /= np.sum(P_j)
     
-    # Joint 2D
-    P_ij     = Pnorm(C[nX, nY]).astype(np.float64)
-    
-    # Factorized 1D x 1D
-    Pi_Pj = Pi.take(nX).astype(np.float64) * Pj.take(nY).astype(np.float64)
-    Pi_Pj = Pi_Pj / np.maximum(np.sum(Pi) * np.sum(Pj), EPS)
+    # Factorized (1D) x (1D) density
+    Pi_Pj  = np.outer(P_i, P_j)
+    Pi_Pj /= np.sum(Pi_Pj.flatten())
 
     # Choose non-zero
     ind = (P_ij > EPS) & (Pi_Pj > EPS)
 
-    # Definition
-    I = np.sum(P_ij[ind] * (np.log(P_ij[ind]) - np.log(Pi_Pj[ind]) ))
-    I = np.clip(I, 0.0, None)
+    # Mutual Information Definition
+    I   = np.sum(P_ij[ind] * np.log(P_ij[ind] / Pi_Pj[ind]))
+    I   = np.clip(I, 0.0, None)
 
     # Normalization
     if   normalized == None:
@@ -187,10 +188,11 @@ def I_score(C, normalized=None, EPS=1E-15):
 
 def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
     alpha=0.32, n_bootstrap=300,
-    automethod='Scott2D', minbins=4, maxbins=100, outlier=0.01):
+    automethod='Scott2D', minbins=5, maxbins=100, outlier=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
+    
     Args:
         x          : array of values
         y          : array of values
@@ -198,7 +200,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         bins_x     : x binning array  If None, then automatic.
         bins_y     : y binning array.
         normalized : normalize the mutual information (see I_score() function)
-        n_bootstrap: number of bootstrap evaluations
+        n_bootstrap: number of percentile bootstrap samples
         alpha      : bootstrap confidence interval
     
     Autobinning args:    
@@ -207,24 +209,38 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
         outlier    : outlier protection percentile
     
     Returns:
-        mutual information, uncertainty
+        mutual information, confidence interval
     """
-    rho,_,_ = pearson_corr(x,y)
+
+    if len(x) != len(y):
+        raise Exception('mutual_information: x and y with different size.')
+    
+    if len(x) < 10:
+        print(__name__ + f'.mutual_information: Error: len(x) < 10')
+        return np.nan, np.array([np.nan, np.nan])
+
+    x = np.asarray(x, dtype=float) # Require float for precision
+    y = np.asarray(y, dtype=float)
 
     if weights is None:
-        w = np.ones(len(x), dtype=float)
-    else:
-        w = weights
+        weights = np.ones(len(x), dtype=float)
+
+    # Normalize to sum to one
+    w = weights / np.sum(weights) 
+
+    # For autobinning methods
+    rho,_,_ = pearson_corr(x=x,y=y, weights=weights)
 
     def autobinwrap(data):
         if   automethod == 'Scott2D':
-            NB = scott_bin(x=data,rho=rho, mode='nbins', alpha=outlier)
+            NB = scott_bin(x=data, rho=rho, mode='nbins', alpha=outlier)
         elif automethod == 'Hacine2D':
             NB = hacine_joint_entropy_bin(x=data, rho=rho, mode='nbins', alpha=outlier)
         else:
             raise Exception(f'mutual_information: Unknown autobinning parameter <{automethod}>')
 
         NB = int(np.minimum(np.maximum(NB, minbins), maxbins))
+
         return np.linspace(np.percentile(data, outlier/2*100), np.percentile(data, 100*(1-outlier/2)), NB + 1)
 
     if bins_x is None:
@@ -232,41 +248,75 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     if bins_y is None:
         bins_y = autobinwrap(y)
 
-    MI_values = np.zeros(n_bootstrap)
+    r_star = np.zeros(n_bootstrap)
 
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
+        if i == 0:
+            ind = np.arange(len(w))
+        w_ = w[ind] / np.sum(w[ind])
+
+        h2d = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x, bins_y], weights=w_)[0]
+
+        # Compute MI
+        r_star[i] = I_score(C=h2d, normalized=normalized)
+    
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
+
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
+
+    return r, r_CI
+
+def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
+    """
+    Distance correlation
+    """
+
+    if len(x) != len(y):
+        raise Exception('distance_corr: x and y with different size.')
+
+    if len(x) < 10:
+        print(__name__ + '.distance_corr: Error: len(x) < 10')
+        return np.nan, np.array([np.nan, np.nan])
+
+    x = np.asarray(x, dtype=float) # Require float for precision
+    y = np.asarray(y, dtype=float)
+
+    if weights is None:
+        weights = np.ones(len(x), dtype=float)
+
+    # Normalize to sum to one
+    w = weights / np.sum(weights) 
+
+    # Obtain estimates and sample uncertainty via bootstrap
+    r_star = np.zeros(n_bootstrap)
+
+    for i in range(n_bootstrap):
+
+        # Random values by sampling with replacement
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
         if i == 0:
             ind = np.arange(len(w))
 
         w_ = w[ind] / np.sum(w[ind])
 
-        XY = np.histogram2d(x=x[ind], y=y[ind], bins=[bins_x,bins_y], weights=w_)[0]
-        XY[XY < 0] = 0 # Entropy defined only for positive definite
-        MI_values[i] = I_score(C=XY, normalized=normalized)
+        # Compute [T.B.D. add weighted version]
+        r_star[i] = dcor.distance_correlation(x[ind], y[ind])
+
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
+
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
     
-    MI     = MI_values[0]       # The non-bootstrapped value
-    MI_err = prc_CI(MI_values, alpha)
-
-    return MI, MI_err
+    return r, r_CI
 
 
-def gaussian_mutual_information(rho):
-    """
-    Analytical 2D-Gaussian mutual information
-    using a correlation coefficient rho.
-    
-    I(X1,X2) = H(X1) + H(X2) - H(X1,X2)
-    Args:
-        rho : correlation coefficient between (-1,1)
-    Returns:
-        mutual information
-    """
-    return -0.5*np.log(1-rho**2)
-
-def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
+def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=300):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
@@ -274,8 +324,9 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     Args:
         x,y        : arrays of values
         weights    : possible event weights
+        return_abs : return absolute value
         alpha      : confidence interval [alpha/2, 1-alpha/2] level 
-        n_bootstrap: number of bootstrap samples
+        n_bootstrap: number of percentile bootstrap samples
     Returns: 
         correlation coefficient [-1,1], confidence interval, p-value
     """
@@ -283,27 +334,28 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
     if len(x) != len(y):
         raise Exception('pearson_corr: x and y with different size.')
 
-    x     = np.asarray(x)
-    y     = np.asarray(y)
-    dtype = type(1.0 + x[0] + y[0]) # Should be at least float64
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
 
     if weights is None:
-        weights = np.ones(len(x), dtype=dtype)
-
+        weights = np.ones(len(x), dtype=float)
+    
     # Normalize to sum to one
     w = weights / np.sum(weights) 
 
-    # Astype guarantees precision. Loss of precision might happen here.
-    x_ = x.astype(dtype) - np.sum(w*x, dtype=dtype)
-    y_ = y.astype(dtype) - np.sum(w*y, dtype=dtype)
+    # Loss of precision might happen here.
+    x_ = x - np.sum(w*x)
+    y_ = y - np.sum(w*y)
 
     # Obtain estimates and sample uncertainty via bootstrap
-    r_values = np.zeros(n_bootstrap)
+    r_star = np.zeros(n_bootstrap)
 
+    # See: Efron, B. (1988). "Bootstrap confidence intervals:
+    #      Good or bad?" Psychological Bulletin, 104, 293-296.
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
         if i == 0:
             ind = np.arange(len(w))
 
@@ -318,19 +370,38 @@ def pearson_corr(x, y, weights = None, alpha=0.32, n_bootstrap=1000):
         
         # Safety
         r = np.clip(r, -1.0, 1.0)
-        
-        r_values[i] = r
 
-    r     = r_values[0]       # The non-bootstrapped value
-    r_err = prc_CI(r_values, alpha)
+        # if we want absolute value
+        if return_abs: r = np.abs(r)
+
+        r_star[i] = r
+
+    # The non-bootstrapped value (original sample based)
+    r    = r_star[0] 
+
+    # Percentile bootstrap based CI
+    r_CI = prc_CI(r_star, alpha)
 
     # 2-sided p-value from the Beta-distribution
     ab   = len(x)/2 - 1
     dist = scipy.stats.beta(ab, ab, loc=-1, scale=2)
     prob = 2*dist.cdf(-abs(r))
 
-    return r, r_err, prob
+    return r, r_CI, prob
 
+
+def gaussian_mutual_information(rho):
+    """
+    Analytical 2D-Gaussian mutual information
+    using a correlation coefficient rho.
+    
+    I(X1,X2) = H(X1) + H(X2) - H(X1,X2)
+    Args:
+        rho : correlation coefficient between (-1,1)
+    Returns:
+        mutual information
+    """
+    return -0.5*np.log(1-rho**2)
 
 def optbins(x, maxM=150, mode="nbins", alpha=0.025):
     """
@@ -452,9 +523,9 @@ def test_gaussian():
             # ---------------------------------------------------------------
 
             # Linear correlation
-            r,r_err,prob = pearson_corr(x=x1, y=x2)
+            r,r_CI,prob = pearson_corr(x=x1, y=x2)
             assert  r == pytest.approx(rho, abs=EPS)
-            print(f'pearson_corr = {r:.3f} (p-value = {prob:0.3E})')
+            print(f'pearson_corr = {r:.3f}, CI = {r_CI}, p-value = {prob:0.3E}')
 
             # MI Reference (exact analytic)
             MI_REF = gaussian_mutual_information(rho)
@@ -464,9 +535,9 @@ def test_gaussian():
             automethod = ['Scott2D', 'Hacine2D']
             
             for method in automethod:
-                MI, MI_err = mutual_information(x=x1, y=x2, automethod=method)
+                MI, MI_CI = mutual_information(x=x1, y=x2, automethod=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
-                print(f'Histogram     MI = {MI:0.3f}, CI = {MI_err} ({method})')
+                print(f'Histogram     MI = {MI:0.3f}, CI = {MI_CI} ({method})')
 
             # Neural MI
             neuromethod = ['MINE', 'MINE_EMA', 'DENSITY']
@@ -494,26 +565,26 @@ def test_constant():
     x1 = np.ones(100)
     x2 = np.ones(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r  = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(1, abs=EPS)
 
-    MI,_      = mutual_information(x=x1, y=x2)
+    MI = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
-    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    MI_mine = mine.estimate(X=x1, Z=x2)[0]
     assert  MI_mine == pytest.approx(0, abs=EPS)
 
 
     ### Other zeros    
     x2 = np.zeros(100)
 
-    r,r_err,prob    = pearson_corr(x=x1, y=x2)
+    r  = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(0, abs=EPS)
 
-    MI,_      = mutual_information(x=x1, y=x2)
+    MI = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
-    MI_mine,_ = mine.estimate(X=x1, Z=x2)
+    MI_mine = mine.estimate(X=x1, Z=x2)[0]
     assert  MI_mine == pytest.approx(0, abs=EPS)
 
 

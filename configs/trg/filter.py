@@ -39,8 +39,8 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
                    'gen_e2_hlt_dr < 0.2']
 
     elif isMC == 'data':
-        cutlist = ['isgjson == 1']
-
+        cutlist = ['BOOL__isgjson == True']
+    
     else:
         raise Exception(__name__ + '.filter_standard: Unknown isMC mode')
 
