@@ -211,6 +211,14 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     Returns:
         mutual information, confidence interval
     """
+
+    if len(x) != len(y):
+        raise Exception('mutual_information: x and y with different size.')
+    
+    if len(x) < 10:
+        print(__name__ + f'.mutual_information: Error: len(x) < 10')
+        return np.nan, np.array([np.nan, np.nan])
+
     x = np.asarray(x, dtype=float) # Require float for precision
     y = np.asarray(y, dtype=float)
 
@@ -245,7 +253,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
         if i == 0:
             ind = np.arange(len(w))
         w_ = w[ind] / np.sum(w[ind])
@@ -269,7 +277,11 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     """
 
     if len(x) != len(y):
-        raise Exception('pearson_corr: x and y with different size.')
+        raise Exception('distance_corr: x and y with different size.')
+
+    if len(x) < 10:
+        print(__name__ + '.distance_corr: Error: len(x) < 10')
+        return np.nan, np.array([np.nan, np.nan])
 
     x = np.asarray(x, dtype=float) # Require float for precision
     y = np.asarray(y, dtype=float)
@@ -286,7 +298,7 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
         if i == 0:
             ind = np.arange(len(w))
 
@@ -327,7 +339,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
 
     if weights is None:
         weights = np.ones(len(x), dtype=float)
-
+    
     # Normalize to sum to one
     w = weights / np.sum(weights) 
 
@@ -343,7 +355,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
     for i in range(n_bootstrap):
 
         # Random values by sampling with replacement
-        ind = np.random.randint(len(w)-1, size=len(w))
+        ind = np.random.choice(range(len(x)), size=len(x), replace=True)
         if i == 0:
             ind = np.arange(len(w))
 

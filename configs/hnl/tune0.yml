@@ -124,13 +124,14 @@ train_runmode:
     #- xgb-MI-max
     - xgb-MI-min
     - dmlp-MI-min
-    - xgb0
+    
     - xgb0-red
+    - xgb0
     
     #- dmlp-MI-max
     #- dmlp0
     #- dmlp0-red
-    
+        
     - cut0
 
 

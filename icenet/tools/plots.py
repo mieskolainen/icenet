@@ -512,14 +512,14 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             yy = X[ind, ids.index(var)]
 
             # Compute Pearson correlation coefficient
-            cc,cc_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=w)
-
+            cc,cc_CI,_         = cortools.pearson_corr(x=xx, y=yy, weights=w)
+            
             # Compute Absolute Pearson correlation coefficient
             cc_abs,cc_abs_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=w, return_abs=True)
 
             # Distance correlation
-            disco,disco_CI   = cortools.distance_corr(x=xx, y=yy, weights=w)
-
+            disco,disco_CI     = cortools.distance_corr(x=xx, y=yy, weights=w)
+            
             # Neural Mutual Information [cannot use, unreliable to compute for small samples]
             #from icefit import mine
             #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
@@ -527,7 +527,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
 
             # Histogram MI
             MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
-
+            
             # Save output
             output[k][var] = {}
 
