@@ -8,7 +8,7 @@ CONFIG="tune0.yml"
 DATAPATH="/home/user/travis-stash/input/icedqcd"
 #DATAPATH="/vols/cms/mc3909/"
 
-mkdir "figs/dqcd/config_[$CONFIG]" -p # for output ascii dump
+#mkdir "figs/dqcd/config-[$CONFIG]" -p # for output ascii dump
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

@@ -19,6 +19,7 @@ from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
 
 
+import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
@@ -505,9 +506,9 @@ def train_models(data_trn, data_val, args=None) :
             set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
             
             if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_xgb)
+                model = train.raytune_main(inputs=inputs, train_func=iceboost.train_xgb)
             else:
-                model = train.train_xgb(**inputs)
+                model = iceboost.train_xgb(**inputs)
 
         elif param['train'] == 'torch_deps':
             
@@ -558,7 +559,7 @@ def train_models(data_trn, data_val, args=None) :
             inputs = {'y_soft': None}
             set_distillation_drain(ID=ID, param=param, inputs=inputs)
 
-            train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
+            iceboost.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
                 trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
                 feature_names=data_trn['data'].ids)  
         
@@ -582,14 +583,13 @@ def train_models(data_trn, data_val, args=None) :
             if args['num_classes'] != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
-            if   param['train'] == 'xgb':
-                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
-                
-                y_soft = model.predict(xgboost.DMatrix(data = data_trn['data'].x))
-                if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
+            cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
-            elif 'torch_' in param['train']:
-                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
+            if   param['train'] == 'xgb':    
+                y_soft = model.predict(xgboost.DMatrix(data=aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X')))
+                if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
+            
+            elif param['train'] == 'torch_graph':
                 y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
             else:
                 raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")

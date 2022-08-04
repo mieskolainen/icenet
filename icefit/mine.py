@@ -25,7 +25,8 @@ class MINENet(nn.Module):
     """
     MINE network object
     """
-    def __init__(self, input_size=2, mlp_dim=[128, 128], activation='relu', dropout=0.01, noise_std=0.025, **args):
+    def __init__(self, input_size=2, mlp_dim=[128, 128],
+            activation='relu', dropout=0.01, noise_std=0.025, batch_norm=False, **args):
         super(MINENet, self).__init__()
         
         def init_weights(m):
@@ -33,7 +34,8 @@ class MINENet(nn.Module):
                 nn.init.normal_(m.weight, std=noise_std)
                 nn.init.constant_(m.bias, 0)
 
-        self.mlp = MLP([input_size] + mlp_dim + [1], activation=activation, dropout=dropout, batch_norm=False)
+        self.mlp = MLP([input_size] + mlp_dim + [1],
+            activation=activation, dropout=dropout, batch_norm=batch_norm)
         
         # Special initialize with noise
         self.mlp.apply(init_weights)

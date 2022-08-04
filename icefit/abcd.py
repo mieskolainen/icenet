@@ -2,7 +2,7 @@
 #
 # Run tests with: pytest icefit/abcd.py -rP
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import copy
 import numpy as np
@@ -10,11 +10,13 @@ import scipy
 import scipy.stats as stats
 import numba
 
+from icefit.cortools import prc_CI
+
 
 def ABCD_eq(b,c,d):
     """
     Basic estimator formula for count in 'A' (signal domain)
-    
+        
     Independent (X,Y) gives us the definition A = B x C / D
     
     Y 

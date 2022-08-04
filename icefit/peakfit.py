@@ -921,7 +921,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
     return all_years
 
 
-def test_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
+def run_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
     """
     J/psi peak fitting
     """
@@ -988,7 +988,7 @@ def test_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
                 print(f'Fit results saved to: {filename} (pickle) \n\n')
 
 
-def test_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
+def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
     """
     Tag & Probe efficiency (& scale factors)
     """
@@ -1076,5 +1076,5 @@ if __name__ == "__main__":
 
     inputfile = 'configs/peakfit/tune0.yml'
 
-    test_jpsi_fitpeak(inputfile=inputfile)
-    test_jpsi_tagprobe(inputfile=inputfile)
+    run_jpsi_fitpeak(inputfile=inputfile)
+    run_jpsi_tagprobe(inputfile=inputfile)

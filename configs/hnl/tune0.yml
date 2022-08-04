@@ -20,7 +20,7 @@ mva_param: &MVA_INPUT_PARAM
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
-  frac: 0.7                           # Train vs validate/test split fraction
+  frac: 0.9                           # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:
@@ -122,18 +122,19 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     
     #- xgb-MI-max
+    #- dmlp-MI-max
+
     - xgb-MI-min
     - dmlp-MI-min
     
-    - xgb0-red
     - xgb0
+    - dmlp0
     
-    #- dmlp-MI-max
-    #- dmlp0
-    #- dmlp0-red
-        
+    - xgb0-red
+    - dmlp0-red
+    
     - cut0
-
+    - cut1
 
   raytune: !include configs/hnl/raytune.yml
 
@@ -143,11 +144,11 @@ train_runmode:
 
     # Big, sophisticated model
     source:
-      xgb0
-      
+      #xgb0
+    
     # Simple, compressed models
     drains:
-      - xgb1
+      #- xgb1
       # - add more here
 
   # Batched "deep" training

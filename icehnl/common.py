@@ -62,6 +62,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     ## Print some diagnostics
     label_type = frame['label_type'].to_numpy().astype(int)
     
+    print(__name__ + f'.load_root_file: Number of events: {len(X)}')
+    
     for c in np.unique(Y):
         print(__name__ + f'.load_root_file: class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
         print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')

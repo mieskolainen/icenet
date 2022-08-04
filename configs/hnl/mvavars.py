@@ -49,7 +49,10 @@ ALL_MVA_VARS = [
 
   # HNL jet
   'hnlJet_nominal_pt',
-  'hnlJet_nominal_eta'
+  'hnlJet_nominal_eta',
+  
+  # HNL tagger
+  'tagger_score'
 ]
 
 

@@ -34,7 +34,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   epochs: 30
   batch_size: 512
   lr: 1.0e-3
-  weight_decay: 0.00001
+  weight_decay: 1.0e-5
   clip_norm: 1.0
   
   mlp_dim: [128, 128]
@@ -44,7 +44,6 @@ MI_REG_PARAM: &MI_REG_PARAM
   activation: 'relu'
 
   powerset_filter: *FINAL_STATE_FILTER
-
 # -----------------------------------------------
 
 
@@ -77,6 +76,14 @@ cut0:
   sign: -1
   transform: null
 
+cut1:
+  train:    'cut'
+  predict:  'cut'
+  label:    'tagger_score'
+  variable: 'tagger_score'
+  sign: 1
+  transform: null
+
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
@@ -85,6 +92,9 @@ xgb0:
   predict: 'xgb'
   label:   'XGB'
   raytune:  xgb_trial_0
+
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
 
   # booster parameters
   model_param:
@@ -170,6 +180,9 @@ xgb-MI-min:
   label:   'XGB-MI-min'
   raytune:  xgb_trial_0
 
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
+  
   # booster parameters
   model_param:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)
@@ -216,6 +229,9 @@ xgb-MI-max:
   label:   'XGB-MI-max'
   raytune:  xgb_trial_0
 
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
+  
   # booster parameters
   model_param:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)
@@ -260,6 +276,9 @@ dmlp0:
   predict: 'torch_vector'
   label:   'DMLP'
   raytune:  null
+  
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
   
   # Model
   conv_type: 'dmlp'
@@ -348,6 +367,9 @@ dmlp-MI-min:
   label:   'DMLP-MI-min'
   raytune:  null
 
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
+  
   # Model
   conv_type: 'dmlp'
   model_param:
@@ -396,6 +418,9 @@ dmlp-MI-max:
   label:   'DMLP-MI-max'
   raytune:  null
 
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['tagger_score']
+  
   # Model
   conv_type: 'dmlp'
   model_param:

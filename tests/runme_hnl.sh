@@ -10,7 +10,7 @@ DATAPATH="./travis-stash/input/icehnl"
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames
-mkdir "figs/hnl/config_[$CONFIG]" -p # for output ascii dump
+mkdir "figs/hnl/config-[$CONFIG]" -p # for output ascii dump
 
 # tee redirect output to both a file and to screen
 python analysis/hnl.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH --datasets "none" #| tee "./figs/hnl/$CONFIG/train_output.txt"

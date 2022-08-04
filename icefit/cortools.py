@@ -2,7 +2,10 @@
 #
 # Run with: pytest ./icefit/cortools -rP (can take few minutes)
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
+
+#import sys
+#sys.path.append(".")
 
 import numpy as np
 #import numba
@@ -16,6 +19,7 @@ import dcor
 import pandas as pd
 
 from icefit import mine
+
 
 def prc_CI(x, alpha):
     return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
@@ -339,7 +343,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
 
     if weights is None:
         weights = np.ones(len(x), dtype=float)
-    
+
     # Normalize to sum to one
     w = weights / np.sum(weights) 
 
@@ -586,6 +590,10 @@ def test_constant():
 
     MI_mine = mine.estimate(X=x1, Z=x2)[0]
     assert  MI_mine == pytest.approx(0, abs=EPS)
+
+
+#if __name__ == "__main__":
+#    test_gaussian()
 
 
 """

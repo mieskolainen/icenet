@@ -1,4 +1,4 @@
-# Test GPU support
+# Test GPU support of tensorflow, torch
 
 import tensorflow
 import torch
