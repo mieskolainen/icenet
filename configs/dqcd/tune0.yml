@@ -9,20 +9,19 @@ mva_param: &MVA_INPUT_PARAM
   num_classes: 2                     # Number of classes in MVA
   signalclass: 1                     # Signal class ID
   
-  inputvar:         null
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
-
-  # Needs to be alphabetical
+  
+  # For xgboost etc. fixed input dimension models
   jagged_maxdim:
     
-    Jet:   10
-    Muon:  8
-    sv:    6
-    cpf:   20
-    npf:   10
+    Jet:  6
+    Muon: 8
+    sv:   9
+    cpf:  20
+    npf:  10
   
-  frac: 0.5                          # Train vs validate/test split fraction
+  frac: 0.6                          # Train vs validate/test split fraction
   
   # Variable imputation
   imputation_param:
@@ -31,7 +30,7 @@ mva_param: &MVA_INPUT_PARAM
     algorithm: 'constant'            # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
     fill_value: -999.0               # For constant imputation
     knn_k: 8                         # Number of nearest neighbours considered
-    values: null                     # Special values which indicate the need for imputation, if null, then only Inf/Nan
+    values: null                     # Special values which indicate the need for imputation, if null, then only Inf/Nan/Empty
 
   varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'          # Tensor variable normalization
@@ -127,12 +126,12 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     
     #- gnet1
-    #- gnet2
+    - gnet2
     #- gnet3
-
+    
     - xgb0
-    - dmlp
-    - lgr0
+    #- dmlp
+    #- lgr0
 
     #- deps
     #- vae0    

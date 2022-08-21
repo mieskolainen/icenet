@@ -11,10 +11,9 @@ mva_param: &MVA_INPUT_PARAM
   num_classes: 2                      # Number of classes in MVA
   signalclass: 1                      # Signal class ID
   
-  inputvar:         'MVA_SCALAR_VARS'
-  inputvar_scalar:  null              # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
-  jagged_maxdim:    6
+  inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  #inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
+  #jagged_maxdim:    6
   
   varnorm: null                       # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'           # Tensor variable normalization

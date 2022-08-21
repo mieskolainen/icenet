@@ -135,16 +135,21 @@ def splitfactor(x, y, w, ids, args):
 
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
+    ### Pick active variables out
+    scalar_vars = aux.process_regexp_ids(all_ids=ids, ids=globals()[args['inputvar_scalar']])
+    image_vars  = aux.process_regexp_ids(all_ids=ids, ids=globals()['CMSSW_MVA_IMAGE_VARS'])
+
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
     
     if KINEMATIC_VARS is not None:
-        k_ind, k_vars = io.pick_vars(data, KINEMATIC_VARS)
+
+        k_ind, k_vars = io.pick_vars(data, aux.process_regexp_ids(all_ids=ids, ids=KINEMATIC_VARS))
         
-        data_kin     = copy.deepcopy(data)
-        data_kin.x   = data.x[:, k_ind].astype(np.float)
-        data_kin.ids = k_vars
+        data_kin      = copy.deepcopy(data)
+        data_kin.x    = data.x[:, k_ind].astype(np.float)
+        data_kin.ids  = k_vars
 
     # -------------------------------------------------------------------------
     ### DeepSets representation
@@ -154,19 +159,18 @@ def splitfactor(x, y, w, ids, args):
     ### Tensor representation
     data_tensor = None
     
-    data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
+    data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=image_vars, args=args)
         
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
 
-    features   = globals()[args['inputvar']]
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-        features=features, graph_param=args['graph_param'])
+        features=scalar_vars, graph_param=args['graph_param'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, globals()[args['inputvar']])
+    s_ind, s_vars = io.pick_vars(data, scalar_vars)
     
     data.x   = data.x[:, s_ind].astype(np.float)
     data.ids = s_vars

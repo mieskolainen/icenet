@@ -1,6 +1,6 @@
 # "Analytic" algorithms, observables, metrics etc.
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -131,6 +131,9 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
                 edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !
             n += 1
 
+    # Cast
+    edge_attr = edge_attr.astype(float)
+    
     return edge_attr
 
 

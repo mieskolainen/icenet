@@ -295,6 +295,9 @@ vae0:
   label:   'VAE'
   raytune:  null
 
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['__model.*'] # No conditional
+  
   # Model param
   conv_type: 'vae'
   model_param:
@@ -476,11 +479,11 @@ gnet2:
     conv_MLP_dropout: 0.01
     conv_aggr: 'max'
     conv_knn: 8
-
+    
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
     fusion_MLP_dropout: 0.01
-
+    
     final_MLP_act: 'relu'
     final_MLP_bn:  False
     final_MLP_dropout: 0.01
@@ -488,7 +491,7 @@ gnet2:
     # Domain adaptation
     DA_active: False
     # ...
-
+  
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy

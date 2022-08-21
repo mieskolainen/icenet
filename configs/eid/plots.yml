@@ -1,6 +1,10 @@
 basic:
   active: false
   nbins:  70
+  exclude_vals: [null, 0]
+
+corrmat:
+  active: false
 
 contours: 
   active: true

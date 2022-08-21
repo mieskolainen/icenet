@@ -15,7 +15,7 @@ from icenet.tools import iceroot
 from icenet.tools import io
 
 path     = '/home/user/travis-stash/input/icedqcd'
-datasets = 'HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+datasets = 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
 key      = 'Events;1'
 
 ids = ['nsv', 'sv_.*', 'cpf_.*', 'Jet_.*']

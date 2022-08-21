@@ -684,20 +684,26 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
-def plotvars(X, y, ids, weights, nbins = 70, title = '', targetdir = '.'):
+def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', targetdir = '.'):
     """ Plot all variables.
     """
     print(__name__ + f'.plotvars: Creating plots ...')
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
-        var = ids[i]
-        plotvar(x=x, y=y, weights=weights, var=var, nbins=nbins, title=title, targetdir=targetdir)
+
+        # Exclude special values
+        ind = np.ones(len(x))
+        for k in range(len(exclude_vals)):
+            ind = np.logical_and(ind, (x != exclude_vals[k]))
+
+        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins, title=title, targetdir=targetdir)
 
 
 def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot a single variable.
     """
-    bins     = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99), nbins)
+    bins     = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99.5), nbins)
+
     fig, axs = plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
     plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
 
@@ -707,7 +713,7 @@ def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     gc.collect()
 
 
-def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
+def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x', linewidth=1.5, rwidth=1.0):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not)!
     """
@@ -724,24 +730,24 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x'):
         # [raw histograms]  Loop over classes
         for c in range(num_classes) :
             ax.hist(X[y == c], bins, density = False,
-                histtype = 'step', fill = False, linewidth = 1.5)
+                histtype = 'step', fill = False, linewidth = linewidth, rwidth=rwidth)
             legends.append(f'$\\mathcal{{C}} = {c}$')
 
         # [weights applied] Loop over classes
         for c in range(num_classes) :
             w = weights[y == c]
             ax.hist(X[y == c], bins, weights = w, density = False,
-                histtype = 'step', fill = False, linestyle = '--', linewidth = 2.0)
+                histtype = 'step', fill = False, linestyle = '--', linewidth = linewidth+0.5, rwidth=rwidth)
             legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
 
         ax.set_ylabel('weighted counts')
         ax.set_xlabel(xlabel)
-
+    
     ax1.set_title(title, fontsize=10)
     ax1.legend(legends)
     ax2.set_yscale('log')
     plt.tight_layout()
-
+    
     return fig, (ax1,ax2)
 
 
@@ -1056,9 +1062,9 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
             yy[i] = fscores[f'f{i}'] # Feature name 'f{i}''
         except:
             yy[i] = 0.0
-
-        labels.append(f'{tick_label[i]} [{i}]')
-
+        
+        labels.append(f'{tick_label[i]} ({yy[i]:0.1f}) [{i}]')
+    
     # Sort them
     if sort:
         s_ind  = np.array(np.argsort(yy), dtype=int)
@@ -1066,7 +1072,7 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
         labels = [labels[i] for i in s_ind]
 
     # Plot
-    fig,ax = plt.subplots(figsize=(1.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
+    fig,ax = plt.subplots(figsize=(0.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
     plt.barh(xx, yy, align='center', height=0.5, tick_label=labels)
     plt.xlabel(f'F-score ({importance_type})')
     plt.title(f'[{label}]')

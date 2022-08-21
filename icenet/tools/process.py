@@ -849,23 +849,23 @@ def make_plots(data, args):
 
     ### Plot variables
     if args['plot_param']['basic']['active']:
-
-        ###
+        
+        ### Specific variables
         if data['data_kin'] is not None:
             targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')
-            for k in data['data_kin'].ids:
-                plots.plotvar(x = data['data_kin'].x[:, data['data_kin'].ids.index(k)],
-                    y = data['data_kin'].y, weights = data['data_kin'].w, var = k, nbins = args['plot_param']['basic']['nbins'],
-                    targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+            plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids, nbins = args['plot_param']['basic']['nbins'],
+                exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
         
-        ### Plot correlations
+        ### Plot MVA input variable plots
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/1D-distributions/')
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids, nbins = args['plot_param']['basic']['nbins'],
+            exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+    
+    ### Correlations
+    if args['plot_param']['corrmat']['active']:
+
         targetdir = aux.makedir(f'{args["plotdir"]}/train/')
         fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
-        
-        ### Plot basic plots
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/1D-distributions/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w, nbins = args['plot_param']['basic']['nbins'], ids = data['data'].ids,
-            targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
 
 
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,

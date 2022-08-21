@@ -84,7 +84,7 @@ def parse_tensor_data(X, ids, image_vars, args):
     return tensor
 
 
-def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):
+def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12, null_value=-999.0):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -181,10 +181,14 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
 
         ## Construct node features
         x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[ev], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        
+        x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
         edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        
+        edge_attr[~np.isfinite(edge_attr)] = null_value # Input protection
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
 
         ## Construct edge connectivity
@@ -195,7 +199,9 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
         if global_on == False: # Null the global features
             u = torch.tensor([], dtype=torch.float)
         else:
-            u = torch.tensor(X[ev, feature_ind].tolist(), dtype=torch.float)
+            u = (X[ev, feature_ind]).astype(float)
+            u[~np.isfinite(u)] = null_value # Input protection
+            u = torch.tensor(u, dtype=torch.float)
         
         dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
@@ -208,7 +214,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
 def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coord):
 
     # Node feature matrix
-    x = np.zeros((num_nodes, num_node_features))
+    x = np.zeros((num_nodes, num_node_features), dtype=float)
 
     for i in range(num_nodes):
 
@@ -235,5 +241,8 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
             except:
                 continue
                 # Not able to read it (empty cluster data)
-            
+    
+    # Cast
+    x = x.astype(float)
+
     return x

@@ -27,7 +27,7 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e9)):
+def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e9), null_value=-999.0):
     """
     TRACKSTER LEVEL
     
@@ -72,6 +72,7 @@ def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e
         x[:,6] = nodes.EV2.to_numpy()
         x[:,7] = nodes.EV3.to_numpy()
 
+        x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
         # --------------------------------------------
 
@@ -127,7 +128,7 @@ def compute_edge_attr(data):
     return edge_attr
 
 
-def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12):
+def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12, null_value=-999.0):
     """
     EVENT LEVEL (PROCESSING CANDIDATES)
     
@@ -227,10 +228,14 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
         
         ## Construct node features
         x = get_node_features(p4vec=p4vec, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        
+        x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
         edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        
+        edge_attr[~np.isfinite(edge_attr)] = null_value # Input protection
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
         
         ## Construct edge connectivity
@@ -240,7 +245,11 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
         # Add this event
         if global_on == False: # Null the global features
             u = torch.tensor(np.zeros(num_global_features), dtype=torch.float)
-        
+        else:
+            u = np.zeros(num_global_features)
+            u[~np.isfinite(u)] = null_value # input protection
+            u = torch.tensor(u, dtype=torch.float)
+
         dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
     print(__name__ + f'.parse_graph_data_candidate: Empty HGCAL events: {num_empty_HGCAL} / {num_events} = {num_empty_HGCAL/num_events:0.5f} (using only global data u)')        
@@ -251,7 +260,7 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
 def get_node_features(p4vec, num_nodes, num_node_features, coord):
 
     # Node feature matrix
-    x = np.zeros((num_nodes, num_node_features))
+    x = np.zeros((num_nodes, num_node_features), dtype=float)
 
     for i in range(num_nodes):
 

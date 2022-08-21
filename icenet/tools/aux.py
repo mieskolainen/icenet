@@ -53,14 +53,45 @@ def red(X, ids, param, mode='X', exclude_tag='exclude_MVA_vars', include_tag='in
     
     # Variable set is reduced
     if np.sum(mask) != len(ids):
-        cprint(__name__ + f'.red: Using reduced set of variables: {np.array(ids)[mask].tolist()}', 'red')
+        cprint(__name__ + f'.red: Using the reduced set of variables: {np.array(ids)[mask].tolist()}', 'red')
     else:
-        cprint(__name__ + f'.red: Using full set of input variables', 'red')
+        cprint(__name__ + f'.red: Using the full set of input variables', 'red')
     
     if mode == 'X':
         return X[:, mask]
     else:
         return np.array(ids)[mask].tolist()
+
+
+def unroll_ak_fields(x, order='first'):
+    """
+    Unroll field names in a (nested) awkward array
+
+    Args:
+        x   : awkward array
+        type: return first order and second order field names 
+    Returns:
+        field names as a list
+    """
+    all_fields = []
+    for key in x.fields: # x.fields returns only the first order fields
+        
+        fields = x[key].fields
+
+        # Non-nested entry
+        if order == 'first' and fields == []:
+            all_fields += [key]
+
+        # Contains second order sub-fields
+        if order == 'second' and fields != []:
+            
+            # Add of type "first_second"
+            extended = []
+            for sub_field in fields:
+                extended += [f'{key}_{sub_field}']
+            all_fields += extended
+
+    return all_fields
 
 
 def process_regexp_ids(all_ids, ids=None):
@@ -124,8 +155,55 @@ def ak2numpy(x, fields, null_value=float(999.0)):
         out[:,i] = ak.flatten(ak.unzip(x[fields[i]]))
     return out
 
+
+def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, null_value=float(-999.0)):
+    """
+    Transform jagged awkward array to fixed dimensional numpy data
+    
+    Args:
+        data:          awkward arrays in a XYW object
+        scalar_vars:   Scalar variable names
+        jagged_vars:   Jagged variable names
+        jagged_maxdim: Maximum dimension per jagged category
+        null_value:    Fill null value
+    Returns:
+        data object
+    """
+    # Create tuplet expanded jagged variable names
+    jagged_dim      = []
+    all_jagged_vars = []
+        
+    for i in range(len(jagged_vars)):
+        
+        # Split by the first "_" occuring
+        dim = int(jagged_maxdim[jagged_vars[i].split('_', 1)[0]])
+        jagged_dim.append(dim)
+        
+        # Create names of type 'varname[j]'
+        for j in range(dim):
+            all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
+
+    # Update representation
+    arg = {
+        'scalar_vars': scalar_vars,
+        'jagged_vars': jagged_vars,
+        'jagged_dim':  jagged_dim,
+        'null_value':  null_value
+    }
+    matrix = jagged2matrix(data.x, **arg)
+    
+    # Cast to numpy arrays
+    new_data = copy.deepcopy(data)
+
+    new_data.x   = ak.to_numpy(matrix)
+    new_data.y   = ak.to_numpy(data.y)
+    new_data.ids = scalar_vars + all_jagged_vars # First scalar, then jagged !
+
+    return new_data
+
+
 #@numba.njit
-def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, null_value=float(-999.0)):
+def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim, null_value=float(-999.0)):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
@@ -133,47 +211,50 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_maxdim, jagged_totdim, n
         arr:           Awkward array type input for N events
         scalar_vars:   Scalar variables to pick (list of strings)
         jagged_vars:   Jagged variables to pick (list of strings)
-        jagged_maxdim: Maximum dimension per jagged variable (integer array)
-        jagged_totdim: Total dimension of jagged
+        jagged_dim:    Maximum dimension per jagged variable (integer array)
         null_value:    Default value for empty ([]) jagged entries
     
     Returns:
         mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
     """
 
-    N   = len(arr)
-    D_S = len(scalar_vars)
-    D   = D_S + int(jagged_totdim)
-     
+    if len(jagged_vars) != len(jagged_dim):
+        raise Exception(__name__ + f'.jagged2matrix: len(jagged_vars) != len(jagged_maxdim) {len(jagged_vars)} != {len(jagged_dim)}')
+
+    N = len(arr)
+    D = len(scalar_vars) + int(np.sum(np.array(jagged_dim)))
+
     print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}]')
 
     # Pre-processing of jagged vars
     jvname = []
     for j in range(len(jagged_vars)):
         # Awkward groups jagged variables, e.g. 'sv_x' to sv.x
-        jvname.append(jagged_vars[j].split('_'))
-    
-    # Loop over events
+        jvname.append(jagged_vars[j].split('_', 1)) # argument 1 takes the first '_' occurance
+
     mat = np.full((N,D), null_value)
     
     ## Pure scalar vars
-    for j in range(D_S):
+    for j in range(len(scalar_vars)):
         mat[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]]))
-
-    ## Jagged vars
+    
+    # Loop over events
     for ev in tqdm(range(N)):
         
-        k = D_S
+        k = len(scalar_vars)
 
+        ## Jagged vars
         for j in range(len(jagged_vars)):
+            
+            maxdim = jagged_dim[j]
 
             x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
             if len(x) > 0:
-                d_this = np.min([len(x), jagged_maxdim[j]])
+                d_this = np.min([len(x), maxdim])
                 mat[ev, k:k+d_this] = x[0:d_this]
             
             # Increase block counter
-            k += jagged_maxdim[j]
+            k += maxdim
 
     return mat
 

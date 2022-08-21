@@ -26,7 +26,7 @@ def filter_standard(X, isMC, xcorr_flow=False):
     Returns:
         Passing indices mask (N)
     """
-    global O; O = X  # __technical__ due to eval() scope
+    global O; O = X  # __technical__ recast due to eval() scope
 
     names = ["O['HLT_Mu9_IP6_part0'] | "
              "O['HLT_Mu9_IP6_part1'] | "

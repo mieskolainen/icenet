@@ -11,10 +11,9 @@ mva_param: &MVA_INPUT_PARAM
   num_classes: 2                      # Number of classes in MVA
   signalclass: 1                      # Signal class ID
   
-  inputvar:         'MVA_SCALAR_VARS'
-  inputvar_scalar:  null              # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
-  jagged_maxdim:    6
+  inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  #inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
+  #jagged_maxdim:    6
   
   varnorm: 'zscore'                   # Variable normalization: 'zscore', 'madscore', null
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
@@ -27,7 +26,7 @@ mva_param: &MVA_INPUT_PARAM
     active: true                      # True / False
     var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                     # For constant imputation
+    fill_value: -999.0                # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
     values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
   

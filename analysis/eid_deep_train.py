@@ -93,7 +93,7 @@ def main():
 
     args, cli  = process.read_config(config_path='./configs/eid', runmode=runmode)
     root_files = args['root_files']
-    features   = globals()[args['inputvar']]
+    scalar_var = globals()[args['inputvar_scalar']]
     
     # Create save path
     args["modeldir"] = aux.makedir(f'./checkpoint/eid/{args["config"]}/')
@@ -110,7 +110,7 @@ def main():
 
     gdata = {}
     gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, maxevents=1,
-        features=features, graph_param=args['graph_param'])
+        features=scalar_var, graph_param=args['graph_param'])
     
     # =========================================================================
     ### Initialize all models
@@ -179,10 +179,10 @@ def main():
                     
                     gdata = {}
                     gdata['trn'] = graphio.parse_graph_data(X=trn.x, Y=trn.y, ids=ids, weights=trn_weights,
-                        features=features, graph_param=args['graph_param'])
+                        features=scalar_var, graph_param=args['graph_param'])
 
                     gdata['val'] = graphio.parse_graph_data(X=val.x, Y=val.y, ids=ids, weights=val_weights,
-                        features=features, graph_param=args['graph_param'])
+                        features=scalar_var, graph_param=args['graph_param'])
                     
                     io.showmem()
 

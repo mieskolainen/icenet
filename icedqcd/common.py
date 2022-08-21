@@ -137,13 +137,21 @@ def splitfactor(x, y, w, ids, args):
         dictionary with different data representations
     """
     data   = io.IceXYW(x=x, y=y, w=w, ids=ids)
-    
+
     data.y = ak.to_numpy(data.y)
     data.w = ak.to_numpy(data.w)
 
-    ### Pick active scalar variables out
-    scalar_vars   = globals()[args['inputvar_scalar']]
-    jagged_vars   = globals()[args['inputvar_jagged']]
+    ### Pick active variables out
+    scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=globals()[args['inputvar_scalar']])
+    jagged_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=globals()[args['inputvar_jagged']])
+    
+    # Individually
+    muon_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUON_VARS)
+    jet_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_JET_VARS)
+    sv_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_SV_VARS)
+    cpf_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_CPF_VARS)
+    npf_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_NPF_VARS)
+    pf_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_PF_VARS)
 
     ### ** Remove conditional variables **
     if args['use_conditional'] == False:
@@ -160,53 +168,32 @@ def splitfactor(x, y, w, ids, args):
     
     if KINEMATIC_VARS is not None:
 
-        data_kin      = copy.deepcopy(data)
-        data_kin.x    = aux.ak2numpy(x=data.x, fields=KINEMATIC_VARS)
-        data_kin.ids  = KINEMATIC_VARS
+        kinematic_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'), ids=KINEMATIC_VARS)
+
+        data_kin       = copy.deepcopy(data)
+        data_kin.x     = aux.ak2numpy(x=data.x, fields=kinematic_vars)
+        data_kin.ids   = kinematic_vars
 
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
 
-    features   = globals()[args['inputvar_scalar']]
+    #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
+    node_features = {'muon': muon_vars}
+    
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-        features=features, graph_param=args['graph_param'])
+        features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])
 
     # -------------------------------------------------------------------------
     ## Tensor representation
     data_tensor = None
 
     # -------------------------------------------------------------------------
-    ## Turn jagged data to "long-vector" matrix representation
-    
-    # Create tuplet expanded jagged variable names
-    all_jagged_vars = []
-    jagged_maxdim   = []
-    jagged_totdim   = int(0)
-    for i in range(len(jagged_vars)):
+    ## Turn jagged data to a "long-vector" zero-padded matrix representation
 
-        sf             = jagged_vars[i].split('_')
-        thisdim        = int(args['jagged_maxdim'][sf[0]])
-        jagged_totdim += thisdim
-
-        for j in range(thisdim):
-            all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
-            jagged_maxdim.append(thisdim)
-
-    # Update representation
-    arg = {
-        'scalar_vars'  : scalar_vars,
-        'jagged_vars'  : jagged_vars,
-        'jagged_maxdim': jagged_maxdim,
-        'jagged_totdim': jagged_totdim,
-        'null_value'   : args['imputation_param']['fill_value']
-    }
-    mat      = aux.jagged2matrix(data.x, **arg)
-
-    data.x   = ak.to_numpy(mat)
-    data.y   = ak.to_numpy(data.y)
-    data.ids = scalar_vars + all_jagged_vars
-    # --------------------------------------------------------------------------
+    data = aux.jagged_ak_to_numpy(data=data, scalar_vars=scalar_vars,
+                       jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
+                       null_value=args['imputation_param']['fill_value'])
 
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
@@ -224,6 +211,5 @@ def splitfactor(x, y, w, ids, args):
     data_deps.ids = all_jagged_vars
     """
     # --------------------------------------------------------------------------
-    
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

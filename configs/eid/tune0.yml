@@ -13,11 +13,16 @@ mva_param: &MVA_INPUT_PARAM
   use_conditional: false             # Conditional (theory parametric) input
   num_classes: 2                     # Number of classes in MVA
   signalclass: 1                     # Signal class ID
-  
-  inputvar:         'CMSSW_MVA_SCALAR_VARS_ORIG'
-  inputvar_scalar:  null             # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
-  jagged_maxdim:    6
+       
+  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_ORIG' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  #inputvar_jagged: null              # 'MVA_JAGGED_VARS'
+  #jagged_maxdim:
+  #  
+  #  Jet:   4
+  #  Muon:  8
+  #  sv:    4
+  #  cpf:   20
+  #  npf:   10
 
   varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
   varnorm_tensor: 'zscore'           # Tensor variable normalization

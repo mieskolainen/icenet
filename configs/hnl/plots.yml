@@ -22,6 +22,10 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 basic:
   active: false
   nbins:  70
+  exclude_vals: [null, -999.0]
+
+corrmat:
+  active: false
 
 contours:
   active: false
