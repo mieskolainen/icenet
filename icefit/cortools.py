@@ -21,6 +21,22 @@ import pandas as pd
 from icefit import mine
 
 
+def percentile_per_dim(x, q):
+    """
+    Compute percentile per column dimension
+
+    Args:
+        input: (N x dim)
+        q:     percentile (0,100)
+
+    Returns:
+        out:   array with length dim
+    """
+    out = np.zeros(x.shape[1])
+    for i in range(len(out)):
+        out[i] = np.percentile(x[:,i], q)
+    return out
+
 def prc_CI(x, alpha):
     return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
 

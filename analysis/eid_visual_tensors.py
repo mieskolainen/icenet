@@ -46,14 +46,14 @@ from iceid import common
 #
 def main() :
     
-    runmode     = 'genesis'
-    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
-    X,Y,W,ids   = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
+    runmode        = 'genesis'
+    args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
     
-    runmode     = 'train'
-    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    runmode        = 'train'
+    args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
     
-    data        = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
+    data           = process.process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
     
     # Pick them out
     data_tensor = data['trn']['data_tensor']

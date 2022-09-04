@@ -15,9 +15,11 @@ MVA_output:
 
 ROC:
   active: true
+  num_bootstrap: 200
 
 ROC_binned:
   active: false
-
+  num_bootstrap: 200
+  
 MVA_2D:
   active: false

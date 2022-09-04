@@ -749,7 +749,8 @@ class Metric:
     """
     Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_pred, weights=None, num_classes=2, hist=True, valrange='prob', N_mva_bins=30, verbose=True):
+    def __init__(self, y_true, y_pred, weights=None, num_classes=2, hist=True, valrange='prob',
+        N_mva_bins=30, verbose=True, num_bootstrap=0):
         """
         Args:
             y_true     : true classifications
@@ -764,6 +765,19 @@ class Metric:
         Returns:
             metrics, see the source code for details
         """
+        self.acc = -1
+        self.auc = -1
+        self.fpr = -1
+        self.tpr = -1
+        self.thresholds = -1
+        
+        self.tpr_bootstrap = None
+        self.fpr_bootstrap = None
+        self.auc_bootstrap = None
+        self.acc_bootstrap = None
+
+        self.mva_bins = []
+        self.mva_hist = []
 
         # Make sure they are binary (scikit ROC functions cannot handle continuous values)
         y_true = np.round(y_true)
@@ -795,14 +809,6 @@ class Metric:
         if len(np.unique(y_true)) <= 1:
             if verbose:
                 print(__name__ + f'.Metric: only one class present cannot evaluate metrics (return -1)')
-            self.acc = -1
-            self.auc = -1
-            self.fpr = -1
-            self.tpr = -1
-            self.thresholds = -1
-            
-            self.mva_bins = []
-            self.mva_hist = []
 
             return # Return None
             
@@ -833,20 +839,73 @@ class Metric:
             self.mva_hist = None
 
         # ------------------------------------
-        # Compute Metrics
-        
-        self.acc = None
-        self.auc = None
-        self.fpr = None
-        self.tpr = None
-        self.thresholds = None
-        
-        if  num_classes == 2:
-            self.fpr, self.tpr, self.thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
-            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
-        else:
-            self.auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=None, \
-                        average="weighted", multi_class='ovo', labels=np.arange(num_classes))
-            self.acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
+        ## Compute Metrics
+        out = compute_metrics(num_classes=num_classes, y_true=y_true, y_pred=y_pred, weights=weights)
 
+        self.acc        = out['acc']
+        self.auc        = out['auc']
+        self.fpr        = out['fpr']
+        self.tpr        = out['tpr']
+        self.thresholds = out['thresholds']
+
+        if num_bootstrap > 0:
+
+            self.tpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.tpr)))
+            self.fpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.fpr)))
+            self.auc_bootstrap = (-1)*np.ones(num_bootstrap)
+            self.acc_bootstrap = (-1)*np.ones(num_bootstrap)
+
+            for i in range(num_bootstrap):
+
+                # ------------------
+                trials = 0
+                while True:
+                    ind = np.random.choice(range(len(y_true)), size=len(y_true), replace=True)
+                    if len(np.unique(y_true[ind])) > 1 or trials > 100: # Protection with very low per class stats
+                        break
+                    else:
+                        trials += 1
+                if trials > 100:
+                    print(__name__ + f'.Metric: bootstrap fail (check your input statistics)')
+                    continue
+                # ------------------
+
+                out = compute_metrics(num_classes=num_classes, y_true=y_true[ind], y_pred=y_pred[ind], weights=weights[ind])
+
+                if out['auc'] > 0:
+
+                    self.auc_bootstrap[i] = out['auc']
+                    self.acc_bootstrap[i] = out['acc']
+
+                    # Interpolate ROC-curve (re-sample to match the non-bootstrapped x-axis)
+                    from scipy import interpolate
+
+                    func = interpolate.interp1d(out['fpr'], out['tpr'], 'linear')
+                    self.tpr_bootstrap[i,:] = func(self.fpr)
+
+                    func = interpolate.interp1d(out['tpr'], out['fpr'], 'linear')
+                    self.fpr_bootstrap[i,:] = func(self.tpr)
+
+
+def compute_metrics(num_classes, y_true, y_pred, weights):
+
+    acc = -1
+    auc = -1
+    fpr = -1
+    tpr = -1
+    thresholds = -1
+
+    try:
+        if  num_classes == 2:
+            fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
+            auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
+            acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
+        else:
+            fpr, tpr, thresholds = None, None, None
+            auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=None, \
+                        average="weighted", multi_class='ovo', labels=np.arange(num_classes))
+            acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
+    except:
+        print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics (check the input statistics)')
+    
+    return {'fpr': fpr, 'tpr': tpr, 'thresholds': thresholds, 'auc': auc, 'acc': acc}

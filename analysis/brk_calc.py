@@ -43,8 +43,7 @@ def main() :
     iodir = aux.makedir(f'output/{args["rootname"]}/{cli.tag}/')
     paths = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
     
-    
-    VARS = features.generate_feature_names(args['MAXT3'])
+    VARS  = features.generate_feature_names(args['MAXT3'])
     modeldir = aux.makedir(f'checkpoint/{args["rootname"]}/{args["config"]}/')
     
     # ====================================================================

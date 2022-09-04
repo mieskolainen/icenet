@@ -139,7 +139,6 @@ def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
     return np.sqrt(r2)
 
 
-
 def prodratio_eprop(A, B, sigmaA, sigmaB, sigmaAB=0, mode='ratio'):
     """
     Error propagation (Taylor expansion) of product A*B or ratio A/B

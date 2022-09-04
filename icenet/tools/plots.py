@@ -202,6 +202,7 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
 
     return fig,ax
 
+
 def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['trk_pt', 'trk_eta']):
     """
     Evaluate AUC per 2D-bin.
@@ -268,7 +269,7 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
     return fig, ax, met
 
 
-def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt'):
+def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt', num_bootstrap=0):
     """
     Evaluate AUC & ROC per 1D-bin.
     
@@ -309,9 +310,9 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
                     
                 # Evaluate metric
                 if weights is not None:
-                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind], weights=weights[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind], weights=weights[ind], num_bootstrap=num_bootstrap)
                 else:
-                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind])
+                    met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind], num_bootstrap=num_bootstrap)
 
                 AUC[i] = met.auc
                 METS.append(met)
@@ -809,7 +810,39 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
     return figs, axs
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1.0e-4) :
+def draw_error_band(ax, x, y, x_err, y_err, **kwargs):
+    
+    """
+    Calculate normals via centered finite differences (except the first point
+    which uses a forward difference and the last point which uses a backward
+    difference).
+
+    https://matplotlib.org/stable/gallery/lines_bars_and_markers/curve_error_band.html
+    """
+    from matplotlib.path import Path
+    from matplotlib.patches import PathPatch
+
+    dx = np.concatenate([[x[1] - x[0]], x[2:] - x[:-2], [x[-1] - x[-2]]])
+    dy = np.concatenate([[y[1] - y[0]], y[2:] - y[:-2], [y[-1] - y[-2]]])
+    l = np.hypot(dx, dy)
+    nx = dy / l
+    ny = -dx / l
+
+    # End points of errors
+    xp = x + nx * x_err
+    yp = y + ny * y_err
+    xn = x - nx * x_err
+    yn = y - ny * y_err
+
+    vertices = np.block([[xp, xn[::-1]],
+                         [yp, yn[::-1]]]).T
+    codes    = np.full(len(vertices), Path.LINETO)
+    codes[0] = codes[len(xp)] = Path.MOVETO
+    path     = Path(vertices, codes)
+    ax.add_patch(PathPatch(path, **kwargs))
+
+
+def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1.0e-4, alpha=0.32):
     """
     Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
 
@@ -820,6 +853,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         filename:
         legend_fontsize:
         xmin:
+        alpha:
     """
 
     for k in [0,1]: # linear & log
@@ -830,15 +864,24 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
         for i in range(len(metrics)):
 
-            linestyle = '-'
-            marker    = 'None'
+            linestyle = '-' if i < 10 else '--'
+            marker = 'None'
 
             if metrics[i] is None:
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
 
-            fpr = metrics[i].fpr
-            tpr = metrics[i].tpr
+            fpr    = metrics[i].fpr
+            tpr    = metrics[i].tpr
+
+            if metrics[i].tpr_bootstrap is not None:
+
+                # Percentile bootstrap based uncertainties
+                tpr_lo = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(alpha/2))
+                tpr_hi = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(1-alpha/2))
+                
+                fpr_lo = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(alpha/2))
+                fpr_hi = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(1-alpha/2))
 
             # Autodetect a ROC point triangle (instead of a curve)
             if len(np.unique(fpr)) == 3:
@@ -850,21 +893,42 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
             
             # A ROC-curve
             elif not (isinstance(fpr, int) or isinstance(fpr, float)):
-                fpr = fpr[1:] # Remove always the first element for log-plot reasons
-                tpr = tpr[1:]
-            
-            plt.plot(fpr, tpr, linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
+                fpr    = fpr[1:] # Remove always the first element for log-plot reasons
+                tpr    = tpr[1:]
 
-        plt.legend(fontsize=legend_fontsize)
-        ax.set_xlabel('False Positive (background) rate $\\alpha$')
-        ax.set_ylabel('True Positive (signal) rate $1-\\beta$')
+                if metrics[i].tpr_bootstrap is not None:
+
+                    tpr_lo = tpr_lo[1:]
+                    tpr_hi = tpr_hi[1:]
+
+                    fpr_lo = fpr_lo[1:]
+                    fpr_hi = fpr_hi[1:]
+            
+            ## Plot it
+            plt.plot(fpr, tpr, color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
+            
+            # Uncertainty band
+            if marker == 'None' and (metrics[i].tpr_bootstrap is not None):
+                
+                plt.fill_between(fpr,  tpr_lo, tpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # vertical
+                plt.fill_betweenx(tpr, fpr_lo, fpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # horizontal
+
+                # draw_error_band(ax=ax, x=fpr, y=tpr, \
+                #   x_err=np.std(metrics[i].fpr_bootstrap, axis=0)[1:], \
+                #   y_err=np.std(metrics[i].tpr_bootstrap, axis=0)[1:], \
+                #   facecolor=f'C{i}', edgecolor="none", alpha=0.2)
+
+        ax.set_xlabel('False Positive Rate $\\alpha$ (background efficiency)')
+        ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
         ax.set_title(title, fontsize=10)
 
-        # Shift legend outside the figure axes
-        if len(metrics) > 6:
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-
         if k == 0: # Linear-Linear
+
+            if len(metrics) > 12:
+                plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
+            else:
+                plt.legend(loc='lower right', fontsize=legend_fontsize)
+
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
             plt.locator_params(axis="x", nbins=11)
@@ -873,7 +937,10 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
 
-        if k == 1: # x-axis logarithmic
+        if k == 1: # Log-Linear
+
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
+
             plt.ylim(0.0, 1.0)
             plt.xlim(xmin, 1.0)
             plt.locator_params(axis="x", nbins=int(-np.log10(xmin) + 1))

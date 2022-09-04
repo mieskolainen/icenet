@@ -118,7 +118,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # No weights
     W = None
 
-    return X, Y, W, ids
+    # TBD add cut statistics etc. info here
+    info = {}
+    
+    return X, Y, W, ids, info
 
 
 def splitfactor(x, y, w, ids, args):

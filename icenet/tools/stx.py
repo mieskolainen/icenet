@@ -1,47 +1,182 @@
-# Functions to evaluate (a boolean) expression tree for vector (component) data
+# Functions to evaluate (a boolean) expression tree and cuts for vector (component) data
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import pyparsing as pp
 import numpy as np
+import copy
 
 from icenet.tools import aux
 
 
 def filter_constructor(filters, X, ids):
     """
-    Powerset filter constructor
+    Filter product main constructor
+    
+    Args:
+        filters: yaml file input
+        X:       columnar input data
+        ids:     data column keys (list of strings)
     
     Returns:
-        mask matrix, mask text labels
+        mask matrix, mask text labels (list), mask path labels (list)
     """
-    cutlist  = [filters[k]['cut']   for k in range(len(filters))]
-    textlist = [filters[k]['latex'] for k in range(len(filters))]
+    def process_set(input_set):
+
+        expand = input_set['expand']
+        cutset = input_set['cutset']
+
+        if   expand == 'set':
+            return set_constructor(cutset=cutset, X=X, ids=ids, veto=False)
+        elif expand == 'vetoset':
+            return set_constructor(cutset=cutset, X=X, ids=ids, veto=True)
+        elif expand == 'powerset':
+            return powerset_constructor(cutset=cutset, X=X, ids=ids)
+        else:
+            raise Exception(__name__ + f'.filter_constructor: expand type should be "set" or "powerset"')
+
+    # Loop over all filter definitions
+    ind = 0
+    all_mask_matrix    = None
+    all_text, all_path = [],[]
+
+    while True:
+        try:
+            f    = filters[f'filter[{ind}]']
+            ind += 1
+        except:
+            break
+
+        sets     = f['sets']      # a list of set indices
+        operator = f['operator']  # an operator to apply (between sets)
+
+        if type(sets) is not list:
+            raise Exception(__name__ + f'.filter_constructor: Input "sets" should be a list')
+
+        # A single set
+        if len(sets) == 1:
+            index = sets[0]
+            mask_matrix, text_set, path_set = process_set(filters[f'set[{index}]'])
+
+        # Two sets combined e.g. with a cartesian product
+        if len(sets) == 2:
+            masks, texts, paths = [],[],[]
+
+            for k in range(len(sets)):
+                index = sets[k]
+                m,t,p = process_set(filters[f'set[{index}]'])
+                masks.append(m), texts.append(t), paths.append(p)
+
+            # Apply operator
+            if operator == 'cartesian_and' or operator == 'cartesian_or':
+
+                if   operator == 'cartesian_and':
+                    logical_func = np.logical_and
+                    name     = 'AND'
+                elif operator == 'cartesian_or':
+                    logical_func = np.logical_or
+                    name     = 'OR'
+
+                # Loop over all cartesian combinations
+                mask_set, text_set, path_set = [],[],[]
+                for i in range(len(masks[0])):
+                    for j in range(len(masks[1])):
+
+                        mask_set.append( logical_func(masks[0][i,:], masks[1][j,:]) )
+                        text_set.append( f'{texts[0][i]} {name} {texts[1][j]}' )
+                        path_set.append( f'{paths[0][i]}_{name}_{paths[1][j]}' )
+
+                # Turn into matrix [num of masks x num of events]
+                mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
+                for i in range(len(mask_set)):
+                    mask_matrix[i,:] = mask_set[i]
+
+            else:
+                raise Exception(__name__ + f'.filter_constructor: Operator should be "cartesian_and" or "cartesian_or" for two sets')
+
+        # ** Add to lists of all filter products **
+        if all_mask_matrix is not None:
+            all_mask_matrix = np.concatenate((all_mask_matrix, mask_matrix), axis=0)
+        else:
+            all_mask_matrix = copy.deepcopy(mask_matrix)
+        all_text += text_set
+        all_path += path_set
+    else:
+        raise Exception(__name__ + f'.filter_constructor: Number of "sets" for filter[{i}] should be 1 or 2')
+
+    return all_mask_matrix, all_text, all_path
+
+
+def set_constructor(cutset, X, ids, veto=False):
+    """
+    Direct set filter constructor
+    
+    Returns:
+        mask matrix, mask text labels (list), mask path labels (list)
+    """
+    cutlist  = [cutset[k]['cut']   for k in range(len(cutset))]
+    textlist = [cutset[k]['latex'] for k in range(len(cutset))]
 
     # Construct cuts and apply
-    cuts, names   = construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
-    print_parallel_cutflow(cut=cuts, names=names)
+    mask_set, names = construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+
+    # Turn into matrix
+    mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
+    print(textlist)
+
+    # Create description strings
+    text_set, path_set = [],[]
+
+    for i in range(len(mask_set)):
+
+        if veto == False:
+            # take passing (index = 1)
+            mask_matrix[i,:] = mask_set[i]
+            string = textlist[i][1]
+        else:
+            # take non-passing (veto) (index = 0)
+            mask_matrix[i,:] = ~mask_set[i]
+            string = textlist[i][0]
+
+        text_set.append(string)
+        path_set.append(string.replace(' ','').replace('$','').replace('\\',''))
+
+    return mask_matrix, text_set, path_set
+
+
+def powerset_constructor(cutset, X, ids):
+    """
+    Powerset (all subsets of boolean combinations) filter constructor
     
-    mask_powerset = powerset_cutmask(cut=cuts)
-    BMAT          = aux.generatebinary(len(cuts))
+    Returns:
+        mask matrix, mask text labels (list), mask path labels (list)
+    """
+    cutlist  = [cutset[k]['cut']   for k in range(len(cutset))]
+    textlist = [cutset[k]['latex'] for k in range(len(cutset))]
+
+    # Construct cuts and apply
+    masks, names  = construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    print_parallel_cutflow(masks=masks, names=names)
+    
+    mask_powerset = powerset_cutmask(cut=masks)
+    BMAT          = aux.generatebinary(len(masks))
 
     print(textlist)
 
     # Loop over all powerset 2**|cuts| masked selections
     # Create a description latex strings and savepath strings
-    text_powerset = []
-    path_powerset = []
+    text_powerset, path_powerset = [],[]
+
     for i in range(BMAT.shape[0]):
         string = ''
         for j in range(BMAT.shape[1]):
             bit = BMAT[i,j] # 0 or 1
             string += f'{textlist[j][bit]}'
-            if j != BMAT.shape[1] - 1:
-                string += ' '
+            if j != BMAT.shape[1] - 1: string += ' '
         string += f' {BMAT[i,:]}'
 
         text_powerset.append(string)
-        path_powerset.append((f'{BMAT[i,:]}').replace(' ', ''))
+        path_powerset.append((f'{BMAT[i,:]}').replace(' ','').replace('$','').replace('\\',''))
 
     return mask_powerset, text_powerset, path_powerset
 
@@ -56,21 +191,21 @@ def construct_columnar_cuts(X, ids, cutlist):
         cutlist : Selection cuts as strings, such as ['ABS__eta < 0.5', 'trgbit == True']
     
     Returns:
-        cuts, names
+        masks (boolean arrays) in a list, boolean expressions (list)
     """
-    cuts  = []
-    names = []
+    masks  = []
+    names  = []
 
     for expr in cutlist:
 
         treelist = parse_boolean_exptree(expr)
         treeobj  = construct_exptree(treelist)
-        output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
+        mask     = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
-        cuts.append(output)
+        masks.append(mask)
         names.append(expr)
     
-    return cuts,names
+    return masks, names
 
 
 def powerset_cutmask(cut):
@@ -130,12 +265,12 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     
     # Print out "parallel flow"
     if xcorr_flow:
-        print_parallel_cutflow(cut=cut, names=names)
+        print_parallel_cutflow(masks=cut, names=names)
     
     return mask
 
 
-def print_parallel_cutflow(cut, names, EPS=1E-12):
+def print_parallel_cutflow(masks, names, EPS=1E-12):
     """
     Print boolean combination cutflow statistics
     
@@ -145,9 +280,9 @@ def print_parallel_cutflow(cut, names, EPS=1E-12):
     """
     print('\n')
     print(__name__ + '.print_parallel_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
-    vec = np.zeros((len(cut[0]), len(cut)))
+    vec = np.zeros((len(masks[0]), len(masks)))
     for j in range(vec.shape[1]):
-        vec[:,j] = np.array(cut[j])
+        vec[:,j] = np.array(masks[j])
 
     intmat = aux.binaryvec2int(vec)
     BMAT   = aux.generatebinary(vec.shape[1])
@@ -209,10 +344,10 @@ def parse_boolean_exptree(instring):
 
     operator        = pp.Regex(">=|<=|!=|>|<|==").setName("operator")
     number          = pp.Regex(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
-    identifier      = pp.Word(pp.alphas, pp.alphanums + "_")
+    identifier      = pp.Word(pp.alphas + "_", pp.alphanums + "_")
     comparison_term = identifier | number
     condition       = pp.Group(comparison_term + operator + comparison_term)
-
+    
     # OR before AND precedence convention
     # makeLRLike guarantees recursive binary tree structure
     expr            = pp.operatorPrecedence(condition,[

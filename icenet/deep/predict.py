@@ -42,6 +42,25 @@ from icenet.deep  import mlgr
 from icenet.deep  import maxo
 
 
+"""
+def pred_exp(args, param):
+    #
+    # This function assumes z-score normalization for the input variables
+    #
+    print(__name__ + f'.pred_exp: Evaluate <{param["label"]}> prod(exp) model ...')
+    
+    # Get feature name variables
+    def func_predict(x):
+        summ = 0.0
+        for i in range(len(param['variable'])):
+            index = args['features'].index(param['variable'][i])
+            summ += -(x[...,index])**2
+
+        return 1 / (1 + np.exp(summ))
+    
+    return func_predict
+"""
+
 def pred_cut(args, param):
 
     print(__name__ + f'.pred_cut: Evaluate <{param["label"]}> cut model ...')

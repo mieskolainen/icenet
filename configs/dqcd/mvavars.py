@@ -39,8 +39,10 @@ MVA_SCALAR_VARS = [
 # -----------------------------------------
 # Conditional (parametric) model variables
 MODEL_VARS = [
-  '__model_m',
-  '__model_ctau'
+  'MODEL_m',
+  'MODEL_ctau',
+  'MODEL_xiO',
+  'MODEL_xiL'
 ]
 MVA_SCALAR_VARS += MODEL_VARS
 # -----------------------------------------
@@ -85,7 +87,7 @@ MVA_JET_VARS = [
   'Jet_pt',
   'Jet_eta',
   'Jet_phi',
-  #'Jet_mass',
+  'Jet_mass',
 
   'Jet_chEmEF',
   'Jet_chHEF',
@@ -145,13 +147,13 @@ MVA_MUON_VARS = [
 #
 MVA_SV_VARS = [
   'sv_ptrel',
-  #'sv_mass',
+  'sv_mass',
   'sv_deta',
   'sv_dphi',
   'sv_dxy',
   'sv_dxysig',
   'sv_d3d',
-  'sv_d3dsig',
+  'sv_d3dsig'
   'sv_deltaR',
   'sv_costhetasvpv',
   'sv_chi2',
@@ -214,3 +216,4 @@ LOAD_VARS += PLOT_VARS
 LOAD_VARS += TRIGGER_VARS
 
 print(LOAD_VARS)
+

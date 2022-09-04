@@ -1,22 +1,30 @@
 FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 
-    # This goes through all the combinations
-    # [0, 0, ..., 0]
-    # [0, 0, ..., 1]
-    # ...
-    # [1, 1, ..., 1]
-    
-    # Latex description is for boolean [0,1] per cut
-    [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
-     {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
-     {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
-     {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
-    
-    # note: dataframe has SS for dilepton_charge == 1, OS for == -1
-    # -- = -2 -> SS
-    # -+ =  0 -> OS
-    # +- =  0 -> OS
-    # ++ =  2 -> SS
+  filter[0]:
+    operator: null   # null (unary), 'cartesian_and', 'cartesian_or'
+    sets: [0]        # input set ids (one or two)
+  
+  # ... more filters here
+
+  # -------------------------------------------------
+
+  set[0]:
+    expand: 'powerset' # 'set', 'vetoset', or 'powerset' which goes through all boolean vector combinations
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
+       {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
+       {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
+       {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
+  
+  # note: dataframe has SS for dilepton_charge == 1, OS for == -1
+  # -- = -2 -> SS
+  # -+ =  0 -> OS
+  # +- =  0 -> OS
+  # ++ =  2 -> SS
+
+  # ... more sets here
+
 # -----------------------------------------------------------------------
 
 # -----------------------------------------------
@@ -43,7 +51,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   noise_std: 0.025
   activation: 'relu'
 
-  powerset_filter: *FINAL_STATE_FILTER
+  set_filter: *FINAL_STATE_FILTER
 # -----------------------------------------------
 
 

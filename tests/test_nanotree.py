@@ -49,7 +49,7 @@ for library in ['ak']:
 	N = 20
 
 	# Add in a new record
-	out['__model_m'] = ak.Array(np.random.rand(len(out)))
+	out['MODEL_m'] = ak.Array(np.random.rand(len(out)))
 	print(len(out))
 	print(out)
 	
@@ -63,7 +63,7 @@ for library in ['ak']:
 			print(f'\n[Event {i}]:')
 			print(f'ak:')
 			print(f'X[{i}]: {X[i]}')
-			print(f'__model_m: {X[i].__model_m}')
+			print(f'MODEL_m: {X[i].MODEL_m}')
 
 			jetIdx = X[i].cpf.jetIdx
 			mask   = (X[i].cpf.jetIdx != -1)

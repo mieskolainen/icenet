@@ -134,15 +134,23 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     new_args['rngseed']  = args['rngseed']
     
     # -----------------------------------------------------
+    # Runmode setup
     if   runmode == 'genesis':
         new_args.update(args['genesis_runmode'])
         new_args.update(inputmap)
+    
     elif runmode == 'train':
         new_args.update(args['train_runmode'])
         new_args['plot_param'] = args['plot_param']
+    
     elif runmode == 'eval':
         new_args.update(args['eval_runmode'])
         new_args['plot_param'] = args['plot_param']
+
+    elif runmode == 'optimize':
+        new_args.update(args['optimize_runmode'])
+        new_args['plot_param'] = args['plot_param']
+
     elif runmode == 'all':
         for key in args.keys():
             if "_runmode" in key:
@@ -219,7 +227,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     return args, cli
 
-
 def read_data(args, func_loader, runmode):
     """
     Load input data
@@ -227,12 +234,9 @@ def read_data(args, func_loader, runmode):
     Args:
         args:  main argument dictionary
         func_loader:  application specific root file loader function
-        
-    Returns:
-        data
     """
     cache_filename = f'{args["datadir"]}/data_{args["__hash__"]}.pkl'
-
+    
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
@@ -243,7 +247,7 @@ def read_data(args, func_loader, runmode):
         # N.B. This loop is needed, because certain applications have each root file loaded here,
         # whereas some apps do all the multi-file processing under 'func_loader'
         for k in range(len(args['root_files'])):
-            X_,Y_,W_,ids = func_loader(root_path=args['root_files'][k], **load_args)
+            X_,Y_,W_,ids,info = func_loader(root_path=args['root_files'][k], **load_args)
 
             if k == 0:
                 X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
@@ -260,17 +264,37 @@ def read_data(args, func_loader, runmode):
 
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
-            pickle.dump([X, Y, W, ids, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump([X, Y, W, ids, info, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open(cache_filename, 'rb') as handle:
             cprint(__name__ + f'.read_data: Loading from cache: "{cache_filename}"', 'yellow')
-            X, Y, W, ids, genesis_args = pickle.load(handle)
-
+            X, Y, W, ids, info, genesis_args = pickle.load(handle)
+            
             cprint(__name__ + f'.read_data: Cached data was generated with arguments:', 'yellow')
             pprint(genesis_args)
 
-    return X, Y, W, ids
+    return X, Y, W, ids, info
+
+
+def read_data_processed(X,Y,W,ids,funcfactor,mvavars,runmode,args):
+    """
+    Read/write (MVA)-processed data
+    """
+    cache_filename = f'{args["datadir"]}/data_processed_{runmode}_{args["__hash__"]}.pkl'
+    
+    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
+        data = process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=funcfactor, mvavars=mvavars, runmode=runmode)
+            
+        with open(cache_filename, 'wb') as handle:
+            cprint(__name__ + f'.read_data_processed: Saving to cache: "{cache_filename}"', 'yellow')
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        with open(cache_filename, 'rb') as handle:
+            cprint(__name__ + f'.read_data_processed: Loading from cache: "{cache_filename}"', 'yellow')
+            data = pickle.load(handle)
+        
+    return data
 
 
 def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
@@ -278,11 +302,11 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
     # ----------------------------------------------------------
     # Pop out conditional variables if they exist
     if args['use_conditional'] == False:
-
+        
         index  = []
         idxvar = []
         for i in range(len(ids)):
-            if '__model' not in ids[i]:
+            if 'MODEL_' not in ids[i]:
                 index.append(i)
                 idxvar.append(ids[i])
             else:
@@ -299,7 +323,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
     # Split into training, validation, test
     trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
     
-    # ----------------------------------------
+    # ----------------------------------------------------------
     if args['imputation_param']['active']:
         module = import_module(mvavars, 'configs.subpkg')
 
@@ -308,7 +332,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
             impute_vars = getattr(module, var)
         else:
             impute_vars = None
-    # ----------------------------------------
+    # ----------------------------------------------------------
     
     ### Split and factor data
     output = {}
@@ -386,7 +410,7 @@ def impute_datasets(data, args, features=None, imputer=None):
         }
         
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
-
+        
     else:
         cprint(__name__ + f'.impute_datasets: Imputing data for Inf/Nan in variables {features}', 'yellow')
 
@@ -572,6 +596,8 @@ def train_models(data_trn, data_val, args=None) :
         elif param['train'] == 'cut':
             None
         elif param['train'] == 'cutset':
+            None
+        elif param['train'] == 'exp':
             None
         else:
             raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
@@ -824,10 +850,14 @@ def evaluate_models(data=None, args=None):
         # ...   
         #
         
+        elif param['predict'] == 'exp':
+            func_predict = predict.pred_exp(args=args, param=param)
+            plot_XYZ_wrap(func_predict = func_predict, x_input = X, y = y, **inputs)
+        
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
-            
+        
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
@@ -835,13 +865,24 @@ def evaluate_models(data=None, args=None):
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
-
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
 
+    ## Pickle results to output
+
+    resdict = {'roc_mstats':        roc_mstats,
+               'roc_labels':        roc_labels,
+               'roc_paths':         roc_paths,
+               'corr_mstats':       corr_mstats,
+               'ROC_binned_mstats': ROC_binned_mstats,
+               'ROC_binned_mlabel': ROC_binned_mlabel}
+
+    targetfile = targetdir + '/eval_results.pkl'
+    print(__name__ + f'.evaluate_models: Saving pickle output to "{targetfile}"')
+    pickle.dump(resdict, open(targetfile, 'wb'))
     return
 
 
@@ -849,7 +890,7 @@ def make_plots(data, args):
 
     ### Plot variables
     if args['plot_param']['basic']['active']:
-        
+            
         ### Specific variables
         if data['data_kin'] is not None:
             targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')
@@ -892,7 +933,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     if args['plot_param']['ROC']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
-            metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask], weights=weights[mask])
+            metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask], weights=weights[mask],
+                num_bootstrap=args['plot_param']['ROC']['num_bootstrap'])
 
             if sublabel not in roc_mstats:
                 roc_mstats[sublabel] = []
@@ -904,13 +946,13 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             roc_paths[sublabel].append(pathlabel)
         
         # ** All inclusive **
-        mask      = np.ones(len(y_pred), dtype=bool)
+        mask = np.ones(len(y_pred), dtype=bool)
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
         # ** Powerset filtered **
-        if 'powerset_filter' in args['plot_param']['ROC']:
+        if 'set_filter' in args['plot_param']['ROC']:
 
-            filters = args['plot_param']['ROC']['powerset_filter']
+            filters = args['plot_param']['ROC']['set_filter']
             mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
@@ -934,7 +976,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             if   len(var) == 1:
 
                 met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0])
+                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0], \
+                    num_bootstrap=args['plot_param']['ROC_binned']['num_bootstrap'])
 
                 # Save for multiple comparison
                 ROC_binned_mstats[i].append(met_1D)
@@ -970,9 +1013,9 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
         # ** Powerset filtered **
-        if 'powerset_filter' in args['plot_param']['MVA_output']:
+        if 'set_filter' in args['plot_param']['MVA_output']:
 
-            filters = args['plot_param']['MVA_output']['powerset_filter']
+            filters = args['plot_param']['MVA_output']['set_filter']
             mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
@@ -1020,11 +1063,11 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             mask      = np.ones(len(y_pred), dtype=bool)
 
             # ** Powerset filtered **
-            if 'powerset_filter' in args['plot_param']['MVA_2D'][pid]:
+            if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
 
                 plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=True)
 
-                filters = args['plot_param']['MVA_2D'][pid]['powerset_filter']
+                filters = args['plot_param']['MVA_2D'][pid]['set_filter']
                 mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
                 for m in range(mask_powerset.shape[0]):
@@ -1055,7 +1098,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         for i in range(100): # Loop over plot indexes
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:
-                if 'powerset_filter' in args['plot_param']['MVA_2D'][pid]:
+                if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
 
                     xlim = args['plot_param']['MVA_2D'][pid]['xlim']
                     plots.plot_correlation_comparison(corr_mstats=corr_mstats, 
@@ -1071,23 +1114,23 @@ def plot_XYZ_multiple_models(targetdir, args):
 
     pprint(roc_mstats)
     
-    # We have the same number of powerset (category) entries for each model, pick the first
+    # We have the same number of filterset (category) entries for each model, pick the first
     dummy = 0
 
     # Direct collect:  Plot all models per powerset category
-    for powerset_key in roc_mstats.keys():
+    for filterset_key in roc_mstats.keys():
 
-        path_label = roc_paths[powerset_key][dummy]
-        plots.ROC_plot(roc_mstats[powerset_key], roc_labels[powerset_key],
-            title=f'category: {powerset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
+        path_label = roc_paths[filterset_key][dummy]
+        plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
+            title=f'category: {filterset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
 
     # Inverse collect: Plot all powerset categories ROCs per model
     for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
         
-        rocs_       = [roc_mstats[powerset_key][model_index] for powerset_key in roc_mstats.keys()]
+        rocs_       = [roc_mstats[filterset_key][model_index] for filterset_key in roc_mstats.keys()]
         labels_     = list(roc_mstats.keys())
         model_label = roc_labels[list(roc_labels)[dummy]][model_index]
-
+        
         plots.ROC_plot(rocs_, labels_,
             title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
 
@@ -1120,7 +1163,7 @@ def plot_XYZ_multiple_models(targetdir, args):
                         ID    = args['active_models'][k]
                         label = args['models'][ID]['label']
                         legs.append(label)
-
+                    
                     ### ROC
                     title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                     plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/--ALL--/ROC-binned[{i}]-bin[{b}]')

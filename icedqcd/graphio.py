@@ -118,11 +118,14 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
                     if   key == 'muon':
                         v.setPtEtaPhiM(X[ev][jvname['muon'][0][0]].pt[k],
                                        X[ev][jvname['muon'][0][0]].eta[k],
-                                       X[ev][jvname['muon'][0][0]].phi[k], M_MUON)
+                                       X[ev][jvname['muon'][0][0]].phi[k],
+                                       M_MUON)
                     elif key == 'jet':
                         v.setPtEtaPhiM(X[ev][jvname['jet'][0][0]].pt[k],
                                        X[ev][jvname['jet'][0][0]].eta[k],
-                                       X[ev][jvname['jet'][0][0]].phi[k], 0)
+                                       X[ev][jvname['jet'][0][0]].phi[k],
+                                       X[ev][jvname['jet'][0][0]].mass[k])
+                    
                     elif key == 'cpf':
                         v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], 0)
                     elif key == 'npf':

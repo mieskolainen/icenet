@@ -92,7 +92,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # No weights
     W = None
 
-    return X, Y, W, NEW_VARS
+    # TBD add info about cut stats etc
+    INFO = {}
+
+    return X, Y, W, NEW_VARS, INFO
 
 
 def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):

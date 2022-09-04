@@ -1,8 +1,7 @@
 # Common input & data reading routines for the DQCD analysis
-# 
+#
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
-
 
 import numpy as np
 import uproot
@@ -52,11 +51,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
         "isMC":        True
     }
 
+    INFO = {'class_1': None, 'class_0': None}
+
     # =================================================================
     # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
 
     proc = args["input"]['class_1']
-    X_S, Y_S, W_S, VARS_S = iceroot.read_multiple_MC(class_id=1,
+    X_S, Y_S, W_S, VARS_S, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     
@@ -64,7 +65,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # *** BACKGROUND MC ***
     
     proc = args["input"]['class_0']
-    X_B, Y_B, W_B, VARS_B = iceroot.read_multiple_MC(class_id=0,
+    X_B, Y_B, W_B, VARS_B, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     
@@ -72,13 +73,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     # Sample conditional theory parameters for the background as they are distributed in signal sample
         
     for var in MODEL_VARS:
-        
+            
         print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for the background')
 
         # Random-sample values for the background as in the signal MC
         p   = ak.to_numpy(W_S / ak.sum(W_S)).squeeze() # probability per event entry
         new = np.random.choice(ak.to_numpy(X_S[var]).squeeze(), size=len(X_B), replace=True, p=p)
-    
+        
         X_B[var] = ak.Array(new)
 
     # =================================================================
@@ -87,42 +88,47 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     X = ak.concatenate((X_B, X_S), axis=0)
     Y = ak.concatenate((Y_B, Y_S), axis=0)
     W = ak.concatenate((W_B, W_S), axis=0)
-
+    
     # ** Crucial -- randomize order to avoid problems with other functions **
     rind = np.random.permutation(len(X))
-
+    
     X    = X[rind]
     Y    = Y[rind]
     W    = W[rind]
     
     print(__name__ + f'.common.load_root_file: len(X) = {len(X)}')
-
-    return X, Y, W, VARS_S
+    
+    return X, Y, W, VARS_S, INFO
 
 
 def process_root(X, ids, isMC, args, **extra):
     
+    FILTERFUNC = globals()[args['filterfunc']]    
     CUTFUNC    = globals()[args['cutfunc']]
-    FILTERFUNC = globals()[args['filterfunc']]
-
+    
+    stats = {'filterfunc': None, 'cutfunc': None}
+    
     # @@ Filtering done here @@
     mask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    stats['filterfunc'] = {'before': len(X), 'after': sum(mask)}
+    
     plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f})', 'green')
-    
     X = X[mask]
     prints.printbar()
-
+    
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, xcorr_flow=args['xcorr_flow'])
+    stats['cutfunc'] = {'before': len(X), 'after': sum(mask)}
+    
     plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f}) \n", 'green')
-
     X = X[mask]
-    io.showmem()
     prints.printbar()
-
-    return X, ids
+    
+    io.showmem()
+    
+    return X, ids, stats
 
 
 def splitfactor(x, y, w, ids, args):
@@ -179,7 +185,7 @@ def splitfactor(x, y, w, ids, args):
     data_graph = None
 
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
-    node_features = {'muon': muon_vars}
+    node_features = {'muon': muon_vars, 'jet': jet_vars}
     
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
         features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])

@@ -6,6 +6,8 @@ QCD_Pt-15to20: &QCD_Pt-15to20
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -15,6 +17,8 @@ QCD_Pt-20to30: &QCD_Pt-20to30
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -24,6 +28,8 @@ QCD_Pt-30to50: &QCD_Pt-30to50
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -33,6 +39,8 @@ QCD_Pt-50to80: &QCD_Pt-50to80
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -42,6 +50,8 @@ QCD_Pt-80to120: &QCD_Pt-80to120
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -51,6 +61,8 @@ QCD_Pt-120to170: &QCD_Pt-120to170
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -60,6 +72,8 @@ QCD_Pt-170to300: &QCD_Pt-170to300
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -69,6 +83,8 @@ QCD_Pt-300to470: &QCD_Pt-300to470
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -78,6 +94,8 @@ QCD_Pt-470to600: &QCD_Pt-470to600
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -87,6 +105,8 @@ QCD_Pt-600to800: &QCD_Pt-600to800
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -96,6 +116,8 @@ QCD_Pt-800to1000: &QCD_Pt-800to1000
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true
 
@@ -105,5 +127,7 @@ QCD_Pt-1000toInf: &QCD_Pt-1000toInf
   model_param:
     m:    null
     ctau: null
+    xiO:  null
+    xiL:  null
   force_xs: false
   isMC: true

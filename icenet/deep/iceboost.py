@@ -166,9 +166,9 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
             cind = (data_trn.y != None) if c == None else (data_trn.y == c)
 
             # Per powerset category
-            if 'powerset_filter' in MI_reg_param:
+            if 'set_filter' in MI_reg_param:
                 mask, text, path = stx.filter_constructor(
-                    filters=MI_reg_param['powerset_filter'], X=data_trn.x[cind,...], ids=data_trn.ids)
+                    filters=MI_reg_param['set_filter'], X=data_trn.x[cind,...], ids=data_trn.ids)
             # All inclusive
             else:
                 mask = np.ones((1, len(data_trn.x[cind,...])), dtype=int)

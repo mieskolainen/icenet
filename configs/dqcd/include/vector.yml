@@ -1,11 +1,93 @@
 # N.B. Use unique names for each sub-sample!
 
+# m_2
+HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    2
+    ctau: 10
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    2
+    ctau: 50
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    2
+    ctau: 100
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+# m_5
+HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    5
+    ctau: 10
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    5
+    ctau: 50
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    5
+    ctau: 100
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+# m_10
 HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1
   path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
   xs: 1.0
   model_param:
     m:    10
     ctau: 10
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    10
+    ctau: 50
+    xiO:  1
+    xiL:  1
   force_xs: true
   isMC: true
 
@@ -15,5 +97,41 @@ HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10
   model_param:
     m:    10
     ctau: 100
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+# m_15
+HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    15
+    ctau: 10
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    15
+    ctau: 50
+    xiO:  1
+    xiL:  1
+  force_xs: true
+  isMC: true
+
+HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1
+  path: 'bparkProductionV2/HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_[0-50].root'
+  xs: 1.0
+  model_param:
+    m:    15
+    ctau: 100
+    xiO:  1
+    xiL:  1
   force_xs: true
   isMC: true

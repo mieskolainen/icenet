@@ -29,7 +29,7 @@ def main() :
 
     if runmode == 'train' or runmode == 'eval':
         data = common.process_tracklet_data(args=args, X=X)
-
+    
     if   runmode == 'train':
         #process.make_plots(data=data['trn'], args=args)
         process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)

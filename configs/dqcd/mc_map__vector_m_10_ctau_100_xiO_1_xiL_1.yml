@@ -13,5 +13,7 @@ input:
       model_param:
         m:    10
         ctau: 100
+        xiO:  1
+        xiL:  1
       force_xs: true
       isMC: true

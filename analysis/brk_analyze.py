@@ -153,7 +153,6 @@ def main() :
         'color'  : iceplot.imperial_dark_red
     }
 
-
     ## Over all observables
     for obs in DA_output['hobj']['S']['0'].keys():
 
@@ -177,13 +176,11 @@ def main() :
             if MC_output['hobj']['S'][str(i)][obs].bins is not None:
                 sources[k]['hdata'] = MC_output['hobj']['S'][str(i)][obs]
                 k += 1
-
         # DATA
         for i in range(len(DA_output['hobj']['S'])):
             if DA_output['hobj']['S'][str(i)][obs].bins is not None:
                 sources[k]['hdata'] = DA_output['hobj']['S'][str(i)][obs]
                 k += 1
-
         # Plot
         for yscale in ['linear']:
             iceplot.set_global_style()
@@ -197,9 +194,7 @@ def main() :
     if len(DA_output['P']) > 0:
         print_pred(DA_output, BMAT)
 
-
     print('\n' + __name__+ ' DONE')
-
 
 if __name__ == '__main__' :
 

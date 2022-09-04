@@ -4,7 +4,9 @@ HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_darkphoton_m_10
   path: 'bparkProductionV2/HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
   xs: 1.0
   model_param:
-    m: 10
+    m:    10
     ctau: 100
+    xiO:  1
+    xiL:  1
   force_xs: true
   isMC: true

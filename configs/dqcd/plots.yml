@@ -1,5 +1,36 @@
+FILTER: &FILTER
+  
+  filter[0]:
+    operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0,1]                # input set ids (one or two)
+  
+  # ... more filters here
+
+  # --------------------
+
+  set[0]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{latex: ['$m \neq 2$',  '$m = 2$'],  cut: 'MODEL_m == 2'},
+       {latex: ['$m \neq 5$',  '$m = 5$'],  cut: 'MODEL_m == 5'},
+       {latex: ['$m \neq 10$', '$m = 10$'], cut: 'MODEL_m == 10'},
+       {latex: ['$m \neq 15$', '$m = 15$'], cut: 'MODEL_m == 15'}]
+
+  set[1]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      [{latex: ['$c\tau \neq 10$',  '$c\tau = 10$'],  cut: 'MODEL_ctau == 10'},
+       {latex: ['$c\tau \neq 50$',  '$c\tau = 50$'],  cut: 'MODEL_ctau == 50'},
+       {latex: ['$c\tau \neq 100$', '$c\tau = 100$'], cut: 'MODEL_ctau == 100'}]
+
+  # ... more sets here
+
+# -----------------------------------------------------------------------
+
+
 basic:
-  active: true
+  active: false
   nbins:  70
   exclude_vals: [null, -999.0]
 
@@ -11,19 +42,22 @@ contours:
 
 ROC:
   active: true
+  num_bootstrap: 200
+  set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: false
+  num_bootstrap: 200
   
-  plot[0]:
-    var:   ['ChsMET_pt']
-    edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
+  #plot[0]:
+  #  var:   ['ChsMET_pt']
+  #  edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
 
-  plot[1]:
-    var:   ['ChsMET_phi', 'ChsMET_pt']
-    edges: [[-3.14159, -2.24399286, -1.34639571, -0.44879857, 0.44879857, 1.34639571, 2.24399286, 3.14159],
-            [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
+  #plot[0]:
+  #  var:   ['MODEL_m', 'MODEL_ctau']
+  #  edges: [[1.9, 2.1, 4.9, 5.1, 9.9, 10.1, 14.1, 15.1],
+  #          [9, 11, 49, 51, 99, 101]]
 
 ## MVA output density (1D)
 MVA_output:
