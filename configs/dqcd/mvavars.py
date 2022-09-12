@@ -1,16 +1,27 @@
-# Variables we read out from the root files (regular expressions supported here)
-#LOAD_VARS = ['.+hlt.?', '.?gen.?']
-#LOAD_VARS = ['.*'] # all
+# DQCD root file input
 
+# ---------------------------------------------------------
+# Conditional (parametric) signal model variables
 
-"""
-KINEMATIC_GEN_VARS = [
-  'gen_pt',
-  'gen_eta',
-  'gen_phi',
-  'gen_energy'
+MODEL_VARS = [
+  'MODEL_m',
+  'MODEL_ctau',
+  'MODEL_xiO',
+  'MODEL_xiL'
 ]
-"""
+
+# ---------------------------------------------------------
+# Generator level variables
+
+KINEMATIC_GEN_VARS = [
+  'GenJet_pt',
+  'GenJet_eta',
+  'GenJet_phi',
+  'GenJet_mass'
+]
+
+# ---------------------------------------------------------
+# Trigger flag bit variables
 
 TRIGGER_VARS = [
   'HLT_Mu9_IP6_part0',
@@ -20,12 +31,26 @@ TRIGGER_VARS = [
   'HLT_Mu9_IP6_part4'
 ]
 
+# ---------------------------------------------------------
+# For plots etc.
+
+PLOT_VARS = [
+  'nJet',
+  'nMuon',
+  'nsv',
+  
+  'ChsMET_phi',
+  'ChsMET_pt'
+]
+
 KINEMATIC_VARS = [
-  # "Dummy" variables
   'ChsMET_phi',
   'ChsMET_pt',
   'ChsMET_sumEt'
 ]
+
+# ---------------------------------------------------------
+# Pure scalar variables (non-nested)
 
 MVA_SCALAR_VARS = [
   'nJet',
@@ -36,20 +61,12 @@ MVA_SCALAR_VARS = [
   'MET_phi'
 ]
 
-# -----------------------------------------
-# Conditional (parametric) model variables
-MODEL_VARS = [
-  'MODEL_m',
-  'MODEL_ctau',
-  'MODEL_xiO',
-  'MODEL_xiL'
-]
-MVA_SCALAR_VARS += MODEL_VARS
-# -----------------------------------------
-
+# ---------------------------------------------------------
 # Charged particle flow
-MVA_CPF_VARS = [
-  
+#
+# 'cpf_' is the custom (nanotron) jet-matched collection
+#
+MVA_CPF_VARS = [  
   'cpf_px',
   'cpf_py',
   'cpf_pz',
@@ -66,9 +83,12 @@ MVA_CPF_VARS = [
 
 #MVA_CPF_VARS = ['cpf_.*']
 
+# ---------------------------------------------------------
 # Neutral particle flow
+#
+# 'npf_' is the custom (nanotron) jet-matched collection
+#
 MVA_NPF_VARS = [
-  
   'npf_px',
   'npf_py',
   'npf_pz',
@@ -78,11 +98,11 @@ MVA_NPF_VARS = [
 
 #MVA_NPF_VARS = ['npf_.*']
 
-MVA_PF_VARS = MVA_CPF_VARS + MVA_NPF_VARS
 
-# -----------------------------------------
-
-# Jet variables
+# ---------------------------------------------------------
+# Jets
+#  'Jet_' is the standard nanoAOD collection
+#
 MVA_JET_VARS = [
   'Jet_pt',
   'Jet_eta',
@@ -115,7 +135,11 @@ MVA_JET_VARS = [
 
 #MVA_JET_VARS = ['Jet_.*']
 
-# Muon variables
+# ---------------------------------------------------------
+# Muons
+#  'Muon_' is the standard nanoAOD collection
+#  'muon_' is the jet matched custom-collection 
+#
 MVA_MUON_VARS = [
   'Muon_eta',
   'Muon_phi',
@@ -132,19 +156,21 @@ MVA_MUON_VARS = [
   'Muon_sip3d',
   'Muon_charge',
   
-  #'Muon_mvaTTH',
   'Muon_tightId',
   'Muon_pfRelIso03_all',
-  'Muon_miniPFRelIso_all'
+  'Muon_miniPFRelIso_all',
+  #'Muon_mvaTTH'
 ]
 
 #MVA_MUON_VARS = ['Muon_.*']
 
-# Secondary vertex:
-# - 'SV_' is the nanoAOD CMS-standard collection
-# - 'sv_' is the custom jet-matched collection
-# - 'svAdapted_' is the "customized" version of sv
-#
+# ---------------------------------------------------------
+# Secondary vertex
+#  'SV_'        is the standard nanoAOD collection
+#  'sv_'        is the jet-matched custom collection
+#  'svAdapted_' is the jet-matched custom collection with adapted SV-reco
+
+"""
 MVA_SV_VARS = [
   'sv_ptrel',
   'sv_mass',
@@ -160,60 +186,56 @@ MVA_SV_VARS = [
   'sv_ntracks',
   'sv_ndof'
 ]
+"""
+
+MVA_SV_VARS = [
+  'SV_pt',      # Transverse momentum
+  'SV_eta',     # Pseudorapidity
+  'SV_phi',     # Atzimuthal angle
+  'SV_mass',    # Mass
+
+  'SV_x',       # Sec. vertex position
+  'SV_y',       # Sec. vertex position
+  'SV_z',       # Sec. vertex position
+
+  'SV_dxy',     # 2D transverse decay length (cm)
+  'SV_dxySig',  # 2D transverse decay length significance
+  'SV_dlen',    # 3D decay length (cm)
+  'SV_dlenSig', # 3D decay length significance
+  'SV_pAngle',  # Pointing angle: acos(p_SV * (SV - PV))
+
+  'SV_chi2',    # Reduced chi2, i.e. chi2 / ndof
+  'SV_ndof'     # Number of degrees of freedom
+]
 
 #MVA_SV_VARS = ['sv_.*']
 
+# ---------------------------------------------------------
+# Combine logical sets
 
+MVA_SCALAR_VARS += MODEL_VARS # Treated on the same basis as scalar vars
+
+MVA_PF_VARS     = MVA_CPF_VARS + MVA_NPF_VARS
 MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_SV_VARS + MVA_PF_VARS
-# -----------------------------------------
 
-PLOT_VARS = [
-  'nJet',
-  'nMuon',
-  'nsv',
-  
-  'ChsMET_phi',
-  'ChsMET_pt'
-  #'sv_mass',
-  #'sv_dxy',
-  #'sv_dxysig',
-  #'sv_dphi',
-  #'sv_deta'
-]
 
-LOAD_VARS = [
-  #'Jet_chEmEF',
-  #'Jet_chHEF',
-  #'Jet_eta',
-  #'Jet_neEmEF',
-  #'Jet_neHEF',
-  #'Jet_phi',
-  #'Jet_pt',
-  #'Jet_nMuons',
+# ---------------------------------------------------------
+# Variables we read out from the root files
 
-  #'Muon_eta',
-  #'Muon_phi',
-  #'Muon_pt',
+LOAD_VARS = []
 
-  #'sv_deta',
-  #'sv_dphi',
-  #'sv_mass',
-  #'sv_chi2',
-  #'sv_dxy',
-  #'sv_dxysig',
-  #'sv_d3d',
-  #'sv_d3dsig',
-  #'sv_ntracks',
-  #'sv_ndof'
-]
-
+LOAD_VARS += TRIGGER_VARS
+LOAD_VARS += PLOT_VARS
 LOAD_VARS += KINEMATIC_VARS
+LOAD_VARS += KINEMATIC_GEN_VARS
+
 LOAD_VARS += MVA_SCALAR_VARS
 LOAD_VARS += MVA_JAGGED_VARS
 LOAD_VARS += MVA_PF_VARS
 
-LOAD_VARS += PLOT_VARS
-LOAD_VARS += TRIGGER_VARS
-
 print(LOAD_VARS)
+
+# (regular expressions supported here)
+#LOAD_VARS = ['.+hlt.?', '.?gen.?']
+#LOAD_VARS = ['.*'] # all
 

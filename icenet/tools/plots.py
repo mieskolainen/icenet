@@ -891,7 +891,8 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
                 linestyle = "None"
                 marker    = 'o'
             
-            # A ROC-curve
+            """
+            # ROC-curve
             elif not (isinstance(fpr, int) or isinstance(fpr, float)):
                 fpr    = fpr[1:] # Remove always the first element for log-plot reasons
                 tpr    = tpr[1:]
@@ -903,15 +904,16 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
                     fpr_lo = fpr_lo[1:]
                     fpr_hi = fpr_hi[1:]
-            
+            """
+
             ## Plot it
-            plt.plot(fpr, tpr, color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
+            plt.plot(fpr, tpr, drawstyle='steps-mid', color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
             
             # Uncertainty band
             if marker == 'None' and (metrics[i].tpr_bootstrap is not None):
                 
-                plt.fill_between(fpr,  tpr_lo, tpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # vertical
-                plt.fill_betweenx(tpr, fpr_lo, fpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # horizontal
+                plt.fill_between(fpr,  tpr_lo, tpr_hi, step='mid', alpha=0.2, color=f'C{i}', edgecolor='none') # vertical
+                plt.fill_betweenx(tpr, fpr_lo, fpr_hi, step='mid', alpha=0.2, color=f'C{i}', edgecolor='none') # horizontal
 
                 # draw_error_band(ax=ax, x=fpr, y=tpr, \
                 #   x_err=np.std(metrics[i].fpr_bootstrap, axis=0)[1:], \

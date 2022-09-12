@@ -13,13 +13,14 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_jagged: 'MVA_JAGGED_VARS'
   
   # For xgboost etc. fixed input dimension models
+  # The variable names below need to match the nanoAOD variable names, e.g. 'Jet_*'
   jagged_maxdim:
     
     Jet:  6
     Muon: 8
-    sv:   6
-    cpf:  20
-    npf:  10
+    SV:   6
+    cpf:  0 #20
+    npf:  0 #10
   
   frac: 0.6                          # Train vs validate/test split fraction
   
@@ -130,9 +131,9 @@ train_runmode:
     #- gnet3
     
     - xgb0
-    #- dmlp
+    - dmlp
     #- lgr0
-
+    
     #- deps
     #- vae0    
     #- dbnf0
