@@ -191,11 +191,11 @@ def main():
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
-                    train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
-                    test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
+                    train_loader     = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
+                    test_loader      = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss         = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
+                    loss             = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Evaluate
                     trn_acc, trn_AUC = deep.optimize.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])

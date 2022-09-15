@@ -54,7 +54,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     """
     
     if type(root_path) is not list:
-        root_path = [root_path] # Add [] list
+        root_path = [root_path] # Make sure it is a list, even if one file only
     
     # -----------------------------------------------
     CUTFUNC    = globals()[args['cutfunc']]

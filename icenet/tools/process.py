@@ -53,9 +53,9 @@ def read_cli():
     parser.add_argument("--runmode",         type=str,  default='null')
     parser.add_argument("--config",          type=str,  default='tune0.yml')
     parser.add_argument("--datapath",        type=str,  default='.')
-    parser.add_argument("--datasets",        type=str,  default='*.root')
+    parser.add_argument("--datasets",        type=str,  default='null')
     parser.add_argument("--tag",             type=str,  default='tag0')
-
+    
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_cache",       type=int,  default=1)

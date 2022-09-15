@@ -38,8 +38,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     """
     
     if type(root_path) is list:
-        root_path = root_path[0] # Remove [] list, we consider only one file here
-
+        root_path = root_path[0] # Remove [] list, we expect only the path here
+    
     # -----------------------------------------------
     param = {
         'entry_start': entry_start,

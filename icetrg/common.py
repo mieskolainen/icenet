@@ -35,9 +35,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         X,Y       : input, output matrices
         ids       : variable names
     """
-    
+
     if type(root_path) is list:
-        root_path = root_path[0] # Remove [] list, we consider only one file here
+        root_path = root_path[0] # Remove [] list, we expect only the path here (no files)
     
     # -----------------------------------------------
     param = {
@@ -70,6 +70,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # *** DATA (background) ***
 
     rootfile          = f'{root_path}/{args["datafile"]}'
+
+
     X_DATA, VARS_DATA = process_root(rootfile=rootfile, tree='tree', isMC='data', **param)
 
     X_DATA = X_DATA[:, [VARS_DATA.index(name.replace("x_", "")) for name in NEW_VARS]]
