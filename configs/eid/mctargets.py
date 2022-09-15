@@ -1,22 +1,35 @@
 # MC only. Supervised training signal class target definitions.
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
 import numba
 
+from icenet.tools import stx
 
-def target_e(events, entry_start=0, entry_stop=None, new=False):
-    """ Classification signal target definition"""
-    if new:
-    	return events.arrays("is_e", library="np", how=list, entry_start=entry_start, entry_stop=entry_stop)
-    return events.array("is_e", entry_start=entry_start, entry_stop=entry_stop)
+def target_e(X, ids, xcorr_flow=False):
+    """ Classification signal target """
+    
+    # Define cuts
+    cutlist = [f'BOOL__is_e== True']
+    
+    # Construct and apply
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    
+    return mask
 
-def target_egamma(events, entry_start=0, entry_stop=None, new=False):
-    """ Classification signal target definition"""
-    if new:
-    	return events.arrays("is_egamma", library="np", how=list, entry_start=entry_start, entry_stop=entry_stop)
-    return events.array("is_egamma", entry_start=entry_start, entry_stop=entry_stop)
+def target_egamma(X, ids, xcorr_flow=False):
+    """ Classification signal target """
+    
+    # Define cuts
+    cutlist = [f'BOOL__is_egamma == True']
+    
+    # Construct and apply
+    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    
+    return mask
 
 # Add alternatives here
 # ...

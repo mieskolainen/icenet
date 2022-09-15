@@ -41,6 +41,7 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
+  xmin: 1.0E-4
   set_filter: *FINAL_STATE_FILTER
 
 
@@ -48,6 +49,7 @@ ROC:
 ROC_binned:
   active: false
   num_bootstrap: 200
+  xmin: 1.0E-4
   
   plot[0]:
     var:   ['x_hlt_pt']

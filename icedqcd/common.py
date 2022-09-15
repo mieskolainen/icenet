@@ -29,23 +29,27 @@ from configs.dqcd.cuts import *
 from configs.dqcd.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
-        root_path: paths to root files
+        root_path: path to root files
     
     Returns:
         X,Y      : data matrices
         ids      : variable names
     """
 
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list
+    
     # -----------------------------------------------
 
     param = {
         "tree":        "Events",
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":    maxevents,
         "args":        args,
         "load_ids":    LOAD_VARS,
         "isMC":        True
@@ -185,7 +189,7 @@ def splitfactor(x, y, w, ids, args):
     data_graph = None
 
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
-    node_features = {'muon': muon_vars, 'jet': jet_vars}
+    node_features = {'muon': muon_vars, 'jet': jet_vars, 'sv': sv_vars}
     
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
         features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])

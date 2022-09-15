@@ -864,9 +864,14 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
         for i in range(len(metrics)):
 
-            linestyle = '-' if i < 10 else '--'
+            if         i < 10:
+                linestyle = '-'
+            elif 10 <= i < 20:
+                linestyle = '--'
+            else:
+                linestyle = ':'
             marker = 'None'
-
+            
             if metrics[i] is None:
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue

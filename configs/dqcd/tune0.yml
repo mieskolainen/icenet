@@ -126,11 +126,12 @@ train_runmode:
   models:  !include configs/dqcd/models.yml
   active_models: &ACTIVE_MODELS
     
+    - xgb0
+
     #- gnet1
     - gnet2
     #- gnet3
     
-    - xgb0
     - dmlp
     #- lgr0
     

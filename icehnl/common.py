@@ -26,21 +26,25 @@ from configs.hnl.mvavars import *
 #from configs.hnl.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
     """ Loads the root file.
     
     Args:
-        root_path : paths to root files
+        root_path : paths to root files (list)
     
     Returns:
         X,Y       : input, output matrices
         ids       : variable names
     """
+    
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list, we consider only one file here
 
     # -----------------------------------------------
     param = {
         'entry_start': entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":   maxevents,
         "args": args
     }
 

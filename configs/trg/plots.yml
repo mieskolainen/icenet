@@ -12,12 +12,14 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
+  xmin: 1.0E-4
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: true
   num_bootstrap: 200
-    
+  xmin: 1.0E-4
+  
   plot[0]:
     var:   ['x_hlt_pt']
     edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]

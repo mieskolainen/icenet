@@ -17,7 +17,7 @@ FILTER: &FILTER
        {latex: ['$m \neq 10$', '$m = 10$'], cut: 'MODEL_m == 10'},
        {latex: ['$m \neq 15$', '$m = 15$'], cut: 'MODEL_m == 15'},
        {latex: ['$m \neq 20$', '$m = 20$'], cut: 'MODEL_m == 20'}]
-  
+
   set[1]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
@@ -45,12 +45,14 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
+  xmin: 1.0E-4
   set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: false
   num_bootstrap: 200
+  xmin: 1.0E-4
   
   #plot[0]:
   #  var:   ['ChsMET_pt']

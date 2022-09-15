@@ -126,10 +126,18 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
                                        X[ev][jvname['jet'][0][0]].phi[k],
                                        X[ev][jvname['jet'][0][0]].mass[k])
                     
+                    elif key == 'sv':
+                        v.setPtEtaPhiM(X[ev][jvname['sv'][0][0]].pt[k],
+                                       X[ev][jvname['sv'][0][0]].eta[k],
+                                       X[ev][jvname['sv'][0][0]].phi[k],
+                                       X[ev][jvname['sv'][0][0]].mass[k])
+
                     elif key == 'cpf':
-                        v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], 0)
+                        v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], M_PION)
+
                     elif key == 'npf':
                         v.setXYZM(X[ev].npf.pz[k], X[ev].npf.py[k], X[ev].npf.pz[k], 0)
+                    
                     else:
                         True # Use null 4-vector for 'sv'
 

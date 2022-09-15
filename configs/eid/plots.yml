@@ -12,11 +12,13 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
+  xmin: 1.0E-4
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: true
   num_bootstrap: 200
+  xmin: 1.0E-4
   
   plot[0]:
     var:   ['trk_pt']

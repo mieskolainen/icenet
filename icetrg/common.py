@@ -25,21 +25,25 @@ from configs.trg.cuts import *
 from configs.trg.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
-        root_path : paths to root files
+        root_path : paths to root files (list)
     
     Returns:
         X,Y       : input, output matrices
         ids       : variable names
     """
-
+    
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list, we consider only one file here
+    
     # -----------------------------------------------
     param = {
         'entry_start': entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":   maxevents,
         "args": args
     }
 
@@ -98,14 +102,14 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     return X, Y, W, NEW_VARS, INFO
 
 
-def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
+def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None, maxevents=None):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
-    
-    events = uproot.open(f'{rootfile}:{tree}')
-    ids    = events.keys()
-    X,ids  = iceroot.events_to_jagged_numpy(events=events, ids=ids, entry_start=entry_start, entry_stop=entry_stop)
+
+    # Load files
+    X,ids = iceroot.load_tree(rootfile=rootfile, tree=tree,
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=None, library='np')
 
     # @@ Filtering done here @@
     mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
@@ -114,7 +118,6 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None):
     
     X   = X[mask]
     prints.printbar()
-    
     
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])

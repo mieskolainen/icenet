@@ -56,7 +56,7 @@ def read_data_tracklet(args, runmode):
         
         data      = preprocess.event_loop(files=args['root_files'], graph_param=args['graph_param'], maxevents=args['maxevents']) 
         X         = graphio.parse_graph_data_trackster(data=data, graph_param=args['graph_param'], weights=None)
-
+        
         # Pickle to disk
         with open(cache_filename, "wb") as fp:
             pickle.dump([X, args], fp)
@@ -107,11 +107,11 @@ def process_tracklet_data(args, X):
     return data
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
     """ Loads the root file.
     
     Args:
-        root_path : paths to root files
+        root_path : paths to root files (list)
     
     Returns:
         X,Y       : input, output matrices
@@ -126,6 +126,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     param = {
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":   maxevents,
         "args":        args,
         "load_ids":    ids     
     }
@@ -181,12 +182,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     return X, Y, W, VARS
 
 
-def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
+def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, maxevents, args):
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids, library='np')
+    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree,
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=load_ids, library='np')
     
     """
     # @@ Filtering done here @@
