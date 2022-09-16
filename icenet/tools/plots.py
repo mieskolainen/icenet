@@ -28,12 +28,14 @@ def binengine(bindef, x):
     
     Args:
         bindef:  binning definition
-                 Examples: 50                                                    (number of bins, integer)
-                           [1.0, 40.0, 50.0]                                     (list of explicit edges)
-                           {'nbin': 30, 'q': [0.0, 0.95], 'space': 'linear'}     (automatic with quantiles)
-                           {'nbin': 30, 'minmax': [2.0, 50.0], 'space': 'log10'} (automatic with boundaries)
-
         x:       data input array
+
+    Examples:
+        50                                                    (number of bins, integer)
+        [1.0, 40.0, 50.0]                                     (list of explicit edges)
+        {'nbin': 30, 'q': [0.0, 0.95], 'space': 'linear'}     (automatic with quantiles)
+        {'nbin': 30, 'minmax': [2.0, 50.0], 'space': 'log10'} (automatic with boundaries)
+    
     Returns:
         edges:   binning edges
     """
@@ -760,7 +762,7 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
         X:                Data matrix (N x D)
         ids:              Variable names (list of length D)
         classes:          Class label ids (list of length N)
-        round_threshold:  Correlation matrix |C_ij| < threshold to set matrix elements to zero
+        round_threshold:  Correlation matrix |C| < threshold to set matrix elements to zero
         targetdir:        Output plot directory
         colorbar:         Colorbar on the plot
     

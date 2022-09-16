@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -35,7 +36,10 @@
 <span class="c1">#</span>
 <span class="c1"># Run with: pytest ./icefit/cortools -rP (can take few minutes)</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2022</span>
+
+<span class="c1">#import sys</span>
+<span class="c1">#sys.path.append(&quot;.&quot;)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="c1">#import numba</span>
@@ -43,13 +47,32 @@
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">import</span> <span class="nn">dcor</span>
 
 <span class="c1"># Needed for tests only</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
+
+<div class="viewcode-block" id="percentile_per_dim"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.percentile_per_dim">[docs]</a><span class="k">def</span> <span class="nf">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute percentile per column dimension</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input: (N x dim)</span>
+<span class="sd">        q:     percentile (0,100)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        out:   array with length dim</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="prc_CI"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.prc_CI">[docs]</a><span class="k">def</span> <span class="nf">prc_CI</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))])</span></div>
 
 <div class="viewcode-block" id="hacine_entropy_bin"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_entropy_bin">[docs]</a><span class="k">def</span> <span class="nf">hacine_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -169,10 +192,10 @@
 <span class="sd">        entropy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Make sure it is normalized</span>
-    <span class="n">p_</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">p_</span>  <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p_</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_</span><span class="p">))</span></div>
-
 
 <div class="viewcode-block" id="I_score"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.I_score">[docs]</a><span class="k">def</span> <span class="nf">I_score</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -185,26 +208,26 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        mutual information score</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">Pnorm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="c1"># Make sure it is positive definite</span>
+    <span class="n">C</span><span class="p">[</span><span class="n">C</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">nX</span><span class="p">,</span> <span class="n">nY</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
-    <span class="n">Pi</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">Pj</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># Joint 2D-density</span>
+    <span class="n">P_ij</span>   <span class="o">=</span> <span class="n">C</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+    <span class="c1"># Marginal densities by summing over the other dimension</span>
+    <span class="n">P_i</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span> <span class="n">P_i</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_i</span><span class="p">)</span>
+    <span class="n">P_j</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span> <span class="n">P_j</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_j</span><span class="p">)</span>
     
-    <span class="c1"># Joint 2D</span>
-    <span class="n">P_ij</span>     <span class="o">=</span> <span class="n">Pnorm</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">nX</span><span class="p">,</span> <span class="n">nY</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    
-    <span class="c1"># Factorized 1D x 1D</span>
-    <span class="n">Pi_Pj</span> <span class="o">=</span> <span class="n">Pi</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">nX</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> <span class="n">Pj</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">nY</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    <span class="n">Pi_Pj</span> <span class="o">=</span> <span class="n">Pi_Pj</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Pj</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="c1"># Factorized (1D) x (1D) density</span>
+    <span class="n">Pi_Pj</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">P_i</span><span class="p">,</span> <span class="n">P_j</span><span class="p">)</span>
+    <span class="n">Pi_Pj</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Pi_Pj</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
 
     <span class="c1"># Choose non-zero</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">P_ij</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">Pi_Pj</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">)</span>
 
-    <span class="c1"># Definition</span>
-    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_ij</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P_ij</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Pi_Pj</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="p">))</span>
-    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Mutual Information Definition</span>
+    <span class="n">I</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_ij</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P_ij</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/</span> <span class="n">Pi_Pj</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span>
+    <span class="n">I</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># Normalization</span>
     <span class="k">if</span>   <span class="n">normalized</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -217,50 +240,208 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;I_score: Error with unknown normalization parameter &quot;</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="mutual_information"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.mutual_information">[docs]</a><span class="k">def</span> <span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bins_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="n">minbins</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<div class="viewcode-block" id="mutual_information"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.mutual_information">[docs]</a><span class="k">def</span> <span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bins_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">automethod</span><span class="o">=</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="n">minbins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">maxbins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">outlier</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mutual information entropy (non-linear measure of dependency)</span>
 <span class="sd">    between x and y variables</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        x          : array of values</span>
 <span class="sd">        y          : array of values</span>
-<span class="sd">        w          : weights (default None)</span>
+<span class="sd">        weights    : weights (default None)</span>
 <span class="sd">        bins_x     : x binning array  If None, then automatic.</span>
 <span class="sd">        bins_y     : y binning array.</span>
 <span class="sd">        normalized : normalize the mutual information (see I_score() function)</span>
+<span class="sd">        n_bootstrap: number of percentile bootstrap samples</span>
+<span class="sd">        alpha      : bootstrap confidence interval</span>
 <span class="sd">    </span>
 <span class="sd">    Autobinning args:    </span>
 <span class="sd">        automethod : &#39;Hacine2D&#39;, &#39;Scott2D&#39;</span>
 <span class="sd">        minbins    : minimum number of bins per dimension</span>
-<span class="sd">        alpha      : outlier protection percentile</span>
-<span class="sd">        gamma      : FD ad-hoc scale parameter</span>
+<span class="sd">        outlier    : outlier protection percentile</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        mutual information</span>
+<span class="sd">        mutual information, confidence interval</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rho</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;mutual_information: x and y with different size.&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.mutual_information: Error: len(x) &lt; 10&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="c1"># Require float for precision</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Normalize to sum to one</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> 
+
+    <span class="c1"># For autobinning methods</span>
+    <span class="n">rho</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">autobinwrap</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">if</span>   <span class="n">automethod</span> <span class="o">==</span> <span class="s1">&#39;Scott2D&#39;</span><span class="p">:</span>
-            <span class="n">NB</span> <span class="o">=</span> <span class="n">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nbins&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">NB</span> <span class="o">=</span> <span class="n">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nbins&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">outlier</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">automethod</span> <span class="o">==</span> <span class="s1">&#39;Hacine2D&#39;</span><span class="p">:</span>
-            <span class="n">NB</span> <span class="o">=</span> <span class="n">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nbins&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="n">NB</span> <span class="o">=</span> <span class="n">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nbins&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">outlier</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mutual_information: Unknown autobinning parameter &lt;</span><span class="si">{</span><span class="n">automethod</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
 
-        <span class="n">NB</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">minbins</span><span class="p">,</span> <span class="n">NB</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)),</span> <span class="n">NB</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">NB</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NB</span><span class="p">,</span> <span class="n">minbins</span><span class="p">),</span> <span class="n">maxbins</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">outlier</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">outlier</span><span class="o">/</span><span class="mi">2</span><span class="p">)),</span> <span class="n">NB</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">bins_x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">bins_x</span> <span class="o">=</span> <span class="n">autobinwrap</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bins_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">bins_y</span> <span class="o">=</span> <span class="n">autobinwrap</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-    <span class="n">XY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="n">bins_x</span><span class="p">,</span><span class="n">bins_y</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">XY</span><span class="p">[</span><span class="n">XY</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Entropy defined only for positive definite</span>
-    <span class="n">mi</span> <span class="o">=</span> <span class="n">I_score</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">XY</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="n">normalized</span><span class="p">)</span>
+    <span class="n">r_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">):</span>
+
+        <span class="c1"># Random values by sampling with replacement</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+        <span class="n">w_</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+        <span class="n">h2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="n">bins_x</span><span class="p">,</span> <span class="n">bins_y</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Compute MI</span>
+        <span class="n">r_star</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_score</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">h2d</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="n">normalized</span><span class="p">)</span>
     
-    <span class="k">return</span> <span class="n">mi</span></div>
+    <span class="c1"># The non-bootstrapped value (original sample based)</span>
+    <span class="n">r</span>    <span class="o">=</span> <span class="n">r_star</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+
+    <span class="c1"># Percentile bootstrap based CI</span>
+    <span class="n">r_CI</span> <span class="o">=</span> <span class="n">prc_CI</span><span class="p">(</span><span class="n">r_star</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span></div>
+
+<div class="viewcode-block" id="distance_corr"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.distance_corr">[docs]</a><span class="k">def</span> <span class="nf">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Distance correlation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;distance_corr: x and y with different size.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.distance_corr: Error: len(x) &lt; 10&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="c1"># Require float for precision</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Normalize to sum to one</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> 
+
+    <span class="c1"># Obtain estimates and sample uncertainty via bootstrap</span>
+    <span class="n">r_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">):</span>
+
+        <span class="c1"># Random values by sampling with replacement</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+
+        <span class="n">w_</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+        <span class="c1"># Compute [T.B.D. add weighted version]</span>
+        <span class="n">r_star</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dcor</span><span class="o">.</span><span class="n">distance_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+    <span class="c1"># The non-bootstrapped value (original sample based)</span>
+    <span class="n">r</span>    <span class="o">=</span> <span class="n">r_star</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+
+    <span class="c1"># Percentile bootstrap based CI</span>
+    <span class="n">r_CI</span> <span class="o">=</span> <span class="n">prc_CI</span><span class="p">(</span><span class="n">r_star</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span></div>
+
+
+<div class="viewcode-block" id="pearson_corr"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.pearson_corr">[docs]</a><span class="k">def</span> <span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pearson Correlation Coefficient</span>
+<span class="sd">    https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x,y        : arrays of values</span>
+<span class="sd">        weights    : possible event weights</span>
+<span class="sd">        return_abs : return absolute value</span>
+<span class="sd">        alpha      : confidence interval [alpha/2, 1-alpha/2] level </span>
+<span class="sd">        n_bootstrap: number of percentile bootstrap samples</span>
+<span class="sd">    Returns: </span>
+<span class="sd">        correlation coefficient [-1,1], confidence interval, p-value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;pearson_corr: x and y with different size.&#39;</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Normalize to sum to one</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> 
+
+    <span class="c1"># Loss of precision might happen here.</span>
+    <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># Obtain estimates and sample uncertainty via bootstrap</span>
+    <span class="n">r_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">)</span>
+
+    <span class="c1"># See: Efron, B. (1988). &quot;Bootstrap confidence intervals:</span>
+    <span class="c1">#      Good or bad?&quot; Psychological Bulletin, 104, 293-296.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bootstrap</span><span class="p">):</span>
+
+        <span class="c1"># Random values by sampling with replacement</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+
+        <span class="n">w_</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+        <span class="c1"># corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w_</span><span class="o">*</span><span class="p">(</span><span class="n">x_</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w_</span><span class="o">*</span><span class="p">(</span><span class="n">y_</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">denom</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w_</span><span class="o">*</span><span class="n">x_</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">*</span><span class="n">y_</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">denom</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># Safety</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1"># if we want absolute value</span>
+        <span class="k">if</span> <span class="n">return_abs</span><span class="p">:</span> <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+        <span class="n">r_star</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+
+    <span class="c1"># The non-bootstrapped value (original sample based)</span>
+    <span class="n">r</span>    <span class="o">=</span> <span class="n">r_star</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+
+    <span class="c1"># Percentile bootstrap based CI</span>
+    <span class="n">r_CI</span> <span class="o">=</span> <span class="n">prc_CI</span><span class="p">(</span><span class="n">r_star</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="c1"># 2-sided p-value from the Beta-distribution</span>
+    <span class="n">ab</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">loc</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dist</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span><span class="p">,</span> <span class="n">prob</span></div>
 
 
 <div class="viewcode-block" id="gaussian_mutual_information"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.gaussian_mutual_information">[docs]</a><span class="k">def</span> <span class="nf">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">):</span>
@@ -275,54 +456,6 @@
 <span class="sd">        mutual information</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="pearson_corr"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.pearson_corr">[docs]</a><span class="k">def</span> <span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Pearson Correlation Coefficient</span>
-<span class="sd">    https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        x,y     : arrays of values</span>
-<span class="sd">        weights : possible event weights</span>
-<span class="sd">    Returns: </span>
-<span class="sd">        correlation coefficient [-1,1], p-value</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;pearson_corr: x and y with different size.&#39;</span><span class="p">)</span>
-
-    <span class="n">x</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">y</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Should be at least float64</span>
-
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-
-    <span class="c1"># Normalize to sum to one</span>
-    <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> 
-
-    <span class="c1"># Astype guarantees precision. Loss of precision might happen here.</span>
-    <span class="n">x_</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">y_</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-
-    <span class="c1"># corr(x,y; w) = cov(x,y; w) / [cov(x,x; w) * cov(y,y; w)]^{1/2}</span>
-    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="p">(</span><span class="n">x_</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="p">(</span><span class="n">y_</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">denom</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">x_</span><span class="o">*</span><span class="n">y_</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">denom</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
-    
-    <span class="c1"># Safety</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-    
-    <span class="c1"># 2-sided p-value from the Beta-distribution</span>
-    <span class="n">ab</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">dist</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">loc</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">prob</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dist</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">prob</span></div>
-
 
 <div class="viewcode-block" id="optbins"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins">[docs]</a><span class="k">def</span> <span class="nf">optbins</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -422,9 +555,9 @@
 <span class="sd">    #Gaussian unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">pytest</span>
-
+    
     <span class="n">EPS</span> <span class="o">=</span> <span class="mf">0.3</span>
-
+    
     <span class="c1">## Create synthetic Gaussian data</span>
     <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">)]:</span>
 
@@ -444,31 +577,31 @@
             <span class="c1"># ---------------------------------------------------------------</span>
 
             <span class="c1"># Linear correlation</span>
-            <span class="n">r</span><span class="p">,</span><span class="n">prob</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+            <span class="n">r</span><span class="p">,</span><span class="n">r_CI</span><span class="p">,</span><span class="n">prob</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
             <span class="k">assert</span>  <span class="n">r</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pearson_corr = </span><span class="si">{</span><span class="n">r</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> (p-value = </span><span class="si">{</span><span class="n">prob</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pearson_corr = </span><span class="si">{</span><span class="n">r</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">, CI = </span><span class="si">{</span><span class="n">r_CI</span><span class="si">}</span><span class="s1">, p-value = </span><span class="si">{</span><span class="n">prob</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="c1"># MI Reference (exact analytic)</span>
             <span class="n">MI_REF</span> <span class="o">=</span> <span class="n">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Gaussian exact MI = </span><span class="si">{</span><span class="n">MI_REF</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="c1"># MI with different autobinnings</span>
+            <span class="c1"># MI with different histogram autobinnings</span>
             <span class="n">automethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="s1">&#39;Hacine2D&#39;</span><span class="p">]</span>
-
+            
             <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">automethod</span><span class="p">:</span>
-                <span class="n">MI</span>     <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">MI</span><span class="p">,</span> <span class="n">MI_CI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Numerical      MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Histogram     MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">, CI = </span><span class="si">{</span><span class="n">MI_CI</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
 
             <span class="c1"># Neural MI</span>
-            <span class="n">neuromethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MINE&#39;</span><span class="p">,</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">]</span>
-
-            <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">neuromethod</span><span class="p">:</span>
+            <span class="n">neuromethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MINE&#39;</span><span class="p">,</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSITY&#39;</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">losstype</span> <span class="ow">in</span> <span class="n">neuromethod</span><span class="p">:</span>
 
                 <span class="c1"># Test with 2D vectors</span>
-                <span class="n">MI</span><span class="p">,</span><span class="n">MI_err</span>  <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">MI</span><span class="p">,</span><span class="n">MI_err</span>  <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural         MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> +- </span><span class="si">{</span><span class="n">MI_err</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural        MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> +- </span><span class="si">{</span><span class="n">MI_err</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">losstype</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
             
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
@@ -486,27 +619,31 @@
     <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
     <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
-    <span class="n">r</span><span class="p">,</span><span class="n">prob</span>    <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">r</span>  <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>   <span class="n">r</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI</span>        <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">MI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI_mine</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
 
     <span class="c1">### Other zeros    </span>
     <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
-    <span class="n">r</span><span class="p">,</span><span class="n">prob</span>    <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">r</span>  <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>   <span class="n">r</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI</span>        <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">MI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI_mine</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
+    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
+
+
+<span class="c1">#if __name__ == &quot;__main__&quot;:</span>
+<span class="c1">#    test_gaussian()</span>
 
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -568,8 +705,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
@@ -593,7 +734,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -610,7 +751,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

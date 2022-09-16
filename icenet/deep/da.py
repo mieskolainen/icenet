@@ -16,10 +16,7 @@ class GradientReversalFunction(Function):
     the gradients are reversed by grad -> -alpha * grad.
     
     Example:
-        net = nn.Sequential(
-              nn.Linear(10, 10),
-              GradientReversal(alpha=1.0)
-        )
+        net = nn.Sequential(nn.Linear(10, 10), GradientReversal(alpha=1.0))
     """
     
     @staticmethod

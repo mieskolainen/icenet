@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -31,9 +32,9 @@
           <div class="body" role="main">
             
   <h1>Source code for icenet.tools.icemap</h1><div class="highlight"><pre>
-<span></span><span class="c1"># &quot;Pandas style&quot; wrapper for columnar data with advanced indexing</span>
+<span></span><span class="c1"># &quot;Pandas style&quot; frame wrapper for columnar data with advanced indexing</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -45,12 +46,28 @@
 <span class="sd">    Args:</span>
 <span class="sd">        x   : data                [N vectors x ... x D dimensions]</span>
 <span class="sd">        ids : variable names      [D strings]</span>
+
+<span class="sd">        OR</span>
+
+<span class="sd">        x   : data dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># constructor</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">ids</span> <span class="o">=</span> <span class="p">[]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Input is a dictionary which contains arrays</span>
+        <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">j</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="c1"># Input is arrays and keys separately</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span>
 
     <span class="c1"># + operator</span>
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -97,11 +114,12 @@
     <span class="sd">&quot;&quot;&quot; Unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">X1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]])</span>
-    <span class="n">X2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">]])</span>
+    <span class="n">X1</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]])</span>
+    <span class="n">X2</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">]])</span>
+    <span class="n">ids</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;var0&#39;</span><span class="p">,</span> <span class="s1">&#39;var1&#39;</span><span class="p">,</span> <span class="s1">&#39;var2&#39;</span><span class="p">]</span>
 
-    <span class="n">new1</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X1</span><span class="p">)</span>
-    <span class="n">new2</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X2</span><span class="p">)</span>
+    <span class="n">new1</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X1</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">new2</span> <span class="o">=</span> <span class="n">icemap</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X2</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
     <span class="n">new3</span> <span class="o">=</span> <span class="n">new1</span> <span class="o">+</span> <span class="n">new2</span>
 
@@ -126,7 +144,11 @@
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="mi">4</span><span class="p">,:]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">])</span>
 
     <span class="c1"># Test boolean selection indexing</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s1">&#39;pt &gt; 3 AND eta &lt;= 5&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span></div>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s1">&#39;pt &gt; 0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">X</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s1">&#39;pt &gt; 3 AND eta &lt;= 5&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s1">&#39;pt &gt; 3 &amp;&amp; eta &lt;= 5&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span></div>
+
+
 
 </pre></div>
 
@@ -155,8 +177,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -180,7 +206,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -197,7 +223,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

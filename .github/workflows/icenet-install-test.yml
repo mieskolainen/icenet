@@ -31,27 +31,26 @@ jobs:
           pip install -r requirements-github-actions-2.txt
       
       ## Docs building
-      # - name: Build docs
-      #   run: |
-      #     if [ -e yarn.lock ]; then
-      #     yarn install --frozen-lockfile
-      #     elif [ -e package-lock.json ]; then
-      #     npm ci
-      #     else
-      #     npm i
-      #     fi
-      #     npm run build
-
-      #     make -C docs/ clean
-      #     make -C docs/ html
-      #     touch docs/build/html/.nojekyll
-
-      # ## Release to gh-pages
-      # - name: Release docs to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./docs/build/html/
+      - name: Build docs
+        run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npm run build
+          make -C docs/ clean
+          make -C docs/ html
+          touch docs/build/html/.nojekyll
+      
+      ## Release to gh-pages
+      - name: Release docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
 
       ## Integration tests
       - name: Run Deep Learning system integration tests

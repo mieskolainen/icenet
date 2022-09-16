@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,6 +40,66 @@
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+
+
+<div class="viewcode-block" id="covmat2corrmat"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.covmat2corrmat">[docs]</a><span class="k">def</span> <span class="nf">covmat2corrmat</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Covariance matrix to correlation matrix</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        C: Covariance matrix</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Correlation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">v</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">C</span><span class="p">))</span>
+    <span class="n">outer_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+    <span class="n">corr</span>    <span class="o">=</span> <span class="n">C</span> <span class="o">/</span> <span class="p">(</span><span class="n">outer_v</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">corr</span><span class="p">[</span><span class="n">C</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># Not defined</span>
+
+    <span class="k">return</span> <span class="n">corr</span></div>
+
+<div class="viewcode-block" id="correlation_matrix"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.correlation_matrix">[docs]</a><span class="k">def</span> <span class="nf">correlation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_cov</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a (sample weighted) correlation or covariance matrix</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        X:           Data matrix (rows as sample points, columns as variables)</span>
+<span class="sd">        weights:     Weights per sample</span>
+<span class="sd">        return_cov:  Return covariance matrix (not correlation)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        correlation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_cov</span><span class="p">:</span> <span class="c1"># Return covariance</span>
+            <span class="k">return</span> <span class="n">C</span>
+
+        <span class="c1"># Turn into a correlation matrix</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">covmat2corrmat</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Zero-mean each column (variable), repeat weights</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">Q</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">W</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span>
+        
+        <span class="c1"># Compute a weighted covariance matrix</span>
+        <span class="n">QW</span> <span class="o">=</span> <span class="n">Q</span><span class="o">*</span><span class="n">W</span>
+        <span class="n">C</span>  <span class="o">=</span> <span class="n">QW</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">QW</span><span class="p">)</span> <span class="o">/</span> <span class="n">W</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_cov</span><span class="p">:</span> <span class="c1"># Return covariance</span>
+            <span class="k">return</span> <span class="n">C</span>
+
+        <span class="c1"># Turn into a correlation matrix</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">covmat2corrmat</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">C</span></div>
 
 
 <div class="viewcode-block" id="error_on_mu"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.error_on_mu">[docs]</a><span class="k">def</span> <span class="nf">error_on_mu</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
@@ -73,12 +134,12 @@
 <span class="sd">  Math note: outer(u,v)_ij = u_i v_j, with outer(u,v) = uv^T</span>
 <span class="sd">  </span>
 <span class="sd">  Args:</span>
-<span class="sd">  	x, y         : values        (numpy arrays)</span>
-<span class="sd">  	x_err, y_err : uncertainties (numpy arrays)</span>
-<span class="sd">  	flip_vertical: flip the values over the vertical (y) dimension</span>
+<span class="sd">    x, y         : values        (numpy arrays)</span>
+<span class="sd">    x_err, y_err : uncertainties (numpy arrays)</span>
+<span class="sd">    flip_vertical: flip the values over the vertical (y) dimension</span>
 <span class="sd">  </span>
 <span class="sd">  Returns:</span>
-<span class="sd">  	z, z_err     : 2D-matrix (with rank 1) and its uncertainty</span>
+<span class="sd">    z, z_err     : 2D-matrix (with rank 1) and its uncertainty</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">z</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
   <span class="n">z_err</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
@@ -91,95 +152,94 @@
 
 
 <div class="viewcode-block" id="tpratio_taylor"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.tpratio_taylor">[docs]</a><span class="k">def</span> <span class="nf">tpratio_taylor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span><span class="n">y_err</span><span class="p">,</span> <span class="n">xy_err</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Error propagation on a ratio</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Error propagation on a ratio</span>
 
-<span class="sd">	r = x/(x+y)</span>
-<span class="sd">	</span>
-<span class="sd">	Args:</span>
-<span class="sd">		x,y         : values</span>
-<span class="sd">		x_err,y_err : uncertainties</span>
-<span class="sd">		xy_err      : covariance (err_x * err_y * rho_xy)</span>
-<span class="sd">	</span>
-<span class="sd">	Returns:</span>
-<span class="sd">		Error propagated ratio error</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">dx</span> <span class="o">=</span>  <span class="n">y</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-	<span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="sd">    r = x/(x+y)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x,y         : values</span>
+<span class="sd">        x_err,y_err : uncertainties</span>
+<span class="sd">        xy_err      : covariance (err_x * err_y * rho_xy)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Error propagated ratio error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dx</span> <span class="o">=</span>  <span class="n">y</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
 
-	<span class="n">r2</span> <span class="o">=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">x_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">dx</span><span class="o">*</span><span class="n">dy</span><span class="o">*</span><span class="n">xy_err</span>
-	
-	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span></div>
-
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">x_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">y_err</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">dx</span><span class="o">*</span><span class="n">dy</span><span class="o">*</span><span class="n">xy_err</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="prodratio_eprop"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.prodratio_eprop">[docs]</a><span class="k">def</span> <span class="nf">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigmaA</span><span class="p">,</span> <span class="n">sigmaB</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Error propagation (Taylor expansion) of product A*B or ratio A/B</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Error propagation (Taylor expansion) of product A*B or ratio A/B</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">		A : Value A </span>
-<span class="sd">		B : Value B</span>
-<span class="sd">		sigmaA  : 1 sigma uncertainty on A</span>
-<span class="sd">		sigmaB  : 1 sigma uncertainty on B</span>
-<span class="sd">		sigmaAB : Covariance of A,B</span>
-<span class="sd">		mode    : &#39;prod&#39; or &#39;ratio&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        A : Value A </span>
+<span class="sd">        B : Value B</span>
+<span class="sd">        sigmaA  : 1 sigma uncertainty on A</span>
+<span class="sd">        sigmaB  : 1 sigma uncertainty on B</span>
+<span class="sd">        sigmaAB : Covariance of A,B</span>
+<span class="sd">        mode    : &#39;prod&#39; or &#39;ratio&#39;</span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">		Uncertainty on A/B </span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;prod&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
-	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">sigmaA</span><span class="o">/</span><span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigmaB</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">sign</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">sigmaAB</span><span class="o">/</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)))</span></div>
+<span class="sd">    Returns:</span>
+<span class="sd">        Uncertainty on A/B </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;prod&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">sigmaA</span><span class="o">/</span><span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigmaB</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">sign</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">sigmaAB</span><span class="o">/</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="welch_ttest"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.welch_ttest">[docs]</a><span class="k">def</span> <span class="nf">welch_ttest</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">X2</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Welch&#39;s two sample t-test for normally distributed variables.</span>
-<span class="sd">	https://en.wikipedia.org/wiki/Welch%27s_t-test</span>
-<span class="sd">	</span>
-<span class="sd">	Args:</span>
-<span class="sd">		X1 : Mean of sample 1</span>
-<span class="sd">		X2 : Mean of sample 2</span>
-<span class="sd">		s1 : Standard deviation of sample 1</span>
-<span class="sd">		s2 : Standard deviation of sample 2</span>
-<span class="sd">		n1 : Counts in sample 1</span>
-<span class="sd">		n2 : Counts in sample 2 </span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Welch&#39;s two sample t-test for normally distributed variables.</span>
+<span class="sd">    https://en.wikipedia.org/wiki/Welch%27s_t-test</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        X1 : Mean of sample 1</span>
+<span class="sd">        X2 : Mean of sample 2</span>
+<span class="sd">        s1 : Standard deviation of sample 1</span>
+<span class="sd">        s2 : Standard deviation of sample 2</span>
+<span class="sd">        n1 : Counts in sample 1</span>
+<span class="sd">        n2 : Counts in sample 2 </span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">		t : test statistic</span>
-<span class="sd">		p : p-value from t-distribution</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        t : test statistic</span>
+<span class="sd">        p : p-value from t-distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="c1"># Satterthwaite Approximation</span>
-	<span class="n">sdelta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n1</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n2</span><span class="p">)</span>
+    <span class="c1"># Satterthwaite Approximation</span>
+    <span class="n">sdelta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n1</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n2</span><span class="p">)</span>
 
-	<span class="c1"># Test statistic</span>
-	<span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">X1</span> <span class="o">-</span> <span class="n">X2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sdelta</span>
+    <span class="c1"># Test statistic</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">X1</span> <span class="o">-</span> <span class="n">X2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sdelta</span>
 
-	<span class="c1"># Degrees of freedom</span>
-	<span class="n">nu1</span> <span class="o">=</span> <span class="n">n1</span><span class="o">-</span><span class="mi">1</span> 
-	<span class="n">nu2</span> <span class="o">=</span> <span class="n">n2</span><span class="o">-</span><span class="mi">1</span>
-	<span class="n">df</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n1</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">s1</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="n">n1</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">nu1</span><span class="p">)</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="n">n2</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">nu2</span><span class="p">)))</span>
+    <span class="c1"># Degrees of freedom</span>
+    <span class="n">nu1</span> <span class="o">=</span> <span class="n">n1</span><span class="o">-</span><span class="mi">1</span> 
+    <span class="n">nu2</span> <span class="o">=</span> <span class="n">n2</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">df</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n1</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">n2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">s1</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="n">n1</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">nu1</span><span class="p">)</span> <span class="o">+</span> <span class="n">s2</span><span class="o">**</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="n">n2</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">nu2</span><span class="p">)))</span>
 
-	<span class="c1"># p-value, two-tailed test gives factor 2</span>
-	<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="c1"># p-value, two-tailed test gives factor 2</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span>
 
-	<span class="k">return</span> <span class="n">t</span><span class="p">,</span><span class="n">p</span></div>
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span><span class="n">p</span></div>
 
 
 <div class="viewcode-block" id="p2zscore"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.p2zscore">[docs]</a><span class="k">def</span> <span class="nf">p2zscore</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	p-value to z-score (standard normal sigmas)</span>
-<span class="sd">	</span>
-<span class="sd">	Example:</span>
-<span class="sd">		p-value is divided by two such that</span>
-<span class="sd">		p = 0.05 gives z_{1-\\alpha/2} = z_{1-0.025} = 1.96</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    p-value to z-score (standard normal sigmas)</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        p-value is divided by two such that</span>
+<span class="sd">        p = 0.05 gives z_{1-\\alpha/2} = z_{1-0.025} = 1.96</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
 
-	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">z</span><span class="p">):</span> <span class="c1"># overflow</span>
-		<span class="n">z</span> <span class="o">=</span> <span class="mi">99</span>
-	<span class="k">return</span> <span class="n">z</span></div>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">z</span><span class="p">):</span> <span class="c1"># overflow</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="mi">99</span>
+    <span class="k">return</span> <span class="n">z</span></div>
 
 
 <div class="viewcode-block" id="clopper_pearson_err"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.clopper_pearson_err">[docs]</a><span class="k">def</span> <span class="nf">clopper_pearson_err</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">CL</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">]):</span>
@@ -212,228 +272,231 @@
 
 
 <div class="viewcode-block" id="poisson_ratio"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.poisson_ratio">[docs]</a><span class="k">def</span> <span class="nf">poisson_ratio</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="n">k2</span><span class="p">,</span> <span class="n">CL</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">])):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Poisson ratio uncertainty via conditional ratio</span>
-<span class="sd">	theta = lambda1 / (lambda1 + lambda2)</span>
-<span class="sd">	</span>
-<span class="sd">	See e.g. &quot;Confidence limits on the ratio of two Poisson variables, 1974&quot;</span>
-<span class="sd">	</span>
-<span class="sd">	E[k1] = lambda1 (Poisson mean)</span>
-<span class="sd">	E[k2] = lambda2 (Poisson mean)</span>
-<span class="sd">	</span>
-<span class="sd">	Args:	</span>
-<span class="sd">		k1 : observations k1</span>
-<span class="sd">		k2 : observations k2</span>
-<span class="sd">		CL : 2-array of lower and upper quantiles</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Poisson ratio uncertainty via conditional ratio</span>
+<span class="sd">    theta = lambda1 / (lambda1 + lambda2)</span>
+<span class="sd">    </span>
+<span class="sd">    See e.g. &quot;Confidence limits on the ratio of two Poisson variables, 1974&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    E[k1] = lambda1 (Poisson mean)</span>
+<span class="sd">    E[k2] = lambda2 (Poisson mean)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:   </span>
+<span class="sd">        k1 : observations k1</span>
+<span class="sd">        k2 : observations k2</span>
+<span class="sd">        CL : 2-array of lower and upper quantiles</span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">		ratio confidence interval endpoints</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ratio confidence interval endpoints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="n">theta</span> <span class="o">=</span> <span class="n">clopper_pearson_err</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">k1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">k1</span><span class="o">+</span><span class="n">k2</span><span class="p">,</span> <span class="n">CL</span><span class="o">=</span><span class="n">CL</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">clopper_pearson_err</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">k1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">k1</span><span class="o">+</span><span class="n">k2</span><span class="p">,</span> <span class="n">CL</span><span class="o">=</span><span class="n">CL</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">theta</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-		<span class="n">R</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">theta</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 
-	<span class="k">return</span> <span class="n">R</span></div>
+    <span class="k">return</span> <span class="n">R</span></div>
 
 
 <div class="viewcode-block" id="poisson_tail"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.poisson_tail">[docs]</a><span class="k">def</span> <span class="nf">poisson_tail</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Single Poisson CDF tail integral. Counts 2 works as the reference.</span>
-<span class="sd">	Args:</span>
-<span class="sd">		k1 : poisson counts 1</span>
-<span class="sd">		k2 : poisson counts 2 (reference sample)</span>
-<span class="sd">	Returns:</span>
-<span class="sd">		p value</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">P</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">poisson</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">k2</span><span class="p">)</span>
-	<span class="k">if</span> <span class="n">k1</span> <span class="o">&gt;</span> <span class="n">k2</span><span class="p">:</span>
-		<span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">P</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="n">P</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Single Poisson CDF tail integral. Counts 2 works as the reference.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        k1 : poisson counts 1</span>
+<span class="sd">        k2 : poisson counts 2 (reference sample)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        p value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">poisson</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">k2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">k1</span> <span class="o">&gt;</span> <span class="n">k2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">P</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">P</span></div>
 
 
 <div class="viewcode-block" id="mc_extreme_npdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.mc_extreme_npdf">[docs]</a><span class="k">def</span> <span class="nf">mc_extreme_npdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Extreme value distribution for normal pdf via Monte Carlo</span>
-<span class="sd">	</span>
-<span class="sd">	Args:</span>
-<span class="sd">		x      : value to evaluate the extreme value pdf upper tail integral</span>
-<span class="sd">		mu     : mean of normal pdf</span>
-<span class="sd">		sigma  : std of normal pdf</span>
-<span class="sd">		N      : sample size</span>
-<span class="sd">		trials : number of Monte Carlo samples, as large as possible CPU wise</span>
-<span class="sd">	</span>
-<span class="sd">	Returns:</span>
-<span class="sd">		p_value : probability for the value x or more extreme</span>
-<span class="sd">		maxvals : full MC distribution of extreme values obtained</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extreme value distribution for normal pdf via Monte Carlo</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x      : value to evaluate the extreme value pdf upper tail integral</span>
+<span class="sd">        mu     : mean of normal pdf</span>
+<span class="sd">        sigma  : std of normal pdf</span>
+<span class="sd">        N      : sample size</span>
+<span class="sd">        trials : number of Monte Carlo samples, as large as possible CPU wise</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        p_value : probability for the value x or more extreme</span>
+<span class="sd">        maxvals : full MC distribution of extreme values obtained</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="n">sample</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">trials</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
-	<span class="n">maxvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># max per each row (trial)</span>
-	<span class="n">p_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maxvals</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
+    <span class="n">sample</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">trials</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="n">maxvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># max per each row (trial)</span>
+    <span class="n">p_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maxvals</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
 
-	<span class="k">return</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span></div>
+    <span class="k">return</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span></div>
 
 
 <div class="viewcode-block" id="mc_extreme_multivariate_npdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.mc_extreme_multivariate_npdf">[docs]</a><span class="k">def</span> <span class="nf">mc_extreme_multivariate_npdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Extreme value distribution for a multivariate normal pdf via Monte Carlo,</span>
-<span class="sd">	e.g. for &quot;correlated measurements or bins&quot; -- casted as a univariate problem</span>
-<span class="sd">	such that maximum of components is taken (not a &quot;vector maximum&quot;)</span>
-<span class="sd">	</span>
-<span class="sd">	Args:</span>
-<span class="sd">		x       : scalar value to evaluate the extreme value pdf upper tail integral</span>
-<span class="sd">		mu      : mean vector (N)</span>
-<span class="sd">		cov     : covariance matrix (NxN)</span>
-<span class="sd">		trials  : number of Monte Carlo samples, as large as possible CPU wise</span>
-<span class="sd">	</span>
-<span class="sd">	Returns:</span>
-<span class="sd">		p_value : probability for the value x or more extreme</span>
-<span class="sd">		maxvals : full MC distribution of extreme values obtained</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extreme value distribution for a multivariate normal pdf via Monte Carlo,</span>
+<span class="sd">    e.g. for &quot;correlated measurements or bins&quot; -- casted as a univariate problem</span>
+<span class="sd">    such that maximum of components is taken (not a &quot;vector maximum&quot;)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x       : scalar value to evaluate the extreme value pdf upper tail integral</span>
+<span class="sd">        mu      : mean vector (N)</span>
+<span class="sd">        cov     : covariance matrix (NxN)</span>
+<span class="sd">        trials  : number of Monte Carlo samples, as large as possible CPU wise</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        p_value : probability for the value x or more extreme</span>
+<span class="sd">        maxvals : full MC distribution of extreme values obtained</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="n">sample</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">trials</span><span class="p">)</span>
-	<span class="n">maxvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># max per each row (trial)</span>
-	<span class="n">p_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maxvals</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
+    <span class="n">sample</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">trials</span><span class="p">)</span>
+    <span class="n">maxvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># max per each row (trial)</span>
+    <span class="n">p_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maxvals</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
 
-	<span class="k">return</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span></div>
+    <span class="k">return</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span></div>
 
 
 <div class="viewcode-block" id="analytical_extreme_npdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf">[docs]</a><span class="k">def</span> <span class="nf">analytical_extreme_npdf</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Analytical expectation (mean) value approximation</span>
-<span class="sd">	for a normal pdf max (extreme) values with a sample size of N.</span>
-<span class="sd">	</span>
-<span class="sd">	References:</span>
-<span class="sd">		Youtube talk:</span>
-<span class="sd">		&quot;From one extreme to another: the statistics of extreme events, Jon Keating, Oxford&quot;</span>
-<span class="sd">		</span>
-<span class="sd">		https://en.wikipedia.org/wiki/Extreme_value_theory</span>
-<span class="sd">		https://en.wikipedia.org/wiki/Gumbel_distribution</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">return</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sigma</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analytical expectation (mean) value approximation (based on an expansion)</span>
+<span class="sd">    for a normal pdf max (extreme) values with a sample size of N.</span>
+<span class="sd">    </span>
+<span class="sd">    References:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Extreme_value_theory</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Gumbel_distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ref: https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution</span>
+    <span class="c1"># y = 0.5772156649 # Euler–Mascheroni constant</span>
+    <span class="c1"># return np.sqrt(np.log(N**2/(2*np.pi*np.log(N**2/(2*np.pi)) ) ) ) *(1+y/np.log(N))</span>
+
+    <span class="c1"># Ref: Youtube, &lt;From one extreme to another: the statistics of extreme events, Jon Keating, Oxford&gt;</span>
+    <span class="k">return</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sigma</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="cormat2covmat"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.cormat2covmat">[docs]</a><span class="k">def</span> <span class="nf">cormat2covmat</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Convert a correlation matrix to a covariance matrix.</span>
-<span class="sd">	</span>
-<span class="sd">	Args:</span>
-<span class="sd">		R : correlation matrix (NxN)</span>
-<span class="sd">		s : vector of standard deviations (N)</span>
-<span class="sd">	Returns:</span>
-<span class="sd">		covariance matrix</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Convert a correlation matrix to a covariance matrix.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        R : correlation matrix (NxN)</span>
+<span class="sd">        s : vector of standard deviations (N)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        covariance matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;cormat2covmat: s vector elements must be positive&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;cormat2covmat: s vector elements must be positive&#39;</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;cormat2covmat: R matrix elements must be between [-1,1]&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;cormat2covmat: R matrix elements must be between [-1,1]&#39;</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">@</span> <span class="n">R</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">@</span> <span class="n">R</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_extreme_npdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.test_extreme_npdf">[docs]</a><span class="k">def</span> <span class="nf">test_extreme_npdf</span><span class="p">():</span>
 
-	<span class="n">mu</span>    <span class="o">=</span> <span class="mi">0</span> <span class="c1"># standard normal</span>
-	<span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">mu</span>    <span class="o">=</span> <span class="mi">0</span> <span class="c1"># standard normal</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
 
-	<span class="n">x</span> <span class="o">=</span> <span class="mf">3.0</span>   <span class="c1"># we test for &quot;x sigma deviation&quot;</span>
-	<span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>   <span class="c1"># data sample size</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mf">3.0</span>   <span class="c1"># we test for &quot;x sigma deviation&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>   <span class="c1"># data sample size</span>
 
-	<span class="c1"># -------</span>
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Independent standard normal PDF&#39;</span><span class="p">)</span>
+    <span class="c1"># -------</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Independent standard normal PDF&#39;</span><span class="p">)</span>
 
-	<span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
 
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1"> [with N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Analytical expectation:  &lt;extreme&gt; = </span><span class="si">{</span><span class="n">analytical_extreme_npdf</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1"> [with N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Analytical expectation:  &lt;extreme&gt; = </span><span class="si">{</span><span class="n">analytical_extreme_npdf</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># -------</span>
+    <span class="c1"># Uncorrelated case, will return the same as independent Gaussians</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Independent standard N-dim normal PDF&#39;</span><span class="p">)</span>
 
-	<span class="c1"># -------</span>
-	<span class="c1"># Uncorrelated case, will return the same as independent Gaussians</span>
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Independent standard N-dim normal PDF&#39;</span><span class="p">)</span>
+    <span class="n">mu</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="c1"># Mean vector</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>   <span class="c1"># Covariance matrix</span>
 
-	<span class="n">mu</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="c1"># Mean vector</span>
-	<span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>   <span class="c1"># Covariance matrix</span>
+    <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_multivariate_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">)</span>
 
-	<span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_multivariate_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># -------</span>
+    <span class="c1"># Correlated bins</span>
+    <span class="n">ccoef</span> <span class="o">=</span> <span class="mf">0.7</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Correlated N-dim normal PDF [ccoef = </span><span class="si">{</span><span class="n">ccoef</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
 
-	<span class="c1"># -------</span>
-	<span class="c1"># Correlated bins</span>
-	<span class="n">ccoef</span> <span class="o">=</span> <span class="mf">0.7</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Correlated N-dim normal PDF [ccoef = </span><span class="si">{</span><span class="n">ccoef</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+    <span class="n">mu</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>             <span class="c1"># Mean vector</span>
 
-	<span class="n">mu</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>             <span class="c1"># Mean vector</span>
+    <span class="n">R</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span> <span class="o">*</span> <span class="n">ccoef</span>  <span class="c1"># Correlation matrix</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">s</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>              <span class="c1"># Vector of standard deviations</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">cormat2covmat</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>  <span class="c1"># --&gt; Covariance matrix</span>
 
-	<span class="n">R</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span> <span class="o">*</span> <span class="n">ccoef</span>  <span class="c1"># Correlation matrix</span>
-	<span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-	<span class="n">s</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>              <span class="c1"># Vector of standard deviations</span>
-	<span class="n">cov</span> <span class="o">=</span> <span class="n">cormat2covmat</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>  <span class="c1"># --&gt; Covariance matrix</span>
-
-	<span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_multivariate_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">)</span>
-	
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="n">p_value</span><span class="p">,</span> <span class="n">maxvals</span> <span class="o">=</span> <span class="n">mc_extreme_multivariate_npdf</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Extreme value p-value for x &gt;= </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s1">0.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; Monte Carlo expectation: &lt;extreme&gt; = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">maxvals</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_ratios"><a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.test_ratios">[docs]</a><span class="k">def</span> <span class="nf">test_ratios</span><span class="p">():</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Test function</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="c1"># Quantile values</span>
-	<span class="n">q68</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">])</span>
-	<span class="n">q95</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">])</span>
+    <span class="c1"># Quantile values</span>
+    <span class="n">q68</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">])</span>
+    <span class="n">q95</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">])</span>
 
-	<span class="c1"># --------------------------------------------</span>
-	<span class="c1"># INPUT TEST DATA</span>
+    <span class="c1"># --------------------------------------------</span>
+    <span class="c1"># INPUT TEST DATA</span>
 
-	<span class="c1"># Observed Poisson counts</span>
-	<span class="n">k_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">17</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
+    <span class="c1"># Observed Poisson counts</span>
+    <span class="n">k_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">17</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
 
-	<span class="c1"># Predicted Poisson counts</span>
-	<span class="n">k_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">380</span><span class="p">,</span> <span class="mi">200</span><span class="p">])</span>
+    <span class="c1"># Predicted Poisson counts</span>
+    <span class="n">k_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">380</span><span class="p">,</span> <span class="mi">200</span><span class="p">])</span>
 
-	<span class="c1"># Poisson uncertainties</span>
-	<span class="n">s_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k_obs</span><span class="p">)</span>
-	<span class="n">s_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k_pre</span><span class="p">)</span>
-	<span class="c1"># --------------------------------------------</span>
+    <span class="c1"># Poisson uncertainties</span>
+    <span class="n">s_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k_obs</span><span class="p">)</span>
+    <span class="n">s_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k_pre</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------</span>
 
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k_obs</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k_obs</span><span class="p">)):</span>
 
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&gt;&gt; Case </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> pre/obs = </span><span class="si">{</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&gt;&gt; Case </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> pre/obs = </span><span class="si">{</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-		<span class="c1"># Conditional Poisson ratios	</span>
-		<span class="n">ppois68</span> <span class="o">=</span> <span class="n">poisson_ratio</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CL</span><span class="o">=</span><span class="n">q68</span><span class="p">)</span>
-		<span class="n">ppois95</span> <span class="o">=</span> <span class="n">poisson_ratio</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CL</span><span class="o">=</span><span class="n">q95</span><span class="p">)</span>
+        <span class="c1"># Conditional Poisson ratios    </span>
+        <span class="n">ppois68</span> <span class="o">=</span> <span class="n">poisson_ratio</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CL</span><span class="o">=</span><span class="n">q68</span><span class="p">)</span>
+        <span class="n">ppois95</span> <span class="o">=</span> <span class="n">poisson_ratio</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CL</span><span class="o">=</span><span class="n">q95</span><span class="p">)</span>
 
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson ratio uncertainty CI68: </span><span class="si">{</span><span class="n">ppois68</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson ratio uncertainty CI95: </span><span class="si">{</span><span class="n">ppois95</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-		
-		<span class="c1"># Systematic residual from target ratio = 1 at CI95 level</span>
-		<span class="n">covers</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="p">:</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span>
-		<span class="n">res</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">covers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ppois95</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Systematic residual: </span><span class="si">{</span><span class="n">res</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-		
-		
-		<span class="c1"># Single sample Poisson tail integral</span>
-		<span class="n">ppois</span> <span class="o">=</span> <span class="n">poisson_tail</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson tail p = </span><span class="si">{</span><span class="n">ppois</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">p2zscore</span><span class="p">(</span><span class="n">ppois</span><span class="p">)</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sigmas)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson ratio uncertainty CI68: </span><span class="si">{</span><span class="n">ppois68</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson ratio uncertainty CI95: </span><span class="si">{</span><span class="n">ppois95</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Systematic residual from target ratio = 1 at CI95 level</span>
+        <span class="n">covers</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="p">:</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">covers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ppois95</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Systematic residual: </span><span class="si">{</span><span class="n">res</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        
+        <span class="c1"># Single sample Poisson tail integral</span>
+        <span class="n">ppois</span> <span class="o">=</span> <span class="n">poisson_tail</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson tail p = </span><span class="si">{</span><span class="n">ppois</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">p2zscore</span><span class="p">(</span><span class="n">ppois</span><span class="p">)</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sigmas)&#39;</span><span class="p">)</span>
 
-		<span class="c1"># Error propagation</span>
-		<span class="n">errAB</span> <span class="o">=</span> <span class="n">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaA</span><span class="o">=</span><span class="n">s_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">s_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-		<span class="n">PRE_over_OBS</span> <span class="o">=</span> <span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  error propagated rel.uncertainty on the ratio: err / (pre/obs) = </span><span class="si">{</span><span class="n">errAB</span> <span class="o">/</span> <span class="n">PRE_over_OBS</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># Error propagation</span>
+        <span class="n">errAB</span> <span class="o">=</span> <span class="n">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaA</span><span class="o">=</span><span class="n">s_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">s_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">PRE_over_OBS</span> <span class="o">=</span> <span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  error propagated rel.uncertainty on the ratio: err / (pre/obs) = </span><span class="si">{</span><span class="n">errAB</span> <span class="o">/</span> <span class="n">PRE_over_OBS</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -461,8 +524,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
@@ -486,7 +553,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -503,7 +570,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

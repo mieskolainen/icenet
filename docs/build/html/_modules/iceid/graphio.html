@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -31,9 +32,9 @@
           <div class="body" role="main">
             
   <h1>Source code for iceid.graphio</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Graph data readers and parsers for electron ID</span>
+<span></span><span class="c1"># Graph and tensor data readers and parsers for electron ID</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -59,28 +60,28 @@
 <span class="kn">from</span>   <span class="nn">icenet.tools.icevec</span> <span class="kn">import</span> <span class="n">vec4</span>
 
 
-<span class="c1"># Torch conversion</span>
-<div class="viewcode-block" id="graph2torch"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.graph2torch">[docs]</a><span class="k">def</span> <span class="nf">graph2torch</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+<span class="c1"># # Torch conversion</span>
+<span class="c1"># def graph2torch(X):</span>
 
-    <span class="c1"># Turn into torch geometric Data object</span>
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
-
-        <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
-                    <span class="n">edge_index</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;edge_index&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span>
-                    <span class="n">edge_attr</span> <span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;edge_attr&#39;</span><span class="p">],</span>  <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
-                    <span class="n">y</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span>
-                    <span class="n">w</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
-                    <span class="n">u</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">Y</span></div>
+<span class="c1">#     # Turn into torch geometric Data object</span>
+<span class="c1">#     Y = np.zeros(len(X), dtype=object)</span>
+<span class="c1">#     for i in range(len(X)):</span>
+        
+<span class="c1">#         d = X[i]</span>
+<span class="c1">#         Y[i] = Data(x=torch.tensor(d[&#39;x&#39;], dtype=torch.float),</span>
+<span class="c1">#                     edge_index=torch.tensor(d[&#39;edge_index&#39;], dtype=torch.long),</span>
+<span class="c1">#                     edge_attr =torch.tensor(d[&#39;edge_attr&#39;],  dtype=torch.float),</span>
+<span class="c1">#                     y=torch.tensor(d[&#39;y&#39;], dtype=torch.long),</span>
+<span class="c1">#                     w=torch.tensor(d[&#39;w&#39;], dtype=torch.float),</span>
+<span class="c1">#                     u=torch.tensor(d[&#39;u&#39;], dtype=torch.float))</span>
+<span class="c1">#     return Y</span>
 
 
 <div class="viewcode-block" id="parse_tensor_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_tensor_data">[docs]</a><span class="k">def</span> <span class="nf">parse_tensor_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">image_vars</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        X     :  Jagged array of variables</span>
-<span class="sd">        ids  :  Variable names as an array of strings</span>
+<span class="sd">        ids   :  Variable names as an array of strings</span>
 <span class="sd">        args  :  Arguments</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
@@ -117,130 +118,37 @@
     <span class="k">return</span> <span class="n">tensor</span></div>
 
 
-<div class="viewcode-block" id="parse_graph_data_np"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data_np">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data_np</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s1">&#39;ptetaphim&#39;</span><span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        X         :  Jagged array of variables</span>
-<span class="sd">        ids      :  Variable names as an array of strings</span>
-<span class="sd">        features  :  Array of active scalar feature strings</span>
-<span class="sd">        Y         :  Target class  array (if any, typically MC only)</span>
-<span class="sd">        W         :  (Re-)weighting array (if any, typically MC only)</span>
-<span class="sd">        global_on :  Global features on / off</span>
-<span class="sd">        coord     :  Coordinates used for nodes (&#39;ptetaphim&#39;, &#39;pxpypze&#39;)</span>
-<span class="sd">        </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        Array of pytorch-geometric Data objects</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># -------------------------------------------</span>
-
-    <span class="n">num_node_features</span> <span class="o">=</span> <span class="mi">6</span>
-    <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">num_classes</span>       <span class="o">=</span> <span class="mi">2</span>
-
-    <span class="n">N_events</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">dataset</span>  <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">zerovec</span>  <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
-
-
-    <span class="c1"># Collect feature indices</span>
-    <span class="n">feature_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)):</span>
-        <span class="n">feature_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-
-    <span class="c1"># Collect indices</span>
-    <span class="n">ind__trk_pt</span>        <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">)</span>
-    <span class="n">ind__trk_eta</span>       <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_eta&#39;</span><span class="p">)</span>
-    <span class="n">ind__trk_phi</span>       <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_phi&#39;</span><span class="p">)</span>
-
-    <span class="n">ind__image_clu_e</span>   <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_e&#39;</span><span class="p">)</span>
-    <span class="n">ind__image_clu_eta</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">)</span>
-    <span class="n">ind__image_clu_phi</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_phi&#39;</span><span class="p">)</span>
-
-
-    <span class="c1"># Loop over events</span>
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_events</span><span class="p">)):</span>
-
-        <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># +1 virtual node</span>
-        <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span> <span class="c1"># include self-connections</span>
-        
-        <span class="c1"># Construct 4-vector for the track, with pion mass</span>
-        <span class="n">p4track</span> <span class="o">=</span> <span class="n">vec4</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__trk_pt</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__trk_eta</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__trk_phi</span><span class="p">],</span> <span class="mf">0.13957</span><span class="p">)</span>
-
-        <span class="c1"># Construct 4-vector for each ECAL cluster [@@ JAGGED @@]</span>
-        <span class="n">p4vec</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">pt</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># Massless approx.</span>
-            <span class="n">p4vec</span> <span class="o">=</span> <span class="n">vec4</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">ind__image_clu_phi</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Massless</span>
-
-
-        <span class="c1"># ====================================================================</span>
-        <span class="c1"># CONSTRUCT TENSORS</span>
-
-        <span class="c1"># Construct output class, note [] is important to have for right dimensions</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">Y</span><span class="p">[</span><span class="n">e</span><span class="p">]]</span> <span class="k">if</span> <span class="n">Y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># Training weights, note [] is important to have for right dimensions</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">W</span><span class="p">[</span><span class="n">e</span><span class="p">]]</span> <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
-
-        <span class="c1">###y = torch.tensor(y, dtype=torch.long)</span>
-        <span class="c1">###w = torch.tensor(w, dtype=torch.float)</span>
-
-        <span class="c1">## Construct global feature vector</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">feature_ind</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="c1">###u = torch.tensor(u, dtype=torch.float)</span>
-        
-        <span class="c1">## Construct node features</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="o">=</span><span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="o">=</span><span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">)</span>
-        <span class="c1">###x = torch.tensor(x, dtype=torch.float)</span>
-
-        <span class="c1">## Construct edge features</span>
-        <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">get_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">)</span>
-        <span class="c1">###edge_attr  = torch.tensor(edge_attr, dtype=torch.float)</span>
-
-        <span class="c1">## Construct edge connectivity</span>
-        <span class="n">edge_index</span> <span class="o">=</span> <span class="n">get_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">)</span>
-        <span class="c1">###edge_index = torch.tensor(edge_index, dtype=torch.long)</span>
-
-        <span class="c1"># Add this event</span>
-        <span class="k">if</span> <span class="n">global_on</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># Null the global features</span>
-            <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
-            <span class="c1">###u = torch.tensor(np.zeros(len(u)), dtype=torch.float)</span>
-
-        <span class="c1"># Pure dictionary</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;edge_index&#39;</span><span class="p">:</span><span class="n">edge_index</span><span class="p">,</span> <span class="s1">&#39;edge_attr&#39;</span><span class="p">:</span><span class="n">edge_attr</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="n">w</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span><span class="n">u</span><span class="p">})</span>
-        <span class="c1">#dataset.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))</span>
-
-    <span class="k">return</span> <span class="n">dataset</span></div>
-
-
-<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s1">&#39;ptetaphim&#39;</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_graph_data"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_graph_data">[docs]</a><span class="k">def</span> <span class="nf">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Jagged array data into pytorch-geometric style Data format array.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        X         :  Jagged array of variables</span>
-<span class="sd">        ids       :  Variable names as an array of strings</span>
-<span class="sd">        features  :  Array of active scalar feature strings</span>
-<span class="sd">        Y         :  Target class  array (if any, typically MC only)</span>
-<span class="sd">        W         :  (Re-)weighting array (if any, typically MC only)</span>
-<span class="sd">        global_on :  Global features on / off</span>
-<span class="sd">        coord     :  Coordinates used for nodes (&#39;ptetaphim&#39;, &#39;pxpypze&#39;)</span>
-<span class="sd">        </span>
+<span class="sd">        X          :  Jagged array of variables</span>
+<span class="sd">        ids        :  Variable names as an array of strings</span>
+<span class="sd">        features   :  Array of active global feature strings</span>
+<span class="sd">        graph_param:  Graph construction parameters dict</span>
+<span class="sd">        Y          :  Target class  array (if any, typically MC only)</span>
+<span class="sd">        weights    :  (Re-)weighting array (if any, typically MC only)</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        Array of pytorch-geometric Data objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M_PION</span>     <span class="o">=</span> <span class="mf">0.13957</span> <span class="c1"># charged pion mass (GeV)</span>
+    
+    <span class="n">global_on</span>  <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;global_on&#39;</span><span class="p">]</span>
+    <span class="n">coord</span>      <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;coord&#39;</span><span class="p">]</span>
+    <span class="n">directed</span>   <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;directed&#39;</span><span class="p">]</span>
+    <span class="n">self_loops</span> <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;self_loops&#39;</span><span class="p">]</span>
+
+    <span class="c1"># ----------------------------------------------</span>
     
     <span class="n">num_node_features</span> <span class="o">=</span> <span class="mi">6</span>
     <span class="n">num_edge_features</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">num_classes</span>       <span class="o">=</span> <span class="mi">2</span>
-
-    <span class="n">N_events</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">dataset</span>  <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Converting </span><span class="si">{</span><span class="n">N_events</span><span class="si">}</span><span class="s1"> events into graphs ...&#39;</span><span class="p">)</span>
+    
+    <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">num_events</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">slice_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Converting </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> events into graphs ...&#39;</span><span class="p">)</span>
     <span class="n">zerovec</span> <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
 
     <span class="c1"># Collect feature indices</span>
@@ -248,7 +156,6 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)):</span>
         <span class="n">feature_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
-
     <span class="c1"># Collect indices</span>
     <span class="n">ind__trk_pt</span>        <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">)</span>
     <span class="n">ind__trk_eta</span>       <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;trk_eta&#39;</span><span class="p">)</span>
@@ -258,34 +165,37 @@
     <span class="n">ind__image_clu_eta</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_eta&#39;</span><span class="p">)</span>
     <span class="n">ind__image_clu_phi</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;image_clu_phi&#39;</span><span class="p">)</span>
 
+    <span class="n">num_empty_ECAL</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Loop over events</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_events</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">)):</span>
 
-        <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># + 1 virtual node</span>
-        <span class="n">num_edges</span> <span class="o">=</span> <span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span>                      <span class="c1"># include self-connections</span>
-        
+        <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">])</span> <span class="c1"># +1 for the virtual node (empty data)</span>
+        <span class="n">num_edges</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="o">=</span><span class="n">self_loops</span><span class="p">)</span>
+
         <span class="c1"># Construct 4-vector for the track, with pion mass</span>
         <span class="n">p4track</span> <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
-        <span class="n">p4track</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__trk_pt</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__trk_eta</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__trk_phi</span><span class="p">],</span> <span class="mf">0.13957</span><span class="p">)</span>
+        <span class="n">p4track</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__trk_pt</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__trk_eta</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__trk_phi</span><span class="p">],</span> <span class="n">M_PION</span><span class="p">)</span>
 
-        <span class="c1"># Construct 4-vector for each ECAL cluster [@@ JAGGED @@]</span>
+        <span class="c1"># Construct 4-vector for each ECAL cluster</span>
         <span class="n">p4vec</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">N_c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">])</span>
+        <span class="n">N_c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">])</span>
         
         <span class="k">if</span> <span class="n">N_c</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_c</span><span class="p">):</span> 
                 
-                <span class="n">pt</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">][</span><span class="n">k</span><span class="p">])</span> <span class="c1"># Massless approx.</span>
-                <span class="n">eta</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
-                <span class="n">phi</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ind__image_clu_phi</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">pt</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_e</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">][</span><span class="n">k</span><span class="p">])</span> <span class="c1"># Massless approx.</span>
+                <span class="n">eta</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_eta</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">phi</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">ind__image_clu_phi</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
 
                 <span class="n">v</span> <span class="o">=</span> <span class="n">vec4</span><span class="p">()</span>
                 <span class="n">v</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-                <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">v</span> <span class="p">)</span>
+                <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="c1"># Empty ECAL cluster information</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL cluster event </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>
+            <span class="n">num_empty_ECAL</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="c1"># However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed</span>
         
         <span class="c1"># ====================================================================</span>
@@ -293,39 +203,44 @@
 
         <span class="c1"># Construct output class, note [] is important to have for right dimensions</span>
         <span class="k">if</span> <span class="n">Y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">Y</span><span class="p">[</span><span class="n">ev</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
 
         <span class="c1"># Training weights, note [] is important to have for right dimensions</span>
-        <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">weights</span><span class="p">[</span><span class="n">ev</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span>  <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
-
-        <span class="c1">## Construct global feature vector</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">feature_ind</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-        
         <span class="c1">## Construct node features</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="o">=</span><span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="o">=</span><span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="o">=</span><span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="o">=</span><span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">)</span>
+        
+        <span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span> <span class="c1"># Input protection</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="c1">## Construct edge features</span>
-        <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">get_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">)</span>
+        <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">)</span>
+        
+        <span class="n">edge_attr</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">edge_attr</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span> <span class="c1"># Input protection</span>
         <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="c1">## Construct edge connectivity</span>
-        <span class="n">edge_index</span> <span class="o">=</span> <span class="n">get_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">)</span>
+        <span class="n">edge_index</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">get_simple_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">self_loops</span><span class="o">=</span><span class="n">self_loops</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="n">directed</span><span class="p">)</span>
         <span class="n">edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
-
-
-        <span class="c1"># Add this event</span>
+        
+        <span class="c1">## Construct global feature vector</span>
         <span class="k">if</span> <span class="n">global_on</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> <span class="c1"># Null the global features</span>
-            <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-
-        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
-
+            <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">,</span> <span class="n">feature_ind</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">u</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span> <span class="c1"># Input protection</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        
+        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">num_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
+    
     <span class="k">return</span> <span class="n">dataset</span></div>
 
 
@@ -333,7 +248,7 @@
 <div class="viewcode-block" id="get_node_features"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.get_node_features">[docs]</a><span class="k">def</span> <span class="nf">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
 
     <span class="c1"># Node feature matrix</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
 
@@ -350,7 +265,7 @@
                 <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pz</span>
                 <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">e</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;parse_graph_data: Unknown coordinate representation&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.get_node_features: Unknown coordinate representation&#39;</span><span class="p">)</span>
             
             <span class="c1"># other features</span>
             <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4track</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -360,87 +275,11 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">continue</span>
                 <span class="c1"># Not able to read it (empty cluster data)</span>
-            
+    
+    <span class="c1"># Cast</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">x</span></div>
-
-
-<div class="viewcode-block" id="get_edge_index"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.get_edge_index">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">get_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">):</span>
-
-    <span class="c1"># Graph connectivity: (~ sparse adjacency matrix)</span>
-    <span class="n">edge_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">))</span>
-
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-
-            <span class="c1"># Full connectivity</span>
-            <span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-            <span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-    <span class="k">return</span> <span class="n">edge_index</span></div>
-
-
-<div class="viewcode-block" id="get_edge_features"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.get_edge_features">[docs]</a><span class="k">def</span> <span class="nf">get_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
-
-    <span class="c1"># Edge features: [num_edges, num_edge_features]</span>
-    <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">indexlist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-
-            <span class="c1"># Compute only non-zero</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">):</span>
-
-                <span class="n">p4_i</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">p4_j</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="c1"># kt-metric (anti)</span>
-                <span class="n">dR2_ij</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-                <span class="n">kt2_i</span>  <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span> 
-                <span class="n">kt2_j</span>  <span class="o">=</span> <span class="n">p4_j</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="o">=</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="o">=</span><span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="o">=</span><span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-                
-                <span class="c1"># Lorentz scalars</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">+</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam s-like</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">-</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam t-like</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">dot4</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span>     <span class="c1"># 4-dot</span>
-
-            <span class="n">indexlist</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="c1">### Copy to the lower triangle for speed (we have symmetric adjacency)</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
-
-            <span class="c1"># Copy only non-zero</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">):</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">edge_attr</span><span class="p">[</span><span class="n">indexlist</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">],:]</span> <span class="c1"># note [j,i] !</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">edge_attr</span></div>
-
-
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">def find_k_nearest(edge_attr, num_nodes, k=5):</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-<span class="sd">    Find fixed k-nearest neighbours, return corresponding edge connectivities</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<span class="sd">    # Loop over each node</span>
-<span class="sd">    for i in range(num_nodes):</span>
-
-<span class="sd">        # Loop over each other node, take distances</span>
-<span class="sd">        for j in range(num_nodes):</span>
-
-<span class="sd">    # Graph connectivity: (~ adjacency matrix)</span>
-<span class="sd">    edge_index = torch.tensor(np.zeros((2, num_edges)), dtype=torch.long)</span>
-<span class="sd">&#39;&#39;&#39;</span>
-
 </pre></div>
 
           </div>
@@ -468,8 +307,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
@@ -493,7 +336,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -510,7 +353,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

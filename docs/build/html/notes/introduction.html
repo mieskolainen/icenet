@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -34,44 +35,61 @@
           <div class="body" role="main">
             
   <section id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>The library structure is the following.</p>
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
+<p>The library structure is as follows:</p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
-<li><p><a class="reference internal" href="#folder-structure" id="id1">Folder structure</a></p></li>
-<li><p><a class="reference internal" href="#algorithms-packages-included" id="id2">Algorithms/packages included</a></p></li>
+<li><p><a class="reference internal" href="#folders" id="id1">Folders</a></p></li>
+<li><p><a class="reference internal" href="#algorithms-and-models" id="id2">Algorithms and models</a></p></li>
+<li><p><a class="reference internal" href="#advanced-training-methodologies" id="id3">Advanced training methodologies</a></p></li>
 </ul>
 </div>
-<section id="folder-structure">
-<h2><a class="toc-backref" href="#id1">Folder structure</a><a class="headerlink" href="#folder-structure" title="Permalink to this headline">¶</a></h2>
+<section id="folders">
+<h2><a class="toc-backref" href="#id1">Folders</a><a class="headerlink" href="#folders" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>-analysis     Main steering macros and scripts
 -checkpoint   Saved models
 -configs      Input configuration
 -docs         Documentation
 -figs         Output figures
--icebrk       B/R(K) functions
+-icebrk       B/R(K) analysis functions
+-icedqcd      DQCD analysis functions
 -icefit       Fitting and statistics functions
+-icehgcal     HGCAL functions
+-icehnl       HNL analysis functions
 -iceid        Electron ID functions
--icenet       Deep learning classes &amp; functions
--icetrg       HLT trigger classifiers
+-icenet       Core deep learning functions &amp; I/O
 -iceplot      Plotting tools
+-icetrg       HLT trigger functions
 -tests        Test and steering scripts
 -output       HDF5, pickle outputs
 -dev          Development code
 </pre></div>
 </div>
 </section>
-<section id="algorithms-packages-included">
-<h2><a class="toc-backref" href="#id2">Algorithms/packages included</a><a class="headerlink" href="#algorithms-packages-included" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1. Factorized (dim-by-dim) likelihoods &amp; ratios using histograms [numpy]
-2. Gradient boosted decision trees [xgboost]
-3. Multinomial Logistic Regression [pytorch]
-4. MAXOUT multilayer feedforward network [pytorch]
-5. Deep Normalizing Flow (BNAF) based likelihoods &amp; ratios [pytorch]
-6. Permutation Equivariant Networks [pytorch]
-7. CNN Networks [pytorch]
-8. Graph Neural Nets [pytorch-geometric]
-9. ...
+<section id="algorithms-and-models">
+<h2><a class="toc-backref" href="#id2">Algorithms and models</a><a class="headerlink" href="#algorithms-and-models" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.  Factorized (dim-by-dim) likelihoods &amp; ratios using histograms [numpy]
+2.  Gradient boosted decision trees with custom autograd loss [xgboost+pytorch]
+3.  Multinomial Logistic Regression, Deep MLPs [pytorch]
+4.  MAXOUT multilayer feedforward network [pytorch]
+5.  Deep Normalizing Flow (BNAF) based likelihoods &amp; ratios [pytorch]
+6.  Permutation Equivariant Networks (DeepSets) [pytorch]
+7.  CNN Networks [pytorch]
+8.  Graph Neural Nets (graph-, node-, edge-level inference) [pytorch-geometric]
+9.  Variational autoencoders [pytorch]
+10. Neural mutual information estimator [pytorch]
+11. ...
+</pre></div>
+</div>
+</section>
+<section id="advanced-training-methodologies">
+<h2><a class="toc-backref" href="#id3">Advanced training methodologies</a><a class="headerlink" href="#advanced-training-methodologies" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1. Model distillation
+2. Conditional (parametric) classifiers
+3. Deep domain adaptation (via gradient reversal)
+4. Automated hyperparameter tuning (via raytune)
+5. Algorithmically [de]correlated (regulated) networks
+6. ...
 </pre></div>
 </div>
 </section>
@@ -103,8 +121,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/icetrg.html">icetrg</a></li>
@@ -128,7 +150,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -145,7 +167,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

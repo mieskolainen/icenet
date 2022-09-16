@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -337,7 +338,7 @@
     <span class="k">return</span> <span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span></div>
 
 
-<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">MAXEVENTS</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
+<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
     <span class="n">EVTGROUPSIZE</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">CHUNKBUFFER</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BMAT</span><span class="o">=</span><span class="p">[],</span> <span class="n">WNORM</span><span class="o">=</span><span class="p">[],</span> <span class="n">SUPERSETS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">hd5dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputXY</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">outputP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Main event processing loop</span>
@@ -388,14 +389,14 @@
     <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">outputXY</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">DTOT</span><span class="p">))</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">DTOT</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">outputP</span><span class="p">:</span>
         <span class="n">P</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span> <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">NCLASS</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func_predict</span><span class="p">)):</span> <span class="n">P</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">NCLASS</span><span class="p">))</span>
     
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">MAXEVENTS</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">))</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">))</span>
 
 
     <span class="c1"># --------------------------------------------------------------------</span>
@@ -446,7 +447,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: WNORM      = </span><span class="si">{</span><span class="n">WNORM</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: SUPERSETS  = </span><span class="si">{</span><span class="n">SUPERSETS</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: MAXEVENTS  = </span><span class="si">{</span><span class="n">MAXEVENTS</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: maxevents  = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
     
 
@@ -462,11 +463,23 @@
             <span class="n">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
         <span class="c1">## Loop over this file</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">evtgroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">EVTGROUPSIZE</span><span class="p">)):</span>
-                        
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;evtgroup = </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> [EVTGROUPSIZE = </span><span class="si">{</span><span class="n">EVTGROUPSIZE</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
+        <span class="n">skips</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">evt_i</span><span class="p">,</span> <span class="n">evtgroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">EVTGROUPSIZE</span><span class="p">)):</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;evtgroup = </span><span class="si">{</span><span class="n">evt_i</span><span class="si">}</span><span class="s1"> [EVTGROUPSIZE = </span><span class="si">{</span><span class="n">EVTGROUPSIZE</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">evtgroup</span><span class="p">)</span>
 
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            if not isMC:</span>
+<span class="sd">                if skips &lt; 1:</span>
+<span class="sd">                    # Skip events hack</span>
+<span class="sd">                    print(&#39;Skipping evtgroup due to simulation&#39;)</span>
+<span class="sd">                    skips += 1</span>
+<span class="sd">                    continue;</span>
+<span class="sd">                else:</span>
+<span class="sd">                    True</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
             <span class="c1"># --------------------------------------------------------------------</span>
             <span class="c1"># *** FULLY VECTORIZED KINEMATICS CONSTRUCTION (JAGGED/COLUMNAR) ***</span>
 
@@ -492,8 +505,8 @@
 
             <span class="k">for</span> <span class="n">evt_index</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="n">evtcount</span> <span class="o">==</span> <span class="n">MAXEVENTS</span><span class="p">):</span> 
-                    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Maximum event count </span><span class="si">{</span><span class="n">MAXEVENTS</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">evtcount</span> <span class="o">==</span> <span class="n">maxevents</span><span class="p">):</span> 
+                    <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">))</span>
                     <span class="n">iterator</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># So we don&#39;t get ghost messages</span>
                     <span class="k">break</span> <span class="c1"># this event group</span>
                     
@@ -664,8 +677,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
@@ -689,7 +706,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -706,7 +723,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -102,7 +103,7 @@
 
 <div class="viewcode-block" id="PEN1_mean"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.PEN1_mean">[docs]</a><span class="k">class</span> <span class="nc">PEN1_mean</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Permutation Equivariant Network (PEN) mean-type layers.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Single dimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
@@ -118,80 +119,83 @@
 <div class="viewcode-block" id="DEPS"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.DEPS">[docs]</a><span class="k">class</span> <span class="nc">DEPS</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Permutation equivariant networks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">phi_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rho_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            D:     Input dimesion</span>
-<span class="sd">            z_dim: Latent dimension</span>
-<span class="sd">            C:     Number of classes</span>
-<span class="sd">            pool:  Pooling operation type</span>
-<span class="sd">        </span>
+<span class="sd">            D:        Input dimension</span>
+<span class="sd">            z_dim:    Latent dimension</span>
+<span class="sd">            C:        Number of classes</span>
+<span class="sd">            pool:     Pooling operation type: &#39;max&#39;,&#39;mean&#39; or &#39;max1&#39;,&#39;mean1&#39; (multi dimensional or single)</span>
+<span class="sd">            dimtype:  &#39;multi&#39; or &#39;single&#39;</span>
+<span class="sd">            dropout:  Dropout regularization</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DEPS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">D</span>     <span class="o">=</span> <span class="n">D</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">=</span> <span class="n">z_dim</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">C</span>     <span class="o">=</span> <span class="n">C</span>
         
-        <span class="k">if</span> <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                <span class="n">PEN_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span>       <span class="o">=</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span>   <span class="o">=</span> <span class="n">z_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span>       <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+        
+        <span class="n">phi_channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">D</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">phi_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span> <span class="n">phi_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_dim</span><span class="p">)</span>
+        <span class="n">phi_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_dim</span><span class="p">)</span>
+
+        <span class="n">rho_channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">z_dim</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rho_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span> <span class="n">rho_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_dim</span><span class="p">)</span>
+        <span class="n">rho_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+
+        <span class="k">if</span>   <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+            <span class="n">accumulator</span> <span class="o">=</span> <span class="n">PEN_max</span>
         <span class="k">elif</span> <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                <span class="n">PEN_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+            <span class="n">accumulator</span> <span class="o">=</span> <span class="n">PEN_mean</span>
         <span class="k">elif</span> <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;max1&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                <span class="n">PEN1_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN1_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN1_max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+            <span class="n">accumulator</span> <span class="o">=</span> <span class="n">PEN1_max</span>
         <span class="k">elif</span> <span class="n">pool</span> <span class="o">==</span> <span class="s1">&#39;mean1&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                <span class="n">PEN1_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN1_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">PEN1_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
+            <span class="n">accumulator</span> <span class="o">=</span> <span class="n">PEN1_mean</span>
+
+        <span class="c1"># -------------------------------------------</span>
+        <span class="c1"># Create phi-function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+                <span class="n">accumulator</span><span class="p">(</span><span class="n">phi_channels</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">phi_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">phi_channels</span><span class="p">))</span>
+        <span class="p">])</span>
+        <span class="c1"># -------------------------------------------</span>
+
+        <span class="c1"># -------------------------------------------</span>
+        <span class="c1"># Create rho-function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">dropout</span><span class="p">),</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">rho_channels</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">rho_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">ro</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">),</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">rho_channels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">])</span>
+        
+        <span class="c1"># N.B. Last layer without activation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">,</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">dropout</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">rho_channels</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">rho_channels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
         <span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
+        <span class="c1"># -------------------------------------------</span>
+    
     <span class="c1"># Forward operator</span>
 <div class="viewcode-block" id="DEPS.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.DEPS.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ro</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span></div>
     
     <span class="c1"># Returns softmax probability</span>
 <div class="viewcode-block" id="DEPS.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.DEPS.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+        <span class="c1">#if self.training:</span>
+        <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
+        <span class="c1">#else:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
     
     <span class="c1"># Return class</span>
 <div class="viewcode-block" id="DEPS.binarypredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deps.DEPS.binarypredict">[docs]</a>    <span class="k">def</span> <span class="nf">binarypredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
@@ -224,8 +228,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -249,7 +257,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -266,7 +274,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
