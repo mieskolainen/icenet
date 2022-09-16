@@ -65,7 +65,7 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#icebrk-common">icebrk.common</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.features">icebrk.features</a></li>
@@ -226,14 +226,17 @@
 
 
 <div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Loads the root file with signal events from MC and background from DATA.</span>
+    <span class="sd">&quot;&quot;&quot; Loads the root files.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        root_path : paths to root files (list)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        X,Y       : input, output matrices</span>
-<span class="sd">        ids       : variable names</span>
+<span class="sd">        X:     columnar data</span>
+<span class="sd">        Y:     class labels</span>
+<span class="sd">        W:     event weights</span>
+<span class="sd">        ids:   columnar variable string (list)</span>
+<span class="sd">        info:  trigger and pre-selection acceptance x efficiency information (dict)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
