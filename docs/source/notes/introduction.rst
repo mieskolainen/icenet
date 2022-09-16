@@ -1,60 +1,104 @@
 Introduction
 =======================
 
-The library structure is as follows:
+The library structure is as follows
 
 .. contents::
     :local:
 
-Folders
+
+Basic design principles
+---------------------------
+
+Core deep learning and I/O functions and classes are designed to be problem generic.
+That is, they can be used without any specific strict workflow and can handle near arbitrary
+inputs as suitable.
+
+The most physics applications such as signal from background discrimination
+fit under certain "quasi-templated YAML-python-workflow" as manifested from the implemented applications.
+
+
+YAML-configuration files
+---------------------------
+
+End-to-end deep learning applications are configured with YAML-files.
+See source files for different applications under ``/configs``
+
+
+Folder structure
 -----------------------
+
+Folders starting with a name ``ice`` denote modules, typically
+either different core modules such as ``icenet`` or ``icefit``
+or physics applications such as ``icedqcd``, which contain their problem
+specific I/O functions.
 
 .. code-block:: none
 
 	-analysis     Main steering macros and scripts
-	-checkpoint   Saved models
-	-configs      Input configuration
+	-checkpoint   Trained and saved machine learning models
+	-configs      YAML-input configuration
 	-docs         Documentation
 	-figs         Output figures
-	-icebrk       B/R(K) analysis functions
-	-icedqcd      DQCD analysis functions
-	-icefit       Fitting and statistics functions
-	-icehgcal     HGCAL functions
-	-icehnl       HNL analysis functions
-	-iceid        Electron ID functions
-	-icenet       Core deep learning functions & I/O
+	-icebrk       B/R(K) analysis application
+	-icedqcd      DQCD analysis application
+	-icefit       Fitting and statistics
+	-icehgcal     HGCAL detector application
+	-icehnl       HNL analysis application
+	-iceid        Electron ID application
+	-icenet       Core deep learning & I/O functions
 	-iceplot      Plotting tools
-	-icetrg       HLT trigger functions
-	-tests        Test and steering scripts
+	-icetrg       HLT trigger application
+	-tests        Test and bash-launch scripts
 	-output       HDF5, pickle outputs
 	-dev          Development code
 
 
-Algorithms and models
+ML-algorithms and models
 -----------------------------
-.. code-block:: none
 
+Various ML-models are implemented and supported. From a fixed dimensional input models
+such as boosted decision trees (BDT) via XGBoost enhanced with a custom torch autograd computed loss function,
+aka ``ICEBOOST``, to more complex "Geometric Deep Learning" with graph neural networks using torch-geometric
+as a low-level backend.
+
+The library is typically agnostic regarding the underlying models, i.e.
+new torch models or loss functions can be easily added and other computational libraries such as JAX can be used.
+
+
+See source files under ``/icenet/deep``
+
+.. code-block:: none
+	
 	1.  Factorized (dim-by-dim) likelihoods & ratios using histograms [numpy]
-	2.  Gradient boosted decision trees with custom autograd loss [xgboost+pytorch]
+	2.  ICEBOOST: Gradient boosted decision trees with custom autograd loss [xgboost+pytorch]
 	3.  Multinomial Logistic Regression, Deep MLPs [pytorch]
-	4.  MAXOUT multilayer feedforward network [pytorch]
+	4.  MaxOUT multilayer feedforward network [pytorch]
 	5.  Deep Normalizing Flow (BNAF) based likelihoods & ratios [pytorch]
 	6.  Permutation Equivariant Networks (DeepSets) [pytorch]
-	7.  CNN Networks [pytorch]
+	7.  CNN-Tensor networks [pytorch]
 	8.  Graph Neural Nets (graph-, node-, edge-level inference) [pytorch-geometric]
 	9.  Variational autoencoders [pytorch]
-	10. Neural mutual information estimator [pytorch]
+	10. Neural mutual information estimator (MINE) [pytorch]
 	11. ...
 
 
-Advanced training methodologies
+Advanced ML-training technology
 ----------------------------------
+See source files under ``/icenet/deep``
+
 .. code-block:: none
 	
 	1. Model distillation
 	2. Conditional (parametric) classifiers
 	3. Deep domain adaptation (via gradient reversal)
 	4. Automated hyperparameter tuning (via raytune)
-	5. Algorithmically [de]correlated (regulated) networks
+	5. Algorithmically [de]correlated (regulated) BDTs and networks with MINE
 	6. ...
+
+
+Automated selectors and combinatorics for distributions
+-------------------------------------------------------
+
+The plotting machinery allows sophisticated filtering/cuts or "combinatorial" binning of various metrics, such as ROC-curves and other figures. See steering-file examples under ``/configs/*/plots.yml``
 
