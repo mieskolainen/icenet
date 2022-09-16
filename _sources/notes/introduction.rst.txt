@@ -14,7 +14,7 @@ Core deep learning and I/O functions and classes are designed to be problem gene
 That is, they can be used without any specific strict workflow and can handle near arbitrary
 inputs as suitable.
 
-The most physics applications such as signal from background discrimination
+Many high energy physics applications such as a signal from background discrimination problem
 fit under certain "quasi-templated YAML-python-workflow" as manifested from the implemented applications.
 
 
@@ -42,12 +42,12 @@ specific I/O functions.
 	-figs         Output figures
 	-icebrk       B/R(K) analysis application
 	-icedqcd      DQCD analysis application
-	-icefit       Fitting and statistics
+	-icefit       Core fitting and statistics
 	-icehgcal     HGCAL detector application
 	-icehnl       HNL analysis application
 	-iceid        Electron ID application
 	-icenet       Core deep learning & I/O functions
-	-iceplot      Plotting tools
+	-iceplot      Core plotting tools
 	-icetrg       HLT trigger application
 	-tests        Test and bash-launch scripts
 	-output       HDF5, pickle outputs

@@ -15,6 +15,7 @@ Preliminaries: Conda installation
 
 Then execute the installer with ``bash filename.sh``.
 
+
 Pre-installed CUDA paths (optional)
 ------------------------------------
 .. code-block:: none

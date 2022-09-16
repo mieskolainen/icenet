@@ -1,8 +1,6 @@
 CMSSW setup
 =======================
 
-The framework installation goes as follows.
-
 .. contents::
     :local:
 
