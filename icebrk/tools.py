@@ -1,4 +1,6 @@
-# Tool functions for B/RK analyzer [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
+# Tool functions for B/RK analyzer  (protocode)
+#
+# [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
 #
 # NOTE: New branches (not originally inside nanoAOD tree) are identified with '_key'
 #

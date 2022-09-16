@@ -1,4 +1,4 @@
-# Features in use in B/RK analyzer
+# Features in use in B/RK analyzer (protocode)
 # 
 # NOTE: use convention such that new features (added here) are always with underscore '_featurename' !
 #

@@ -26,14 +26,17 @@ from configs.trg.filter import *
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
-    """ Loads the root file with signal events from MC and background from DATA.
+    """ Loads the root files.
     
     Args:
         root_path : paths to root files (list)
     
     Returns:
-        X,Y       : input, output matrices
-        ids       : variable names
+        X:     columnar data
+        Y:     class labels
+        W:     event weights
+        ids:   columnar variable string (list)
+        info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
 
     if type(root_path) is list:

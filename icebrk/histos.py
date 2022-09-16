@@ -1,4 +1,4 @@
-# B/RK analyzer observables and histograms
+# B/RK analyzer observables and histograms (protocode)
 # 
 # 
 # Mikael Mieskolainen, 2020

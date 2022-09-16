@@ -1,4 +1,6 @@
-# B/RK analyzer main event loop [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
+# B/RK analyzer main event loop (protocode)
+#
+# [CODE IS ROTTEN / UNFIXED due to awkward0 --> awkward1 changes]
 #
 #
 # Mikael Mieskolainen, 2022

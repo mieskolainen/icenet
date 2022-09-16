@@ -33,8 +33,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         root_path : paths to root files (list)
     
     Returns:
-        X,Y       : input, output matrices
-        ids       : variable names
+        X:     columnar data
+        Y:     class labels
+        W:     event weights
+        ids:   columnar variable string (list)
+        info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
     
     if type(root_path) is list:

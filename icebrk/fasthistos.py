@@ -1,4 +1,4 @@
-# Raw "fast" observable containers for B/RK analyzer
+# Raw "fast" observable containers for B/RK analyzer (protocode)
 # 
 # 
 # Mikael Mieskolainen, 2020

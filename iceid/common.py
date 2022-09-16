@@ -43,14 +43,17 @@ from configs.eid.cuts import *
 
 
 def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None, library='np'):
-    """ Loads root files
+    """ Loads the root files.
     
     Args:
-        root_path: paths to root files (list)
+        root_path : paths to root files (list)
     
     Returns:
-        X,Y      : input, output data (with jagged content)
-        ids      : variable names
+        X:     columnar data
+        Y:     class labels
+        W:     event weights
+        ids:   columnar variable string (list)
+        info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
     
     if type(root_path) is not list:

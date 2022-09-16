@@ -1,4 +1,4 @@
-# Cuts and statistics objects for B/RK analyzer
+# Cuts and statistics objects for B/RK analyzer (protocode)
 #
 # Mikael Mieskolainen, 2020
 # m.mieskolainen@imperial.ac.uk
