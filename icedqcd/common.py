@@ -106,7 +106,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
 
 
 def process_root(X, ids, isMC, args, **extra):
-    
+    """
+    Apply selections
+    """
+
     FILTERFUNC = globals()[args['filterfunc']]    
     CUTFUNC    = globals()[args['cutfunc']]
     
@@ -116,21 +119,22 @@ def process_root(X, ids, isMC, args, **extra):
     mask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     stats['filterfunc'] = {'before': len(X), 'after': sum(mask)}
     
-    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f})', 'green')
-    X = X[mask]
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
+    
+    X = X[mask]
     
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, xcorr_flow=args['xcorr_flow'])
     stats['cutfunc'] = {'before': len(X), 'after': sum(mask)}
     
-    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f}) \n", 'green')
-    X = X[mask]
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
-    
     io.showmem()
+    
+    X = X[mask]
     
     return X, ids, stats
 
