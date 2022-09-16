@@ -76,7 +76,7 @@ def compute_reweight(root_files, num_events, args):
 
     entry_stop     = np.min([args['reweight_param']['maxevents'], num_events[index]])
     X,Y,W,ids,info = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
-
+    
     # Compute re-weights
     _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
 
@@ -109,7 +109,7 @@ def main():
     pdf,X,Y,W,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
 
     gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, maxevents=1,
+    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, entry_start=0, entry_stop=1,
         features=scalar_var, graph_param=args['graph_param'])
     
     # =========================================================================

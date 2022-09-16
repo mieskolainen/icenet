@@ -23,6 +23,8 @@ jobs:
       # conda install -c conda-forge cudatoolkit-dev
       
       # Install conda packages
+      
+      # (needed e.g. for xgboost tree visualization)
       # conda install python-graphviz
       
       - name: Install pip-requirements
@@ -44,7 +46,7 @@ jobs:
           make -C docs/ clean
           make -C docs/ html
           touch docs/build/html/.nojekyll
-      
+
       ## Release to gh-pages
       - name: Release docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
