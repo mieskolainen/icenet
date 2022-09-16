@@ -17,7 +17,7 @@ mva_param: &MVA_INPUT_PARAM
   jagged_maxdim:
     
     Jet:  6
-    Muon: 8
+    Muon: 6
     SV:   6
     cpf:  0 #20
     npf:  0 #10

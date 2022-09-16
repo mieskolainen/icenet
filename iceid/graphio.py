@@ -84,7 +84,7 @@ def parse_tensor_data(X, ids, image_vars, args):
     return tensor
 
 
-def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12, null_value=-999.0):
+def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_start=None, entry_stop=None, EPS=1e-12, null_value=-999.0):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -111,9 +111,9 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
     num_node_features = 6
     num_edge_features = 4
     
-    num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
-    dataset  = []
-
+    entry_start, entry_stop, num_events = aux.slice_range(start=entry_start, stop=entry_stop, N=len(X))
+    dataset = []
+    
     print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
     zerovec = vec4()
 
@@ -134,7 +134,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, maxeve
     num_empty_ECAL = 0
 
     # Loop over events
-    for ev in tqdm(range(num_events)):
+    for ev in tqdm(range(entry_start, entry_stop)):
 
         num_nodes = 1 + len(X[ev, ind__image_clu_eta]) # +1 for the virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)

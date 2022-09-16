@@ -7,6 +7,7 @@ import math
 import numpy as np
 import awkward as ak
 import re
+import time
 
 import numba
 import copy
@@ -19,8 +20,47 @@ from sklearn import metrics
 from scipy import stats
 import scipy.special as special
 
+import multiprocessing
+import ctypes
+
+
+from functools import partial
+from itertools import repeat
+from multiprocessing import Pool, freeze_support
+
+
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
+
+
+def slice_range(start, stop, N):
+    """
+    Python slice type processor function
+
+    Args:
+        start:   first index
+        stop:    end index + 1
+        N:       total number of indices
+
+    Returns:
+        a,b,b-a: processed indices and total length
+    """
+
+    if start is None:
+        a = 0
+    elif start < 0: # count from the end
+        a = N - start
+    else:
+        a = start
+
+    if stop is None:
+        b = N
+    elif stop < 0: # count from the end
+        b = N - stop
+    else:
+        b = stop
+    
+    return a, b, b-a
 
 
 def red(X, ids, param, mode='X', exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
@@ -156,7 +196,7 @@ def ak2numpy(x, fields, null_value=float(999.0)):
     return out
 
 
-def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, null_value=float(-999.0)):
+def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_start=None, entry_stop=None, null_value=float(-999.0)):
     """
     Transform jagged awkward array to fixed dimensional numpy data
     
@@ -183,14 +223,18 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, null_value
         for j in range(dim):
             all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
 
-    # Update representation
+    # Parameters
     arg = {
+        'entry_start': entry_start,
+        'entry_stop':  entry_stop,
         'scalar_vars': scalar_vars,
         'jagged_vars': jagged_vars,
         'jagged_dim':  jagged_dim,
         'null_value':  null_value
     }
-    matrix = jagged2matrix(data.x, **arg)
+
+    #matrix = jagged2matrix(data.x, **arg)
+    matrix = jagged2matrix_multiprocess(data.x, **arg)
     
     # Cast to numpy arrays
     new_data = copy.deepcopy(data)
@@ -202,8 +246,52 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, null_value
     return new_data
 
 
-#@numba.njit
-def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim, null_value=float(-999.0)):
+# ------------------------------------------------------------------------
+# Multiprocessing
+
+# Global
+parfunc = None
+
+def my_func(index):#, def_param=shared_array):
+    """
+    Helper function for jagged2matrix_multiprocessor()
+        
+    Args:
+        index: Pair of (index for the new array, event number)
+    """
+
+    global parfunc
+
+    arr          = parfunc['arr']
+    jagged_dim   = parfunc['jagged_dim']
+    scalar_vars  = parfunc['scalar_vars']
+    jagged_vars  = parfunc['jagged_vars']
+    jvname       = parfunc['jvname']
+    shared_array = parfunc['shared_array']
+
+    k  = len(scalar_vars)
+    i  = index[0]
+    ev = index[1]
+
+    ## Jagged variables looped over
+    for j in range(len(jagged_vars)):
+
+        x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
+        if len(x) > 0:
+            d_this = np.min([len(x), jagged_dim[j]])
+            shared_array[i, k:k+d_this] = x[0:d_this]
+        
+        # Increase block counter
+        k += jagged_dim[j]
+
+    # -----------------------------------
+    # For printing
+    if ev % 10000 == 0:
+        print(f'Event: {ev}')
+    # -----------------------------------
+
+
+def jagged2matrix_multiprocess(arr, scalar_vars, jagged_vars, jagged_dim, entry_start=None, entry_stop=None, null_value=float(-999.0)):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
@@ -215,16 +303,16 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim, null_value=float(-9
         null_value:    Default value for empty ([]) jagged entries
     
     Returns:
-        mat:     Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
+        Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
     """
 
     if len(jagged_vars) != len(jagged_dim):
-        raise Exception(__name__ + f'.jagged2matrix: len(jagged_vars) != len(jagged_maxdim) {len(jagged_vars)} != {len(jagged_dim)}')
+        raise Exception(__name__ + f'.jagged2matrix_multiprocess: len(jagged_vars) != len(jagged_maxdim) {len(jagged_vars)} != {len(jagged_dim)}')
 
-    N = len(arr)
+    entry_start, entry_stop, N = slice_range(start=entry_start, stop=entry_stop, N=len(arr))
     D = len(scalar_vars) + int(np.sum(np.array(jagged_dim)))
 
-    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}]')
+    print(__name__ + f'.jagged2matrix_multiprocess: Creating a matrix with dimensions [{N} x {D}] ({N*D*64/8/1024**3:0.3f} GB)')
 
     # Pre-processing of jagged vars
     jvname = []
@@ -232,37 +320,118 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim, null_value=float(-9
         # Awkward groups jagged variables, e.g. 'sv_x' to sv.x
         jvname.append(jagged_vars[j].split('_', 1)) # argument 1 takes the first '_' occurance
 
-    mat = np.full((N,D), null_value)
+    # Return matrix
+    shared_array_base = multiprocessing.Array(ctypes.c_double, N*D)
+    shared_array      = np.ctypeslib.as_array(shared_array_base.get_obj())
+    shared_array      = shared_array.reshape(N, D)
+    np.copyto(shared_array, np.full((N,D), null_value)) # Initialize values
+
+    ## 1. Pure scalar vars without multiprocessing (very fast)
+    for j in range(len(scalar_vars)):
+        shared_array[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]])[entry_start:entry_stop])
+
+    ## 2. Jagged variables with multiprocessing per event
+    global parfunc
+
+    parfunc = {}
+    parfunc['arr']          = arr
+    parfunc['jagged_dim']   = jagged_dim
+    parfunc['scalar_vars']  = scalar_vars
+    parfunc['jagged_vars']  = jagged_vars
+    parfunc['jvname']       = jvname
+    parfunc['shared_array'] = shared_array
+
+    # Multiprocess
+    num_cores = multiprocessing.cpu_count()
+    print(__name__ + f'.jagged2matrix_multiprocess: {num_cores} asynchronous parallel processes launched')
+    t = time.time()
     
+    pool = multiprocessing.Pool(processes=num_cores)
+    pool.map(my_func, zip(range(N), range(entry_start, entry_stop)))
+    #pool.map(partial(my_func, b=parfunc), range(N))
+
+    #from joblib import Parallel, delayed
+    #from tqdm_joblib import tqdm_joblib
+
+    #with tqdm_joblib(desc="My calculation", total=10) as progress_bar:
+    #Parallel(n_jobs=num_cores)(delayed(my_func)(i) for i in range(N))
+
+    elapsed = time.time() - t
+    print(__name__ + f'jagged2matrix_multiprocess: Processing took {elapsed:0.1f} sec')
+    print(shared_array)
+
+    return shared_array
+
+# ------------------------------------------------------------------------
+
+
+#@numba.njit
+def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim, entry_start=None, entry_stop=None, null_value=float(-999.0)):
+    """
+    Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
+    
+    Args:
+        arr:           Awkward array type input for N events
+        scalar_vars:   Scalar variables to pick (list of strings)
+        jagged_vars:   Jagged variables to pick (list of strings)
+        jagged_dim:    Maximum dimension per jagged variable (integer array)
+        null_value:    Default value for empty ([]) jagged entries
+    
+    Returns:
+        Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])
+    """
+
+    if len(jagged_vars) != len(jagged_dim):
+        raise Exception(__name__ + f'.jagged2matrix: len(jagged_vars) != len(jagged_maxdim) {len(jagged_vars)} != {len(jagged_dim)}')
+
+    entry_start, entry_stop, N = slice_range(start=entry_start, stop=entry_stop, N=len(arr))
+    D = len(scalar_vars) + int(np.sum(np.array(jagged_dim)))
+    
+    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}] ({N*D*64/8/1024**3:0.3f} GB)')
+
+    # Pre-processing of jagged vars
+    jvname = []
+    for j in range(len(jagged_vars)):
+        # Awkward groups jagged variables, e.g. 'sv_x' to sv.x
+        jvname.append(jagged_vars[j].split('_', 1)) # argument 1 takes the first '_' occurance
+
+    # Return matrix
+    shared_array = np.full((N,D), null_value)
+
     ## Pure scalar vars
     for j in range(len(scalar_vars)):
-        mat[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]]))
+        shared_array[:,j] = ak.to_numpy(ak.ravel(arr[scalar_vars[j]])[entry_start:entry_stop])
+    
+    t = time.time()
     
     # Loop over events
-    for ev in tqdm(range(N)):
+    for index in tqdm(zip(range(N), range(entry_start, entry_stop))):
         
-        k = len(scalar_vars)
+        k  = len(scalar_vars)
+        i  = index[0]
+        ev = index[1]
 
         ## Jagged vars
         for j in range(len(jagged_vars)):
-            
-            maxdim = jagged_dim[j]
 
             x  = ak.to_numpy(arr[ev][jvname[j][0]][jvname[j][1]])
             if len(x) > 0:
-                d_this = np.min([len(x), maxdim])
-                mat[ev, k:k+d_this] = x[0:d_this]
+                d_this = np.min([len(x), jagged_dim[j]])
+                shared_array[i, k:k+d_this] = x[0:d_this]
             
             # Increase block counter
-            k += maxdim
+            k += jagged_dim[j]
 
-    return mat
+    elapsed = time.time() - t
+    print(__name__ + f'jagged2matrix: Processing took {elapsed:0.1f} sec')
+    print(shared_array)
+
+    return shared_array
 
 
 def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
     """
     Args:
-        
         X          : input data (samples x dimensions) with jagged structure
         ids        : all variable names
         xyz        : array of (x,y,z) channel triplet strings such as [['image_clu_eta', 'image_clu_phi', 'image_clu_e']]

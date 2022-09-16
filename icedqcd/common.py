@@ -187,24 +187,24 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
-
+    
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
     node_features = {'muon': muon_vars, 'jet': jet_vars, 'sv': sv_vars}
     
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
         features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])
-
+    
     # -------------------------------------------------------------------------
     ## Tensor representation
     data_tensor = None
-
+    
     # -------------------------------------------------------------------------
     ## Turn jagged data to a "long-vector" zero-padded matrix representation
-
+    
     data = aux.jagged_ak_to_numpy(data=data, scalar_vars=scalar_vars,
                        jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
                        null_value=args['imputation_param']['fill_value'])
-
+    
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
