@@ -1,12 +1,12 @@
 Introduction
 =======================
 
-The library structure is the following.
+The library structure is as follows:
 
 .. contents::
     :local:
 
-Folder structure
+Folders
 -----------------------
 
 .. code-block:: none
@@ -16,12 +16,13 @@ Folder structure
 	-configs      Input configuration
 	-docs         Documentation
 	-figs         Output figures
-	-icebrk       B/R(K) functions
-	-icedqcd      DQCD functions
+	-icebrk       B/R(K) analysis functions
+	-icedqcd      DQCD analysis functions
 	-icefit       Fitting and statistics functions
 	-icehgcal     HGCAL functions
+	-icehnl       HNL analysis functions
 	-iceid        Electron ID functions
-	-icenet       Deep learning classes & functions
+	-icenet       Core deep learning functions & I/O
 	-iceplot      Plotting tools
 	-icetrg       HLT trigger functions
 	-tests        Test and steering scripts
@@ -29,13 +30,13 @@ Folder structure
 	-dev          Development code
 
 
-Algorithms/packages included
+Algorithms and models
 -----------------------------
 .. code-block:: none
 
 	1.  Factorized (dim-by-dim) likelihoods & ratios using histograms [numpy]
-	2.  Gradient boosted decision trees [xgboost]
-	3.  Multinomial Logistic Regression [pytorch]
+	2.  Gradient boosted decision trees with custom autograd loss [xgboost+pytorch]
+	3.  Multinomial Logistic Regression, Deep MLPs [pytorch]
 	4.  MAXOUT multilayer feedforward network [pytorch]
 	5.  Deep Normalizing Flow (BNAF) based likelihoods & ratios [pytorch]
 	6.  Permutation Equivariant Networks (DeepSets) [pytorch]
@@ -46,8 +47,8 @@ Algorithms/packages included
 	11. ...
 
 
-Training methodologies included
------------------------------
+Advanced training methodologies
+----------------------------------
 .. code-block:: none
 	
 	1. Model distillation

@@ -21,8 +21,12 @@ Under development!
    :caption: Package Reference
 
    modules/icebrk
+   modules/icedqcd
    modules/icefit
+   modules/icehgcal
+   modules/icehnl
    modules/iceid
+   modules/icemc
    modules/icenet
    modules/iceplot
    modules/icetrg

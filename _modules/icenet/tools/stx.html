@@ -32,14 +32,188 @@
           <div class="body" role="main">
             
   <h1>Source code for icenet.tools.stx</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Functions to evaluate (a boolean) expression tree for vector (component) data</span>
+<span></span><span class="c1"># Functions to evaluate (a boolean) expression tree and cuts for vector (component) data</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2021</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2022</span>
 
 <span class="kn">import</span> <span class="nn">pyparsing</span> <span class="k">as</span> <span class="nn">pp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+
+
+<div class="viewcode-block" id="filter_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.filter_constructor">[docs]</a><span class="k">def</span> <span class="nf">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter product main constructor</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        filters: yaml file input</span>
+<span class="sd">        X:       columnar input data</span>
+<span class="sd">        ids:     data column keys (list of strings)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        mask matrix, mask text labels (list), mask path labels (list)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">process_set</span><span class="p">(</span><span class="n">input_set</span><span class="p">):</span>
+
+        <span class="n">expand</span> <span class="o">=</span> <span class="n">input_set</span><span class="p">[</span><span class="s1">&#39;expand&#39;</span><span class="p">]</span>
+        <span class="n">cutset</span> <span class="o">=</span> <span class="n">input_set</span><span class="p">[</span><span class="s1">&#39;cutset&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span>   <span class="n">expand</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">set_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="o">=</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">veto</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">expand</span> <span class="o">==</span> <span class="s1">&#39;vetoset&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">set_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="o">=</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">veto</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">expand</span> <span class="o">==</span> <span class="s1">&#39;powerset&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">powerset_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="o">=</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: expand type should be &quot;set&quot; or &quot;powerset&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Loop over all filter definitions</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">all_mask_matrix</span>    <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">all_text</span><span class="p">,</span> <span class="n">all_path</span> <span class="o">=</span> <span class="p">[],[]</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span>    <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;filter[</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span>
+            <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">sets</span>     <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;sets&#39;</span><span class="p">]</span>      <span class="c1"># a list of set indices</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">]</span>  <span class="c1"># an operator to apply (between sets)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sets</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: Input &quot;sets&quot; should be a list&#39;</span><span class="p">)</span>
+
+        <span class="c1"># A single set</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mask_matrix</span><span class="p">,</span> <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span> <span class="o">=</span> <span class="n">process_set</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;set[</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Two sets combined e.g. with a cartesian product</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">masks</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="p">[],[],[]</span>
+
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sets</span><span class="p">)):</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">sets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">m</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">p</span> <span class="o">=</span> <span class="n">process_set</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;set[</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">])</span>
+                <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+            <span class="c1"># Apply operator</span>
+            <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;cartesian_and&#39;</span> <span class="ow">or</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;cartesian_or&#39;</span><span class="p">:</span>
+
+                <span class="k">if</span>   <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;cartesian_and&#39;</span><span class="p">:</span>
+                    <span class="n">logical_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span>
+                    <span class="n">name</span>     <span class="o">=</span> <span class="s1">&#39;AND&#39;</span>
+                <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;cartesian_or&#39;</span><span class="p">:</span>
+                    <span class="n">logical_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span>
+                    <span class="n">name</span>     <span class="o">=</span> <span class="s1">&#39;OR&#39;</span>
+
+                <span class="c1"># Loop over all cartesian combinations</span>
+                <span class="n">mask_set</span><span class="p">,</span> <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span> <span class="o">=</span> <span class="p">[],[],[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+
+                        <span class="n">mask_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">logical_func</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">,:],</span> <span class="n">masks</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">,:])</span> <span class="p">)</span>
+                        <span class="n">text_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">texts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">texts</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">)</span>
+                        <span class="n">path_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">paths</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">)</span>
+
+                <span class="c1"># Turn into matrix [num of masks x num of events]</span>
+                <span class="n">mask_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">)):</span>
+                    <span class="n">mask_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">mask_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: Operator should be &quot;cartesian_and&quot; or &quot;cartesian_or&quot; for two sets&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ** Add to lists of all filter products **</span>
+        <span class="k">if</span> <span class="n">all_mask_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_mask_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">all_mask_matrix</span><span class="p">,</span> <span class="n">mask_matrix</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_mask_matrix</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">mask_matrix</span><span class="p">)</span>
+        <span class="n">all_text</span> <span class="o">+=</span> <span class="n">text_set</span>
+        <span class="n">all_path</span> <span class="o">+=</span> <span class="n">path_set</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: Number of &quot;sets&quot; for filter[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] should be 1 or 2&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">all_mask_matrix</span><span class="p">,</span> <span class="n">all_text</span><span class="p">,</span> <span class="n">all_path</span></div>
+
+
+<div class="viewcode-block" id="set_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.set_constructor">[docs]</a><span class="k">def</span> <span class="nf">set_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">veto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Direct set filter constructor</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        mask matrix, mask text labels (list), mask path labels (list)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cutlist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">cutset</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;cut&#39;</span><span class="p">]</span>   <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cutset</span><span class="p">))]</span>
+    <span class="n">textlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">cutset</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;latex&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cutset</span><span class="p">))]</span>
+
+    <span class="c1"># Construct cuts and apply</span>
+    <span class="n">mask_set</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="o">=</span><span class="n">cutlist</span><span class="p">)</span>
+
+    <span class="c1"># Turn into matrix</span>
+    <span class="n">mask_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">textlist</span><span class="p">)</span>
+
+    <span class="c1"># Create description strings</span>
+    <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span> <span class="o">=</span> <span class="p">[],[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">)):</span>
+
+        <span class="k">if</span> <span class="n">veto</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># take passing (index = 1)</span>
+            <span class="n">mask_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">mask_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="n">textlist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># take non-passing (veto) (index = 0)</span>
+            <span class="n">mask_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="n">textlist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">text_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">path_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">mask_matrix</span><span class="p">,</span> <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span></div>
+
+
+<div class="viewcode-block" id="powerset_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_constructor">[docs]</a><span class="k">def</span> <span class="nf">powerset_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Powerset (all subsets of boolean combinations) filter constructor</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        mask matrix, mask text labels (list), mask path labels (list)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cutlist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">cutset</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;cut&#39;</span><span class="p">]</span>   <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cutset</span><span class="p">))]</span>
+    <span class="n">textlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">cutset</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;latex&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cutset</span><span class="p">))]</span>
+
+    <span class="c1"># Construct cuts and apply</span>
+    <span class="n">masks</span><span class="p">,</span> <span class="n">names</span>  <span class="o">=</span> <span class="n">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="o">=</span><span class="n">cutlist</span><span class="p">)</span>
+    <span class="n">print_parallel_cutflow</span><span class="p">(</span><span class="n">masks</span><span class="o">=</span><span class="n">masks</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+    
+    <span class="n">mask_powerset</span> <span class="o">=</span> <span class="n">powerset_cutmask</span><span class="p">(</span><span class="n">cut</span><span class="o">=</span><span class="n">masks</span><span class="p">)</span>
+    <span class="n">BMAT</span>          <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">generatebinary</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">textlist</span><span class="p">)</span>
+
+    <span class="c1"># Loop over all powerset 2**|cuts| masked selections</span>
+    <span class="c1"># Create a description latex strings and savepath strings</span>
+    <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span> <span class="o">=</span> <span class="p">[],[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">bit</span> <span class="o">=</span> <span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="c1"># 0 or 1</span>
+            <span class="n">string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">textlist</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">bit</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">string</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="n">text_powerset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">path_powerset</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">mask_powerset</span><span class="p">,</span> <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span></div>
+
 
 <div class="viewcode-block" id="construct_columnar_cuts"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_columnar_cuts">[docs]</a><span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -51,58 +225,105 @@
 <span class="sd">        cutlist : Selection cuts as strings, such as [&#39;ABS__eta &lt; 0.5&#39;, &#39;trgbit == True&#39;]</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        cuts, names</span>
+<span class="sd">        masks (boolean arrays) in a list, boolean expressions (list)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cuts</span>  <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">masks</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span>  <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">cutlist</span><span class="p">:</span>
 
         <span class="n">treelist</span> <span class="o">=</span> <span class="n">parse_boolean_exptree</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="n">treeobj</span>  <span class="o">=</span> <span class="n">construct_exptree</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
-        <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="n">mask</span>     <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
-        <span class="n">cuts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">masks</span><span class="p">,</span> <span class="n">names</span></div>
 
-    <span class="k">return</span> <span class="n">cuts</span><span class="p">,</span><span class="n">names</span></div>
+
+<div class="viewcode-block" id="powerset_cutmask"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_cutmask">[docs]</a><span class="k">def</span> <span class="nf">powerset_cutmask</span><span class="p">(</span><span class="n">cut</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate powerset 2**|cuts| masks</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cut : list of pre-calculated cuts, each list element is a boolean array</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        mask: (2**|cuts| x num_events) sized boolean mask matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+    <span class="n">num_events</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">num_cuts</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+    <span class="n">BMAT</span>       <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">generatebinary</span><span class="p">(</span><span class="n">num_cuts</span><span class="p">)</span>
+
+    <span class="n">power</span>      <span class="o">=</span> <span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">powerset</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">power</span><span class="p">,</span> <span class="n">num_events</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="c1"># Loop over each boolean</span>
+    <span class="c1"># [0,0,..0], [0,0,...,1] ... [1,1,..., 1] cut set combination</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">power</span><span class="p">):</span>
+    
+        <span class="c1"># Loop over each event</span>
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_events</span><span class="p">):</span>
+
+            <span class="c1"># Loop over each individual cut result</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">cut</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">evt</span><span class="p">]</span> <span class="o">==</span> <span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cuts</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            <span class="n">powerset</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">evt</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">powerset</span></div>
+
 
 <div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Apply cutflow</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        cut        : list of pre-calculated cuts, each list element is a boolean array</span>
-<span class="sd">        names      : list of names (description of each cut, for printout only)</span>
-<span class="sd">        xcorr_flow : compute full N-point correlations</span>
+<span class="sd">        cut             : list of pre-calculated cuts, each list element is a boolean array</span>
+<span class="sd">        names           : list of names (description of each cut, for printout only)</span>
+<span class="sd">        xcorr_flow      : compute full N-point correlations</span>
+<span class="sd">        return_powerset : return each of 2**|cuts| as a separate boolean mask vector</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        ind        : list of indices, 1 = pass, 0 = fail</span>
+<span class="sd">        mask            : boolean mask of size number of events (1 = pass, 0 = fail)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="c1"># Print out &quot;serial flow&quot;</span>
-    <span class="n">N</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">N</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="c1"># Apply cuts in series</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)):</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cut[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">&gt;35</span><span class="si">}</span><span class="s1">]: pass </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Print out &quot;serial flow&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cut[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">&gt;50</span><span class="si">}</span><span class="s1">]: pass </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> | total = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="c1"># Print out &quot;parallel flow&quot;</span>
     <span class="k">if</span> <span class="n">xcorr_flow</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
-        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-
-        <span class="n">intmat</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
-        <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">print_parallel_cutflow</span><span class="p">(</span><span class="n">masks</span><span class="o">=</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
     
-    <span class="k">return</span> <span class="n">ind</span></div>
+    <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="print_parallel_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_parallel_cutflow">[docs]</a><span class="k">def</span> <span class="nf">print_parallel_cutflow</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print boolean combination cutflow statistics</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cut   : list of pre-calculated cuts, each list element is a boolean array with size of num of events</span>
+<span class="sd">        names : list of names (description of each cut, for printout only)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.print_parallel_cutflow: Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="n">intmat</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">generatebinary</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="parse_boolean_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.parse_boolean_exptree">[docs]</a><span class="k">def</span> <span class="nf">parse_boolean_exptree</span><span class="p">(</span><span class="n">instring</span><span class="p">):</span>
@@ -157,10 +378,10 @@
 
     <span class="n">operator</span>        <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;&gt;=|&lt;=|!=|&gt;|&lt;|==&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="s2">&quot;operator&quot;</span><span class="p">)</span>
     <span class="n">number</span>          <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Regex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?&quot;</span><span class="p">)</span>
-    <span class="n">identifier</span>      <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Word</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">alphas</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="n">identifier</span>      <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Word</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">alphas</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
     <span class="n">comparison_term</span> <span class="o">=</span> <span class="n">identifier</span> <span class="o">|</span> <span class="n">number</span>
     <span class="n">condition</span>       <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">Group</span><span class="p">(</span><span class="n">comparison_term</span> <span class="o">+</span> <span class="n">operator</span> <span class="o">+</span> <span class="n">comparison_term</span><span class="p">)</span>
-
+    
     <span class="c1"># OR before AND precedence convention</span>
     <span class="c1"># makeLRLike guarantees recursive binary tree structure</span>
     <span class="n">expr</span>            <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">operatorPrecedence</span><span class="p">(</span><span class="n">condition</span><span class="p">,[</span>
@@ -324,10 +545,12 @@
             <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;INV&#39;</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">x</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;BOOL&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Unknown function </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eval_boolean_exptree: Operator f=</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">() chosen for &quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Operator f=</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">() chosen for &quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
     <span class="c1"># -------------------------------------------------</span>
 
     <span class="c1"># Middle binary operators g(x,y)</span>
@@ -369,7 +592,6 @@
     <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">output</span></div>
-
 
 <div class="viewcode-block" id="test_syntax_tree_parsing"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_parsing">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_parsing</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -438,6 +660,36 @@
             <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">))</span>
 
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_powerset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_powerset">[docs]</a><span class="k">def</span> <span class="nf">test_powerset</span><span class="p">():</span>
+
+    <span class="n">cut</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]),</span>
+           <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]),</span>
+           <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])]</span>
+
+    <span class="n">maskmatrix</span> <span class="o">=</span> <span class="n">powerset_cutmask</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+    <span class="c1"># 0 000</span>
+    <span class="c1"># 1 001</span>
+    <span class="c1"># 2 010</span>
+    <span class="c1"># 3 011</span>
+    <span class="c1"># 4 100</span>
+    <span class="c1"># 5 101</span>
+    <span class="c1"># 6 110</span>
+    <span class="c1"># 7 111</span>
+
+    <span class="n">reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+         <span class="p">[</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]])</span>
+
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">maskmatrix</span> <span class="o">==</span> <span class="n">reference</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -465,8 +717,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -507,7 +763,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

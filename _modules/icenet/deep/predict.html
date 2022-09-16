@@ -70,11 +70,30 @@
 
 <span class="kn">from</span> <span class="nn">icenet.algo</span>  <span class="kn">import</span> <span class="n">flr</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">bnaf</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dopt</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dbnf</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">mlgr</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">maxo</span>
 
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def pred_exp(args, param):</span>
+<span class="sd">    #</span>
+<span class="sd">    # This function assumes z-score normalization for the input variables</span>
+<span class="sd">    #</span>
+<span class="sd">    print(__name__ + f&#39;.pred_exp: Evaluate &lt;{param[&quot;label&quot;]}&gt; prod(exp) model ...&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    # Get feature name variables</span>
+<span class="sd">    def func_predict(x):</span>
+<span class="sd">        summ = 0.0</span>
+<span class="sd">        for i in range(len(param[&#39;variable&#39;])):</span>
+<span class="sd">            index = args[&#39;features&#39;].index(param[&#39;variable&#39;][i])</span>
+<span class="sd">            summ += -(x[...,index])**2</span>
+
+<span class="sd">        return 1 / (1 + np.exp(summ))</span>
+<span class="sd">    </span>
+<span class="sd">    return func_predict</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="pred_cut"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_cut">[docs]</a><span class="k">def</span> <span class="nf">pred_cut</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 
@@ -82,21 +101,22 @@
 
     <span class="c1"># Get feature name variables</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">])</span>
-
+    
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="c1"># Squeeze the values via tanh() from R -&gt; [-1,1]</span>
-        <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tanh&#39;</span><span class="p">:</span>
+        <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tanh&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">index</span><span class="p">])</span>
+        <span class="c1"># Transform via sigmoid from R -&gt; [0,1]</span>
+        <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sigmoid&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">index</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">index</span><span class="p">]</span>
     
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
-
 <div class="viewcode-block" id="pred_cutset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_cutset">[docs]</a><span class="k">def</span> <span class="nf">pred_cutset</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_cutset: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; fixed cutset model ...&#39;</span><span class="p">)</span>
-
     <span class="n">cutstring</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;cutstring&#39;</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cutstring: &quot;</span><span class="si">{</span><span class="n">cutstring</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
     
@@ -109,9 +129,8 @@
     
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
-
 <div class="viewcode-block" id="pred_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">pred_graph_xgb</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_graph_xgb: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
     
     <span class="n">graph_model</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> \
@@ -143,21 +162,18 @@
             <span class="n">x_tot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">dim1</span><span class="p">]</span> <span class="o">=</span> <span class="n">conv_x</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>  <span class="c1"># Convoluted features</span>
             <span class="n">x_tot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">dim1</span><span class="p">:]</span>  <span class="o">=</span> <span class="n">x_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">u</span>    <span class="c1"># Global features</span>
 
-        <span class="k">if</span> <span class="s1">&#39;multi&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;xgb&#39;</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;objective&#39;</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_tot</span><span class="p">))[:,</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_tot</span><span class="p">))</span> 
-
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x_tot</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[:,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">pred</span>
+    
     <span class="k">return</span> <span class="n">func_predict</span></div>
-
 
 <div class="viewcode-block" id="pred_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">pred_torch_graph</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_graph: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
-    
     <span class="n">model</span>         <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
 
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 
@@ -173,14 +189,12 @@
     
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
-
 <div class="viewcode-block" id="pred_torch_generic"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch_generic">[docs]</a><span class="k">def</span> <span class="nf">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_generic: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
-    
     <span class="n">model</span>         <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 
@@ -195,14 +209,12 @@
     
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
-
 <div class="viewcode-block" id="pred_torch_scalar"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_torch_scalar">[docs]</a><span class="k">def</span> <span class="nf">pred_torch_scalar</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_scalar: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
-    
     <span class="n">model</span>         <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dopt</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         
@@ -226,18 +238,39 @@
 <div class="viewcode-block" id="pred_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_xgb">[docs]</a><span class="k">def</span> <span class="nf">pred_xgb</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_xgb: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
-
     <span class="n">filename</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">],</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">)</span>
     <span class="n">xgb_model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;multi&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;objective&#39;</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))[:,</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))</span>   
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[:,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;signalclass&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">pred</span>
 
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
+<div class="viewcode-block" id="pred_xgb_scalar"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_xgb_scalar">[docs]</a><span class="k">def</span> <span class="nf">pred_xgb_scalar</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_xgb_scalar: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
+    <span class="n">filename</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">],</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">)</span>
+    <span class="n">xgb_model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pred</span>
+    
+    <span class="k">return</span> <span class="n">func_predict</span></div>
+
+<div class="viewcode-block" id="pred_xgb_logistic"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_xgb_logistic">[docs]</a><span class="k">def</span> <span class="nf">pred_xgb_logistic</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_xgb_logistic: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
+    <span class="n">filename</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">],</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">)</span>
+    <span class="n">xgb_model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Apply sigmoid function    </span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">x</span><span class="p">))))</span>
+    
+    <span class="k">return</span> <span class="n">func_predict</span></div>
 
 <div class="viewcode-block" id="pred_flow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_flow">[docs]</a><span class="k">def</span> <span class="nf">pred_flow</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">n_dims</span><span class="p">):</span>
 
@@ -261,11 +294,11 @@
 <div class="viewcode-block" id="pred_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.predict.pred_flr">[docs]</a><span class="k">def</span> <span class="nf">pred_flr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_flr: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
-
-    <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+    
+    <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_0_.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">flr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">)</span>
-        
+    
     <span class="k">return</span> <span class="n">func_predict</span></div>
 
 </pre></div>
@@ -295,8 +328,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -337,7 +374,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

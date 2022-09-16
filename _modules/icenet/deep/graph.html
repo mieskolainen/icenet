@@ -56,7 +56,7 @@
 <span class="kn">from</span> <span class="nn">icenet.deep.da</span> <span class="kn">import</span> <span class="n">GradientReversal</span>
 
 <span class="kn">from</span> <span class="nn">icenet.deep.pgraph</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">dopt</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">optimize</span>
 <span class="kn">from</span> <span class="nn">icenet.deep.dmlp</span> <span class="kn">import</span> <span class="n">MLP</span><span class="p">,</span> <span class="n">MLP_ALL_ACT</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
@@ -101,93 +101,6 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(nn=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span></div>
 
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd"># NNConv based graph net</span>
-<span class="sd">#</span>
-<span class="sd"># https://arxiv.org/abs/1704.01212</span>
-<span class="sd">#</span>
-<span class="sd">class NNNet(torch.nn.Module):</span>
-<span class="sd">    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=1, z_dim=196, task=&#39;graph&#39;, conv_aggr=&#39;max&#39;, global_pool=&#39;mean&#39;):</span>
-<span class="sd">        super(NNNet, self).__init__()</span>
-
-<span class="sd">        self.D = d_dim  # node feature dimension</span>
-<span class="sd">        self.E = e_dim  # edge feature dimension</span>
-<span class="sd">        self.G = u_dim  # global feature dimension</span>
-<span class="sd">        self.C = c_dim  # number output classes</span>
-<span class="sd">        </span>
-<span class="sd">        self.cdim = cdim  # latent dimension</span>
-
-<span class="sd">        self.task        = task</span>
-<span class="sd">        self.global_pool = global_pool</span>
-
-<span class="sd">        # Convolution layers</span>
-<span class="sd">        # nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]</span>
-<span class="sd">        self.conv1 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)</span>
-<span class="sd">        self.conv2 = NNConv(in_channels=D, out_channels=D, nn=MLP_ALL_ACT([E, D*D]), aggr=conv_aggr)</span>
-<span class="sd">        </span>
-<span class="sd">        # &quot;Fusion&quot; layer taking in conv layer outputs</span>
-<span class="sd">        self.lin1  = MLP([D+D, self.cdim])</span>
-
-<span class="sd">        # Set2Set pooling operation produces always output with 2 x input dimension</span>
-<span class="sd">        # =&gt; use linear layer to project down</span>
-<span class="sd">        if self.global_pool == &#39;s2s&#39;:</span>
-<span class="sd">            self.S2Spool = Set2Set(in_channels=self.cdim, processing_steps=3, num_layers=1)</span>
-<span class="sd">            self.S2Slin  = Linear(2*self.cdim, self.cdim)</span>
-
-<span class="sd">        if (self.G &gt; 0):</span>
-<span class="sd">            self.Z = self.cdim + self.G</span>
-<span class="sd">        else:</span>
-<span class="sd">            self.Z = self.cdim</span>
-<span class="sd">        </span>
-<span class="sd">        # Final layers concatenating everything</span>
-<span class="sd">        self.mlp1  = MLP([self.Z, self.Z, self.C])</span>
-
-
-<span class="sd">    def forward(self, data, conv_only=False):</span>
-
-<span class="sd">        if not hasattr(data,&#39;batch&#39;) or data.batch is None:</span>
-<span class="sd">            # Create virtual null batch if singlet graph input</span>
-<span class="sd">            setattr(data, &#39;batch&#39;, torch.tensor(np.zeros(data.x.shape[0]), dtype=torch.long))</span>
-
-<span class="sd">        x1 = self.conv1(data.x, data.edge_index, data.edge_attr)</span>
-<span class="sd">        x2 = self.conv2(x1,     data.edge_index, data.edge_attr)</span>
-<span class="sd">        x  = self.lin1(torch.cat([x1, x2], dim=1))</span>
-
-<span class="sd">        # ** Global pooling **</span>
-<span class="sd">        if self.task == &#39;graph&#39;:</span>
-<span class="sd">            if self.global_pool == &#39;s2s&#39;:</span>
-<span class="sd">                x = self.S2Spool(x, data.batch)</span>
-<span class="sd">                x = self.S2Slin(x)</span>
-<span class="sd">            elif self.global_pool == &#39;max&#39;:</span>
-<span class="sd">                x = global_max_pool(x, data.batch)</span>
-<span class="sd">            elif self.global_pool == &#39;add&#39;:</span>
-<span class="sd">                x = global_add_pool(x, data.batch)</span>
-<span class="sd">            elif self.global_pool == &#39;mean&#39;:</span>
-<span class="sd">                x = global_mean_pool(x, data.batch)</span>
-<span class="sd">            else:</span>
-<span class="sd">                raise Exception(__name__ + f&#39;: Unknown global_pool &lt;{self.global_pool}&gt;&#39;)</span>
-
-<span class="sd">        if conv_only: # Return convolution part</span>
-<span class="sd">            return x</span>
-
-<span class="sd">        # Global features concatenated</span>
-<span class="sd">        if self.G &gt; 0:</span>
-<span class="sd">            u = data.u.view(-1, self.G)</span>
-<span class="sd">            x = torch.cat([x, u], 1)</span>
-
-<span class="sd">        # Final layers</span>
-<span class="sd">        x = self.mlp1(x)</span>
-
-<span class="sd">        return x</span>
-<span class="sd">    </span>
-<span class="sd">    # Returns softmax probability</span>
-<span class="sd">    def softpredict(self,x) :</span>
-<span class="sd">        if self.training:</span>
-<span class="sd">            return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
-<span class="sd">        else:</span>
-<span class="sd">            return F.softmax(self.forward(x), dim=-1)</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="GNNGeneric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a><span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -301,27 +214,31 @@
         <span class="k">return</span> <span class="n">x</span></div>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_dim</span><span class="p">,</span> <span class="n">c_dim</span><span class="p">,</span> <span class="n">u_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">e_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_dim</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
-        <span class="n">conv_type</span>      <span class="o">=</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">,</span>
-        <span class="n">task</span>           <span class="o">=</span> <span class="s1">&#39;node&#39;</span><span class="p">,</span>
-        <span class="n">global_pool</span>    <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+        <span class="n">conv_type</span>        <span class="o">=</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">,</span>
+        <span class="n">task</span>             <span class="o">=</span> <span class="s1">&#39;node&#39;</span><span class="p">,</span>
+        <span class="n">global_pool</span>      <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span>
         
-        <span class="n">conv_MLP_act</span>   <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
-        <span class="n">conv_MLP_bn</span>    <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">conv_aggr</span>      <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span>
-        <span class="n">conv_knn</span>       <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">conv_MLP_act</span>     <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">conv_MLP_bn</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">conv_MLP_dropout</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">conv_aggr</span>        <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span>
+        <span class="n">conv_knn</span>         <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        
+        <span class="n">fusion_MLP_act</span>     <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">fusion_MLP_bn</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">fusion_MLP_dropout</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 
-        <span class="n">fusion_MLP_act</span> <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
-        <span class="n">fusion_MLP_bn</span>  <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">final_MLP_act</span>      <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">final_MLP_bn</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">final_MLP_dropout</span>  <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 
-        <span class="n">final_MLP_act</span>  <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
-        <span class="n">final_MLP_bn</span>   <span class="o">=</span>  <span class="kc">True</span><span class="p">,</span>
+        <span class="n">DA_active</span>        <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">DA_alpha</span>         <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">DA_MLP</span>           <span class="o">=</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
 
-        <span class="n">DA_active</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">DA_alpha</span>       <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">DA_MLP</span>         <span class="o">=</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
-        <span class="n">DA_MLP_act</span>     <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
-        <span class="n">DA_MLP_bn</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">DA_MLP_dropout</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">DA_MLP_act</span>       <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">DA_MLP_bn</span>        <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">DA_MLP_dropout</span>   <span class="o">=</span> <span class="mf">0.0</span>
         <span class="p">):</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">GNNGeneric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -349,34 +266,46 @@
 
         <span class="c1"># SuperEdgeConv,   https://arxiv.org/abs/xyz</span>
         <span class="k">if</span>   <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SuperEdgeConv&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SuperEdgeConv_</span>
 
         <span class="c1"># EdgeConv,        https://arxiv.org/abs/1801.07829</span>
         <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EdgeConv_</span>
 
         <span class="c1"># DynamicEdgeConv, https://arxiv.org/abs/1801.07829</span>
         <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;DynamicEdgeConv&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">32</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DynamicEdgeConv_</span>
 
         <span class="c1"># NNConv,          https://arxiv.org/abs/1704.01212</span>
         <span class="c1"># nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]</span>
         <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;NNConv&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NNConv_</span>
 
@@ -387,7 +316,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GATConv_</span>
 
@@ -396,7 +326,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SplineConv_</span>
 
@@ -404,7 +335,8 @@
         <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SAGEConv&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SAGEConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SAGEConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SAGEConv_</span>
 
@@ -414,7 +346,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SGConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SGConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SGConv_</span>
             
@@ -422,7 +355,8 @@
         <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;GINEConv&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">])),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">]))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
            
             <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GINEConv_</span>
 
@@ -466,20 +400,23 @@
 
         <span class="c1"># Node level or graph level inference</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">)</span>
 
         <span class="c1"># 2-point (node) probability computation function (edge level inference)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_asymmetric&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                    <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
-                    <span class="c1">#nn.Dropout(0.5),</span>
-                    <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
+                    <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">),</span>
+                    <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">),</span>
                     <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_symmetric&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-                    <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
-                    <span class="c1">#nn.Dropout(0.5),</span>
-                    <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">),</span>
+                    <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">),</span>
+                    <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">),</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.GraphNetGeneric: Unknown task = </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s1"> parameter&#39;</span><span class="p">)</span>
@@ -600,12 +537,10 @@
 
     <span class="c1"># Returns softmax probability</span>
 <div class="viewcode-block" id="GNNGeneric.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
-
-
+        <span class="c1">#if self.training:</span>
+        <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
+        <span class="c1">#else:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -633,8 +568,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -675,7 +614,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -1,7 +1,7 @@
 icetrg
 =====================
 
-High Level Trigger (HLT) classifiers.
+High Level Trigger (HLT) functions.
 
 icetrg.common
 ---------------------

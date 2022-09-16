@@ -1,11 +1,18 @@
 icedqcd
 =====================
 
-DQCD analysis classifiers.
+DQCD analysis functions.
 
 icedqcd.common
 ---------------------
 
 .. automodule:: icedqcd.common
+    :members:
+    :undoc-members:
+
+icedqcd.graphio
+---------------------
+
+.. automodule:: icedqcd.graphio
     :members:
     :undoc-members:

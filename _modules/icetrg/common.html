@@ -59,21 +59,25 @@
 <span class="kn">from</span> <span class="nn">configs.trg.filter</span> <span class="kn">import</span> <span class="o">*</span>
 
 
-<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Loads the root file with signal events from MC and background from DATA.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        root_path : paths to root files</span>
+<span class="sd">        root_path : paths to root files (list)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        X,Y       : input, output matrices</span>
 <span class="sd">        ids       : variable names</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list, we expect only the path here (no files)</span>
+    
     <span class="c1"># -----------------------------------------------</span>
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span>
         <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entry_stop</span><span class="p">,</span>
+        <span class="s2">&quot;maxevents&quot;</span><span class="p">:</span>   <span class="n">maxevents</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span>
     <span class="p">}</span>
 
@@ -100,6 +104,8 @@
     <span class="c1"># *** DATA (background) ***</span>
 
     <span class="n">rootfile</span>          <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+
+
     <span class="n">X_DATA</span><span class="p">,</span> <span class="n">VARS_DATA</span> <span class="o">=</span> <span class="n">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
     <span class="n">X_DATA</span> <span class="o">=</span> <span class="n">X_DATA</span><span class="p">[:,</span> <span class="p">[</span><span class="n">VARS_DATA</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">NEW_VARS</span><span class="p">]]</span>
@@ -126,17 +132,20 @@
     <span class="c1"># No weights</span>
     <span class="n">W</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">NEW_VARS</span></div>
+    <span class="c1"># TBD add info about cut stats etc</span>
+    <span class="n">INFO</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">NEW_VARS</span><span class="p">,</span> <span class="n">INFO</span></div>
 
 
-<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icetrg.html#icetrg.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="n">CUTFUNC</span>    <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]]</span>
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
-    
-    <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">ids</span>    <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="n">X</span><span class="p">,</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">events_to_jagged_numpy</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span>
+
+    <span class="c1"># Load files</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span>
+        <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">)</span>
 
     <span class="c1"># @@ Filtering done here @@</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
@@ -145,7 +154,6 @@
     
     <span class="n">X</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
-    
     
     <span class="c1"># @@ Observable cut selections done here @@</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
@@ -173,17 +181,20 @@
     
     <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
     
+    <span class="c1">### Pick active variables out</span>
+    <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]])</span>
+
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Pick kinematic variables out</span>
     <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
-
+    
     <span class="k">if</span> <span class="n">KINEMATIC_VARS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">k_ind</span><span class="p">,</span> <span class="n">k_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">KINEMATIC_VARS</span><span class="p">)</span>
+        <span class="n">k_ind</span><span class="p">,</span> <span class="n">k_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">KINEMATIC_VARS</span><span class="p">))</span>
         
         <span class="n">data_kin</span>      <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_kin</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">k_vars</span>
-
+    
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="n">data_deps</span>   <span class="o">=</span> <span class="kc">None</span>
 
@@ -193,14 +204,20 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="n">data_graph</span>  <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Mutual information regularization targets</span>
+    <span class="n">MI_ind</span><span class="p">,</span> <span class="n">MI_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MI_VARS&#39;</span><span class="p">])</span>
+    <span class="n">data_MI</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">MI_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### Finally pick active scalar variables out</span>
-    <span class="n">s_ind</span><span class="p">,</span> <span class="n">s_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar&#39;</span><span class="p">]])</span>
+    <span class="n">s_ind</span><span class="p">,</span> <span class="n">s_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">)</span>
     
     <span class="n">data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">s_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">s_vars</span>
     
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_MI&#39;</span><span class="p">:</span> <span class="n">data_MI</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
 </pre></div>
 
           </div>
@@ -228,8 +245,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a></li>
@@ -270,7 +291,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -34,7 +34,7 @@
   <h1>Source code for icenet.tools.plots</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Plotting functions</span>
 <span class="c1"># </span>
-<span class="c1"># Mikael Mieskolainen, 2021</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -43,6 +43,9 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
@@ -50,6 +53,7 @@
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">statstools</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">process</span>
+<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">cortools</span>
 
 
 <div class="viewcode-block" id="binengine"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binengine">[docs]</a><span class="k">def</span> <span class="nf">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
@@ -58,12 +62,14 @@
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        bindef:  binning definition</span>
-<span class="sd">                 Examples: 50                                                    (number of bins, integer)</span>
-<span class="sd">                           [1.0, 40.0, 50.0]                                     (list of explicit edges)</span>
-<span class="sd">                           {&#39;nbin&#39;: 30, &#39;q&#39;: [0.0, 0.95], &#39;space&#39;: &#39;linear&#39;}     (automatic with quantiles)</span>
-<span class="sd">                           {&#39;nbin&#39;: 30, &#39;minmax&#39;: [2.0, 50.0], &#39;space&#39;: &#39;log10&#39;} (automatic with boundaries)</span>
-
 <span class="sd">        x:       data input array</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        50                                                    (number of bins, integer)</span>
+<span class="sd">        [1.0, 40.0, 50.0]                                     (list of explicit edges)</span>
+<span class="sd">        {&#39;nbin&#39;: 30, &#39;q&#39;: [0.0, 0.95], &#39;space&#39;: &#39;linear&#39;}     (automatic with quantiles)</span>
+<span class="sd">        {&#39;nbin&#39;: 30, &#39;minmax&#39;: [2.0, 50.0], &#39;space&#39;: &#39;log10&#39;} (automatic with boundaries)</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        edges:   binning edges</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -167,8 +173,12 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">--log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># --------        </span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="plot_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_matrix</span><span class="p">(</span><span class="n">XY</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">grid_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -188,12 +198,12 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span><span class="p">,</span><span class="n">c</span></div>
 
 
-<div class="viewcode-block" id="plot_train_evolution"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_train_evolution">[docs]</a><span class="k">def</span> <span class="nf">plot_train_evolution</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_train_evolution_multi"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_train_evolution_multi">[docs]</a><span class="k">def</span> <span class="nf">plot_train_evolution_multi</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">0.85</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Training evolution plots.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        losses:   loss values</span>
-<span class="sd">        trn_aucs: training matrices</span>
+<span class="sd">        losses:   loss values in a dictionary</span>
+<span class="sd">        trn_aucs: training metrics</span>
 <span class="sd">        val_aucs: validation metrics</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
@@ -201,26 +211,30 @@
 <span class="sd">        ax:  figure axis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">))</span>
     
-    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">losses</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">losses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">continue</span> <span class="c1"># Do not plot sum if only one loss term</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">losses</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+    
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;k (epoch)&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">trn_aucs</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_aucs</span><span class="p">)</span>
-    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;train&#39;</span><span class="p">,</span><span class="s1">&#39;validation&#39;</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;train&#39;</span><span class="p">,</span><span class="s1">&#39;validation&#39;</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;k (epoch)&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;AUC&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     
-    <span class="n">ratio</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span><span class="o">*</span><span class="n">ratio</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span><span class="o">*</span><span class="n">aspect</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
-        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span><span class="o">*</span><span class="n">ratio</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span><span class="o">*</span><span class="n">aspect</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span><span class="n">ax</span></div>
 
@@ -291,7 +305,7 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">met</span></div>
 
 
-<div class="viewcode-block" id="binned_1D_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_1D_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="binned_1D_AUC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_1D_AUC">[docs]</a><span class="k">def</span> <span class="nf">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">VARS_kin</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="n">num_bootstrap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate AUC &amp; ROC per 1D-bin.</span>
 <span class="sd">    </span>
@@ -332,9 +346,9 @@
                     
                 <span class="c1"># Evaluate metric</span>
                 <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">num_bootstrap</span><span class="o">=</span><span class="n">num_bootstrap</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                    <span class="n">met</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">num_bootstrap</span><span class="o">=</span><span class="n">num_bootstrap</span><span class="p">)</span>
 
                 <span class="n">AUC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">auc</span>
                 <span class="n">METS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
@@ -348,7 +362,7 @@
     <span class="k">return</span> <span class="n">METS</span><span class="p">,</span> <span class="n">LABELS</span></div>
 
 
-<div class="viewcode-block" id="density_MVA_wclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_MVA_wclass">[docs]</a><span class="k">def</span> <span class="nf">density_MVA_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="density_MVA_wclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_MVA_wclass">[docs]</a><span class="k">def</span> <span class="nf">density_MVA_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate MVA output (1D) density per class.</span>
 <span class="sd">    </span>
@@ -362,23 +376,20 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Plot pdf saved directly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Number of classes</span>
-    <span class="n">C</span>         <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
     
     <span class="c1"># Make sure it is 1-dim array of length N (not N x num classes)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
 
     <span class="c1"># Over classes</span>
     <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
     
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
 
         <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
@@ -390,19 +401,105 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">classlegs</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper center&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;MVA output $f(</span><span class="se">\\</span><span class="s1">mathbf{{x}})$&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;density&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
     
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">scale</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">]:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">outputdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">savepath</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/MVA-output--</span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_MVA_wclass: Save: &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># --------        </span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
-    <span class="n">outputdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">savepath</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/MVA_output.pdf&#39;</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_MVA_wclass: Saving figure to &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="plot_correlation_comparison"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_correlation_comparison">[docs]</a><span class="k">def</span> <span class="nf">plot_correlation_comparison</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">xlim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot collected correlation metrics from density_COR_wclass()</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        corr_mstats: statistics dictionary</span>
+<span class="sd">        num_classes: number of classes</span>
+<span class="sd">        targetdir:   output directory</span>
+<span class="sd">        xlim:        plot limits dictionary per class</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        plots saved to a directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">## Find all variables</span>
+    <span class="n">all_var</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">corr_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">corr_mstats</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">class_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">corr_mstats</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">category</span><span class="p">][</span><span class="n">class_ind</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">all_var</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+    <span class="n">all_var</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_var</span><span class="p">)</span> <span class="c1"># Reduce to a set (values appear only once)</span>
 
 
-<div class="viewcode-block" id="density_COR_wclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR_wclass">[docs]</a><span class="k">def</span> <span class="nf">density_COR_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> \
-    <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
+    <span class="c1">## Over all variables</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">all_var</span><span class="p">:</span>
+
+        <span class="c1"># Over classes</span>
+        <span class="k">for</span> <span class="n">class_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+
+            <span class="c1"># Over different statistical metrics</span>
+            <span class="k">for</span> <span class="n">stats</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="s1">&#39;abs_pearson&#39;</span><span class="p">,</span> <span class="s1">&#39;disco&#39;</span><span class="p">,</span> <span class="s1">&#39;MI&#39;</span><span class="p">]:</span>
+
+                <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+                
+                <span class="c1"># Per model</span>
+                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">corr_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                    <span class="n">categories</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+                    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">))</span>
+                    <span class="n">lower</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">))</span>
+                    <span class="n">upper</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">))</span>
+
+                    <span class="c1">## Over each powerset category</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">)):</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">corr_mstats</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">categories</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">class_ind</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">{}:</span> <span class="c1"># We have some stats</span>
+                            <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+                            <span class="n">lower</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s1">_CI&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">upper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s1">_CI&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="c1"># Simple symmetric errors</span>
+                    <span class="c1">#lower = np.abs(values - np.array(lower))</span>
+                    <span class="c1">#upper = np.abs(values - np.array(upper))</span>
+                    <span class="c1">#asymmetric_error = np.array(list(zip(lower, upper))).T</span>
+
+                    <span class="c1"># Vertical line at zero</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)),</span> <span class="n">color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+                    <span class="c1">## Plot horizontal plot i.e. values +- (lower, upper) on x-axis, category on y-axis</span>
+                    <span class="n">legend_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">]&#39;</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)),</span> <span class="n">xerr</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">)</span>
+
+                    <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">class_ind</span><span class="si">}</span><span class="s1">$&#39;</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s1">$_</span><span class="se">{{</span><span class="s1">XY</span><span class="se">}}</span><span class="s1">$ (MVA score, </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">) (68CL)&#39;</span><span class="p">)</span>
+
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="n">stats</span><span class="p">][</span><span class="n">class_ind</span><span class="p">])</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+                
+                <span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>    
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/COR/&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;var-</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">--stats-</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s1">--class-</span><span class="si">{</span><span class="n">class_ind</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="density_COR_wclass"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR_wclass">[docs]</a><span class="k">def</span> <span class="nf">density_COR_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> \
+    <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
     
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate the 2D-density of the MVA algorithm output vs other variables per class.</span>
@@ -410,70 +507,126 @@
 <span class="sd">    Args:</span>
 <span class="sd">        y_pred      :  MVA algorithm output</span>
 <span class="sd">        y           :  Output (truth level target) data</span>
-<span class="sd">        X_RAW       :  Variables to be plotted</span>
-<span class="sd">        ids_RAW     :  Identifiers of the variables in X_RAW</span>
+<span class="sd">        X           :  Variables to be plotted</span>
+<span class="sd">        ids         :  Identifiers of the variables in X</span>
 <span class="sd">        label       :  Label of the MVA model (string)</span>
 <span class="sd">        weights     :  Sample weights</span>
 <span class="sd">        hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)</span>
 <span class="sd">        path        :  Save path</span>
 <span class="sd">        cmap        :  Color map</span>
-<span class="sd">    </span>
+<span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Plot pdf saved directly</span>
+<span class="sd">        correlation values in a dictionary (per variable, per class)</span>
+<span class="sd">        plots are saved directly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Number of classes</span>
-    <span class="n">C</span>         <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
 
     <span class="c1"># Make sure it is 1-dim array of length N (not N x num classes)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (weighted </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">])</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+        <span class="n">classlegs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$, $N=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">$ (no weights)&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+    
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">object_</span><span class="p">)</span>
 
     <span class="c1"># Over classes</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
         
+        <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR_wclass: No samples for class </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> -- continue&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
         <span class="c1"># Loop over variables</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ids_RAW</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
 
-            <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">yy</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span>
 
-            <span class="c1"># Plot 2D</span>
-            <span class="n">xx</span>   <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
-            <span class="n">yy</span>   <span class="o">=</span> <span class="n">X_RAW</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
+            <span class="c1"># Compute Pearson correlation coefficient</span>
+            <span class="n">cc</span><span class="p">,</span><span class="n">cc_CI</span><span class="p">,</span><span class="n">_</span>         <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
             
+            <span class="c1"># Compute Absolute Pearson correlation coefficient</span>
+            <span class="n">cc_abs</span><span class="p">,</span><span class="n">cc_abs_CI</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">return_abs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Distance correlation</span>
+            <span class="n">disco</span><span class="p">,</span><span class="n">disco_CI</span>     <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+            
+            <span class="c1"># Neural Mutual Information [cannot use, unreliable to compute for small samples]</span>
+            <span class="c1">#from icefit import mine</span>
+            <span class="c1">#MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)</span>
+            <span class="c1">#MI_CI = np.array([MI-MI_err, MI+MI_err])</span>
+
+            <span class="c1"># Histogram MI</span>
+            <span class="n">MI</span><span class="p">,</span><span class="n">MI_CI</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Save output</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;pearson&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">cc</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;pearson_CI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_CI</span>
+            
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;abs_pearson&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">cc_abs</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;abs_pearson_CI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_abs_CI</span>
+
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;disco&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">disco</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;disco_CI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disco_CI</span>
+            
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;MI&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">MI</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">var</span><span class="p">][</span><span class="s1">&#39;MI_CI&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">MI_CI</span>
+
             <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">hist_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">),</span> <span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">hist_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">yy</span><span class="p">)]</span>
-            <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
-            
-            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA output $f(</span><span class="se">\\</span><span class="s1">mathbf</span><span class="se">{{</span><span class="s1">x</span><span class="se">}}</span><span class="s1">)$&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | class = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
-            <span class="c1"># -----</span>
+            <span class="k">for</span> <span class="n">scale</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">]:</span> 
 
-            <span class="n">outputdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">savepath</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">_class_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR_wclass: Saving figure to &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+                <span class="n">fig</span><span class="p">,</span><span class="n">ax</span>    <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+                <span class="n">outputdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">savepath</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/var-</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">--class-</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">--</span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+                        <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+                        <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
+                    
+                    <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA output $f(</span><span class="se">\\</span><span class="s1">mathbf</span><span class="se">{{</span><span class="s1">x</span><span class="se">}}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">rho_value</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">rho_</span><span class="se">{{</span><span class="s1">XY</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">cc</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">-</span><span class="si">{</span><span class="n">cc</span><span class="o">-</span><span class="n">cc_CI</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">0.2f</span><span class="se">}}</span><span class="si">}</span><span class="s1">^</span><span class="se">{{</span><span class="s1">+</span><span class="si">{</span><span class="n">cc_CI</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">cc</span><span class="si">:</span><span class="s1">0.2f</span><span class="se">}}</span><span class="si">}</span><span class="s1">$&#39;</span>
+                    <span class="n">MI_value</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">I</span><span class="se">}}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">XY</span><span class="se">}}</span><span class="s1"> = (</span><span class="si">{</span><span class="n">MI_CI</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">MI_CI</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">)$&#39;</span>
+                    
+                    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | $</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$ | </span><span class="si">{</span><span class="n">rho_value</span><span class="si">}</span><span class="s1"> | </span><span class="si">{</span><span class="n">MI_value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+                    <span class="c1"># -----</span>
+
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR_wclass: Save: &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+                    
+                    <span class="c1"># -----                    </span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+                
+                <span class="k">except</span><span class="p">:</span> <span class="c1"># Matplotlib LogNorm() can be buggy</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR_wclass: Failed to produce plot </span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="density_COR"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR">[docs]</a><span class="k">def</span> <span class="nf">density_COR</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="density_COR"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR">[docs]</a><span class="k">def</span> <span class="nf">density_COR</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate the 2D-density of the MVA algorithm output vs other variables.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        y_pred      :  MVA algorithm output</span>
-<span class="sd">        X_RAW       :  Variables to be plotted</span>
-<span class="sd">        ids_RAW     :  Identifiers of the variables in X_RAW</span>
+<span class="sd">        X           :  Variables to be plotted</span>
+<span class="sd">        ids         :  Identifiers of the variables in X</span>
 <span class="sd">        label       :  Label of the MVA model (string)</span>
 <span class="sd">        weights     :  Sample weights</span>
 <span class="sd">        hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)</span>
@@ -487,32 +640,36 @@
     <span class="c1"># Make sure it is 1-dim array of length N (not N x num classes)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+    
     <span class="c1"># Loop over variables</span>
-    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ids_RAW</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
 
         <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
         <span class="c1"># Plot 2D</span>
         <span class="n">xx</span>   <span class="o">=</span> <span class="n">y_pred</span>
-        <span class="n">yy</span>   <span class="o">=</span> <span class="n">X_RAW</span><span class="p">[:,</span> <span class="n">ids_RAW</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
+        <span class="n">yy</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span>
         
         <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">hist_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">),</span> <span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">hist_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">yy</span><span class="p">)]</span>
         <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
         
         <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA output $f(</span><span class="se">\\</span><span class="s1">mathbf</span><span class="se">{{</span><span class="s1">x</span><span class="se">}}</span><span class="s1">)$&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
         
         <span class="c1"># -----</span>
 
         <span class="n">outputdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">savepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
+        <span class="n">savepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outputdir</span><span class="si">}</span><span class="s1">/var-</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR: Saving figure to &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.density_COR: Save: &quot;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
+        <span class="c1"># -----                    </span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
+        
 
 <div class="viewcode-block" id="annotate_heatmap"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.annotate_heatmap">[docs]</a><span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Add text annotations to a matrix heatmap plot</span>
@@ -564,55 +721,70 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="plotvars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvars">[docs]</a><span class="k">def</span> <span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="plotvars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvars">[docs]</a><span class="k">def</span> <span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span> <span class="n">exclude_vals</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Plot all variables.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plotvars: Creating plots ...&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">var</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">plotvar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">)</span></div>
+
+        <span class="c1"># Exclude special values</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exclude_vals</span><span class="p">)):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">exclude_vals</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+
+        <span class="n">plotvar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">var</span><span class="o">=</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="plotvar"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvar">[docs]</a><span class="k">def</span> <span class="nf">plotvar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Plot a single variable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">99</span><span class="p">),</span> <span class="n">nbins</span><span class="p">)</span>
-    <span class="n">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">title</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="n">var</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+    <span class="n">bins</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">),</span> <span class="n">nbins</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">title</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="n">var</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/var-</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="c1"># -----                    </span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="plot_reweight_result"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_reweight_result">[docs]</a><span class="k">def</span> <span class="nf">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_reweight_result"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_reweight_result">[docs]</a><span class="k">def</span> <span class="nf">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">rwidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Here plot pure event counts</span>
 <span class="sd">        so we see that also integrated class fractions are equalized (or not)!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Plot re-weighting results</span>
     <span class="n">fig</span><span class="p">,(</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
 
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">legends</span>     <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># loop over [linear, log]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">ax1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ax2</span>
 
-        <span class="c1"># Loop over classes</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">:</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+        <span class="c1"># [raw histograms]  Loop over classes</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span> <span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">bins</span><span class="p">,</span> <span class="n">density</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">)</span>
+                <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">rwidth</span><span class="o">=</span><span class="n">rwidth</span><span class="p">)</span>
+            <span class="n">legends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Loop over classes</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">:</span>
+        <span class="c1"># [weights applied] Loop over classes</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span> <span class="p">:</span>
             <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">bins</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">,</span> <span class="n">density</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">)</span>
-        
+                <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="n">linewidth</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">rwidth</span><span class="o">=</span><span class="n">rwidth</span><span class="p">)</span>
+            <span class="n">legends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">mathcal</span><span class="se">{{</span><span class="s1">C</span><span class="se">}}</span><span class="s1"> = </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">$ (weighted)&#39;</span><span class="p">)</span>
+
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;weighted counts&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
-
+    
     <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;class 0&#39;</span><span class="p">,</span><span class="s1">&#39;class 1&#39;</span><span class="p">,</span> <span class="s1">&#39;class 0 (w)&#39;</span><span class="p">,</span><span class="s1">&#39;class 1 (w)&#39;</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">legends</span><span class="p">)</span>
     <span class="n">ax2</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-
+    
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">)</span></div>
 
 
@@ -624,7 +796,7 @@
 <span class="sd">        X:                Data matrix (N x D)</span>
 <span class="sd">        ids:              Variable names (list of length D)</span>
 <span class="sd">        classes:          Class label ids (list of length N)</span>
-<span class="sd">        round_threshold:  Correlation matrix |C_ij| &lt; threshold to set matrix elements to zero</span>
+<span class="sd">        round_threshold:  Correlation matrix |C| &lt; threshold to set matrix elements to zero</span>
 <span class="sd">        targetdir:        Output plot directory</span>
 <span class="sd">        colorbar:         Colorbar on the plot</span>
 <span class="sd">    </span>
@@ -667,14 +839,46 @@
             <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">targetdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fname</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_correlation_matrix.pdf&#39;</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_correlations: Saving figure to &quot;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">-correlation-matrix.pdf&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_correlations: Save: &quot;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">figs</span><span class="p">,</span> <span class="n">axs</span></div>
 
 
-<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="draw_error_band"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.draw_error_band">[docs]</a><span class="k">def</span> <span class="nf">draw_error_band</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate normals via centered finite differences (except the first point</span>
+<span class="sd">    which uses a forward difference and the last point which uses a backward</span>
+<span class="sd">    difference).</span>
+
+<span class="sd">    https://matplotlib.org/stable/gallery/lines_bars_and_markers/curve_error_band.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">PathPatch</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]]])</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]]])</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">/</span> <span class="n">l</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span> <span class="o">/</span> <span class="n">l</span>
+
+    <span class="c1"># End points of errors</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">x_err</span>
+    <span class="n">yp</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">y_err</span>
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">x_err</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">y_err</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">block</span><span class="p">([[</span><span class="n">xp</span><span class="p">,</span> <span class="n">xn</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
+                         <span class="p">[</span><span class="n">yp</span><span class="p">,</span> <span class="n">yn</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">codes</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span> <span class="n">Path</span><span class="o">.</span><span class="n">LINETO</span><span class="p">)</span>
+    <span class="n">codes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">codes</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">xp</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">MOVETO</span>
+    <span class="n">path</span>     <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">codes</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">PathPatch</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</span>
 
@@ -685,6 +889,7 @@
 <span class="sd">        filename:</span>
 <span class="sd">        legend_fontsize:</span>
 <span class="sd">        xmin:</span>
+<span class="sd">        alpha:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># linear &amp; log</span>
@@ -695,15 +900,29 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)):</span>
 
-            <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
-            <span class="n">marker</span>    <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
-
+            <span class="k">if</span>         <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+            <span class="k">elif</span> <span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span>
+            <span class="n">marker</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+            
             <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.ROC_plot: metrics[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">) is None, continue without&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="n">fpr</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
-            <span class="n">tpr</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
+            <span class="n">fpr</span>    <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
+            <span class="n">tpr</span>    <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
+
+            <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># Percentile bootstrap based uncertainties</span>
+                <span class="n">tpr_lo</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">tpr_hi</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+                
+                <span class="n">fpr_lo</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">fpr_hi</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
 
             <span class="c1"># Autodetect a ROC point triangle (instead of a curve)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fpr</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
@@ -713,19 +932,46 @@
                 <span class="n">linestyle</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
                 <span class="n">marker</span>    <span class="o">=</span> <span class="s1">&#39;o&#39;</span>
             
-            <span class="c1"># A ROC-curve</span>
-            <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-                <span class="n">fpr</span> <span class="o">=</span> <span class="n">fpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># Remove always the first element for log-plot reasons</span>
-                <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-            
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">: AUC = </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # ROC-curve</span>
+<span class="sd">            elif not (isinstance(fpr, int) or isinstance(fpr, float)):</span>
+<span class="sd">                fpr    = fpr[1:] # Remove always the first element for log-plot reasons</span>
+<span class="sd">                tpr    = tpr[1:]</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive (background) rate $</span><span class="se">\\</span><span class="s1">alpha$&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True Positive (signal) rate $1-</span><span class="se">\\</span><span class="s1">beta$&#39;</span><span class="p">)</span>
+<span class="sd">                if metrics[i].tpr_bootstrap is not None:</span>
+
+<span class="sd">                    tpr_lo = tpr_lo[1:]</span>
+<span class="sd">                    tpr_hi = tpr_hi[1:]</span>
+
+<span class="sd">                    fpr_lo = fpr_lo[1:]</span>
+<span class="sd">                    fpr_hi = fpr_hi[1:]</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c1">## Plot it</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">drawstyle</span><span class="o">=</span><span class="s1">&#39;steps-mid&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">: AUC = </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Uncertainty band</span>
+            <span class="k">if</span> <span class="n">marker</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                
+                <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span>  <span class="n">tpr_lo</span><span class="p">,</span> <span class="n">tpr_hi</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="c1"># vertical</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">fpr_lo</span><span class="p">,</span> <span class="n">fpr_hi</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="c1"># horizontal</span>
+
+                <span class="c1"># draw_error_band(ax=ax, x=fpr, y=tpr, \</span>
+                <span class="c1">#   x_err=np.std(metrics[i].fpr_bootstrap, axis=0)[1:], \</span>
+                <span class="c1">#   y_err=np.std(metrics[i].tpr_bootstrap, axis=0)[1:], \</span>
+                <span class="c1">#   facecolor=f&#39;C{i}&#39;, edgecolor=&quot;none&quot;, alpha=0.2)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive Rate $</span><span class="se">\\</span><span class="s1">alpha$ (background efficiency)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True Positive Rate $1-</span><span class="se">\\</span><span class="s1">beta$ (signal efficiency)&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Linear-Linear</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
+
             <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">locator_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
@@ -734,7 +980,10 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># x-axis logarithmic</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># Log-Linear</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fontsize</span><span class="p">)</span>
+
             <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">locator_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">xmin</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
@@ -742,7 +991,7 @@
 
             <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;--log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
@@ -817,9 +1066,12 @@
                 <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
                 <span class="c1">#ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;--log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="c1"># --------        </span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="plot_contour_grid"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_contour_grid">[docs]</a><span class="k">def</span> <span class="nf">plot_contour_grid</span><span class="p">(</span><span class="n">pred_func</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">reso</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
@@ -838,7 +1090,7 @@
 <span class="sd">        npoints:    number of points to draw</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_contour_grid: Evaluating ...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_contour_grid: Evaluating, X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">)</span>
     <span class="n">MAXP</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">D</span>    <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">pad</span>  <span class="o">=</span> <span class="mf">0.5</span>
@@ -858,14 +1110,14 @@
             <span class="c1"># -------------------------------------</span>
             <span class="c1">## Evaluate function values</span>
 
-            <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">reso</span><span class="o">*</span><span class="n">reso</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
-            <span class="n">Z</span><span class="p">[:,</span> <span class="n">dim1</span><span class="p">]</span> <span class="o">=</span> <span class="n">PX</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-            <span class="n">Z</span><span class="p">[:,</span> <span class="n">dim2</span><span class="p">]</span> <span class="o">=</span> <span class="n">PY</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">XX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">reso</span><span class="o">*</span><span class="n">reso</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+            <span class="n">XX</span><span class="p">[:,</span> <span class="n">dim1</span><span class="p">]</span> <span class="o">=</span> <span class="n">PX</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">XX</span><span class="p">[:,</span> <span class="n">dim2</span><span class="p">]</span> <span class="o">=</span> <span class="n">PY</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
             <span class="k">if</span>   <span class="n">transform</span> <span class="o">==</span> <span class="s1">&#39;torch&#39;</span><span class="p">:</span>
-                <span class="n">Z</span> <span class="o">=</span> <span class="n">pred_func</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">pred_func</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">XX</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">))</span>
             <span class="k">elif</span> <span class="n">transform</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
-                <span class="n">Z</span> <span class="o">=</span> <span class="n">pred_func</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">pred_func</span><span class="p">(</span><span class="n">XX</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_decision_contour: Unknown matrix type = </span><span class="si">{</span><span class="n">matrix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -886,11 +1138,15 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;x[</span><span class="si">{</span><span class="n">dim2</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">dim2</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
             
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dim1</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">dim2</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dim1</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">dim2</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># --------        </span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="plot_xgb_importance"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_xgb_importance">[docs]</a><span class="k">def</span> <span class="nf">plot_xgb_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">tick_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_xgb_importance"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_xgb_importance">[docs]</a><span class="k">def</span> <span class="nf">plot_xgb_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tick_label</span><span class="p">,</span> <span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot XGBoost model feature importance</span>
 <span class="sd">    </span>
@@ -905,18 +1161,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fscores</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_score</span><span class="p">(</span><span class="n">importance_type</span><span class="o">=</span><span class="n">importance_type</span><span class="p">)</span>
     
-    <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
-    <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
-    
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span> <span class="c1"># try, except needed because xgb does Not return it for all of them</span>
+    <span class="n">dim</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tick_label</span><span class="p">)</span> 
+    <span class="n">xx</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+    <span class="n">yy</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Try, Except needed because xgb does Not return (always) for all of them</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fscores</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;f</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+            <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fscores</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;f</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="c1"># Feature name &#39;f{i}&#39;&#39;</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tick_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">yy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">) [</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
     
-    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">1.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dim</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dim</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">tick_label</span><span class="o">=</span><span class="n">tick_label</span><span class="p">)</span>
+    <span class="c1"># Sort them</span>
+    <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+        <span class="n">s_ind</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">yy</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">yy</span>     <span class="o">=</span> <span class="n">yy</span><span class="p">[</span><span class="n">s_ind</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s_ind</span><span class="p">]</span>
+
+    <span class="c1"># Plot</span>
+    <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dim</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dim</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">tick_label</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F-score (</span><span class="si">{</span><span class="n">importance_type</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 </pre></div>
@@ -946,8 +1215,12 @@
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a></li>
@@ -988,7 +1261,7 @@
       &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
