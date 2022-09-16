@@ -135,7 +135,7 @@ HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10
   isMC: true
   maxevents_scale: 1.0
 
-HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1
+HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1
   path: 'bparkProductionV2/HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
   xs: 1.0 # [pb]
   model_param:

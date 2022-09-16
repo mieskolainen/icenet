@@ -50,6 +50,19 @@ def optimize_selection(info, args):
     Work in progress
     """
 
+    # --------------------------------------------------------
+    ## Main parameters
+
+    # Integrated luminosity
+    L_int        = 30*(1E3) # inverse femtobarn to [pico(barn)^{-1}]
+    
+    # Background efficiency target
+    B_target_eff = 1e-5
+    # --------------------------------------------------------
+
+    print(f'L = {L_int} pb^{{-1}}')
+
+
     # Prepare output folders
     targetfile = f'{args["plotdir"]}/eval/eval_results.pkl'
     resdict = pickle.load(open(targetfile, 'rb'))
@@ -63,22 +76,21 @@ def optimize_selection(info, args):
 
 
     # MVA-model labels
-    print(resdict['roc_labels']['inclusive'])
+    MVA_model_names = resdict['roc_labels']['inclusive']
 
-
-    # Background efficiency target
-    B_target_eff = 1e-4
-
-    L_int = 30*(1E3) # [pico(barn)^{-1}]
-
-    print(f'L = {L_int} pb^{{-1}}')
 
     # --------------------------------------------------------
     # Total background estimate
-    B_tot = 0
-    c     = 0
+    B_tot        = 0
+    c            = 0
     
     # Loop over sub-process classes
+    B_xs_tot     = 0
+    B_acc_eff_xs = 0
+    
+    
+    print('Process && xs [pb] && accXeff && <N> \\\\')
+    
     for name in info[f"class_{c}"].keys():
 
       proc    = info[f"class_{c}"][name]
@@ -86,20 +98,28 @@ def optimize_selection(info, args):
       xs      = proc['yaml']["xs"]
       eff_acc = proc['eff_acc']
       N       = eff_acc * xs * L_int
-      B_tot  += N
 
-      print(f'{name} && {xs:0.1f} pb && {eff_acc:0.4f} && {N:0.3E} \\\\')
+      B_tot        += N
+      B_acc_eff_xs += eff_acc * xs
+      B_xs_tot     += xs
+
+      print(f'{name} && {xs:0.1f} && {eff_acc:0.4f} && {N:0.3E} \\\\')
+
+    B_acc_eff = B_acc_eff_xs / B_xs_tot
 
     # --------------------------------------------------------------------
     # Signal estimate per model point
 
     for MVA_model_index in [0,1]:
 
-      c       = 1
-      B       = np.zeros(len(info[f"class_{c}"].keys()))
-      S       = np.zeros(len(B))
-      MVA_eff = np.zeros((len(B), 2))
-      names   = len(S) * [None]
+      c = 1 # Class
+      S = np.zeros(len(info[f"class_{c}"].keys()))
+      B = np.zeros(len(S))
+
+      S_acc_eff = np.zeros(len(S))
+
+      MVA_eff   = np.zeros((len(B), 2))
+      names     = len(S) * [None]
 
       # Loop over different signal model points
       i = 0
@@ -112,8 +132,8 @@ def optimize_selection(info, args):
 
         #print(name)
 
-        names[i]    = name
-        proc        = info[f"class_{c}"][name]
+        names[i]  = name
+        proc      = info[f"class_{c}"][name]
         #print(resdict['roc_mstats'].keys())
 
         # ----------------
@@ -132,15 +152,16 @@ def optimize_selection(info, args):
         x,y     = roc_obj.fpr,roc_obj.tpr
         y_err   = np.zeros(len(y))
         for k in range(len(y_err)):
-          y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k]) + 1e-2
+          y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k]) + y[k]*1e-3 + 1e-12
 
         # -----------------
         # Interpolate ROC-curve
-        """
-        func        = interpolate.interp1d(x,y,'linear')
+        
+        func    = interpolate.interp1d(x, y, 'linear')
+
+        ## Pick ROC-working point from the interpolation
         xval = np.logspace(-8, 0, 1000)
-        yhat        = func(B_target_eff)
-        """
+        yhat    = func(B_target_eff)
 
         # -----------------
         # Fit the ROC-curve
@@ -158,8 +179,9 @@ def optimize_selection(info, args):
         fit_label += ')$'
         # -----------------
 
-        xval = np.logspace(-8, 0, 1000)
-        yhat = func_binormal(B_target_eff, *popt)
+        ## Pick ROC-working point from the analytic fit
+        #xval = np.logspace(-8, 0, 1000)
+        #yhat = func_binormal(B_target_eff, *popt)
 
         # -----------------
         # Construct efficiency for background, signal
@@ -173,10 +195,11 @@ def optimize_selection(info, args):
         # ----------------
         xs           = proc['yaml']["xs"]
         eff_acc      = proc['eff_acc']
+
+        S_acc_eff[i] = eff_acc
         # ----------------
 
         S[i]         = eff_acc * xs * L_int * MVA_eff[i,1]
-
 
         # ------------------------------------
         fig,ax = plt.subplots(1,2)
@@ -232,13 +255,16 @@ def optimize_selection(info, args):
       # ------------------
       # Discovery significance
 
-      print('signal model point && MVA $B_{\\epsilon}$ && MVA $S_{\\epsilon}$ && $S/\\sqrt{B}$ \\\\')
+      print(f'MVA model: {MVA_model_names[MVA_model_index]} \\\\')
+
+      print('signal model point && effxAcc $B$ && eff(MVA) $B$ && effxAcc $S$ && eff(MVA) $S$ && $B$ && $S$ && $S/\\sqrt{B}$ \\\\')
       for i in range(len(S)):
 
+        # Gaussian limit discovery significance
         ds = S[i] / np.sqrt(B[i])
 
-        #print(f'MVA_eff = {MVA_eff} [background, signal]')
-        print(f'{names[i]} && {MVA_eff[i,0]:0.3E} && {MVA_eff[i,1]:0.3E} && {S[i]:0.1f}/sqrt[{B[i]:0.1f}] = {ds:0.1f} \\\\')
+        line = f'{names[i]} && {B_acc_eff:0.3E} && {MVA_eff[i,0]:0.3E} && {S_acc_eff[i]:0.3E} && {MVA_eff[i,1]:0.3E} && {B[i]:0.1f} && {S[i]:0.1f} && {ds:0.1f} \\\\'
+        print(line)
 
       # print(roc_obj.thresholds)
 

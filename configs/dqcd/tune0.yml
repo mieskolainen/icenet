@@ -127,12 +127,12 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     
     - xgb0
-
+    
     #- gnet1
     - gnet2
     #- gnet3
     
-    - dmlp
+    #- dmlp
     #- lgr0
     
     #- deps

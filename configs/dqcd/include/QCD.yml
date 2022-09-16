@@ -1,6 +1,6 @@
 # N.B. Use unique names for each sub-sample!
 
-QCD_Pt-15to20: &QCD_Pt-15to20
+QCD_Pt-15to20_MuEnrichedPt5: &QCD_Pt-15to20_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 2799000.0 # [pb]
   model_param:
@@ -12,7 +12,7 @@ QCD_Pt-15to20: &QCD_Pt-15to20
   isMC: true
   maxevents_scale: 1.0
 
-QCD_Pt-20to30: &QCD_Pt-20to30 
+QCD_Pt-20to30_MuEnrichedPt5: &QCD_Pt-20to30_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 2526000.0 # [pb]
   model_param:
@@ -22,9 +22,9 @@ QCD_Pt-20to30: &QCD_Pt-20to30
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.95
+  maxevents_scale: 1.0
 
-QCD_Pt-30to50: &QCD_Pt-30to50
+QCD_Pt-30to50_MuEnrichedPt5: &QCD_Pt-30to50_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 1362000.0 # [pb]
   model_param:
@@ -34,9 +34,9 @@ QCD_Pt-30to50: &QCD_Pt-30to50
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.698
+  maxevents_scale: 1.0
 
-QCD_Pt-50to80: &QCD_Pt-50to80
+QCD_Pt-50to80_MuEnrichedPt5: &QCD_Pt-50to80_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 376600.0 # [pb]
   model_param:
@@ -46,9 +46,9 @@ QCD_Pt-50to80: &QCD_Pt-50to80
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.367
+  maxevents_scale: 1.0
 
-QCD_Pt-80to120: &QCD_Pt-80to120
+QCD_Pt-80to120_MuEnrichedPt5: &QCD_Pt-80to120_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 88930.0 # [pb]
   model_param:
@@ -58,9 +58,9 @@ QCD_Pt-80to120: &QCD_Pt-80to120
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.178
+  maxevents_scale: 1.0
 
-QCD_Pt-120to170: &QCD_Pt-120to170
+QCD_Pt-120to170_MuEnrichedPt5: &QCD_Pt-120to170_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 21230.0 # [pb]
   model_param:
@@ -70,9 +70,9 @@ QCD_Pt-120to170: &QCD_Pt-120to170
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.087
+  maxevents_scale: 1.0
 
-QCD_Pt-170to300: &QCD_Pt-170to300
+QCD_Pt-170to300_MuEnrichedPt5: &QCD_Pt-170to300_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 7055.0 # [pb]
   model_param:
@@ -82,9 +82,9 @@ QCD_Pt-170to300: &QCD_Pt-170to300
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.05
+  maxevents_scale: 1.0
 
-QCD_Pt-300to470: &QCD_Pt-300to470
+QCD_Pt-300to470_MuEnrichedPt5: &QCD_Pt-300to470_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 619.3 # [pb]
   model_param:
@@ -94,9 +94,9 @@ QCD_Pt-300to470: &QCD_Pt-300to470
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.015
+  maxevents_scale: 1.0
 
-QCD_Pt-470to600: &QCD_Pt-470to600
+QCD_Pt-470to600_MuEnrichedPt5: &QCD_Pt-470to600_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 59.24 # [pb]
   model_param:
@@ -106,9 +106,9 @@ QCD_Pt-470to600: &QCD_Pt-470to600
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.0046
+  maxevents_scale: 0.5
 
-QCD_Pt-600to800: &QCD_Pt-600to800
+QCD_Pt-600to800_MuEnrichedPt5: &QCD_Pt-600to800_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 18.21 # [pb]
   model_param:
@@ -118,9 +118,9 @@ QCD_Pt-600to800: &QCD_Pt-600to800
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.0026
+  maxevents_scale: 0.25
 
-QCD_Pt-800to1000: &QCD_Pt-800to1000
+QCD_Pt-800to1000_MuEnrichedPt5: &QCD_Pt-800to1000_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 3.275 # [pb]
   model_param:
@@ -130,9 +130,9 @@ QCD_Pt-800to1000: &QCD_Pt-800to1000
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.0011
+  maxevents_scale: 0.25
 
-QCD_Pt-1000toInf: &QCD_Pt-1000toInf
+QCD_Pt-1000toInf_MuEnrichedPt5: &QCD_Pt-1000toInf_MuEnrichedPt5
   path: 'bparkProductionV1_bkg/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking/output_*.root'
   xs: 1.078 # [pb]
   model_param:
@@ -142,4 +142,4 @@ QCD_Pt-1000toInf: &QCD_Pt-1000toInf
     xiL:  null
   force_xs: false
   isMC: true
-  maxevents_scale: 0.0006
+  maxevents_scale: 0.25
