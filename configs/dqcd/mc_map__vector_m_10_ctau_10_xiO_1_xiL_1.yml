@@ -17,4 +17,4 @@ input:
         xiL:  1
       force_xs: true
       isMC: true
-  
+      maxevents_scale: 1.0

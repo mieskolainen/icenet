@@ -28,7 +28,7 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12, null_value=float(-999.0)):
+def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weights=None, entry_start=None, entry_stop=None, EPS=1e-12, null_value=float(-999.0)):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -53,8 +53,8 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
     self_loops = graph_param['self_loops']
 
     # --------------------------------------------------------------------
-    num_events = np.min([len(X), maxevents]) if maxevents is not None else len(X)
-    dataset    = []
+    entry_start, entry_stop, num_events = aux.slice_range(start=entry_start, stop=entry_stop, N=len(X))
+    dataset = []
     
     print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
 
@@ -65,7 +65,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
 
     k = 0
     for key in node_features.keys():
-        num_node_features[key]       = len(node_features[key])
+        num_node_features[key]        = len(node_features[key])
         node_features_hetero_ind[key] = np.arange(k, k + num_node_features[key])
         k += num_node_features[key]
 
@@ -86,7 +86,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
     # Loop over events
     num_empty = 0
 
-    for ev in tqdm(range(num_events)):
+    for ev in tqdm(range(entry_start, entry_stop)):
 
         # Count the number of heterogeneous nodes by picking the first feature
         nums = {}
@@ -126,10 +126,18 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
                                        X[ev][jvname['jet'][0][0]].phi[k],
                                        X[ev][jvname['jet'][0][0]].mass[k])
                     
+                    elif key == 'sv':
+                        v.setPtEtaPhiM(X[ev][jvname['sv'][0][0]].pt[k],
+                                       X[ev][jvname['sv'][0][0]].eta[k],
+                                       X[ev][jvname['sv'][0][0]].phi[k],
+                                       X[ev][jvname['sv'][0][0]].mass[k])
+
                     elif key == 'cpf':
-                        v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], 0)
+                        v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], M_PION)
+
                     elif key == 'npf':
                         v.setXYZM(X[ev].npf.pz[k], X[ev].npf.py[k], X[ev].npf.pz[k], 0)
+                    
                     else:
                         True # Use null 4-vector for 'sv'
 
@@ -150,6 +158,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
         
         # ====================================================================
         # CONSTRUCT TENSORS
+        # # https://pytorch.org/docs/stable/tensors.html
 
         # Construct output class, note [] is important to have for right dimensions
         if Y is not None:

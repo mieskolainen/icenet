@@ -15,6 +15,6 @@ if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 mkdir "figs/trg/config-[$CONFIG]" -p # for output ascii dump
 
 # tee redirect output to both a file and to screen
-python analysis/trg.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH --datasets "none" #| tee "./figs/trg/$CONFIG/train_output.txt"
-python analysis/trg.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH --datasets "none" #| tee "./figs/trg/$CONFIG/train_output.txt"
-python analysis/trg.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH --datasets "none" #| tee "./figs/trg/$CONFIG/eval_output.txt"
+python analysis/trg.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH #| tee "./figs/trg/$CONFIG/train_output.txt"
+python analysis/trg.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH #| tee "./figs/trg/$CONFIG/train_output.txt"
+python analysis/trg.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH #| tee "./figs/trg/$CONFIG/eval_output.txt"

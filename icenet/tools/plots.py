@@ -28,12 +28,14 @@ def binengine(bindef, x):
     
     Args:
         bindef:  binning definition
-                 Examples: 50                                                    (number of bins, integer)
-                           [1.0, 40.0, 50.0]                                     (list of explicit edges)
-                           {'nbin': 30, 'q': [0.0, 0.95], 'space': 'linear'}     (automatic with quantiles)
-                           {'nbin': 30, 'minmax': [2.0, 50.0], 'space': 'log10'} (automatic with boundaries)
-
         x:       data input array
+
+    Examples:
+        50                                                    (number of bins, integer)
+        [1.0, 40.0, 50.0]                                     (list of explicit edges)
+        {'nbin': 30, 'q': [0.0, 0.95], 'space': 'linear'}     (automatic with quantiles)
+        {'nbin': 30, 'minmax': [2.0, 50.0], 'space': 'log10'} (automatic with boundaries)
+    
     Returns:
         edges:   binning edges
     """
@@ -760,7 +762,7 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
         X:                Data matrix (N x D)
         ids:              Variable names (list of length D)
         classes:          Class label ids (list of length N)
-        round_threshold:  Correlation matrix |C_ij| < threshold to set matrix elements to zero
+        round_threshold:  Correlation matrix |C| < threshold to set matrix elements to zero
         targetdir:        Output plot directory
         colorbar:         Colorbar on the plot
     
@@ -864,9 +866,14 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
         for i in range(len(metrics)):
 
-            linestyle = '-' if i < 10 else '--'
+            if         i < 10:
+                linestyle = '-'
+            elif 10 <= i < 20:
+                linestyle = '--'
+            else:
+                linestyle = ':'
             marker = 'None'
-
+            
             if metrics[i] is None:
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
@@ -891,7 +898,8 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
                 linestyle = "None"
                 marker    = 'o'
             
-            # A ROC-curve
+            """
+            # ROC-curve
             elif not (isinstance(fpr, int) or isinstance(fpr, float)):
                 fpr    = fpr[1:] # Remove always the first element for log-plot reasons
                 tpr    = tpr[1:]
@@ -903,15 +911,16 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
 
                     fpr_lo = fpr_lo[1:]
                     fpr_hi = fpr_hi[1:]
-            
+            """
+
             ## Plot it
-            plt.plot(fpr, tpr, color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
+            plt.plot(fpr, tpr, drawstyle='steps-mid', color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
             
             # Uncertainty band
             if marker == 'None' and (metrics[i].tpr_bootstrap is not None):
                 
-                plt.fill_between(fpr,  tpr_lo, tpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # vertical
-                plt.fill_betweenx(tpr, fpr_lo, fpr_hi, alpha=0.2, color=f'C{i}', edgecolor='none') # horizontal
+                plt.fill_between(fpr,  tpr_lo, tpr_hi, step='mid', alpha=0.2, color=f'C{i}', edgecolor='none') # vertical
+                plt.fill_betweenx(tpr, fpr_lo, fpr_hi, step='mid', alpha=0.2, color=f'C{i}', edgecolor='none') # horizontal
 
                 # draw_error_band(ax=ax, x=fpr, y=tpr, \
                 #   x_err=np.std(metrics[i].fpr_bootstrap, axis=0)[1:], \

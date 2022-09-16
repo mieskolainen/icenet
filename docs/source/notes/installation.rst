@@ -13,7 +13,7 @@ Preliminaries: Conda installation
 
 	wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 
 
-Then execute with 'bash filename.sh'
+Then execute the installer with ``bash filename.sh``.
 
 Pre-installed CUDA paths (optional)
 ------------------------------------
@@ -27,7 +27,7 @@ This can be used with IC machines, however, is not needed with conda driven setu
 Automated setup
 ----------------------------------
 
-Remark: To avoid ´No space left on device´ problem with conda or pip, set the temporary path, e.g.
+Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first, e.g.
 
 .. code-block:: none
 	
@@ -56,23 +56,23 @@ Execute
 Possible problems
 ----------------------------------
 
-Note: If you experience ´OSError: libcusparse.so.11´ (or similar) with torch-geometric, set the system path
+Note: If you experience ``OSError: libcusparse.so.11`` (or similar) with torch-geometric, set the system path
 
 .. code-block:: none
 
 	export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 
 
-Note: If you experience ´Could not load dynamic library libcusolver.so.10´ with tensorflow, make a symbolic link
+Note: If you experience ``Could not load dynamic library libcusolver.so.10`` with tensorflow, make a symbolic link
 
 .. code-block:: none
 
 	ln -s $CONDA_PREFIX/lib/libcusolver.so.11 $CONDA_PREFIX/lib/libcusolver.so.10
 
-Note: $CONDA_PREFIX will be found after 'conda activate icenet'
+Note: ``$CONDA_PREFIX`` will be found after ``conda activate icenet``
 
-Note: If you experience ´Requirement already satisfied´ infinite loop with pip, try
-removing e.g. ´tensorflow´ from requirements.txt, and install it separately with
+Note: If you experience "Requirement already satisfied" infinite loop with pip, try
+removing e.g. ``tensorflow`` from requirements.txt, and install it separately with
 
 .. code-block:: none
 	

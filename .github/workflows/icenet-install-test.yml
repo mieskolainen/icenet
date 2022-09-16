@@ -23,6 +23,8 @@ jobs:
       # conda install -c conda-forge cudatoolkit-dev
       
       # Install conda packages
+      
+      # (needed e.g. for xgboost tree visualization)
       # conda install python-graphviz
       
       - name: Install pip-requirements
@@ -31,27 +33,26 @@ jobs:
           pip install -r requirements-github-actions-2.txt
       
       ## Docs building
-      # - name: Build docs
-      #   run: |
-      #     if [ -e yarn.lock ]; then
-      #     yarn install --frozen-lockfile
-      #     elif [ -e package-lock.json ]; then
-      #     npm ci
-      #     else
-      #     npm i
-      #     fi
-      #     npm run build
+      - name: Build docs
+        run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npm run build
+          make -C docs/ clean
+          make -C docs/ html
+          touch docs/build/html/.nojekyll
 
-      #     make -C docs/ clean
-      #     make -C docs/ html
-      #     touch docs/build/html/.nojekyll
-
-      # ## Release to gh-pages
-      # - name: Release docs to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./docs/build/html/
+      ## Release to gh-pages
+      - name: Release docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
 
       ## Integration tests
       - name: Run Deep Learning system integration tests
@@ -62,4 +63,4 @@ jobs:
           source setenv.sh && maxevents=10000; source tests/runme_eid.sh
           source setenv.sh && maxevents=10000; source tests/runme_eid_deep.sh
           source setenv.sh && maxevents=10000; source tests/runme_eid_visual.sh
-          source setenv.sh && maxevents=10000; source tests/runme_brk.sh
+      ## source setenv.sh && maxevents=10000; source tests/runme_brk.sh

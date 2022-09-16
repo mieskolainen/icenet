@@ -53,9 +53,9 @@ def read_cli():
     parser.add_argument("--runmode",         type=str,  default='null')
     parser.add_argument("--config",          type=str,  default='tune0.yml')
     parser.add_argument("--datapath",        type=str,  default='.')
-    parser.add_argument("--datasets",        type=str,  default='*.root')
+    parser.add_argument("--datasets",        type=str,  default='null')
     parser.add_argument("--tag",             type=str,  default='tag0')
-
+    
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_cache",       type=int,  default=1)
@@ -191,18 +191,20 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # -------------------------------------------------------------------
     ## Create new variables
 
-    args["config"]     = cli_dict['config']
-    args["modeltag"]   = cli_dict['modeltag']
+    args["config"]    = cli_dict['config']
+    args["modeltag"]  = cli_dict['modeltag']
 
-    args['datadir']    = aux.makedir(f'output/{args["rootname"]}')
-    args['modeldir']   = aux.makedir(f'checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
-    args['plotdir']    = aux.makedir(f'figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
+    args['datadir']   = aux.makedir(f'output/{args["rootname"]}')
+    args['modeldir']  = aux.makedir(f'checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
+    args['plotdir']   = aux.makedir(f'figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
-
+    
+    
     # Technical
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
+
 
     # -------------------------------------------------------------------
     ## Create directories
@@ -227,6 +229,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     return args, cli
 
+
 def read_data(args, func_loader, runmode):
     """
     Load input data
@@ -239,28 +242,12 @@ def read_data(args, func_loader, runmode):
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
-        load_args = {'entry_start': 0, 'entry_stop': args['maxevents'], 'args': args}
-        
         if runmode != "genesis":
             raise Exception(__name__ + f'.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
 
-        # N.B. This loop is needed, because certain applications have each root file loaded here,
-        # whereas some apps do all the multi-file processing under 'func_loader'
-        for k in range(len(args['root_files'])):
-            X_,Y_,W_,ids,info = func_loader(root_path=args['root_files'][k], **load_args)
-
-            if k == 0:
-                X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
-            else:
-                if   isinstance(X, np.ndarray):
-                    concat = np.concatenate
-                elif isinstance(X, ak.Array):
-                    concat = ak.concatenate
-                
-                X = concat((X, X_), axis=0)
-                Y = concat((Y, Y_), axis=0)
-                if W is not None:
-                    W = concat((W, W_), axis=0)
+        # func_loader does the multifile processing
+        load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
+        X,Y,W,ids,info = func_loader(root_path=args['root_files'], **load_args)
 
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
@@ -984,7 +971,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 ROC_binned_mlabel[i].append(label_1D)
 
                 # Plot this one
-                plots.ROC_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}]')
+                plots.ROC_plot(met_1D, label_1D, xmin=args['plot_param']['ROC_binned']['xmin'], title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}]')
                 plots.MVA_plot(met_1D, label_1D, title = f'{label}', filename=aux.makedir(f'{targetdir}/MVA/{label}') + f'/MVA-binned[{i}]')
 
             ## 2D
@@ -1122,6 +1109,7 @@ def plot_XYZ_multiple_models(targetdir, args):
 
         path_label = roc_paths[filterset_key][dummy]
         plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
+            xmin=args['plot_param']['ROC']['xmin'],
             title=f'category: {filterset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
 
     # Inverse collect: Plot all powerset categories ROCs per model
@@ -1132,6 +1120,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         model_label = roc_labels[list(roc_labels)[dummy]][model_index]
         
         plots.ROC_plot(rocs_, labels_,
+            xmin=args['plot_param']['ROC']['xmin'],
             title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
 
     ### Plot all MVA outputs (not implemented)
@@ -1166,8 +1155,8 @@ def plot_XYZ_multiple_models(targetdir, args):
                     
                     ### ROC
                     title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                    plots.ROC_plot(xy, legs, title=title, filename=targetdir + f'/ROC/--ALL--/ROC-binned[{i}]-bin[{b}]')
-
+                    plots.ROC_plot(xy, legs, xmin=args['plot_param']['ROC_binned']['xmin'], title=title, filename=targetdir + f'/ROC/--ALL--/ROC-binned[{i}]-bin[{b}]')
+                    
                     ### MVA (not implemented)
                     #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                     #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/--ALL--/MVA-binned[{i}]-bin[{b}]')

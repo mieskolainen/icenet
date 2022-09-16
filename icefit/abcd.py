@@ -19,12 +19,12 @@ def ABCD_eq(b,c,d):
         
     Independent (X,Y) gives us the definition A = B x C / D
     
-    Y 
-    ^
+    Y
     |C | A
     |-----
     |D | B
     0------> X
+    
     """
     return b * c / d
 

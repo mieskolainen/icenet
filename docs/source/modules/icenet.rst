@@ -37,6 +37,14 @@ icenet.deep
 Deep learning model classes.
 
 
+icenet.deep.autogradxgb
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.autogradxgb
+    :members:
+    :undoc-members:
+
+
 icenet.deep.bnaf
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -53,10 +61,26 @@ icenet.deep.cnn
     :undoc-members:
 
 
+icenet.deep.da
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.da
+    :members:
+    :undoc-members:
+
+
 icenet.deep.dbnf
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.dbnf
+    :members:
+    :undoc-members:
+
+
+icenet.deep.deeptools
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.deeptools
     :members:
     :undoc-members:
 
@@ -77,14 +101,6 @@ icenet.deep.dmlp
     :undoc-members:
 
 
-icenet.deep.optimize
-~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: icenet.deep.optimize
-    :members:
-    :undoc-members:
-
-
 icenet.deep.gcnn
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -101,8 +117,16 @@ icenet.deep.graph
     :undoc-members:
 
 
+icenet.deep.iceboost
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.iceboost
+    :members:
+    :undoc-members:
+
+
 icenet.deep.losstools
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.losstools
     :members:
@@ -125,6 +149,14 @@ icenet.deep.mlgr
     :undoc-members:
 
 
+icenet.deep.optimize
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.optimize
+    :members:
+    :undoc-members:
+
+
 icenet.deep.pgraph
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -142,7 +174,7 @@ icenet.deep.predict
 
 
 icenet.deep.tempscale
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.tempscale
     :members:
@@ -153,6 +185,14 @@ icenet.deep.train
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.train
+    :members:
+    :undoc-members:
+
+
+icenet.deep.vae
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.vae
     :members:
     :undoc-members:
 
@@ -199,7 +239,7 @@ icenet.tools.aux
     :undoc-members:
 
 icenet.tools.aux_torch
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.aux_torch
     :members:
@@ -263,7 +303,7 @@ icenet.tools.process
 
 
 icenet.tools.reweight
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.reweight
     :members:

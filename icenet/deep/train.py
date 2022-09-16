@@ -57,7 +57,7 @@ from icenet.optim import scheduler
 
 # Raytune
 from ray import tune
-from ray.tune.suggest.hyperopt import HyperOptSearch
+from ray.tune.search.hyperopt import HyperOptSearch
 from ray.tune import CLIReporter
 from ray.tune.schedulers import ASHAScheduler
 from functools import partial

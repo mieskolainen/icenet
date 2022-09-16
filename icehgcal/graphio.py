@@ -128,7 +128,7 @@ def compute_edge_attr(data):
     return edge_attr
 
 
-def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, maxevents=None, EPS=1e-12, null_value=-999.0):
+def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=None, entry_start=None, entry_stop=None, EPS=1e-12, null_value=-999.0):
     """
     EVENT LEVEL (PROCESSING CANDIDATES)
     
@@ -157,8 +157,8 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     num_edge_features   = 4
     num_global_features = 0
     
-    num_events = np.min([X.shape[0], maxevents]) if maxevents is not None else X.shape[0]
-    dataset    = []
+    entry_start, entry_stop, num_events = aux.slice_range(start=entry_start, stop=entry_stop, N=len(X))
+    dataset = []
     
     print(__name__ + f'.parse_graph_data_candidate: Converting {num_events} events into graphs ...')
     zerovec = vec4()
@@ -181,7 +181,7 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     num_empty_HGCAL = 0
 
     # Loop over events
-    for ev in tqdm(range(num_events)):
+    for ev in tqdm(range(entry_start, entry_stop)):
 
         num_nodes = 1 + len(X[ev, ind__candidate_energy]) # +1 for virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)

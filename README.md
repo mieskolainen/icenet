@@ -1,9 +1,9 @@
 ```
-██  ██████ ███████ ███    ██ ███████ ████████
-██ ██      ██      ████   ██ ██         ██
-██ ██      █████   ██ ██  ██ █████      ██
-██ ██      ██      ██  ██ ██ ██         ██
-██  ██████ ███████ ██   ████ ███████    ██
+██  ██████ ███████ ███    ██ ███████ ████████
+██ ██      ██      ████   ██ ██         ██   
+██ ██      █████   ██ ██  ██ █████      ██   
+██ ██      ██      ██  ██ ██ ██         ██   
+██  ██████ ███████ ██   ████ ███████    ██   
 ```
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/mieskolainen/icenet/actions/workflows/icenet-install-test.yml/badge.svg)](https://github.com/mieskolainen/icenet/actions)
@@ -15,7 +15,7 @@ https://mieskolainen.github.io/icenet
 
 ## First steps
 
-Start with the installation
+Start with the installation:
 
 ```
 docs/source/notes/installation.rst
@@ -32,7 +32,7 @@ If you use this work in your research (especially if you find algorithms or idea
 ```
 @misc{mieskolainen2022icenet,
   author = "{Mikael Mieskolainen}",
-  title  = "icenet",
+  title  = "icenet: a deep learning library",
   year   = "2022",
   url    = "https://github.com/mieskolainen/icenet",
   note   = "[Online code; accessed XX-YY-2022]"
@@ -42,3 +42,4 @@ If you use this work in your research (especially if you find algorithms or idea
 
 Mikael Mieskolainen, 2022 \
 m.mieskolainen@imperial.ac.uk
+

@@ -38,18 +38,23 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
         # --------------------
         
-        datasets    = processes[key]['path']
-        xs          = processes[key]['xs']
-        model_param = processes[key]['model_param']
-        force_xs    = processes[key]['force_xs']
+        datasets        = processes[key]['path']
+        xs              = processes[key]['xs']
+        model_param     = processes[key]['model_param']
+        force_xs        = processes[key]['force_xs']
+        maxevents_scale = processes[key]['maxevents_scale']
 
         # --------------------
 
         rootfile    = io.glob_expand_files(datasets=datasets, datapath=root_path)
 
+        # Custom scale event statistics
+        maxevents   = np.max([1, int(param['maxevents'] * maxevents_scale)])
+        
         # Load file
         X__, ids    = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
-                        entry_start=param['entry_start'], entry_stop=param['entry_stop'], ids=param['load_ids'], library='ak')
+                        entry_start=param['entry_start'], entry_stop=param['entry_stop'],
+                        maxevents=maxevents, ids=param['load_ids'], library='ak')
         
         N_before = len(X__)
         
@@ -180,7 +185,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, label=No
     return X, ids
 
 
-def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library='np'):
+def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, ids=None, library='np'):
     """
     Load ROOT files
     
@@ -189,6 +194,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
         tree:              Tree to read out
         entry_start:       First event to read per file
         entry_stop:        Last event to read per file
+        maxevents:          Maximum number of events in total (over all files)
         ids:               Variable names to read out from the root tree
         library:           Return type 'np' (jagged numpy) or 'ak' (awkward) of the array
     
@@ -215,8 +221,6 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
     
     if   library == 'np':
-
-
         for i in tqdm(range(len(files))):
             events = uproot.open(files[i])
             param = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop, 'label': files[i]}
@@ -227,9 +231,9 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
                 temp,_ = events_to_jagged_numpy(**param)
                 X = np.concatenate((X, temp), axis=0)
             
-            if (entry_stop is not None) and (len(X) > entry_stop):
-                X = X[0:entry_stop]
-                print(__name__ + f'.load_tree: Maximum event count {entry_stop} reached')
+            if (maxevents is not None) and (len(X) > maxevents):
+                X = X[0:maxevents]
+                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                 break
 
         print(X.shape)
@@ -257,10 +261,10 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, ids=None, library=
             else:
                 temp = events.arrays(load_ids, **param)
                 X = ak.concatenate((X,temp), axis=0)
-                
-            if (entry_stop is not None) and (len(X) > entry_stop):
-                X = X[0:entry_stop]
-                print(__name__ + f'.load_tree: Maximum event count {entry_stop} reached')
+            
+            if (maxevents is not None) and (len(X) > maxevents):
+                X = X[0:maxevents]
+                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                 break
 
         return X, ak.fields(X)

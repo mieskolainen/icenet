@@ -140,12 +140,12 @@ def glob_expand_files(datasets, datapath):
         if filepath != []:
             for i in range(len(filepath)):
                 files.append(filepath[i])
-
-    #print(__name__ + f'.glob_expand_files: After glob: {files}')
-
+    
     if files == []:
        files = [datapath]
-
+   
+    #print(__name__ + f'.glob_expand_files: Final files: {files}')
+        
     return files
 
 

@@ -42,34 +42,39 @@ from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None, library='np'):
-    """ Loads a single root file.
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None, library='np'):
+    """ Loads root files
     
     Args:
-        root_path : paths to root file
+        root_path: paths to root files (list)
     
     Returns:
-        X,Y       : input, output data (with jagged content)
-        ids       : variable names
+        X,Y      : input, output data (with jagged content)
+        ids      : variable names
     """
+    
+    if type(root_path) is not list:
+        root_path = [root_path] # Make sure it is a list, even if one file only
     
     # -----------------------------------------------
     CUTFUNC    = globals()[args['cutfunc']]
     TARFUNC    = globals()[args['targetfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
     # -----------------------------------------------
-    
+
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
-    file   = uproot.open(root_path)
-    events = file[args['tree_name']]
 
-    # Check is it MC (based on the first event)
+    # Check is it MC (based on the first file and first event)
+    file   = uproot.open(root_path[0])
+    events = file[args['tree_name']]
     isMC   = bool(events.arrays('is_mc')[0]['is_mc'])
 
     # --------------------------------------------------------------
-    load_ids = aux.process_regexp_ids(ids=ids, all_ids=events.keys())
-    X,ids    = iceroot.events_to_jagged_numpy(events=events, ids=load_ids, entry_start=entry_start, entry_stop=entry_stop)
+    # Load all files
+
+    X,ids = iceroot.load_tree(rootfile=root_path, tree=args['tree_name'],
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=None, library=library)
     Y = None
     # --------------------------------------------------------------
     
@@ -84,14 +89,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
         # @@ MC target definition here @@
         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(events, entry_start=entry_start, entry_stop=entry_stop, new=True)
-        Y = np.asarray(Y).T
+        Y = TARFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
         print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
-        
-        # For info
-        labels1 = ['is_e', 'is_egamma']
-        aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop, new=True)
-        prints.printbar()
         
         # @@ MC filtering done here @@
         mask_mc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])

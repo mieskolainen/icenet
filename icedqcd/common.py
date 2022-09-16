@@ -29,23 +29,27 @@ from configs.dqcd.cuts import *
 from configs.dqcd.filter import *
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
     """ Loads the root file with signal events from MC and background from DATA.
     
     Args:
-        root_path: paths to root files
+        root_path: path to root files
     
     Returns:
         X,Y      : data matrices
         ids      : variable names
     """
 
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list
+    
     # -----------------------------------------------
 
     param = {
         "tree":        "Events",
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":    maxevents,
         "args":        args,
         "load_ids":    LOAD_VARS,
         "isMC":        True
@@ -102,7 +106,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
 
 
 def process_root(X, ids, isMC, args, **extra):
-    
+    """
+    Apply selections
+    """
+
     FILTERFUNC = globals()[args['filterfunc']]    
     CUTFUNC    = globals()[args['cutfunc']]
     
@@ -112,21 +119,22 @@ def process_root(X, ids, isMC, args, **extra):
     mask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     stats['filterfunc'] = {'before': len(X), 'after': sum(mask)}
     
-    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f})', 'green')
-    X = X[mask]
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
+    
+    X = X[mask]
     
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, xcorr_flow=args['xcorr_flow'])
     stats['cutfunc'] = {'before': len(X), 'after': sum(mask)}
     
-    plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/len(X):0.6f}) \n", 'green')
-    X = X[mask]
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
-    
     io.showmem()
+    
+    X = X[mask]
     
     return X, ids, stats
 
@@ -183,24 +191,24 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
-
+    
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
-    node_features = {'muon': muon_vars, 'jet': jet_vars}
+    node_features = {'muon': muon_vars, 'jet': jet_vars, 'sv': sv_vars}
     
     data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
         features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])
-
+    
     # -------------------------------------------------------------------------
     ## Tensor representation
     data_tensor = None
-
+    
     # -------------------------------------------------------------------------
     ## Turn jagged data to a "long-vector" zero-padded matrix representation
-
+    
     data = aux.jagged_ak_to_numpy(data=data, scalar_vars=scalar_vars,
                        jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
                        null_value=args['imputation_param']['fill_value'])
-
+    
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None

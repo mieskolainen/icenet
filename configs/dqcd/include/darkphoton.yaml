@@ -10,3 +10,4 @@ HiddenValley_darkphoton_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_darkphoton_m_10
     xiL:  1
   force_xs: true
   isMC: true
+  maxevents_scale: 1.0

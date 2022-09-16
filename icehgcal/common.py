@@ -1,5 +1,5 @@
-# Common input & data reading routines for HGCAL
-#
+# Common input & data reading routines for HGCAL (CND, TRK modes)
+# 
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
@@ -45,6 +45,9 @@ from configs.hgcal.cuts import *
 
 
 def read_data_tracklet(args, runmode):
+    """
+    (HGCAL-TRK)
+    """
 
     # Create trackster data
     cache_filename = f'{args["datadir"]}/data_{args["__hash__"]}.pkl'
@@ -56,7 +59,7 @@ def read_data_tracklet(args, runmode):
         
         data      = preprocess.event_loop(files=args['root_files'], graph_param=args['graph_param'], maxevents=args['maxevents']) 
         X         = graphio.parse_graph_data_trackster(data=data, graph_param=args['graph_param'], weights=None)
-
+        
         # Pickle to disk
         with open(cache_filename, "wb") as fp:
             pickle.dump([X, args], fp)
@@ -73,6 +76,9 @@ def read_data_tracklet(args, runmode):
     return X
 
 def process_tracklet_data(args, X):
+    """
+    (HGCAL-TRK)
+    """
 
     ### Edge weight re-weighting
     if args['reweight']:
@@ -107,17 +113,23 @@ def process_tracklet_data(args, X):
     return data
 
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=None):
-    """ Loads the root file.
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
+    """ 
+    (HGCAL-CND)
+
+    Loads the root files
     
     Args:
-        root_path : paths to root files
+        root_path : paths to root files (list)
     
     Returns:
         X,Y       : input, output matrices
         ids       : variable names
     """
 
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list, we expect only the path here
+    
     # -----------------------------------------------
 
     # ** Pick the variables **
@@ -126,12 +138,12 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     param = {
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
+        "maxevents":   maxevents,
         "args":        args,
         "load_ids":    ids     
     }
     
     tree = args['tree_name']
-
 
     # =================================================================
     # *** BACKGROUND MC ***
@@ -139,8 +151,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     filename = args["input"]['class_0']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
     
-    X_B, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
-    Y_B = np.zeros(X_B.shape[0])
+    X_B,ids  = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
+    Y_B      = np.zeros(X_B.shape[0])
 
 
     # =================================================================
@@ -149,7 +161,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     filename = args["input"]['class_1']
     rootfile = io.glob_expand_files(datasets=filename, datapath=root_path)
 
-    X_S, VARS = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
+    X_S,ids  = process_root(rootfile=rootfile, tree=tree, isMC=True, **param)
     Y_S = np.ones(X_S.shape[0])
     
     
@@ -168,25 +180,26 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, args=Non
     Y    = Y[rind].squeeze()
     
     # =================================================================
-    # Custom treat specific variables
-
-    """
-    ind      = NEW_VARS.index('x_hlt_pms2')
-    X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
-    """
     
     # No weights
     W = None
 
-    return X, Y, W, VARS
+    # TBD add cut statistics etc. here
+    info = {}
+
+    return X, Y, W, ids, info
 
 
-def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
+def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, maxevents, args):
+    """
+    (HGCAL-CND)
+    """
 
     CUTFUNC    = globals()[args['cutfunc']]
     FILTERFUNC = globals()[args['filterfunc']]
 
-    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree, entry_start=entry_start, entry_stop=entry_stop, ids=load_ids, library='np')
+    X,ids      = iceroot.load_tree(rootfile=rootfile, tree=tree,
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=load_ids, library='np')
     
     """
     # @@ Filtering done here @@
@@ -212,6 +225,8 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, args):
 
 def splitfactor(x, y, w, ids, args):
     """
+    (HGCAL-CND)
+    
     Transform data into different datatypes.
     
     Args:
@@ -261,7 +276,6 @@ def splitfactor(x, y, w, ids, args):
     data.x = None
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
-
 
 # ========================================================================
 # ========================================================================

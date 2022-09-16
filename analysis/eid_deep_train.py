@@ -75,8 +75,8 @@ def compute_reweight(root_files, num_events, args):
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
     entry_stop     = np.min([args['reweight_param']['maxevents'], num_events[index]])
-    X,Y,W,ids,info = common.load_root_file(root_files[index], ids=None, entry_stop=entry_stop, args=args, library='np')
-
+    X,Y,W,ids,info = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
+    
     # Compute re-weights
     _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
 
@@ -109,7 +109,7 @@ def main():
     pdf,X,Y,W,ids = compute_reweight(root_files=root_files, num_events=num_events, args=args)
 
     gdata = {}
-    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, maxevents=1,
+    gdata['trn'] = graphio.parse_graph_data(X=X, Y=Y, ids=ids, weights=W, entry_start=0, entry_stop=1,
         features=scalar_var, graph_param=args['graph_param'])
     
     # =========================================================================
@@ -165,7 +165,7 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,W,ids,info = common.load_root_file(root_files[f], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
+                    X,Y,W,ids,info = common.load_root_file(root_path=[root_files[f]], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
                     trn, val, tst  = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
                     
                     # =========================================================================
@@ -191,11 +191,11 @@ def main():
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
-                    train_loader = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
-                    test_loader  = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
+                    train_loader     = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
+                    test_loader      = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss         = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
+                    loss             = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Evaluate
                     trn_acc, trn_AUC = deep.optimize.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])

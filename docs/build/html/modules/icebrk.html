@@ -1,65 +1,210 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>icebrk &#8212; icenet alpha documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icebrk &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="icefit" href="icefit.html" />
-    <link rel="prev" title="Markup" href="../notes/markup.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="next" title="icedqcd" href="icedqcd.html" />
+    <link rel="prev" title="Markup" href="../notes/markup.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> icenet
+          </a>
+              <div class="version">
+                0.0.7.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#c-library-versions">C-library versions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#folders">Folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#algorithms-and-models">Algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#advanced-training-methodologies">Advanced training methodologies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.cutstats">icebrk.cutstats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.fasthistos">icebrk.fasthistos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.features">icebrk.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.histos">icebrk.histos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.loop">icebrk.loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icebrk.tools">icebrk.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icedqcd.html">icedqcd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.common">icedqcd.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.abcd">icefit.abcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.cortools">icefit.cortools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.em">icefit.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.jacobian">icefit.jacobian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.lognormal">icefit.lognormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.mine">icefit.mine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.peakfit">icefit.peakfit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.score">icefit.score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.statstools">icefit.statstools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icehgcal.html">icehgcal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icehgcal.html#module-icehgcal.common">icehgcal.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icehgcal.html#module-icehgcal.graphio">icehgcal.graphio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icehgcal.html#module-icehgcal.preprocess">icehgcal.preprocess</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icehnl.html">icehnl</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icehnl.html#module-icehnl.common">icehnl.common</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.common">iceid.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iceid.html#module-iceid.graphio">iceid.graphio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icemc.html">icemc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icemc.html#module-icemc.icemc">icemc.icemc</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="icetrg.html#module-icetrg.common">icetrg.common</a></li>
+</ul>
+</li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
+        </div>
+      </div>
+    </nav>
 
-          <div class="body" role="main">
-            
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>icebrk</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/icebrk.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <section id="icebrk">
-<h1>icebrk<a class="headerlink" href="#icebrk" title="Permalink to this headline">¶</a></h1>
+<h1>icebrk<a class="headerlink" href="#icebrk" title="Permalink to this heading">¶</a></h1>
 <p>B-physics analysis classes.</p>
 <section id="module-icebrk.common">
-<span id="icebrk-common"></span><h2>icebrk.common<a class="headerlink" href="#module-icebrk.common" title="Permalink to this headline">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="icebrk.common.init">
-<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/common.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.common.init" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data initialization function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>args  :
-cli   :
-iodir :</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>paths</p>
-</dd>
-</dl>
-</dd></dl>
-
+<span id="icebrk-common"></span><h2>icebrk.common<a class="headerlink" href="#module-icebrk.common" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="module-icebrk.cutstats">
-<span id="icebrk-cutstats"></span><h2>icebrk.cutstats<a class="headerlink" href="#module-icebrk.cutstats" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-cutstats"></span><h2>icebrk.cutstats<a class="headerlink" href="#module-icebrk.cutstats" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.cutstats.apply_cuts">
 <span class="sig-name descname"><span class="pre">apply_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutflow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/cutstats.html#apply_cuts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.cutstats.apply_cuts" title="Permalink to this definition">¶</a></dt>
@@ -125,7 +270,7 @@ mcinfostats_BC:</p>
 
 </section>
 <section id="module-icebrk.fasthistos">
-<span id="icebrk-fasthistos"></span><h2>icebrk.fasthistos<a class="headerlink" href="#module-icebrk.fasthistos" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-fasthistos"></span><h2>icebrk.fasthistos<a class="headerlink" href="#module-icebrk.fasthistos" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.fasthistos.initialize">
 <span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/fasthistos.html#initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.fasthistos.initialize" title="Permalink to this definition">¶</a></dt>
@@ -140,7 +285,7 @@ mcinfostats_BC:</p>
 
 </section>
 <section id="module-icebrk.features">
-<span id="icebrk-features"></span><h2>icebrk.features<a class="headerlink" href="#module-icebrk.features" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-features"></span><h2>icebrk.features<a class="headerlink" href="#module-icebrk.features" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.features.construct_new_branches">
 <span class="sig-name descname"><span class="pre">construct_new_branches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/features.html#construct_new_branches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.features.construct_new_branches" title="Permalink to this definition">¶</a></dt>
@@ -166,7 +311,7 @@ mcinfostats_BC:</p>
 
 </section>
 <section id="module-icebrk.histos">
-<span id="icebrk-histos"></span><h2>icebrk.histos<a class="headerlink" href="#module-icebrk.histos" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-histos"></span><h2>icebrk.histos<a class="headerlink" href="#module-icebrk.histos" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.histos.calc_MC_observables">
 <span class="sig-name descname"><span class="pre">calc_MC_observables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1_p4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2_p4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_p4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXT3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/histos.html#calc_MC_observables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.histos.calc_MC_observables" title="Permalink to this definition">¶</a></dt>
@@ -277,7 +422,7 @@ mcinfostats_BC:</p>
 
 </section>
 <section id="module-icebrk.loop">
-<span id="icebrk-loop"></span><h2>icebrk.loop<a class="headerlink" href="#module-icebrk.loop" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-loop"></span><h2>icebrk.loop<a class="headerlink" href="#module-icebrk.loop" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.loop.hdf5_append">
 <span class="sig-name descname"><span class="pre">hdf5_append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#hdf5_append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.loop.hdf5_append" title="Permalink to this definition">¶</a></dt>
@@ -332,11 +477,8 @@ mcinfostats_BC:</p>
 <li><p><strong>h5datasets</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>w</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>w</p>
 </dd>
 </dl>
 </dd></dl>
@@ -385,18 +527,15 @@ N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</p>
 <li><p><strong>WNORM</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>w</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>w</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.loop.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_predict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXT3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXEVENTS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EVTGROUPSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CHUNKBUFFER</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VERBOSE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BMAT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WNORM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SUPERSETS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hd5dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputXY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.loop.process" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_predict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXT3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAXN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxevents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EVTGROUPSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CHUNKBUFFER</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VERBOSE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BMAT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WNORM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SUPERSETS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hd5dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputXY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/loop.html#process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.loop.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main event processing loop</p>
 <p>Args:</p>
 <p>Returns:</p>
@@ -404,10 +543,10 @@ N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</p>
 
 </section>
 <section id="module-icebrk.PDG">
-<span id="icebrk-pdg"></span><h2>icebrk.PDG<a class="headerlink" href="#module-icebrk.PDG" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-pdg"></span><h2>icebrk.PDG<a class="headerlink" href="#module-icebrk.PDG" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="module-icebrk.tools">
-<span id="icebrk-tools"></span><h2>icebrk.tools<a class="headerlink" href="#module-icebrk.tools" title="Permalink to this headline">¶</a></h2>
+<span id="icebrk-tools"></span><h2>icebrk.tools<a class="headerlink" href="#module-icebrk.tools" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="icebrk.tools.construct_MC_tree">
 <span class="sig-name descname"><span class="pre">construct_MC_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icebrk/tools.html#construct_MC_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icebrk.tools.construct_MC_tree" title="Permalink to this definition">¶</a></dt>
@@ -522,83 +661,34 @@ Returns:</p>
 </section>
 
 
+           </div>
           </div>
-          
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../notes/markup.html" class="btn btn-neutral float-left" title="Markup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="icedqcd.html" class="btn btn-neutral float-right" title="icedqcd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">icenet</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">icebrk</a></li>
-<li class="toctree-l1"><a class="reference internal" href="icefit.html">icefit</a></li>
-<li class="toctree-l1"><a class="reference internal" href="iceid.html">iceid</a></li>
-<li class="toctree-l1"><a class="reference internal" href="icenet.html">icenet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="iceplot.html">iceplot</a></li>
-<li class="toctree-l1"><a class="reference internal" href="icetrg.html">icetrg</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="../notes/markup.html" title="previous chapter">Markup</a></li>
-      <li>Next: <a href="icefit.html" title="next chapter">icefit</a></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="../_sources/modules/icebrk.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>
