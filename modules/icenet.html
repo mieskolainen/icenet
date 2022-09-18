@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.7.5
+                0.0.7.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -2386,27 +2386,7 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.jagged2matrix">
-<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform a “jagged” event container to a matrix (rows ~ event, columns ~ variables)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arr</strong> – Awkward array type input for N events</p></li>
-<li><p><strong>scalar_vars</strong> – Scalar variables to pick (list of strings)</p></li>
-<li><p><strong>jagged_vars</strong> – Jagged variables to pick (list of strings)</p></li>
-<li><p><strong>jagged_dim</strong> – Maximum dimension per jagged variable (integer array)</p></li>
-<li><p><strong>null_value</strong> – Default value for empty ([]) jagged entries</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.aux.jagged2matrix_multiprocess">
-<span class="sig-name descname"><span class="pre">jagged2matrix_multiprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix_multiprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix_multiprocess" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jagged2matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'columnar'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged2matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a “jagged” event container to a matrix (rows ~ event, columns ~ variables)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2530,17 +2510,6 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.aux.my_func">
-<span class="sig-name descname"><span class="pre">my_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#my_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.my_func" title="Permalink to this definition">¶</a></dt>
-<dd><p>Helper function for jagged2matrix_multiprocessor()</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>index</strong> – Pair of (index for the new array, event number)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.number_of_set_bits">
 <span class="sig-name descname"><span class="pre">number_of_set_bits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#number_of_set_bits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.number_of_set_bits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return how many bits are active of an integer in a standard binary representation.</p>
@@ -2637,10 +2606,17 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.split_start_end">
-<span class="sig-name descname"><span class="pre">split_start_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#split_start_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.split_start_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns approx equally sized chunks.
-:param a: Total number
-:param n: Number of chunks</p>
+<span class="sig-name descname"><span class="pre">split_start_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#split_start_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.split_start_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns approx equally sized chunks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – Total number</p></li>
+<li><p><strong>n</strong> – Number of chunks</p></li>
+<li><p><strong>end</strong> – Python/nympy index style (i.e. + 1 for the end)</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Example</p>
 <p>list(split(10, 3))</p>
 </dd></dl>

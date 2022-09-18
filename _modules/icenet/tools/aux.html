@@ -28,7 +28,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.7.5
+                0.0.7.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -433,11 +433,10 @@
         <span class="s1">&#39;null_value&#39;</span><span class="p">:</span>  <span class="n">null_value</span>
     <span class="p">}</span>
 
-    <span class="c1">#matrix = jagged2matrix(data.x, **arg)</span>
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">jagged2matrix_multiprocess</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+    <span class="n">matrix</span>       <span class="o">=</span> <span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
     
     <span class="c1"># Cast to numpy arrays</span>
-    <span class="n">new_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">new_data</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="n">new_data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
     <span class="n">new_data</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
@@ -446,127 +445,8 @@
     <span class="k">return</span> <span class="n">new_data</span></div>
 
 
-<span class="c1"># ------------------------------------------------------------------------</span>
-<span class="c1"># Multiprocessing</span>
-
-<span class="c1"># Global</span>
-<span class="n">parfunc</span> <span class="o">=</span> <span class="kc">None</span>
-
-<div class="viewcode-block" id="my_func"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.my_func">[docs]</a><span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="n">index</span><span class="p">):</span><span class="c1">#, def_param=shared_array):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Helper function for jagged2matrix_multiprocessor()</span>
-<span class="sd">        </span>
-<span class="sd">    Args:</span>
-<span class="sd">        index: Pair of (index for the new array, event number)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">global</span> <span class="n">parfunc</span>
-
-    <span class="n">arr</span>          <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;arr&#39;</span><span class="p">]</span>
-    <span class="n">jagged_dim</span>   <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jagged_dim&#39;</span><span class="p">]</span>
-    <span class="n">scalar_vars</span>  <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;scalar_vars&#39;</span><span class="p">]</span>
-    <span class="n">jagged_vars</span>  <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jagged_vars&#39;</span><span class="p">]</span>
-    <span class="n">jvname</span>       <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jvname&#39;</span><span class="p">]</span>
-    <span class="n">shared_array</span> <span class="o">=</span> <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;shared_array&#39;</span><span class="p">]</span>
-
-    <span class="n">k</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span>
-    <span class="n">i</span>  <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">ev</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="c1">## Jagged variables looped over</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
-
-        <span class="n">x</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">d_this</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
-            <span class="n">shared_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d_this</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">d_this</span><span class="p">]</span>
-        
-        <span class="c1"># Increase block counter</span>
-        <span class="n">k</span> <span class="o">+=</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-
-    <span class="c1"># -----------------------------------</span>
-    <span class="c1"># For printing</span>
-    <span class="k">if</span> <span class="n">ev</span> <span class="o">%</span> <span class="mi">10000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Event: </span><span class="si">{</span><span class="n">ev</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
-    <span class="c1"># -----------------------------------</span>
-
-
-<div class="viewcode-block" id="jagged2matrix_multiprocess"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix_multiprocess">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix_multiprocess</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        arr:           Awkward array type input for N events</span>
-<span class="sd">        scalar_vars:   Scalar variables to pick (list of strings)</span>
-<span class="sd">        jagged_vars:   Jagged variables to pick (list of strings)</span>
-<span class="sd">        jagged_dim:    Maximum dimension per jagged variable (integer array)</span>
-<span class="sd">        null_value:    Default value for empty ([]) jagged entries</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        Fixed dimensional 2D-numpy matrix (N x [# scalar var x {#jagged var x maxdim}_i])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jagged_dim</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix_multiprocess: len(jagged_vars) != len(jagged_maxdim) </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_dim</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">slice_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jagged_dim</span><span class="p">)))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix_multiprocess: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="mi">64</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Pre-processing of jagged vars</span>
-    <span class="n">jvname</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
-        <span class="c1"># Awkward groups jagged variables, e.g. &#39;sv_x&#39; to sv.x</span>
-        <span class="n">jvname</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="c1"># argument 1 takes the first &#39;_&#39; occurance</span>
-
-    <span class="c1"># Return matrix</span>
-    <span class="n">shared_array_base</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="p">)</span>
-    <span class="n">shared_array</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">as_array</span><span class="p">(</span><span class="n">shared_array_base</span><span class="o">.</span><span class="n">get_obj</span><span class="p">())</span>
-    <span class="n">shared_array</span>      <span class="o">=</span> <span class="n">shared_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">shared_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">))</span> <span class="c1"># Initialize values</span>
-
-    <span class="c1">## 1. Pure scalar vars without multiprocessing (very fast)</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)):</span>
-        <span class="n">shared_array</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]])[</span><span class="n">entry_start</span><span class="p">:</span><span class="n">entry_stop</span><span class="p">])</span>
-
-    <span class="c1">## 2. Jagged variables with multiprocessing per event</span>
-    <span class="k">global</span> <span class="n">parfunc</span>
-
-    <span class="n">parfunc</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;arr&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">arr</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jagged_dim&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">jagged_dim</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;scalar_vars&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">scalar_vars</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jagged_vars&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">jagged_vars</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;jvname&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">jvname</span>
-    <span class="n">parfunc</span><span class="p">[</span><span class="s1">&#39;shared_array&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shared_array</span>
-
-    <span class="c1"># Multiprocess</span>
-    <span class="n">num_cores</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix_multiprocess: </span><span class="si">{</span><span class="n">num_cores</span><span class="si">}</span><span class="s1"> asynchronous parallel processes launched&#39;</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    
-    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_cores</span><span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">my_func</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">)))</span>
-    <span class="c1">#pool.map(partial(my_func, b=parfunc), range(N))</span>
-
-    <span class="c1">#from joblib import Parallel, delayed</span>
-    <span class="c1">#from tqdm_joblib import tqdm_joblib</span>
-
-    <span class="c1">#with tqdm_joblib(desc=&quot;My calculation&quot;, total=10) as progress_bar:</span>
-    <span class="c1">#Parallel(n_jobs=num_cores)(delayed(my_func)(i) for i in range(N))</span>
-
-    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;jagged2matrix_multiprocess: Processing took </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">shared_array</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">shared_array</span></div>
-
-<span class="c1"># ------------------------------------------------------------------------</span>
-
-
-<span class="c1">#@numba.njit</span>
-<div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">)):</span>
+<div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span>
+    <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
 <span class="sd">    </span>
@@ -589,7 +469,7 @@
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="mi">64</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Pre-processing of jagged vars</span>
+    <span class="c1"># Pre-processing of jagged variable names</span>
     <span class="n">jvname</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
         <span class="c1"># Awkward groups jagged variables, e.g. &#39;sv_x&#39; to sv.x</span>
@@ -598,33 +478,56 @@
     <span class="c1"># Return matrix</span>
     <span class="n">shared_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">)</span>
 
-    <span class="c1">## Pure scalar vars</span>
+    <span class="c1">## Pure scalar vars (very fast)</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)):</span>
         <span class="n">shared_array</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">scalar_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]])[</span><span class="n">entry_start</span><span class="p">:</span><span class="n">entry_stop</span><span class="p">])</span>
     
     <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    
-    <span class="c1"># Loop over events</span>
-    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">))):</span>
-        
+
+    <span class="c1">## Jagged vars dimension by dimension (very fast), with the maximum</span>
+    <span class="c1"># number of objects dictated by by jagged_dim[]</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;columnar&#39;</span><span class="p">:</span>
+
         <span class="n">k</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span>
-        <span class="n">i</span>  <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ev</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="c1">## Jagged vars</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">))):</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 
-            <span class="n">x</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">d_this</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
-                <span class="n">shared_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d_this</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">d_this</span><span class="p">]</span>
-            
-            <span class="c1"># Increase block counter</span>
+                <span class="c1"># E.g. jet.pt ~ a = jet, b = pt</span>
+                <span class="c1"># Boolean mask for events, at least dim number of objects (e.g. jets)</span>
+                <span class="n">a</span><span class="p">,</span><span class="n">b</span>  <span class="o">=</span> <span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">entry_start</span><span class="p">:</span><span class="n">entry_stop</span><span class="p">][</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">dim</span><span class="p">)</span>
+
+                <span class="c1"># Push to numpy array</span>
+                <span class="n">shared_array</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="p">(</span><span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> \
+                    <span class="n">arr</span><span class="p">[</span><span class="n">entry_start</span><span class="p">:</span><span class="n">entry_stop</span><span class="p">][</span><span class="n">mask</span><span class="p">][</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">][:,</span> <span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Increase jagged block counter</span>
             <span class="n">k</span> <span class="o">+=</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="c1"># Jagged variables by explicit event loop (slow)</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">))):</span>
+
+            <span class="n">k</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span>
+            <span class="n">i</span>  <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ev</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="c1">## Variable by variable</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">)):</span>
+
+                <span class="n">x</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">jvname</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">d_this</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                    <span class="n">shared_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">d_this</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">d_this</span><span class="p">]</span>
+                
+                <span class="c1"># Increase jagged block counter</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
     <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;jagged2matrix: Processing took </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">shared_array</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Processing took </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">shared_array</span></div>
 
@@ -732,19 +635,22 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">):(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns approx equally sized chunks.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        a : Total number</span>
-<span class="sd">        n : Number of chunks</span>
+<span class="sd">        a :  Total number</span>
+<span class="sd">        n :  Number of chunks</span>
+<span class="sd">        end: Python/nympy index style (i.e. + 1 for the end)</span>
 <span class="sd">    Example:</span>
 <span class="sd">        list(split(10, 3))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)):</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">end</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 
