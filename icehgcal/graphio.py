@@ -212,16 +212,16 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
         # CONSTRUCT TENSORS
 
         # Construct output class, note [] is important to have for right dimensions
-        if Y is not None:
+        if Y is None:
+            y = torch.tensor([0],     dtype=torch.long)            
+        else:
             y = torch.tensor([Y[ev]], dtype=torch.long)
-        else:
-            y = torch.tensor([0],    dtype=torch.long)
-
+        
         # Training weights, note [] is important to have for right dimensions
-        if weights is not None:
-            w = torch.tensor([weights[ev]], dtype=torch.float)
+        if weights is None:
+            w = torch.tensor([1.0],   dtype=torch.float)    
         else:
-            w = torch.tensor([1.0],  dtype=torch.float)
+            w = torch.tensor([weights[ev]], dtype=torch.float)
 
         ## Construct global feature vector
         #u = torch.tensor(X[ev, feature_ind].tolist(), dtype=torch.float)

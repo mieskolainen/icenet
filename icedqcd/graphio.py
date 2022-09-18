@@ -5,6 +5,7 @@
 
 import numpy as np
 import awkward as ak
+import ray
 
 import numba
 from   tqdm import tqdm
@@ -12,6 +13,7 @@ import copy
 import pickle
 import os
 import uuid
+import gc
 
 from termcolor import colored, cprint
 
@@ -28,7 +30,15 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 
-def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weights=None, entry_start=None, entry_stop=None, EPS=1e-12, null_value=float(-999.0)):
+@ray.remote
+def parse_graph_data_ray(X, ids, features, node_features, graph_param,
+    Y=None, weights=None, entry_start=None, entry_stop=None, null_value=float(-999.0), EPS=1e-12):
+    
+    return parse_graph_data(X, ids, features, node_features, graph_param,
+        Y, weights, entry_start, entry_stop, null_value, EPS)
+
+def parse_graph_data(X, ids, features, node_features, graph_param,
+    Y=None, weights=None, entry_start=None, entry_stop=None, null_value=float(-999.0), EPS=1e-12):
     """
     Jagged array data into pytorch-geometric style Data format array.
     
@@ -56,7 +66,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
     entry_start, entry_stop, num_events = aux.slice_range(start=entry_start, stop=entry_stop, N=len(X))
     dataset = []
     
-    print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
+    #print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
 
     num_global_features = len(features)
     
@@ -69,7 +79,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
         node_features_hetero_ind[key] = np.arange(k, k + num_node_features[key])
         k += num_node_features[key]
 
-    print(__name__ + f'.parse_graph_data: hetero_ind: {node_features_hetero_ind}')
+    #print(__name__ + f'.parse_graph_data: hetero_ind: {node_features_hetero_ind}')
     num_edge_features = 4
     
     # -----------------------------------------------
@@ -80,13 +90,14 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
         for j in range(num_node_features[key]):
 
             # Awkward groups jagged variables, e.g. 'sv_x' to sv.x
-            jvname[key].append(node_features[key][j].split('_', 1)) # argument 1 takes the first '_' occurance
+            # argument 1 takes the first '_' occurance
+            jvname[key].append(node_features[key][j].split('_', 1))
     # -----------------------------------------------
 
     # Loop over events
     num_empty = 0
 
-    for ev in tqdm(range(entry_start, entry_stop)):
+    for ev in range(entry_start, entry_stop):
 
         # Count the number of heterogeneous nodes by picking the first feature
         nums = {}
@@ -101,13 +112,23 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
         # ------------------------------------------------------------------
         # Construct the node features
         p4vec  = []
-        fvec   = []
-        node_hetero_type = []
 
-        total = 0
+        # Node feature matrix
+        x = np.zeros((num_nodes, np.sum([num_node_features[key] for key in num_node_features.keys()] )), dtype=float)
+        tot_nodes = 0
+
         for key in jvname.keys():
 
             if nums[key] > 0:
+
+                # ------------------------------------------------
+                # Collect all particle features in columnar way, all particles simultaneously
+                for j in range(num_node_features[key]):
+                    x[tot_nodes:tot_nodes+nums[key], node_features_hetero_ind[key][j]] = \
+                        X[ev][jvname[key][j][0]][jvname[key][j][1]]
+                
+                tot_nodes += nums[key] # Running index
+                # ------------------------------------------------
 
                 # Loop over nodes of this hetero-type
                 for k in range(nums[key]):
@@ -115,22 +136,25 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
                     # Construct 4-momentum
                     v = vec4() # initialized to zero by default
 
-                    if   key == 'muon':
-                        v.setPtEtaPhiM(X[ev][jvname['muon'][0][0]].pt[k],
-                                       X[ev][jvname['muon'][0][0]].eta[k],
-                                       X[ev][jvname['muon'][0][0]].phi[k],
+                    if key == 'muon':
+                        a = jvname['muon'][0][0]
+                        v.setPtEtaPhiM(X[ev][a].pt[k],
+                                       X[ev][a].eta[k],
+                                       X[ev][a].phi[k],
                                        M_MUON)
                     elif key == 'jet':
-                        v.setPtEtaPhiM(X[ev][jvname['jet'][0][0]].pt[k],
-                                       X[ev][jvname['jet'][0][0]].eta[k],
-                                       X[ev][jvname['jet'][0][0]].phi[k],
-                                       X[ev][jvname['jet'][0][0]].mass[k])
+                        a = jvname['jet'][0][0]
+                        v.setPtEtaPhiM(X[ev][a].pt[k],
+                                       X[ev][a].eta[k],
+                                       X[ev][a].phi[k],
+                                       X[ev][a].mass[k])
                     
                     elif key == 'sv':
-                        v.setPtEtaPhiM(X[ev][jvname['sv'][0][0]].pt[k],
-                                       X[ev][jvname['sv'][0][0]].eta[k],
-                                       X[ev][jvname['sv'][0][0]].phi[k],
-                                       X[ev][jvname['sv'][0][0]].mass[k])
+                        a = jvname['sv'][0][0]
+                        v.setPtEtaPhiM(X[ev][a].pt[k],
+                                       X[ev][a].eta[k],
+                                       X[ev][a].phi[k],
+                                       X[ev][a].mass[k])
 
                     elif key == 'cpf':
                         v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], M_PION)
@@ -139,17 +163,9 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
                         v.setXYZM(X[ev].npf.pz[k], X[ev].npf.py[k], X[ev].npf.pz[k], 0)
                     
                     else:
-                        True # Use null 4-vector for 'sv'
+                        True # Use null 4-vector
 
                     p4vec.append(v)
-
-                    # Construct abstract feature vector variable by variable
-                    v = np.zeros(num_node_features[key])
-                    for j in range(len(v)):
-                        v[j] = ak.to_numpy(X[ev][jvname[key][j][0]][jvname[key][j][1]][k])
-
-                    fvec.append(v)
-                    node_hetero_type.append(key)
 
         # Empty information
         if num_nodes - 1 == 0:
@@ -161,22 +177,18 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
         # # https://pytorch.org/docs/stable/tensors.html
 
         # Construct output class, note [] is important to have for right dimensions
-        if Y is not None:
-            y = torch.tensor([Y[ev]], dtype=torch.long)
+        if Y is None:
+            y = torch.tensor([0],     dtype=torch.long)            
         else:
-            y = torch.tensor([0],     dtype=torch.long)
+            y = torch.tensor([Y[ev]], dtype=torch.long)
 
         # Training weights, note [] is important to have for right dimensions
-        if weights is not None:
-            w = torch.tensor([weights[ev]], dtype=torch.float)
+        if weights is None:
+            w = torch.tensor([1.0],  dtype=torch.float)    
         else:
-            w = torch.tensor([1.0],  dtype=torch.float)
+            w = torch.tensor([weights[ev]], dtype=torch.float)
 
         ## Construct node features
-        x = get_node_features(num_nodes=num_nodes, num_node_features=num_node_features,
-            p4vec=p4vec, fvec=fvec, node_features_hetero_ind=node_features_hetero_ind,
-            node_hetero_type=node_hetero_type, coord=coord)
-
         x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
 
@@ -202,46 +214,9 @@ def parse_graph_data(X, ids, features, node_features, graph_param, Y=None, weigh
             u_mat[~np.isfinite(u_mat)] = null_value # Input protection
             u = torch.tensor(u_mat, dtype=torch.float)
 
-        dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
-    
-    print(__name__ + f'.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
+        data = Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u)
+        dataset.append(data)
+
+    #print(__name__ + f'.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
     
     return dataset
-
-
-def get_node_features(p4vec, fvec, num_nodes, num_node_features, node_features_hetero_ind, node_hetero_type, coord):
-
-    # Node feature matrix
-    x = np.zeros((num_nodes, np.sum([num_node_features[key] for key in num_node_features.keys()] )), dtype=float)
-
-    for i in range(num_nodes):
-
-        index = i-1
-
-        # i = 0 case is the virtual node
-        if i > 0:
-
-            """
-            # 4-momentum
-            if   coord == 'ptetaphim':
-                x[i,0] = p4vec[index].pt
-                x[i,1] = p4vec[index].eta
-                x[i,2] = p4vec[index].phi
-                x[i,3] = p4vec[index].m
-            elif coord == 'pxpypze':
-                x[i,0] = p4vec[index].px
-                x[i,1] = p4vec[index].py
-                x[i,2] = p4vec[index].pz
-                x[i,3] = p4vec[index].e
-            else:
-                raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
-            """
-
-            # Other features
-            key = node_hetero_type[index]
-            x[i, node_features_hetero_ind[key]] = fvec[index]
-
-    # Cast
-    x = x.astype(float)
-
-    return x

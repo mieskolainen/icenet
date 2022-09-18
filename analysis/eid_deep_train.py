@@ -155,7 +155,7 @@ def main():
                 
                 entry_start = block_ind[block][0]
                 entry_stop  = block_ind[block][-1]
-
+                
                 prints.printbar('=')
                 cprint(__name__ + f'.block: {block+1} / {N_blocks} (events = {entry_stop - entry_start} | total = {num_events[f]}) \n', 'yellow')
 

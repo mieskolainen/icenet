@@ -77,7 +77,7 @@ def apply_in_batches(X, Z, model, losstype, weights=None, batch_size=4096):
     sum_MI_lb = 0.0
 
     for b in range(N_batches):
-        ind    = np.arange(batch_ind[b][0], batch_ind[b][1]+1)
+        ind    = np.arange(batch_ind[b][0], batch_ind[b][-1])
 
         joint, marginal, w = sample_batch(X=X[ind], Z=Z[ind], weights=weights[ind], batch_size=None, device=X.device)
 

@@ -9,6 +9,9 @@ from tqdm import tqdm
 import psutil
 import copy
 import os
+import ray
+import time
+import multiprocessing
 
 from termcolor import colored, cprint
 
@@ -39,8 +42,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         X:     jagged columnar data
         Y:     class labels
         W:     event weights
-        ids:   columnar variable string (list)
-        info:  trigger and pre-selection acceptance x efficiency information (dict)
+        ids:   columnar variables string (list)
+        info:  trigger and pre-selection acceptance x efficiency information etc. (dict)
     """
 
     if type(root_path) is list:
@@ -64,7 +67,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
 
     proc = args["input"]['class_1']
-    X_S, Y_S, W_S, VARS_S, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
+    X_S, Y_S, W_S, ind_S, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     
@@ -72,13 +75,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # *** BACKGROUND MC ***
     
     proc = args["input"]['class_0']
-    X_B, Y_B, W_B, VARS_B, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
+    X_B, Y_B, W_B, ind_B, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
-    
+
+
     # =================================================================
     # Sample conditional theory parameters for the background as they are distributed in signal sample
-        
+    
     for var in MODEL_VARS:
             
         print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for the background')
@@ -97,15 +100,15 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     W = ak.concatenate((W_B, W_S), axis=0)
     
     # ** Crucial -- randomize order to avoid problems with other functions **
-    rind = np.random.permutation(len(X))
+    rand = np.random.permutation(len(X))
     
-    X    = X[rind]
-    Y    = Y[rind]
-    W    = W[rind]
+    X    = X[rand]
+    Y    = Y[rand]
+    W    = W[rand]
     
     print(__name__ + f'.common.load_root_file: len(X) = {len(X)}')
     
-    return X, Y, W, VARS_S, INFO
+    return X, Y, W, ind_S, INFO
 
 
 def process_root(X, ids, isMC, args, **extra):
@@ -197,10 +200,52 @@ def splitfactor(x, y, w, ids, args):
     
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
     node_features = {'muon': muon_vars, 'jet': jet_vars, 'sv': sv_vars}
-    
-    data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
+    """
+    start_time = time.time()
+    data_graph_ = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
         features=scalar_vars, node_features=node_features, graph_param=args['graph_param'])
+
+    print(f'single_results: {time.time()-start_time:0.1f} sec')
+    """
+
+    ## ------------------------------------------
+    # Parallel processing of graph objects with Ray
+
     
+    start_time  = time.time()
+
+    big_chunk_size = 10000
+    num_workers    = multiprocessing.cpu_count()
+    big_chunks     = int(np.ceil(len(data.x) / big_chunk_size))
+
+    chunk_ind   = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
+    print(chunk_ind)
+
+    data_graph  = []
+    k = 0
+    for i in tqdm(range(big_chunks)):
+        
+        ray.init(num_cpus=num_workers)
+        graph_futures = []
+        obj_ref       = ray.put(data.x)
+
+        for j in range(num_workers):
+
+            entry_start, entry_stop = chunk_ind[k][0], chunk_ind[k][-1]
+
+            ret = graphio.parse_graph_data_ray.remote(
+                obj_ref, data.ids, scalar_vars, node_features, args['graph_param'], data.y, data.w, entry_start, entry_stop)
+            graph_futures.append(ret)
+
+            k += 1
+
+        data_graph += sum(ray.get(graph_futures), []) # Join split array results
+
+        ray.shutdown()
+
+    print(f'ray_results: {time.time() - start_time:0.1f} sec')
+    
+
     # -------------------------------------------------------------------------
     ## Tensor representation
     data_tensor = None

@@ -168,16 +168,16 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
         # CONSTRUCT TENSORS
 
         # Construct output class, note [] is important to have for right dimensions
-        if Y is not None:
+        if Y is None:
+            y = torch.tensor([0],     dtype=torch.long)            
+        else:
             y = torch.tensor([Y[ev]], dtype=torch.long)
-        else:
-            y = torch.tensor([0],    dtype=torch.long)
-
+        
         # Training weights, note [] is important to have for right dimensions
-        if weights is not None:
-            w = torch.tensor([weights[ev]], dtype=torch.float)
+        if weights is None:
+            w = torch.tensor([1.0],  dtype=torch.float)    
         else:
-            w = torch.tensor([1.0],  dtype=torch.float)
+            w = torch.tensor([weights[ev]], dtype=torch.float)
 
         ## Construct node features
         x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[ev], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
