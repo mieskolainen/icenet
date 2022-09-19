@@ -44,6 +44,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
@@ -261,24 +262,22 @@
         <span class="s2">&quot;isMC&quot;</span><span class="p">:</span>        <span class="kc">True</span>
     <span class="p">}</span>
 
-    <span class="n">INFO</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class_1&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;class_0&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">INFO</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class_0&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;class_1&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
     <span class="c1"># =================================================================</span>
-    <span class="c1"># *** SIGNAL MC *** (first signal, so we can use it&#39;s theory conditional parameters)</span>
-
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span>
-    <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">ind_S</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+    <span class="c1"># *** SIGNAL MC ***</span>
     
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span>
+    <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** BACKGROUND MC ***</span>
     
     <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span>
-    <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">ind_B</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-
-
+    
     <span class="c1"># =================================================================</span>
     <span class="c1"># Sample conditional theory parameters for the background as they are distributed in signal sample</span>
     
@@ -308,7 +307,7 @@
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.common.load_root_file: len(X) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ind_S</span><span class="p">,</span> <span class="n">INFO</span></div>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span></div>
 
 
 <div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
@@ -400,6 +399,7 @@
     
     <span class="c1">#node_features = {&#39;muon&#39;: muon_vars, &#39;jet&#39;: jet_vars, &#39;cpf&#39;: cpf_vars, &#39;npf&#39;: npf_vars, &#39;sv&#39;: sv_vars}</span>
     <span class="n">node_features</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;muon&#39;</span><span class="p">:</span> <span class="n">muon_vars</span><span class="p">,</span> <span class="s1">&#39;jet&#39;</span><span class="p">:</span> <span class="n">jet_vars</span><span class="p">,</span> <span class="s1">&#39;sv&#39;</span><span class="p">:</span> <span class="n">sv_vars</span><span class="p">}</span>
+    
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    start_time = time.time()</span>
 <span class="sd">    data_graph_ = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, </span>
@@ -411,7 +411,6 @@
     <span class="c1">## ------------------------------------------</span>
     <span class="c1"># Parallel processing of graph objects with Ray</span>
 
-    
     <span class="n">start_time</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="n">big_chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
@@ -424,8 +423,8 @@
     <span class="n">data_graph</span>  <span class="o">=</span> <span class="p">[]</span>
     <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">big_chunks</span><span class="p">)):</span>
-        
-        <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="n">num_workers</span><span class="p">)</span>
+
+        <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">_temp_dir</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s1">/tmp/&#39;</span><span class="p">)</span>
         <span class="n">graph_futures</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">obj_ref</span>       <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
 
@@ -433,18 +432,18 @@
 
             <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span> <span class="o">=</span> <span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
-                <span class="n">obj_ref</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">node_features</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">)</span>
-            <span class="n">graph_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+            <span class="n">graph_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
+                <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span> \
+                    <span class="n">obj_ref</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">node_features</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">data_graph</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">graph_futures</span><span class="p">),</span> <span class="p">[])</span> <span class="c1"># Join split array results</span>
-
         <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ray_results: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
-    
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## Tensor representation</span>
@@ -456,7 +455,8 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="o">=</span><span class="n">scalar_vars</span><span class="p">,</span>
                        <span class="n">jagged_vars</span><span class="o">=</span><span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_maxdim&#39;</span><span class="p">],</span>
                        <span class="n">null_value</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">])</span>
-    
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># Create DeepSet style representation from the &quot;long-vector&quot; content</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="kc">None</span>

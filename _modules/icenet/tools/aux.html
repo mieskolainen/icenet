@@ -44,6 +44,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
@@ -634,23 +635,42 @@
     <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">):(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
 
+<div class="viewcode-block" id="split_size"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_size">[docs]</a><span class="k">def</span> <span class="nf">split_size</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    As split_start_end() but returns only size per chunk</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span>  <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">))]</span>
 
-<div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="explicit_range"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.explicit_range">[docs]</a><span class="k">def</span> <span class="nf">explicit_range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">num_entries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clean None from entry_start and entry_stop</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">entry_start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">entry_start</span>
+    <span class="n">stop</span>  <span class="o">=</span> <span class="n">num_entries</span> <span class="k">if</span> <span class="n">entry_stop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">entry_stop</span>
+
+    <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span></div>
+
+<div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">end_plus</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns approx equally sized chunks.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        a :  Total number</span>
-<span class="sd">        n :  Number of chunks</span>
-<span class="sd">        end: Python/nympy index style (i.e. + 1 for the end)</span>
-<span class="sd">    Example:</span>
-<span class="sd">        list(split(10, 3))</span>
+<span class="sd">        a:        Range, define with range()</span>
+<span class="sd">        n:        Number of chunks</span>
+<span class="sd">        end_plus: Python/nympy index style (i.e. + 1 for the end)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        split_start_end(range(100), 3)  returns [[0, 34], [34, 67], [67, 100]]</span>
+<span class="sd">        split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">ll</span>  <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)):</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">end</span><span class="p">])</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">end_plus</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 

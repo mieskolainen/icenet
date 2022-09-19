@@ -44,6 +44,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
@@ -205,9 +206,14 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
-<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
@@ -215,10 +221,91 @@
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
 
+<span class="c1">#@ray.remote</span>
+<div class="viewcode-block" id="read_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_MC">[docs]</a><span class="k">def</span> <span class="nf">read_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">):</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># --------------------</span>
+    
+    <span class="n">datasets</span>        <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+    <span class="n">xs</span>              <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;xs&#39;</span><span class="p">]</span>
+    <span class="n">model_param</span>     <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
+    <span class="n">force_xs</span>        <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;force_xs&#39;</span><span class="p">]</span>
+    <span class="n">maxevents_scale</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;maxevents_scale&#39;</span><span class="p">]</span>
+
+    <span class="c1"># --------------------</span>
+
+    <span class="n">rootfile</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+
+    <span class="c1"># Custom scale event statistics</span>
+    <span class="n">maxevents</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">maxevents_scale</span><span class="p">)])</span>
+    
+    <span class="c1"># Load file</span>
+    <span class="n">X_uncut</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tree&#39;</span><span class="p">],</span>
+                    <span class="n">entry_start</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_start&#39;</span><span class="p">],</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_stop&#39;</span><span class="p">],</span>
+                    <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;load_ids&#39;</span><span class="p">],</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">)</span>
+    
+    <span class="n">N_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_uncut</span><span class="p">)</span>
+
+    <span class="c1">## ** Here one could save X before any cuts **</span>
+    
+    <span class="c1"># Apply selections</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">stats</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_uncut</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+    <span class="n">N_after</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="n">eff_acc</span>  <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+
+    <span class="c1"># -------------------------------------------------</span>
+    <span class="c1"># Visible cross-section weights</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">force_xs</span><span class="p">:</span>
+        <span class="c1"># Sum over W yields --&gt; (eff_acc * xs)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span><span class="p">)</span>
+    
+    <span class="c1"># &#39;force_xs&#39; mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants</span>
+    <span class="c1"># to have equal proportions for e.g. theory conditional MVA training.</span>
+    <span class="c1"># (then one uses the same input &#39;xs&#39; value for each process in the steering .yaml file)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Sum over W yields --&gt; xs</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span>
+
+    <span class="c1"># Save statistics information</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yaml&#39;</span><span class="p">:</span> <span class="n">process</span><span class="p">,</span> <span class="s1">&#39;cut_stats&#39;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span> <span class="s1">&#39;eff_acc&#39;</span><span class="p">:</span> <span class="n">eff_acc</span><span class="p">}</span>
+
+    <span class="c1"># -------------------------------------------------</span>
+    <span class="c1"># Add conditional (theory param) variables</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            
+        <span class="n">value</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+        
+        <span class="c1"># Pick random between [a,b]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Pick specific fixed value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>         
+        
+        <span class="c1"># Create new &#39;record&#39; (column) to ak-array</span>
+        <span class="n">col_name</span>    <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span>
+        <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="n">W</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span><span class="n">info</span><span class="p">}</span></div>
+
+
 <div class="viewcode-block" id="read_multiple_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_multiple_MC">[docs]</a><span class="k">def</span> <span class="nf">read_multiple_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">processes</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loop over different MC processes</span>
-
+<span class="sd">    Loop over different MC processes as defined in the yaml files</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        process_func:  data processing function</span>
 <span class="sd">        processes:     MC processes dictionary (from yaml)</span>
@@ -227,95 +314,45 @@
 <span class="sd">        class_id:      class identifier (integer), e.g. 0, 1, 2 ...</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        X, Y, W, ids   (awkward array format)</span>
+<span class="sd">        X, Y, W, ids, info (awkward array format)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#num_workers = multiprocessing.cpu_count()</span>
+    <span class="c1">#ray.init(num_cpus=len(processes), _temp_dir=f&#39;{os.getcwd()}/tmp/&#39;)</span>
+    <span class="c1">#futures = []</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1"># Span ray session for each file process</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">processes</span><span class="p">):</span>
+        <span class="c1">#ret = read_MC.remote(process_func, processes[key], root_path, param, class_id)</span>
+        <span class="c1">#futures.append(ret)</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: </span><span class="si">{</span><span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">read_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">))</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
 
-        <span class="c1"># --------------------</span>
-        
-        <span class="n">datasets</span>        <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
-        <span class="n">xs</span>              <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;xs&#39;</span><span class="p">]</span>
-        <span class="n">model_param</span>     <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
-        <span class="n">force_xs</span>        <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;force_xs&#39;</span><span class="p">]</span>
-        <span class="n">maxevents_scale</span> <span class="o">=</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;maxevents_scale&#39;</span><span class="p">]</span>
+    <span class="c1">#data = ray.get(futures) # Get results</span>
 
-        <span class="c1"># --------------------</span>
+    <span class="c1"># Combine results</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">info</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span>
 
-        <span class="n">rootfile</span>    <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
-
-        <span class="c1"># Custom scale event statistics</span>
-        <span class="n">maxevents</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">maxevents_scale</span><span class="p">)])</span>
-        
-        <span class="c1"># Load file</span>
-        <span class="n">X__</span><span class="p">,</span> <span class="n">ids</span>    <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tree&#39;</span><span class="p">],</span>
-                        <span class="n">entry_start</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_start&#39;</span><span class="p">],</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;entry_stop&#39;</span><span class="p">],</span>
-                        <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;load_ids&#39;</span><span class="p">],</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">)</span>
-        
-        <span class="n">N_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X__</span><span class="p">)</span>
-        
-        <span class="c1"># Apply selections</span>
-        <span class="n">X__</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">stats</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X__</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-        <span class="n">N_after</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X__</span><span class="p">)</span>
-
-        <span class="n">eff_acc</span>  <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Process &lt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&gt; | efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="n">Y__</span> <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
-
-        <span class="c1"># -------------------------------------------------</span>
-        <span class="c1"># Visible cross-section weights</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">force_xs</span><span class="p">:</span>
-            <span class="c1"># Sum over W yields --&gt; (eff_acc * xs)</span>
-            <span class="n">W__</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span><span class="p">)</span>
-        
-        <span class="c1"># &#39;force_xs&#39; mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants</span>
-        <span class="c1"># to have equal proportions for e.g. theory conditional MVA training.</span>
-        <span class="c1"># (then one uses the same input &#39;xs&#39; value for each process in the steering .yaml file)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Sum over W yields --&gt; xs</span>
-            <span class="n">W__</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span>
-
-        <span class="c1"># Save statistics information</span>
-        <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yaml&#39;</span><span class="p">:</span> <span class="n">processes</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="s1">&#39;cut_stats&#39;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span> <span class="s1">&#39;eff_acc&#39;</span><span class="p">:</span> <span class="n">eff_acc</span><span class="p">}</span>
-
-        <span class="c1"># -------------------------------------------------</span>
-        <span class="c1"># Add conditional (theory param) variables</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
-        
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                
-            <span class="n">value</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-            
-            <span class="c1"># Pick random between [a,b]</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
-                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X__</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
-            <span class="c1"># Pick specific fixed value</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-                <span class="n">col</span> <span class="o">=</span> <span class="n">value</span>  <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X__</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>         
-            
-            <span class="c1"># Create new &#39;record&#39; (column) to ak-array</span>
-            <span class="n">col_name</span>      <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="n">X__</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span>
-            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span>
-        <span class="c1"># -------------------------------------------------</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
 
         <span class="c1"># Concatenate processes</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X__</span><span class="p">,</span> <span class="n">Y__</span><span class="p">,</span> <span class="n">W__</span>
+            <span class="n">X</span>    <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;X&#39;</span><span class="p">])</span>
+            <span class="n">Y</span>    <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+            <span class="n">W</span>    <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;W&#39;</span><span class="p">])</span>
+            <span class="n">ids</span>  <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ids&#39;</span><span class="p">])</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;info&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">X__</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">Y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Y</span><span class="p">,</span> <span class="n">Y__</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">W</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">W</span><span class="p">,</span> <span class="n">W__</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        
+            <span class="n">X</span>    <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;X&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">Y</span>    <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Y</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;Y&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">W</span>    <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">W</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;W&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;info&#39;</span><span class="p">])</span>
+            <span class="c1"># ids = always the same</span>
+    
+    <span class="c1">#ray.shutdown()</span>
+    
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">info</span></div>
 
 
@@ -339,18 +376,19 @@
     <span class="n">num_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)):</span>
-        <span class="n">file</span>     <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">events</span>   <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">tree</span><span class="p">]</span>
-        <span class="n">key_name</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span>    
+        <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
 
-        <span class="n">num_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">key_name</span><span class="p">))</span>
-        
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: </span><span class="si">{</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: keys(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: values(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
-        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">events</span>   <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">tree</span><span class="p">]</span>
+            <span class="n">key_name</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span>    
+
+            <span class="n">num_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">key_name</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: </span><span class="si">{</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: keys(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: values(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">num_events</span></div>
 
@@ -361,7 +399,7 @@
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        events:      uproot tree</span>
-<span class="sd">        ids:         variable names to pick</span>
+<span class="sd">        ids:         names of the variables to pick</span>
 <span class="sd">        entry_start: first event to consider</span>
 <span class="sd">        entry_stop:  last event to consider</span>
 <span class="sd">    </span>
@@ -388,32 +426,32 @@
 <div class="viewcode-block" id="load_tree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.load_tree">[docs]</a><span class="k">def</span> <span class="nf">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load ROOT files</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        rootfile:          Name of root file paths (string or a list of strings)</span>
-<span class="sd">        tree:              Tree to read out</span>
-<span class="sd">        entry_start:       First event to read per file</span>
-<span class="sd">        entry_stop:        Last event to read per file</span>
-<span class="sd">        maxevents:          Maximum number of events in total (over all files)</span>
-<span class="sd">        ids:               Variable names to read out from the root tree</span>
-<span class="sd">        library:           Return type &#39;np&#39; (jagged numpy) or &#39;ak&#39; (awkward) of the array</span>
+<span class="sd">        rootfile:      Name of root file paths (string or a list of strings)</span>
+<span class="sd">        tree:          Tree to read out</span>
+<span class="sd">        entry_start:   First event to read per file</span>
+<span class="sd">        entry_stop:    Last event to read per file</span>
+<span class="sd">        maxevents:     Maximum number of events in total (over all files)</span>
+<span class="sd">        ids:           Names of the variables to read out from the root tree</span>
+<span class="sd">        library:       Return type &#39;np&#39; (jagged numpy) or &#39;ak&#39; (awkward) of the array</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        array of type &#39;library&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">rootfile</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">]</span>
 
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Opening rootfile </span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1"> with a tree key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
+    <span class="c1"># Add Tree handles here using the string-syntax of uproot {file:tree}</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">))]</span>
     
     <span class="c1"># ----------------------------------------------------------</span>
     <span class="c1">### Select variables</span>
-    <span class="n">events</span>  <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">all_ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="c1">#events.close() # This will cause memmap problems</span>
+    <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+        <span class="n">all_ids</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
     
     <span class="n">load_ids</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">all_ids</span><span class="o">=</span><span class="n">all_ids</span><span class="p">)</span>
 
@@ -422,55 +460,131 @@
     
     <span class="k">if</span>   <span class="n">library</span> <span class="o">==</span> <span class="s1">&#39;np&#39;</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">))):</span>
-            <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="n">param</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;events&#39;</span><span class="p">:</span> <span class="n">events</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">load_ids</span><span class="p">,</span> <span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span>
+            <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+                
+                <span class="n">param</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;events&#39;</span><span class="p">:</span> <span class="n">events</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">load_ids</span><span class="p">,</span> <span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">events_to_jagged_numpy</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">X</span><span class="p">,</span><span class="n">ids</span>  <span class="o">=</span> <span class="n">events_to_jagged_numpy</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">temp</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">events_to_jagged_numpy</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">temp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxevents</span><span class="p">):</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-                <span class="k">break</span>
+                <span class="c1"># Concatenate with other file results</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">output</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">output</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxevents</span><span class="p">):</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
+                    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="k">break</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">ids</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        # uproot.concatenate does not allow (??) to control maximum number of events per file</span>
-<span class="sd">        </span>
-<span class="sd">        Y = uproot.concatenate(files, expressions=load_ids, library=library)</span>
-
-<span class="sd">        ids = [i for i in Y.keys()]</span>
-<span class="sd">        X   = np.empty((len(Y[ids[0]]), len(ids)), dtype=object) </span>
-<span class="sd">        for i in range(len(ids)):</span>
-<span class="sd">            X[:,i] = Y[ids[i]]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span>
 
     <span class="k">elif</span> <span class="n">library</span> <span class="o">==</span> <span class="s1">&#39;ak&#39;</span><span class="p">:</span>
 
-        <span class="n">param</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="s1">&#39;library&#39;</span><span class="p">:</span> <span class="s1">&#39;ak&#39;</span><span class="p">,</span> <span class="s1">&#39;how&#39;</span><span class="p">:</span> <span class="s1">&#39;zip&#39;</span><span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        # Non-multiprocessed version</span>
+<span class="sd">        </span>
+<span class="sd">        for i in tqdm(range(len(files))):</span>
+<span class="sd">            </span>
+<span class="sd">            # Get the number of events</span>
+<span class="sd">            num_events = get_num_events(rootfile=files[i])</span>
+<span class="sd">            </span>
+<span class="sd">            with uproot.open(files[i]) as events:</span>
+<span class="sd">                </span>
+<span class="sd">                output = events.arrays(load_ids, entry_start=entry_start, entry_stop=entry_stop, library=&#39;ak&#39;, how=&#39;zip&#39;)</span>
+<span class="sd">                </span>
+<span class="sd">                # Concatenate with other file results</span>
+<span class="sd">                X = output if (i == 0) else ak.concatenate((X, output), axis=0)</span>
+<span class="sd">                        </span>
+<span class="sd">                if (maxevents is not None) and (len(X) &gt; maxevents):</span>
+<span class="sd">                    X = X[0:maxevents]</span>
+<span class="sd">                    cprint(__name__ + f&#39;.load_tree: Maximum event count {maxevents} reached&#39;, &#39;red&#39;)</span>
+<span class="sd">                    break</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># ======================================================</span>
+        <span class="c1"># Multiprocessing version</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">))):</span>
-            <span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">X</span>    <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">load_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">temp</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">load_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">temp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxevents</span><span class="p">):</span>
-                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-                <span class="k">break</span>
+        <span class="n">num_workers</span>  <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span> <span class="c1"># min handles the case #files &lt; #cpu</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">_temp_dir</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s1">/tmp/&#39;</span><span class="p">)</span>
+
+        <span class="n">chunk_ind</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_start_end</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)),</span> <span class="n">num_workers</span><span class="p">)</span>
+        <span class="n">submaxevents</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_size</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">maxevents</span><span class="p">),</span> <span class="n">num_workers</span><span class="p">)</span>
+        <span class="n">futures</span>      <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: submaxevents per Ray process: </span><span class="si">{</span><span class="n">submaxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_workers</span><span class="p">):</span>    
+            <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read_file_ak</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">load_ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">submaxevents</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span> <span class="c1"># synchronous read-out</span>
+
+        <span class="c1"># Combine future returned sub-arrays</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Unknown library support&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">read_file_ak</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ray multiprocess read-wrapper-function per root file.</span>
+<span class="sd">    </span>
+<span class="sd">    Remark:</span>
+<span class="sd">        Multiprocessing within one file did not yield good</span>
+<span class="sd">        performance empirically, but performance scales linearly for separate files.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        files:        list of root filenames</span>
+<span class="sd">        ids:          variables to read out</span>
+<span class="sd">        entry_start:  first entry to to read</span>
+<span class="sd">        entry_stop:   last entry to read</span>
+<span class="sd">        maxevents:    maximum number of events (in total over all files)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        awkward array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">))):</span>
+
+        <span class="c1"># Get the number of entries</span>
+        <span class="c1">#num_entries = get_num_events(rootfile=files[i])</span>
+        <span class="c1">#print(__name__ + f&#39;.read_file_ak: Found {num_entries} entries from the file: {files[i]}&#39;)</span>
+
+        <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;zip&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Concatenate with other file results</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">output</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">output</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxevents</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
+                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">output</span>
+
+
+<div class="viewcode-block" id="get_num_events"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.get_num_events">[docs]</a><span class="k">def</span> <span class="nf">get_num_events</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">key_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the number of entries in a rootfile by reading a key</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        rootfile:   rootfile string (with possible Tree name appended with :)</span>
+<span class="sd">        key_index:  which variable use as a dummy</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        number of entries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="n">key_index</span><span class="p">]))</span></div>
+
+<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">events_to_jagged_ak</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;ak&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;zip&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper for Ray &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="n">how</span><span class="p">)</span>
+
 </pre></div>
 
            </div>

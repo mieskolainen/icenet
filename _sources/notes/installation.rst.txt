@@ -54,6 +54,17 @@ Execute
 	(OR pip install -r requirements-cpu-only.txt)
 
 
+Initialize the environment
+----------------------------------
+
+Always start with
+
+.. code-block:: none
+
+	conda activate icenet
+	source setenv.sh
+
+
 Possible problems
 ----------------------------------
 

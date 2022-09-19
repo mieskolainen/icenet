@@ -44,6 +44,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
@@ -205,6 +206,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">vector</span>
 <span class="kn">import</span> <span class="nn">ray</span>
 
 <span class="kn">import</span> <span class="nn">numba</span>
@@ -254,8 +256,8 @@
 <span class="sd">        Array of pytorch-geometric Data objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">M_MUON</span>     <span class="o">=</span> <span class="mf">0.105658</span> <span class="c1"># Muon mass (GeV)</span>
-    <span class="n">M_PION</span>     <span class="o">=</span> <span class="mf">0.139</span>    <span class="c1"># Charged pion mass (GeV)</span>
+    <span class="n">M_MUON</span>     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.105658</span><span class="p">)</span> <span class="c1"># Muon mass (GeV)</span>
+    <span class="n">M_PION</span>     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.139</span><span class="p">)</span>    <span class="c1"># Charged pion mass (GeV)</span>
 
     <span class="n">global_on</span>  <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;global_on&#39;</span><span class="p">]</span>
     <span class="n">coord</span>      <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;coord&#39;</span><span class="p">]</span>
@@ -298,7 +300,7 @@
     <span class="n">num_empty</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">):</span>
-
+        
         <span class="c1"># Count the number of heterogeneous nodes by picking the first feature</span>
         <span class="n">nums</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">jvname</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -330,6 +332,31 @@
                 <span class="n">tot_nodes</span> <span class="o">+=</span> <span class="n">nums</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="c1"># Running index</span>
                 <span class="c1"># ------------------------------------------------</span>
 
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                if key == &#39;muon&#39;:</span>
+
+<span class="sd">                    a = jvname[&#39;muon&#39;][0][0]</span>
+<span class="sd">                    p4 = vector.Array({</span>
+<span class="sd">                                    &#39;pt&#39; : X[ev][a].pt,</span>
+<span class="sd">                                    &#39;eta&#39;: X[ev][a].eta,</span>
+<span class="sd">                                    &#39;phi&#39;: X[ev][a].phi,</span>
+<span class="sd">                                    &#39;m&#39;:   (0.0*X[ev][a].phi + 1.0)*M_MUON})</span>
+
+<span class="sd">                if key == &#39;jet&#39; or key == &#39;sv&#39;:</span>
+
+<span class="sd">                    a = jvname[key][0][0]</span>
+<span class="sd">                    p4 = vector.Array({</span>
+<span class="sd">                                    &#39;pt&#39; : X[ev][a].pt,</span>
+<span class="sd">                                    &#39;eta&#39;: X[ev][a].eta,</span>
+<span class="sd">                                    &#39;phi&#39;: X[ev][a].phi,</span>
+<span class="sd">                                    &#39;m&#39;:   X[ev][a].mass})</span>
+<span class="sd">                </span>
+<span class="sd">                if p4 is None:</span>
+<span class="sd">                    p4vec = p4</span>
+<span class="sd">                else:</span>
+<span class="sd">                    p4vec = ak.concatenate((p4vec,p4))</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
                 <span class="c1"># Loop over nodes of this hetero-type</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
                     
@@ -342,15 +369,9 @@
                                        <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">eta</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
                                        <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
                                        <span class="n">M_MUON</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;jet&#39;</span><span class="p">:</span>
-                        <span class="n">a</span> <span class="o">=</span> <span class="n">jvname</span><span class="p">[</span><span class="s1">&#39;jet&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="n">v</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
-                                       <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">eta</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
-                                       <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
-                                       <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-                    
-                    <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sv&#39;</span><span class="p">:</span>
-                        <span class="n">a</span> <span class="o">=</span> <span class="n">jvname</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;jet&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;sv&#39;</span><span class="p">:</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="n">jvname</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">v</span><span class="o">.</span><span class="n">setPtEtaPhiM</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
                                        <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">eta</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
                                        <span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
