@@ -252,7 +252,7 @@ def read_data(args, func_loader, runmode):
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data: Saving to file: "{cache_filename}"', 'yellow')
             pickle.dump([X, Y, W, ids, info, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+    
     else:
         with open(cache_filename, 'rb') as handle:
             cprint(__name__ + f'.read_data: Loading from file: "{cache_filename}"', 'yellow')

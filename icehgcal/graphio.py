@@ -137,13 +137,13 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     Args:
         X          :  Jagged array of variables
         ids        :  Variable names as an array of strings
-        features   :  Array of active global feature strings
+        features   :  List of active global feature strings
         graph_param:  Graph construction parameters dict
         Y          :  Target class  array (if any, typically MC only)
         weights    :  (Re-)weighting array (if any, typically MC only)
     
     Returns:
-        Array of pytorch-geometric Data objects
+        List of pytorch-geometric Data objects
     """
 
     global_on  = graph_param['global_on']

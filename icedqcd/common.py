@@ -43,9 +43,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         Y:     class labels
         W:     event weights
         ids:   columnar variables string (list)
-        info:  trigger and pre-selection acceptance x efficiency information etc. (dict)
+        info:  trigger, MC xs, pre-selection acceptance x efficiency information (dict)
     """
-
+    
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list
     

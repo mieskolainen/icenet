@@ -10,6 +10,7 @@ import ray
 import multiprocessing
 import os
 import copy
+import gc
 
 from tqdm import tqdm
 from termcolor import colored, cprint
@@ -149,7 +150,10 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
             W    = ak.concatenate((W, data[i]['W']), axis=0)
             info.update(data[i]['info'])
             # ids = always the same
-    
+        
+        del data[i]
+
+    gc.collect()
     #ray.shutdown()
     
     return X,Y,W,ids,info
@@ -265,8 +269,10 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                 output = events_to_jagged_numpy(**param)
 
                 # Concatenate with other file results
-                X = output if (i == 0) else np.concatenate((X, output), axis=0)
-                
+                X = copy.deepcopy(output) if (i == 0) else np.concatenate((X, output), axis=0)
+                del output
+                gc.collect()
+
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
@@ -299,7 +305,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         # ======================================================
         # Multiprocessing version
 
-        num_workers  = min(len(files), multiprocessing.cpu_count()) # min handles the case #files < #cpu
+        num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
         ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
         chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
@@ -315,7 +321,9 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
 
         # Combine future returned sub-arrays
         for k in range(len(results)):
-            X = results[k] if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+            X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+            results[k] = None # free memory
+            gc.collect()
 
         ray.shutdown()
 
@@ -355,14 +363,18 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
             output = events.arrays(ids, entry_start=entry_start, entry_stop=entry_stop, library='ak', how='zip')
 
             # Concatenate with other file results
-            X = output if (i == 0) else ak.concatenate((X, output), axis=0)
+            X = copy.deepcopy(output) if (i == 0) else ak.concatenate((X, output), axis=0)
+            del output
+            io.showmem()
             
             if (maxevents is not None) and (len(X) > maxevents):
                 X = X[0:maxevents]
                 cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                 break
 
-    return output
+        gc.collect()
+
+    return X
 
 
 def get_num_events(rootfile, key_index=0):

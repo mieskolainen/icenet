@@ -438,11 +438,13 @@ def eval_boolean_exptree(root, X, ids):
         """ Helper function """
         if isinstance(a, str):
             
+            print(f'a:{a}, b:{b}')
+
             # Split '__' because of function operators (see below)
             return a.split('__')[-1] in b
         else:
             return False
-
+    
     # Empty tree
     if root is None:
         return 0

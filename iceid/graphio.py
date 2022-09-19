@@ -91,13 +91,13 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
     Args:
         X          :  Jagged array of variables
         ids        :  Variable names as an array of strings
-        features   :  Array of active global feature strings
+        features   :  List of active global feature strings
         graph_param:  Graph construction parameters dict
         Y          :  Target class  array (if any, typically MC only)
         weights    :  (Re-)weighting array (if any, typically MC only)
     
     Returns:
-        Array of pytorch-geometric Data objects
+        List of pytorch-geometric Data objects
     """
     M_PION     = 0.13957 # charged pion mass (GeV)
     

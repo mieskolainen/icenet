@@ -5,8 +5,8 @@
 # Run with: source runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="/home/user/travis-stash/input/icedqcd"
-#DATAPATH="/vols/cms/mc3909/"
+#DATAPATH="/home/user/travis-stash/input/icedqcd"
+DATAPATH="/vols/cms/mc3909/"
 
 CONDITIONAL=1
 
