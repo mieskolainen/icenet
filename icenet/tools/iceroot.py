@@ -151,9 +151,9 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
             info.update(data[i]['info'])
             # ids = always the same
         
-        del data[i]
-
-    gc.collect()
+        data[i] = None # Free memory
+        gc.collect()
+    
     #ray.shutdown()
     
     return X,Y,W,ids,info
@@ -366,7 +366,7 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
             X = copy.deepcopy(output) if (i == 0) else ak.concatenate((X, output), axis=0)
             del output
             io.showmem()
-            
+
             if (maxevents is not None) and (len(X) > maxevents):
                 X = X[0:maxevents]
                 cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
