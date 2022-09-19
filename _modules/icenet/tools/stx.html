@@ -639,11 +639,13 @@
         <span class="sd">&quot;&quot;&quot; Helper function &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;a:</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s1">, b:</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
             <span class="c1"># Split &#39;__&#39; because of function operators (see below)</span>
             <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
-
+    
     <span class="c1"># Empty tree</span>
     <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">0</span>
