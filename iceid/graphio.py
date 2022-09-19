@@ -156,7 +156,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
 
                 v = vec4()
                 v.setPtEtaPhiM(pt, eta, phi, 0)
-
+                
                 p4vec.append(v)
 
         # Empty ECAL cluster information
@@ -210,37 +210,34 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
     return dataset
 
 
-
 def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coord):
 
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features), dtype=float)
 
-    for i in range(num_nodes):
+    for i in range(num_nodes-1): # Last one is the empty event case
 
-        # i = 0 case is the virtual node
-        if i > 0:
-            if   coord == 'ptetaphim':
-                x[i,0] = p4vec[i-1].pt
-                x[i,1] = p4vec[i-1].eta
-                x[i,2] = p4vec[i-1].phi
-                x[i,3] = p4vec[i-1].m
-            elif coord == 'pxpypze':
-                x[i,0] = p4vec[i-1].px
-                x[i,1] = p4vec[i-1].py
-                x[i,2] = p4vec[i-1].pz
-                x[i,3] = p4vec[i-1].e
-            else:
-                raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
-            
-            # other features
-            x[i,4] = p4track.deltaR(p4vec[i-1])
+        if   coord == 'ptetaphim':
+            x[i,0] = p4vec[i].pt
+            x[i,1] = p4vec[i].eta
+            x[i,2] = p4vec[i].phi
+            x[i,3] = p4vec[i].m
+        elif coord == 'pxpypze':
+            x[i,0] = p4vec[i].px
+            x[i,1] = p4vec[i].py
+            x[i,2] = p4vec[i].pz
+            x[i,3] = p4vec[i].e
+        else:
+            raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
+        
+        # other features
+        x[i,4] = p4track.deltaR(p4vec[i])
 
-            try:
-                x[i,5] = X[ids.index('image_clu_nhit')][i-1]
-            except:
-                continue
-                # Not able to read it (empty cluster data)
+        try:
+            x[i,5] = X[ids.index('image_clu_nhit')][i]
+        except:
+            continue
+            # Not able to read it (empty cluster data)
     
     # Cast
     x = x.astype(float)

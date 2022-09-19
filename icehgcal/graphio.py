@@ -185,7 +185,7 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
 
         num_nodes = 1 + len(X[ev, ind__candidate_energy]) # +1 for virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
-
+        
         # Construct 4-vector for each HGCAL candidate
         p4vec = []
         N_c = len(X[ev, ind__candidate_energy])
@@ -262,21 +262,19 @@ def get_node_features(p4vec, num_nodes, num_node_features, coord):
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features), dtype=float)
 
-    for i in range(num_nodes):
+    for i in range(num_nodes-1): # Last one is the empty event case
 
-        # i = 0 case is the virtual node
-        if i > 0:
-            if   coord == 'ptetaphim':
-                x[i,0] = p4vec[i-1].pt
-                x[i,1] = p4vec[i-1].eta
-                x[i,2] = p4vec[i-1].phi
-                x[i,3] = p4vec[i-1].m
-            elif coord == 'pxpypze':
-                x[i,0] = p4vec[i-1].px
-                x[i,1] = p4vec[i-1].py
-                x[i,2] = p4vec[i-1].pz
-                x[i,3] = p4vec[i-1].e
-            else:
-                raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
-
+        if   coord == 'ptetaphim':
+            x[i,0] = p4vec[i].pt
+            x[i,1] = p4vec[i].eta
+            x[i,2] = p4vec[i].phi
+            x[i,3] = p4vec[i].m
+        elif coord == 'pxpypze':
+            x[i,0] = p4vec[i].px
+            x[i,1] = p4vec[i].py
+            x[i,2] = p4vec[i].pz
+            x[i,3] = p4vec[i].e
+        else:
+            raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
+    
     return x

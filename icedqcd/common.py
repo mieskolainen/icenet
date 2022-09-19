@@ -61,24 +61,22 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         "isMC":        True
     }
 
-    INFO = {'class_1': None, 'class_0': None}
+    INFO = {'class_0': None, 'class_1': None}
 
     # =================================================================
-    # *** SIGNAL MC *** (first signal, so we can use it's theory conditional parameters)
-
-    proc = args["input"]['class_1']
-    X_S, Y_S, W_S, ind_S, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
-        process_func=process_root, processes=proc, root_path=root_path, param=param)
+    # *** SIGNAL MC ***
     
+    proc = args["input"]['class_1']
+    X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
+        process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     # =================================================================
     # *** BACKGROUND MC ***
     
     proc = args["input"]['class_0']
-    X_B, Y_B, W_B, ind_B, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
+    X_B, Y_B, W_B, ind, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
-
-
+    
     # =================================================================
     # Sample conditional theory parameters for the background as they are distributed in signal sample
     
@@ -108,7 +106,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     print(__name__ + f'.common.load_root_file: len(X) = {len(X)}')
     
-    return X, Y, W, ind_S, INFO
+    return X, Y, W, ind, INFO
 
 
 def process_root(X, ids, isMC, args, **extra):
@@ -200,6 +198,7 @@ def splitfactor(x, y, w, ids, args):
     
     #node_features = {'muon': muon_vars, 'jet': jet_vars, 'cpf': cpf_vars, 'npf': npf_vars, 'sv': sv_vars}
     node_features = {'muon': muon_vars, 'jet': jet_vars, 'sv': sv_vars}
+    
     """
     start_time = time.time()
     data_graph_ = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
@@ -211,7 +210,6 @@ def splitfactor(x, y, w, ids, args):
     ## ------------------------------------------
     # Parallel processing of graph objects with Ray
 
-    
     start_time  = time.time()
 
     big_chunk_size = 10000
@@ -224,8 +222,8 @@ def splitfactor(x, y, w, ids, args):
     data_graph  = []
     k = 0
     for i in tqdm(range(big_chunks)):
-        
-        ray.init(num_cpus=num_workers)
+
+        ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
         graph_futures = []
         obj_ref       = ray.put(data.x)
 
@@ -233,18 +231,18 @@ def splitfactor(x, y, w, ids, args):
 
             entry_start, entry_stop = chunk_ind[k][0], chunk_ind[k][-1]
 
-            ret = graphio.parse_graph_data_ray.remote(
-                obj_ref, data.ids, scalar_vars, node_features, args['graph_param'], data.y, data.w, entry_start, entry_stop)
-            graph_futures.append(ret)
+            graph_futures.append( \
+                graphio.parse_graph_data_ray.remote( \
+                    obj_ref, data.ids, scalar_vars, node_features, args['graph_param'], data.y, data.w, entry_start, entry_stop)
+            )
 
             k += 1
 
         data_graph += sum(ray.get(graph_futures), []) # Join split array results
-
         ray.shutdown()
 
     print(f'ray_results: {time.time() - start_time:0.1f} sec')
-    
+    io.showmem()
 
     # -------------------------------------------------------------------------
     ## Tensor representation
@@ -256,7 +254,8 @@ def splitfactor(x, y, w, ids, args):
     data = aux.jagged_ak_to_numpy(data=data, scalar_vars=scalar_vars,
                        jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
                        null_value=args['imputation_param']['fill_value'])
-    
+    io.showmem()
+
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None

@@ -98,12 +98,12 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
     indexlist = np.zeros((num_nodes, num_nodes), dtype=int)
     
     n = 0
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-            
-            # Compute only non-zero
-            if (i > 0 and j > 0) and (j > i):
+    for i in range(num_nodes-1): # -1, last is the empty event (virtual) one
+        for j in range(num_nodes-1):
 
+            # Compute only diagonal + upper triangle
+            if (j >= i):
+                
                 p4_i   = p4vec[i-1]
                 p4_j   = p4vec[j-1]
 
@@ -120,14 +120,12 @@ def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, EP
                 
             indexlist[i,j] = n
             n += 1
-
+    
     ### Copy to the lower triangle for speed (we have symmetric adjacency)
     n = 0
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-
-            # Copy only non-zero
-            if (i > 0 and j > 0) and (j < i):
+    for i in range(num_nodes - 1):
+        for j in range(num_nodes - 1):
+            if (j < i):
                 edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !
             n += 1
 
@@ -157,7 +155,7 @@ def get_simple_edge_index(num_nodes, num_edges, directed, self_loops):
     edge_index = np.zeros((2, num_edges))
 
     n = 0
-    for i in range(num_nodes):
+    for i in range(num_nodes): # -1, last is the empty event (virtual) one
         for j in range(num_nodes):
 
             if (i == j) and (self_loops == False):

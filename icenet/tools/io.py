@@ -97,12 +97,8 @@ def glob_expand_files(datasets, datapath):
         files: full filenames including the path
     """
     print("")
-    print("Supported: ")
-    print(" Try 'filename_*' ")
-    print(" Try 'filename_0' ")
-    print(" Try 'filename_[0-99]' ")
-    print(" Try 'filename_{0,3,4}' ")
-    print(" Google <glob wildcards> and brace expansion (be careful, do not use [,] brackets in your filenames)")
+    print(__name__ + f".glob_expand_files: Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
+    print("Google <glob wildcards> and brace expansion (be careful, do not use [,] brackets in your filenames)")
     print("")
     
     datasets = list(braceexpand(datasets))

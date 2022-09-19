@@ -8,26 +8,13 @@ import socket
 
 __version__    = '0.0.7.6'
 __release__    = 'alpha'
-__date__       = '18/09/2022'
+__date__       = '19/09/2022'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \
 """
-██  ██████ ███████ ███    ██ ███████ ████████
-██ ██      ██      ████   ██ ██         ██   
-██ ██      █████   ██ ██  ██ █████      ██   
-██ ██      ██      ██  ██ ██ ██         ██   
-██  ██████ ███████ ██   ████ ███████    ██   
+ICENET
 """
-
-print(__asciiart__)
-print(f'{datetime.now()} | hostname: {socket.gethostname()}')
+print(f'{__asciiart__} version: {__version__}, date: {__date__}, author: {__author__}, repository: {__repository__}')
+print(f' {datetime.now()} | hostname: {socket.gethostname()}')
 print('')
-print(f'MIT license')
-print(f' version:    {__version__}')
-print(f' release:    {__release__}')
-print(f' date:       {__date__}')
-print(f' author:     {__author__}')
-print(f' repository: {__repository__}')
-print(f'')
-print(f'')

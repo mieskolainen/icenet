@@ -434,23 +434,42 @@ def split(a, n):
     k, m = divmod(len(a), n)
     return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
+def split_size(a, n):
+    """
+    As split_start_end() but returns only size per chunk
+    """
+    ll  = list(split(a,n))
+    out = [len(ll[i]) for i in range(len(ll))]
 
-def split_start_end(a, n, end=1):
+    return out
+
+def explicit_range(entry_start, entry_stop, num_entries):
+    """
+    Clean None from entry_start and entry_stop
+    """
+    start = 0 if entry_start is None else entry_start
+    stop  = num_entries if entry_stop is None else entry_stop
+
+    return start, stop
+
+def split_start_end(a, n, end_plus=1):
     """
     Returns approx equally sized chunks.
 
     Args:
-        a :  Total number
-        n :  Number of chunks
-        end: Python/nympy index style (i.e. + 1 for the end)
-    Example:
-        list(split(10, 3))
+        a:        Range, define with range()
+        n:        Number of chunks
+        end_plus: Python/nympy index style (i.e. + 1 for the end)
+
+    Examples:
+        split_start_end(range(100), 3)  returns [[0, 34], [34, 67], [67, 100]]
+        split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]
     """
-    ll = list(split(a,n))
+    ll  = list(split(a,n))
     out = []
 
     for i in range(len(ll)):
-        out.append([ll[i][0], ll[i][-1] + end])
+        out.append([ll[i][0], ll[i][-1] + end_plus])
 
     return out
 

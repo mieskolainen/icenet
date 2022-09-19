@@ -5,6 +5,7 @@
 
 import numpy as np
 import awkward as ak
+import vector
 import ray
 
 import numba
@@ -54,8 +55,8 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
         Array of pytorch-geometric Data objects
     """
 
-    M_MUON     = 0.105658 # Muon mass (GeV)
-    M_PION     = 0.139    # Charged pion mass (GeV)
+    M_MUON     = float(0.105658) # Muon mass (GeV)
+    M_PION     = float(0.139)    # Charged pion mass (GeV)
 
     global_on  = graph_param['global_on']
     coord      = graph_param['coord']
@@ -98,7 +99,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
     num_empty = 0
 
     for ev in range(entry_start, entry_stop):
-
+        
         # Count the number of heterogeneous nodes by picking the first feature
         nums = {}
         for key in jvname.keys():
@@ -130,6 +131,31 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
                 tot_nodes += nums[key] # Running index
                 # ------------------------------------------------
 
+                """
+                if key == 'muon':
+
+                    a = jvname['muon'][0][0]
+                    p4 = vector.Array({
+                                    'pt' : X[ev][a].pt,
+                                    'eta': X[ev][a].eta,
+                                    'phi': X[ev][a].phi,
+                                    'm':   (0.0*X[ev][a].phi + 1.0)*M_MUON})
+
+                if key == 'jet' or key == 'sv':
+
+                    a = jvname[key][0][0]
+                    p4 = vector.Array({
+                                    'pt' : X[ev][a].pt,
+                                    'eta': X[ev][a].eta,
+                                    'phi': X[ev][a].phi,
+                                    'm':   X[ev][a].mass})
+                
+                if p4 is None:
+                    p4vec = p4
+                else:
+                    p4vec = ak.concatenate((p4vec,p4))
+                """
+
                 # Loop over nodes of this hetero-type
                 for k in range(nums[key]):
                     
@@ -142,15 +168,9 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
                                        X[ev][a].eta[k],
                                        X[ev][a].phi[k],
                                        M_MUON)
-                    elif key == 'jet':
-                        a = jvname['jet'][0][0]
-                        v.setPtEtaPhiM(X[ev][a].pt[k],
-                                       X[ev][a].eta[k],
-                                       X[ev][a].phi[k],
-                                       X[ev][a].mass[k])
-                    
-                    elif key == 'sv':
-                        a = jvname['sv'][0][0]
+
+                    elif key == 'jet' or key == 'sv':
+                        a = jvname[key][0][0]
                         v.setPtEtaPhiM(X[ev][a].pt[k],
                                        X[ev][a].eta[k],
                                        X[ev][a].phi[k],

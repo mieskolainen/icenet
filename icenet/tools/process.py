@@ -61,8 +61,7 @@ def read_cli():
     parser.add_argument("--use_cache",       type=int,  default=1)
     parser.add_argument("--inputmap",        type=str,  default=None)
     parser.add_argument("--modeltag",        type=str,  default=None)
-
-
+    
     cli      = parser.parse_args()
     cli_dict = vars(cli)
 
@@ -73,6 +72,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     """
     Commandline and YAML configuration reader
     """
+    cwd = os.getcwd()
 
     # -------------------------------------------------------------------
     ## Parse command line arguments
@@ -87,7 +87,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     args = {}
     config_yaml_file = cli.config
-    with open(f'{config_path}/{config_yaml_file}', 'r') as f:
+    with open(f'{cwd}/{config_path}/{config_yaml_file}', 'r') as f:
         try:
             args = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -113,7 +113,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         yaml = YAML()
         yaml.allow_duplicate_keys = True
 
-        with open(f'{config_path}/{file}', 'r') as f:
+        with open(f'{cwd}/{config_path}/{file}', 'r') as f:
             try:
                 inputmap = yaml.load(f)
 
@@ -176,7 +176,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     hash_args = {}
 
-    mvavars_path = f'{config_path}/mvavars.py'
+    mvavars_path = f'{cwd}/{config_path}/mvavars.py'
     if os.path.exists(mvavars_path):
         hash_args['__hash__mvavars.py'] = io.make_hash_sha256_file(mvavars_path)
     
@@ -194,9 +194,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args["config"]    = cli_dict['config']
     args["modeltag"]  = cli_dict['modeltag']
 
-    args['datadir']   = aux.makedir(f'output/{args["rootname"]}')
-    args['modeldir']  = aux.makedir(f'checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
-    args['plotdir']   = aux.makedir(f'figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
+    args['datadir']   = aux.makedir(f'{cwd}/output/{args["rootname"]}')
+    args['modeldir']  = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
+    args['plotdir']   = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
     
@@ -243,22 +243,22 @@ def read_data(args, func_loader, runmode):
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         if runmode != "genesis":
-            raise Exception(__name__ + f'.read_data: Data not in cache (or __use_cache__ == False) but --runmode is not "genesis"')
-
+            raise Exception(__name__ + f'.read_data: Data "{cache_filename}" not found (or __use_cache__ == False) but --runmode is not "genesis"')
+        
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
         X,Y,W,ids,info = func_loader(root_path=args['root_files'], **load_args)
 
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data: Saving to cache: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data: Saving to file: "{cache_filename}"', 'yellow')
             pickle.dump([X, Y, W, ids, info, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data: Loading from cache: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data: Loading from file: "{cache_filename}"', 'yellow')
             X, Y, W, ids, info, genesis_args = pickle.load(handle)
             
-            cprint(__name__ + f'.read_data: Cached data was generated with arguments:', 'yellow')
+            cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
             pprint(genesis_args)
 
     return X, Y, W, ids, info
@@ -274,11 +274,11 @@ def read_data_processed(X,Y,W,ids,funcfactor,mvavars,runmode,args):
         data = process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=funcfactor, mvavars=mvavars, runmode=runmode)
             
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data_processed: Saving to cache: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Saving to file: "{cache_filename}"', 'yellow')
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data_processed: Loading from cache: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Loading from file: "{cache_filename}"', 'yellow')
             data = pickle.load(handle)
         
     return data
