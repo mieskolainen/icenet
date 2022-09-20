@@ -3,6 +3,7 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
+import os
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import interpolate
@@ -26,6 +27,19 @@ from icefit import cortools
 # icedqcd
 from icedqcd import common
 
+latex_header = \
+"""
+\\documentclass{article}
+% General document formatting
+\\usepackage[margin=0.7in]{geometry}
+\\usepackage[parfill]{parskip}
+\\usepackage[utf8]{inputenc}
+  
+% Related to math
+\\usepackage{amsmath,amssymb,amsfonts,amsthm}
+
+\\begin{document}
+"""
 
 """
 def func_binormal(x, a, b):
@@ -44,229 +58,275 @@ def func_binormal(x, a, b):
   return norm.cdf(a + b*norm.ppf(x))
 
 # -----------------------------------------------------------------------
+
 def optimize_selection(info, args):
 
-    """
-    Work in progress
-    """
+  latex_path     = f'{args["plotdir"]}/eval/significance'
+  latex_filename = f'{latex_path}/optimize.tex'
 
-    # --------------------------------------------------------
-    ## Main parameters
+  def dprint(string, mode='a'):
+    print(string)
+    with open(latex_filename, mode) as f:
+      f.write(f'{string} \n')
 
-    # Integrated luminosity
-    L_int        = 30*(1E3) # inverse femtobarn to [pico(barn)^{-1}]
+  """
+  Work in progress
+  """
+
+  dprint('', 'w') # Clear the file  
+  dprint(latex_header)
+
+  # --------------------------------------------------------
+  ## Main parameters
+
+  # Integrated luminosity
+  L_int        = 41.0*(1000) # in inverse picobarns
+  
+  # Background efficiency target
+  B_target_eff = 1e-4
+  # --------------------------------------------------------
+
+  dprint(f'$L = {L_int:0.0f} \\; \\text{{pb}}^{{-1}}$ \\\\')
+  dprint('')
+
+  # Prepare output folders
+  targetfile = f'{args["plotdir"]}/eval/eval_results.pkl'
+  resdict = pickle.load(open(targetfile, 'rb'))
+
+  # Optimize
+  print(__name__ + f'.optimize_models: Running ...')
+  print('info')
+  pprint(info)
+  print('resdict')
+  pprint(resdict)
+
+
+  # MVA-model labels
+  MVA_model_names = resdict['roc_labels']['inclusive']
+
+
+  # --------------------------------------------------------
+  # Total background estimate
+  B_tot        = 0
+  c            = 0
+  
+  # Loop over sub-process classes
+  B_xs_tot     = 0
+
+  B_trg_eA_xs  = 0
+  B_cut_eA_xs  = 0
+  B_acc_eff_xs = 0
+
+  dprint('\\tiny')
+  dprint('\\begin{tabular}{l|l|ccc|c}')
+  dprint('Background process & input xs $\\sigma$ [pb] & $\\epsilon A$(trg) & $\\epsilon$(cut) & $\\epsilon A$(trg x cut) & $\\langle B \\rangle$ \\\\')
+  dprint('\\hline')
+
+  for name in info[f"class_{c}"].keys():
+
+    # ----------
+    proc          = info[f"class_{c}"][name]
+    # ----------
+
+    xs            = proc['yaml']["xs"]    # Cross section
     
-    # Background efficiency target
-    B_target_eff = 1e-5
-    # --------------------------------------------------------
-
-    print(f'L = {L_int} pb^{{-1}}')
-
-
-    # Prepare output folders
-    targetfile = f'{args["plotdir"]}/eval/eval_results.pkl'
-    resdict = pickle.load(open(targetfile, 'rb'))
-
-    # Optimize
-    print(__name__ + f'.optimize_models: Running ...')
-    print('info')
-    pprint(info)
-    print('resdict')
-    pprint(resdict)
-
-
-    # MVA-model labels
-    MVA_model_names = resdict['roc_labels']['inclusive']
-
-
-    # --------------------------------------------------------
-    # Total background estimate
-    B_tot        = 0
-    c            = 0
+    trg_eA        = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
+    cut_eA        = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
+    eff_acc       = trg_eA * cut_eA       # combined eff x Acc
+    N             = eff_acc * xs * L_int  # 
     
-    # Loop over sub-process classes
-    B_xs_tot     = 0
-    B_acc_eff_xs = 0
-    
-    
-    print('Process && xs [pb] && accXeff && <N> \\\\')
-    
+    B_tot        += N
+
+    B_trg_eA_xs  += trg_eA  * xs
+    B_cut_eA_xs  += cut_eA  * xs
+    B_acc_eff_xs += eff_acc * xs
+    B_xs_tot     += xs
+
+    dprint(f'{name.replace("_", "-")} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {eff_acc:0.3f} & {N:0.1E} \\\\')
+
+  B_trg_eA  = B_trg_eA_xs  / B_xs_tot
+  B_cut_eA  = B_cut_eA_xs  / B_xs_tot
+  B_acc_eff = B_acc_eff_xs / B_xs_tot
+  
+  dprint(f'\\hline')
+  dprint(f'Total & {B_xs_tot:0.1f} & {B_trg_eA:0.3f} & {B_cut_eA:0.3f} & {B_acc_eff:0.3f} & {B_tot:0.1E} \\\\')
+  dprint('\\end{tabular}')
+  dprint('\\\\')
+  dprint('')
+
+  # --------------------------------------------------------------------
+  # Signal estimate per model point
+
+  for MVA_model_index in [0,1]:
+
+    c = 1 # Class
+    S = np.zeros(len(info[f"class_{c}"].keys()))
+    B = np.zeros(len(S))
+
+    S_trg_eA = np.zeros(len(S))
+    S_cut_eA = np.zeros(len(S))
+
+    MVA_eff  = np.zeros((len(B), 2))
+    names    = len(S) * [None]
+
+    # Loop over different signal model points
+    i = 0
+
+    from PyPDF2 import PdfFileMerger
+    #Create and instance of PdfFileMerger() class
+    merger = PdfFileMerger()
+
     for name in info[f"class_{c}"].keys():
 
-      proc    = info[f"class_{c}"][name]
+      #print(name)
 
-      xs      = proc['yaml']["xs"]
-      eff_acc = proc['eff_acc']
-      N       = eff_acc * xs * L_int
+      names[i]  = name.replace('_', '-')
+      proc      = info[f"class_{c}"][name]
+      #print(resdict['roc_mstats'].keys())
 
-      B_tot        += N
-      B_acc_eff_xs += eff_acc * xs
-      B_xs_tot     += xs
+      # ----------------
+      # Pick model parameters
+      model_param = proc['yaml']['model_param']
+      #print(model_param)
 
-      print(f'{name} && {xs:0.1f} && {eff_acc:0.4f} && {N:0.3E} \\\\')
+      key       = f"$m = {model_param['m']}$ AND $c\\tau = {model_param['ctau']}$"
+      roc_obj   = resdict['roc_mstats'][key][MVA_model_index]
+      roc_path  = resdict['roc_paths'][key][MVA_model_index]
 
-    B_acc_eff = B_acc_eff_xs / B_xs_tot
+      #print(resdict)
 
-    # --------------------------------------------------------------------
-    # Signal estimate per model point
+      roc_label = resdict['roc_labels'][key][MVA_model_index]
 
-    for MVA_model_index in [0,1]:
+      x,y       = roc_obj.fpr,roc_obj.tpr
+      y_err     = np.zeros(len(y))
+      for k in range(len(y_err)):
+        y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k]) + y[k]*1e-3 + 1e-12
 
-      c = 1 # Class
-      S = np.zeros(len(info[f"class_{c}"].keys()))
-      B = np.zeros(len(S))
+      # -----------------
+      # Interpolate ROC-curve
+      
+      func    = interpolate.interp1d(x, y, 'linear')
 
-      S_acc_eff = np.zeros(len(S))
+      ## Pick ROC-working point from the interpolation
+      xval = np.logspace(-8, 0, 1000)
+      yhat    = func(B_target_eff)
 
-      MVA_eff   = np.zeros((len(B), 2))
-      names     = len(S) * [None]
+      # -----------------
+      # Fit the ROC-curve
 
-      # Loop over different signal model points
-      i = 0
+      popt, pcov = curve_fit(f=func_binormal, xdata=x, ydata=y, sigma=y_err)
 
-      from PyPDF2 import PdfFileMerger
-      #Create and instance of PdfFileMerger() class
-      merger = PdfFileMerger()
+      # -----------------
+      # Create parameter estimate text label
+      param     = np.round(np.array(popt),2)
+      param_err = np.round(np.sqrt(np.diag(np.array(pcov))), 2)
+      fit_label = f'fit: $\\Phi(a_0 + a_1\\Phi^{{-1}}(x)), ('
+      for k in range(len(param)):
+        fit_label += f'a_{{{k}}} = {param[k]} \\pm {param_err[k]}'
+        if k < len(param)-1: fit_label += ','
+      fit_label += ')$'
+      # -----------------
 
-      for name in info[f"class_{c}"].keys():
+      ## Pick ROC-working point from the analytic fit
+      #xval = np.logspace(-8, 0, 1000)
+      #yhat = func_binormal(B_target_eff, *popt)
 
-        #print(name)
+      # -----------------
+      # Construct efficiency for background, signal
 
-        names[i]  = name
-        proc      = info[f"class_{c}"][name]
-        #print(resdict['roc_mstats'].keys())
+      MVA_eff[i,:] = np.array([B_target_eff, yhat])
+      
+      # ----------------
+      # Compute background and signal event count
+      B[i]         = B_tot * MVA_eff[i,0]
 
-        # ----------------
-        # Pick model parameters
-        model_param = proc['yaml']['model_param']
-        #print(model_param)
+      # ----------------
+      xs           = proc['yaml']["xs"]
+      eff_acc      = proc['eff_acc']
 
-        key       = f"$m = {model_param['m']}$ AND $c\\tau = {model_param['ctau']}$"
-        roc_obj   = resdict['roc_mstats'][key][MVA_model_index]
-        roc_path  = resdict['roc_paths'][key][MVA_model_index]
+      S_trg_eA[i]  = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
+      S_cut_eA[i]  = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
+      # ----------------
 
-        #print(resdict)
+      S[i]         = S_trg_eA[i] * S_cut_eA[i] * xs * L_int * MVA_eff[i,1]
 
-        roc_label = resdict['roc_labels'][key][MVA_model_index]
+      # ------------------------------------
+      fig,ax = plt.subplots(1,2)
+      alpha = 0.32
 
-        x,y     = roc_obj.fpr,roc_obj.tpr
-        y_err   = np.zeros(len(y))
-        for k in range(len(y_err)):
-          y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k]) + y[k]*1e-3 + 1e-12
+      for k in [0,1]:
 
-        # -----------------
-        # Interpolate ROC-curve
-        
-        func    = interpolate.interp1d(x, y, 'linear')
+        plt.sca(ax[k])
 
-        ## Pick ROC-working point from the interpolation
-        xval = np.logspace(-8, 0, 1000)
-        yhat    = func(B_target_eff)
+        auc_CI  = cortools.prc_CI(x=roc_obj.auc_bootstrap, alpha=alpha)
+        auc_err = np.abs(auc_CI - roc_obj.auc)
+        plt.plot(x,y, drawstyle='steps-mid', color=f'C{i}', label=f'{roc_label}, AUC: ${roc_obj.auc:0.3f} \\pm_{{{auc_err[0]:0.3f}}}^{{{auc_err[1]:0.3f}}}$')
 
-        # -----------------
-        # Fit the ROC-curve
+        tpr_lo = cortools.percentile_per_dim(x=roc_obj.tpr_bootstrap, q=100*(alpha/2))
+        tpr_hi = cortools.percentile_per_dim(x=roc_obj.tpr_bootstrap, q=100*(1-alpha/2))
+        plt.fill_between(x, tpr_lo, tpr_hi, step='mid', alpha=0.4, color=f'C{i}', edgecolor='none') # vertical
 
-        popt, pcov = curve_fit(f=func_binormal, xdata=x, ydata=y, sigma=y_err)
+        plt.plot(xval, func_binormal(xval, *popt), linestyle='-', color=(0.35,0.35,0.35), label='binormal fit')
+        plt.plot(xval, xval, color=(0.5,0.5,0.5), linestyle=':')
 
-        # -----------------
-        # Create parameter estimate text label
-        param     = np.round(np.array(popt),2)
-        param_err = np.round(np.sqrt(np.diag(np.array(pcov))), 2)
-        fit_label = f'fit: $\\Phi(a_0 + a_1\\Phi^{{-1}}(x)), ('
-        for k in range(len(param)):
-          fit_label += f'a_{{{k}}} = {param[k]} \\pm {param_err[k]}'
-          if k < len(param)-1: fit_label += ','
-        fit_label += ')$'
-        # -----------------
+        path = aux.makedir(f'{args["plotdir"]}/eval/significance/ROCfit/{roc_label}')
 
-        ## Pick ROC-working point from the analytic fit
-        #xval = np.logspace(-8, 0, 1000)
-        #yhat = func_binormal(B_target_eff, *popt)
+        if k == 0:
+          plt.xscale('linear')
+          plt.xlim([0, 1])
+          ax[k].set_aspect('equal', 'box')
+          plt.ylabel('True positive rate $1 - \\beta$ (signal efficiency)')
+          plt.title(f'{names[i]}', fontsize=7)
+          plt.legend(loc='lower right', fontsize=7)
 
-        # -----------------
-        # Construct efficiency for background, signal
+        if k == 1:
+          plt.xscale('log')
+          xmin = 1e-4
+          plt.xlim([xmin, 1])
+          ax[k].set_aspect(-np.log10(xmin))
+          plt.title(fit_label, fontsize=7)
+          plt.xlabel('False positive rate $\\alpha$ (background efficiency)')
 
-        MVA_eff[i,:] = np.array([B_target_eff, yhat])
-        
-        # ----------------
-        # Compute background and signal event count
-        B[i]         = B_tot * MVA_eff[i,0]
+        plt.ylim([0,1])
 
-        # ----------------
-        xs           = proc['yaml']["xs"]
-        eff_acc      = proc['eff_acc']
+      pdf_filename = f'{path}/{roc_path}.pdf'
+      plt.savefig(pdf_filename, bbox_inches='tight')
+      plt.close()
+      
+      merger.append(pdf_filename)
+      # ------------------------------------
 
-        S_acc_eff[i] = eff_acc
-        # ----------------
+      i += 1
 
-        S[i]         = eff_acc * xs * L_int * MVA_eff[i,1]
+    merger.write(f'{path}/ROC_all.pdf')
+    print('')
 
-        # ------------------------------------
-        fig,ax = plt.subplots(1,2)
-        alpha = 0.32
+    # ------------------
+    # Discovery significance
 
-        for k in [0,1]:
+    dprint(f'MVA model: {MVA_model_names[MVA_model_index]} \\\\')
+    dprint('')
+    dprint('\\tiny')
+    dprint('\\begin{tabular}{l||c|ccc|cc|c}')
+    dprint('Signal model point & $B$: $\\epsilon$(MVA) & $S$: $\\epsilon A$(trg) & $S$: $\\epsilon$(cut) & $S$: $\\epsilon$(MVA) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & $\\langle S \\rangle / \\sqrt{{ \\langle B \\rangle }}$ \\\\')
+    dprint('\\hline')
+    
+    for i in range(len(S)):
 
-          plt.sca(ax[k])
+      # Gaussian limit discovery significance
+      ds   = S[i] / np.sqrt(B[i])
 
-          auc_CI  = cortools.prc_CI(x=roc_obj.auc_bootstrap, alpha=alpha)
-          auc_err = np.abs(auc_CI - roc_obj.auc)
-          plt.plot(x,y, drawstyle='steps-mid', color=f'C{i}', label=f'{roc_label}, AUC: ${roc_obj.auc:0.3f} \\pm_{{{auc_err[0]:0.3f}}}^{{{auc_err[1]:0.3f}}}$')
+      line = f'{names[i]} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
+      dprint(line)
 
-          tpr_lo = cortools.percentile_per_dim(x=roc_obj.tpr_bootstrap, q=100*(alpha/2))
-          tpr_hi = cortools.percentile_per_dim(x=roc_obj.tpr_bootstrap, q=100*(1-alpha/2))
-          plt.fill_between(x, tpr_lo, tpr_hi, step='mid', alpha=0.4, color=f'C{i}', edgecolor='none') # vertical
+    # print(roc_obj.thresholds)
+    dprint('\\end{tabular}')
+    dprint('')
 
-          plt.plot(xval, func_binormal(xval, *popt), linestyle='-', color=(0.35,0.35,0.35), label='binormal fit')
-          plt.plot(xval, xval, color=(0.5,0.5,0.5), linestyle=':')
+  dprint('\\end{document}')
 
-          path = aux.makedir(f'{args["plotdir"]}/eval/significance/ROCfit/{roc_label}')
-
-          if k == 0:
-            plt.xscale('linear')
-            plt.xlim([0, 1])
-            ax[k].set_aspect('equal', 'box')
-            plt.ylabel('True positive rate $1 - \\beta$ (signal efficiency)')
-            plt.title(f'{names[i]}', fontsize=7)
-            plt.legend(loc='lower right', fontsize=7)
-
-          if k == 1:
-            plt.xscale('log')
-            xmin = 1e-4
-            plt.xlim([xmin, 1])
-            ax[k].set_aspect(-np.log10(xmin))
-            plt.title(fit_label, fontsize=7)
-            plt.xlabel('False positive rate $\\alpha$ (background efficiency)')
-
-          plt.ylim([0,1])
-
-        pdf_filename = f'{path}/{roc_path}.pdf'
-        plt.savefig(pdf_filename, bbox_inches='tight')
-        plt.close()
-        
-        merger.append(pdf_filename)
-        # ------------------------------------
-
-        i += 1
-
-      merger.write(f'{path}/ROC_all.pdf')
-      print('')
-
-      # ------------------
-      # Discovery significance
-
-      print(f'MVA model: {MVA_model_names[MVA_model_index]} \\\\')
-
-      print('signal model point && effxAcc $B$ && eff(MVA) $B$ && effxAcc $S$ && eff(MVA) $S$ && $B$ && $S$ && $S/\\sqrt{B}$ \\\\')
-      for i in range(len(S)):
-
-        # Gaussian limit discovery significance
-        ds = S[i] / np.sqrt(B[i])
-
-        line = f'{names[i]} && {B_acc_eff:0.3E} && {MVA_eff[i,0]:0.3E} && {S_acc_eff[i]:0.3E} && {MVA_eff[i,1]:0.3E} && {B[i]:0.1f} && {S[i]:0.1f} && {ds:0.1f} \\\\'
-        print(line)
-
-      # print(roc_obj.thresholds)
+  # Compile latex
+  os.system(f'pdflatex -output-directory {latex_path} {latex_filename}')
 
 
 # Main function

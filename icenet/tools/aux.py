@@ -222,7 +222,7 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_star
         # Create names of type 'varname[j]'
         for j in range(dim):
             all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
-
+    
     # Parameters
     arg = {
         'entry_start': entry_start,
@@ -232,7 +232,7 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_star
         'jagged_dim':  jagged_dim,
         'null_value':  null_value
     }
-
+    
     matrix       = jagged2matrix(data.x, **arg)
     
     # Cast to numpy arrays

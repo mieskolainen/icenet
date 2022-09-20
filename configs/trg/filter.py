@@ -37,7 +37,7 @@ def filter_standard(X, ids, isMC, xcorr_flow=False):
                    'gen_e2_l1_dr  < 0.2',
                    'gen_e1_hlt_dr < 0.2',
                    'gen_e2_hlt_dr < 0.2']
-
+    
     elif isMC == 'data':
         cutlist = ['BOOL__isgjson == True']
     

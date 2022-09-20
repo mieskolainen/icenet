@@ -7,6 +7,8 @@ import argparse
 import numpy as np
 import awkward as ak
 import torch
+import copy
+from tqdm import tqdm
 
 from importlib import import_module
 from termcolor import colored, cprint
@@ -17,7 +19,6 @@ import pickle
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
-
 
 import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
@@ -235,31 +236,56 @@ def read_data(args, func_loader, runmode):
     Load input data
     
     Args:
-        args:  main argument dictionary
+        args:         main argument dictionary
         func_loader:  application specific root file loader function
     """
-    cache_filename = f'{args["datadir"]}/data_{args["__hash__"]}.pkl'
     
-    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
+    def get_chunk_ind(N):
+        chunks = int(np.ceil(N / args['pickle_size']))
+        return aux.split_start_end(range(N), chunks)
+
+    cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash__"]}')
+    
+    if args['__use_cache__'] == False or (not os.path.exists(f'{cache_directory}/output_0.pkl')):
 
         if runmode != "genesis":
-            raise Exception(__name__ + f'.read_data: Data "{cache_filename}" not found (or __use_cache__ == False) but --runmode is not "genesis"')
-        
+            raise Exception(__name__ + f'.read_data: Data "{cache_directory}" not found (or __use_cache__ == False) but --runmode is not "genesis"')
+
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
         X,Y,W,ids,info = func_loader(root_path=args['root_files'], **load_args)
 
-        with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data: Saving to file: "{cache_filename}"', 'yellow')
-            pickle.dump([X, Y, W, ids, info, args], handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
+        cprint(__name__ + f'.read_data: Saving to path: "{cache_directory}"', 'yellow')
+        C = get_chunk_ind(N=len(X))
+
+        for i in tqdm(range(len(C))):
+            with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
+                pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
+                    handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data: Loading from file: "{cache_filename}"', 'yellow')
-            X, Y, W, ids, info, genesis_args = pickle.load(handle)
-            
-            cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
-            pprint(genesis_args)
+
+        num_files = io.count_files_in_dir(cache_directory)
+        cprint(__name__ + f'.read_data: Loading from path: "{cache_directory}"', 'yellow')
+        
+        for i in tqdm(range(num_files)):
+            with open(f'{cache_directory}/output_{i}.pkl', 'rb') as handle:
+                X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
+                        
+                if i > 0:
+                    if   isinstance(X_, np.ndarray):
+                        X = np.concatenate((X, X_), axis=0)
+                        Y = np.concatenate((Y, Y_), axis=0)
+                        W = np.concatenate((W, W_), axis=0)
+                        
+                    elif isinstance(X_, ak.Array):
+                        X = np.concatenate((X, X_), axis=0)
+                        Y = np.concatenate((Y, Y_), axis=0)
+                        W = np.concatenate((W, W_), axis=0)
+                else:
+                    X,Y,W = copy.deepcopy(X_),copy.deepcopy(Y_),copy.deepcopy(W_)
+                    
+                #cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
+                #pprint(genesis_args)
 
     return X, Y, W, ids, info
 

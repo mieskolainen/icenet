@@ -4,18 +4,20 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
-import uproot
-from tqdm import tqdm
 import psutil
 import copy
 import os
+
 import ray
+from ray.actor import ActorHandle
+from tqdm import tqdm
+
 import time
 import multiprocessing
 
 from termcolor import colored, cprint
 
-
+from icenet.tools import raytools
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import plots
@@ -206,37 +208,38 @@ def splitfactor(x, y, w, ids, args):
 
     print(f'single_results: {time.time()-start_time:0.1f} sec')
     """
-
+    
     ## ------------------------------------------
     # Parallel processing of graph objects with Ray
-
+    
     start_time  = time.time()
-
+    
     big_chunk_size = 10000
     num_workers    = multiprocessing.cpu_count()
     big_chunks     = int(np.ceil(len(data.x) / big_chunk_size))
-
+    
     chunk_ind   = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
     print(chunk_ind)
 
-    data_graph  = []
-    k = 0
-    for i in tqdm(range(big_chunks)):
+    data_graph = []
+    job_index  = 0
+    for _ in tqdm(range(big_chunks)):
 
         ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
+
         graph_futures = []
         obj_ref       = ray.put(data.x)
 
-        for j in range(num_workers):
-
-            entry_start, entry_stop = chunk_ind[k][0], chunk_ind[k][-1]
-
+        for _ in range(num_workers):
+            
+            entry_start, entry_stop = chunk_ind[job_index][0], chunk_ind[job_index][-1]
+            
             graph_futures.append( \
                 graphio.parse_graph_data_ray.remote( \
                     obj_ref, data.ids, scalar_vars, node_features, args['graph_param'], data.y, data.w, entry_start, entry_stop)
             )
 
-            k += 1
+            job_index += 1
 
         data_graph += sum(ray.get(graph_futures), []) # Join split array results
         ray.shutdown()

@@ -438,8 +438,8 @@ def eval_boolean_exptree(root, X, ids):
         """ Helper function """
         if isinstance(a, str):
             
-            print(f'a:{a}, b:{b}')
-
+            # print(f'a:{a}, b:{b}')
+            
             # Split '__' because of function operators (see below)
             return a.split('__')[-1] in b
         else:
@@ -484,7 +484,7 @@ def eval_boolean_exptree(root, X, ids):
 
         lhs = left_sum
         rhs = right_sum
-
+    
     # Flip the direction
     else:
         lhs = right_sum
@@ -492,7 +492,7 @@ def eval_boolean_exptree(root, X, ids):
 
         flips    = {'<=':'>=', '>=':'<=', '>':'<', '<':'>', '==':'==', '!=':'!='}
         operator = flips[operator]
-
+    
     # Vector index
     split = lhs.split('__')
     ind   = ids.index(split[-1])
@@ -504,7 +504,7 @@ def eval_boolean_exptree(root, X, ids):
     if len(split) == 2: # We have 'OPERATOR__x' type input
         
         func_name = split[0]
-
+        
         if   func_name == 'ABS':
             f = lambda x : np.abs(x)
         elif func_name == 'POW2':

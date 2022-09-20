@@ -133,23 +133,23 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
     #data = ray.get(futures) # Get results
 
     # Combine results
-    X,Y,W,ids,info = None,None,None,None,None
+    X,Y,W,ids,info = None,None,None,None,{}
 
-    for i in range(len(data)):
+    print(__name__ + f'.read_multiple_MC: Concatenating different MC processes')
+    for i,key in tqdm(enumerate(processes)):
 
         # Concatenate processes
         if i == 0:
             X    = copy.deepcopy(data[i]['X'])
             Y    = copy.deepcopy(data[i]['Y'])
             W    = copy.deepcopy(data[i]['W'])
-            ids  = copy.deepcopy(data[i]['ids'])
-            info = copy.deepcopy(data[i]['info'])
         else:
             X    = ak.concatenate((X, data[i]['X']), axis=0)
             Y    = ak.concatenate((Y, data[i]['Y']), axis=0)
             W    = ak.concatenate((W, data[i]['W']), axis=0)
-            info.update(data[i]['info'])
-            # ids = always the same
+
+        ids       = copy.deepcopy(data[i]['ids']) # Same for all processes
+        info[key] = copy.deepcopy(data[i]['info'])
         
         data[i] = None # Free memory
         gc.collect()
@@ -312,7 +312,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         submaxevents = aux.split_size(range(maxevents), num_workers)
         futures      = []
         
-        print(__name__ + f'.load_tree: submaxevents per Ray process: {submaxevents}')
+        print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
 
         for k in range(num_workers):    
             futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]], load_ids, entry_start, entry_stop, submaxevents[k]))
@@ -320,13 +320,14 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         results = ray.get(futures) # synchronous read-out
 
         # Combine future returned sub-arrays
-        for k in range(len(results)):
+        print(__name__ + f'.load_tree: Concatenating results from futures')
+
+        for k in tqdm(range(len(results))):
             X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
             results[k] = None # free memory
             gc.collect()
 
         ray.shutdown()
-
         return X, ak.fields(X)
         
     else:
@@ -352,28 +353,26 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
     Returns:
         awkward array
     """
-    for i in tqdm(range(len(files))):
+    for i in range(len(files)):
 
         # Get the number of entries
         #num_entries = get_num_events(rootfile=files[i])
         #print(__name__ + f'.read_file_ak: Found {num_entries} entries from the file: {files[i]}')
-
+        
         with uproot.open(files[i]) as events:
-
+            
             output = events.arrays(ids, entry_start=entry_start, entry_stop=entry_stop, library='ak', how='zip')
-
+            
             # Concatenate with other file results
             X = copy.deepcopy(output) if (i == 0) else ak.concatenate((X, output), axis=0)
             del output
+            gc.collect()
             io.showmem()
-
+                        
             if (maxevents is not None) and (len(X) > maxevents):
                 X = X[0:maxevents]
                 cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                 break
-
-        gc.collect()
-
     return X
 
 

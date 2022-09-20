@@ -31,9 +31,14 @@ import copy
 
 import hashlib
 import base64
-
-
 import yaml
+
+
+def count_files_in_dir(path):
+    """
+    Count the number of files in a path
+    """
+    return len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
 
 def make_hash_sha256_file(filename):
     """

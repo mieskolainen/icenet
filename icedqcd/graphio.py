@@ -7,9 +7,9 @@ import numpy as np
 import awkward as ak
 import vector
 import ray
+from tqdm import tqdm
 
 import numba
-from   tqdm import tqdm
 import copy
 import pickle
 import os
@@ -98,7 +98,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
     # Loop over events
     num_empty = 0
 
-    for ev in range(entry_start, entry_stop):
+    for ev in tqdm(range(entry_start, entry_stop), miniters=int(np.ceil(num_events/10))):
         
         # Count the number of heterogeneous nodes by picking the first feature
         nums = {}

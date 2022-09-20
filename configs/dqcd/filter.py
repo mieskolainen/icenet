@@ -12,7 +12,8 @@ from icenet.tools import stx
 
 
 def filter_nofilter(X, isMC, xcorr_flow=False):
-    """ All pass """
+    """ All pass
+    """
     return ak.Array(np.ones(len(X), dtype=np.bool_)) # Note datatype np.bool_
 
 
