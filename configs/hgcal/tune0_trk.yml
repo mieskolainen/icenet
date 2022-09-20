@@ -73,6 +73,7 @@ genesis_runmode:
   cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
+  pickle_size: 1000                  # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
