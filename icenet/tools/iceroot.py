@@ -123,7 +123,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
     for i,key in enumerate(processes):
         
         data = read_MC(process_func, processes[key], root_path, param, class_id)
-        
+
         # Concatenate processes
         if i == 0:
             X = copy.deepcopy(data['X'])
@@ -290,7 +290,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         # ======================================================
         # Multiprocessing version
 
-        num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
+        num_workers  = min(len(files), multiprocessing.cpu_count()) # min handles the case #files < #cpu
         ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
         chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
