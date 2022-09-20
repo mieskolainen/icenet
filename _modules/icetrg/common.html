@@ -288,19 +288,20 @@
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X_MC_e1</span><span class="p">,</span> <span class="n">X_MC_e2</span><span class="p">,</span> <span class="n">X_DATA</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Y_MC_e1</span><span class="p">,</span> <span class="n">Y_MC_e2</span><span class="p">,</span> <span class="n">Y_DATA</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     
+    <span class="c1"># Trivial weights</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
     <span class="c1"># ** Crucial -- randomize order to avoid problems with other functions **</span>
-    <span class="n">rind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
-    <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">rind</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Squeeze removes additional [] dimension</span>
-    <span class="n">Y</span>    <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">rind</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Squeeze removes additional [] dimension</span>
+    <span class="n">Y</span>    <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="n">W</span>    <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># Custom treat specific variables</span>
 
     <span class="n">ind</span>      <span class="o">=</span> <span class="n">NEW_VARS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;x_hlt_pms2&#39;</span><span class="p">)</span>
     <span class="n">X</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]),</span> <span class="n">a_min</span><span class="o">=-</span><span class="mf">1e10</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1e10</span><span class="p">)</span>
-
-    <span class="c1"># No weights</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># TBD add info about cut stats etc</span>
     <span class="n">INFO</span> <span class="o">=</span> <span class="p">{}</span>
