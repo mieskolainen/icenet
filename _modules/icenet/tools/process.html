@@ -207,6 +207,7 @@
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -499,7 +500,7 @@
     
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">process_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">func_factor</span><span class="o">=</span><span class="n">funcfactor</span><span class="p">,</span> <span class="n">mvavars</span><span class="o">=</span><span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span>
-            
+        
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data_processed: Saving to file: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
@@ -710,8 +711,8 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
 
         <span class="c1"># Collect garbage</span>
-        <span class="kn">import</span> <span class="nn">gc</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
         
         <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
         <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
@@ -838,7 +839,7 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="evaluate_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a><span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="evaluate_models"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a><span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate ML/AI models.</span>
 
@@ -1092,8 +1093,9 @@
                <span class="s1">&#39;roc_paths&#39;</span><span class="p">:</span>         <span class="n">roc_paths</span><span class="p">,</span>
                <span class="s1">&#39;corr_mstats&#39;</span><span class="p">:</span>       <span class="n">corr_mstats</span><span class="p">,</span>
                <span class="s1">&#39;ROC_binned_mstats&#39;</span><span class="p">:</span> <span class="n">ROC_binned_mstats</span><span class="p">,</span>
-               <span class="s1">&#39;ROC_binned_mlabel&#39;</span><span class="p">:</span> <span class="n">ROC_binned_mlabel</span><span class="p">}</span>
-
+               <span class="s1">&#39;ROC_binned_mlabel&#39;</span><span class="p">:</span> <span class="n">ROC_binned_mlabel</span><span class="p">,</span>
+               <span class="s1">&#39;info&#39;</span><span class="p">:</span>              <span class="n">info</span><span class="p">}</span>
+    
     <span class="n">targetfile</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/eval_results.pkl&#39;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.evaluate_models: Saving pickle output to &quot;</span><span class="si">{</span><span class="n">targetfile</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">resdict</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">targetfile</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>

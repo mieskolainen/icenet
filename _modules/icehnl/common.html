@@ -284,20 +284,20 @@
     <span class="c1">#   wjets_label  = 2</span>
     <span class="c1">#   dyjets_label = 3</span>
     <span class="c1">#   ttbar_label  = 4</span>
-    
+
     <span class="c1"># ** Crucial -- randomize order to avoid problems with other functions **</span>
     <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
     <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Squeeze removes additional [] dimension</span>
     <span class="n">Y</span>    <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
     <span class="n">W</span>    <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-    
+
     <span class="c1"># Apply maxevents cutoff</span>
     <span class="n">maxevents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)])</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
         
     <span class="c1"># TBD add cut statistics etc. here</span>
     <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
-    
+        
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span></div>
 
 
