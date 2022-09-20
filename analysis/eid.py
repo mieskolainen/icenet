@@ -42,8 +42,10 @@ def main() :
   runmode   = cli_dict['runmode']
   
   args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
-  X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
   
+  if runmode in ['genesis', 'train', 'eval']:  
+    X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
+
   if runmode == 'train' or runmode == 'eval':
     data = process.read_data_processed(X=X,Y=Y,W=W,ids=ids,
       funcfactor=common.splitfactor,mvavars='configs.eid.mvavars',runmode=runmode,args=args)

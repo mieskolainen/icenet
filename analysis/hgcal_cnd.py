@@ -21,19 +21,21 @@ def main() :
   runmode   = cli_dict['runmode']
   
   args, cli      = process.read_config(config_path=f'configs/hgcal', runmode=runmode)
-  X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
+  
+  if runmode in ['genesis', 'train', 'eval']:  
+    X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
   
   if runmode == 'train' or runmode == 'eval':
-      data = process.read_data_processed(X=X,Y=Y,W=W,ids=ids,
-        funcfactor=common.splitfactor,mvavars='configs.hgcal.mvavars',runmode=runmode,args=args)
-      
+    data = process.read_data_processed(X=X,Y=Y,W=W,ids=ids,
+      funcfactor=common.splitfactor,mvavars='configs.hgcal.mvavars',runmode=runmode,args=args)
+          
   if   runmode == 'train':
-      #prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
-      #process.make_plots(data=data['trn'], args=args)
-      process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+    #prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
+    #process.make_plots(data=data['trn'], args=args)
+    process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
   
   elif runmode == 'eval':
-      process.evaluate_models(data=data['tst'], info=info, args=args)
+    process.evaluate_models(data=data['tst'], info=info, args=args)
 
   print(__name__ + ' [done]')
 

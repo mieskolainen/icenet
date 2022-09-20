@@ -26,7 +26,7 @@ def main() :
     args, cli = process.read_config(config_path=f'configs/hgcal', runmode=runmode)
     
     X = common.read_data_tracklet(args=args, runmode=runmode)    
-
+    
     if runmode == 'train' or runmode == 'eval':
         data = common.process_tracklet_data(args=args, X=X)
     
