@@ -297,9 +297,11 @@ def optimize_selection(args):
 
   # --------------------------------------------------------------------
   # Signal estimate per model point
+  
+  num_MVA_models = len(resdict['roc_mstats'][resdict['roc_mstats'].keys()[0]])
+  
+  for MVA_model_index in range(num_MVA_models):
 
-  for MVA_model_index in range(len(resdict['roc_mstats'][key])):
-    
     c  = 1 # Class
     S  = np.zeros(len(info[f"class_{c}"].keys()))
     B  = np.zeros(len(S))
@@ -313,7 +315,7 @@ def optimize_selection(args):
 
     # Loop over different signal model points
     i = 0
-    
+
     from PyPDF2 import PdfFileMerger
     #Create and instance of PdfFileMerger() class
     merger = PdfFileMerger()
