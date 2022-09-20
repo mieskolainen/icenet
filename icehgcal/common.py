@@ -174,22 +174,20 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X = np.concatenate((X_B, X_S), axis=0)
     Y = np.concatenate((Y_B, Y_S), axis=0)
     
-    
-    # ** Crucial -- randomize order to avoid problems with other functions **
-    arr  = np.arange(X.shape[0])
-    rind = np.random.shuffle(arr)
+    # Trivial weights
+    W = np.ones(len(X))
 
-    X    = X[rind, ...].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rind].squeeze()
-    
     # =================================================================
     
-    # No weights
-    W = None
-
+    # ** Crucial -- randomize order to avoid problems with other functions **
+    rand = np.random.permutation(len(X))
+    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rand].squeeze()
+    W    = W[rand].squeeze()
+    
     # TBD add cut statistics etc. here
     info = {}
-
+    
     return X, Y, W, ids, info
 
 

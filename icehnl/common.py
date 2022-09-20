@@ -83,13 +83,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     #   wjets_label  = 2
     #   dyjets_label = 3
     #   ttbar_label  = 4
-
+    
     # ** Crucial -- randomize order to avoid problems with other functions **
-    rind = np.random.permutation(len(X))
-    X    = X[rind].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rind].squeeze()
-    W    = W[rind].squeeze()
-
+    rand = np.random.permutation(len(X))
+    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rand].squeeze()
+    W    = W[rand].squeeze()
+    
     # Apply maxevents cutoff
     maxevents = np.min([args['maxevents'], len(X)])
     X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]

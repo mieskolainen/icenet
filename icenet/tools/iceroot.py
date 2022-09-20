@@ -257,7 +257,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                 X = copy.deepcopy(output) if (i == 0) else np.concatenate((X, output), axis=0)
                 del output
                 gc.collect()
-
+                
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')

@@ -117,12 +117,18 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     prints.printbar()
     file.close()
 
-    # No weights
-    W = None
+    # Trivial weights
+    W = np.ones(len(X))
 
     # TBD add cut statistics etc. info here
     info = {}
     
+    # ** Crucial -- randomize order to avoid problems with other functions **
+    rand = np.random.permutation(len(X))
+    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rand].squeeze()
+    W    = W[rand].squeeze()
+
     return X, Y, W, ids, info
 
 

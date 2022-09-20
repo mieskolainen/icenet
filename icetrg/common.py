@@ -87,19 +87,20 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X = np.concatenate((X_MC_e1, X_MC_e2, X_DATA), axis=0)
     Y = np.concatenate((Y_MC_e1, Y_MC_e2, Y_DATA), axis=0)
     
+    # Trivial weights
+    W = np.ones(len(X))
+
     # ** Crucial -- randomize order to avoid problems with other functions **
-    rind = np.random.permutation(len(X))
-    X    = X[rind].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rind].squeeze()
+    rand = np.random.permutation(len(X))
+    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rand].squeeze()
+    W    = W[rand].squeeze()
     
     # =================================================================
     # Custom treat specific variables
 
     ind      = NEW_VARS.index('x_hlt_pms2')
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
-
-    # No weights
-    W = None
 
     # TBD add info about cut stats etc
     INFO = {}
