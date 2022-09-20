@@ -298,8 +298,8 @@ def optimize_selection(args):
   # --------------------------------------------------------------------
   # Signal estimate per model point
 
-  for MVA_model_index in [0,1]:
-
+  for MVA_model_index in range(len(resdict['roc_mstats'][key])):
+    
     c  = 1 # Class
     S  = np.zeros(len(info[f"class_{c}"].keys()))
     B  = np.zeros(len(S))
@@ -313,7 +313,7 @@ def optimize_selection(args):
 
     # Loop over different signal model points
     i = 0
-
+    
     from PyPDF2 import PdfFileMerger
     #Create and instance of PdfFileMerger() class
     merger = PdfFileMerger()
@@ -390,7 +390,7 @@ def optimize_selection(args):
       S_cut_eA[i]  = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
       # ----------------
 
-      S[i]         = S_trg_eA[i] * S_cut_eA[i] * xs * L_int * MVA_eff[i,1]
+      S[i]         = S_trg_eA[i] * S_cut_eA[i] * xs[i] * L_int * MVA_eff[i,1]
 
       # ------------------------------------
       fig,ax = plt.subplots(1,2)
@@ -457,10 +457,10 @@ def optimize_selection(args):
 
       # Gaussian limit discovery significance
       ds   = S[i] / np.sqrt(B[i])
-      
+
       line = f'{names[i]} & {xs[i]:0.1E} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
       dprint(line)
-    
+
     # print(roc_obj.thresholds)
     dprint('\\end{tabular}')
     dprint('')
