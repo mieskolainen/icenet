@@ -319,16 +319,17 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
             futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]], load_ids, entry_start, entry_stop, submaxevents[k]))
 
         results = ray.get(futures) # synchronous read-out
-
+        ray.shutdown()
+        
         # Combine future returned sub-arrays
         print(__name__ + f'.load_tree: Concatenating results from futures')
 
         for k in tqdm(range(len(results))):
             X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
-            results[k] = None # free memory
-            gc.collect()
-
-        ray.shutdown()
+        
+        del results # free memory
+        gc.collect()
+        
         return X, ak.fields(X)
         
     else:
