@@ -13,9 +13,12 @@ CONDITIONAL=1
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
+# Set system stack size to unlimited
+ulimit -s unlimited
+
 # Use * or other glob wildcards for filenames
 # tee redirect output to both a file and to screen
-#python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
-#python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-#python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

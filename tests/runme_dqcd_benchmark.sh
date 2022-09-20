@@ -15,6 +15,9 @@ CMD="python analysis/dqcd.py"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
+# Set system stack size to unlimited
+ulimit -s unlimited
+
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_all.yml                       --datapath $DATAPATH
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_m_10_ctau_10_xiO_1_xiL_1.yml  --datapath $DATAPATH
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_m_10_ctau_100_xiO_1_xiL_1.yml --datapath $DATAPATH
