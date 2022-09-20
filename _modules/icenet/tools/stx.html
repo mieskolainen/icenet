@@ -639,8 +639,8 @@
         <span class="sd">&quot;&quot;&quot; Helper function &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;a:</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s1">, b:</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+            <span class="c1"># print(f&#39;a:{a}, b:{b}&#39;)</span>
+            
             <span class="c1"># Split &#39;__&#39; because of function operators (see below)</span>
             <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span>
         <span class="k">else</span><span class="p">:</span>
@@ -685,7 +685,7 @@
 
         <span class="n">lhs</span> <span class="o">=</span> <span class="n">left_sum</span>
         <span class="n">rhs</span> <span class="o">=</span> <span class="n">right_sum</span>
-
+    
     <span class="c1"># Flip the direction</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">lhs</span> <span class="o">=</span> <span class="n">right_sum</span>
@@ -693,7 +693,7 @@
 
         <span class="n">flips</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span><span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span><span class="s1">&#39;!=&#39;</span><span class="p">}</span>
         <span class="n">operator</span> <span class="o">=</span> <span class="n">flips</span><span class="p">[</span><span class="n">operator</span><span class="p">]</span>
-
+    
     <span class="c1"># Vector index</span>
     <span class="n">split</span> <span class="o">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)</span>
     <span class="n">ind</span>   <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -705,7 +705,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># We have &#39;OPERATOR__x&#39; type input</span>
         
         <span class="n">func_name</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
+        
         <span class="k">if</span>   <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;ABS&#39;</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;POW2&#39;</span><span class="p">:</span>

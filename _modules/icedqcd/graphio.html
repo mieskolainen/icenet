@@ -208,9 +208,9 @@
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 <span class="kn">import</span> <span class="nn">vector</span>
 <span class="kn">import</span> <span class="nn">ray</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">from</span>   <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -299,7 +299,7 @@
     <span class="c1"># Loop over events</span>
     <span class="n">num_empty</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">),</span> <span class="n">miniters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_events</span><span class="o">/</span><span class="mi">10</span><span class="p">))):</span>
         
         <span class="c1"># Count the number of heterogeneous nodes by picking the first feature</span>
         <span class="n">nums</span> <span class="o">=</span> <span class="p">{}</span>
