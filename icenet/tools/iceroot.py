@@ -117,46 +117,30 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         X, Y, W, ids, info (awkward array format)
     """
 
-    #num_workers = multiprocessing.cpu_count()
-    #ray.init(num_cpus=len(processes), _temp_dir=f'{os.getcwd()}/tmp/')
-    #futures = []
-    data = []
-
-    # Span ray session for each file process
-    for i,key in enumerate(processes):
-        #ret = read_MC.remote(process_func, processes[key], root_path, param, class_id)
-        #futures.append(ret)
-
-        data.append( read_MC(process_func, processes[key], root_path, param, class_id))
-        io.showmem()
-
-    #data = ray.get(futures) # Get results
-
     # Combine results
     X,Y,W,ids,info = None,None,None,None,{}
 
-    print(__name__ + f'.read_multiple_MC: Concatenating different MC processes')
-    for i,key in tqdm(enumerate(processes)):
-
+    for i,key in enumerate(processes):
+        
+        data = read_MC(process_func, processes[key], root_path, param, class_id)
+        
         # Concatenate processes
         if i == 0:
-            X    = copy.deepcopy(data[i]['X'])
-            Y    = copy.deepcopy(data[i]['Y'])
-            W    = copy.deepcopy(data[i]['W'])
+            X = copy.deepcopy(data['X'])
+            Y = copy.deepcopy(data['Y'])
+            W = copy.deepcopy(data['W'])
         else:
-            X    = ak.concatenate((X, data[i]['X']), axis=0)
-            Y    = ak.concatenate((Y, data[i]['Y']), axis=0)
-            W    = ak.concatenate((W, data[i]['W']), axis=0)
+            X = ak.concatenate((X, data['X']), axis=0)
+            Y = ak.concatenate((Y, data['Y']), axis=0)
+            W = ak.concatenate((W, data['W']), axis=0)
 
-        ids       = copy.deepcopy(data[i]['ids']) # Same for all processes
-        info[key] = copy.deepcopy(data[i]['info'])
+        ids       = copy.deepcopy(data['ids']) # Same for all processes
+        info[key] = copy.deepcopy(data['info'])
+        
+        del data # free memory
+        gc.collect()
         io.showmem()
-    
-    del data
-    gc.collect()
 
-    #ray.shutdown()
-    
     return X,Y,W,ids,info
 
 
@@ -326,10 +310,10 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
 
         for k in tqdm(range(len(results))):
             X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
-        
-        del results # free memory
-        gc.collect()
-        
+
+            results[k] = None # free memory
+            gc.collect()
+
         return X, ak.fields(X)
         
     else:
