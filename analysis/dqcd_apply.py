@@ -201,16 +201,16 @@ def optimize_selection(args):
       f.write(f'{string} \n')
 
   latex_path     = f'{args["plotdir"]}/eval/significance'
+  aux.makedir(latex_path)
   latex_filename = f'{latex_path}/optimize.tex'
-
+  
   """
   Work in progress
   """
 
-  dprint('', 'a') # Clear the file  
   dprint('', 'w')
   dprint(latex_header)
-  
+
   # --------------------------------------------------------
   ## Main parameters
 
