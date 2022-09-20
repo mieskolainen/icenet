@@ -25,3 +25,4 @@ ulimit -v unlimited
 #python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+
