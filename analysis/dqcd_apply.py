@@ -8,6 +8,7 @@ import awkward as ak
 from tqdm import tqdm
 import pickle
 from pprint import pprint
+import os
 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -299,9 +300,10 @@ def optimize_selection(args):
 
   for MVA_model_index in [0,1]:
 
-    c = 1 # Class
-    S = np.zeros(len(info[f"class_{c}"].keys()))
-    B = np.zeros(len(S))
+    c  = 1 # Class
+    S  = np.zeros(len(info[f"class_{c}"].keys()))
+    B  = np.zeros(len(S))
+    xs = np.zeros(len(S))
 
     S_trg_eA = np.zeros(len(S))
     S_cut_eA = np.zeros(len(S))
@@ -381,7 +383,7 @@ def optimize_selection(args):
       B[i]         = B_tot * MVA_eff[i,0]
 
       # ----------------
-      xs           = proc['yaml']["xs"]
+      xs[i]        = proc['yaml']["xs"]
       eff_acc      = proc['eff_acc']
 
       S_trg_eA[i]  = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
@@ -448,17 +450,17 @@ def optimize_selection(args):
     dprint('')
     dprint('\\tiny')
     dprint('\\begin{tabular}{l||c|ccc|cc|c}')
-    dprint('Signal model point & $B$: $\\epsilon$(MVA) & $S$: $\\epsilon A$(trg) & $S$: $\\epsilon$(cut) & $S$: $\\epsilon$(MVA) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & $\\langle S \\rangle / \\sqrt{{ \\langle B \\rangle }}$ \\\\')
+    dprint('Signal model point & xs $\\sigma$ [pb] & $B$: $\\epsilon$(MVA) & $S$: $\\epsilon A$(trg) & $S$: $\\epsilon$(cut) & $S$: $\\epsilon$(MVA) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & $\\langle S \\rangle / \\sqrt{{ \\langle B \\rangle }}$ \\\\')
     dprint('\\hline')
     
     for i in range(len(S)):
 
       # Gaussian limit discovery significance
       ds   = S[i] / np.sqrt(B[i])
-
-      line = f'{names[i]} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
+      
+      line = f'{names[i]} & {xs[i]:0.1E} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
       dprint(line)
-
+    
     # print(roc_obj.thresholds)
     dprint('\\end{tabular}')
     dprint('')

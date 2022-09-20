@@ -423,17 +423,17 @@ gnet1:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
+    conv_MLP_dropout: 0.1
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_dropout: 0.1
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.01
+    final_MLP_dropout: 0.1
 
     # Domain adaptation
     DA_active: False
@@ -448,7 +448,7 @@ gnet1:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 150
+    epochs: 100
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -484,17 +484,17 @@ gnet2:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
+    conv_MLP_dropout: 0.1
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_dropout: 0.1
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.01
+    final_MLP_dropout: 0.1
     
     # Domain adaptation
     DA_active: False
@@ -509,7 +509,7 @@ gnet2:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 150
+    epochs: 100
     batch_size: 64
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -545,18 +545,18 @@ gnet3:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.01
+    conv_MLP_dropout: 0.1
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.01
+    fusion_MLP_dropout: 0.1
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.01
-
+    final_MLP_dropout: 0.1
+    
     # Domain adaptation
     DA_active: False
     # ...
