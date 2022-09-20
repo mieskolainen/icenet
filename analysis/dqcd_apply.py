@@ -7,6 +7,7 @@ import numpy as np
 import awkward as ak
 from tqdm import tqdm
 import pickle
+from pprint import pprint
 
 from icenet.tools import stx
 from icenet.tools import io
@@ -200,10 +201,9 @@ def optimize_selection(args):
     with open(latex_filename, mode) as f:
       f.write(f'{string} \n')
 
-  latex_path     = f'{args["plotdir"]}/eval/significance'
-  aux.makedir(latex_path)
+  latex_path     = aux.makedir(f'{args["plotdir"]}/eval/significance')
   latex_filename = f'{latex_path}/optimize.tex'
-  
+
   """
   Work in progress
   """
