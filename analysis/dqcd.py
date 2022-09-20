@@ -4,11 +4,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 import os
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy import interpolate
-from scipy.stats import ncx2,norm
-
 import pickle
 import numpy as np
 
@@ -41,7 +36,7 @@ def main():
   
   if runmode in ['genesis', 'train', 'eval']:  
     X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
-  
+
   if runmode in ['train', 'eval']:
     data = process.read_data_processed(X=X,Y=Y,W=W,ids=ids,
       funcfactor=common.splitfactor,mvavars='configs.dqcd.mvavars',runmode=runmode,args=args)

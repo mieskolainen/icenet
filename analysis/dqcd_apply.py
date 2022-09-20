@@ -9,6 +9,11 @@ from tqdm import tqdm
 import pickle
 from pprint import pprint
 
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy import interpolate
+from scipy.stats import ncx2,norm
+
 from icenet.tools import stx
 from icenet.tools import io
 from icenet.tools import prints
