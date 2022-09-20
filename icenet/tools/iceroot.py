@@ -137,7 +137,7 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
     print(__name__ + f'.read_multiple_MC: Concatenating different MC processes')
     for i,key in tqdm(enumerate(processes)):
-
+        
         # Concatenate processes
         if i == 0:
             X    = copy.deepcopy(data[i]['X'])
@@ -153,6 +153,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
         
         data[i] = None # Free memory
         gc.collect()
+        
+        io.showmem()
     
     #ray.shutdown()
     
