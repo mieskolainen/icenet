@@ -194,15 +194,15 @@ def func_binormal(x, a, b):
 # -----------------------------------------------------------------------
 
 def optimize_selection(args):
-  
-  latex_path     = f'{args["plotdir"]}/eval/significance'
-  latex_filename = f'{latex_path}/optimize.tex'
 
   def dprint(string, mode='a'):
     print(string)
     with open(latex_filename, mode) as f:
       f.write(f'{string} \n')
 
+  latex_path     = f'{args["plotdir"]}/eval/significance'
+  latex_filename = f'{latex_path}/optimize.tex'
+  
   """
   Work in progress
   """
