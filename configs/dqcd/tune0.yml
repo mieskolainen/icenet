@@ -132,7 +132,7 @@ train_runmode:
     
     #- gnet1
     - gnet2
-    #- gnet3
+    - gnet3
     
     #- dmlp
     #- lgr0

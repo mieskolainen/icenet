@@ -423,17 +423,17 @@ gnet1:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.1
+    conv_MLP_dropout: 0.03
     conv_aggr: 'max'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.1
+    fusion_MLP_dropout: 0.03
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.1
+    final_MLP_dropout: 0.03
 
     # Domain adaptation
     DA_active: False
@@ -449,9 +449,9 @@ gnet1:
     clip_norm: 1.0
 
     epochs: 100
-    batch_size: 64
+    batch_size: 128
     lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  0.00005    # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -477,24 +477,24 @@ gnet2:
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
     z_dim: 128                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.1
-    conv_aggr: 'max'
+    conv_MLP_dropout: 0.03
+    conv_aggr: 'mean'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.1
+    fusion_MLP_dropout: 0.03
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.1
+    final_MLP_dropout: 0.03
     
     # Domain adaptation
     DA_active: False
@@ -510,7 +510,7 @@ gnet2:
     clip_norm: 1.0
 
     epochs: 100
-    batch_size: 64
+    batch_size: 128
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
 
@@ -545,18 +545,18 @@ gnet3:
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
-    conv_MLP_dropout: 0.1
-    conv_aggr: 'max'
+    conv_MLP_dropout: 0.03
+    conv_aggr: 'mean'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
-    fusion_MLP_dropout: 0.1
+    fusion_MLP_dropout: 0.03
 
     final_MLP_act: 'relu'
     final_MLP_bn:  False
-    final_MLP_dropout: 0.1
-    
+    final_MLP_dropout: 0.03
+
     # Domain adaptation
     DA_active: False
     # ...
@@ -570,10 +570,10 @@ gnet3:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 150
-    batch_size: 64
+    epochs: 100
+    batch_size: 128
     lr: 1.0e-3
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  0.00005    # L2-regularization
 
   # Scheduler
   scheduler_param:
