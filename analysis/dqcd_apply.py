@@ -302,7 +302,7 @@ def optimize_selection(args):
   num_MVA_models = len(resdict['roc_mstats'][keys[0]])
 
   for MVA_model_index in range(num_MVA_models):
-    
+
     c  = 1 # Class
     S  = np.zeros(len(info[f"class_{c}"].keys()))
     B  = np.zeros(len(S))
@@ -452,7 +452,7 @@ def optimize_selection(args):
     dprint(f'MVA model: {MVA_model_names[MVA_model_index]} \\\\')
     dprint('')
     dprint('\\tiny')
-    dprint('\\begin{tabular}{l||c|ccc|cc|c}')
+    dprint('\\begin{tabular}{lc||c|ccc|cc|c}')
     dprint('Signal model point & xs $\\sigma$ [pb] & $B$: $\\epsilon$(MVA) & $S$: $\\epsilon A$(trg) & $S$: $\\epsilon$(cut) & $S$: $\\epsilon$(MVA) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & $\\langle S \\rangle / \\sqrt{{ \\langle B \\rangle }}$ \\\\')
     dprint('\\hline')
     
@@ -461,7 +461,7 @@ def optimize_selection(args):
       # Gaussian limit discovery significance
       ds   = S[i] / np.sqrt(B[i])
 
-      line = f'{names[i]} & {xs[i]:0.1E} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
+      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
       dprint(line)
 
     # print(roc_obj.thresholds)
