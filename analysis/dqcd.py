@@ -36,14 +36,16 @@ def main():
   
   cli, cli_dict  = process.read_cli()
   runmode        = cli_dict['runmode']
-  
-  args, cli      = process.read_config(config_path=f'configs/dqcd', runmode=runmode)
-  X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
 
-  if   runmode == 'train' or runmode == 'eval':
+  args, cli      = process.read_config(config_path=f'configs/dqcd', runmode=runmode)
+  
+  if runmode in ['genesis', 'train', 'mode']:  
+    X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
+
+  if runmode in ['train', 'eval']:
     data = process.read_data_processed(X=X,Y=Y,W=W,ids=ids,
       funcfactor=common.splitfactor,mvavars='configs.dqcd.mvavars',runmode=runmode,args=args)
-    
+  
   if   runmode == 'train':
     prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
     process.make_plots(data=data['trn'], args=args)
@@ -55,9 +57,8 @@ def main():
     
   elif runmode == 'optimize':
     dqcd_apply.optimize_selection(args=args)
-
+  
   print(__name__ + ' [done]')
 
 if __name__ == '__main__' :
    main()
-   
