@@ -300,9 +300,9 @@ def optimize_selection(args):
 
   keys = list(resdict['roc_mstats'].keys())
   num_MVA_models = len(resdict['roc_mstats'][keys[0]])
-  
-  for MVA_model_index in range():
 
+  for MVA_model_index in range(num_MVA_models):
+    
     c  = 1 # Class
     S  = np.zeros(len(info[f"class_{c}"].keys()))
     B  = np.zeros(len(S))
