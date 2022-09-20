@@ -251,8 +251,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
             with uproot.open(files[i]) as events:
                 
                 param  = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop, 'label': files[i]}
-                output = events_to_jagged_numpy(**param)
-
+                output, ids = events_to_jagged_numpy(**param)
+                
                 # Concatenate with other file results
                 X = copy.deepcopy(output) if (i == 0) else np.concatenate((X, output), axis=0)
                 del output
