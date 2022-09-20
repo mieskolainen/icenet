@@ -297,8 +297,8 @@ def optimize_selection(args):
 
   # --------------------------------------------------------------------
   # Signal estimate per model point
-  
-  num_MVA_models = len(resdict['roc_mstats'][resdict['roc_mstats'].keys()[0]])
+
+  num_MVA_models = len(resdict['roc_mstats'][resdict['roc_mstats'].items()[0]])
   
   for MVA_model_index in range(num_MVA_models):
 
