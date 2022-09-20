@@ -21,7 +21,7 @@ ulimit -v unlimited
 
 # Use * or other glob wildcards for filenames
 # tee redirect output to both a file and to screen
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+#python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
+#python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

@@ -33,7 +33,7 @@ def main() :
       process.train_models(data_trn=data['trn'], data_val=data['val'], args=args)
   
   elif runmode == 'eval':
-      process.evaluate_models(data=data['tst'], args=args)
+      process.evaluate_models(data=data['tst'], info=info, args=args)
 
   print(__name__ + ' [done]')
 

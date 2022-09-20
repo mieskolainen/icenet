@@ -36,7 +36,7 @@ def main() :
     
   elif runmode == 'eval':
     prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
-    process.evaluate_models(data=data['tst'], args=args)
+    process.evaluate_models(data=data['tst'], info=info, args=args)
 
   print(__name__ + ' [done]')
 

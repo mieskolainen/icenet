@@ -6,6 +6,7 @@
 import argparse
 import numpy as np
 import awkward as ak
+import gc
 import torch
 import copy
 from tqdm import tqdm
@@ -298,7 +299,7 @@ def read_data_processed(X,Y,W,ids,funcfactor,mvavars,runmode,args):
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
         data = process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=funcfactor, mvavars=mvavars, runmode=runmode)
-            
+        
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data_processed: Saving to file: "{cache_filename}"', 'yellow')
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -509,8 +510,8 @@ def train_models(data_trn, data_val, args=None) :
     for i in range(len(args['active_models'])):
 
         # Collect garbage
-        import gc
         gc.collect()
+        io.showmem()
         
         ID    = args['active_models'][i]
         param = args['models'][ID]
@@ -637,7 +638,7 @@ def train_models(data_trn, data_val, args=None) :
     return
 
 
-def evaluate_models(data=None, args=None):
+def evaluate_models(data=None, info=None, args=None):
     """
     Evaluate ML/AI models.
 
@@ -891,8 +892,9 @@ def evaluate_models(data=None, args=None):
                'roc_paths':         roc_paths,
                'corr_mstats':       corr_mstats,
                'ROC_binned_mstats': ROC_binned_mstats,
-               'ROC_binned_mlabel': ROC_binned_mlabel}
-
+               'ROC_binned_mlabel': ROC_binned_mlabel,
+               'info':              info}
+    
     targetfile = targetdir + '/eval_results.pkl'
     print(__name__ + f'.evaluate_models: Saving pickle output to "{targetfile}"')
     pickle.dump(resdict, open(targetfile, 'wb'))

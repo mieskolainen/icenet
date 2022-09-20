@@ -20,8 +20,8 @@ from icetrg import common
 def main() :
         
   cli, cli_dict = process.read_cli()
-  runmode     = cli_dict['runmode']
-  args, cli   = process.read_config(config_path=f'configs/trg', runmode=runmode)
+  runmode       = cli_dict['runmode']
+  args, cli     = process.read_config(config_path=f'configs/trg', runmode=runmode)
   
   X,Y,W,ids,info = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
   
@@ -36,7 +36,7 @@ def main() :
 
   elif runmode == 'eval':
     prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
-    process.evaluate_models(data=data['tst'], args=args)
+    process.evaluate_models(data=data['tst'], info=info, args=args)
   
   print(__name__ + ' [done]')
 

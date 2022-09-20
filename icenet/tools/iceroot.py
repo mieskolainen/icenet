@@ -252,12 +252,12 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                 
                 param  = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop, 'label': files[i]}
                 output, ids = events_to_jagged_numpy(**param)
-                
+
                 # Concatenate with other file results
                 X = copy.deepcopy(output) if (i == 0) else np.concatenate((X, output), axis=0)
                 del output
                 gc.collect()
-                
+
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
@@ -289,8 +289,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         """
         # ======================================================
         # Multiprocessing version
-
-        num_workers  = min(len(files), multiprocessing.cpu_count()) # min handles the case #files < #cpu
+        
+        num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
         ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
         chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
