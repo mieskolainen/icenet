@@ -23,8 +23,23 @@ ulimit -v unlimited
 # tee redirect output to both a file and to screen
 
 # Generate steering YAML for QCD
-python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0,10]'
+python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
 
+# Vector
+python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[0-20]'
+
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+
+# Darkphoton
+python configs/dqcd/include/ymlgen.py --process 'darkphoton' --filerange '[0-10]'
+
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 
 # Higgs
 python configs/dqcd/include/ymlgen.py --process 'higgs'      --filerange '*'
@@ -33,22 +48,3 @@ python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__higgs_all.yml
 python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-
-
-# Vector
-python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[0,20]'
-
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-
-
-# Darkphoton
-python configs/dqcd/include/ymlgen.py --process 'darkphoton' --filerange '[0,10]'
-
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-
