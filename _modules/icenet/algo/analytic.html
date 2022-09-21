@@ -291,44 +291,49 @@
     
     <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="get_Lorentz_edge_features"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">[docs]</a><span class="k">def</span> <span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<div class="viewcode-block" id="get_Lorentz_edge_features"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">[docs]</a><span class="k">def</span> <span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span>  <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
     
     <span class="c1"># Edge features: [num_edges, num_edge_features]</span>
     <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">indexlist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     
     <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># -1, last is the empty event (virtual) one</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
 
-            <span class="c1"># Compute only diagonal + upper triangle</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="n">i</span><span class="p">):</span>
-                
-                <span class="n">p4_i</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">p4_j</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">self_loops</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="k">continue</span>
 
-                <span class="c1"># kt-metric (anti)</span>
-                <span class="n">dR2_ij</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-                <span class="n">kt2_i</span>  <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span> 
-                <span class="n">kt2_j</span>  <span class="o">=</span> <span class="n">p4_j</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="o">=</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="o">=</span><span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="o">=</span><span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-                
-                <span class="c1"># Lorentz scalars</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">+</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam s-like</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">-</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam t-like</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">dot4</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span>   <span class="c1"># 4-dot</span>
-                
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>  <span class="ow">and</span> <span class="p">(</span><span class="n">directed</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">p4_i</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p4_j</span>   <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="c1"># kt-metric (anti)</span>
+            <span class="n">dR2_ij</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">kt2_i</span>  <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span> 
+            <span class="n">kt2_j</span>  <span class="o">=</span> <span class="n">p4_j</span><span class="o">.</span><span class="n">pt2</span> <span class="o">+</span> <span class="n">EPS</span>
+            <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="o">=</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="o">=</span><span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="o">=</span><span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            
+            <span class="c1"># Lorentz scalars</span>
+            <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">+</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam s-like</span>
+            <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4_i</span> <span class="o">-</span> <span class="n">p4_j</span><span class="p">)</span><span class="o">.</span><span class="n">m2</span>  <span class="c1"># Mandelstam t-like</span>
+            <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4_i</span><span class="o">.</span><span class="n">dot4</span><span class="p">(</span><span class="n">p4_j</span><span class="p">)</span>   <span class="c1"># 4-dot</span>
+            
             <span class="n">indexlist</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
             <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
     
     <span class="c1">### Copy to the lower triangle for speed (we have symmetric adjacency)</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">):</span>
-                <span class="n">edge_attr</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">edge_attr</span><span class="p">[</span><span class="n">indexlist</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">],:]</span> <span class="c1"># note [j,i] !</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># (update this to be compatible with self-loops and directed computation)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    n = 0</span>
+<span class="sd">    for i in range(num_nodes):</span>
+<span class="sd">        for j in range(num_nodes):</span>
+<span class="sd">            if (j &lt; i):</span>
+<span class="sd">                edge_attr[n,:] = edge_attr[indexlist[j,i],:] # note [j,i] !</span>
+<span class="sd">            n += 1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Cast</span>
     <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">edge_attr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -354,9 +359,9 @@
 
     <span class="c1"># Graph connectivity: (~ sparse adjacency matrix)</span>
     <span class="n">edge_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">))</span>
-
+    
     <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span> <span class="c1"># -1, last is the empty event (virtual) one</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">):</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">self_loops</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>

@@ -297,8 +297,6 @@
     <span class="c1"># -----------------------------------------------</span>
 
     <span class="c1"># Loop over events</span>
-    <span class="n">num_empty</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">),</span> <span class="n">miniters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_events</span><span class="o">/</span><span class="mi">10</span><span class="p">))):</span>
         
         <span class="c1"># Count the number of heterogeneous nodes by picking the first feature</span>
@@ -308,7 +306,7 @@
         
         <span class="c1">#print(__name__ + f&#39;.parse_graph_data: event: {ev} | num_nodes: {nums}&#39;)</span>
 
-        <span class="n">num_nodes</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">nums</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">nums</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span> <span class="c1"># +1 for virtual node (empty data)</span>
+        <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">nums</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">nums</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
         <span class="n">num_edges</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="o">=</span><span class="n">self_loops</span><span class="p">)</span>
 
         <span class="c1"># ------------------------------------------------------------------</span>
@@ -389,9 +387,9 @@
                     <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
         <span class="c1"># Empty information</span>
-        <span class="k">if</span> <span class="n">num_nodes</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">num_empty</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="c1"># However, never skip empty events here!!, do pre-filtering before this function if needed</span>
+        <span class="c1">#if num_nodes - 1 == 0:</span>
+        <span class="c1">#    num_empty += 1</span>
+        <span class="c1">#    # However, never skip empty events here!!, do pre-filtering before this function if needed</span>
         
         <span class="c1"># ====================================================================</span>
         <span class="c1"># CONSTRUCT TENSORS</span>
