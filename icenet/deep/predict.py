@@ -134,11 +134,12 @@ def pred_graph_xgb(args, param, device='cpu'):
     
     return func_predict
 
-def pred_torch_graph(args, param):
+def pred_torch_graph(args, param, batch_size=5000):
 
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
     model.eval() # ! Turn on eval mode!
 
     def func_predict(x):
@@ -149,9 +150,14 @@ def pred_torch_graph(args, param):
             x_in = [x]
         
         # Geometric type -> need to use batch loader
-        loader  = torch_geometric.loader.DataLoader(x_in, batch_size=len(x), shuffle=False)
+        loader = torch_geometric.loader.DataLoader(x_in, batch_size=batch_size, shuffle=False)
+
+        # Predict in smaller batches not to overflow GPU memory
+        i = 0
         for batch in loader:
-            return model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
+            y = model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
+            y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
+            i += 1
     
     return func_predict
 
