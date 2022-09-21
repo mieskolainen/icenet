@@ -122,15 +122,21 @@ MVA_JET_VARS = [
   #'Jet_chFPV2EF',
   #'Jet_chFPV3EF',
 
+  'Jet_nMuons',
+  'Jet_nElectrons',
+  'Jet_nConstituents',
+
   #'Jet_btagCMVA',
   #'Jet_btagCSVV2',
-  #'Jet_btagDeepB',
-  #'Jet_btagDeepC',
+  'Jet_btagDeepB',
+  'Jet_btagDeepC',
   #'Jet_btagDeepFlavB',
   #'Jet_btagDeepFlavC',
-  'Jet_hadronFlavour',
-
-  'Jet_nMuons'
+  'Jet_qgl',
+  'Jet_puIdDisc',
+  
+  'Jet_muonIdx1',
+  'Jet_muonIdx2' 
 ]
 
 #MVA_JET_VARS = ['Jet_.*']
@@ -144,22 +150,24 @@ MVA_MUON_VARS = [
   'Muon_eta',
   'Muon_phi',
   'Muon_pt',
-
   'Muon_ptErr',
+
   'Muon_dxy',
   'Muon_dxyErr',
   
   'Muon_dz',
   'Muon_dzErr',
   
-  'Muon_ip3d'
+  'Muon_ip3d',
   'Muon_sip3d',
   'Muon_charge',
   
   'Muon_tightId',
+  'Muon_softMva',
   'Muon_pfRelIso03_all',
   'Muon_miniPFRelIso_all',
-  #'Muon_mvaTTH'
+
+  'Muon_jetIdx'
 ]
 
 #MVA_MUON_VARS = ['Muon_.*']

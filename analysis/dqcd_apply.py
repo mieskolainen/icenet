@@ -23,7 +23,7 @@ from icenet.tools import reweight
 from icenet.tools import plots
 from icefit import cortools
 
-from PyPDF2 import PdfFileMerger
+#from PyPDF2 import PdfFileMerger
 
 
 latex_header = \
@@ -174,8 +174,8 @@ def optimize_selection(args):
     # Loop over different signal model points
     i = 0
 
-    #Create and instance of PdfFileMerger() class
-    merger = PdfFileMerger()
+    # Create and instance of PdfFileMerger() class
+    # merger = PdfFileMerger()
 
     for name in info[f"class_{c}"].keys():
 
@@ -199,10 +199,11 @@ def optimize_selection(args):
       roc_label = resdict['roc_labels'][key][MVA_model_index]
 
       x,y       = roc_obj.fpr,roc_obj.tpr
-      y_err     = np.zeros(len(y))
-      for k in range(len(y_err)):
-        y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k]) + y[k]*1e-3 + 1e-12
-
+      y_err     = np.ones(len(y))
+      
+      #for k in range(len(y_err)):
+      #  y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k])
+      
       # -----------------
       # Interpolate ROC-curve
       
@@ -290,17 +291,17 @@ def optimize_selection(args):
           plt.xlabel('False positive rate $\\alpha$ (background efficiency)', fontsize=9)
 
         plt.ylim([0,1])
-
+      
       pdf_filename = f'{path}/{roc_path}.pdf'
-      plt.savefig(pdf_filename)#, bbox_inches='tight')
+      plt.savefig(pdf_filename, bbox_inches='tight')
       plt.close()
       
-      merger.append(pdf_filename)
+      #merger.append(pdf_filename)
       # ------------------------------------
 
       i += 1
 
-    merger.write(f'{path}/ROC_all.pdf')
+    #merger.write(f'{path}/ROC_all.pdf')
     print('')
 
     # ------------------
