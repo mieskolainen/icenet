@@ -731,8 +731,6 @@ def evaluate_models(data=None, info=None, args=None):
         X_kin    = data['data_kin'].x
         VARS_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
-
-    if weights is not None: print(__name__ + ".evaluate_models: -- per event weighted evaluation ON ")
     
     try:
         ### Tensor variable normalization
@@ -948,7 +946,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     if args['plot_param']['ROC']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
-            metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask], weights=weights[mask],
+            metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask],
+                weights=weights[mask] if weights is not None else None,
                 num_bootstrap=args['plot_param']['ROC']['num_bootstrap'])
 
             if sublabel not in roc_mstats:
@@ -1018,7 +1017,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
         def plot_helper(mask, sublabel, pathlabel):
             hist_edges = args['plot_param'][f'MVA_output']['edges']
-            inputs = {'y_pred': y_pred[mask], 'y': y[mask], 'weights': weights[mask], 'num_classes': args['num_classes'],
+            inputs = {'y_pred': y_pred[mask], 'y': y[mask],
+                'weights': weights[mask] if weights is not None else None, 'num_classes': args['num_classes'],
                 'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': f'{targetdir}/MVA/{label}/{pathlabel}'}
 
             plots.density_MVA_wclass(**inputs)
@@ -1048,18 +1048,21 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 edges = args['plot_param']['MVA_2D'][pid]['edges']
             else:
                 break # No more this type of plots
-
+            
             def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
 
                 # Two step
                 XX = X_RAW[mask, ...]
                 XX = XX[:, pick_ind]
                 
-                inputs = {'y_pred': y_pred[mask], 'weights': weights[mask], 'X': XX,
-                    'ids': np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
+                inputs = {
+                    'y_pred':      y_pred[mask],
+                    'weights':     weights[mask] if weights is not None else None,
+                    'X':           XX,
+                    'ids':         np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
                     'num_classes': args['num_classes'],
-                    'label': f'{label}/{sublabel}', 'hist_edges': edges,
-                    'path': f'{targetdir}/COR/{label}/{pathlabel}'}
+                    'label':       f'{label}/{sublabel}', 'hist_edges': edges,
+                    'path':        f'{targetdir}/COR/{label}/{pathlabel}'}
                 
                 output = plots.density_COR_wclass(y=y[mask], **inputs)
                 #plots.density_COR(**inputs)

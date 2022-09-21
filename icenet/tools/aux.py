@@ -964,8 +964,9 @@ class Metric:
                     continue
                 # ------------------
 
-                out = compute_metrics(num_classes=num_classes, y_true=y_true[ind], y_pred=y_pred[ind], weights=weights[ind])
-
+                ww  = weights[ind] if weights is not None else None
+                out = compute_metrics(num_classes=num_classes, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
+                
                 if out['auc'] > 0:
 
                     self.auc_bootstrap[i] = out['auc']

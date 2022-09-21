@@ -22,9 +22,10 @@ from iceid import common
 def ele_mva_classifier(data, args=None):
     """
     External classifier directly from the root tree
+    (TBD: update this method to be compatible with the new workflow, change to function pointer)
     """
     varname = 'ele_mva_value_depth15'
-
+    
     print(f'\nEvaluate <{varname}> classifier ...')
     try:
         y    = np.array(data.y, dtype=float)
@@ -59,11 +60,11 @@ def main() :
 
     # ----------------------------
     # Evaluate external classifiers
-    met_elemva = ele_mva_classifier(data=data['tst']['data_kin'], args=args)
+    #met_elemva = ele_mva_classifier(data=data['tst']['data_kin'], args=args)
 
     # Add to the stack
-    process.roc_mstats.append(met_elemva)
-    process.roc_labels.append('elemva15')
+    #process.roc_mstats.append(met_elemva)
+    #process.roc_labels.append('elemva15')
     # ----------------------------
     
     prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)

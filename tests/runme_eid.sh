@@ -5,9 +5,9 @@
 # Run with: source runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="./travis-stash/input/iceid"
+#DATAPATH="./travis-stash/input/iceid"
 #DATAPATH="/vols/cms/icenet/data/2020Oct16"
-#DATAPATH="/home/user/imperial_new_trees/2020Oct16"
+DATAPATH="/home/user/imperial_new_trees/2020Oct16"
 
 mkdir "figs/eid/config-[$CONFIG]" -p # for output ascii dump
 

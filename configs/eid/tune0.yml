@@ -160,7 +160,7 @@ train_runmode:
     #- dbnf0
     - gnet0
     #- gnet1
-    #- gnet2
+    - gnet2
     #- gnet3
     
     - flr0

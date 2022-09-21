@@ -204,7 +204,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, label=No
         cprint( __name__ + f'.events_to_jagged_numpy: Loading: {label}', 'yellow')
     cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop} | realized = {N} ({100*N/N_all:0.3f} % | available = {N_all})', 'green')
     
-    for j in range(len(ids)):
+    for j in tqdm(range(len(ids))):
         x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
         X[:,j] = np.asarray(x)
 

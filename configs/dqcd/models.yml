@@ -412,13 +412,13 @@ gnet1:
   label:    'EdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'EdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'EdgeConv'        # See models under icenet/deep/graph.py
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 96                 # Convolution output dimension
+    z_dim: 196                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -449,7 +449,7 @@ gnet1:
     clip_norm: 1.0
 
     epochs: 120
-    batch_size: 128
+    batch_size: 256
     lr: 1.0e-3
     weight_decay:  0.00005    # L2-regularization
 
@@ -479,7 +479,7 @@ gnet2:
   model_param:
     task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 96                  # Convolution output dimension
+    z_dim: 196                  # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -489,11 +489,11 @@ gnet2:
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
     fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
     final_MLP_dropout: 0.01
     
     # Domain adaptation
@@ -510,7 +510,7 @@ gnet2:
     clip_norm: 1.0
 
     epochs: 120
-    batch_size: 128
+    batch_size: 256
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
 
@@ -538,9 +538,9 @@ gnet3:
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    task: 'graph'                    # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 96                 # Convolution output dimension
+    z_dim: 196                       # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -550,11 +550,11 @@ gnet3:
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
-    fusion_MLP_bn: True
+    fusion_MLP_bn: False
     fusion_MLP_dropout: 0.01
 
     final_MLP_act: 'relu'
-    final_MLP_bn:  True
+    final_MLP_bn:  False
     final_MLP_dropout: 0.01
 
     # Domain adaptation
@@ -571,7 +571,7 @@ gnet3:
     clip_norm: 1.0
 
     epochs: 120
-    batch_size: 128
+    batch_size: 256
     lr: 1.0e-3
     weight_decay:  0.00005    # L2-regularization
 
