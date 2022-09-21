@@ -96,8 +96,6 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
     # -----------------------------------------------
 
     # Loop over events
-    num_empty = 0
-
     for ev in tqdm(range(entry_start, entry_stop), miniters=int(np.ceil(num_events/10))):
         
         # Count the number of heterogeneous nodes by picking the first feature
@@ -107,7 +105,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
         
         #print(__name__ + f'.parse_graph_data: event: {ev} | num_nodes: {nums}')
 
-        num_nodes = 1 + np.sum([nums[key] for key in nums.keys()]) # +1 for virtual node (empty data)
+        num_nodes = np.sum([nums[key] for key in nums.keys()])
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
 
         # ------------------------------------------------------------------
@@ -188,9 +186,9 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
                     p4vec.append(v)
 
         # Empty information
-        if num_nodes - 1 == 0:
-            num_empty += 1
-            # However, never skip empty events here!!, do pre-filtering before this function if needed
+        #if num_nodes - 1 == 0:
+        #    num_empty += 1
+        #    # However, never skip empty events here!!, do pre-filtering before this function if needed
         
         # ====================================================================
         # CONSTRUCT TENSORS

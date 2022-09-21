@@ -418,7 +418,7 @@ gnet1:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 128                # Convolution output dimension
+    z_dim: 96                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -448,7 +448,7 @@ gnet1:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 100
+    epochs: 120
     batch_size: 128
     lr: 1.0e-3
     weight_decay:  0.00005    # L2-regularization
@@ -479,7 +479,7 @@ gnet2:
   model_param:
     task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 128                 # Convolution output dimension
+    z_dim: 96                  # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -509,7 +509,7 @@ gnet2:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 100
+    epochs: 120
     batch_size: 128
     lr: 1.0e-3
     weight_decay:  0.00005      # L2-regularization
@@ -540,7 +540,7 @@ gnet3:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 128                # Convolution output dimension
+    z_dim: 96                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -570,7 +570,7 @@ gnet3:
     optimizer: 'Adam'
     clip_norm: 1.0
 
-    epochs: 100
+    epochs: 120
     batch_size: 128
     lr: 1.0e-3
     weight_decay:  0.00005    # L2-regularization

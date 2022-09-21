@@ -28,23 +28,23 @@ python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]
 # Vector
 python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[180-200]'
 
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 
 # Darkphoton
 python configs/dqcd/include/ymlgen.py --process 'darkphoton' --filerange '[180-200]'
 
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__darkphoton_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 
 # Higgs
 python configs/dqcd/include/ymlgen.py --process 'higgs'      --filerange '*'
 
-python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH
-python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__higgs_all.yml --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__higgs_all.yml --modeltag higgs_all --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__higgs_all.yml --modeltag higgs_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode eval     $MAX --inputmap mc_map__higgs_all.yml --modeltag higgs_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize $MAX --inputmap mc_map__higgs_all.yml --modeltag higgs_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
