@@ -66,18 +66,20 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     INFO = {'class_0': None, 'class_1': None}
 
     # =================================================================
+    # *** SIGNAL MC ***
+    
+    proc = args["input"]['class_1']
+    X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
+        process_func=process_root, processes=proc, root_path=root_path, param=param)
+    
+    
+    # =================================================================
     # *** BACKGROUND MC ***
     
     proc = args["input"]['class_0']
     X_B, Y_B, W_B, ind, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
-    # =================================================================
-    # *** SIGNAL MC ***
-    
-    proc = args["input"]['class_1']
-    X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
-        process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     # =================================================================
     # Sample conditional theory parameters for the background as they are distributed in signal sample
