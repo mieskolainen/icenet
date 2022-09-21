@@ -158,6 +158,7 @@ def pred_torch_graph(args, param, batch_size=5000):
             y = model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
             i += 1
+        return y_tot
     
     return func_predict
 
