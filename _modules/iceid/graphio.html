@@ -365,6 +365,8 @@
             <span class="n">num_empty_ECAL</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="c1"># However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed</span>
         
+        <span class="n">p4vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vec4</span><span class="p">())</span> <span class="c1"># Add empty 4-vector (for all events, due to empty events)</span>
+
         <span class="c1"># ====================================================================</span>
         <span class="c1"># CONSTRUCT TENSORS</span>
 
@@ -387,7 +389,8 @@
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="c1">## Construct edge features</span>
-        <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">)</span>
+        <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="o">=</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">num_nodes</span><span class="p">,</span> \
+            <span class="n">num_edges</span><span class="o">=</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="o">=</span><span class="n">num_edge_features</span><span class="p">,</span> <span class="n">self_loops</span><span class="o">=</span><span class="n">self_loops</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="n">directed</span><span class="p">)</span>
         
         <span class="n">edge_attr</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">edge_attr</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span> <span class="c1"># Input protection</span>
         <span class="n">edge_attr</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
@@ -412,12 +415,12 @@
 
 
 <div class="viewcode-block" id="get_node_features"><a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.get_node_features">[docs]</a><span class="k">def</span> <span class="nf">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">p4track</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
-
+    
     <span class="c1"># Node feature matrix</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># Last one is the empty event case</span>
-
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># Last one is the empty event case</span>
+        
         <span class="k">if</span>   <span class="n">coord</span> <span class="o">==</span> <span class="s1">&#39;ptetaphim&#39;</span><span class="p">:</span>
             <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pt</span>
             <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">p4vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eta</span>
