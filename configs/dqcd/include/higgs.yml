@@ -1,317 +1,5 @@
  
 # [0] 
-HiddenValley_higgs_m_2_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_2_ctau_10_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 10 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [1] 
-HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 10 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [2] 
-HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_10_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 10 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [3] 
-HiddenValley_higgs_m_2_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_2_ctau_50_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 50 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [4] 
-HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 50 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [5] 
-HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_50_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 50 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [6] 
-HiddenValley_higgs_m_2_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_2_ctau_100_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 100 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [7] 
-HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 100 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [8] 
-HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_100_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 100 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [9] 
-HiddenValley_higgs_m_2_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_2_ctau_500_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 500 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [10] 
-HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 500 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [11] 
-HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_2_ctau_500_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    2 
-    ctau: 500 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [12] 
-HiddenValley_higgs_m_5_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_5_ctau_10_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 10 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [13] 
-HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 10 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [14] 
-HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_10_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 10 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [15] 
-HiddenValley_higgs_m_5_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_5_ctau_50_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 50 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [16] 
-HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 50 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [17] 
-HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_50_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 50 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [18] 
-HiddenValley_higgs_m_5_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_5_ctau_100_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 100 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [19] 
-HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 100 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [20] 
-HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_100_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 100 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [21] 
-HiddenValley_higgs_m_5_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_5_ctau_500_xiO_1_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 500 
-    xiO:  1 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [22] 
-HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_1 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 500 
-    xiO:  2.5 
-    xiL:  1 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [23] 
-HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_2p5 
-  path: 'bparkProductionV2/HiddenValley_higgs_m_5_ctau_500_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
-  xs:   1.0 # [pb] 
-  model_param: 
-    m:    5 
-    ctau: 500 
-    xiO:  2.5 
-    xiL:  2.5 
-  force_xs: true 
-  isMC:     true 
-  maxevents_scale: 1.0 
- 
-# [24] 
 HiddenValley_higgs_m_10_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_10_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -324,7 +12,7 @@ HiddenValley_higgs_m_10_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_10_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [25] 
+# [1] 
 HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -337,7 +25,7 @@ HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_10_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [26] 
+# [2] 
 HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -350,7 +38,7 @@ HiddenValley_higgs_m_10_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_1
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [27] 
+# [3] 
 HiddenValley_higgs_m_10_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_50_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -363,7 +51,7 @@ HiddenValley_higgs_m_10_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_50_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [28] 
+# [4] 
 HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -376,7 +64,7 @@ HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_50_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [29] 
+# [5] 
 HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -389,7 +77,7 @@ HiddenValley_higgs_m_10_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_5
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [30] 
+# [6] 
 HiddenValley_higgs_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_100_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -402,7 +90,7 @@ HiddenValley_higgs_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_100_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [31] 
+# [7] 
 HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -415,7 +103,7 @@ HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_10
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [32] 
+# [8] 
 HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -428,7 +116,7 @@ HiddenValley_higgs_m_10_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [33] 
+# [9] 
 HiddenValley_higgs_m_10_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_500_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -441,7 +129,7 @@ HiddenValley_higgs_m_10_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_10_ctau_500_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [34] 
+# [10] 
 HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -454,7 +142,7 @@ HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_10_ctau_50
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [35] 
+# [11] 
 HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -467,7 +155,7 @@ HiddenValley_higgs_m_10_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_10_ctau_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [36] 
+# [12] 
 HiddenValley_higgs_m_15_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_10_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -480,7 +168,7 @@ HiddenValley_higgs_m_15_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_10_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [37] 
+# [13] 
 HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -493,7 +181,7 @@ HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_10_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [38] 
+# [14] 
 HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -506,7 +194,7 @@ HiddenValley_higgs_m_15_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_1
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [39] 
+# [15] 
 HiddenValley_higgs_m_15_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_50_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -519,7 +207,7 @@ HiddenValley_higgs_m_15_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_50_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [40] 
+# [16] 
 HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -532,7 +220,7 @@ HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_50_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [41] 
+# [17] 
 HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -545,7 +233,7 @@ HiddenValley_higgs_m_15_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_5
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [42] 
+# [18] 
 HiddenValley_higgs_m_15_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_100_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -558,7 +246,7 @@ HiddenValley_higgs_m_15_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_100_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [43] 
+# [19] 
 HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -571,7 +259,7 @@ HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_10
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [44] 
+# [20] 
 HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -584,7 +272,7 @@ HiddenValley_higgs_m_15_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [45] 
+# [21] 
 HiddenValley_higgs_m_15_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_500_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -597,7 +285,7 @@ HiddenValley_higgs_m_15_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_15_ctau_500_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [46] 
+# [22] 
 HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -610,7 +298,7 @@ HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_15_ctau_50
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [47] 
+# [23] 
 HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -623,7 +311,7 @@ HiddenValley_higgs_m_15_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_15_ctau_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [48] 
+# [24] 
 HiddenValley_higgs_m_20_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_10_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -636,7 +324,7 @@ HiddenValley_higgs_m_20_ctau_10_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_10_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [49] 
+# [25] 
 HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -649,7 +337,7 @@ HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_10_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [50] 
+# [26] 
 HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -662,7 +350,7 @@ HiddenValley_higgs_m_20_ctau_10_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_1
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [51] 
+# [27] 
 HiddenValley_higgs_m_20_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_50_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -675,7 +363,7 @@ HiddenValley_higgs_m_20_ctau_50_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_50_xi
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [52] 
+# [28] 
 HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -688,7 +376,7 @@ HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_50_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [53] 
+# [29] 
 HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -701,7 +389,7 @@ HiddenValley_higgs_m_20_ctau_50_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_5
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [54] 
+# [30] 
 HiddenValley_higgs_m_20_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_100_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -714,7 +402,7 @@ HiddenValley_higgs_m_20_ctau_100_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_100_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [55] 
+# [31] 
 HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -727,7 +415,7 @@ HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_10
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [56] 
+# [32] 
 HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -740,7 +428,7 @@ HiddenValley_higgs_m_20_ctau_100_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [57] 
+# [33] 
 HiddenValley_higgs_m_20_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_500_xiO_1_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -753,7 +441,7 @@ HiddenValley_higgs_m_20_ctau_500_xiO_1_xiL_1: &HiddenValley_higgs_m_20_ctau_500_
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [58] 
+# [34] 
 HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_1 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 
@@ -766,7 +454,7 @@ HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_1: &HiddenValley_higgs_m_20_ctau_50
   isMC:     true 
   maxevents_scale: 1.0 
  
-# [59] 
+# [35] 
 HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_2p5: &HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_2p5 
   path: 'bparkProductionV2/HiddenValley_higgs_m_20_ctau_500_xiO_2p5_xiL_2p5_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root' 
   xs:   1.0 # [pb] 

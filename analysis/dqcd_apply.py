@@ -462,7 +462,7 @@ def optimize_selection(args):
       # Gaussian limit
       ds   = S[i] / np.sqrt(B[i])
 
-      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1E} \\\\'
+      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2E} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1E} \\\\'
       dprint(line)
     
     # print(roc_obj.thresholds)
