@@ -23,14 +23,13 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
         # MC
         if m != 'null':
           param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
-          process_name = f'{process}_{param_name}'
-          folder_name  = f'{process}_{end_name}'
-        
+          process_name = f'{process}_{param_name}'  
         # Data
         else:
           process_name = f'{process}'
-          folder_name  = f'{end_name}'
-
+        
+        folder_name  = f'{process}_{end_name}'
+        
         # Print
         dprint(f'# [{i}]')
         dprint(f'{process_name}: &{process_name}')
