@@ -25,19 +25,19 @@ FILTER: &FILTER
        {latex: ['$c\tau \neq 50$',  '$c\tau = 50$'],  cut: 'MODEL_ctau == 50'},
        {latex: ['$c\tau \neq 100$', '$c\tau = 100$'], cut: 'MODEL_ctau == 100'},
        {latex: ['$c\tau \neq 500$', '$c\tau = 500$'], cut: 'MODEL_ctau == 500'}]
-
+  
   # ... more sets here
 
 # -----------------------------------------------------------------------
 
 
 basic:
-  active: false
+  active: true
   nbins:  70
   exclude_vals: [null, -999.0]
 
 corrmat:
-  active: false
+  active: true
 
 contours:
   active: false
@@ -45,7 +45,7 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
-  xmin: 1.0E-4
+  xmin: 1.0E-5
   set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
@@ -67,6 +67,7 @@ ROC_binned:
 MVA_output:
   active: true
   edges: 80
+  set_filter: *FILTER
 
 ## (MVA output x External variable) density (2D)
 MVA_2D:

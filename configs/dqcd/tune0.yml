@@ -59,7 +59,7 @@ mva_param: &MVA_INPUT_PARAM
 genesis_runmode:
     
   maxevents:  null
-  inputmap: "mc_input.yml"
+  inputmap:  "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
 
   targetfunc:  null                  # Training target,    implemented under mctargets.py
