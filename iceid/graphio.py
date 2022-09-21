@@ -164,6 +164,8 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
             num_empty_ECAL += 1
             # However, never skip empty ECAL cluster events here!!, do pre-filtering before this function if needed
         
+        p4vec.append(vec4()) # Add empty 4-vector (for all events, due to empty events)
+
         # ====================================================================
         # CONSTRUCT TENSORS
 
@@ -186,7 +188,8 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
-        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, \
+            num_edges=num_edges, num_edge_features=num_edge_features, self_loops=self_loops, directed=directed)
         
         edge_attr[~np.isfinite(edge_attr)] = null_value # Input protection
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)
@@ -211,12 +214,12 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
 
 
 def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coord):
-
+    
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features), dtype=float)
 
-    for i in range(num_nodes-1): # Last one is the empty event case
-
+    for i in range(num_nodes - 1): # Last one is the empty event case
+        
         if   coord == 'ptetaphim':
             x[i,0] = p4vec[i].pt
             x[i,1] = p4vec[i].eta

@@ -183,7 +183,7 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
     # Loop over events
     for ev in tqdm(range(entry_start, entry_stop)):
 
-        num_nodes = 1 + len(X[ev, ind__candidate_energy]) # +1 for virtual node (empty data)
+        num_nodes = len(X[ev, ind__candidate_energy])
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
         
         # Construct 4-vector for each HGCAL candidate
@@ -233,7 +233,8 @@ def parse_graph_data_candidate(X, ids, features, graph_param, Y=None, weights=No
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
-        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, \
+            num_edges=num_edges, num_edge_features=num_edge_features, self_loops=self_loops, directed=directed)
         
         edge_attr[~np.isfinite(edge_attr)] = null_value # Input protection
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)

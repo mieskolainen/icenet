@@ -211,7 +211,8 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
         x = torch.tensor(x, dtype=torch.float)
 
         ## Construct edge features
-        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, num_edges=num_edges, num_edge_features=num_edge_features)
+        edge_attr  = analytic.get_Lorentz_edge_features(p4vec=p4vec, num_nodes=num_nodes, \
+            num_edges=num_edges, num_edge_features=num_edge_features, self_loops=self_loops, directed=directed)
         
         edge_attr[~np.isfinite(edge_attr)] = null_value # Input protection
         edge_attr  = torch.tensor(edge_attr, dtype=torch.float)

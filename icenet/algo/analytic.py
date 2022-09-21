@@ -90,7 +90,7 @@ def ktmetric(kt2_i, kt2_j, dR2_ij, p = -1, R = 1.0):
     
     return (a * c) if (a < b) else (b * c)
 
-def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features,  directed, self_loops, EPS=1E-12):
+def get_Lorentz_edge_features(p4vec, num_nodes, num_edges, num_edge_features, directed, self_loops, EPS=1E-12):
     
     # Edge features: [num_edges, num_edge_features]
     edge_attr = np.zeros((num_edges, num_edge_features), dtype=float)
@@ -158,7 +158,7 @@ def get_simple_edge_index(num_nodes, num_edges, directed, self_loops):
 
     # Graph connectivity: (~ sparse adjacency matrix)
     edge_index = np.zeros((2, num_edges))
-    
+
     n = 0
     for i in range(num_nodes):
         for j in range(num_nodes):
