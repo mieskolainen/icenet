@@ -27,8 +27,8 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
         # Data
         else:
           process_name = f'{process}'
-        
-        folder_name  = f'{process}_{end_name}'
+
+        folder_name  = f'{process_name}_{end_name}'
         
         # Print
         dprint(f'# [{i}]')
