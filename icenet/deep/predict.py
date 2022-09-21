@@ -141,7 +141,7 @@ def pred_torch_graph(args, param, batch_size=5000):
     model, device = optimize.model_to_cuda(model, device_type=param['device'])
     
     model.eval() # ! Turn on eval mode!
-
+    
     def func_predict(x):
 
         if isinstance(x, list):
@@ -153,13 +153,12 @@ def pred_torch_graph(args, param, batch_size=5000):
         loader = torch_geometric.loader.DataLoader(x_in, batch_size=batch_size, shuffle=False)
 
         # Predict in smaller batches not to overflow GPU memory
-        i = 0
-        for batch in loader:
+        for i, batch in enumerate(loader):
             y = model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
-            i += 1
+        
         return y_tot
-    
+
     return func_predict
 
 def pred_torch_generic(args, param):

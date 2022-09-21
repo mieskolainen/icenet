@@ -23,6 +23,8 @@ from icenet.tools import reweight
 from icenet.tools import plots
 from icefit import cortools
 
+from PyPDF2 import PdfFileMerger
+
 
 latex_header = \
 """
@@ -172,7 +174,6 @@ def optimize_selection(args):
     # Loop over different signal model points
     i = 0
 
-    from PyPDF2 import PdfFileMerger
     #Create and instance of PdfFileMerger() class
     merger = PdfFileMerger()
 
@@ -291,7 +292,7 @@ def optimize_selection(args):
         plt.ylim([0,1])
 
       pdf_filename = f'{path}/{roc_path}.pdf'
-      plt.savefig(pdf_filename, bbox_inches='tight')
+      plt.savefig(pdf_filename)#, bbox_inches='tight')
       plt.close()
       
       merger.append(pdf_filename)
