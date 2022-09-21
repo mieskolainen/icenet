@@ -353,7 +353,7 @@ def optimize_selection(args):
       func    = interpolate.interp1d(x, y, 'linear')
 
       ## Pick ROC-working point from the interpolation
-      xval = np.logspace(-8, 0, 1000)
+      xval    = np.logspace(-8, 0, int(1e4))
       yhat    = func(B_target_eff)
 
       # -----------------
@@ -382,7 +382,7 @@ def optimize_selection(args):
       MVA_eff[i,:] = np.array([B_target_eff, yhat])
       
       # ----------------
-      # Compute background and signal event count
+      # Compute background event count
       B[i]         = B_tot * MVA_eff[i,0]
 
       # ----------------
@@ -393,6 +393,7 @@ def optimize_selection(args):
       S_cut_eA[i]  = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
       # ----------------
 
+      # Compute signal event count 
       S[i]         = S_trg_eA[i] * S_cut_eA[i] * xs[i] * L_int * MVA_eff[i,1]
 
       # ------------------------------------
@@ -420,7 +421,7 @@ def optimize_selection(args):
           plt.xscale('linear')
           plt.xlim([0, 1])
           ax[k].set_aspect('equal', 'box')
-          plt.ylabel('True positive rate $1 - \\beta$ (signal efficiency)')
+          plt.ylabel('True positive rate $1 - \\beta$ (signal efficiency)', fontsize=9)
           plt.title(f'{names[i]}', fontsize=7)
           plt.legend(loc='lower right', fontsize=7)
 
@@ -430,7 +431,7 @@ def optimize_selection(args):
           plt.xlim([xmin, 1])
           ax[k].set_aspect(-np.log10(xmin))
           plt.title(fit_label, fontsize=7)
-          plt.xlabel('False positive rate $\\alpha$ (background efficiency)')
+          plt.xlabel('False positive rate $\\alpha$ (background efficiency)', fontsize=9)
 
         plt.ylim([0,1])
 
@@ -458,16 +459,16 @@ def optimize_selection(args):
     
     for i in range(len(S)):
 
-      # Gaussian limit discovery significance
+      # Gaussian limit
       ds   = S[i] / np.sqrt(B[i])
 
-      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1f} \\\\'
+      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1E} \\\\'
       dprint(line)
-
+    
     # print(roc_obj.thresholds)
     dprint('\\end{tabular}')
     dprint('')
-
+    
   dprint('\\end{document}')
 
   # Compile latex
