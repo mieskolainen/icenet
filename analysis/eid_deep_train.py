@@ -78,9 +78,12 @@ def compute_reweight(root_files, num_events, args):
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    entry_stop     = np.min([args['reweight_param']['maxevents'], num_events[index]])
-    X,Y,W,ids,info = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
+    entry_stop = np.min([args['reweight_param']['maxevents'], num_events[index]])
+    predata    = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
     
+
+    X,Y,W,ids  = predata['X'],predata['Y'],predata['W'],predata['ids']
+
     # Compute re-weights
     _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
 
@@ -169,7 +172,9 @@ def main():
 
                     visited = True # For the special case
 
-                    X,Y,W,ids,info = common.load_root_file(root_path=[root_files[f]], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
+                    predata        = common.load_root_file(root_path=[root_files[f]], entry_start=entry_start, entry_stop=entry_stop, args=args, library='np')
+                    
+                    X,Y,W,ids      = predata['X'],predata['Y'],predata['W'],predata['ids']
                     trn, val, tst  = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
                     
                     # =========================================================================
