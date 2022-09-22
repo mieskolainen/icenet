@@ -256,7 +256,7 @@ def generic_flow(rootname, func_loader, func_factor):
             func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
         
     if runmode == 'train':
-
+        
         prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
         make_plots(data=data['trn'], args=args)
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)

@@ -72,7 +72,7 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, ids, active_dim = [], W=None):
+def print_variables(X : np.array, ids, W=None):
     """ Print in a format (# samples x # dimensions)
     """
 
@@ -88,26 +88,25 @@ def print_variables(X : np.array, ids, active_dim = [], W=None):
     print('\n')
     print(__name__ + f'.print_variables:')
 
-    if active_dim == []:
-        active_dim = np.arange(0,len(ids))
-
-    print(f'active_dim: {active_dim} \n')
-
     print('[i] variable_name : [min, med, max] [#unique]   mean +- std   [[isinf, isnan]]')
-    for j in active_dim:
-        
-        x = np.array(X[:,j], dtype=np.float)
+    
+    for j in range(len(ids)):
+        try:
+            x = np.array(X[:,j], dtype=np.float)
 
-        minval     = np.min(x)
-        med        = np.median(x)
-        maxval     = np.max(x)
-        mean,std   = weighted_avg_and_std(values=x, weights=W)
-        num_unique = len(np.unique(x))
+            minval     = np.min(x)
+            med        = np.median(x)
+            maxval     = np.max(x)
+            mean,std   = weighted_avg_and_std(values=x, weights=W)
+            num_unique = len(np.unique(x))
 
-        isinf  = np.any(np.isinf(x))
-        isnan  = np.any(np.isnan(x))
+            isinf  = np.any(np.isinf(x))
+            isnan  = np.any(np.isnan(x))
 
-        print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t {: >10.2E} +- {: >10.2E}   [[{}, {}]]'
-            .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
+            print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t {: >10.2E} +- {: >10.2E}   [[{}, {}]]'
+                .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
+        except:
+            print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')
+    
     print('\n')
 

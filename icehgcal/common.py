@@ -274,7 +274,8 @@ def splitfactor(x, y, w, ids, args):
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
-    data.x = None
+
+    data.x = None # To protect other routines (TBD see global impact --> comment this line)
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
 

@@ -44,7 +44,7 @@ gnet0:
     
     epochs: 80
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -105,7 +105,7 @@ gnet1:
     
     epochs: 80
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -166,7 +166,7 @@ gnet2:
     
     epochs: 80
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler

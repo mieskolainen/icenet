@@ -4,7 +4,7 @@ gnet0:
   predict:  'torch_graph'
   label:    'EdgeConv'
   raytune:  'gnn_setup'
-
+  
   conv_type:   'EdgeConv'       # See models under icenet/deep/graph.py
   
   # Model
@@ -45,7 +45,7 @@ gnet0:
     
     epochs: 80
     batch_size: 128
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.0      # L2-regularization
 
   # Scheduler
@@ -107,7 +107,7 @@ gnet1:
 
     epochs: 80
     batch_size: 128
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.0      # L2-regularization
 
   # Scheduler
@@ -170,7 +170,7 @@ gnet2:
 
     epochs: 80
     batch_size: 128
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.0      # L2-regularization
 
   # Scheduler

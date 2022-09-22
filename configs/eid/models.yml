@@ -152,7 +152,7 @@ gnet0:
 
     epochs: 150
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -213,7 +213,7 @@ gnet1:
 
     epochs: 150
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -236,7 +236,7 @@ gnet2:
   label:    'SuperEdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'SuperEdgeConv'  # See models under icenet/deep/graph.py
   
   # Model
   model_param:
@@ -274,7 +274,7 @@ gnet2:
 
     epochs: 150
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler
@@ -335,7 +335,7 @@ gnet3:
 
     epochs: 150
     batch_size: 64
-    lr: 1.0e-3
+    lr: 3.0e-4
     weight_decay:  0.00005      # L2-regularization
 
   # Scheduler

@@ -1,5 +1,5 @@
 basic:
-  active: true
+  active: false # no-support for jagged variables currently
   nbins:  70
   exclude_vals: [null, 0]
 

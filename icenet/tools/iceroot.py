@@ -207,11 +207,11 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, maxevent
     if (maxevents is not None) and N > maxevents:
         entry_stop_final = entry_start + maxevents
     else:
-        entry_stop_final = entry_stop
+        entry_stop_final = entry_stop if entry_stop is not None else N
     # -------------------------------
-    
+
     X     = np.empty((entry_stop_final - entry_start, len(ids)), dtype=object) 
-    
+
     for j in tqdm(range(len(ids))):
         X[:,j] = np.asarray(events.arrays(ids[j],
                     entry_start=entry_start, entry_stop=entry_stop_final, library="np", how=list))
