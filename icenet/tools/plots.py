@@ -695,7 +695,7 @@ def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', 
         x = X[:,i]
 
         # Exclude special values
-        ind = np.ones(len(x))
+        ind = np.ones(len(x), dtype=bool)
         for k in range(len(exclude_vals)):
             ind = np.logical_and(ind, (x != exclude_vals[k]))
 
@@ -705,18 +705,18 @@ def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', 
 def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     """ Plot a single variable.
     """
-    bins     = np.linspace(np.percentile(x, 0.5), np.percentile(x, 99.5), nbins)
-
-    fig, axs = plot_reweight_result(X=x, y=y, bins=bins, weights=weights, title = title, xlabel = var)
+    binrange = (np.percentile(x, 0.5), np.percentile(x, 99.5))
+    
+    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights, title=title, xlabel=var)
     plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
 
-    # -----                    
+    # -----
     fig.clf()
     plt.close()
     gc.collect()
 
 
-def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x', linewidth=1.5):
+def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not)!
     """
@@ -727,10 +727,10 @@ def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x', linewidt
     
     # Loop over classes
     for c in range(num_classes):
-
-        # Compute histograms with numpy
-        counts,   edges = np.histogram(X[y == c], bins, weights=None)
-        counts_w, edges = np.histogram(X[y == c], bins, weights=weights[y == c])
+        
+        # Compute histograms with numpy (we use nbins and range() for speed)
+        counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+        counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
 
         # Linear and log scale scale (left and right plots)
         for i in range(2):
