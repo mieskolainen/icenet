@@ -301,6 +301,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         # ======================================================
         # Multiprocessing version
         
+        if maxevents is None: maxevents = int(1e10)
+        
         num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
         ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 

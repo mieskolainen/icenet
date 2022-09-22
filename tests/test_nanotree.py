@@ -15,7 +15,7 @@ from icenet.tools import iceroot
 from icenet.tools import io
 
 path     = '/home/user/travis-stash/input/icedqcd'
-datasets = 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_*.root'
+datasets = 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_1.root'
 key      = 'Events;1'
 
 ids = ['nsv', 'sv_.*', 'cpf_.*', 'Jet_.*']
@@ -65,7 +65,11 @@ for library in ['ak']:
 			print(f'X[{i}]: {X[i]}')
 			print(f'MODEL_m: {X[i].MODEL_m}')
 
-			jetIdx = X[i].cpf.jetIdx
+
+			print(f'TEST:: {ak.sum(np.logical_and(X.Jet.pt > 5.0, np.abs(X.Jet.eta) < 2.4), -1) > 0}')
+
+
+			jetIdx =  X[i].cpf.jetIdx
 			mask   = (X[i].cpf.jetIdx != -1)
 
 			print(mask)
