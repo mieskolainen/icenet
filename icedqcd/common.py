@@ -72,7 +72,6 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
-    
     # =================================================================
     # *** BACKGROUND MC ***
     
@@ -107,10 +106,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X    = X[rand]
     Y    = Y[rand]
     W    = W[rand]
+
+    print(__name__ + f'.common.load_root_file: len(X) = [{len(X[Y==0])}, {len(X[Y==1])}]')
     
-    print(__name__ + f'.common.load_root_file: len(X) = {len(X)}')
-    
-    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
+    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
 
 
 def process_root(X, ids, isMC, args, **extra):
