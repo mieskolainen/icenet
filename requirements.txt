@@ -8,7 +8,7 @@ torchaudio==0.11.0
 torch-scatter
 torch-sparse
 torch-cluster
-torch-spline-conv
+#torch-spline-conv # this will give problems with GLIBC 2.27
 torch-geometric
 -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
 

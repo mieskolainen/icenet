@@ -29,9 +29,9 @@ def cut_fiducial(X, xcorr_flow=False):
     global O; O = X  # __technical__ recast due to eval() scope
     
     # Create cut strings
-    names = ['ak.sum(O.Muon.pt > 5.0,    -1) > 0',
-             'ak.sum(O.Jet.pt > 15.0,    -1) > 0',
-             'ak.sum(np.abs(O.Jet.eta) < 2.5, -1) > 0']
+    names = ['ak.sum(O.Muon.pt >  5.0 & np.abs(O.Muon.eta) < 2.4, -1) > 0',
+             'ak.sum(O.Jet.pt  > 15.0 & np.abs(O.Jet.eta)  < 2.4, -1) > 0']
+    
              #'ak.sum(O.svAdapted.dxysig > 5.0, -1) > 0',
     
     # Evaluate columnar cuts; Compute cutflow
