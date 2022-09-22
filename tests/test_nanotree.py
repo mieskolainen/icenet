@@ -1,4 +1,4 @@
-# Fast root file processor tests
+# Fast root file processor tests (playground)
 # 
 # m.mieskolainen@imperial.ac.uk, 2022
 
@@ -57,6 +57,8 @@ for library in ['ak']:
 
 	print(ak.fields(out))
 	
+	X = out
+
 	def loop(X):
 		for i in range(N):
 			nsv = X[i].nsv
@@ -64,9 +66,6 @@ for library in ['ak']:
 			print(f'ak:')
 			print(f'X[{i}]: {X[i]}')
 			print(f'MODEL_m: {X[i].MODEL_m}')
-
-
-			print(f'TEST:: {ak.sum(np.logical_and(X.Jet.pt > 5.0, np.abs(X.Jet.eta) < 2.4), -1) > 0}')
 
 
 			jetIdx =  X[i].cpf.jetIdx
@@ -87,7 +86,9 @@ for library in ['ak']:
 				print(f'sv[{j}].mass: {X[i].sv[j].mass}')
 				#print(f'{X_list[i]}')
 
-	##
+	print(f'---------------------------------------------------')
+	
+	
 	print(f'Testing ak under different representations')
 
 	X    = out[:N]
@@ -95,7 +96,7 @@ for library in ['ak']:
 	
 	#X_list  = out[:N].tolist()
 	loop(X)
-
+	
 
 	print(f'---------------------------------------------------')
 	print(f'Testing nested object property based selection')
@@ -104,19 +105,11 @@ for library in ['ak']:
 	cut_str = ['X.nsv >= 1',
 			   'ak.sum(X.sv.dxysig >= 5,        -1)',
 			   'ak.sum(X.Jet.pt    > 40.0,      -1)',
-			   'ak.sum(np.abs(X.Jet.eta) < 2.0, -1)']
+			   'ak.sum(np.abs(X.Jet.eta) < 2.0, -1)',
+			   'ak.sum(np.logical_and(X.Jet.pt  > 150.0, np.abs(X.Jet.eta)  < 2.4), -1) > 0']
 
 	cuts = []
 	for i in range(len(cut_str)):
 		cuts.append(eval(cut_str[i]))
 		print(f'cuts[{i}] = {cuts[i]}')
 	
-	mask = masks[0]
-	for i in range(1, len(masks)):
-		mask = mask & masks[i]
-
-	Y = X[mask]
-	
-	print(Y)
-	print(len(Y))
-
