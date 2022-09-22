@@ -67,7 +67,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
 
     print('\n')
     cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
-
+    
     # Check is it MC (based on the first file and first event)
     file   = uproot.open(root_path[0])
     events = file[args['tree_name']]

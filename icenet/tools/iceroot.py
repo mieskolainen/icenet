@@ -181,7 +181,7 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
     return num_events
 
 
-def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, label=None):
+def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, maxevents=None, label=None):
     """
     Process uproot tree to a jagged numpy (object) array
     
@@ -194,20 +194,30 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, label=No
     Returns:
         X
     """
-
-    N_all  = len(events.arrays(ids[0]))
-    X_test = events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop)
-    N      = len(X_test)
-    X      = np.empty((N, len(ids)), dtype=object) 
-    
     if label is not None:
         cprint( __name__ + f'.events_to_jagged_numpy: Loading: {label}', 'yellow')
-    cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop} | realized = {N} ({100*N/N_all:0.3f} % | available = {N_all})', 'green')
+
+    # -------------------------------
+    if entry_start is None:
+        entry_start = 0
+
+    N_all = len(events.arrays(ids[0]))
+    N     = len(events.arrays(ids[0], entry_start=entry_start, entry_stop=entry_stop))
+    
+    if (maxevents is not None) and N > maxevents:
+        entry_stop_final = entry_start + maxevents
+    else:
+        entry_stop_final = entry_stop
+    # -------------------------------
+    
+    X     = np.empty((entry_stop_final - entry_start, len(ids)), dtype=object) 
     
     for j in tqdm(range(len(ids))):
-        x = events.arrays(ids[j], entry_start=entry_start, entry_stop=entry_stop, library="np", how=list)
-        X[:,j] = np.asarray(x)
+        X[:,j] = np.asarray(events.arrays(ids[j],
+                    entry_start=entry_start, entry_stop=entry_stop_final, library="np", how=list))
 
+    cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop}, maxevents = {maxevents} | realized = {len(X)} ({100*len(X)/N_all:0.3f} % | available = {N_all})', 'green')
+    
     return X, ids
 
 
@@ -250,7 +260,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         for i in tqdm(range(len(files))):
             with uproot.open(files[i]) as events:
                 
-                param  = {'events': events, 'ids': load_ids, 'entry_start': entry_start, 'entry_stop': entry_stop, 'label': files[i]}
+                param  = {'events': events, 'ids': load_ids,
+                          'entry_start': entry_start, 'entry_stop': entry_stop, 'maxevents': maxevents, 'label': files[i]}
                 output, ids = events_to_jagged_numpy(**param)
 
                 # Concatenate with other file results
@@ -258,7 +269,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                 del output
                 gc.collect()
 
-                if (maxevents is not None) and (len(X) > maxevents):
+                if (maxevents is not None) and (len(X) >= maxevents):
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                     break
@@ -355,7 +366,7 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
             gc.collect()
             io.showmem()
                         
-            if (maxevents is not None) and (len(X) > maxevents):
+            if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
                 cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                 break
