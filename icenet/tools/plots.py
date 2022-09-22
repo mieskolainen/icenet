@@ -702,7 +702,7 @@ def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', 
         plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins, title=title, targetdir=targetdir)
 
 
-def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
+def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
     """ Plot a single variable.
     """
     binrange = (np.percentile(x, 0.5), np.percentile(x, 99.5))
@@ -727,7 +727,7 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
     
     # Loop over classes
     for c in range(num_classes):
-        
+
         # Compute histograms with numpy (we use nbins and range() for speed)
         counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
         counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
