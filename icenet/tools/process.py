@@ -232,6 +232,43 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     return args, cli
 
 
+def generic_flow(rootname, func_loader, func_factor):
+    """
+    Generic (data -- train -- evaluation) workflow
+    
+    Args:
+        rootname:     name of the workflow config folder
+        func_loader:  data loader (function handle)
+        func_factor:  data transformer (function handle)
+    """
+    cli, cli_dict  = read_cli()
+    runmode        = cli_dict['runmode']
+    
+    args, cli      = read_config(config_path=f'configs/{rootname}', runmode=runmode)
+      
+    if runmode == 'genesis':
+
+        read_data(args=args, func_loader=func_loader, runmode=runmode) 
+        
+    if runmode == 'train' or runmode == 'eval':
+
+        data = read_data_processed(args=args, func_loader=func_loader,
+            func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
+        
+    if runmode == 'train':
+
+        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
+        make_plots(data=data['trn'], args=args)
+        train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+
+    if runmode == 'eval':
+
+        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
+        evaluate_models(data=data['tst'], info=data['info'], args=args)
+
+    return args, runmode
+
+
 def read_data(args, func_loader, runmode):
     """
     Load input data
@@ -254,7 +291,13 @@ def read_data(args, func_loader, runmode):
 
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
-        X,Y,W,ids,info = func_loader(root_path=args['root_files'], **load_args)
+        predata   = func_loader(root_path=args['root_files'], **load_args)
+
+        X    = predata['X']
+        Y    = predata['Y']
+        W    = predata['W']
+        ids  = predata['ids']
+        info = predata['info']
 
         cprint(__name__ + f'.read_data: Saving to path: "{cache_directory}"', 'yellow')
         C = get_chunk_ind(N=len(X))
@@ -288,17 +331,23 @@ def read_data(args, func_loader, runmode):
                 #cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
                 #pprint(genesis_args)
 
-    return X, Y, W, ids, info
+    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
-def read_data_processed(X,Y,W,ids,funcfactor,mvavars,runmode,args):
+def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     """
     Read/write (MVA)-processed data
     """
+
     cache_filename = f'{args["datadir"]}/data_processed_{runmode}_{args["__hash__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
-        data = process_data(args=args, X=X, Y=Y, W=W, ids=ids, func_factor=funcfactor, mvavars=mvavars, runmode=runmode)
+
+        # Read it
+        predata = read_data(args=args, func_loader=func_loader, runmode=runmode) 
+        
+        # Process it
+        data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data_processed: Saving to file: "{cache_filename}"', 'yellow')
@@ -311,7 +360,16 @@ def read_data_processed(X,Y,W,ids,funcfactor,mvavars,runmode,args):
     return data
 
 
-def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
+def process_data(args, predata, func_factor, mvavars, runmode):
+    """
+    Process data further
+    """
+
+    X    = predata['X']
+    Y    = predata['Y']
+    W    = predata['W']
+    ids  = predata['ids']
+    info = predata['info']
 
     # ----------------------------------------------------------
     # Pop out conditional variables if they exist
@@ -349,7 +407,8 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
     # ----------------------------------------------------------
     
     ### Split and factor data
-    output = {}
+    output = {'info': info}
+
     if   runmode == 'train':
 
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
@@ -371,7 +430,7 @@ def process_data(args, X, Y, W, ids, func_factor, mvavars, runmode):
 
     elif runmode == 'eval':
         
-        ### Compute reweighting weights (before funcfactor because we need all the variables !)
+        ### Compute reweighting weights (before func_factor because we need all the variables !)
         if args['reweight']:
             pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
             tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
@@ -900,10 +959,13 @@ def evaluate_models(data=None, info=None, args=None):
 
 
 def make_plots(data, args):
-
+    """
+    Basic Q/A-plots
+    """
+    
     ### Plot variables
     if args['plot_param']['basic']['active']:
-            
+        
         ### Specific variables
         if data['data_kin'] is not None:
             targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')

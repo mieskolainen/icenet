@@ -1,5 +1,5 @@
 basic:
-  active: false
+  active: true
   nbins:  70
   exclude_vals: [null, 0]
 

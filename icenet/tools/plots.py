@@ -716,42 +716,43 @@ def plotvar(x, y, var, weights, nbins = 70, title = '', targetdir = '.'):
     gc.collect()
 
 
-def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x', linewidth=1.5, rwidth=1.0):
+def plot_reweight_result(X, y, bins, weights, title = '', xlabel = 'x', linewidth=1.5):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not)!
     """
-    # Plot re-weighting results
-    fig,(ax1,ax2) = plt.subplots(1, 2, figsize = (10,5))
 
+    fig,ax      = plt.subplots(1, 2, figsize = (10, 4.25))
     num_classes = len(np.unique(y))
     legends     = []
     
-    # loop over [linear, log]
-    for i in range(2):
-        ax = ax1 if i == 0 else ax2
+    # Loop over classes
+    for c in range(num_classes):
 
-        # [raw histograms]  Loop over classes
-        for c in range(num_classes) :
-            ax.hist(X[y == c], bins, density = False,
-                histtype = 'step', fill = False, linewidth = linewidth, rwidth=rwidth)
-            legends.append(f'$\\mathcal{{C}} = {c}$')
+        # Compute histograms with numpy
+        counts,   edges = np.histogram(X[y == c], bins, weights=None)
+        counts_w, edges = np.histogram(X[y == c], bins, weights=weights[y == c])
 
-        # [weights applied] Loop over classes
-        for c in range(num_classes) :
-            w = weights[y == c]
-            ax.hist(X[y == c], bins, weights = w, density = False,
-                histtype = 'step', fill = False, linestyle = '--', linewidth = linewidth+0.5, rwidth=rwidth)
-            legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
+        # Linear and log scale scale (left and right plots)
+        for i in range(2):
 
-        ax.set_ylabel('weighted counts')
-        ax.set_xlabel(xlabel)
+            plt.sca(ax[i])
+            plt.stairs(counts,   edges, fill=False, linewidth = linewidth)
+            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='--')
+            
+            if i == 0:
+                legends.append(f'$\\mathcal{{C}} = {c}$')
+                legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
     
-    ax1.set_title(title, fontsize=10)
-    ax1.legend(legends)
-    ax2.set_yscale('log')
+    ax[0].set_ylabel('weighted counts')
+    ax[0].set_xlabel(xlabel)
+    ax[1].set_xlabel(xlabel)
+    
+    ax[1].set_title(title, fontsize=10)
+    ax[1].legend(legends)
+    ax[1].set_yscale('log')
     plt.tight_layout()
     
-    return fig, (ax1,ax2)
+    return fig,ax
 
 
 def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):

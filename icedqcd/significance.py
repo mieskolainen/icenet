@@ -1,5 +1,5 @@
-# Get mode predictions over a batch of input files
-#
+# Compute S/sqrt[B]
+# 
 # m.mieskolainen@imperial.ac.uk, 2022
 
 import torch
@@ -200,10 +200,10 @@ def optimize_selection(args):
 
       x,y       = roc_obj.fpr,roc_obj.tpr
       y_err     = np.ones(len(y))
-      
+
       #for k in range(len(y_err)):
       #  y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k])
-      
+
       # -----------------
       # Interpolate ROC-curve
       

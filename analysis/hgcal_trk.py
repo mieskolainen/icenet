@@ -3,22 +3,17 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-# icenet system paths
 import sys
 sys.path.append(".")
-import pickle
 
-# icenet
+# Configure plotting backend
+import matplotlib
+matplotlib.use('Agg')
+
 from icenet.tools import process
-from icenet.tools import aux
 from icenet.tools import plots
-from icenet.tools import io
-
-# icehgcal
 from icehgcal import common
 
-# Main function
-#
 def main() :
     
     cli, cli_dict  = process.read_cli()

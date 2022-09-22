@@ -96,8 +96,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         
     # TBD add cut statistics etc. here
     info = {}
-        
-    return X, Y, W, ids, info
+    
+    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
 def splitfactor(x, y, w, ids, args):

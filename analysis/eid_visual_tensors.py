@@ -11,6 +11,10 @@
 import sys
 sys.path.append(".")
 
+# Configure plotting backend
+import matplotlib
+matplotlib.use('Agg')
+
 import math
 import numpy as np
 import argparse

@@ -110,7 +110,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     print(__name__ + f'.common.load_root_file: len(X) = {len(X)}')
     
-    return X, Y, W, ind, INFO
+    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
 def process_root(X, ids, isMC, args, **extra):

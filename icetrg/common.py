@@ -103,9 +103,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X[:,ind] = np.clip(a=np.asarray(X[:,ind]), a_min=-1e10, a_max=1e10)
 
     # TBD add info about cut stats etc
-    INFO = {}
+    info = {}
 
-    return X, Y, W, NEW_VARS, INFO
+    return {'X':X, 'Y':Y, 'W':W, 'ids':NEW_VARS, 'info':info}
 
 
 def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None, maxevents=None):

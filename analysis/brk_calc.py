@@ -7,6 +7,10 @@
 import sys
 sys.path.append(".")
 
+# Configure plotting backend
+import matplotlib
+matplotlib.use('Agg')
+
 import pickle
 import xgboost
 import matplotlib as plt
