@@ -188,7 +188,7 @@ def construct_columnar_cuts(X, ids, cutlist):
     Args:
         X       : Input columnar data matrix
         ids     : Variable names for each column of X
-        cutlist : Selection cuts as strings, such as ['ABS__eta < 0.5', 'trgbit == True']
+        cutlist : Selection cuts as strings, such as ['ABS@eta < 0.5', 'trgbit == True']
     
     Returns:
         masks (boolean arrays) in a list, boolean expressions (list)
@@ -344,7 +344,9 @@ def parse_boolean_exptree(instring):
 
     operator        = pp.Regex(">=|<=|!=|>|<|==").setName("operator")
     number          = pp.Regex(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
-    identifier      = pp.Word(pp.alphas + "_", pp.alphanums + "_")
+    
+    # Extend sets with '_' and '@' special characters
+    identifier      = pp.Word(pp.alphas + "_" + "@", pp.alphanums + "_" + "@")
     comparison_term = identifier | number
     condition       = pp.Group(comparison_term + operator + comparison_term)
     
@@ -440,8 +442,8 @@ def eval_boolean_exptree(root, X, ids):
             
             # print(f'a:{a}, b:{b}')
             
-            # Split '__' because of function operators (see below)
-            return a.split('__')[-1] in b
+            # Split at '@' because of function operators (see below)
+            return a.split('@')[-1] in b
         else:
             return False
     
@@ -493,15 +495,15 @@ def eval_boolean_exptree(root, X, ids):
         flips    = {'<=':'>=', '>=':'<=', '>':'<', '<':'>', '==':'==', '!=':'!='}
         operator = flips[operator]
     
-    # Vector index
-    split = lhs.split('__')
+    # Pick the columnar index
+    split = lhs.split('@') # Treat the possible operator
     ind   = ids.index(split[-1])
     
     # -------------------------------------------------
     # Construct possible function operator
     f = lambda x : x
 
-    if len(split) == 2: # We have 'OPERATOR__x' type input
+    if len(split) == 2: # We have 'OPERATOR@x' type input
         
         func_name = split[0]
         
@@ -590,7 +592,7 @@ def test_syntax_tree_simple():
         ids      = ['x', 'y', 'z']
 
         ### TEST 1
-        expr     = 'x >= 0.0 AND POW2__z < 2500'
+        expr     = 'x >= 0.0 AND POW2@z < 2500'
 
         treelist = parse_boolean_exptree(expr)
         treeobj  = construct_exptree(treelist)
@@ -615,7 +617,7 @@ def test_syntax_tree_flip():
         ids          = ['x', 'y', 'z']
 
         ### TEST
-        expr_strings = ['ABS__x > 3.8 OR (x > 7 AND (y >= 2 OR z <= 4))', '((y >= 2 OR z <= 4) AND 7 < x) OR 3.8 < ABS__x']
+        expr_strings = ['ABS@x > 3.8 OR (x > 7 AND (y >= 2 OR z <= 4))', '((y >= 2 OR z <= 4) AND 7 < x) OR 3.8 < ABS@x']
         output = []
         
         # Test both syntax strings

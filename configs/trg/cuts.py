@@ -32,7 +32,7 @@ def cut_fiducial(X, ids, isMC, xcorr_flow=False):
                    'e2_hlt_trkValidHits >= 1']
     
     elif isMC == 'data':
-        cutlist = ['BOOL__l1_doubleE5 == True',
+        cutlist = ['BOOL@l1_doubleE5 == True',
                    'hlt_trkValidHits >= 1']
 
     else:

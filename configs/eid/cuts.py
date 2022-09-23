@@ -28,10 +28,10 @@ def cut_standard(X, ids, xcorr_flow=False):
     MAXETA  = 1.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
-    #                              also ABS__, POW2__, SQRT__, INV__, BOOL__)
-    cutlist = [f'BOOL__has_gsf == True' ,
+    #                              also ABS@, POW2@, SQRT@, INV@, BOOL@)
+    cutlist = [f'BOOL@has_gsf == True' ,
                f'gsf_pt       > {MINPT}',
-               f'ABS__trk_eta < {MAXETA}']
+               f'ABS@trk_eta < {MAXETA}']
     
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

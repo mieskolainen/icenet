@@ -19,7 +19,7 @@ def filter_charged(X, ids, xcorr_flow=False):
     """ Only generator level charged """
     
     # Define cuts
-    cutlist = [f'ABS__gen_charge > 0.5']
+    cutlist = [f'ABS@gen_charge > 0.5']
     
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
@@ -42,10 +42,10 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     MAXETA  = 2.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
-    #                              also ABS__, POW2__, SQRT__, INV__, BOOL__)
-    cutlist = [f'BOOL__is_egamma == False' ,
+    #                              also ABS@, POW2@, SQRT@, INV@, BOOL@)
+    cutlist = [f'BOOL@is_egamma == False' ,
                f'tag_pt       > {MINPT}',
-               f'ABS__tag_eta < {MAXETA}']
+               f'ABS@tag_eta < {MAXETA}']
     
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

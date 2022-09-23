@@ -12,8 +12,8 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
     expand: 'powerset' # 'set', 'vetoset' or 'powerset' which goes through all boolean vector combinations
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{latex: ['$\mu', '$e'],   cut: 'BOOL__leadingLeptons_isElectron == True'},
-       {latex: ['\mu',  'e'],    cut: 'BOOL__subleadingLeptons_isElectron == True'},
+      [{latex: ['$\mu', '$e'],   cut: 'BOOL@leadingLeptons_isElectron == True'},
+       {latex: ['\mu',  'e'],    cut: 'BOOL@subleadingLeptons_isElectron == True'},
        {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
        {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
 
