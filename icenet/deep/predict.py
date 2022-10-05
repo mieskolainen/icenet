@@ -213,8 +213,8 @@ def pred_xgb(args, param):
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
-    def func_predict(x):
-        pred = xgb_model.predict(xgboost.DMatrix(data = x))
+    def func_predict(x, feature_names=None):
+        pred = xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
         if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         return pred
 
@@ -227,7 +227,7 @@ def pred_xgb_scalar(args, param):
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        pred = xgb_model.predict(xgboost.DMatrix(data = x))
+        pred = xgb_model.predict(xgboost.DMatrix(data = x, nthread=-1))
         return pred
     
     return func_predict

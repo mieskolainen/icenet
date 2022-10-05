@@ -90,20 +90,20 @@ def make_hashable(o):
     return o
 
 
-def glob_expand_files(datasets, datapath):
+def glob_expand_files(datasets, datapath, recursive_glob=False):
     """
     Do global / brace expansion of files
 
     Args:
         datasets: dataset filename with glob syntax
-        datapath: path to files
+        datapath: root path to files
     
     Returns:
         files: full filenames including the path
     """
     print("")
     print(__name__ + f".glob_expand_files: Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
-    print("Google <glob wildcards> and brace expansion (be careful, do not use [,] brackets in your filenames)")
+    print("See https://docs.python.org/3/library/glob.html and brace expansion (be careful, do not use [,] brackets in your filenames)")
     print("")
     
     datasets = list(braceexpand(datasets))
@@ -137,11 +137,15 @@ def glob_expand_files(datasets, datapath):
     # Parse input files into a list
     files = list()
     for data in datasets:
-        filepath = glob(datapath + '/' + data)
-        if filepath != []:
-            for i in range(len(filepath)):
-                files.append(filepath[i])
-    
+
+        x = datapath + '/' + data
+        expanded_files = glob(x, recursive=recursive_glob) # This does e.g. _*.root expansion (finds the files)
+
+        # Loop over expanded set of files
+        if expanded_files != []:
+            for i in range(len(expanded_files)):
+                files.append(expanded_files[i])
+
     if files == []:
        files = [datapath]
    

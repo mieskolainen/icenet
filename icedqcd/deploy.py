@@ -3,22 +3,45 @@
 # m.mieskolainen@imperial.ac.uk, 2022
 
 
+import os
 import torch
 import torch_geometric
 import numpy as np
 import awkward as ak
 import pickle
+import uproot
 
 
 # GLOBALS
 from configs.dqcd.mvavars import *
 
 from icedqcd import common
-from icenet.tools import iceroot, io
+from icenet.tools import iceroot, io, aux
 from icenet.deep import predict
 
 
-def process_data(args, path, filename):
+def process_data(args):
+
+    ## ** Special YAML loader here **
+    from libs.ccorp.ruamel.yaml.include import YAML
+    yaml = YAML()
+    yaml.allow_duplicate_keys = True
+    cwd = os.getcwd()
+
+    with open(f'{cwd}/configs/dqcd/{args["inputmap"]}', 'r') as f:
+        try:
+            inputmap = yaml.load(f)
+
+            if 'includes' in inputmap:
+                del inputmap['includes'] # ! crucial
+
+        except yaml.YAMLError as exc:
+            print(f'yaml.YAMLError: {exc}')
+            exit()
+
+    root_path = args['root_files']
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list
 
     # ------------------
     # Phase 1: Read ROOT-file to awkward-format
@@ -29,77 +52,117 @@ def process_data(args, path, filename):
     VARS += MVA_JAGGED_VARS
     VARS += MVA_PF_VARS
 
-    rootfile  = path + filename
+    for key in inputmap.keys():
 
-    param = {
-        'rootfile'    : rootfile,
-        'tree'        : 'Events',
-        'entry_start' : 0,
-        'entry_stop'  : None,
-        'maxevents'   : int(1E9),
-        'ids'         : LOAD_VARS,
-        'library'     : 'ak'
-    }
-    
-    X_uncut, ids = iceroot.load_tree(**param)
-    
-    # ------------------
-    # Phase 2: Apply selections (no selections applied --> event numbers kept intact)
+        print(__name__ + f'.process_data: Processing "{key}"')
 
-    X = X_uncut
-
-    #N_before     = len(X_uncut)
-    #X,ids,stats  = common.process_root(X=X_uncut, ids=ids, isMC=False, args=args)
-    #N_after      = len(X)
-    #eff_acc      = N_after / N_before
-    #print(__name__ + f' efficiency x acceptance = {eff_acc:0.6f}')
-    
-    # ------------------
-    # Phase 3: Convert to icenet dataformat
-
-    Y        = ak.Array(np.zeros(len(X))) # Dummy
-    W        = ak.Array(np.zeros(len(X))) # Dummy
-    data     = common.splitfactor(x=X, y=Y, w=W, ids=ids, args=args)
-    
-    # ------------------
-    # Phase 4: Apply MVA-models (so far only to events which pass the trigger & pre-cuts)
-
-    for i in range(len(args['active_models'])):
+        # Get all files
+        datasets  = inputmap[key]['path'] + '/' + inputmap[key]['files']
+        rootfiles = io.glob_expand_files(datasets=datasets, datapath=root_path)
         
-        ID    = args['active_models'][i]
-        param = args['models'][ID]
-        
-        if param['predict'] == 'xgb':
+        # Loop over the files
+        for k in range(len(rootfiles)):
 
-            print(f'Evaluating <{ID}> \n')    
+            filename = rootfiles[k]
+            param = {
+                'rootfile'    : filename,
+                'tree'        : 'Events',
+                'entry_start' : None,
+                'entry_stop'  : None,
+                'maxevents'   : None,
+                'ids'         : LOAD_VARS,
+                'library'     : 'ak'
+            }
             
-            func_predict = get_predictor(args=args, param=param)
-            X            = data['data'].x
+            X_uncut, ids_uncut = iceroot.load_tree(**param)
 
-            ### Variable normalization
-            if   args['varnorm'] == 'zscore':
+            # -------------------------------------------------
+            # Add conditional (theory param) variables
+            model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
 
-                print('\nZ-score normalizing variables ...')
-                X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
-                X = io.apply_zscore(X, X_mu, X_std)
-            
-            scores = func_predict(X)
+            if args['use_conditional']:
 
-            # Simple x-check
-            if len(X) != len(scores):
-                raise Exception(__name__ + f'.process_data: Error: length of input != length of output')
+                print(__name__ + f'.process_data: Initializing conditional theory (model) parameters')
+                for var in model_param.keys():
+                    # Create new 'record' (column) to ak-array
+                    col_name    = f'MODEL_{var}'
+                    X_uncut[col_name] = model_param[var]
+
+                ids_uncut = ak.fields(X_uncut)
 
             # ------------------
-            # Phase 5: Write MVA-scores out
-            outputfile = './output/' + filename.replace('/', '--').replace('.root', '.xgbscore')
-            print(__name__ + f'.process_data: Saving output to "{outputfile}"')
-            np.savetxt(outputfile, scores)
+            # Phase 2: Apply selections (no selections applied --> event numbers kept intact)
 
-        else:
-            continue
+            X = X_uncut
 
-        #if param['predict'] == 'torch_graph':
-        #    scores = func_predict(data['graph'])
+            #N_before     = len(X_uncut)
+            #X,ids,stats  = common.process_root(X=X_uncut, ids=ids, isMC=False, args=args)
+            #N_after      = len(X)
+            #eff_acc      = N_after / N_before
+            #print(__name__ + f' efficiency x acceptance = {eff_acc:0.6f}')
+            
+            # ------------------
+            # Phase 3: Convert to icenet dataformat
+
+            Y        = ak.Array(np.zeros(len(X))) # Dummy
+            W        = ak.Array(np.zeros(len(X))) # Dummy
+            data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_uncut, args=args, skip_graph=True)
+            
+            # ------------------
+            # Phase 4: Apply MVA-models (so far only to events which pass the trigger & pre-cuts)
+
+            for i in range(len(args['active_models'])):
+                
+                ID    = args['active_models'][i]
+                param = args['models'][ID]
+                
+                if param['predict'] == 'xgb':
+
+                    print(f'Evaluating MVA-model "{ID}" \n')
+                    
+                    func_predict = get_predictor(args=args, param=param)
+
+                    X   = data['data'].x
+                    ids = data['data'].ids
+
+                    ### Set the conditional variables
+                    model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
+
+                    """
+                    ### Variable normalization
+                    if   args['varnorm'] == 'zscore':
+
+                        print(__name__ + f'.process_data: Z-score normalizing variables ...')
+                        X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+
+                        print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
+                        X = io.apply_zscore(X, X_mu, X_std)
+                    """
+                    scores = func_predict(X, feature_names=ids)
+                    
+                    # Simple x-check
+                    if len(X_uncut) != len(scores):
+                        raise Exception(__name__ + f'.process_data: Error: len(X_uncut) != len(scores)')
+
+                    if len(X) != len(scores):
+                        raise Exception(__name__ + f'.process_data: Error: len(X) != len(scores)')
+
+                    # ------------------
+                    # Phase 5: Write MVA-scores out
+
+                    basepath   = f'{cwd}/output/deploy' + '/' + f"modeltag-[{args['modeltag']}]"
+                    outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
+                    outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
+
+                    with uproot.recreate(outputfile, compression=None) as file:
+                        print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
+                        file[f"tree1"] = {f"{ID}": scores}
+
+                else:
+                    continue
+
+                #if param['predict'] == 'torch_graph':
+                #    scores = func_predict(data['graph'])
 
 
 def get_predictor(args, param):    

@@ -5,14 +5,8 @@
 # Run with: source runme.sh
 
 CONFIG="tune0.yml"
-#DATAPATH="/home/user/travis-stash/input/icedqcd"
-DATAPATH="/vols/cms/mc3909/"
-
-CONDITIONAL=1
-
-#mkdir "figs/dqcd/config-[$CONFIG]" -p # for output ascii dump
-
-if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
+DATAPATH="/home/user/travis-stash/input/icedqcd"
+#DATAPATH="/vols/cms/mc3909/"
 
 # Set system memory limits
 ulimit -s unlimited
@@ -22,10 +16,12 @@ ulimit -v unlimited
 # Use * or other glob wildcards for filenames
 # tee redirect output to both a file and to screen
 
-# Generate steering YAML for QCD
-#python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
+python configs/dqcd/include/ymlgen.py --process 'QCD' --filerange '*' --outputfile $configs/dqcd/include/QCD_deploy.yml
+python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/QCD_deploy.yml' --modeltag vector_all --config $CONFIG --datapath $DATAPATH
 
-# Vector
-#python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[150-200]'
+python configs/dqcd/include/ymlgen.py --process 'vector' --filerange '*' --outputfile configs/dqcd/include/vector_deploy.yml
+python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/vector_deploy.yml' --modeltag vector_all --config $CONFIG --datapath $DATAPATH
 
-python analysis/dqcd_deploy.py --runmode all $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH
+python configs/dqcd/include/ymlgen.py --process 'data' --filerange '*' --outputfile configs/dqcd/include/data_deploy.yml
+python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/data_deploy.yml' --modeltag vector_all --config $CONFIG --datapath $DATAPATH
+

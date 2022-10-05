@@ -33,7 +33,8 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
         # Print
         dprint(f'# [{i}]')
         dprint(f'{process_name}: &{process_name}')
-        dprint(f"  path: \'{path}/{folder_name}/{filename}\'")
+        dprint(f"  path:  \'{path}/{folder_name}\'")
+        dprint(f"  files: \'{filename}\'")
         dprint(f'  xs:   {xs}')
         dprint(f'  model_param:')
         dprint(f'    m:    {m}')
@@ -250,13 +251,13 @@ def data(outputfile, filerange='*'):
   # Basic
   filename        = f'output_{filerange}.root'
   path            = 'bparkProductionV3'
-  end_name        = 'ParkingBPH1_Run2018C-05May2019-v1_MINIAOD_v1_generationForBParking'
+  end_name        = 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1_generationForBParking'
   xs              = 'null'
   force_xs        = 'false'
   isMC            = 'false'
   maxevents_scale = '1.0'
   # ------------------------------------------
-
+  
   rp = {}
   rp['m']         = ['null']
   rp['ctau']      = ['null'] 

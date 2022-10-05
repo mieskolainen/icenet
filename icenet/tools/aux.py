@@ -219,9 +219,9 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_star
         dim = int(jagged_maxdim[jagged_vars[i].split('_', 1)[0]])
         jagged_dim.append(dim)
         
-        # Create names of type 'varname[j]'
+        # Create names of type 'varname(j)' (xgboost does not accept [,], or <)
         for j in range(dim):
-            all_jagged_vars.append(f'{jagged_vars[i]}[{j}]')
+            all_jagged_vars.append(f'{jagged_vars[i]}({j})')
     
     # Parameters
     arg = {
@@ -786,24 +786,22 @@ def deltar(eta1,eta2, phi1,phi2):
     return np.sqrt((eta1 - eta2)**2 + deltaphi(phi1,phi2)**2)
 
 
-def create_model_filename(path, label, epoch, filetype):
+def create_model_filename(path, label, epoch, filetype, max_epochs=int(1e5)):
 
     def createfilename(i):
         return path + '/' + label + '_' + str(i) + filetype
 
     # Loop over epochs
-    i = 0
     last_found  = -1
-    while True:
+    for i in range(max_epochs):
         filename = createfilename(i)
         if os.path.exists(filename):
             last_found = i
-        else:
-            break
-        i += 1
 
-    epoch = last_found if epoch == -1 else epoch
-    return createfilename(epoch)
+    filename = createfilename(last_found)
+    print(__name__ + f'.create_model_filename: Found model file: {filename}')
+
+    return filename
 
 
 def pick_ind(x, minmax):

@@ -116,7 +116,7 @@ MVA_JET_VARS = [
   
   'Jet_muEF',
   'Jet_muonSubtrFactor',
-
+  
   'Jet_chFPV0EF',
   #'Jet_chFPV1EF',
   #'Jet_chFPV2EF',
@@ -152,18 +152,18 @@ MVA_MUON_VARS = [
   'Muon_pt',
   'Muon_ptErr',
 
-  'Muon_dxy',
+  'Muon_dxy',         # impact parameter: dxy (with sign) wrt PV (cm)
   'Muon_dxyErr',
   
-  'Muon_dz',
+  'Muon_dz',          # impact parameter: dz  (with sign) wrt PV (cm)
   'Muon_dzErr',
   
-  'Muon_ip3d',
+  'Muon_ip3d',        # 3D impact parameter wrt first PV (cm)
   'Muon_sip3d',
   'Muon_charge',
   
   'Muon_tightId',
-  'Muon_softMva',
+  'Muon_softMva',            # Soft MVA ID score
   'Muon_pfRelIso03_all',
   'Muon_miniPFRelIso_all',
 

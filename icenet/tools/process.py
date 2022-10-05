@@ -52,10 +52,10 @@ def read_cli():
     parser = argparse.ArgumentParser()
     
     ## argparse.SUPPRESS removes argument from the namespace if not passed
-    parser.add_argument("--runmode",         type=str,  default='null')
+    parser.add_argument("--runmode",         type=str,  default='all')
     parser.add_argument("--config",          type=str,  default='tune0.yml')
-    parser.add_argument("--datapath",        type=str,  default='.')
-    parser.add_argument("--datasets",        type=str,  default='null')
+    parser.add_argument("--datapath",        type=str,  default='')
+    parser.add_argument("--datasets",        type=str,  default='')
     parser.add_argument("--tag",             type=str,  default='tag0')
     
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
@@ -102,7 +102,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     # -------------------------------------------------------------------
     ## Inputmap .yml setup
-
 
     if cli_dict['inputmap'] is not None:
         args["genesis_runmode"]["inputmap"] = cli_dict['inputmap']        
@@ -685,7 +684,7 @@ def train_models(data_trn, data_val, args=None) :
             cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
             if   param['train'] == 'xgb':    
-                y_soft = model.predict(xgboost.DMatrix(data=aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X')))
+                y_soft = model.predict(xgboost.DMatrix(data=aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), feature_names=data_trn['data'].ids))
                 if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
             
             elif param['train'] == 'torch_graph':

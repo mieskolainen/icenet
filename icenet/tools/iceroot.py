@@ -24,11 +24,11 @@ from icenet.tools.icemap import icemap
 #@ray.remote
 def read_MC(process_func, process, root_path, param, class_id):
 
-    print(__name__ + f'.read_multiple_MC: {process}')
+    print(__name__ + f'.read_MC: {process}')
 
     # --------------------
     
-    datasets        = process['path']
+    datasets        = process['path'] + '/' + process['files']
     xs              = process['xs']
     model_param     = process['model_param']
     force_xs        = process['force_xs']
@@ -97,7 +97,9 @@ def read_MC(process_func, process, root_path, param, class_id):
         # Create new 'record' (column) to ak-array
         col_name    = f'MODEL_{var}'
         X[col_name] = col
-        ids.append(col_name)
+
+    # This as a last
+    ids = ak.fields(X)
 
     return {'X':X, 'Y':Y, 'W': W, 'ids':ids, 'info':info}
 
@@ -274,6 +276,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                     break
 
+        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        
         return X, ids
 
     elif library == 'ak':
@@ -327,6 +331,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
             results[k] = None # free memory
             gc.collect()
 
+        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        
         return X, ak.fields(X)
         
     else:
