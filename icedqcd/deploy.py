@@ -10,6 +10,7 @@ import numpy as np
 import awkward as ak
 import pickle
 import uproot
+from termcolor import colored, cprint
 
 
 # GLOBALS
@@ -77,7 +78,7 @@ def process_data(args):
             try:
                 X_uncut, ids_uncut = iceroot.load_tree(**param)
             except:
-                print(__name__ + f'.process_data: A problem occured in iceroot.load_tree with file "{filename}"')
+                print(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
                 continue
             
             # -------------------------------------------------
