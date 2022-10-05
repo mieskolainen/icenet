@@ -120,9 +120,9 @@ def process_data(args):
 
                     print(f'Evaluating MVA-model "{ID}" \n')
 
-                    X,ids = red(X=data['data'].x, ids=data['data'].ids, param=param)
+                    X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
                     func_predict = get_predictor(args=args, param=param, feature_names=ids)
-                    
+
                     ### Set the conditional variables
                     model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
 
