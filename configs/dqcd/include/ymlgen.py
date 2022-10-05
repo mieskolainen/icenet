@@ -20,12 +20,17 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
     for ctau in rp['ctau']:
       for xi_pair in rp['xi_pair']:
 
-        # MC
+        # MC signal
         if isMC == 'true' and m != 'null':
           param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
           process_name = f'{process}_{param_name}'  
           folder_name  = f'{process_name}_{end_name}'
 
+        # MC background
+        elif isMC == 'true' and m == 'null':
+          process_name = f'{process}'  
+          folder_name  = f'{process_name}_{end_name}'
+        
         # Data
         else:
           process_name = f'{process}'
