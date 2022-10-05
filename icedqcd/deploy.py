@@ -119,12 +119,10 @@ def process_data(args):
                 if param['predict'] == 'xgb':
 
                     print(f'Evaluating MVA-model "{ID}" \n')
+
+                    X,ids = red(X=data['data'].x, ids=data['data'].ids, param=param)
+                    func_predict = get_predictor(args=args, param=param, feature_names=ids)
                     
-                    func_predict = get_predictor(args=args, param=param)
-
-                    X   = data['data'].x
-                    ids = data['data'].ids
-
                     ### Set the conditional variables
                     model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
 
@@ -138,7 +136,7 @@ def process_data(args):
                         print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
                         X = io.apply_zscore(X, X_mu, X_std)
                     """
-                    scores = func_predict(X, feature_names=ids)
+                    scores = func_predict(X)
                     
                     # Simple x-check
                     if len(X_uncut) != len(scores):
