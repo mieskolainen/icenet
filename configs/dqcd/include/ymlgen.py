@@ -21,7 +21,7 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
       for xi_pair in rp['xi_pair']:
 
         # MC
-        if isMC == 'true':
+        if isMC == 'true' and m != 'null':
           param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
           process_name = f'{process}_{param_name}'  
           folder_name  = f'{process_name}_{end_name}'
@@ -312,5 +312,5 @@ if __name__ == '__main__':
 
   else:
     print('Error: unknown --process chosen (run --help)')
-  
+
   print(f'Saved to file "{outputfile}"')
