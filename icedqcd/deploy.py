@@ -163,13 +163,13 @@ def process_data(args):
                 #    scores = func_predict(data['graph'])
 
 
-def get_predictor(args, param):    
+def get_predictor(args, param, feature_names=None):    
 
     if   param['predict'] == 'xgb':
-        func_predict = predict.pred_xgb(args=args, param=param)
+        func_predict = predict.pred_xgb(args=args, param=param, feature_names=feature_names)
 
     elif param['predict'] == 'xgb_logistic':
-        func_predict = predict.pred_xgb_logistic(args=args, param=param)
+        func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names)
 
     elif param['predict'] == 'torch_vector':
         func_predict = predict.pred_torch_generic(args=args, param=param)
