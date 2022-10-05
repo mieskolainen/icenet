@@ -282,13 +282,14 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
 
     elif library == 'ak':
 
-        """
-        # Non-multiprocessed version
+        if maxevents is None: maxevents = int(1e10)
+
+        # Non-multiprocessed version for single files
         
-        for i in tqdm(range(len(files))):
-            
+        if len(files) == 1:
+
             # Get the number of events
-            num_events = get_num_events(rootfile=files[i])
+            num_events = get_num_events(rootfile=files[0])
             
             with uproot.open(files[i]) as events:
                 
@@ -301,38 +302,37 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                     break
-        """
-        # ======================================================
-        # Multiprocessing version
-        
-        if maxevents is None: maxevents = int(1e10)
-        
-        num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
-        ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
+        else:
 
-        chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
-        submaxevents = aux.split_size(range(maxevents), num_workers)
-        futures      = []
-        
-        print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
+            # ======================================================
+            # Multiprocessing version for multiple files
+            
+            num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
+            ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
-        for k in range(num_workers):    
-            futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]], load_ids, entry_start, entry_stop, submaxevents[k]))
+            chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
+            submaxevents = aux.split_size(range(maxevents), num_workers)
+            futures      = []
+            
+            print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
 
-        results = ray.get(futures) # synchronous read-out
-        ray.shutdown()
-        
-        # Combine future returned sub-arrays
-        print(__name__ + f'.load_tree: Concatenating results from futures')
+            for k in range(num_workers):    
+                futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]], load_ids, entry_start, entry_stop, submaxevents[k]))
 
-        for k in tqdm(range(len(results))):
-            X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+            results = ray.get(futures) # synchronous read-out
+            ray.shutdown()
+            
+            # Combine future returned sub-arrays
+            print(__name__ + f'.load_tree: Concatenating results from futures')
 
-            results[k] = None # free memory
-            gc.collect()
+            for k in tqdm(range(len(results))):
+                X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+
+                results[k] = None # free memory
+                gc.collect()
 
         print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
-        
+            
         return X, ak.fields(X)
         
     else:

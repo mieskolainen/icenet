@@ -841,7 +841,7 @@ def evaluate_models(data=None, info=None, args=None):
                  'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
 
         if   param['predict'] == 'xgb':
-            func_predict = predict.pred_xgb(args=args, param=param)
+            func_predict = predict.pred_xgb(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
@@ -849,7 +849,7 @@ def evaluate_models(data=None, info=None, args=None):
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
 
         elif param['predict'] == 'xgb_logistic':
-            func_predict = predict.pred_xgb_logistic(args=args, param=param)
+            func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
             
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
@@ -932,7 +932,7 @@ def evaluate_models(data=None, info=None, args=None):
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
-
+            
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))

@@ -207,32 +207,32 @@ def pred_xtx(args, param):
 # Not implemented
 '''
 
-def pred_xgb(args, param):
+def pred_xgb(args, param, feature_names=None):
     
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
-    def func_predict(x, feature_names=None):
+    def func_predict(x):
         pred = xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
         if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         return pred
 
     return func_predict
 
-def pred_xgb_scalar(args, param):
+def pred_xgb_scalar(args, param, feature_names=None):
     
     print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
     xgb_model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        pred = xgb_model.predict(xgboost.DMatrix(data = x, nthread=-1))
+        pred = xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
         return pred
     
     return func_predict
 
-def pred_xgb_logistic(args, param):
+def pred_xgb_logistic(args, param, feature_names=None):
     
     print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
@@ -240,7 +240,7 @@ def pred_xgb_logistic(args, param):
     
     def func_predict(x):
         # Apply sigmoid function    
-        return 1 / (1 + np.exp(- xgb_model.predict(xgboost.DMatrix(data = x))))
+        return 1 / (1 + np.exp(- xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))))
     
     return func_predict
 
