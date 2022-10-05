@@ -74,8 +74,12 @@ def process_data(args):
                 'library'     : 'ak'
             }
             
-            X_uncut, ids_uncut = iceroot.load_tree(**param)
-
+            try:
+                X_uncut, ids_uncut = iceroot.load_tree(**param)
+            except:
+                print(__name__ + f'.process_data: A problem occured in iceroot.load_tree with file "{filename}"')
+                continue
+            
             # -------------------------------------------------
             # Add conditional (theory param) variables
             model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
