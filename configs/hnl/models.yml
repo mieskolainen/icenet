@@ -100,10 +100,10 @@ xgb0:
   predict: 'xgb'
   label:   'XGB'
   raytune:  xgb_trial_0
-
+  
   # ** Custom set of variables **
   exclude_MVA_vars: ['tagger_score']
-
+  
   # booster parameters
   model_param:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)

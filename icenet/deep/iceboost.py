@@ -194,8 +194,11 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    dtrain    = xgboost.DMatrix(data = aux.red(data_trn.x, data_trn.ids, param, 'X'), label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=data_trn.ids)
-    deval     = xgboost.DMatrix(data = aux.red(data_val.x, data_val.ids, param, 'X'), label = data_val.y,  weight = w_val, feature_names=data_val.ids)
+    X_trn, ids_trn = aux.red(data_trn.x, data_trn.ids, param)
+    dtrain    = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=ids_trn)
+    
+    X_val, ids_val = aux.red(data_val.x, data_val.ids, param)
+    deval     = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val, feature_names=ids_val)
     
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
     print(param)

@@ -683,8 +683,9 @@ def train_models(data_trn, data_val, args=None) :
             
             cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
-            if   param['train'] == 'xgb':    
-                y_soft = model.predict(xgboost.DMatrix(data=aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), feature_names=data_trn['data'].ids))
+            if   param['train'] == 'xgb':
+                XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
+                y_soft = model.predict(xgboost.DMatrix(data=XX, feature_names=XX_ids))
                 if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
             
             elif param['train'] == 'torch_graph':

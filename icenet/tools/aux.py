@@ -63,10 +63,10 @@ def slice_range(start, stop, N):
     return a, b, b-a
 
 
-def red(X, ids, param, mode='X', exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
+def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
     """
     Reduce the input set variables of X
-     
+    
     Args:
         X:           data matrix
         ids:         names of columns
@@ -97,10 +97,12 @@ def red(X, ids, param, mode='X', exclude_tag='exclude_MVA_vars', include_tag='in
     else:
         cprint(__name__ + f'.red: Using the full set of input variables', 'red')
     
-    if mode == 'X':
+    if   mode == 'X':
         return X[:, mask]
-    else:
+    elif mode == 'ids':
         return np.array(ids)[mask].tolist()
+    else:
+        return X[:, mask], np.array(ids)[mask].tolist()
 
 
 def unroll_ak_fields(x, order='first'):
