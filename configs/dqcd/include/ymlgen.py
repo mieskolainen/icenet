@@ -238,7 +238,7 @@ def QCD(outputfile, filerange='*'):
       'isMC':            isMC,
       'maxevents_scale': maxevents_scale
     }
-    
+
     if i == 0:
       printer(**param)
     else:
@@ -312,6 +312,5 @@ if __name__ == '__main__':
 
   else:
     print('Error: unknown --process chosen (run --help)')
-
-
+  
   print(f'Saved to file "{outputfile}"')
