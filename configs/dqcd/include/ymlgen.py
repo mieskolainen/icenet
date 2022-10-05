@@ -30,7 +30,7 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
         else:
           process_name = f'{process}'
           folder_name  = f'{end_name}'
-        
+
         # Print
         dprint(f'# [{i}]')
         dprint(f'{process_name}: &{process_name}')
@@ -222,7 +222,7 @@ def QCD(outputfile, filerange='*'):
     filename        = f'output_{filerange}.root'
     path            = 'bparkProductionV1_bkg'
     force_xs        = 'false'
-    isMC            = 'false'
+    isMC            = 'true'
     maxevents_scale = '1.0'
     # ------------------------------------------
 
@@ -238,11 +238,12 @@ def QCD(outputfile, filerange='*'):
       'isMC':            isMC,
       'maxevents_scale': maxevents_scale
     }
-
+    
     if i == 0:
       printer(**param)
     else:
       printer(**param, flush_index=i)
+
 
 def data(outputfile, filerange='*'):
 
