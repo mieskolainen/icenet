@@ -28,7 +28,7 @@ def generate_cartesian_param(ids):
 
     Note. Keep the order m, ctau, xiO, xiL
     """
-    
+
     values    = {'m':    np.round(np.linspace(2,   25, 6), 1),
                  'ctau': np.round(np.linspace(10, 500, 6), 1),
                  'xiO':  np.round(np.array([1.0]), 1),
@@ -43,6 +43,14 @@ def generate_cartesian_param(ids):
     pindex[3] = ids.index('MODEL_xiL')
 
     return CAX, pindex
+
+
+# Save the scores
+def f2s(value):
+    """
+    Convert floating point "1.5" to "1p5"
+    """
+    return str(np.round(value,1)).replace('.', 'p')
 
 
 def process_data(args):
@@ -167,12 +175,11 @@ def process_data(args):
 
                             # Predict
                             output = func_predict(X)
-
-                            # Save the scores
-                            label  = f'm_{nval[0]:0.1f}_ctau_{nval[1]:0.1f}_xiO_{nval[2]:0.1f}_xiL_{nval[3]:0.1f}'
+                            
+                            label  = f'm={f2s(nval[0])}-ctau={f2s(nval[1])}-xiO={f2s(nval[2])}-xiL={f2s(nval[3])}'
                             scores[label] = output
                     else:
-                        
+
                         """
                         ### Variable normalization
                         if   args['varnorm'] == 'zscore':
