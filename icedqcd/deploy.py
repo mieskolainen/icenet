@@ -176,7 +176,7 @@ def process_data(args):
                             # Predict
                             output = func_predict(X)
                             
-                            label  = f'm={f2s(nval[0])}-ctau={f2s(nval[1])}-xiO={f2s(nval[2])}-xiL={f2s(nval[3])}'
+                            label  = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
                             scores[label] = output
                     else:
 
