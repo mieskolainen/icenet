@@ -23,14 +23,31 @@ import scipy.special as special
 import multiprocessing
 import ctypes
 
-
 from functools import partial
 from itertools import repeat
 from multiprocessing import Pool, freeze_support
 
-
 import icenet.tools.prints as prints
 import icenet.tools.stx as stx
+
+
+def cartesian_product(*arrays):
+    """
+    N-dimensional generalized cartesian product between arrays
+    
+    Args:
+        *arrays: a list of arrays
+        
+    Example:
+        cartesian_product(*[values['m'], values['ctau']])
+    """
+    la = len(arrays)
+    dtype = np.result_type(*arrays)
+    arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
+    for i, a in enumerate(np.ix_(*arrays)):
+        arr[...,i] = a
+    
+    return arr.reshape(-1, la)
 
 
 def slice_range(start, stop, N):

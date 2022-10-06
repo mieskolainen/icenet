@@ -196,8 +196,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args["modeltag"]  = cli_dict['modeltag']
 
     args['datadir']   = aux.makedir(f'{cwd}/output/{args["rootname"]}')
-    args['modeldir']  = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config-[{cli_dict["config"]}]/modeltag-[{cli_dict["modeltag"]}]')
-    args['plotdir']   = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config-[{cli_dict["config"]}]/inputmap-[{cli_dict["inputmap"]}]--modeltag-[{cli_dict["modeltag"]}]')
+    args['modeldir']  = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{cli_dict["config"]}/modeltag__{cli_dict["modeltag"]}')
+    args['plotdir']   = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{cli_dict["config"]}/inputmap__{cli_dict["inputmap"]}--modeltag__{cli_dict["modeltag"]}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
     
@@ -932,13 +932,13 @@ def evaluate_models(data=None, info=None, args=None):
         elif param['predict'] == 'cutset':
             func_predict = predict.pred_cutset(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
-            
+
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
         else:
             raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
-    
+
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
 

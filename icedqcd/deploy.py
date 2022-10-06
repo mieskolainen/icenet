@@ -19,6 +19,30 @@ from configs.dqcd.mvavars import *
 from icedqcd import common
 from icenet.tools import iceroot, io, aux
 from icenet.deep import predict
+from tqdm import tqdm
+
+
+def generate_cartesian_param(ids):
+    """
+    Generate cartesian array for the theory model parameters
+
+    Note. Keep the order m, ctau, xiO, xiL
+    """
+    
+    values    = {'m':    np.round(np.linspace(2,   25, 6), 1),
+                 'ctau': np.round(np.linspace(10, 500, 6), 1),
+                 'xiO':  np.round(np.array([1.0]), 1),
+                 'xiL':  np.round(np.array([1.0]), 1)}
+
+    CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
+
+    pindex    = np.zeros(4, dtype=int)
+    pindex[0] = ids.index('MODEL_m')
+    pindex[1] = ids.index('MODEL_ctau')
+    pindex[2] = ids.index('MODEL_xiO')
+    pindex[3] = ids.index('MODEL_xiL')
+
+    return CAX, pindex
 
 
 def process_data(args):
@@ -32,7 +56,6 @@ def process_data(args):
     with open(f'{cwd}/configs/dqcd/{args["inputmap"]}', 'r') as f:
         try:
             inputmap = yaml.load(f)
-
             if 'includes' in inputmap:
                 del inputmap['includes'] # ! crucial
 
@@ -80,10 +103,10 @@ def process_data(args):
             except:
                 print(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
                 continue
-            
+
             # -------------------------------------------------
             # Add conditional (theory param) variables
-            model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
+            model_param = {'m': 0.0, 'ctau': 0.0, 'xiO': 0.0, 'xiL': 0.0}
 
             if args['use_conditional']:
 
@@ -125,47 +148,61 @@ def process_data(args):
 
                     print(f'Evaluating MVA-model "{ID}" \n')
 
-                    X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
+                    X,ids        = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
                     func_predict = get_predictor(args=args, param=param, feature_names=ids)
 
-                    ### Set the conditional variables
-                    model_param = {'ctau': 0.0, 'm': 0.0, 'xiO': 0.0, 'xiL': 0.0}
+                    ## Conditional model
+                    if args['use_conditional']:
 
-                    """
-                    ### Variable normalization
-                    if   args['varnorm'] == 'zscore':
+                        ## Get conditional parameters
+                        CAX,pindex = generate_cartesian_param(ids=ids)
 
-                        print(__name__ + f'.process_data: Z-score normalizing variables ...')
-                        X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+                        ## Run the MVA-model on all the theory model points
+                        scores = {}
+                        for z in tqdm(range(len(CAX))):
 
-                        print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
-                        X = io.apply_zscore(X, X_mu, X_std)
-                    """
-                    scores = func_predict(X)
-                    
-                    # Simple x-check
-                    if len(X_uncut) != len(scores):
-                        raise Exception(__name__ + f'.process_data: Error: len(X_uncut) != len(scores)')
+                            # Set the new conditional model parameters to X
+                            nval         = CAX[z,:]
+                            X[:, pindex] = nval
 
-                    if len(X) != len(scores):
-                        raise Exception(__name__ + f'.process_data: Error: len(X) != len(scores)')
+                            # Predict
+                            output = func_predict(X)
+
+                            # Save the scores
+                            label  = f'm_{nval[0]:0.1f}_ctau_{nval[1]:0.1f}_xiO_{nval[2]:0.1f}_xiL_{nval[3]:0.1f}'
+                            scores[label] = output
+                    else:
+                        
+                        """
+                        ### Variable normalization
+                        if   args['varnorm'] == 'zscore':
+                            
+                            print(__name__ + f'.process_data: Z-score normalizing variables ...')
+                            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+                            
+                            print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
+                            X = io.apply_zscore(X, X_mu, X_std)
+                        """
+
+                        # Obtain the scores
+                        scores = func_predict(X)
 
                     # ------------------
                     # Phase 5: Write MVA-scores out
 
-                    basepath   = f'{cwd}/output/deploy' + '/' + f"modeltag-[{args['modeltag']}]"
+                    basepath   = f'{cwd}/output/dqcd/deploy' + '/' + f"modeltag__{args['modeltag']}"
                     outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
                     outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
 
-                    with uproot.recreate(outputfile, compression=None) as file:
+                    with uproot.recreate(outputfile, compression=None) as file:        
                         print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
-                        file[f"tree1"] = {f"{ID}": scores}
+                        file[f"Events"] = {f"{ID}": scores}
 
                 else:
                     continue
 
-                #if param['predict'] == 'torch_graph':
-                #    scores = func_predict(data['graph'])
+                # if param['predict'] == 'torch_graph':
+                #   scores = func_predict(data['graph'])
 
 
 def get_predictor(args, param, feature_names=None):    
@@ -220,7 +257,6 @@ def get_predictor(args, param, feature_names=None):
         raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
     return func_predict
-
 
 
 def apply_models(data=None, args=None):
