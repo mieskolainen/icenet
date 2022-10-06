@@ -2544,6 +2544,19 @@ returns the loss. Optional for most optimizers.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.cartesian_product">
+<span class="sig-name descname"><span class="pre">cartesian_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">arrays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#cartesian_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.cartesian_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>N-dimensional generalized cartesian product between arrays</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*arrays</strong> – a list of arrays</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>cartesian_product(<a href="#id1"><span class="problematic" id="id2">*</span></a>[values[‘m’], values[‘ctau’]])</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.compute_metrics">
 <span class="sig-name descname"><span class="pre">compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#compute_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.compute_metrics" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3917,7 +3930,7 @@ other dimensions evaluated at zero=(0,0,…0) (thus z-normalized with 0-mean is 
 <li><p><strong>X</strong> – Data matrix (N x D)</p></li>
 <li><p><strong>ids</strong> – Variable names (list of length D)</p></li>
 <li><p><strong>classes</strong> – Class label ids (list of length N)</p></li>
-<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id1"><span class="problematic" id="id2">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
+<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id3"><span class="problematic" id="id4">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
 <li><p><strong>targetdir</strong> – Output plot directory</p></li>
 <li><p><strong>colorbar</strong> – Colorbar on the plot</p></li>
 </ul>
