@@ -160,8 +160,8 @@ def process_data(args):
                     # Impute data
                     if args['imputation_param']['active']:
                         imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
-                        data['data'].x, _  = process.impute_datasets(data=data['data'].x, features=None, args=args['imputation_param'], imputer=imputer)
-                    
+                        data['data'].x, _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
+
                     # Get the MVA-model
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
                     func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
