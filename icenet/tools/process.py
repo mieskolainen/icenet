@@ -194,7 +194,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     args["config"]    = cli_dict['config']
     args["modeltag"]  = cli_dict['modeltag']
-
+    
     args['datadir']   = aux.makedir(f'{cwd}/output/{args["rootname"]}')
     args['modeldir']  = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{cli_dict["config"]}/modeltag__{cli_dict["modeltag"]}')
     args['plotdir']   = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{cli_dict["config"]}/inputmap__{cli_dict["inputmap"]}--modeltag__{cli_dict["modeltag"]}')

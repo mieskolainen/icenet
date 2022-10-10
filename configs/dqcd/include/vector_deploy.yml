@@ -2,7 +2,7 @@
 # [0] 
 HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    2 
@@ -16,7 +16,7 @@ HiddenValley_vector_m_2_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_10_xi
 # [1] 
 HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    2 
@@ -30,7 +30,7 @@ HiddenValley_vector_m_2_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_50_xi
 # [2] 
 HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    2 
@@ -44,7 +44,7 @@ HiddenValley_vector_m_2_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_100_
 # [3] 
 HiddenValley_vector_m_2_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_500_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_2_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    2 
@@ -58,7 +58,7 @@ HiddenValley_vector_m_2_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_2_ctau_500_
 # [4] 
 HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    5 
@@ -72,7 +72,7 @@ HiddenValley_vector_m_5_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_10_xi
 # [5] 
 HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    5 
@@ -86,7 +86,7 @@ HiddenValley_vector_m_5_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_50_xi
 # [6] 
 HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    5 
@@ -100,7 +100,7 @@ HiddenValley_vector_m_5_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_100_
 # [7] 
 HiddenValley_vector_m_5_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_500_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_5_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    5 
@@ -114,7 +114,7 @@ HiddenValley_vector_m_5_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_5_ctau_500_
 # [8] 
 HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    10 
@@ -128,7 +128,7 @@ HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10_
 # [9] 
 HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    10 
@@ -142,7 +142,7 @@ HiddenValley_vector_m_10_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_50_
 # [10] 
 HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    10 
@@ -156,7 +156,7 @@ HiddenValley_vector_m_10_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_10
 # [11] 
 HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    10 
@@ -170,7 +170,7 @@ HiddenValley_vector_m_10_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_10_ctau_50
 # [12] 
 HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    15 
@@ -184,7 +184,7 @@ HiddenValley_vector_m_15_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_10_
 # [13] 
 HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    15 
@@ -198,7 +198,7 @@ HiddenValley_vector_m_15_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_50_
 # [14] 
 HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    15 
@@ -212,7 +212,7 @@ HiddenValley_vector_m_15_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_10
 # [15] 
 HiddenValley_vector_m_15_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_500_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_15_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    15 
@@ -226,7 +226,7 @@ HiddenValley_vector_m_15_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_15_ctau_50
 # [16] 
 HiddenValley_vector_m_20_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_10_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_20_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    20 
@@ -240,7 +240,7 @@ HiddenValley_vector_m_20_ctau_10_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_10_
 # [17] 
 HiddenValley_vector_m_20_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_50_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_20_ctau_50_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    20 
@@ -254,7 +254,7 @@ HiddenValley_vector_m_20_ctau_50_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_50_
 # [18] 
 HiddenValley_vector_m_20_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_100_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_20_ctau_100_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    20 
@@ -268,7 +268,7 @@ HiddenValley_vector_m_20_ctau_100_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_10
 # [19] 
 HiddenValley_vector_m_20_ctau_500_xiO_1_xiL_1: &HiddenValley_vector_m_20_ctau_500_xiO_1_xiL_1 
   path:  'bparkProductionV3/HiddenValley_vector_m_20_ctau_500_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v3_generationForBParking' 
-  files: 'output_[25-50].root' 
+  files: 'output_[0-149].root' 
   xs:   1.0 # [pb] 
   model_param: 
     m:    20 

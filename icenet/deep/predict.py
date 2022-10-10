@@ -134,7 +134,7 @@ def pred_graph_xgb(args, param, device='cpu'):
     
     return func_predict
 
-def pred_torch_graph(args, param, batch_size=5000):
+def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
@@ -159,9 +159,13 @@ def pred_torch_graph(args, param, batch_size=5000):
         
         return y_tot
 
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
-def pred_torch_generic(args, param):
+
+def pred_torch_generic(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
@@ -179,9 +183,13 @@ def pred_torch_generic(args, param):
         
         return model.softpredict(x_in)[:, args['signalclass']].detach().cpu().numpy()
     
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
-def pred_torch_scalar(args, param):
+
+def pred_torch_scalar(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
@@ -199,7 +207,10 @@ def pred_torch_scalar(args, param):
         
         return model.softpredict(x_in).detach().cpu().numpy()
     
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
 '''
 def pred_xtx(args, param):
@@ -207,44 +218,56 @@ def pred_xtx(args, param):
 # Not implemented
 '''
 
-def pred_xgb(args, param, feature_names=None):
+def pred_xgb(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    xgb_model = pickle.load(open(filename, 'rb'))
+    model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        pred = xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
+        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
         if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
         return pred
 
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
-def pred_xgb_scalar(args, param, feature_names=None):
+
+def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    xgb_model = pickle.load(open(filename, 'rb'))
+    model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        pred = xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
+        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
         return pred
     
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
-def pred_xgb_logistic(args, param, feature_names=None):
+
+def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
     filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    xgb_model = pickle.load(open(filename, 'rb'))
+    model = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
         # Apply sigmoid function    
-        return 1 / (1 + np.exp(- xgb_model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))))
+        return 1 / (1 + np.exp(- model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))))
     
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, model
 
-def pred_flow(args, param, n_dims):
+
+def pred_flow(args, param, n_dims, return_model=False):
 
     print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
 
@@ -260,7 +283,10 @@ def pred_flow(args, param, n_dims):
     def func_predict(x):
         return dbnf.predict(x, models)
 
-    return func_predict
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, models
 
 
 def pred_flr(args, param):

@@ -3,6 +3,7 @@
 # m.mieskolainen@imperial.ac.uk, 2022
 
 
+import matplotlib.pyplot as plt
 import os
 import torch
 import torch_geometric
@@ -17,7 +18,7 @@ from termcolor import colored, cprint
 from configs.dqcd.mvavars import *
 
 from icedqcd import common
-from icenet.tools import iceroot, io, aux
+from icenet.tools import iceroot, io, aux, process
 from icenet.deep import predict
 from tqdm import tqdm
 
@@ -156,12 +157,19 @@ def process_data(args):
 
                     print(f'Evaluating MVA-model "{ID}" \n')
 
-                    X,ids        = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
-                    func_predict = get_predictor(args=args, param=param, feature_names=ids)
+                    X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
+                    
+                    # Impute data
+                    if args['imputation_param']['active']:
+                        imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
+                        X, _  = process.impute_datasets(data=X, features=ids, args=args['imputation_param'], imputer=imputer)
+
+                    # Get the MVA-model
+                    func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
                     ## Conditional model
                     if args['use_conditional']:
-
+                        
                         ## Get conditional parameters
                         CAX,pindex = generate_cartesian_param(ids=ids)
 
@@ -175,11 +183,30 @@ def process_data(args):
 
                             # Predict
                             output = func_predict(X)
+
+                            # ----------------------------
+                            # Import SHAP
                             
-                            label  = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+                            """
+                            import shap
+                            import xgboost
+                            explainer   = shap.Explainer(model, feature_names=ids)
+                            maxEvent    = 3
+                            shap_values = explainer(X[0:maxEvent,:])
+                            
+                            # visualize the first prediction's explanation
+                            
+                            for n in range(len(shap_values)):
+                                shap.plots.waterfall(shap_values[i], max_display=20)
+                                plt.savefig(f'./output/waterfall_{key}_{n}.pdf', bbox_inches='tight')
+                                plt.close()
+                            """
+                            # ----------------------------
+                            
+                            label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
                             scores[label] = output
                     else:
-
+                        
                         """
                         ### Variable normalization
                         if   args['varnorm'] == 'zscore':
@@ -214,11 +241,13 @@ def process_data(args):
 
 def get_predictor(args, param, feature_names=None):    
 
+    model = None
+
     if   param['predict'] == 'xgb':
-        func_predict = predict.pred_xgb(args=args, param=param, feature_names=feature_names)
+        func_predict, model = predict.pred_xgb(args=args, param=param, feature_names=feature_names, return_model=True)
 
     elif param['predict'] == 'xgb_logistic':
-        func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names)
+        func_predict, model = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names, return_model=True)
 
     elif param['predict'] == 'torch_vector':
         func_predict = predict.pred_torch_generic(args=args, param=param)
@@ -263,7 +292,7 @@ def get_predictor(args, param, feature_names=None):
     else:
         raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
 
-    return func_predict
+    return func_predict, model
 
 
 def apply_models(data=None, args=None):
