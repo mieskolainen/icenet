@@ -212,8 +212,9 @@ def process_data(args):
 
                             # Set the new conditional model parameters to X
                             XX            = copy.deepcopy(X)
-                            XX[:, pindex] = CAX[z,:] # Set new values
-
+                            nval          = CAX[z,:]
+                            XX[:, pindex] = nval  # Set new values
+                            
                             # Variable normalization
                             XX = zscore_normalization(X=XX, args=args)
 
