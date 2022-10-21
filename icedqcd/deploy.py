@@ -2,7 +2,6 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
-
 import matplotlib.pyplot as plt
 import os
 import torch
@@ -14,6 +13,7 @@ import uproot
 import logging
 import shap
 import xgboost
+import copy
 
 from termcolor import colored, cprint
 
@@ -243,7 +243,7 @@ def process_data(args):
                             plt.close()
                         """
                         # ----------------------------
-                        
+
                         # Predict
                         scores = func_predict(XX)
 

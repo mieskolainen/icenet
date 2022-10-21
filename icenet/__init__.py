@@ -15,6 +15,6 @@ __asciiart__   = \
 """
 ICENET
 """
-print(f'{__asciiart__} version: {__version__} | date: {__date__} | author: {__author__} | repository: {__repository__}')
+print(f'{__asciiart__} version: {__version__} | date: {__date__} | author: {__author__} | repository: {__repository__}')
 print(f' {datetime.now()} | hostname: {socket.gethostname()}')
 print('')
