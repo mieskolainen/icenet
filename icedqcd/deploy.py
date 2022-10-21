@@ -260,13 +260,13 @@ def process_data(args):
 
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
-                        
+
                 else:
                     # if param['predict'] == 'torch_graph': # Turned off for now
                     #   scores = func_predict(data['graph'])
 
                     # Write to log-file
-                    logging.debug(f'Did not evaluate model (unsupported deployment): "{ID}')
+                    logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
                     continue
 
         # Write to log-file
