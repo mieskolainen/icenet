@@ -82,7 +82,7 @@ def slice_range(start, stop, N):
 
 def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
     """
-    Reduce the input set variables of X
+    Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)
     
     Args:
         X:           data matrix

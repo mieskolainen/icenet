@@ -58,6 +58,9 @@ xgb0:
   label:   'XGB'
   raytune:  xgb_trial_0
 
+  #exclude_MVA_vars: ['.*']
+  #include_MVA_vars: ['.*']
+  
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
@@ -99,7 +102,8 @@ xgb0-no-mass:
 
   # ** Custom set of variables **
   exclude_MVA_vars: ['SV_mass.*', 'Jet_mass.*']
-
+  #include_MVA_vars: []
+  
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
@@ -140,8 +144,9 @@ xgb0-only-mu:
   raytune:  xgb_trial_0
 
   # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
   include_MVA_vars: ['nMuon', 'Muon_.*', 'MODEL_.*']
-  
+
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
