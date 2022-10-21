@@ -180,94 +180,95 @@ def process_data(args):
             # ------------------
             # Phase 4: Apply MVA-models (so far only to events which pass the trigger & pre-cuts)
 
-            for i in range(len(args['active_models'])):
+            with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 
-                ID    = args['active_models'][i]
-                param = args['models'][ID]
-                
-                if param['predict'] == 'xgb':
+                for i in range(len(args['active_models'])):
+                    
+                    ID    = args['active_models'][i]
+                    param = args['models'][ID]
+                    
+                    if param['predict'] == 'xgb':
 
-                    print(f'Evaluating MVA-model "{ID}" \n')
+                        print(f'Evaluating MVA-model "{ID}" \n')
 
-                    # Impute data
-                    if args['imputation_param']['active']:
-                        imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
-                        data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
+                        # Impute data
+                        if args['imputation_param']['active']:
+                            imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
+                            data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
 
-                    ## Apply the input variable set reductor
-                    X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
+                        ## Apply the input variable set reductor
+                        X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
 
-                    ## Get the MVA-model
-                    func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
+                        ## Get the MVA-model
+                        func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
-                    ## Conditional model
-                    if args['use_conditional']:
+                        ## Conditional model
+                        if args['use_conditional']:
 
-                        ## Get conditional parameters
-                        CAX,pindex = generate_cartesian_param(ids=ids)
+                            ## Get conditional parameters
+                            CAX,pindex = generate_cartesian_param(ids=ids)
 
-                        ## Run the MVA-model on all the theory model points in CAX array
-                        scores = {}
-                        for z in tqdm(range(len(CAX))):
+                            ## Run the MVA-model on all the theory model points in CAX array
+                            scores = {}
+                            for z in tqdm(range(len(CAX))):
 
-                            # Set the new conditional model parameters to X
-                            XX            = copy.deepcopy(X)
-                            nval          = CAX[z,:]
-                            XX[:, pindex] = nval  # Set new values
+                                # Set the new conditional model parameters to X
+                                XX            = copy.deepcopy(X)
+                                nval          = CAX[z,:]
+                                XX[:, pindex] = nval  # Set new values
+
+                                # Variable normalization
+                                XX = zscore_normalization(X=XX, args=args)
+
+                                # Predict
+                                output = func_predict(XX)
+                                                            
+                                label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+                                scores[label] = output
+                        else:
 
                             # Variable normalization
-                            XX = zscore_normalization(X=XX, args=args)
+                            XX = copy.deepcopy(X)
+                            XX = zscore_normalization(XX)
+
+                            # ----------------------------
+                            # Import SHAP
+                            
+                            """
+                            explainer   = shap.Explainer(model, feature_names=ids)
+                            maxEvent    = 3
+                            shap_values = explainer(XX[0:maxEvent,:])
+                            
+                            # Visualize the SHAP value explanation
+                            for n in range(len(shap_values)):
+                                shap.plots.waterfall(shap_values[i], max_display=30)
+                                plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
+                                plt.close()
+                            """
+                            # ----------------------------
 
                             # Predict
-                            output = func_predict(XX)
-                                                        
-                            label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
-                            scores[label] = output
-                    else:
+                            scores = func_predict(XX)
 
-                        # Variable normalization
-                        XX = copy.deepcopy(X)
-                        XX = zscore_normalization(XX)
+                        # ------------------
+                        # Phase 5: Write MVA-scores out
 
-                        # ----------------------------
-                        # Import SHAP
-                        
-                        """
-                        explainer   = shap.Explainer(model, feature_names=ids)
-                        maxEvent    = 3
-                        shap_values = explainer(XX[0:maxEvent,:])
-                        
-                        # Visualize the SHAP value explanation
-                        for n in range(len(shap_values)):
-                            shap.plots.waterfall(shap_values[i], max_display=30)
-                            plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
-                            plt.close()
-                        """
-                        # ----------------------------
+                        outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
+                        outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
 
-                        # Predict
-                        scores = func_predict(XX)
-
-                    # ------------------
-                    # Phase 5: Write MVA-scores out
-
-                    outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
-                    outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
-
-                    with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as file:        
                         print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
-                        file[f"Events"] = {f"{ID}": scores}
+                        rfile[f"Events"] = {f"{ID}": scores}
 
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
 
-                else:
-                    # if param['predict'] == 'torch_graph': # Turned off for now
-                    #   scores = func_predict(data['graph'])
+                    else:
+                        # if param['predict'] == 'torch_graph': # Turned off for now
+                        #   scores = func_predict(data['graph'])
 
-                    # Write to log-file
-                    logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
-                    continue
+                        # Write to log-file
+                        logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
+                        continue
 
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
