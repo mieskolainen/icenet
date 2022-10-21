@@ -55,7 +55,7 @@ def f2s(value):
     """
     return str(np.round(value,1)).replace('.', 'p')
 
-def zcore_normalization(X, args):
+def zscore_normalization(X, args):
     """
     Z-score normalization
     """
