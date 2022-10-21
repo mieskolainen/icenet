@@ -324,9 +324,13 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
         ## Plot feature importance
         if plot_importance:
             for sort in [True, False]:
-                fig,ax = plots.plot_xgb_importance(model=model, tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'), label=param["label"], sort=sort)
-                targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
-                plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
+                for importance_type in ['weight', 'gain', 'cover', 'total_gain', 'total_cover']:
+                    fig,ax = plots.plot_xgb_importance(model=model, 
+                        tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'),
+                        label=param["label"], importance_type=importance_type, sort=sort)
+                    targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
+                    plt.savefig(f'{targetdir}/{param["label"]}--type_{importance_type}--sort-{sort}.pdf', bbox_inches='tight');
+                    plt.close()
         
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:

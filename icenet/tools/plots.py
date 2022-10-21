@@ -1113,16 +1113,16 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             gc.collect()
 
 
-def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, sort=True):
+def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, sort=True, default_names=False):
     """
     Plot XGBoost model feature importance
     
     Args:
-        model:           xgboost model object
-        dim:             feature space dimension
-        tick_label:      feature names
-        importance_type: type of importance metric
-
+        model:             xgboost model object
+        dim:               feature space dimension
+        tick_label:        feature names
+        importance_type:   type of importance metric ['weight', 'gain', 'cover', 'total_gain', 'total_cover']
+        default_names:     True for xgboost default, else set False (uses tick_label)
     Returns
         fig, ax
     """
@@ -1136,7 +1136,10 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
     # Try, Except needed because xgb does Not return (always) for all of them
     for i in range(dim):
         try:
-            yy[i] = fscores[f'f{i}'] # Feature name 'f{i}''
+            if default_names:
+                yy[i] = fscores[f'f{i}']       # XGBoost default feature name 'f{i}'
+            else:
+                yy[i] = fscores[tick_label[i]] # Definite names
         except:
             yy[i] = 0.0
         
@@ -1151,7 +1154,7 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
     # Plot
     fig,ax = plt.subplots(figsize=(0.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
     plt.barh(xx, yy, align='center', height=0.5, tick_label=labels)
-    plt.xlabel(f'F-score ({importance_type})')
+    plt.xlabel(f'Score ({importance_type})')
     plt.title(f'[{label}]')
     
     return fig, ax

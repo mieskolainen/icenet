@@ -190,14 +190,21 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
 
     # -------------------------------------------------------------------
-    ## Create new variables
+    ## Create new variables to args dictionary
 
-    args["config"]    = cli_dict['config']
-    args["modeltag"]  = cli_dict['modeltag']
+    # Protection for '/' -> '-'
+    def safetxt(txt):
+        if type(txt) is str:
+            return txt.replace('/', '').replace('include', '')
+        else:
+            return txt
+
+    args["config"]     = cli_dict['config']
+    args["modeltag"]   = cli_dict['modeltag']
     
-    args['datadir']   = aux.makedir(f'{cwd}/output/{args["rootname"]}')
-    args['modeldir']  = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{cli_dict["config"]}/modeltag__{cli_dict["modeltag"]}')
-    args['plotdir']   = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{cli_dict["config"]}/inputmap__{cli_dict["inputmap"]}--modeltag__{cli_dict["modeltag"]}')
+    args['datadir']    = aux.makedir(f'{cwd}/output/{args["rootname"]}')
+    args['modeldir']   = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{cli_dict["config"]}/modeltag__{cli_dict["modeltag"]}')
+    args['plotdir']    = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{cli_dict["config"]}/inputmap__{safetxt(cli_dict["inputmap"])}--modeltag__{cli_dict["modeltag"]}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
     

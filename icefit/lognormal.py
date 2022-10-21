@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 
 
-def lognormal_param(m, v, inmode='mean'):
+def lognormal_param(m, v, inmode='mean', verbose=False):
     """
     Compute log-normal distribution \mu and \sigma parameters from
     the target mean (or median) m and variance v
@@ -45,9 +45,10 @@ def lognormal_param(m, v, inmode='mean'):
     else:
         raise Except('lognormal_param: Unknown inmode')
 
-    print(f'lognormal_param:')
-    print(f'  - Input:     m = {m:0.5f}, v = {v:0.5f}, target = {inmode}')
-    print(f'  - Obtained parameters: mu = {mu:0.5f}, sigma = {sigma:0.5f}')
+    if verbose:
+        print(f'lognormal_param:')
+        print(f'  - Input:     m = {m:0.5f}, v = {v:0.5f}, target = {inmode}')
+        print(f'  - Obtained parameters: mu = {mu:0.5f}, sigma = {sigma:0.5f}')
 
     return mu, sigma
 

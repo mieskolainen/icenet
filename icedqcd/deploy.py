@@ -1,4 +1,4 @@
-# Deploy MVA-model to data (or MC) files (work in progress ...)
+# Deploy MVA-model to data (or MC) files (work in progress, not all models supported ...)
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
@@ -11,6 +11,10 @@ import numpy as np
 import awkward as ak
 import pickle
 import uproot
+import logging
+import shap
+import xgboost
+
 from termcolor import colored, cprint
 
 
@@ -45,14 +49,24 @@ def generate_cartesian_param(ids):
 
     return CAX, pindex
 
-
-# Save the scores
 def f2s(value):
     """
     Convert floating point "1.5" to "1p5"
     """
     return str(np.round(value,1)).replace('.', 'p')
 
+def zcore_normalization(X, args):
+    """
+    Z-score normalization
+    """
+    if   args['varnorm'] == 'zscore':                            
+        print(__name__ + f'.process_data: Z-score normalizing variables ...')
+        X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+
+        print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
+        X = io.apply_zscore(X, X_mu, X_std)
+
+    return X
 
 def process_data(args):
 
@@ -85,15 +99,25 @@ def process_data(args):
     VARS += MVA_JAGGED_VARS
     VARS += MVA_PF_VARS
 
+    basepath   = f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}"
+    logging.basicConfig(filename=f'{basepath}/deploy.log', encoding='utf-8',
+        level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+
     for key in inputmap.keys():
 
         print(__name__ + f'.process_data: Processing "{key}"')
 
+        # Write to log-file
+        logging.debug('-------------------------------------------------------')
+        logging.debug(f'Process: {key}')
+
         # Get all files
         datasets  = inputmap[key]['path'] + '/' + inputmap[key]['files']
         rootfiles = io.glob_expand_files(datasets=datasets, datapath=root_path)
-        
+
         # Loop over the files
+        total_num_events = 0
+
         for k in range(len(rootfiles)):
 
             filename = rootfiles[k]
@@ -109,8 +133,16 @@ def process_data(args):
             
             try:
                 X_uncut, ids_uncut = iceroot.load_tree(**param)
+
+                # Write to log-file
+                logging.debug(f'{filename} | Number of events: {len(X_uncut)}')
+                total_num_events += len(X_uncut)
+
             except:
-                print(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
+                cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
+                
+                # Write to log-file
+                logging.debug(f'{filename} | A fatal error in iceroot.load_tree !')
                 continue
 
             # -------------------------------------------------
@@ -128,7 +160,7 @@ def process_data(args):
                 ids_uncut = ak.fields(X_uncut)
 
             # ------------------
-            # Phase 2: Apply selections (no selections applied --> event numbers kept intact)
+            # Phase 2: Apply selections (no selections applied here --> event numbers kept intact)
 
             X = X_uncut
 
@@ -141,8 +173,8 @@ def process_data(args):
             # ------------------
             # Phase 3: Convert to icenet dataformat
 
-            Y        = ak.Array(np.zeros(len(X))) # Dummy
-            W        = ak.Array(np.zeros(len(X))) # Dummy
+            Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
+            W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
             data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_uncut, args=args, skip_graph=True)
             
             # ------------------
@@ -162,8 +194,10 @@ def process_data(args):
                         imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
                         data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
 
-                    # Get the MVA-model
+                    ## Apply the input variable set reductor
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
+
+                    ## Get the MVA-model
                     func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
                     ## Conditional model
@@ -172,71 +206,70 @@ def process_data(args):
                         ## Get conditional parameters
                         CAX,pindex = generate_cartesian_param(ids=ids)
 
-                        ## Run the MVA-model on all the theory model points
+                        ## Run the MVA-model on all the theory model points in CAX array
                         scores = {}
                         for z in tqdm(range(len(CAX))):
 
                             # Set the new conditional model parameters to X
-                            nval         = CAX[z,:]
-                            X[:, pindex] = nval
+                            XX            = copy.deepcopy(X)
+                            XX[:, pindex] = CAX[z,:] # Set new values
+
+                            # Variable normalization
+                            XX = zscore_normalization(X=XX, args=args)
 
                             # Predict
-                            output = func_predict(X)
-
-                            # ----------------------------
-                            # Import SHAP
-                            
-                            """
-                            import shap
-                            import xgboost
-                            explainer   = shap.Explainer(model, feature_names=ids)
-                            maxEvent    = 3
-                            shap_values = explainer(X[0:maxEvent,:])
-                            
-                            # visualize the first prediction's explanation
-                            
-                            for n in range(len(shap_values)):
-                                shap.plots.waterfall(shap_values[i], max_display=20)
-                                plt.savefig(f'./output/waterfall_{key}_{n}.pdf', bbox_inches='tight')
-                                plt.close()
-                            """
-                            # ----------------------------
-                            
+                            output = func_predict(XX)
+                                                        
                             label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
                             scores[label] = output
                     else:
+
+                        # Variable normalization
+                        XX = copy.deepcopy(X)
+                        XX = zscore_normalization(XX)
+
+                        # ----------------------------
+                        # Import SHAP
                         
                         """
-                        ### Variable normalization
-                        if   args['varnorm'] == 'zscore':
-                            
-                            print(__name__ + f'.process_data: Z-score normalizing variables ...')
-                            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
-                            
-                            print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
-                            X = io.apply_zscore(X, X_mu, X_std)
+                        explainer   = shap.Explainer(model, feature_names=ids)
+                        maxEvent    = 3
+                        shap_values = explainer(XX[0:maxEvent,:])
+                        
+                        # Visualize the SHAP value explanation
+                        for n in range(len(shap_values)):
+                            shap.plots.waterfall(shap_values[i], max_display=30)
+                            plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
+                            plt.close()
                         """
-
-                        # Obtain the scores
-                        scores = func_predict(X)
+                        # ----------------------------
+                        
+                        # Predict
+                        scores = func_predict(XX)
 
                     # ------------------
                     # Phase 5: Write MVA-scores out
 
-                    basepath   = f'{cwd}/output/dqcd/deploy' + '/' + f"modeltag__{args['modeltag']}"
                     outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
                     outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
 
-                    with uproot.recreate(outputfile, compression=None) as file:        
+                    with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as file:        
                         print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
                         file[f"Events"] = {f"{ID}": scores}
 
+                        # Write to log-file
+                        logging.debug(f'Evaluated scores of MVA-model: "{ID}')
+
                 else:
+                    # if param['predict'] == 'torch_graph': # Turned off for now
+                    #   scores = func_predict(data['graph'])
+
+                    # Write to log-file
+                    logging.debug(f'Did not evaluate MVA-model (unsupported deployment): "{ID}')
                     continue
 
-                # if param['predict'] == 'torch_graph':
-                #   scores = func_predict(data['graph'])
-
+        # Write to log-file
+        logging.debug(f'Total number of events: {total_num_events}')
 
 def get_predictor(args, param, feature_names=None):    
 
@@ -293,7 +326,7 @@ def get_predictor(args, param, feature_names=None):
 
     return func_predict, model
 
-
+"""
 def apply_models(data=None, args=None):
     #
     #Evaluate ML/AI models.
@@ -336,4 +369,4 @@ def apply_models(data=None, args=None):
         
     if X_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
-
+"""

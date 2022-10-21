@@ -13,6 +13,9 @@ jaxlib>=0.3.15
 # IMINUIT
 iminuit>=2.16.0
 
+# MYSTIC
+mystic>=0.3.9
+
 # RAY
 ray>=2.0.0
 hyperopt>=0.2.7
