@@ -214,7 +214,7 @@ def process_data(args):
                             XX            = copy.deepcopy(X)
                             nval          = CAX[z,:]
                             XX[:, pindex] = nval  # Set new values
-                            
+
                             # Variable normalization
                             XX = zscore_normalization(X=XX, args=args)
 
@@ -259,14 +259,14 @@ def process_data(args):
                         file[f"Events"] = {f"{ID}": scores}
 
                         # Write to log-file
-                        logging.debug(f'Evaluated scores of MVA-model: "{ID}')
-
+                        logging.debug(f'Evaluated scores of model: {ID}')
+                        
                 else:
                     # if param['predict'] == 'torch_graph': # Turned off for now
                     #   scores = func_predict(data['graph'])
 
                     # Write to log-file
-                    logging.debug(f'Did not evaluate MVA-model (unsupported deployment): "{ID}')
+                    logging.debug(f'Did not evaluate model (unsupported deployment): "{ID}')
                     continue
 
         # Write to log-file
