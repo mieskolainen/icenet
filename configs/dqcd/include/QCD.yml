@@ -1,8 +1,8 @@
  
 # [0] 
-QCD_Pt-15to20_MuEnrichedPt5: &QCD_Pt-15to20_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-15to20_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-15to20_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   2799000.0 
   model_param: 
     m:    null 
@@ -10,13 +10,13 @@ QCD_Pt-15to20_MuEnrichedPt5: &QCD_Pt-15to20_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [1] 
-QCD_Pt-20to30_MuEnrichedPt5: &QCD_Pt-20to30_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-20to30_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-20to30_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   2526000.0 
   model_param: 
     m:    null 
@@ -24,13 +24,13 @@ QCD_Pt-20to30_MuEnrichedPt5: &QCD_Pt-20to30_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [2] 
-QCD_Pt-30to50_MuEnrichedPt5: &QCD_Pt-30to50_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-30to50_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-30to50_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   1362000.0 
   model_param: 
     m:    null 
@@ -38,13 +38,13 @@ QCD_Pt-30to50_MuEnrichedPt5: &QCD_Pt-30to50_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [3] 
-QCD_Pt-50to80_MuEnrichedPt5: &QCD_Pt-50to80_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-50to80_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-50to80_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   376600.0 
   model_param: 
     m:    null 
@@ -52,41 +52,69 @@ QCD_Pt-50to80_MuEnrichedPt5: &QCD_Pt-50to80_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [4] 
-QCD_Pt-80to120_MuEnrichedPt5: &QCD_Pt-80to120_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-80to120_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-80to120_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
-  xs:   88930.0 
+  files: 'output_[0-10].root' 
+  xs:   44465.0 
   model_param: 
     m:    null 
     ctau: null 
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [5] 
-QCD_Pt-120to170_MuEnrichedPt5: &QCD_Pt-120to170_MuEnrichedPt5 
-  path:  'bparkProductionV1_bkg/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
-  xs:   21230.0 
+bparkProductionV1_bkg_ext--QCD_Pt-80to120_MuEnrichedPt5: &bparkProductionV1_bkg_ext--QCD_Pt-80to120_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg_ext/QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   44465.0 
   model_param: 
     m:    null 
     ctau: null 
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [6] 
-QCD_Pt-170to300_MuEnrichedPt5: &QCD_Pt-170to300_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-120to170_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-120to170_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   10615.0 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [7] 
+bparkProductionV1_bkg_ext--QCD_Pt-120to170_MuEnrichedPt5: &bparkProductionV1_bkg_ext--QCD_Pt-120to170_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg_ext/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   10615.0 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [8] 
+bparkProductionV1_bkg--QCD_Pt-170to300_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-170to300_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   7055.0 
   model_param: 
     m:    null 
@@ -94,41 +122,69 @@ QCD_Pt-170to300_MuEnrichedPt5: &QCD_Pt-170to300_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
-  maxevents_scale: 1.0 
- 
-# [7] 
-QCD_Pt-300to470_MuEnrichedPt5: &QCD_Pt-300to470_MuEnrichedPt5 
-  path:  'bparkProductionV1_bkg/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
-  xs:   619.3 
-  model_param: 
-    m:    null 
-    ctau: null 
-    xiO:  null 
-    xiL:  null 
-  force_xs: false 
-  isMC:     false 
-  maxevents_scale: 1.0 
- 
-# [8] 
-QCD_Pt-470to600_MuEnrichedPt5: &QCD_Pt-470to600_MuEnrichedPt5 
-  path:  'bparkProductionV1_bkg/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
-  xs:   59.24 
-  model_param: 
-    m:    null 
-    ctau: null 
-    xiO:  null 
-    xiL:  null 
-  force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
 # [9] 
-QCD_Pt-600to800_MuEnrichedPt5: &QCD_Pt-600to800_MuEnrichedPt5 
+bparkProductionV1_bkg--QCD_Pt-300to470_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-300to470_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   309.65 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [10] 
+bparkProductionV1_bkg_ext--QCD_Pt-300to470_MuEnrichedPt5: &bparkProductionV1_bkg_ext--QCD_Pt-300to470_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg_ext/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v1_MINIAODSIM_v2_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   309.65 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [11] 
+bparkProductionV1_bkg--QCD_Pt-470to600_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-470to600_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   29.62 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [12] 
+bparkProductionV1_bkg_ext--QCD_Pt-470to600_MuEnrichedPt5: &bparkProductionV1_bkg_ext--QCD_Pt-470to600_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg_ext/QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   29.62 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [13] 
+bparkProductionV1_bkg--QCD_Pt-600to800_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-600to800_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   18.21 
   model_param: 
     m:    null 
@@ -136,27 +192,41 @@ QCD_Pt-600to800_MuEnrichedPt5: &QCD_Pt-600to800_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
-# [10] 
-QCD_Pt-800to1000_MuEnrichedPt5: &QCD_Pt-800to1000_MuEnrichedPt5 
+# [14] 
+bparkProductionV1_bkg--QCD_Pt-800to1000_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-800to1000_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
-  xs:   3.275 
+  files: 'output_[0-10].root' 
+  xs:   1.6375 
   model_param: 
     m:    null 
     ctau: null 
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  
-# [11] 
-QCD_Pt-1000toInf_MuEnrichedPt5: &QCD_Pt-1000toInf_MuEnrichedPt5 
+# [15] 
+bparkProductionV1_bkg_ext--QCD_Pt-800to1000_MuEnrichedPt5: &bparkProductionV1_bkg_ext--QCD_Pt-800to1000_MuEnrichedPt5 
+  path:  'bparkProductionV1_bkg_ext/QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v2_generationForBParking' 
+  files: 'output_[0-10].root' 
+  xs:   1.6375 
+  model_param: 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
+  force_xs: false 
+  isMC:     true 
+  maxevents_scale: 1.0 
+ 
+# [16] 
+bparkProductionV1_bkg--QCD_Pt-1000toInf_MuEnrichedPt5: &bparkProductionV1_bkg--QCD_Pt-1000toInf_MuEnrichedPt5 
   path:  'bparkProductionV1_bkg/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking' 
-  files: 'output_[0-1000].root' 
+  files: 'output_[0-10].root' 
   xs:   1.078 
   model_param: 
     m:    null 
@@ -164,6 +234,6 @@ QCD_Pt-1000toInf_MuEnrichedPt5: &QCD_Pt-1000toInf_MuEnrichedPt5
     xiO:  null 
     xiL:  null 
   force_xs: false 
-  isMC:     false 
+  isMC:     true 
   maxevents_scale: 1.0 
  

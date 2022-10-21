@@ -14,7 +14,9 @@ import logging
 import shap
 import xgboost
 import copy
+import socket
 
+from datetime import datetime
 from termcolor import colored, cprint
 
 
@@ -99,10 +101,17 @@ def process_data(args):
     VARS += MVA_JAGGED_VARS
     VARS += MVA_PF_VARS
 
-    basepath   = f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}"
-    logging.basicConfig(filename=f'{basepath}/deploy.log', encoding='utf-8',
+    basepath = f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}"
+
+    nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
+    logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
+    # Save to log-file
+    logging.debug(__name__ + f'.process_data: {nodestr}')
+    logging.debug('')
+    logging.debug(f'{inputmap}')
+    
     for key in inputmap.keys():
 
         print(__name__ + f'.process_data: Processing "{key}"')
@@ -182,7 +191,7 @@ def process_data(args):
 
             outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
             outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
-            
+
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
 
                 for i in range(len(args['active_models'])):

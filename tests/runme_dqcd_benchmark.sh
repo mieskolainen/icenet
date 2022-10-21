@@ -20,6 +20,13 @@ ulimit -s unlimited
 ulimit -l unlimited
 ulimit -v unlimited
 
+# Generate steering YAML for QCD
+python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
+
+# Vector
+python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[150-200]'
+
+
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_all.yml                       --datapath $DATAPATH
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_m_10_ctau_10_xiO_1_xiL_1.yml  --datapath $DATAPATH
 $CMD $MAX --runmode genesis --config $CONFIG --inputmap mc_map__vector_m_10_ctau_100_xiO_1_xiL_1.yml --datapath $DATAPATH

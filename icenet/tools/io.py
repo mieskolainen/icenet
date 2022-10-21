@@ -34,6 +34,15 @@ import base64
 import yaml
 
 
+def safetxt(txt):
+    """
+    Protection for '/'
+    """
+    if type(txt) is str:
+        return txt.replace('/', '|')
+    else:
+        return txt
+
 def count_files_in_dir(path):
     """
     Count the number of files in a path

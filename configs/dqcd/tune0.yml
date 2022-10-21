@@ -129,10 +129,12 @@ train_runmode:
   active_models: &ACTIVE_MODELS
     
     - xgb0
+    - xgb0-no-mass
+    - xgb0-only-mu
     
     #- gnet1
-    - gnet2
-    - gnet3
+    #- gnet2
+    #- gnet3
     
     #- dmlp
     #- lgr0
