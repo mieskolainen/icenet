@@ -178,10 +178,13 @@ def process_data(args):
             data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_uncut, args=args, skip_graph=True)
             
             # ------------------
-            # Phase 4: Apply MVA-models (so far only to events which pass the trigger & pre-cuts)
+            # Phase 4: Apply MVA-models
 
+            outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
+            outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
+            
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
-                
+
                 for i in range(len(args['active_models'])):
                     
                     ID    = args['active_models'][i]
@@ -252,9 +255,6 @@ def process_data(args):
 
                         # ------------------
                         # Phase 5: Write MVA-scores out
-
-                        outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
-                        outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
 
                         print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
                         rfile[f"Events"] = {f"{ID}": scores}
