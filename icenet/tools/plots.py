@@ -913,9 +913,9 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
                     fpr_lo = fpr_lo[1:]
                     fpr_hi = fpr_hi[1:]
             """
-
+            
             ## Plot it
-            plt.plot(fpr, tpr, drawstyle='steps-mid', color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.3f}')
+            plt.plot(fpr, tpr, drawstyle='steps-mid', color=f'C{i}', linestyle=linestyle, marker=marker, label = f'{labels[i]}: AUC = {metrics[i].auc:.4f}')
             
             # Uncertainty band
             if marker == 'None' and (metrics[i].tpr_bootstrap is not None):
