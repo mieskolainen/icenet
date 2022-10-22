@@ -36,10 +36,10 @@ def generate_cartesian_param(ids):
     Note. Keep the order m, ctau, xiO, xiL
     """
 
-    values    = {'m':    np.round(np.array([2.0, 5.0, 10.0, 15.0, 20.0]), 1),
-                 'ctau': np.round(np.array([10, 50, 100, 500]), 1),
-                 'xiO':  np.round(np.array([1.0]), 1),
-                 'xiL':  np.round(np.array([1.0]), 1)}
+    values    = {'m':    np.round(np.array([2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
+                 'ctau': np.round(np.array([10, 25, 50, 75, 100, 250, 500]), 1),
+                 'xiO':  np.round(np.array([1.0, 2.5]), 1),
+                 'xiL':  np.round(np.array([1.0, 2.5]), 1)}
 
     CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
 
@@ -153,7 +153,7 @@ def process_data(args):
                 # Write to log-file
                 logging.debug(f'{filename} | A fatal error in iceroot.load_tree !')
                 continue
-            
+
             # -------------------------------------------------
             # Add conditional (theory param) variables
             model_param = {'m': 0.0, 'ctau': 0.0, 'xiO': 0.0, 'xiL': 0.0}
@@ -174,6 +174,13 @@ def process_data(args):
             mask     = common.process_root(X=X_nocut, args=args, return_mask=True)
             X        = X_nocut[mask]
 
+            if len(X) == 0:
+                print(__name__ + f".deploy: No events left after pre-cuts -- skipping file")
+                
+                # Write to log-file
+                logging.debug(f'No events left after pre-cuts -- skipping file')
+                continue
+            
             # ------------------
             # Phase 3: Convert to icenet dataformat
 
