@@ -157,7 +157,11 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
 
     if files == []:
        files = [datapath]
-   
+    
+    # Transform multiple slashes
+    for i in range(len(files)):
+        files[i] = files[i].replace('////','/').replace('///', '/').replace('//', '/')
+    
     #print(__name__ + f'.glob_expand_files: Final files: {files}')
         
     return files
