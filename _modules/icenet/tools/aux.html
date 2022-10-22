@@ -515,7 +515,7 @@
 
 <div class="viewcode-block" id="red"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.red">[docs]</a><span class="k">def</span> <span class="nf">red</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_tag</span><span class="o">=</span><span class="s1">&#39;exclude_MVA_vars&#39;</span><span class="p">,</span> <span class="n">include_tag</span><span class="o">=</span><span class="s1">&#39;include_MVA_vars&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reduce the input set variables of X</span>
+<span class="sd">    Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X:           data matrix</span>
