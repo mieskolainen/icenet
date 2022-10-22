@@ -144,8 +144,8 @@ def process_data(args):
                 X_nocut, ids_nocut = iceroot.load_tree(**param)
 
                 # Write to log-file
-                logging.debug(f'{filename} | Number of events: {len(X_uncut)}')
-                total_num_events += len(X_uncut)
+                logging.debug(f'{filename} | Number of events: {len(X_nocut)}')
+                total_num_events += len(X_nocut)
 
             except:
                 cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
@@ -153,7 +153,7 @@ def process_data(args):
                 # Write to log-file
                 logging.debug(f'{filename} | A fatal error in iceroot.load_tree !')
                 continue
-
+            
             # -------------------------------------------------
             # Add conditional (theory param) variables
             model_param = {'m': 0.0, 'ctau': 0.0, 'xiO': 0.0, 'xiL': 0.0}
@@ -165,7 +165,7 @@ def process_data(args):
                     # Create new 'record' (column) to ak-array
                     col_name    = f'MODEL_{var}'
                     X_nocut[col_name] = model_param[var]
-                
+
                 ids_nocut = ak.fields(X_nocut)
 
             # ------------------
