@@ -141,7 +141,7 @@ def process_data(args):
             }
             
             try:
-                X_uncut, ids_uncut = iceroot.load_tree(**param)
+                X_nocut, ids_nocut = iceroot.load_tree(**param)
 
                 # Write to log-file
                 logging.debug(f'{filename} | Number of events: {len(X_uncut)}')
@@ -164,9 +164,9 @@ def process_data(args):
                 for var in model_param.keys():
                     # Create new 'record' (column) to ak-array
                     col_name    = f'MODEL_{var}'
-                    X_uncut[col_name] = model_param[var]
-
-                ids_nocut = ak.fields(X_uncut)
+                    X_nocut[col_name] = model_param[var]
+                
+                ids_nocut = ak.fields(X_nocut)
 
             # ------------------
             # Phase 2: Apply pre-selections to get an event mask
@@ -230,7 +230,7 @@ def process_data(args):
                             ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
                             ALL_scores[io.rootsafe(ID_label)] = aux.unmask(x=pred, mask=mask, default_value=-1)
                     else:
-                        
+
                         # Variable normalization
                         XX = copy.deepcopy(X)
                         XX = zscore_normalization(XX)
