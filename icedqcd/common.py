@@ -146,8 +146,10 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     if return_mask == False:
         return X_final, ids, stats
     else:
-        fmask[fmask] = cmask # cmask is evaluated for which fmask == True
-        return fmask
+        fmask_np = fmask.to_numpy()
+        fmask_np[fmask_np] = cmask # cmask is evaluated for which fmask == True
+        
+        return fmask_np
 
 
 def splitfactor(x, y, w, ids, args, skip_graph=False):
