@@ -31,6 +31,15 @@ import icenet.tools.prints as prints
 import icenet.tools.stx as stx
 
 
+def unmask(x, mask, default_value=-1):
+    """
+    Unmasking function
+    """
+    out = default_value * np.ones(len(mask))
+    out[mask] = x
+    return out
+
+
 def cartesian_product(*arrays):
     """
     N-dimensional generalized cartesian product between arrays

@@ -11,18 +11,17 @@ import numba
 from icenet.tools import stx
 
 
-def filter_nofilter(X, isMC, xcorr_flow=False):
+def filter_nofilter(X, isMC=None, xcorr_flow=False):
     """ All pass
     """
     return ak.Array(np.ones(len(X), dtype=np.bool_)) # Note datatype np.bool_
 
 
-def filter_standard(X, isMC, xcorr_flow=False):
+def filter_standard(X, isMC=None, xcorr_flow=False):
     """ Basic filters.
     
     Args:
     	X    : Awkward jagged array
-        isMC : MC or not
     
     Returns:
         Passing indices mask (N)

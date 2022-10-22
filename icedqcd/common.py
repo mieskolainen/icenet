@@ -112,7 +112,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
 
 
-def process_root(X, ids, isMC, args, **extra):
+def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     """
     Apply selections
     """
@@ -123,27 +123,30 @@ def process_root(X, ids, isMC, args, **extra):
     stats = {'filterfunc': None, 'cutfunc': None}
     
     # @@ Filtering done here @@
-    mask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    stats['filterfunc'] = {'before': len(X), 'after': sum(mask)}
+    fmask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
     
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f})', 'green')
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
     
-    X = X[mask]
+    X_new = X[fmask]
     
     # @@ Observable cut selections done here @@
-    mask = CUTFUNC(X=X, xcorr_flow=args['xcorr_flow'])
-    stats['cutfunc'] = {'before': len(X), 'after': sum(mask)}
+    cmask = CUTFUNC(X=X_new, xcorr_flow=args['xcorr_flow'])
+    stats['cutfunc'] = {'before': len(X_new), 'after': sum(cmask)}
     
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X)}, after: {sum(mask)} events ({sum(mask)/(len(X)+1E-12):0.6f}) \n", 'green')
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
     io.showmem()
     
-    X = X[mask]
-    
-    return X, ids, stats
+    X_final = X_new[cmask]
+
+    if return_mask == False:
+        return X_final, ids, stats
+    else:
+        return fmask[fmask == True] = cmask
 
 
 def splitfactor(x, y, w, ids, args, skip_graph=False):

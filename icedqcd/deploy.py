@@ -166,25 +166,20 @@ def process_data(args):
                     col_name    = f'MODEL_{var}'
                     X_uncut[col_name] = model_param[var]
 
-                ids_uncut = ak.fields(X_uncut)
+                ids_nocut = ak.fields(X_uncut)
 
             # ------------------
-            # Phase 2: Apply selections (no selections applied here --> event numbers kept intact)
+            # Phase 2: Apply pre-selections to get an event mask
 
-            X = X_uncut
+            mask     = common.process_root(X=X_nocut, args=args, return_mask=True)
+            X        = X_nocut[mask]
 
-            #N_before     = len(X_uncut)
-            #X,ids,stats  = common.process_root(X=X_uncut, ids=ids, isMC=False, args=args)
-            #N_after      = len(X)
-            #eff_acc      = N_after / N_before
-            #print(__name__ + f' efficiency x acceptance = {eff_acc:0.6f}')
-            
             # ------------------
             # Phase 3: Convert to icenet dataformat
 
             Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
             W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
-            data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_uncut, args=args, skip_graph=True)
+            data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_nocut, args=args, skip_graph=True)
             
             # ------------------
             # Phase 4: Apply MVA-models
@@ -230,12 +225,12 @@ def process_data(args):
                             XX = zscore_normalization(X=XX, args=args)
 
                             # Predict
-                            output = func_predict(XX)
-                                     
+                            pred = func_predict(XX)
+                            
                             ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
-                            ALL_scores[io.rootsafe(ID_label)] = output
+                            ALL_scores[io.rootsafe(ID_label)] = aux.unmask(x=pred, mask=mask, default_value=-1)
                     else:
-
+                        
                         # Variable normalization
                         XX = copy.deepcopy(X)
                         XX = zscore_normalization(XX)
@@ -257,8 +252,9 @@ def process_data(args):
                         # ----------------------------
 
                         # Predict
-                        ALL_scores[io.rootsafe(ID)] = func_predict(XX)
-                        
+                        pred = func_predict(XX)
+                        ALL_scores[io.rootsafe(ID)] = aux.unmask(x=pred, mask=mask, default_value=-1)
+
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
 
