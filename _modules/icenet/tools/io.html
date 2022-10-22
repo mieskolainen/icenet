@@ -590,7 +590,11 @@
 
     <span class="k">if</span> <span class="n">files</span> <span class="o">==</span> <span class="p">[]:</span>
        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapath</span><span class="p">]</span>
-   
+    
+    <span class="c1"># Transform multiple slashes</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)):</span>
+        <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;////&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;///&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    
     <span class="c1">#print(__name__ + f&#39;.glob_expand_files: Final files: {files}&#39;)</span>
         
     <span class="k">return</span> <span class="n">files</span></div>
