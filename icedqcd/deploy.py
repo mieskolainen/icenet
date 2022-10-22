@@ -233,7 +233,7 @@ def process_data(args):
                             output = func_predict(XX)
                                      
                             ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
-                            ALL_scores[ID_label] = output
+                            ALL_scores[io.rootsafe(ID_label)] = output
                     else:
 
                         # Variable normalization
@@ -257,8 +257,8 @@ def process_data(args):
                         # ----------------------------
 
                         # Predict
-                        ALL_scores[ID] = func_predict(XX)
-
+                        ALL_scores[io.rootsafe(ID)] = func_predict(XX)
+                        
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
 
