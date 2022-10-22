@@ -231,11 +231,11 @@ def process_data(args):
 
                             # Predict
                             output = func_predict(XX)
-                                                        
-                            ID_label = f'{ID}-m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+                                     
+                            ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
                             ALL_scores[ID_label] = output
                     else:
-                        
+
                         # Variable normalization
                         XX = copy.deepcopy(X)
                         XX = zscore_normalization(XX)
@@ -258,14 +258,14 @@ def process_data(args):
 
                         # Predict
                         ALL_scores[ID] = func_predict(XX)
-                        
+
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
 
                 else:
                     # if param['predict'] == 'torch_graph': # Turned off for now
                     #   scores = func_predict(data['graph'])
-                    
+
                     # Write to log-file
                     logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
                     continue
