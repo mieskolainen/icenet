@@ -176,7 +176,7 @@ def process_data(args):
 
             if len(X) == 0:
                 print(__name__ + f".deploy: No events left after pre-cuts -- skipping file")
-                
+
                 # Write to log-file
                 logging.debug(f'No events left after pre-cuts -- skipping file')
                 continue
@@ -281,7 +281,7 @@ def process_data(args):
             
             print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
 
-            with uproot.recreate(outputfile, compression=uproot.ZLIB(9)) as rfile:
+            with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 rfile[f"Events"] = ALL_scores
 
         # Write to log-file
