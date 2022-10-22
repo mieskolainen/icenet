@@ -279,7 +279,7 @@ def process_data(args):
             print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
 
             with uproot.recreate(outputfile, compression=uproot.ZLIB(9)) as rfile:
-                rfile[f"Events"] = {'icenet': ALL_scores}
+                rfile[f"Events"] = uproot.newtree(ALL_scores)
         
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
