@@ -35,7 +35,7 @@ def generate_cartesian_param(ids):
 
     Note. Keep the order m, ctau, xiO, xiL
     """
-    
+
     values    = {'m':    np.round(np.array([2.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
                  'ctau': np.round(np.array([10, 25, 50, 75, 100, 250, 500]), 1),
                  'xiO':  np.round(np.array([1.0, 2.5]), 1),
@@ -101,8 +101,8 @@ def process_data(args):
     VARS += MVA_JAGGED_VARS
     VARS += MVA_PF_VARS
 
-    basepath = f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}"
-
+    basepath = aux.makedir(f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}")
+    
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
