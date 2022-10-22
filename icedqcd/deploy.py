@@ -36,10 +36,10 @@ def generate_cartesian_param(ids):
     Note. Keep the order m, ctau, xiO, xiL
     """
 
-    values    = {'m':    np.round(np.array([2.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
-                 'ctau': np.round(np.array([10, 25, 50, 75, 100, 250, 500]), 1),
-                 'xiO':  np.round(np.array([1.0, 2.5]), 1),
-                 'xiL':  np.round(np.array([1.0, 2.5]), 1)}
+    values    = {'m':    np.round(np.array([2.0, 5.0, 10.0, 15.0, 20.0]), 1),
+                 'ctau': np.round(np.array([10, 50, 100, 500]), 1),
+                 'xiO':  np.round(np.array([1.0]), 1),
+                 'xiL':  np.round(np.array([1.0]), 1)}
 
     CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
 
@@ -102,7 +102,7 @@ def process_data(args):
     VARS += MVA_PF_VARS
 
     basepath = aux.makedir(f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}")
-    
+
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
@@ -188,97 +188,99 @@ def process_data(args):
             
             # ------------------
             # Phase 4: Apply MVA-models
+            
+            ALL_scores = {}
 
-            outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
-            outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
+            for i in range(len(args['active_models'])):
+                
+                ID    = args['active_models'][i]
+                param = args['models'][ID]
+                
+                if param['predict'] == 'xgb':
 
-            with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
+                    print(f'Evaluating MVA-model "{ID}" \n')
 
-                for i in range(len(args['active_models'])):
-                    
-                    ID    = args['active_models'][i]
-                    param = args['models'][ID]
-                    
-                    if param['predict'] == 'xgb':
+                    # Impute data
+                    if args['imputation_param']['active']:
+                        imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
+                        data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
 
-                        print(f'Evaluating MVA-model "{ID}" \n')
+                    ## Apply the input variable set reductor
+                    X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
 
-                        # Impute data
-                        if args['imputation_param']['active']:
-                            imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
-                            data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
+                    ## Get the MVA-model
+                    func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
-                        ## Apply the input variable set reductor
-                        X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
+                    ## Conditional model
+                    if args['use_conditional']:
 
-                        ## Get the MVA-model
-                        func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
+                        ## Get conditional parameters
+                        CAX,pindex = generate_cartesian_param(ids=ids)
 
-                        ## Conditional model
-                        if args['use_conditional']:
+                        ## Run the MVA-model on all the theory model points in CAX array
+                        scores = {}
+                        for z in tqdm(range(len(CAX))):
 
-                            ## Get conditional parameters
-                            CAX,pindex = generate_cartesian_param(ids=ids)
-
-                            ## Run the MVA-model on all the theory model points in CAX array
-                            scores = {}
-                            for z in tqdm(range(len(CAX))):
-
-                                # Set the new conditional model parameters to X
-                                XX            = copy.deepcopy(X)
-                                nval          = CAX[z,:]
-                                XX[:, pindex] = nval  # Set new values
-
-                                # Variable normalization
-                                XX = zscore_normalization(X=XX, args=args)
-
-                                # Predict
-                                output = func_predict(XX)
-                                                            
-                                label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
-                                scores[label] = output
-                        else:
+                            # Set the new conditional model parameters to X
+                            XX            = copy.deepcopy(X)
+                            nval          = CAX[z,:]
+                            XX[:, pindex] = nval  # Set new values
 
                             # Variable normalization
-                            XX = copy.deepcopy(X)
-                            XX = zscore_normalization(XX)
-
-                            # ----------------------------
-                            # Import SHAP
-                            
-                            """
-                            explainer   = shap.Explainer(model, feature_names=ids)
-                            maxEvent    = 3
-                            shap_values = explainer(XX[0:maxEvent,:])
-                            
-                            # Visualize the SHAP value explanation
-                            for n in range(len(shap_values)):
-                                shap.plots.waterfall(shap_values[i], max_display=30)
-                                plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
-                                plt.close()
-                            """
-                            # ----------------------------
+                            XX = zscore_normalization(X=XX, args=args)
 
                             # Predict
-                            scores = func_predict(XX)
+                            output = func_predict(XX)
+                                                        
+                            label = f'm_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+                            scores[label] = output
+                    else:
 
-                        # ------------------
-                        # Phase 5: Write MVA-scores out
+                        # Variable normalization
+                        XX = copy.deepcopy(X)
+                        XX = zscore_normalization(XX)
 
-                        print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
-                        rfile[f"Events"] = {f"{ID}": scores}
+                        # ----------------------------
+                        # Import SHAP
+                        
+                        """
+                        explainer   = shap.Explainer(model, feature_names=ids)
+                        maxEvent    = 3
+                        shap_values = explainer(XX[0:maxEvent,:])
+                        
+                        # Visualize the SHAP value explanation
+                        for n in range(len(shap_values)):
+                            shap.plots.waterfall(shap_values[i], max_display=30)
+                            plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
+                            plt.close()
+                        """
+                        # ----------------------------
+
+                        # Predict
+                        ALL_scores[ID] = func_predict(XX)
 
                         # Write to log-file
                         logging.debug(f'Evaluated scores of model: {ID}')
 
-                    else:
-                        # if param['predict'] == 'torch_graph': # Turned off for now
-                        #   scores = func_predict(data['graph'])
+                else:
+                    # if param['predict'] == 'torch_graph': # Turned off for now
+                    #   scores = func_predict(data['graph'])
 
-                        # Write to log-file
-                        logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
-                        continue
+                    # Write to log-file
+                    logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
+                    continue
 
+            # ------------------
+            # Phase 5: Write MVA-scores out
+
+            outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
+            outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
+            
+            print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
+
+            with uproot.recreate(outputfile, compression=uproot.ZLIB(9)) as rfile:
+                rfile[f"Events"] = ALL_scores
+        
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
 
