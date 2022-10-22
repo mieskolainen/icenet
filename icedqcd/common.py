@@ -146,7 +146,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     if return_mask == False:
         return X_final, ids, stats
     else:
-        fmask[fmask == True] = cmask
+        fmask[fmask] = cmask # cmask is evaluated for which fmask == True
         return fmask
 
 
