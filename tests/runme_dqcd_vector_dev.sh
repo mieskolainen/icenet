@@ -26,7 +26,7 @@ ulimit -v unlimited
 python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
 
 # Vector
-python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[150-200]'
+python configs/dqcd/include/ymlgen.py --process 'vector'     --filerange '[150-2000]'
 
 python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH
 python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

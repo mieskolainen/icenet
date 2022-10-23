@@ -26,7 +26,7 @@ ulimit -v unlimited
 python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
 
 # Darkphoton
-python configs/dqcd/include/ymlgen.py --process 'darkphoton' --filerange '[150-200]'
+python configs/dqcd/include/ymlgen.py --process 'darkphoton' --filerange '[150-2000]'
 
 python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH
 python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__darkphoton_all.yml --modeltag darkphoton_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
