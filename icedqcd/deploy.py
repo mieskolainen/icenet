@@ -35,7 +35,7 @@ def generate_cartesian_param(ids):
 
     Note. Keep the order m, ctau, xiO, xiL
     """
-    
+
     values    = {'m':    np.round(np.array([2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
                  'ctau': np.round(np.array([10, 25, 50, 75, 100, 250, 500]), 1),
                  'xiO':  np.round(np.array([1.0, 2.5]), 1),
@@ -171,15 +171,15 @@ def process_data(args):
             # ------------------
             # Phase 2: Apply pre-selections to get an event mask
 
-            mask     = common.process_root(X=X_nocut, args=args, return_mask=True)
-            X        = X_nocut[mask]
-
-            if len(X) == 0:
-                print(__name__ + f".deploy: No events left after pre-cuts -- skipping file")
-
-                # Write to log-file
-                logging.debug(f'No events left after pre-cuts -- skipping file')
-                continue
+            mask = common.process_root(X=X_nocut, args=args, return_mask=True)
+            
+            if len(X_nocut[mask]) == 0:
+                X        = X_nocut
+                logging.debug("No events left after pre-cuts -- scores will be -1 for all events")
+                OK_event = False
+            else:
+                X        = X_nocut[mask]
+                OK_event = True
             
             # ------------------
             # Phase 3: Convert to icenet dataformat
@@ -224,46 +224,56 @@ def process_data(args):
                         for z in tqdm(range(len(CAX))):
 
                             # Set the new conditional model parameters to X
-                            XX            = copy.deepcopy(X)
                             nval          = CAX[z,:]
-                            XX[:, pindex] = nval  # Set new values
+                            ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+
+                            if OK_event:
+                                XX            = copy.deepcopy(X)
+                                XX[:, pindex] = nval  # Set new values
+
+                                # Variable normalization
+                                XX = zscore_normalization(X=XX, args=args)
+
+                                # Predict
+                                pred = func_predict(XX)
+                                pred = aux.unmask(x=pred, mask=mask, default_value=-1)
+                            else:
+                                pred = (-1) * np.ones(len(mask)) # all -1
+
+                            # Save
+                            ALL_scores[io.rootsafe(ID_label)] = pred
+
+                    else:
+
+                        if OK_event:
 
                             # Variable normalization
+                            XX = copy.deepcopy(X)
                             XX = zscore_normalization(X=XX, args=args)
 
                             # Predict
                             pred = func_predict(XX)
+                            pred = aux.unmask(x=pred, mask=mask, default_value=-1)
+
+                            # ----------------------------
+                            # Import SHAP
                             
-                            ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
-                            ALL_scores[io.rootsafe(ID_label)] = aux.unmask(x=pred, mask=mask, default_value=-1)
-                    else:
+                            """
+                            explainer   = shap.Explainer(model, feature_names=ids)
+                            maxEvent    = 3
+                            shap_values = explainer(XX[0:maxEvent,:])
+                            
+                            # Visualize the SHAP value explanation
+                            for n in range(len(shap_values)):
+                                shap.plots.waterfall(shap_values[i], max_display=30)
+                                plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
+                                plt.close()
+                            """                            
+                        else:
+                            pred = (-1) * np.ones(len(mask)) # all -1
 
-                        # Variable normalization
-                        XX = copy.deepcopy(X)
-                        XX = zscore_normalization(XX)
-
-                        # ----------------------------
-                        # Import SHAP
-                        
-                        """
-                        explainer   = shap.Explainer(model, feature_names=ids)
-                        maxEvent    = 3
-                        shap_values = explainer(XX[0:maxEvent,:])
-                        
-                        # Visualize the SHAP value explanation
-                        for n in range(len(shap_values)):
-                            shap.plots.waterfall(shap_values[i], max_display=30)
-                            plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
-                            plt.close()
-                        """
-                        # ----------------------------
-
-                        # Predict
-                        pred = func_predict(XX)
-                        ALL_scores[io.rootsafe(ID)] = aux.unmask(x=pred, mask=mask, default_value=-1)
-
-                        # Write to log-file
-                        logging.debug(f'Evaluated scores of model: {ID}')
+                        # Save
+                        ALL_scores[io.rootsafe(ID)] = pred
 
                 else:
                     # if param['predict'] == 'torch_graph': # Turned off for now
@@ -272,7 +282,7 @@ def process_data(args):
                     # Write to log-file
                     logging.debug(f'Did not evaluate model (unsupported deployment): {ID}')
                     continue
-
+            
             # ------------------
             # Phase 5: Write MVA-scores out
 
