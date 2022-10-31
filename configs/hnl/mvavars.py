@@ -1,9 +1,9 @@
 
+# Generator level variables
 KINEMATIC_GEN_VARS = [
-
 ]
 
-# Variables to plot along
+# Variables to plot etc.
 KINEMATIC_VARS = [
   'tagger_score',
   'hnlJet_nominal_llpdnnx_ratio_LLP_Q',
@@ -73,8 +73,6 @@ MI_VARS = [
   'tagger_score'
 ]
 
-#PLOT_VARS = [
-#]
 
 # Variables we read out from the root files (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']

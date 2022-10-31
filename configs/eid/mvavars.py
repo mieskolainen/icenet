@@ -1,3 +1,8 @@
+# Generator level variables
+KINEMATIC_GEN_VARS = [
+]
+
+# For plots etc.
 KINEMATIC_VARS = [
   'trk_pt',
   'trk_eta',

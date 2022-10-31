@@ -126,7 +126,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     fmask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
     
-    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=CUT_VARS, library='ak')
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
     
@@ -136,7 +136,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     cmask = CUTFUNC(X=X_new, xcorr_flow=args['xcorr_flow'])
     stats['cutfunc'] = {'before': len(X_new), 'after': sum(cmask)}
     
-    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS, library='ak')
+    #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=CUT_VARS, library='ak')
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
     io.showmem()

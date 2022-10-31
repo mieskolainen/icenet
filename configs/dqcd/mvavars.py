@@ -34,16 +34,11 @@ TRIGGER_VARS = [
 # ---------------------------------------------------------
 # For plots etc.
 
-PLOT_VARS = [
+KINEMATIC_VARS = [
   'nJet',
   'nMuon',
   'nsv',
-  
-  'ChsMET_phi',
-  'ChsMET_pt'
-]
 
-KINEMATIC_VARS = [
   'ChsMET_phi',
   'ChsMET_pt',
   'ChsMET_sumEt'
@@ -233,7 +228,6 @@ MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_SV_VARS + MVA_PF_VARS
 LOAD_VARS = []
 
 LOAD_VARS += TRIGGER_VARS
-LOAD_VARS += PLOT_VARS
 LOAD_VARS += KINEMATIC_VARS
 LOAD_VARS += KINEMATIC_GEN_VARS
 

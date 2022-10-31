@@ -205,7 +205,7 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, maxeve
     """
     # @@ Filtering done here @@
     mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<filter>_{isMC}', varlist=CUT_VARS)
     cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(mask)} events ', 'green')
     
     X   = X[mask]
@@ -213,7 +213,7 @@ def process_root(rootfile, tree, load_ids, isMC, entry_start, entry_stop, maxeve
     
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
-    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=PLOT_VARS)
+    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f'<cutfunc>_{isMC}', varlist=CUT_VARS)
     cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>: before: {len(X)}, after: {sum(mask)} events \n", 'green')
 
     X   = X[mask]

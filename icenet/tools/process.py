@@ -758,17 +758,24 @@ def evaluate_models(data=None, info=None, args=None):
         ## Set feature indices for simple cut classifiers
         args['features'] = data['data'].ids
 
-        X        = copy.deepcopy(data['data'].x)
-        ids      = data['data'].ids
+        X       = copy.deepcopy(data['data'].x)
+        ids     = copy.deepcopy(data['data'].ids)
 
-        X_RAW    = data['data'].x
-        ids_RAW  = data['data'].ids
+        # These will be left untouched by e.g. z-score normalization
+        X_RAW   = copy.deepcopy(data['data'].x)
+        ids_RAW = copy.deepcopy(data['data'].ids)
 
-        # Add extra variables
+        # Add extra variables to the end if not already there
+        # (certain plotting routines pull them from X_RAW)
         if data['data_kin'] is not None:
-            X_RAW    = np.concatenate([X_RAW, data['data_kin'].x], axis=1)
-            ids_RAW  = ids_RAW + data['data_kin'].ids
-
+            for var in data['data_kin'].ids:
+                
+                if var not in ids_RAW:
+                    ids_RAW = ids_RAW + [var]
+                    
+                    index   = np.where(np.isin(data['data_kin'].ids, var))[0]
+                    X_RAW   = np.concatenate([X_RAW, data['data_kin'].x[:,index]], axis=1)
+        
         y        = data['data'].y
         weights  = data['data'].w
 

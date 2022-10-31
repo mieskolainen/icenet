@@ -1,8 +1,10 @@
 # MVA variables. Use here only variables available in real data.
 
+# Generator level variables
+KINEMATIC_GEN_VARS = [
+]
 
-# Use these to test that the (re-weight trained) classifier
-# is independent of these
+# For plots etc.
 KINEMATIC_VARS = [
 
 ]
