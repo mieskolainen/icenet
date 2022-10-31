@@ -29,7 +29,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.8.0
+                0.0.8.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -1191,17 +1191,24 @@
         <span class="c1">## Set feature indices for simple cut classifiers</span>
         <span class="n">args</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span>
 
-        <span class="n">X</span>        <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">ids</span>      <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span>
+        <span class="n">X</span>       <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ids</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
 
-        <span class="n">X_RAW</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">ids_RAW</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span>
+        <span class="c1"># These will be left untouched by e.g. z-score normalization</span>
+        <span class="n">X_RAW</span>   <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ids_RAW</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
 
-        <span class="c1"># Add extra variables</span>
+        <span class="c1"># Add extra variables to the end if not already there</span>
+        <span class="c1"># (certain plotting routines pull them from X_RAW)</span>
         <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">X_RAW</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">ids_RAW</span>  <span class="o">=</span> <span class="n">ids_RAW</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span>
-
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ids_RAW</span><span class="p">:</span>
+                    <span class="n">ids_RAW</span> <span class="o">=</span> <span class="n">ids_RAW</span> <span class="o">+</span> <span class="p">[</span><span class="n">var</span><span class="p">]</span>
+                    
+                    <span class="n">index</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">var</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">X_RAW</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data_kin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="n">index</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
         <span class="n">y</span>        <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">y</span>
         <span class="n">weights</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">w</span>
 

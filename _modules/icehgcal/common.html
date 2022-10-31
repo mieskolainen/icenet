@@ -29,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.8.0
+                0.0.8.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -638,7 +638,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # @@ Filtering done here @@</span>
 <span class="sd">    mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
-<span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;filter&gt;_{isMC}&#39;, varlist=PLOT_VARS)</span>
+<span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;filter&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
 <span class="sd">    cprint(__name__ + f&#39;.process_root: isMC = {isMC} | &lt;filterfunc&gt; before: {len(X)}, after: {sum(mask)} events &#39;, &#39;green&#39;)</span>
 <span class="sd">    </span>
 <span class="sd">    X   = X[mask]</span>
@@ -646,7 +646,7 @@
 <span class="sd">    </span>
 <span class="sd">    # @@ Observable cut selections done here @@</span>
 <span class="sd">    mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
-<span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;cutfunc&gt;_{isMC}&#39;, varlist=PLOT_VARS)</span>
+<span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;cutfunc&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
 <span class="sd">    cprint(__name__ + f&quot;.process_root: isMC = {isMC} | &lt;cutfunc&gt;: before: {len(X)}, after: {sum(mask)} events \n&quot;, &#39;green&#39;)</span>
 
 <span class="sd">    X   = X[mask]</span>
