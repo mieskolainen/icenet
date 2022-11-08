@@ -145,7 +145,6 @@ def raytune_main(param, loss_func=None, inputs={}, num_samples=20, max_num_epoch
     return optimal_param
 """
 
-
 def TH1_to_numpy(hist):
     """
     Convert TH1 (ROOT) histogram to numpy array
@@ -156,15 +155,40 @@ def TH1_to_numpy(hist):
 
     #for n, v in hist.__dict__.items(): # class generated on the fly
     #   print(f'{n} {v}')
-
+    
     hh         = hist.to_numpy()
     counts     = np.array(hist.values())
     errors     = np.array(hist.errors())
-
+    
     bin_edges  = np.array(hh[1])
     bin_center = np.array((bin_edges[1:] + bin_edges[:-1]) / 2)
-
+    
     return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
+
+
+def voigt_FWHM(gamma, sigma):
+    """
+    Full width at half-maximum (FWHM) of a Voigtian function
+    (Voigtian == a convolution integral between Lorentzian and Gaussian)
+    
+    Args:
+        gamma: Lorentzian (non-relativistic Breit-Wigner) parameter (half width!)
+        sigma: Gaussian distribution parameter
+    Returns:
+        full width at half-maximum
+    
+    See: Olivero, J. J.; R. L. Longbothum (1977).
+        "Empirical fits to the Voigt line width: A brief review"
+    
+        https://en.wikipedia.org/wiki/Voigt_profile
+    """
+    
+    # Full widths at half-maximum for Gaussian and Lorentzian
+    G = 2*sigma*np.sqrt(2*np.log(2))
+    L = 2*gamma
+
+    # Approximate result
+    return 0.5346*L + np.sqrt(0.2166*L**2 + G**2)
 
 
 def gauss_pdf(x, par, norm=True):

@@ -111,7 +111,7 @@ def vector(outputfile, filerange='*'):
   rp['ctau']      = ['[10, 25]', '[25, 75]', '[75, 250]', '[250, 500]'] 
   rp['xi_pair']   = [['1', '1']]
   rp['xi2str']    = {'1': '1'}
-
+  
   param = {
     'outputfile':      outputfile,
     'rp':              rp,
