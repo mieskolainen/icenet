@@ -347,5 +347,5 @@ class vec4:
         self._x = self.px + aux2*betaX
         self._y = self.py + aux2*betaY
         self._z = self.pz + aux2*betaZ
-        self._e = gamma*(self.e + aux1)
+        self._t = gamma*(self.e + aux1)
 
