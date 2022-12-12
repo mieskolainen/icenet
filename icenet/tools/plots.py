@@ -932,12 +932,13 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
         ax.set_title(title, fontsize=10)
 
+        # Legend
+        if len(metrics) > 12:
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
+        else:
+            plt.legend(loc='lower right', fontsize=legend_fontsize)
+        
         if k == 0: # Linear-Linear
-
-            if len(metrics) > 12:
-                plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
-            else:
-                plt.legend(loc='lower right', fontsize=legend_fontsize)
 
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
@@ -948,8 +949,6 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
             plt.savefig(filename + '.pdf', bbox_inches='tight')
 
         if k == 1: # Log-Linear
-
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
 
             plt.ylim(0.0, 1.0)
             plt.xlim(xmin, 1.0)
