@@ -16,7 +16,7 @@ from termcolor import colored, cprint
 import os
 import copy
 import sys
-import _pickle as pickle # Fast C-version
+import pickle
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
