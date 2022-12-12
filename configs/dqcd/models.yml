@@ -567,8 +567,8 @@ gnet2:
   # Model
   model_param:
     task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'mean'
-    z_dim: 196                  # Convolution output dimension
+    global_pool: 'attention'   # 'attention', 'mean', 'max' etc
+    z_dim: 196                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'

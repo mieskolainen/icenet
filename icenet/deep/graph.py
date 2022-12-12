@@ -308,14 +308,14 @@ class GNNGeneric(torch.nn.Module):
 
         # SuperEdgeConv,   https://arxiv.org/abs/xyz
         if   conv_type == 'SuperEdgeConv':
-            self.conv1 = SuperEdgeConv(aggr=conv_aggr,
-                nn=MLP_ALL_ACT([2 * self.d_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
+            self.conv1 = SuperEdgeConv(aggr=conv_aggr, mp_attn_dim=self.z_dim,
+                nn=MLP_ALL_ACT([3 * self.d_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
                 nn_final=MLP_ALL_ACT([self.z_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout))
-            self.conv2 = SuperEdgeConv(aggr=conv_aggr,
-                nn=MLP_ALL_ACT([2 * self.z_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
+            self.conv2 = SuperEdgeConv(aggr=conv_aggr, mp_attn_dim=self.z_dim,
+                nn=MLP_ALL_ACT([3 * self.z_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
                 nn_final=MLP_ALL_ACT([self.z_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout))
-            self.conv3 = SuperEdgeConv(aggr=conv_aggr,
-                nn=MLP_ALL_ACT([2 * self.z_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
+            self.conv3 = SuperEdgeConv(aggr=conv_aggr, mp_attn_dim=self.z_dim,
+                nn=MLP_ALL_ACT([3 * self.z_dim + self.e_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout),
                 nn_final=MLP_ALL_ACT([self.z_dim, self.z_dim], activation=conv_MLP_act, batch_norm=conv_MLP_bn, dropout=conv_MLP_dropout))
             
             self.lin1  = MLP_ALL_ACT([3*self.z_dim, self.z_dim],
