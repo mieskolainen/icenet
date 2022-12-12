@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.8.1
+                0.0.8.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -219,6 +219,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.score">icefit.score</a><ul>
@@ -422,8 +423,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>icefit</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">icefit</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/modules/icefit.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -1349,6 +1350,29 @@ cov_arr  : Covariance matrix</p>
 <dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_tagprobe">
 <span class="sig-name descname"><span class="pre">run_jpsi_tagprobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tune0.yml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./output/peakfit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_tagprobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_tagprobe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tag &amp; Probe efficiency (&amp; scale factors)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.voigt_FWHM">
+<span class="sig-name descname"><span class="pre">voigt_FWHM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#voigt_FWHM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.voigt_FWHM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full width at half-maximum (FWHM) of a Voigtian function
+(Voigtian == a convolution integral between Lorentzian and Gaussian)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma</strong> – Lorentzian (non-relativistic Breit-Wigner) parameter (half width!)</p></li>
+<li><p><strong>sigma</strong> – Gaussian distribution parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>full width at half-maximum</p>
+</dd>
+</dl>
+<dl>
+<dt>See: Olivero, J. J.; R. L. Longbothum (1977).</dt><dd><p>“Empirical fits to the Voigt line width: A brief review”</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Voigt_profile">https://en.wikipedia.org/wiki/Voigt_profile</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

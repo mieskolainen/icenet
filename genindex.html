@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.8.1
+                0.0.8.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -216,6 +216,7 @@
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="modules/icefit.html#module-icefit.score">icefit.score</a><ul>
@@ -419,8 +420,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Index</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -1784,10 +1785,12 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/icenet.html#icenet.deep.graph.GNNGeneric.NNConv_">NNConv_() (GNNGeneric method)</a>
+      <li><a href="modules/icenet.html#icenet.deep.graph.SuperEdgeConv.nn_final">nn_final (SuperEdgeConv attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/icenet.html#icenet.deep.graph.GNNGeneric.NNConv_">NNConv_() (GNNGeneric method)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.aux.number_of_set_bits">number_of_set_bits() (in module icenet.tools.aux)</a>
 </li>
   </ul></td>
@@ -2052,10 +2055,10 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.iceroot.read_multiple_MC">read_multiple_MC() (in module icenet.tools.iceroot)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icefit.html#icefit.peakfit.read_yaml_input">read_yaml_input() (in module icefit.peakfit)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.tools.aux.red">red() (in module icenet.tools.aux)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.optim.scheduler.ReduceLROnPlateau">ReduceLROnPlateau (class in icenet.optim.scheduler)</a>
@@ -2063,6 +2066,8 @@
       <li><a href="modules/icenet.html#icenet.tools.io.fastarray1.reset">reset() (fastarray1 method)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.gcnn.GCN_layer.reset_param">reset_param() (GCN_layer method)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.deep.graph.SuperEdgeConv.reset_parameters">reset_parameters() (SuperEdgeConv method)</a>
 </li>
       <li><a href="modules/icemc.html#icemc.icemc.resonance_generator">resonance_generator() (in module icemc.icemc)</a>
 </li>
@@ -2148,8 +2153,12 @@
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.showmem">showmem() (in module icenet.tools.io)</a>
 </li>
+      <li><a href="modules/icenet.html#icenet.tools.io.showmem_cuda">showmem_cuda() (in module icenet.tools.io)</a>
+</li>
       <li><a href="modules/icenet.html#icenet.tools.aux.slice_range">slice_range() (in module icenet.tools.aux)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icenet.html#icenet.deep.cnn.CNN.softpredict">softpredict() (CNN method)</a>
 
       <ul>
@@ -2168,8 +2177,6 @@
         <li><a href="modules/icenet.html#icenet.deep.vae.VAE.softpredict">(VAE method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icemc.html#icemc.icemc.spherical_acceptance">spherical_acceptance() (in module icemc.icemc)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.deep.graph.GNNGeneric.SplineConv_">SplineConv_() (GNNGeneric method)</a>
@@ -2441,6 +2448,8 @@
       <li><a href="modules/icenet.html#icenet.deep.vae.VariationalEncoder">VariationalEncoder (class in icenet.deep.vae)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.icevec.vec4">vec4 (class in icenet.tools.icevec)</a>
+</li>
+      <li><a href="modules/icefit.html#icefit.peakfit.voigt_FWHM">voigt_FWHM() (in module icefit.peakfit)</a>
 </li>
   </ul></td>
 </tr></table>

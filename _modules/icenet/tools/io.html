@@ -29,7 +29,7 @@
             <a href="../../../index.html" class="icon icon-home"> icenet
           </a>
               <div class="version">
-                0.0.8.1
+                0.0.8.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -216,6 +216,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.score">icefit.score</a><ul>
@@ -419,9 +420,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>icenet.tools.io</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">icenet.tools.io</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -607,7 +608,10 @@
 
 
 <div class="viewcode-block" id="showmem"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.showmem">[docs]</a><span class="k">def</span> <span class="nf">showmem</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">):</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.showmem: Process RAM usage: </span><span class="si">{</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB [total RAM in use </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span></div>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;.showmem: Process RAM: </span><span class="si">{</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB [total RAM in use </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %]&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="showmem_cuda"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.showmem_cuda">[docs]</a><span class="k">def</span> <span class="nf">showmem_cuda</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">):</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.showmem_cuda: Process RAM: </span><span class="si">{</span><span class="n">process_memory_use</span><span class="p">()</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB [total RAM in use </span><span class="si">{</span><span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> %] | VRAM usage: </span><span class="si">{</span><span class="n">get_gpu_memory_map</span><span class="p">()</span><span class="si">}</span><span class="s2"> GB [total VRAM </span><span class="si">{</span><span class="n">torch_cuda_total_memory</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> GB]&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_gpu_memory_map"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.get_gpu_memory_map">[docs]</a><span class="k">def</span> <span class="nf">get_gpu_memory_map</span><span class="p">():</span>
