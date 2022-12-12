@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from   torch.nn import Sequential, Linear, ReLU, Dropout, BatchNorm1d
+import torch_geometric
 
 from   typing import Union, Tuple, Callable
 from   torch_geometric.typing import OptTensor, OptPairTensor, Adj, Size
@@ -304,7 +305,7 @@ class GNNGeneric(torch.nn.Module):
         self.DA_MLP_act     = DA_MLP_act
         self.DA_MLP_bn      = DA_MLP_bn
         self.DA_MLP_dropout = DA_MLP_dropout
-        
+
         # SuperEdgeConv,   https://arxiv.org/abs/xyz
         if   conv_type == 'SuperEdgeConv':
             self.conv1 = SuperEdgeConv(aggr=conv_aggr,
