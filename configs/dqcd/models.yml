@@ -567,16 +567,16 @@ gnet2:
   # Model
   model_param:
     task: 'graph'              # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
-    global_pool: 'attention'   # 'attention', 'mean', 'max' etc
+    global_pool: 'mean'        # 'mean', 'max' etc
     z_dim: 196                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
     conv_MLP_dropout: 0.01
-    conv_aggr: 'max'
+    conv_aggr: 'attention'     # 'mean', 'max', 'attention' (for SuperEdgeConv)
     conv_knn: 8
-
+    
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
     fusion_MLP_dropout: 0.01
