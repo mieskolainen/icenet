@@ -16,7 +16,7 @@ from termcolor import colored, cprint
 import os
 import copy
 import sys
-import pickle
+import _pickle as pickle # Fast C-version
 import xgboost
 from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
@@ -283,6 +283,9 @@ def read_data(args, func_loader, runmode):
 
     cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash__"]}')
     
+    # Disable garbage collector for speed
+    gc.disable()
+
     if args['__use_cache__'] == False or (not os.path.exists(f'{cache_directory}/output_0.pkl')):
 
         if runmode != "genesis":
@@ -300,7 +303,7 @@ def read_data(args, func_loader, runmode):
 
         cprint(__name__ + f'.read_data: Saving to path: "{cache_directory}"', 'yellow')
         C = get_chunk_ind(N=len(X))
-
+        
         for i in tqdm(range(len(C))):
             with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
                 pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
@@ -329,7 +332,8 @@ def read_data(args, func_loader, runmode):
                     
                 #cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
                 #pprint(genesis_args)
-
+    gc.enable()
+        
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
@@ -349,13 +353,19 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
         data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data_processed: Saving to file: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Saving to a file: "{cache_filename}"', 'yellow')
+            # Disable garbage collector for speed
+            gc.disable()
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            gc.enable()
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data_processed: Loading from file: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Loading from a file: "{cache_filename}"', 'yellow')
+            # Disable garbage collector for speed
+            gc.disable()
             data = pickle.load(handle)
-        
+            gc.enable()
+
     return data
 
 

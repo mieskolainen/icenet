@@ -128,13 +128,13 @@ train_runmode:
   models:  !include configs/dqcd/models.yml
   active_models: &ACTIVE_MODELS
     
-    - xgb0
-    - xgb0-no-mass
-    - xgb0-only-mu
-    
-    #- gnet1
-    #- gnet2
+    - gnet2
+    - gnet1
     #- gnet3
+    
+    - xgb0
+    #- xgb0-no-mass
+    #- xgb0-only-mu
     
     #- dmlp
     #- lgr0
@@ -149,10 +149,10 @@ train_runmode:
     #- dmx1
     
     #- exp
-    - cut0
-    - cut1
-    - cut2
-    - cutset0
+    #- cut0
+    #- cut1
+    #- cut2
+    #- cutset0
   
   raytune: !include configs/dqcd/raytune.yml
 

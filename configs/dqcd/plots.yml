@@ -32,12 +32,12 @@ FILTER: &FILTER
 
 
 basic:
-  active: true
+  active: false
   nbins:  70
   exclude_vals: [null, -999.0]
 
 corrmat:
-  active: true
+  active: false
 
 contours:
   active: false

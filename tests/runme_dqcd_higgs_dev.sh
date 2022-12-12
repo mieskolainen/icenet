@@ -15,9 +15,8 @@ CONDITIONAL=1
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Set system memory limits
-ulimit -s unlimited
-ulimit -l unlimited
-ulimit -v unlimited
+ulimit -s unlimited # stack
+ulimit -v unlimited # virtual memory
 
 # Use * or other glob wildcards for filenames
 # tee redirect output to both a file and to screen

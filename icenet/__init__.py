@@ -6,9 +6,9 @@ import icenet.tools
 from datetime import datetime
 import socket
 
-__version__    = '0.0.8.1'
+__version__    = '0.0.8.2'
 __release__    = 'alpha'
-__date__       = '31/10/2022'
+__date__       = '12/12/2022'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \
