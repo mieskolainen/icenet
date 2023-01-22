@@ -1,36 +1,74 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>icenet.tools.aux &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../../../index.html" class="icon icon-home"> icenet
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 0.0.8.2
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -38,7 +76,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
@@ -407,30 +456,69 @@
 </li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">icenet</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">icenet.tools.aux</li>
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>icenet.tools.aux</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <h1>Source code for icenet.tools.aux</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Auxialary functions</span>
 <span class="c1"># </span>
@@ -466,7 +554,7 @@
 
 
 <div class="viewcode-block" id="unmask"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.unmask">[docs]</a><span class="k">def</span> <span class="nf">unmask</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unmasking function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">default_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
@@ -475,7 +563,7 @@
 
 
 <div class="viewcode-block" id="cartesian_product"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.cartesian_product">[docs]</a><span class="k">def</span> <span class="nf">cartesian_product</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    N-dimensional generalized cartesian product between arrays</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -494,7 +582,7 @@
 
 
 <div class="viewcode-block" id="slice_range"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.slice_range">[docs]</a><span class="k">def</span> <span class="nf">slice_range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Python slice type processor function</span>
 
 <span class="sd">    Args:</span>
@@ -524,7 +612,7 @@
 
 
 <div class="viewcode-block" id="red"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.red">[docs]</a><span class="k">def</span> <span class="nf">red</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_tag</span><span class="o">=</span><span class="s1">&#39;exclude_MVA_vars&#39;</span><span class="p">,</span> <span class="n">include_tag</span><span class="o">=</span><span class="s1">&#39;include_MVA_vars&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -566,7 +654,7 @@
 
 
 <div class="viewcode-block" id="unroll_ak_fields"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.unroll_ak_fields">[docs]</a><span class="k">def</span> <span class="nf">unroll_ak_fields</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unroll field names in a (nested) awkward array</span>
 
 <span class="sd">    Args:</span>
@@ -597,7 +685,7 @@
 
 
 <div class="viewcode-block" id="process_regexp_ids"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.process_regexp_ids">[docs]</a><span class="k">def</span> <span class="nf">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process regular expressions for variable names</span>
 
 <span class="sd">    Args:</span>
@@ -630,7 +718,7 @@
 
 
 <div class="viewcode-block" id="parse_vars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.parse_vars">[docs]</a><span class="k">def</span> <span class="nf">parse_vars</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parse a series of key-value pairs and return a dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
@@ -643,7 +731,7 @@
 
 
 <div class="viewcode-block" id="ak2numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.ak2numpy">[docs]</a><span class="k">def</span> <span class="nf">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">999.0</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unzip awkward array to numpy array per column (awkward Record)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -659,7 +747,7 @@
 
 
 <div class="viewcode-block" id="jagged_ak_to_numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform jagged awkward array to fixed dimensional numpy data</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -709,7 +797,7 @@
 
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span>
     <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -795,7 +883,7 @@
 
 
 <div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
 <span class="sd">        ids        : all variable names</span>
@@ -825,7 +913,7 @@
 
 
 <div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Array representation summed to matrix.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -854,7 +942,7 @@
 
 
 <div class="viewcode-block" id="x2ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.x2ind">[docs]</a><span class="k">def</span> <span class="nf">x2ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">binedges</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Return histogram bin indices for data in x, which needs to be an array [].</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return histogram bin indices for data in x, which needs to be an array [].</span>
 <span class="sd">    Args:</span>
 <span class="sd">        x:        data to be classified between bin edges</span>
 <span class="sd">        binedges: histogram bin edges</span>
@@ -877,7 +965,7 @@
 
 
 <div class="viewcode-block" id="makedir"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.makedir">[docs]</a><span class="k">def</span> <span class="nf">makedir</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="n">exist_ok</span><span class="p">)</span>
@@ -885,7 +973,7 @@
 
 
 <div class="viewcode-block" id="split"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generator which returns approx equally sized chunks.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        a : Total number</span>
@@ -897,7 +985,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">):(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="split_size"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_size">[docs]</a><span class="k">def</span> <span class="nf">split_size</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    As split_start_end() but returns only size per chunk</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ll</span>  <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
@@ -906,7 +994,7 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="explicit_range"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.explicit_range">[docs]</a><span class="k">def</span> <span class="nf">explicit_range</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">num_entries</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clean None from entry_start and entry_stop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">entry_start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">entry_start</span>
@@ -915,7 +1003,7 @@
     <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span></div>
 
 <div class="viewcode-block" id="split_start_end"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.split_start_end">[docs]</a><span class="k">def</span> <span class="nf">split_start_end</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">end_plus</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns approx equally sized chunks.</span>
 
 <span class="sd">    Args:</span>
@@ -937,7 +1025,7 @@
 
 
 <div class="viewcode-block" id="count_targets"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.count_targets">[docs]</a><span class="k">def</span> <span class="nf">count_targets</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Targets statistics printout</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Targets statistics printout</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        events :     uproot object</span>
@@ -962,13 +1050,13 @@
     <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
     
     <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="longvec2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.longvec2matrix">[docs]</a><span class="k">def</span> <span class="nf">longvec2matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A matrix representation / dimension converter function</span>
 <span class="sd">    useful e.g. for DeepSets and similar neural architectures.</span>
 <span class="sd">    </span>
@@ -991,7 +1079,7 @@
 
 <div class="viewcode-block" id="number_of_set_bits"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.number_of_set_bits">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">number_of_set_bits</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Return how many bits are active of an integer in a standard binary representation.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return how many bits are active of an integer in a standard binary representation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="p">((</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x55555555</span><span class="p">)</span>
     <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mh">0x33333333</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x33333333</span><span class="p">)</span>
@@ -1000,7 +1088,7 @@
 
 <div class="viewcode-block" id="binvec_are_equal"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binvec_are_equal">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">binvec_are_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Compare equality of two binary vectors a and b.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Compare equality of two binary vectors a and b.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        a,b : binary vectors</span>
@@ -1015,7 +1103,7 @@
 
 <div class="viewcode-block" id="binvec2powersetindex"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binvec2powersetindex">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">binvec2powersetindex</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Binary vector to powerset index.</span>
 
 <span class="sd">    Args:</span>
@@ -1038,7 +1126,7 @@
 
 
 <div class="viewcode-block" id="to_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.to_graph">[docs]</a><span class="k">def</span> <span class="nf">to_graph</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Turn the list into a graph.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Turn the list into a graph.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
@@ -1050,7 +1138,7 @@
 
 
 <div class="viewcode-block" id="to_edges"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.to_edges">[docs]</a><span class="k">def</span> <span class="nf">to_edges</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; treat `l` as a Graph and returns it&#39;s edges </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; treat `l` as a Graph and returns it&#39;s edges </span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        to_edges([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]) -&gt; [(a,b), (b,c),(c,d)]</span>
@@ -1064,7 +1152,7 @@
 
 
 <div class="viewcode-block" id="merge_connected"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.merge_connected">[docs]</a><span class="k">def</span> <span class="nf">merge_connected</span><span class="p">(</span><span class="n">lists</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Merge sets with common elements (find connected graphs problem).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Merge sets with common elements (find connected graphs problem).</span>
 <span class="sd">    </span>
 <span class="sd">    Examples:</span>
 <span class="sd">        Input:  [{0, 1}, {0, 1}, {2, 3}, {2, 3}, {4, 5}, {4, 5}, {6, 7}, {6, 7}, {8, 9}, {8, 9}, {10}, {11}]</span>
@@ -1095,7 +1183,7 @@
 
 
 <div class="viewcode-block" id="los2lol"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.los2lol">[docs]</a><span class="k">def</span> <span class="nf">los2lol</span><span class="p">(</span><span class="n">listOsets</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Convert a list of sets [{},{},..,{}] to a list of of lists [[], [], ..., []].</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Convert a list of sets [{},{},..,{}] to a list of of lists [[], [], ..., []].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">lists</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">listOsets</span><span class="p">:</span>
@@ -1104,19 +1192,19 @@
 
 
 <div class="viewcode-block" id="bin_array"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.bin_array">[docs]</a><span class="k">def</span> <span class="nf">bin_array</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Convert a positive integer num into an N-bit bit vector.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Convert a positive integer num into an N-bit bit vector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">binary_repr</span><span class="p">(</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">N</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="binomial"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binomial">[docs]</a><span class="k">def</span> <span class="nf">binomial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Binomial coefficient C(n,k).  </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Binomial coefficient C(n,k).  </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">k</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="generatebinary_fixed"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.generatebinary_fixed">[docs]</a><span class="k">def</span> <span class="nf">generatebinary_fixed</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Generate all combinations of n bits with fixed k ones.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Generate all combinations of n bits with fixed k ones.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Initialize</span>
@@ -1150,7 +1238,7 @@
 
 
 <div class="viewcode-block" id="generatebinary"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.generatebinary">[docs]</a><span class="k">def</span> <span class="nf">generatebinary</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Function to generate all 2**N binary vectors (as boolean matrix rows)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to generate all 2**N binary vectors (as boolean matrix rows)</span>
 <span class="sd">        with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1184,7 +1272,7 @@
 
 
 <div class="viewcode-block" id="bin2int"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.bin2int">[docs]</a><span class="k">def</span> <span class="nf">bin2int</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Binary vector to integer.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Binary vector to integer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">base</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">63</span><span class="p">:</span> <span class="c1"># Doubles for large number of bits</span>
@@ -1194,7 +1282,7 @@
 
 
 <div class="viewcode-block" id="binom_coeff_all"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binom_coeff_all">[docs]</a><span class="k">def</span> <span class="nf">binom_coeff_all</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">MAX</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Sum all all binomial coefficients up to MAX.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Sum all all binomial coefficients up to MAX.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">MAX</span><span class="p">)</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1206,7 +1294,7 @@
 
 
 <div class="viewcode-block" id="binaryvec2int"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.binaryvec2int">[docs]</a><span class="k">def</span> <span class="nf">binaryvec2int</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Turn a matrix of binary vectors row-by-row into integer reps.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Turn a matrix of binary vectors row-by-row into integer reps.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">63</span><span class="p">:</span>
@@ -1221,7 +1309,7 @@
 
 
 <div class="viewcode-block" id="int2onehot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.int2onehot">[docs]</a><span class="k">def</span> <span class="nf">int2onehot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Integer class vector to class &quot;one-hot encoding&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Integer class vector to class &quot;one-hot encoding&quot;</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        Y:         Class indices (# samples)</span>
@@ -1238,13 +1326,13 @@
 
 <div class="viewcode-block" id="deltaphi"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.deltaphi">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">deltaphi</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Deltaphi measure. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Deltaphi measure. &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">phi1</span> <span class="o">-</span> <span class="n">phi2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
 
 
 <div class="viewcode-block" id="deltar"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.deltar">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">deltar</span><span class="p">(</span><span class="n">eta1</span><span class="p">,</span><span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; DeltaR measure. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; DeltaR measure. &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">eta1</span> <span class="o">-</span> <span class="n">eta2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaphi</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
@@ -1267,7 +1355,7 @@
 
 
 <div class="viewcode-block" id="pick_ind"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.pick_ind">[docs]</a><span class="k">def</span> <span class="nf">pick_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">minmax</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Return indices between minmax[0] &lt;= x &lt; minmax[1], i.e. [a,b)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return indices between minmax[0] &lt;= x &lt; minmax[1], i.e. [a,b)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        x :      Input vector</span>
@@ -1279,7 +1367,7 @@
 
 
 <div class="viewcode-block" id="multiclass_roc_auc_score"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.multiclass_roc_auc_score">[docs]</a><span class="k">def</span> <span class="nf">multiclass_roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Multiclass AUC (area under the curve).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Multiclass AUC (area under the curve).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_true : True classifications</span>
@@ -1300,12 +1388,12 @@
 
 
 <div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Classifier performance evaluation metrics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">valrange</span><span class="o">=</span><span class="s1">&#39;prob&#39;</span><span class="p">,</span>
         <span class="n">N_mva_bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_bootstrap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            y_true     : true classifications</span>
 <span class="sd">            y_pred     : predicted probabilities per class (N x 1), (N x 2) or (N x K) dimensional array</span>
@@ -1347,7 +1435,7 @@
             <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         
         <span class="c1"># Check numerical validity</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        if (np.squeeze(y_pred).ndim &gt; 1):</span>
 <span class="sd">            ok = np.isfinite(np.sum(y_pred,axis=1))</span>
 <span class="sd">        else:</span>
@@ -1413,14 +1501,15 @@
 
                 <span class="c1"># ------------------</span>
                 <span class="n">trials</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">max_trials</span> <span class="o">=</span> <span class="mi">10000</span>
                 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">trials</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span> <span class="c1"># Protection with very low per class stats</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">trials</span> <span class="o">&gt;</span> <span class="n">max_trials</span><span class="p">:</span> <span class="c1"># Protection with very low per class stats</span>
                         <span class="k">break</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">trials</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: bootstrap fail (check your input statistics)&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">trials</span> <span class="o">&gt;</span> <span class="n">max_trials</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: bootstrap fail with num_classes &lt; 2 (check the input per class statistics)&#39;</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="c1"># ------------------</span>
 
@@ -1450,6 +1539,12 @@
     <span class="n">tpr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">thresholds</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
+    <span class="c1"># Fix NaN</span>
+    <span class="n">num_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">num_nan</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_metrics: Found </span><span class="si">{</span><span class="n">num_nan</span><span class="si">}</span><span class="s1"> NaN/Inf (set to zero)&#39;</span><span class="p">)</span>
+        <span class="n">y_pred</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Set to zero</span>
+    
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span>  <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_curve</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_score</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -1460,37 +1555,55 @@
             <span class="n">auc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span>  <span class="n">y_score</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
                         <span class="n">average</span><span class="o">=</span><span class="s2">&quot;weighted&quot;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovo&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_classes</span><span class="p">))</span>
             <span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_metrics: Unable to compute ROC-metrics (check the input statistics)&#39;</span><span class="p">)</span>
-    
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_metrics: Unable to compute ROC-metrics: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;num_class[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;fpr&#39;</span><span class="p">:</span> <span class="n">fpr</span><span class="p">,</span> <span class="s1">&#39;tpr&#39;</span><span class="p">:</span> <span class="n">tpr</span><span class="p">,</span> <span class="s1">&#39;thresholds&#39;</span><span class="p">:</span> <span class="n">thresholds</span><span class="p">,</span> <span class="s1">&#39;auc&#39;</span><span class="p">:</span> <span class="n">auc</span><span class="p">,</span> <span class="s1">&#39;acc&#39;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span></div>
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
-  </div>
+    <p>
+        &#169; Copyright 2023, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

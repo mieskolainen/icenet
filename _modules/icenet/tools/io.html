@@ -1,36 +1,74 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>icenet.tools.io &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../../../index.html" class="icon icon-home"> icenet
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 0.0.8.2
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -38,7 +76,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
@@ -407,30 +456,69 @@
 </li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">icenet</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">icenet.tools.io</li>
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>icenet.tools.io</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <h1>Source code for icenet.tools.io</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Input data containers and memory management</span>
 <span class="c1"># </span>
@@ -469,13 +557,13 @@
 
 
 <div class="viewcode-block" id="rootsafe"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.rootsafe">[docs]</a><span class="k">def</span> <span class="nf">rootsafe</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Change character due to ROOT</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">txt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="safetxt"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.safetxt">[docs]</a><span class="k">def</span> <span class="nf">safetxt</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Protection for &#39;/&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
@@ -484,13 +572,13 @@
         <span class="k">return</span> <span class="n">txt</span></div>
 
 <div class="viewcode-block" id="count_files_in_dir"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.count_files_in_dir">[docs]</a><span class="k">def</span> <span class="nf">count_files_in_dir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count the number of files in a path</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">))])</span></div>
 
 <div class="viewcode-block" id="make_hash_sha256_file"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.make_hash_sha256_file">[docs]</a><span class="k">def</span> <span class="nf">make_hash_sha256_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create SHA256 hash from a file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">h</span>  <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
@@ -502,7 +590,7 @@
     <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="make_hash_sha256_object"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.make_hash_sha256_object">[docs]</a><span class="k">def</span> <span class="nf">make_hash_sha256_object</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create SHA256 hash from an object</span>
 
 <span class="sd">    Args:</span>
@@ -524,7 +612,7 @@
 
 
 <div class="viewcode-block" id="make_hashable"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.make_hashable">[docs]</a><span class="k">def</span> <span class="nf">make_hashable</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Turn a python object into hashable type (recursively)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
@@ -540,7 +628,7 @@
 
 
 <div class="viewcode-block" id="glob_expand_files"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.glob_expand_files">[docs]</a><span class="k">def</span> <span class="nf">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">recursive_glob</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Do global / brace expansion of files</span>
 
 <span class="sd">    Args:</span>
@@ -615,7 +703,7 @@
 
 
 <div class="viewcode-block" id="get_gpu_memory_map"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.get_gpu_memory_map">[docs]</a><span class="k">def</span> <span class="nf">get_gpu_memory_map</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Get the GPU VRAM use in GB.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the GPU VRAM use in GB.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary with keys as device ids [integers]</span>
@@ -634,14 +722,14 @@
 
 
 <div class="viewcode-block" id="torch_cuda_total_memory"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.torch_cuda_total_memory">[docs]</a><span class="k">def</span> <span class="nf">torch_cuda_total_memory</span><span class="p">(</span><span class="n">device</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return CUDA device VRAM available in GB.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_properties</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">total_memory</span> <span class="o">/</span> <span class="mf">1024.0</span><span class="o">**</span><span class="mi">3</span></div>
 
 
 <div class="viewcode-block" id="process_memory_use"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.process_memory_use">[docs]</a><span class="k">def</span> <span class="nf">process_memory_use</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return system memory (RAM) used by the process in GB.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
@@ -650,7 +738,7 @@
 
 
 <div class="viewcode-block" id="checkinfnan"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.checkinfnan">[docs]</a><span class="k">def</span> <span class="nf">checkinfnan</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Check inf and Nan values and replace with a default value.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Check inf and Nan values and replace with a default value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">inf_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">nan_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -666,7 +754,7 @@
 
 
 <div class="viewcode-block" id="fastarray1"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.fastarray1">[docs]</a><span class="k">class</span> <span class="nc">fastarray1</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; 1D pre-memory occupied buffer arrays for histogramming etc.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; 1D pre-memory occupied buffer arrays for histogramming etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span> <span class="o">=</span> <span class="mi">32</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
@@ -703,7 +791,7 @@
 
 
 <div class="viewcode-block" id="pick_vars"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.pick_vars">[docs]</a><span class="k">def</span> <span class="nf">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">set_of_vars</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Choose the active set of input variables.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Choose the active set of input variables.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data:        IceXYW type object</span>
@@ -723,7 +811,7 @@
 
 
 <div class="viewcode-block" id="IceXYW"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.IceXYW">[docs]</a><span class="k">class</span> <span class="nc">IceXYW</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        x : data object</span>
 <span class="sd">        y : target output data</span>
@@ -799,7 +887,7 @@
 
 
 <div class="viewcode-block" id="split_data_simple"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data_simple">[docs]</a><span class="k">def</span> <span class="nf">split_data_simple</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Split machine learning data into train, validation, test sets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Split machine learning data into train, validation, test sets</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X:         data as a list of event objects (such as torch geometric Data)</span>
@@ -830,7 +918,7 @@
 
 
 <div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Split machine learning data into train, validation, test sets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Split machine learning data into train, validation, test sets</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X:         data matrix</span>
@@ -896,7 +984,7 @@
 
 
 <div class="viewcode-block" id="impute_data"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.impute_data">[docs]</a><span class="k">def</span> <span class="nf">impute_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">999</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;iterative&#39;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">knn_k</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Data imputation (treatment of missing values, Nan and Inf).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Data imputation (treatment of missing values, Nan and Inf).</span>
 <span class="sd">    </span>
 <span class="sd">    NOTE: This function can impute only fixed dimensional input currently (not Jagged numpy arrays)</span>
 <span class="sd">    </span>
@@ -980,7 +1068,7 @@
 
 
 <div class="viewcode-block" id="calc_madscore"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.calc_madscore">[docs]</a><span class="k">def</span> <span class="nf">calc_madscore</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Calculate robust normalization.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate robust normalization.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        X : Input with [# vectors x # dimensions]</span>
@@ -1006,7 +1094,7 @@
     <span class="k">return</span> <span class="n">X_m</span><span class="p">,</span> <span class="n">X_mad</span></div>
 
 <div class="viewcode-block" id="calc_zscore_tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.calc_zscore_tensor">[docs]</a><span class="k">def</span> <span class="nf">calc_zscore_tensor</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute z-score normalization for tensors.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        T : input tensor data (events x channels x rows x cols, ...)</span>
@@ -1021,7 +1109,7 @@
     <span class="k">return</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span></div>
 
 <div class="viewcode-block" id="apply_zscore_tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.apply_zscore_tensor">[docs]</a><span class="k">def</span> <span class="nf">apply_zscore_tensor</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply z-score normalization for tensors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
@@ -1033,7 +1121,7 @@
     <span class="k">return</span> <span class="n">Y</span></div>
 
 <div class="viewcode-block" id="calc_zscore"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.calc_zscore">[docs]</a><span class="k">def</span> <span class="nf">calc_zscore</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Calculate 0-mean &amp; unit-variance normalization.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate 0-mean &amp; unit-variance normalization.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        X : Input with [# vectors x # dimensions]</span>
@@ -1062,7 +1150,7 @@
 
 <div class="viewcode-block" id="apply_zscore"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.apply_zscore">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">apply_zscore</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Z-score normalization</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Z-score normalization</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1073,7 +1161,7 @@
 
 <div class="viewcode-block" id="apply_madscore"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.apply_madscore">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">apply_madscore</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">X_m</span><span class="p">,</span> <span class="n">X_mad</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; MAD-score normalization</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; MAD-score normalization</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1084,30 +1172,46 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
-  </div>
+    <p>
+        &#169; Copyright 2023, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

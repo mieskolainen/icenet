@@ -1,36 +1,74 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>icebrk.cutstats &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../../index.html" class="icon icon-home"> icenet
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 0.0.8.2
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -38,7 +76,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a><ul>
@@ -407,30 +456,69 @@
 </li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">icenet</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">icebrk.cutstats</li>
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>icebrk.cutstats</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <h1>Source code for icebrk.cutstats</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Cuts and statistics objects for B/RK analyzer (protocode)</span>
 <span class="c1">#</span>
@@ -443,7 +531,7 @@
 
 
 <div class="viewcode-block" id="apply_cuts"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.apply_cuts">[docs]</a><span class="k">def</span> <span class="nf">apply_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Selection cuts function.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Selection cuts function.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        d:</span>
@@ -455,7 +543,7 @@
 <span class="sd">	</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-	<span class="sd">&#39;&#39;&#39;</span>
+<span class="w">	</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">	if (d[&#39;nSV&#39;][evt_index] != 1):</span>
 <span class="sd">		cutflow[&#39;nSV != 2&#39;] += 1</span>
 <span class="sd">		return False</span>
@@ -465,13 +553,13 @@
 
 
 <div class="viewcode-block" id="triplet_cuts"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.triplet_cuts">[docs]</a><span class="k">def</span> <span class="nf">triplet_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Triplet cuts &quot;&quot;&quot;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Triplet cuts &quot;&quot;&quot;</span>
 
 	<span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="collect_info_stats"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_info_stats">[docs]</a><span class="k">def</span> <span class="nf">collect_info_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Collect event information.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Collect event information.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        d:</span>
@@ -490,7 +578,7 @@
 
 
 <div class="viewcode-block" id="collect_mcinfo_stats"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats">[docs]</a><span class="k">def</span> <span class="nf">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Collect MC only information.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Collect MC only information.</span>
 <span class="sd">	</span>
 <span class="sd">    Args:</span>
 
@@ -505,7 +593,7 @@
 
 
 <div class="viewcode-block" id="init_stat_objects"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.init_stat_objects">[docs]</a><span class="k">def</span> <span class="nf">init_stat_objects</span><span class="p">():</span>
-	<span class="sd">&quot;&quot;&quot;Initialize cutflow and statistics objects.</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;Initialize cutflow and statistics objects.</span>
 
 <span class="sd">    Args:</span>
 
@@ -532,30 +620,46 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
-  </div>
+    <p>
+        &#169; Copyright 2023, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
