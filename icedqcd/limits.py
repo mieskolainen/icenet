@@ -21,7 +21,7 @@ sys.path.append(".")
 from icenet.tools import aux,io
 from icefit import lognormal
 from icefit.peakfit import TH1_to_numpy
-from icefit.dev_icelimit import *
+from icefit.icelimit import *
 
 brazil_green  = np.array([0, 245, 34]) / 255
 brazil_yellow = np.array([245, 245, 56]) / 255
