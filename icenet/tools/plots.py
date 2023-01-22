@@ -933,7 +933,7 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
         ax.set_title(title, fontsize=10)
 
         # Legend
-        if len(metrics) > 12:
+        if len(metrics) > 12: # Put outside the figure
             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
         else:
             plt.legend(loc='lower right', fontsize=legend_fontsize)

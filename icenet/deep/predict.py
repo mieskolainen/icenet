@@ -135,7 +135,7 @@ def pred_graph_xgb(args, param, device='cpu'):
     return func_predict
 
 def pred_torch_graph(args, param, batch_size=5000, return_model=False):
-
+    
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = optimize.model_to_cuda(model, device_type=param['device'])

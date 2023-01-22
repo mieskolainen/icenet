@@ -979,14 +979,15 @@ class Metric:
 
                 # ------------------
                 trials = 0
+                max_trials = 10000
                 while True:
                     ind = np.random.choice(range(len(y_true)), size=len(y_true), replace=True)
-                    if len(np.unique(y_true[ind])) > 1 or trials > 100: # Protection with very low per class stats
+                    if len(np.unique(y_true[ind])) > 1 or trials > max_trials: # Protection with very low per class stats
                         break
                     else:
                         trials += 1
-                if trials > 100:
-                    print(__name__ + f'.Metric: bootstrap fail (check your input statistics)')
+                if trials > max_trials:
+                    print(__name__ + f'.Metric: bootstrap fail with num_classes < 2 (check the input per class statistics)')
                     continue
                 # ------------------
 
@@ -1016,6 +1017,12 @@ def compute_metrics(num_classes, y_true, y_pred, weights):
     tpr = -1
     thresholds = -1
 
+    # Fix NaN
+    num_nan = np.sum(~np.isfinite(y_pred))
+    if num_nan > 0:
+        print(__name__ + f'.compute_metrics: Found {num_nan} NaN/Inf (set to zero)')
+        y_pred[~np.isfinite(y_pred)] = 0 # Set to zero
+    
     try:
         if  num_classes == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
@@ -1026,7 +1033,9 @@ def compute_metrics(num_classes, y_true, y_pred, weights):
             auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=None, \
                         average="weighted", multi_class='ovo', labels=np.arange(num_classes))
             acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
-    except:
-        print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics (check the input statistics)')
-    
+    except Exception as e:
+        print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics: {e}')
+        for i in range(num_classes):
+            print(f'num_class[{i}] = {np.sum(y_true == i)}')
+
     return {'fpr': fpr, 'tpr': tpr, 'thresholds': thresholds, 'auc': auc, 'acc': acc}

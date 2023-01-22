@@ -128,8 +128,8 @@ train_runmode:
   models:  !include configs/dqcd/models.yml
   active_models: &ACTIVE_MODELS
     
-    - gnet2
-    - gnet1
+    #- gnet2
+    #- gnet1
     #- gnet3
     
     - xgb0
