@@ -1245,7 +1245,7 @@ def group_systematics(inputfile):
             print(hyperbin)
             for SYST in p['param']['systematics']:
                 print(f"{d[hyperbin][SYST]['scale']:0.4f} +- {d[hyperbin][SYST]['scale_err']:0.4f} \t ({SYST})")
-
+        
         ## Save collected results
         path = './output/peakfit'
         if not os.path.exists(path):
