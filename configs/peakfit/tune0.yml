@@ -7,10 +7,16 @@
 # Tips: One can simplify the model by settings some parameters to
 # their "symmetric" (e.g. 0) values and fixing those.
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
-path:     '/home/user/fitdata/flat/muon/generalTracks/JPsi'
-fitrange: [2.91, 3.29] # GeV
+path:     '/home/user/hnl_systematics_23/flat/muon/generalTracks/JPsi'
+years:    [2016, 2017, 2018]
+
+fitrange: [2.85, 3.35] # Nominal fit window (GeV)
+
+# List of systematic variations active
+systematics: ['DEFAULT', 'SYMMETRIC-SIGNAL', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+
 
 fit:
 
@@ -30,8 +36,8 @@ fit:
     # aRBW_param = par[0],par[4],par[5]        ~ J/Psi resonance ~ [initial state pdf x form factor x breit-wigner]
     
     p_name:   ['M0', 'sigma', 'n', 'alpha', 'Gamma', 'asym']
-    p_start:  [3.097, 0.02, 1.001, 1.3, 1.0e-4, -0.01]
-    p_limit:  [[3.085, 3.1], [0.01, 0.05], [1.001, 2.0], [0.1, 2.0], [9.32e-5, 0.05], [-10.0, 10.0]]
+    p_start:  [3.097, 0.02, 1.001, 5.0, 1.0e-4, -0.01]
+    p_limit:  [[3.085, 3.12], [0.01, 0.05], [1.001, 10.0], [0.001, 10.0], [9.32e-5, 0.05], [-3.0, 3.0]]
     p_fixed:  [False, False, False, False, False, False]
     
   B:
@@ -56,20 +62,21 @@ fit:
 
 # Fit algorithm parameters
 techno:
-  losstype: 'nll'              # 'chi2' or 'nll'
-  use_limits: True             # Use parameter bounds
-  zerobin: 1.0e-2              # Minimum number of counts in a valid bin
+  losstype: 'nll'               # 'chi2' or 'nll'
+  use_limits: True              # Use parameter bounds
+  zerobin: 1.0e-2               # Minimum number of counts in a valid bin
   
-  # Use at least 10k iterations (otherwise can get stuck in bad local minima)
+  # Use enough calls / iterations (otherwise can get stuck in bad local minima)
   
-  ncall_simplex_scipy: 10000   # Number of scipy search calls
-  ncall_scan:     1000         # Number of brute force scan calls
-  ncall_simplex:  20000        # Number of Nelder-Mead simplex search calls
-  ncall_gradient: 10000        # Number of Minuit gradient search calls
+  ncall_scipy_simplex: 0           # Number of scipy search calls
+  ncall_mystic_diffev2:     1      # Number of Mystic solver calls
+  ncall_mystic_fmin_powell: 1      # Number of Mystic solver calls
+
+  ncall_minuit_scan:     0         # Number of brute force 1D-scan calls
+  ncall_minuit_simplex:  0         # Number of Nelder-Mead simplex search calls
+  ncall_minuit_gradient: 10000     # Number of Minuit gradient search calls
   
-  
-  hesse: True       # Minuit HESSE uncertainties
-  minos: False      # Minuit MINOS uncertainties
+  minos: True       # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
 
   max_chi2: 1200    # Maximum chi2/ndf for a succesful fit
   min_count: 5      # Minimum number of entries in the histogram

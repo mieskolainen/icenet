@@ -9,10 +9,9 @@
 #   without proper normalization can result in wrong yield uncertainties,
 #   to remark.
 # 
+# Run with: python icefit/peakfit.py --analyze --group
 # 
-# pytest icefit/peakfit.py -rP
-# 
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 
@@ -37,10 +36,15 @@ import pickle
 import iminuit
 import matplotlib.pyplot as plt
 import uproot
+import pytest
+from termcolor import cprint
 
 from scipy import interpolate
 import scipy.special as special
 import scipy.integrate as integrate
+
+from os import listdir
+from os.path import isfile, join
 
 # iceplot
 import sys
@@ -57,7 +61,7 @@ from numpy.random import default_rng
 """
 # Raytune
 from ray import tune
-from ray.tune.search.hyperopt import HyperOptSearch
+from ray.tune.suggest.hyperopt import HyperOptSearch
 from ray.tune import CLIReporter
 from ray.tune.schedulers import ASHAScheduler
 from functools import partial
@@ -145,6 +149,7 @@ def raytune_main(param, loss_func=None, inputs={}, num_samples=20, max_num_epoch
     return optimal_param
 """
 
+
 def TH1_to_numpy(hist):
     """
     Convert TH1 (ROOT) histogram to numpy array
@@ -155,16 +160,15 @@ def TH1_to_numpy(hist):
 
     #for n, v in hist.__dict__.items(): # class generated on the fly
     #   print(f'{n} {v}')
-    
+
     hh         = hist.to_numpy()
     counts     = np.array(hist.values())
     errors     = np.array(hist.errors())
-    
+
     bin_edges  = np.array(hh[1])
     bin_center = np.array((bin_edges[1:] + bin_edges[:-1]) / 2)
-    
-    return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
+    return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
 def voigt_FWHM(gamma, sigma):
     """
@@ -190,7 +194,6 @@ def voigt_FWHM(gamma, sigma):
     # Approximate result
     return 0.5346*L + np.sqrt(0.2166*L**2 + G**2)
 
-
 def gauss_pdf(x, par, norm=True):
     """
     Normal (Gaussian) density
@@ -206,7 +209,7 @@ def gauss_pdf(x, par, norm=True):
     return y
 
 
-def CB_pdf(x, par, norm=True):
+def CB_pdf(x, par, norm=True, EPS=1E-12):
     """
     https://en.wikipedia.org/wiki/Crystal_Ball_function
 
@@ -218,12 +221,14 @@ def CB_pdf(x, par, norm=True):
     """
 
     mu, sigma, n, alpha = par
-    abs_a = np.abs(alpha) # Protect floats
+
+    # Protect float
+    abs_a = np.abs(alpha)
 
     A = (n / abs_a)**n * np.exp(-0.5 * abs_a**2)
     B =  n / abs_a - abs_a
 
-    C = (n / abs_a) * (1 / (n-1)) * np.exp(-0.5 * abs_a**2)
+    C = (n / abs_a) * (1 / np.max([n-1, EPS])) * np.exp(-0.5 * abs_a**2)
     D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))
     N =  1 / (sigma * (C + D))
 
@@ -231,10 +236,10 @@ def CB_pdf(x, par, norm=True):
     y = np.zeros(len(x))
 
     for i in range(len(y)):
-        if (x[i] - mu)/sigma > -alpha:
-            y[i] = N * np.exp(-(x[i] - mu)**2 / (2*sigma**2))
+        if (x[i] - mu)/np.max([sigma,EPS]) > -alpha:
+            y[i] = N * np.exp(-(x[i] - mu)**2 / np.max([2*sigma**2, EPS]))
         else:
-            y[i] = N * A*(B - (x[i] - mu)/sigma)**(-n)
+            y[i] = N * A * (B - (x[i] - mu)/np.max([sigma, EPS]))**(-n)
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
@@ -440,9 +445,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             max_trials:     Maximum number of restarts
             max_chi2:       Maximum chi2/ndf threshold for restarts
             min_count:      Minimum number of histogram counts
-            
-            hesse:          Hesse uncertainties
-            minos:          Minos uncertainties
+            minos:          Minos uncertainties if True, Hesse if False
     """
 
     # -------------------------------------------------------------------------------
@@ -455,7 +458,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     cbins  = h['bin_center']
 
     # Limit the fit range
-    fit_range_ind = (cbins >= param['fitrange'][0]) & (cbins <= param['fitrange'][1])
+    fit_range_ind = (param['fitrange'][0] <= cbins) & (cbins <= param['fitrange'][1])
 
     # Extract out
     losstype = techno['losstype']
@@ -512,41 +515,61 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         else:
             start_values = param['start_values'] + np.random.rand(len(param['start_values']))
 
+        # ------------------------------------------------------------
+        # Nelder-Mead search from scipy
+        if techno['ncall_scipy_simplex'] > 0:
+            from scipy.optimize import minimize
+            options = {'maxiter': techno['ncall_scipy_simplex'], 'disp': True}
 
+            res = minimize(loss, x0=start_values, method='nelder-mead', \
+                bounds=param['limits'] if techno['use_limits'] else None, options=options)
+            start_values = res.x
 
         # ------------------------------------------------------------
-        # Nelder-Mead search
-        from scipy.optimize import minimize
-        options = {'maxiter': techno['ncall_simplex_scipy'], 'disp': True}
+        # Mystic solver
+        
+        # Set search range limits
+        bounds = []
+        for i in range(len(param['limits'])):
+            bounds.append(param['limits'][i])
 
-        res = minimize(loss, x0=start_values, method='nelder-mead', \
-            bounds=param['limits'] if techno['use_limits'] else None, options=options)
-        print(res)
-        start_values = res.x
+        # Differential evolution 2 solver
+        if techno['ncall_mystic_diffev2'] > 0:
 
+            from mystic.solvers import diffev2
+            x0 = start_values
+            start_values = diffev2(loss, x0=x0, bounds=bounds)
+            cprint(f'Mystic diffev2 solution: {start_values}', 'green')
+
+        # Fmin-Powell solver
+        if techno['ncall_mystic_fmin_powell'] > 0:
+
+            from mystic.solvers import fmin_powell
+            x0 = start_values
+            start_values = fmin_powell(loss, x0=x0, bounds=bounds)
+            cprint(f'Mystic fmin_powell solution: {start_values}', 'green')
 
         # --------------------------------------------------------------------
-        # Now reset fixed values
+        # Set fixed parameter values, if True
         for k in range(len(param['fixed'])):
             if param['fixed'][k]:
                 start_values[k] = param['start_values'][k]
-        # --------------------------------------------------------------------
 
+        # --------------------------------------------------------------------
         ## Initialize Minuit
         m1 = iminuit.Minuit(loss, start_values, name=param['name'])
 
-        # Fix parameters 
+        # Fix parameters (minuit allows parameter fixing)
         for k in range(len(param['fixed'])):
             m1.fixed[k] = param['fixed'][k]
         # --------------------------------------------------------------------
         
-
         if   techno['losstype'] == 'chi2':
             m1.errordef = iminuit.Minuit.LEAST_SQUARES
         elif techno['losstype'] == 'nll':
             m1.errordef = iminuit.Minuit.LIKELIHOOD
 
-
+        # Set parameter bounds
         if techno['use_limits']:
             m1.limits   = param['limits']
 
@@ -554,15 +577,16 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         m1.strategy = techno['strategy']
         m1.tol      = techno['tol']
         
-        # Brute force 1D-scan per dimension
-        m1.scan(ncall=techno['ncall_scan'])
-        print(m1.fmin)
+        # Minuit Brute force 1D-scan per dimension
+        if techno['ncall_minuit_scan'] > 0:
+            m1.scan(ncall=techno['ncall_minuit_scan'])
+            print(m1.fmin)
         
-        # Simplex (Nelder-Mead search)
-        m1.simplex(ncall=techno['ncall_simplex'])
-        print(m1.fmin)
+        # Minuit Simplex (Nelder-Mead search)
+        if techno['ncall_minuit_simplex'] > 0:
+            m1.simplex(ncall=techno['ncall_minuit_simplex'])
+            print(m1.fmin)
         
-
         # --------------------------------------------------------------------
         # Raytune
         """
@@ -576,20 +600,21 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         """
         # --------------------------------------------------------------------
 
-        # Gradient search
-        m1.migrad(ncall=techno['ncall_gradient'])
+        # Minuit Gradient search
+        m1.migrad(ncall=techno['ncall_minuit_gradient'])
         print(m1.fmin)
-
-        # Finalize with error analysis [migrad << hesse << minos (best)]
-        if techno['hesse']:
-            m1.hesse()
-
+        
+        # Finalize with stat. uncertainty analysis [migrad << hesse << minos (best)]
         if techno['minos']:
             try:
+                print(f'binned_1D_fit: Computing MINOS stat. uncertainties')
                 m1.minos()
             except:
-                print(f'binned_1D_fit: Error occured with MINOS uncertainty estimation, trying HESSE')
+                cprint(f'binned_1D_fit: Error occured with MINOS stat. uncertainty estimation, trying HESSE', 'red')
                 m1.hesse()
+        else:
+            print('binned_1D_fit: Computing HESSE stat. uncertainties')
+            m1.hesse()
 
         ### Output
         par     = m1.values
@@ -610,20 +635,20 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     print(f'Covariance: {cov}')
 
     if cov is None:
-        print('binned_1D_fit: Uncertainty estimation failed!')
+        cprint('binned_1D_fit: Uncertainty estimation failed (covariance non-positive definite), using Poisson errors!', 'red')
         cov = -1 * np.ones((len(par), len(par)))
 
     if np.sum(counts[fit_range_ind]) < techno['min_count']:
-        print(f'binned_1D_fit: Input histogram count < min_count = {techno["min_count"]} ==> fit not realistic')
+        cprint(f'binned_1D_fit: Input histogram count < min_count = {techno["min_count"]} ==> fit not realistic', 'red')
         if techno['set_to_nan']:
-            print('--> Setting parameters to NaN')
+            cprint('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
     if (chi2 / ndof) > techno['max_chi2']:
-        print(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesful')
+        cprint(f'binned_1D_fit: chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesful', 'red')
         if techno['set_to_nan']:
-            print('--> Setting parameters to NaN')
+            cprint('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
@@ -878,15 +903,18 @@ def read_yaml_input(inputfile):
 
     # Total fit function as a linear (incoherent) superposition
     def fitfunc(x, par):
-        y = 0
+        y   = 0
+        par = np.array(par) # Make sure it is numpy array
         for key in w_pind.keys():
             y += par[w_pind[key]] * cfunc[key](x=x, par=par[p_pind[key]], **args[key])
         return y
 
     # Finally collect all
     param  = {'path':         steer['path'],
+              'years':        steer['years'],
+              'systematics':  steer['systematics'],
               'start_values': start_values,
-              'limits':       limits,
+              'limits':       limits, 
               'fixed':        fixed,
               'name':         name,
               'fitrange':     steer['fitrange'],
@@ -895,6 +923,7 @@ def read_yaml_input(inputfile):
               'p_pind':       p_pind}
 
     print(param)
+    print('')
 
     return param, fitfunc, cfunc, steer['techno']
 
@@ -913,30 +942,53 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
             files = []
             
             # 1D-observables
-            for OBS in ['absdxy']:
-                for BIN in [1,2,3]:
-                    for PASS in ['Pass', 'Fail']:
+            # for OBS in ['absdxy']:
+            #     for BIN in [1,2,3]:
+            #         for PASS in ['Pass', 'Fail']:
+            #             for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
 
-                        rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
-                        tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
+            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
 
-                        file = {'OBS': OBS, 'BIN': BIN, 'rootfile': rootfile, 'tree': tree}
-                        files.append(file)                
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS}.root'
+            #                 # tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
+
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
+            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+
+            #                 rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS}.root'
+            #                 tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
+
+            #                 file = {'OBS': OBS, 'BIN': BIN, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+            #                 files.append(file)                
             
             # 2D-observables
-            for OBS1 in ['absdxy_sig', 'absdxy']:
+            #for OBS1 in ['absdxy_sig', 'absdxy']:
+            for OBS1 in ['absdxy_hack']:
                 OBS2 = 'pt'
 
                 # Binning
-                for BIN1 in [1,2,3]:
+                #for BIN1 in [1,2,3]:
+                for BIN1 in [1,2,3,4]:
                     for BIN2 in [1,2,3,4,5]:
                         for PASS in ['Pass', 'Fail']:
+                            #for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
+                            for SYST in ['Nominal']:
 
-                            rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
-                            tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
+                                # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
 
-                            file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'rootfile': rootfile, 'tree': tree}
-                            files.append(file)
+                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS1}_{OBS2}.root'
+                                # tree     = f'NUM_MyNum_DEN_MyDen_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+
+                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
+                                # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+
+                                rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS1}_{OBS2}.root'
+                                tree     = f'NUM_MyNum_DEN_MyDen_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+
+                                file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+                                files.append(file)
 
             info[TYPE] = files
 
@@ -945,29 +997,28 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
     return all_years
 
 
-def run_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
+def run_jpsi_fitpeak(inputparam, savepath='output_14Dec22/peakfit'):
     """
     J/psi peak fitting
     """
+    rng = default_rng(seed=1)
 
-    import pytest
+    # ====================================================================
+    # Collect fit parametrization setup
+
+    param   = inputparam['param']
+    fitfunc = inputparam['fitfunc']
+    cfunc   = inputparam['cfunc']
+    techno  = inputparam['techno']
+    # ====================================================================
 
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 
-    rng = default_rng(seed=1)
-
-    
-    # ====================================================================
-    # Fit parametrization setup
-
-    param, fitfunc, cfunc, techno = read_yaml_input(inputfile=inputfile)
-
-
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
 
-    all_years = get_rootfiles_jpsi(path=param['path'])
+    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
 
     from pprint import pprint
     pprint(all_years)
@@ -977,6 +1028,7 @@ def run_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
 
         for TYPE in y['info']:
             for f in y['info'][TYPE]:
+                SYST = f["SYST"]
 
                 tree = f["tree"]
                 hist = uproot.open(f["rootfile"])[tree]
@@ -984,15 +1036,17 @@ def run_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
                 # Fit and analyze
                 par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
                 fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
-                                                           par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
+                                                        par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
                 # Create savepath
-                total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
+                #total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
+                total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/{SYST}'
                 if not os.path.exists(total_savepath):
                     os.makedirs(total_savepath)
 
                 # Save the fit plot
                 plt.savefig(f'{total_savepath}/{tree}.pdf')
+                plt.savefig(f'{total_savepath}/{tree}.png')
                 plt.close('all')
                 
                 # Save the fit numerical data
@@ -1009,15 +1063,22 @@ def run_jpsi_fitpeak(inputfile='tune0.yml', savepath='output/peakfit'):
 
                 filename = f"{total_savepath}/{tree}.pkl"
                 pickle.dump(outdict, open(filename, "wb"))
-                print(f'Fit results saved to: {filename} (pickle) \n\n')
+                cprint(f'Fit results saved to: {filename} (pickle) \n\n', 'green')
 
 
-def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
+def run_jpsi_tagprobe(inputparam, savepath='./output_14Dec22/peakfit'):
     """
     Tag & Probe efficiency (& scale factors)
     """
 
-    import pytest
+    # ====================================================================
+    # Collect fit parametrization setup
+
+    param   = inputparam['param']
+    fitfunc = inputparam['fitfunc']
+    cfunc   = inputparam['cfunc']
+    techno  = inputparam['techno']
+    # ====================================================================
     
     def tagprobe(tree, total_savepath):
 
@@ -1027,7 +1088,7 @@ def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
         for PASS in ['Pass', 'Fail']:
 
             filename = f"{total_savepath}/{f'{tree}_{PASS}'}.pkl"
-            print(f'Reading fit results from: {filename} (pickle)')         
+            cprint(f'Reading fit results from: {filename} (pickle)', 'green')         
             outdict  = pickle.load(open(filename, "rb"))
             #pprint(outdict)
 
@@ -1038,13 +1099,8 @@ def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
         return N, N_err
 
     # ====================================================================
-    # Fit parametrization setup
-
-    param, fitfunc, cfunc, techno = read_yaml_input(inputfile=inputfile)
-
     ## Read filenames
-    all_years = get_rootfiles_jpsi(path=param['path'])
-
+    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
 
     ### Loop over datasets
     for y in all_years:
@@ -1053,13 +1109,14 @@ def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
         data_tag = f'Run{YEAR}'
         mc_tag   = 'JPsi_pythia8'
 
-        # Create savepath
-        total_savepath = f'{savepath}/Run{YEAR}/Efficiency'
-        if not os.path.exists(total_savepath):
-            os.makedirs(total_savepath)
-        
         # Loop over observables -- pick 'data_tag' (both data and mc have the same observables)
         for f in y['info'][data_tag]:
+
+            SYST = f['SYST']
+            # Create savepath
+            total_savepath = f'{savepath}/Run{YEAR}/Efficiency/{SYST}'
+            if not os.path.exists(total_savepath):
+                os.makedirs(total_savepath)
 
             # Pick Pass -- just a pick (both Pass and Fail will be used)
             if '_Pass' in f['tree']:
@@ -1072,7 +1129,7 @@ def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
                 for TYPE in [data_tag, mc_tag]:
 
                     ### Compute Tag & Probe efficiency
-                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/Nominal')
+                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/{SYST}')
                     eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
                     eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
@@ -1095,10 +1152,122 @@ def run_jpsi_tagprobe(inputfile='tune0.yml', savepath='./output/peakfit'):
                 pickle.dump(outdict, open(filename, "wb"))
                 print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
 
+def readwrap(inputfile):
+    """
+    Read out basic parameters
+    """
+    p = {}
+    p['param'], p['fitfunc'], p['cfunc'], p['techno'] = read_yaml_input(inputfile=inputfile)
+    return p
+
+
+def fit_and_analyze(inputfile):
+    """
+    Main analysis steering
+    """
+
+    # Get YAML parameters
+    p = readwrap(inputfile=inputfile)
+
+    for SYST in p['param']['systematics']:
+        
+        ## 1 (mass window shifted down)
+        if   SYST == 'MASS-WINDOW-DOWN':
+            p = readwrap(inputfile=inputfile)
+            p['param']['fitrange'] = [2.83, 3.33]
+
+        ## 2 (mass window shifted up)
+        elif SYST == 'MASS-WINDOW-UP':
+            p = readwrap(inputfile=inputfile)
+            p['param']['fitrange'] = [2.87, 3.37]
+
+        ## 3 (symmetric signal shape fixed)
+        elif SYST == 'SYMMETRIC-SIGNAL':
+            p = readwrap(inputfile=inputfile)
+
+            # ---------------------------
+            # Fixed parameter values for symmetric 'CB_asym_RBW_conv_pdf'
+            pairs = {'asym': 1e-6, 'n': 1.0 + 1e-6, 'alpha': 10.0}
+
+            # Fix the parameters
+            for key in pairs.keys():
+
+                ind = p['param']['name'].index(f'p__{key}')
+                x   = pairs[key]
+
+                p['param']['start_values'][ind] = x
+                p['param']['limits'][ind] = [x, x]
+                p['param']['fixed'][ind]  = True
+            # ------------------------
+
+        ## 4 (Default setup)
+        elif SYST == 'DEFAULT':
+            p = readwrap(inputfile=inputfile)
+        
+        else:
+            raise Exception('Undefined systematic variation chosen: {SYST}')
+        
+        # Execute yield fit and compute tag&probe
+        run_jpsi_fitpeak(inputparam=p,  savepath=f'./output/peakfit/fitparam_{SYST}')
+        run_jpsi_tagprobe(inputparam=p, savepath=f'./output/peakfit/fitparam_{SYST}')
+
+
+def group_systematics(inputfile):
+    """
+    Group and print results of systematic fit variations
+    """
+
+    # Get YAML parameters
+    p = readwrap(inputfile=inputfile)
+
+    for YEAR in p['param']['years']:
+
+        d = {}
+
+        for SYST in p['param']['systematics']:
+            path = f'./output/peakfit/fitparam_{SYST}/Run{YEAR}/Efficiency/Nominal/'
+
+            files = [f for f in listdir(path) if isfile(join(path, f))]
+
+            for filename in files:
+                with open(path + filename, 'rb') as f:
+                    x = pickle.load(f)
+                
+                if filename not in d:
+                    d[filename] = {}
+
+                d[filename][SYST] = x
+
+        ## Go through results and print
+        print('')
+        print(f'YEAR: {YEAR}')
+        for hyperbin in list(d.keys()):
+            print(hyperbin)
+            for SYST in p['param']['systematics']:
+                print(f"{d[hyperbin][SYST]['scale']:0.4f} +- {d[hyperbin][SYST]['scale_err']:0.4f} \t ({SYST})")
+
+        ## Save collected results
+        path = './output/peakfit'
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        filename = f'./output/peakfit/peakfit_systematics_YEAR_{YEAR}.pkl'
+        pickle.dump(d, open(filename, "wb"))
+        cprint(f'Systematics grouped results saved to: {filename} (pickle)', 'green')
 
 if __name__ == "__main__":
 
-    inputfile = 'configs/peakfit/tune0.yml'
-
-    run_jpsi_fitpeak(inputfile=inputfile)
-    run_jpsi_tagprobe(inputfile=inputfile)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--analyze',   help="Fit and analyze", action="store_true")
+    parser.add_argument('--group',     help="Collect and group results", action="store_true")
+    parser.add_argument('--inputfile', type=str, default='configs/peakfit/tune0.yml', help="Steering input YAML file", nargs='?')
+    
+    args = parser.parse_args()
+    print(args)
+    
+    if args.analyze:
+        fit_and_analyze(inputfile=args.inputfile)
+    
+    if args.group:
+        group_systematics(inputfile=args.inputfile)
