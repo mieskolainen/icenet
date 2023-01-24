@@ -1,4 +1,4 @@
-# Binned histogram chi2/likelihood fits with iminuit (minuit from python)
+# Binned histogram chi2/likelihood fits with mystic + iminuit (minuit from python)
 # 
 #
 # Notes:
@@ -603,7 +603,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         # Minuit Gradient search
         m1.migrad(ncall=techno['ncall_minuit_gradient'])
         print(m1.fmin)
-        
+
         # Finalize with stat. uncertainty analysis [migrad << hesse << minos (best)]
         if techno['minos']:
             try:
