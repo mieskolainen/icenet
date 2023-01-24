@@ -260,12 +260,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.binned_1D_fit"><code class="docutils literal notranslate"><span class="pre">binned_1D_fit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.cauchy_pdf"><code class="docutils literal notranslate"><span class="pre">cauchy_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.exp_pdf"><code class="docutils literal notranslate"><span class="pre">exp_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.gauss_pdf"><code class="docutils literal notranslate"><span class="pre">gauss_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.group_systematics"><code class="docutils literal notranslate"><span class="pre">group_systematics()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.highres_x"><code class="docutils literal notranslate"><span class="pre">highres_x()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.iminuit2python"><code class="docutils literal notranslate"><span class="pre">iminuit2python()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.poly_pdf"><code class="docutils literal notranslate"><span class="pre">poly_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.readwrap"><code class="docutils literal notranslate"><span class="pre">readwrap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
@@ -1241,7 +1244,7 @@ where (*) is a convolution product.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.CB_pdf">
-<span class="sig-name descname"><span class="pre">CB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_pdf" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_pdf" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Crystal_Ball_function">https://en.wikipedia.org/wiki/Crystal_Ball_function</a></p>
 <p>Consists of a Gaussian core portion and a power-law low-end tail,
 below a certain threshold.</p>
@@ -1319,16 +1322,14 @@ below a certain threshold.</p>
 <li><p><strong>hist</strong> – TH1 histogram object (from uproot)</p></li>
 <li><p><strong>param</strong> – Fitting parametrization dictionary</p></li>
 <li><p><strong>fitfunc</strong> – Fit function</p></li>
-<li><p><strong>techno</strong> – <p>losstype:       Loss function type
+<li><p><strong>techno</strong> – losstype:       Loss function type
 ncall_simplex:  Number of calls
 ncall_gradient: Number of calls
 use_limits:     Use parameter limits
 max_trials:     Maximum number of restarts
 max_chi2:       Maximum chi2/ndf threshold for restarts
-min_count:      Minimum number of histogram counts</p>
-<p>hesse:          Hesse uncertainties
-minos:          Minos uncertainties</p>
-</p></li>
+min_count:      Minimum number of histogram counts
+minos:          Minos uncertainties if True, Hesse if False</p></li>
 </ul>
 </dd>
 </dl>
@@ -1352,6 +1353,12 @@ minos:          Minos uncertainties</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.fit_and_analyze">
+<span class="sig-name descname"><span class="pre">fit_and_analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#fit_and_analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.fit_and_analyze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main analysis steering</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.gauss_pdf">
 <span class="sig-name descname"><span class="pre">gauss_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#gauss_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.gauss_pdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normal (Gaussian) density</p>
@@ -1366,6 +1373,12 @@ minos:          Minos uncertainties</p>
 <dt class="sig sig-object py" id="icefit.peakfit.get_rootfiles_jpsi">
 <span class="sig-name descname"><span class="pre">get_rootfiles_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2016,</span> <span class="pre">2017,</span> <span class="pre">2018]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#get_rootfiles_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.get_rootfiles_jpsi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return rootfile names for the J/psi study.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.group_systematics">
+<span class="sig-name descname"><span class="pre">group_systematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#group_systematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.group_systematics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group and print results of systematic fit variations</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1431,14 +1444,20 @@ cov_arr  : Covariance matrix</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.readwrap">
+<span class="sig-name descname"><span class="pre">readwrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#readwrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.readwrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read out basic parameters</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_fitpeak">
-<span class="sig-name descname"><span class="pre">run_jpsi_fitpeak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tune0.yml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/peakfit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_fitpeak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_fitpeak" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run_jpsi_fitpeak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output_14Dec22/peakfit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_fitpeak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_fitpeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>J/psi peak fitting</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_tagprobe">
-<span class="sig-name descname"><span class="pre">run_jpsi_tagprobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tune0.yml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./output/peakfit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_tagprobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_tagprobe" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run_jpsi_tagprobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./output_14Dec22/peakfit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_tagprobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_tagprobe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tag &amp; Probe efficiency (&amp; scale factors)</p>
 </dd></dl>
 
