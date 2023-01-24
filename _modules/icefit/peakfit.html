@@ -523,7 +523,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for icefit.peakfit</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Binned histogram chi2/likelihood fits with iminuit (minuit from python)</span>
+<span></span><span class="c1"># Binned histogram chi2/likelihood fits with mystic + iminuit (minuit from python)</span>
 <span class="c1"># </span>
 <span class="c1">#</span>
 <span class="c1"># Notes:</span>
@@ -1128,7 +1128,7 @@
         <span class="c1"># Minuit Gradient search</span>
         <span class="n">m1</span><span class="o">.</span><span class="n">migrad</span><span class="p">(</span><span class="n">ncall</span><span class="o">=</span><span class="n">techno</span><span class="p">[</span><span class="s1">&#39;ncall_minuit_gradient&#39;</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">fmin</span><span class="p">)</span>
-        
+
         <span class="c1"># Finalize with stat. uncertainty analysis [migrad &lt;&lt; hesse &lt;&lt; minos (best)]</span>
         <span class="k">if</span> <span class="n">techno</span><span class="p">[</span><span class="s1">&#39;minos&#39;</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
