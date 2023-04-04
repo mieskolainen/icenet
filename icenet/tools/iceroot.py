@@ -36,10 +36,17 @@ def read_MC(process_func, process, root_path, param, class_id):
 
     # --------------------
 
+    print(datasets)
+    print(root_path)
+
     rootfile     = io.glob_expand_files(datasets=datasets, datapath=root_path)
 
+    
     # Custom scale event statistics
-    maxevents    = np.max([1, int(param['maxevents'] * maxevents_scale)])
+    if param['maxevents'] is None:
+        maxevents = None
+    else:
+        maxevents = np.max([1, int(param['maxevents'] * maxevents_scale)])
     
     # Load file
     X_uncut, ids = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],

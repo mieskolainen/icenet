@@ -172,6 +172,11 @@ MVA_MUON_VARS = [
 #  'SV_'        is the standard nanoAOD collection
 #  'sv_'        is the jet-matched custom collection
 #  'svAdapted_' is the jet-matched custom collection with adapted SV-reco
+#  'MuonSV_'    is the custom muon SV collection
+
+#  'SV_'        is the standard nanoAOD collection
+#  'sv_'        is the jet-matched custom collection
+#  'svAdapted_' is the jet-matched custom collection with adapted SV-reco
 
 """
 MVA_SV_VARS = [
@@ -190,6 +195,28 @@ MVA_SV_VARS = [
   'sv_ndof'
 ]
 """
+
+MVA_MUONSV_VARS = [
+  'muonSV_chi2',     # Reduced chi2, i.e. chi2 / ndof
+  'muonSV_pAngle',   # Pointing angle: acos(p_SV * (SV - PV))
+
+  'muonSV_dlen',     # 3D decay length (cm)
+  'muonSV_dlenSig',  # 3D decay length significance
+  'muonSV_dxy',      # 2D transverse decay length (cm)
+  'muonSV_dxySig',   # 2D transverse decay length significance
+
+  'muonSV_mu1pt',    # Muon (1) kinematics
+  'muonSV_mu1eta',
+  'muonSV_mu1phi',
+  'muonSV_mu2pt',    # Muon (2) kinematics
+  'muonSV_mu2eta',
+  'muonSV_mu2phi',
+  
+  'muonSV_x',        # Sec. vertex position
+  'muonSV_y',        # Sec. vertex position
+  'muonSV_z'         # Sec. vertex position
+]
+
 
 MVA_SV_VARS = [
   'SV_pt',      # Transverse momentum
@@ -219,7 +246,7 @@ MVA_SV_VARS = [
 MVA_SCALAR_VARS += MODEL_VARS # Treated on the same basis as scalar vars
 
 MVA_PF_VARS     = MVA_CPF_VARS + MVA_NPF_VARS
-MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_SV_VARS + MVA_PF_VARS
+MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_MUONSV_VARS + MVA_SV_VARS + MVA_PF_VARS
 
 
 # ---------------------------------------------------------

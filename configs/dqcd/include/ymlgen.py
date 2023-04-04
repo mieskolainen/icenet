@@ -56,7 +56,7 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
 
 def darkphoton(outputfile, filerange='*'):
-
+  
   process         = 'HiddenValley_darkphoton'
 
   # ------------------------------------------
@@ -74,7 +74,7 @@ def darkphoton(outputfile, filerange='*'):
   rp['m']         = ['2', '5', '10', '15']
   rp['ctau']      = ['10', '50', '100', '500'] 
   rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5', '2.5': '2p5'}
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
 
   param = {
     'outputfile':      outputfile,
@@ -98,8 +98,8 @@ def vector(outputfile, filerange='*'):
   # ------------------------------------------
   # Basic
   filename        = f'output_{filerange}.root'
-  path            = 'bparkProductionV3'
-  end_name        = 'privateMC_11X_NANOAODSIM_v3_generationForBParking'
+  path            = 'bparkProductionV10'
+  end_name        = 'privateMC_11X_NANOAODSIM_v10_generationForBParkingUpdateMuonSV'
   xs              = '1.0 # [pb]'
   force_xs        = 'true'
   isMC            = 'true'
@@ -107,10 +107,10 @@ def vector(outputfile, filerange='*'):
   # ------------------------------------------
   
   rp = {}
-  rp['m']         = ['2', '5', '10', '15', '20']
-  rp['ctau']      = ['10', '50', '100', '500'] 
+  rp['m']         = ['2', '20']
+  rp['ctau']      = ['1', '10', '50', '100', '500'] 
   rp['xi_pair']   = [['1', '1']]
-  rp['xi2str']    = {'1': '1'}
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
   
   param = {
     'outputfile':      outputfile,
@@ -146,7 +146,7 @@ def higgs(outputfile, filerange='*'):
   rp['m']         = ['10', '15', '20']
   rp['ctau']      = ['10', '50', '100', '500'] 
   rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5', '2.5': '2p5'}
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
 
   param = {
     'outputfile':      outputfile,
@@ -166,99 +166,97 @@ def higgs(outputfile, filerange='*'):
 def QCD(outputfile, filerange='*'):
 
   processes = [ \
-  {'path':     'bparkProductionV1_bkg',
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-15to20_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 2799000.0} # pb
-
   ,
-  {'path':     'bparkProductionV1_bkg',
+  
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-20to30_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 2526000.0 }
-
   ,
-  {'path':     'bparkProductionV1_bkg',
+
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-30to50_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 1362000.0}
-
   ,
-  {'path':     'bparkProductionV1_bkg',
+
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-50to80_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 376600.0}
-
   ,
-  {'path':     'bparkProductionV1_bkg',
+
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-80to120_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking',
-   'xs': 44465.0} # 88930.0 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 44465.0} # 44465.0 = 88930.0 / 2 [two paths treated as "separate" processes]
   ,
-  {'path':     'bparkProductionV1_bkg_ext', # Extension sample
+  {'path':     'bparkProductionV4_bkg', # Extension sample !
    'process':  'QCD_Pt-80to120_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking',
-   'xs': 44465.0} # 88930.0 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 44465.0} # 44465.0 = 88930.0 / 2 [two paths treated as "separate" processes]
+  ,
 
-  ,
-  {'path':     'bparkProductionV1_bkg',
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-120to170_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking',
-   'xs': 10615.0} # 21230.0 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 10615.0} # 10615.0 = 21230.0 / 2 [two paths treated as "separate" processes]
   ,
-  {'path':     'bparkProductionV1_bkg_ext', # Extension sample
+  {'path':     'bparkProductionV4_bkg', # Extension sample !
    'process':  'QCD_Pt-120to170_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking',
-   'xs': 10615.0} # 21230.0 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 10615.0} # 10615.0 = 21230.0 / 2 [two paths treated as "separate" processes]
+  ,
 
-  ,
-  {'path':     'bparkProductionV1_bkg',
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-170to300_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 7055.0}
+  ,
 
-  ,
-  {'path':     'bparkProductionV1_bkg',
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-300to470_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v1_generationForBParking',
-   'xs': 309.65} # 619.3 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 309.65} # 309.65 = 619.3 / 2 [two paths treated as "separate" processes]
   ,
-  {'path':     'bparkProductionV1_bkg_ext', # Extension sample
+  {'path':     'bparkProductionV4_bkg', # Extension sample !
    'process':  'QCD_Pt-300to470_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v1_MINIAODSIM_v2_generationForBParking',
-   'xs': 309.65} # 619.3 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 309.65} # 309.65 = 619.3 / 2 [two paths treated as "separate" processes]
+  ,
 
-  ,
-  {'path':     'bparkProductionV1_bkg',
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-470to600_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking',
-   'xs': 29.62}  # 59.24 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 29.62}  # 29.62 = 59.24 / 2 [two paths treated as "separate" processes]
   ,
-  {'path':     'bparkProductionV1_bkg_ext', # Extension sample
+  {'path':     'bparkProductionV4_bkg', # Extension sample !
    'process':  'QCD_Pt-470to600_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v2_generationForBParking',
-   'xs': 29.62}  # 59.24 / 2 [two paths treated as "separate" processes]
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 29.62}  # 29.62 = 59.24 / 2 [two paths treated as "separate" processes]
   ,
-  {'path':     'bparkProductionV1_bkg',
+
+  {'path':     'bparkProductionV4_bkg',
    'process':  'QCD_Pt-600to800_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
    'xs': 18.21}
   ,
-  {'path':     'bparkProductionV1_bkg',
-   'process':  'QCD_Pt-800to1000_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v1_generationForBParking',
-   'xs': 1.6375} # 3.275 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionV1_bkg_ext', # Extension sample
-   'process':  'QCD_Pt-800to1000_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v2_generationForBParking',
-   'xs': 1.6375} # 3.275 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionV1_bkg',
-   'process':  'QCD_Pt-1000toInf_MuEnrichedPt5',
-   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v1_generationForBParking',
-   'xs': 1.078} ]
 
+  {'path':     'bparkProductionV4_bkg',
+   'process':  'QCD_Pt-800to1000_MuEnrichedPt5',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 3.275}
+  ,
+
+  {'path':     'bparkProductionV4_bkg',
+   'process':  'QCD_Pt-1000toInf_MuEnrichedPt5',
+   'end_name': 'TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_v4_generationForBParkingUpdateMuonSV',
+   'xs': 1.078} ]
+  
   rp = {}
   rp['m']       = ['null']
   rp['ctau']    = ['null'] 
@@ -301,8 +299,8 @@ def data(outputfile, filerange='*'):
   # ------------------------------------------
   # Basic
   filename        = f'output_{filerange}.root'
-  path            = 'bparkProductionV3'
-  end_name        = 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1_generationForBParking'
+  path            = 'bparkProductionV3_data'
+  end_name        = 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v3_generationForBParkingUpdateMuonSV'
   xs              = 'null'
   force_xs        = 'false'
   isMC            = 'false'

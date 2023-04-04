@@ -18,6 +18,7 @@ mva_param: &MVA_INPUT_PARAM
     
     Jet:  6
     Muon: 6
+    MuonSV: 6
     SV:   6
     cpf:  0 #20
     npf:  0 #10
@@ -133,7 +134,7 @@ train_runmode:
     #- gnet3
     
     - xgb0
-    #- xgb0-no-mass
+    - xgb0-no-mass
     #- xgb0-only-mu
     
     #- dmlp

@@ -167,18 +167,20 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
 
     data.y = ak.to_numpy(data.y)
     data.w = ak.to_numpy(data.w)
-
+    
     ### Pick active variables out
     scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=globals()[args['inputvar_scalar']])
     jagged_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=globals()[args['inputvar_jagged']])
     
-    # Individually
-    muon_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUON_VARS)
-    jet_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_JET_VARS)
-    sv_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_SV_VARS)
-    cpf_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_CPF_VARS)
-    npf_vars  = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_NPF_VARS)
-    pf_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_PF_VARS)
+    # Individually for GNNs
+    muon_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUON_VARS)
+    jet_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_JET_VARS)
+    sv_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_SV_VARS)
+
+    muonsv_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUONSV_VARS)
+    cpf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_CPF_VARS)
+    npf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_NPF_VARS)
+    pf_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_PF_VARS)
 
     ### ** Remove conditional variables **
     if args['use_conditional'] == False:
