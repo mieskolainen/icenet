@@ -19,8 +19,8 @@ jobs:
           python-version: '3.10.10'
       
       ## Install GPU tools
-	    # conda install -c nvidia cudatoolkit==11.7.0
-	    # conda install -c conda-forge cudnn==8.4.1.50 cudatoolkit-dev==11.7.0
+      # conda install -c nvidia cudatoolkit==11.7.0 cudnn==8.4.1.50
+      # conda install -c conda-forge cudatoolkit-dev==11.7.0
       
       # Install conda packages
       
