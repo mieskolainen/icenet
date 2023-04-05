@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icenet.deep.graph &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+          </a>
+              <div class="version">
+                0.0.8.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#c-library-versions">C-library versions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#icebrk-common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.cutstats.apply_cuts"><code class="docutils literal notranslate"><span class="pre">apply_cuts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.cutstats.collect_info_stats"><code class="docutils literal notranslate"><span class="pre">collect_info_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats"><code class="docutils literal notranslate"><span class="pre">collect_mcinfo_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.cutstats.init_stat_objects"><code class="docutils literal notranslate"><span class="pre">init_stat_objects()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.cutstats.triplet_cuts"><code class="docutils literal notranslate"><span class="pre">triplet_cuts()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.fasthistos.initialize"><code class="docutils literal notranslate"><span class="pre">initialize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.features">icebrk.features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.features.construct_new_branches"><code class="docutils literal notranslate"><span class="pre">construct_new_branches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.features.generate_feature_names"><code class="docutils literal notranslate"><span class="pre">generate_feature_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.features.getdimension"><code class="docutils literal notranslate"><span class="pre">getdimension()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.histos.calc_MC_observables"><code class="docutils literal notranslate"><span class="pre">calc_MC_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.histos.calc_batch_MC_observables"><code class="docutils literal notranslate"><span class="pre">calc_batch_MC_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.histos.calc_batch_observables"><code class="docutils literal notranslate"><span class="pre">calc_batch_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.histos.calc_observables"><code class="docutils literal notranslate"><span class="pre">calc_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.histos.pickle_files"><code class="docutils literal notranslate"><span class="pre">pickle_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.hdf5_append"><code class="docutils literal notranslate"><span class="pre">hdf5_append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.hdf5_write_handles"><code class="docutils literal notranslate"><span class="pre">hdf5_write_handles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.hist_flush"><code class="docutils literal notranslate"><span class="pre">hist_flush()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.initarrays"><code class="docutils literal notranslate"><span class="pre">initarrays()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.poweranalysis"><code class="docutils literal notranslate"><span class="pre">poweranalysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.loop.process"><code class="docutils literal notranslate"><span class="pre">process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.construct_MC_tree"><code class="docutils literal notranslate"><span class="pre">construct_MC_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.construct_MC_truth"><code class="docutils literal notranslate"><span class="pre">construct_MC_truth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.construct_input_vec"><code class="docutils literal notranslate"><span class="pre">construct_input_vec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.construct_kinematics"><code class="docutils literal notranslate"><span class="pre">construct_kinematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.construct_output_vec"><code class="docutils literal notranslate"><span class="pre">construct_output_vec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.deltar_3"><code class="docutils literal notranslate"><span class="pre">deltar_3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.find_connected_triplets"><code class="docutils literal notranslate"><span class="pre">find_connected_triplets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.get_first_indices"><code class="docutils literal notranslate"><span class="pre">get_first_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.index_of_first_signal"><code class="docutils literal notranslate"><span class="pre">index_of_first_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.index_of_last_signal"><code class="docutils literal notranslate"><span class="pre">index_of_last_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icebrk.html#icebrk.tools.print_MC_event"><code class="docutils literal notranslate"><span class="pre">print_MC_event()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.abcd">icefit.abcd</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_2NLL"><code class="docutils literal notranslate"><span class="pre">ABCD_2NLL()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.H_score"><code class="docutils literal notranslate"><span class="pre">H_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.I_score"><code class="docutils literal notranslate"><span class="pre">I_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.bw2bins"><code class="docutils literal notranslate"><span class="pre">bw2bins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.distance_corr"><code class="docutils literal notranslate"><span class="pre">distance_corr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.freedman_diaconis_bin"><code class="docutils literal notranslate"><span class="pre">freedman_diaconis_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.gaussian_mutual_information"><code class="docutils literal notranslate"><span class="pre">gaussian_mutual_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.hacine_entropy_bin"><code class="docutils literal notranslate"><span class="pre">hacine_entropy_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.hacine_joint_entropy_bin"><code class="docutils literal notranslate"><span class="pre">hacine_joint_entropy_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.mutual_information"><code class="docutils literal notranslate"><span class="pre">mutual_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.optbins"><code class="docutils literal notranslate"><span class="pre">optbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.optbins2d"><code class="docutils literal notranslate"><span class="pre">optbins2d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.pearson_corr"><code class="docutils literal notranslate"><span class="pre">pearson_corr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.percentile_per_dim"><code class="docutils literal notranslate"><span class="pre">percentile_per_dim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.prc_CI"><code class="docutils literal notranslate"><span class="pre">prc_CI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.scott_bin"><code class="docutils literal notranslate"><span class="pre">scott_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.test_constant"><code class="docutils literal notranslate"><span class="pre">test_constant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.get_full_hessian"><code class="docutils literal notranslate"><span class="pre">get_full_hessian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.get_gradient"><code class="docutils literal notranslate"><span class="pre">get_gradient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.get_jacobian"><code class="docutils literal notranslate"><span class="pre">get_jacobian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.observed_fisher_info"><code class="docutils literal notranslate"><span class="pre">observed_fisher_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.test_dimension_interfaces"><code class="docutils literal notranslate"><span class="pre">test_dimension_interfaces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.test_hessians"><code class="docutils literal notranslate"><span class="pre">test_hessians()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.jacobian.test_jacobians"><code class="docutils literal notranslate"><span class="pre">test_jacobians()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.lognormal_param"><code class="docutils literal notranslate"><span class="pre">lognormal_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.rand_lognormal"><code class="docutils literal notranslate"><span class="pre">rand_lognormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.train_loop"><code class="docutils literal notranslate"><span class="pre">train_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.peakfit">icefit.peakfit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.CB_G_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_G_conv_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.CB_RBW_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_RBW_conv_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.CB_asym_RBW_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_asym_RBW_conv_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.CB_pdf"><code class="docutils literal notranslate"><span class="pre">CB_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.RBW_pdf"><code class="docutils literal notranslate"><span class="pre">RBW_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.TH1_to_numpy"><code class="docutils literal notranslate"><span class="pre">TH1_to_numpy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.analyze_1D_fit"><code class="docutils literal notranslate"><span class="pre">analyze_1D_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.asym_BW_pdf"><code class="docutils literal notranslate"><span class="pre">asym_BW_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.asym_RBW_pdf"><code class="docutils literal notranslate"><span class="pre">asym_RBW_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.binned_1D_fit"><code class="docutils literal notranslate"><span class="pre">binned_1D_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.cauchy_pdf"><code class="docutils literal notranslate"><span class="pre">cauchy_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.exp_pdf"><code class="docutils literal notranslate"><span class="pre">exp_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.gauss_pdf"><code class="docutils literal notranslate"><span class="pre">gauss_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.group_systematics"><code class="docutils literal notranslate"><span class="pre">group_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.highres_x"><code class="docutils literal notranslate"><span class="pre">highres_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.iminuit2python"><code class="docutils literal notranslate"><span class="pre">iminuit2python()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.poly_pdf"><code class="docutils literal notranslate"><span class="pre">poly_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.readwrap"><code class="docutils literal notranslate"><span class="pre">readwrap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.score">icefit.score</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.score.logL"><code class="docutils literal notranslate"><span class="pre">logL()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.error_on_mu"><code class="docutils literal notranslate"><span class="pre">error_on_mu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.error_on_std"><code class="docutils literal notranslate"><span class="pre">error_on_std()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.geom_mean_2D"><code class="docutils literal notranslate"><span class="pre">geom_mean_2D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.mc_extreme_multivariate_npdf"><code class="docutils literal notranslate"><span class="pre">mc_extreme_multivariate_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.mc_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">mc_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.prodratio_eprop"><code class="docutils literal notranslate"><span class="pre">prodratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehgcal.html">icehgcal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icehgcal.html#module-icehgcal.common">icehgcal.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.common.process_tracklet_data"><code class="docutils literal notranslate"><span class="pre">process_tracklet_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.common.read_data_tracklet"><code class="docutils literal notranslate"><span class="pre">read_data_tracklet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icehgcal.html#module-icehgcal.graphio">icehgcal.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.graphio.compute_edge_attr"><code class="docutils literal notranslate"><span class="pre">compute_edge_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.graphio.get_node_features"><code class="docutils literal notranslate"><span class="pre">get_node_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_candidate"><code class="docutils literal notranslate"><span class="pre">parse_graph_data_candidate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_trackster"><code class="docutils literal notranslate"><span class="pre">parse_graph_data_trackster()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icehgcal.html#module-icehgcal.preprocess">icehgcal.preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.preprocess.compute_edges"><code class="docutils literal notranslate"><span class="pre">compute_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.preprocess.create_trackster_data"><code class="docutils literal notranslate"><span class="pre">create_trackster_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehgcal.html#icehgcal.preprocess.event_loop"><code class="docutils literal notranslate"><span class="pre">event_loop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icehnl.html">icehnl</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icehnl.html#module-icehnl.common">icehnl.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehnl.html#icehnl.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icehnl.html#icehnl.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.common">iceid.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceid.html#iceid.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceid.html#iceid.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceid.html#iceid.graphio.get_node_features"><code class="docutils literal notranslate"><span class="pre">get_node_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceid.html#iceid.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceid.html#iceid.graphio.parse_tensor_data"><code class="docutils literal notranslate"><span class="pre">parse_tensor_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icemc.html">icemc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icemc.html#module-icemc.icemc">icemc.icemc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.Gamma2tau"><code class="docutils literal notranslate"><span class="pre">Gamma2tau()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.annotate_heatmap"><code class="docutils literal notranslate"><span class="pre">annotate_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.outer_sim_loop"><code class="docutils literal notranslate"><span class="pre">outer_sim_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.outer_sim_loop_2"><code class="docutils literal notranslate"><span class="pre">outer_sim_loop_2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.produce_acceptance_sim"><code class="docutils literal notranslate"><span class="pre">produce_acceptance_sim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.randexp"><code class="docutils literal notranslate"><span class="pre">randexp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.randpow"><code class="docutils literal notranslate"><span class="pre">randpow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.resonance_generator"><code class="docutils literal notranslate"><span class="pre">resonance_generator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.set_aspect_true_equal"><code class="docutils literal notranslate"><span class="pre">set_aspect_true_equal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.spherical_acceptance"><code class="docutils literal notranslate"><span class="pre">spherical_acceptance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.tau2Gamma"><code class="docutils literal notranslate"><span class="pre">tau2Gamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.test_toy_pt_spectrum"><code class="docutils literal notranslate"><span class="pre">test_toy_pt_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icemc.html#icemc.icemc.twobody"><code class="docutils literal notranslate"><span class="pre">twobody()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.binwidth"><code class="docutils literal notranslate"><span class="pre">binwidth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.change2density_labels"><code class="docutils literal notranslate"><span class="pre">change2density_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.chi2_cost"><code class="docutils literal notranslate"><span class="pre">chi2_cost()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.colors"><code class="docutils literal notranslate"><span class="pre">colors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.create_axes"><code class="docutils literal notranslate"><span class="pre">create_axes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.edge2centerbins"><code class="docutils literal notranslate"><span class="pre">edge2centerbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.fuse_histograms"><code class="docutils literal notranslate"><span class="pre">fuse_histograms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.generate_colormap"><code class="docutils literal notranslate"><span class="pre">generate_colormap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist"><code class="docutils literal notranslate"><span class="pre">hist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist_filled_error"><code class="docutils literal notranslate"><span class="pre">hist_filled_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist_obj"><code class="docutils literal notranslate"><span class="pre">hist_obj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist_to_density"><code class="docutils literal notranslate"><span class="pre">hist_to_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist_to_density_fullspace"><code class="docutils literal notranslate"><span class="pre">hist_to_density_fullspace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.histhepdata"><code class="docutils literal notranslate"><span class="pre">histhepdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.histmc"><code class="docutils literal notranslate"><span class="pre">histmc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hobj"><code class="docutils literal notranslate"><span class="pre">hobj</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.ordered_legend"><code class="docutils literal notranslate"><span class="pre">ordered_legend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.plot_horizontal_line"><code class="docutils literal notranslate"><span class="pre">plot_horizontal_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.ratioerr"><code class="docutils literal notranslate"><span class="pre">ratioerr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.set_axis_ticks"><code class="docutils literal notranslate"><span class="pre">set_axis_ticks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.set_global_style"><code class="docutils literal notranslate"><span class="pre">set_global_style()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.stepspace"><code class="docutils literal notranslate"><span class="pre">stepspace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.superplot"><code class="docutils literal notranslate"><span class="pre">superplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.test_iceplot"><code class="docutils literal notranslate"><span class="pre">test_iceplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.tick_calc"><code class="docutils literal notranslate"><span class="pre">tick_calc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.tick_creator"><code class="docutils literal notranslate"><span class="pre">tick_creator()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icetrg.html#module-icetrg.common">icetrg.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icetrg.html#icetrg.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icetrg.html#icetrg.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icetrg.html#icetrg.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">icenet.deep.graph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icenet.deep.graph</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Graph Neural Nets</span>
+<span class="c1">#</span>
+<span class="c1"># Mikael Mieskolainen, 2022</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span>   <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNorm1d</span>
+<span class="kn">import</span> <span class="nn">torch_geometric</span>
+
+<span class="kn">from</span>   <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span>   <span class="nn">torch_geometric.typing</span> <span class="kn">import</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">OptPairTensor</span><span class="p">,</span> <span class="n">Adj</span><span class="p">,</span> <span class="n">Size</span>
+
+<span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">Set2Set</span><span class="p">,</span> <span class="n">global_add_pool</span><span class="p">,</span> <span class="n">global_mean_pool</span><span class="p">,</span> <span class="n">global_max_pool</span><span class="p">,</span> <span class="n">global_sort_pool</span>
+<span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">NNConv</span><span class="p">,</span> <span class="n">GINEConv</span><span class="p">,</span> <span class="n">GATConv</span><span class="p">,</span> <span class="n">SplineConv</span><span class="p">,</span> <span class="n">GCNConv</span><span class="p">,</span> <span class="n">SGConv</span><span class="p">,</span> <span class="n">SAGEConv</span><span class="p">,</span> <span class="n">EdgeConv</span><span class="p">,</span> <span class="n">DynamicEdgeConv</span>
+<span class="kn">from</span>   <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
+
+<span class="kn">from</span> <span class="nn">torch_scatter</span> <span class="kn">import</span> <span class="n">scatter_add</span><span class="p">,</span> <span class="n">scatter_max</span><span class="p">,</span> <span class="n">scatter_mean</span>
+
+<span class="kn">from</span> <span class="nn">icenet.deep.da</span> <span class="kn">import</span> <span class="n">GradientReversal</span>
+
+<span class="kn">from</span> <span class="nn">icenet.deep.pgraph</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">optimize</span>
+<span class="kn">from</span> <span class="nn">icenet.deep.dmlp</span> <span class="kn">import</span> <span class="n">MLP</span><span class="p">,</span> <span class="n">MLP_ALL_ACT</span>
+
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">losstools</span>
+
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.typing</span> <span class="kn">import</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">,</span> <span class="n">PairOptTensor</span><span class="p">,</span> <span class="n">Adj</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.nn.conv</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
+
+
+<div class="viewcode-block" id="SuperEdgeConv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv">[docs]</a><span class="k">class</span> <span class="nc">SuperEdgeConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom GNN</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">nn_final</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">train_eps</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">aggr</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">mp_attn_dim</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">aggr</span> <span class="o">==</span> <span class="s1">&#39;attention&#39;</span><span class="p">:</span>
+            <span class="n">aggr</span> <span class="o">=</span> <span class="n">torch_geometric</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">aggr</span><span class="o">.</span><span class="n">MultiAggregation</span><span class="p">(</span><span class="n">aggrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;attn&#39;</span><span class="p">,</span>
+                <span class="n">mode_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in_channels&#39;</span><span class="p">:</span><span class="n">mp_attn_dim</span><span class="p">,</span> <span class="s1">&#39;out_channels&#39;</span><span class="p">:</span><span class="n">mp_attn_dim</span><span class="p">,</span> <span class="s1">&#39;num_heads&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">})</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="n">aggr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn</span>       <span class="o">=</span> <span class="n">nn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn_final</span> <span class="o">=</span> <span class="n">nn_final</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        self.initial_eps = eps</span>
+<span class="sd">        if train_eps:</span>
+<span class="sd">            self.eps = torch.nn.Parameter(torch.Tensor([eps]))</span>
+<span class="sd">        else:</span>
+<span class="sd">            self.register_buffer(&#39;eps&#39;, torch.Tensor([eps]))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SuperEdgeConv.reset_parameters"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.reset_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">torch_geometric</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">inits</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span>
+        <span class="n">torch_geometric</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">inits</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nn_final</span><span class="p">)</span></div>
+        <span class="c1">#self.eps.data.fill_(self.initial_eps)</span>
+
+<div class="viewcode-block" id="SuperEdgeConv.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">],</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span>
+            <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">:</span> <span class="n">OptTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="n">Size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="c1">#print(f&#39;forward: x: {x.shape}&#39;)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">PairTensor</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># propagate_type: (x: PairTensor)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="n">edge_weight</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn_final</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">out</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SuperEdgeConv.message"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_i</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">x_j</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+
+        <span class="c1">#print(f&#39;message: x_i: {x_i.shape}&#39;)</span>
+        <span class="c1">#print(f&#39;message: x_j: {x_j.shape}&#39;)</span>
+
+        <span class="k">if</span> <span class="n">edge_attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge_attr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># if 1-dim edge_attributes</span>
+            <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">edge_attr</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">edge_attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span> <span class="o">-</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span> <span class="o">*</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span> <span class="o">-</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">x_j</span> <span class="o">*</span> <span class="n">x_i</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">edge_weight</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span> <span class="o">*</span> <span class="n">edge_weight</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+    <span class="c1"># Memory efficient fusion of message and aggregate via sparse matrix</span>
+    <span class="c1">#def message_and_aggregate(self, adj_t: SparseTensor,</span>
+    <span class="c1">#                          x: OptPairTensor) -&gt; Tensor:</span>
+    <span class="c1">#    adj_t = adj_t.set_value(None, layout=None)</span>
+    <span class="c1">#    return matmul(adj_t, x[0], reduce=self.aggr)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(nn=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span></div>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">class SuperEdgeConv(MessagePassing):</span>
+<span class="sd">    #Custom convolution operator.</span>
+<span class="sd">    </span>
+<span class="sd">    def __init__(self, nn: Callable, aggr: str = &#39;max&#39;, **kwargs):</span>
+<span class="sd">        super(SuperEdgeConv, self).__init__(aggr=aggr, **kwargs)</span>
+<span class="sd">        self.nn = nn</span>
+<span class="sd">        #self.reset_parameters()</span>
+
+<span class="sd">    #def reset_parameters(self):</span>
+<span class="sd">        #reset(self.nn)</span>
+
+<span class="sd">    def forward(self, x: Union[Tensor, PairTensor], edge_index: Adj,</span>
+<span class="sd">            edge_attr: OptTensor = None, size: Size = None) -&gt; Tensor:</span>
+<span class="sd">        if isinstance(x, Tensor):</span>
+<span class="sd">            x: PairTensor = (x, x)</span>
+<span class="sd">        </span>
+<span class="sd">        # propagate_type: (x: PairTensor)</span>
+<span class="sd">        return self.propagate(edge_index, x=x, edge_attr=edge_attr, size=None)</span>
+
+<span class="sd">    def message(self, x_i: Tensor, x_j: Tensor, edge_attr: Tensor) -&gt; Tensor:</span>
+
+<span class="sd">        return self.nn(torch.cat([x_i, x_j - x_i, edge_attr], dim=-1))</span>
+
+<span class="sd">    def __repr__(self):</span>
+<span class="sd">        return &#39;{}(nn={})&#39;.format(self.__class__.__name__, self.nn)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GNNGeneric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a><span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Technical Remarks:</span>
+<span class="sd">        </span>
+<span class="sd">        Remember always to use MLP_ALL_ACT in the intermediate blocks, i.e.</span>
+<span class="sd">        MLPs with an activation function also after the last layer.</span>
+<span class="sd">        (otherwise very bad performance may happen for certain message passing / convolution operators).</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="GNNGeneric.SuperEdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SuperEdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SuperEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.EdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.EdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">EdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.DynamicEdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.DynamicEdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">DynamicEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.NNConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.NNConv_">[docs]</a>    <span class="k">def</span> <span class="nf">NNConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.GATConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GATConv_">[docs]</a>    <span class="k">def</span> <span class="nf">GATConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.SplineConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SplineConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SplineConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">elu</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">elu</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">elu</span><span class="p">(</span><span class="n">x3</span><span class="p">)</span>
+
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.SAGEConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SAGEConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SAGEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.SGConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SGConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SGConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+        
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.GINEConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINEConv_">[docs]</a>    <span class="k">def</span> <span class="nf">GINEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>  <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">)</span>
+        <span class="n">x3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">)</span>        
+
+        <span class="c1"># Apply &quot;residual-fusion&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.PANConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.PANConv_">[docs]</a>    <span class="k">def</span> <span class="nf">PANConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Message passing</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span>
+        <span class="n">perm_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">edge_mask_list</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">score_perm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+        <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+
+        <span class="c1"># AFTERDROP, edge_mask_list = self.drop1(edge_index, p=0.5)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="o">=</span><span class="n">edge_mask_list</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">score_perm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+        <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+
+        <span class="c1"># AFTERDROP, edge_mask_list = self.drop2(edge_index, p=0.5)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="o">=</span><span class="n">edge_mask_list</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">score_perm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+        <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_dim</span><span class="p">,</span> <span class="n">c_dim</span><span class="p">,</span> <span class="n">u_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">e_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_dim</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
+        <span class="n">conv_type</span>        <span class="o">=</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">,</span>
+        <span class="n">task</span>             <span class="o">=</span> <span class="s1">&#39;node&#39;</span><span class="p">,</span>
+        <span class="n">global_pool</span>      <span class="o">=</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+        
+        <span class="n">conv_MLP_act</span>     <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">conv_MLP_bn</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">conv_MLP_dropout</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">conv_aggr</span>        <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span>
+        <span class="n">conv_knn</span>         <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        
+        <span class="n">fusion_MLP_act</span>     <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">fusion_MLP_bn</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">fusion_MLP_dropout</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+
+        <span class="n">final_MLP_act</span>      <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">final_MLP_bn</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">final_MLP_dropout</span>  <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+
+        <span class="n">DA_active</span>        <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">DA_alpha</span>         <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">DA_MLP</span>           <span class="o">=</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+
+        <span class="n">DA_MLP_act</span>       <span class="o">=</span> <span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+        <span class="n">DA_MLP_bn</span>        <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">DA_MLP_dropout</span>   <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">GNNGeneric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">=</span> <span class="n">d_dim</span>  <span class="c1"># node feature dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_dim</span> <span class="o">=</span> <span class="n">u_dim</span>  <span class="c1"># graph global feature dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span> <span class="o">=</span> <span class="n">e_dim</span>  <span class="c1"># edge feature dimension</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span> <span class="o">=</span> <span class="n">c_dim</span>  <span class="c1"># number of output classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span>     <span class="o">=</span> <span class="n">c_dim</span>  <span class="c1"># (used elsewhere in icenet)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">=</span> <span class="n">z_dim</span>  <span class="c1"># latent dimension</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span>           <span class="o">=</span> <span class="n">task</span>           <span class="c1"># &#39;node&#39;, &#39;edge&#39;, &#39;graph&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span>    <span class="o">=</span> <span class="n">global_pool</span>    <span class="c1"># &#39;s2s&#39;, &#39;max&#39;, &#39;mean&#39;, &#39;add&#39;</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_active</span>      <span class="o">=</span> <span class="n">DA_active</span>      <span class="c1"># Domain adaptation (True, False)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_alpha</span>       <span class="o">=</span> <span class="n">DA_alpha</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP</span>         <span class="o">=</span> <span class="n">DA_MLP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_act</span>     <span class="o">=</span> <span class="n">DA_MLP_act</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_bn</span>      <span class="o">=</span> <span class="n">DA_MLP_bn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_dropout</span> <span class="o">=</span> <span class="n">DA_MLP_dropout</span>
+
+        <span class="c1"># SuperEdgeConv,   https://arxiv.org/abs/xyz</span>
+        <span class="k">if</span>   <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SuperEdgeConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">,</span> <span class="n">mp_attn_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span>
+                <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span>
+                <span class="n">nn_final</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">,</span> <span class="n">mp_attn_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span>
+                <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span>
+                <span class="n">nn_final</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">SuperEdgeConv</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">,</span> <span class="n">mp_attn_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span>
+                <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span>
+                <span class="n">nn_final</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">))</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SuperEdgeConv_</span>
+
+        <span class="c1"># EdgeConv,        https://arxiv.org/abs/1801.07829</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">EdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EdgeConv_</span>
+
+        <span class="c1"># DynamicEdgeConv, https://arxiv.org/abs/1801.07829</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;DynamicEdgeConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">DynamicEdgeConv</span><span class="p">(</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">conv_knn</span><span class="p">,</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DynamicEdgeConv_</span>
+
+        <span class="c1"># NNConv,          https://arxiv.org/abs/1704.01212</span>
+        <span class="c1"># nn with size [-1, num_edge_features] x [-1, in_channels * out_channels]</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;NNConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">NNConv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">nn</span><span class="o">=</span><span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">conv_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">conv_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">),</span> <span class="n">aggr</span><span class="o">=</span><span class="n">conv_aggr</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NNConv_</span>
+
+        <span class="c1"># GATConv,         https://arxiv.org/abs/1710.10903</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;GATConv&#39;</span><span class="p">:</span>
+
+            <span class="n">heads</span> <span class="o">=</span> <span class="mi">2</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span>         <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="n">heads</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">*</span> <span class="n">heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="n">heads</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">GATConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">*</span> <span class="n">heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="n">heads</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">conv_MLP_dropout</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">*</span> <span class="n">heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GATConv_</span>
+
+        <span class="c1"># SplineConv,      https://arxiv.org/abs/1711.08920</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SplineConv&#39;</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">SplineConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_dim</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SplineConv_</span>
+
+        <span class="c1"># SAGEConv,        https://arxiv.org/abs/1706.02216</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SAGEConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SAGEConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SAGEConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">SAGEConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SAGEConv_</span>
+
+        <span class="c1"># SGConv,          https://arxiv.org/abs/1902.07153</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;SGConv&#39;</span><span class="p">:</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Change this to input parameters</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">SGConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">SGConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">SGConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SGConv_</span>
+            
+        <span class="c1"># GINEConv,        https://arxiv.org/abs/1810.00826, https://arxiv.org/abs/1905.12265</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;GINEConv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">])),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">GINEConv</span><span class="p">(</span><span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">]))</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span>  <span class="o">=</span> <span class="n">MLP_ALL_ACT</span><span class="p">([</span><span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">fusion_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">fusion_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">fusion_MLP_dropout</span><span class="p">)</span>
+           
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GINEConv_</span>
+
+        <span class="c1"># PANConv,         https://arxiv.org/abs/2006.16811</span>
+        <span class="k">elif</span> <span class="n">conv_type</span> <span class="o">==</span> <span class="s1">&#39;PANConv&#39;</span><span class="p">:</span>
+            <span class="n">filter_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">PANConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">filter_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool1</span> <span class="o">=</span> <span class="n">PANXUMPooling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">)</span>
+            <span class="c1"># self.drop1 = PANDropout()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">PANConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">filter_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool2</span> <span class="o">=</span> <span class="n">PANXUMPooling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">)</span>
+            <span class="c1"># self.drop2 = PANDropout()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">PANConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">filter_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool3</span> <span class="o">=</span> <span class="n">PANXUMPooling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PANConv_</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.GraphNetGeneric: Unknown conv_type = </span><span class="si">{</span><span class="n">conv_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ----------------------------------------------------</span>
+        <span class="c1">## Pooling for graph level inference</span>
+        <span class="c1">## Set2Set pooling operation produces always output with 2 x input dimension</span>
+        <span class="c1"># =&gt; use linear layer to project down</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S2Spool</span> <span class="o">=</span> <span class="n">Set2Set</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">processing_steps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_layers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S2Slin</span>  <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">)</span>
+        <span class="c1"># ----------------------------------------------------</span>
+
+        <span class="c1">## Add global feature dimension</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_dim</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_dim</span>
+        
+
+        <span class="c1"># ----------------------------------------------------</span>
+        <span class="c1">## Final MLP</span>
+
+        <span class="c1"># Node level or graph level inference</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">)</span>
+
+        <span class="c1"># 2-point (node) probability computation function (edge level inference)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_asymmetric&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_symmetric&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span> <span class="o">=</span>  <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_dim</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">],</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">final_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">final_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">final_MLP_dropout</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.GraphNetGeneric: Unknown task = </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s1"> parameter&#39;</span><span class="p">)</span>
+        <span class="c1"># ----------------------------------------------------</span>
+
+        <span class="c1">### Domain adaptation via gradient reversal</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_active</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DA_grad_reverse</span>  <span class="o">=</span> <span class="n">GradientReversal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DA_alpha</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_net</span>       <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">c_dim</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">MLP_dim</span> <span class="o">+</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_dropout</span><span class="p">)</span>
+
+        <span class="c1"># ----------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="GNNGeneric.forward_2pt"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_2pt">[docs]</a>    <span class="k">def</span> <span class="nf">forward_2pt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MLP decoder of two-point correlations (edges)</span>
+
+<span class="sd">        Because this function is not (necessarily) permutation symmetric between edge_index[0] and [1],</span>
+<span class="sd">        we can learn (in principle) a directed or undirected edge (adjacency) behavior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Not permutation symmetric under i &lt;-&gt; j exchange</span>
+        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_asymmetric&#39;</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">...</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Permutation symmetric under i &lt;-&gt; j exchange</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;edge_symmetric&#39;</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GNNGeneric.GINE_helper"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINE_helper">[docs]</a>    <span class="k">def</span> <span class="nf">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GINEConv requires node features and edge features with the same dimension.</span>
+<span class="sd">        Increase dimensionality here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">D_n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">D_e</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">D_n</span> <span class="o">&gt;</span> <span class="n">D_e</span><span class="p">:</span>
+            <span class="n">lin</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">D_n</span><span class="p">)</span>
+            <span class="n">x</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">lin</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">D_e</span> <span class="o">&gt;</span> <span class="n">D_n</span><span class="p">:</span>
+            <span class="n">lin</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">D_e</span><span class="p">)</span>
+            <span class="n">x</span>   <span class="o">=</span> <span class="n">lin</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span>
+
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span></div>
+        
+<div class="viewcode-block" id="GNNGeneric.forward_with_DA"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_with_DA">[docs]</a>    <span class="k">def</span> <span class="nf">forward_with_DA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward call with Domain Adaptation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span> <span class="c1"># GNN-convolution to final inference net</span>
+        
+        <span class="n">x</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_grad_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x_DA</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DA_MLP_net</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>           <span class="c1"># Domain adaptation (source, target) discriminator net</span>
+
+        <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">x_DA</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Create virtual null batch if singlet graph input</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;batch&#39;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">))</span>
+        
+        <span class="c1">## Apply GNN message passing layers</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1">## Global node feature pooling (to handle graph level classification)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;graph&#39;</span><span class="p">:</span>
+            <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;s2s&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Spool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S2Slin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_max_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_add_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">global_mean_pool</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.forward: Unknown global_pool &lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_pool</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># ===========================================</span>
+        <span class="k">if</span> <span class="n">conv_only</span><span class="p">:</span> <span class="c1"># Return convolution part</span>
+            <span class="k">return</span> <span class="n">x</span>
+        <span class="c1"># ===========================================</span>
+
+        <span class="c1"># Final inference net</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="GNNGeneric.inference"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Final inference network forward call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## Global features concatenated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_dim</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_dim</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1">## Final MLP map</span>
+        
+        <span class="c1"># Edge level inference</span>
+        <span class="k">if</span> <span class="s1">&#39;edge&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_2pt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
+
+        <span class="c1"># Node or graph level inference</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">x</span></div>
+
+    <span class="c1"># Returns softmax probability</span>
+<div class="viewcode-block" id="GNNGeneric.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1">#if self.training:</span>
+        <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
+        <span class="c1">#else:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

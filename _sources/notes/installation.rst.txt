@@ -22,7 +22,7 @@ Pre-installed CUDA paths (optional)
 
 	source /vols/software/cuda/setup.sh 11.2.0
 
-This can be used with IC machines, however, is not needed with conda driven setup.
+This can be used with IC machines in principle, however, is not needed with Conda driven setup.
 
 
 Automated setup
@@ -42,16 +42,17 @@ Execute
 	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
 	# Create environment
-	conda create -y --name icenet python==3.9.16
+	conda create -y --name icenet python==3.11.1
 	conda activate icenet
 	
 	# Install cudatoolkit and cudnn (make sure no other installations overlap)
-	conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
-	conda install -c conda-forge cudatoolkit-dev
+	conda install -c nvidia cudatoolkit==11.7.0
+	conda install -c conda-forge cudnn==8.4.1.50 cudatoolkit-dev==11.7.0
 	
 	# Install dependencies with pip
 	pip install -r requirements.txt
-	(OR pip install -r requirements-cpu-only.txt)
+	
+	(OR pip install -r requirements-cpu-only.txt e.g. for Github Actions)
 
 
 Initialize the environment
@@ -101,13 +102,13 @@ Show the graphics card status
 
 .. code-block:: none
 	
-	nvidia-smi	
+	nvidia-smi
 
 Show CUDA-compiler tools status
 
 .. code-block:: none
 	
-	nvcc --version	
+	nvcc --version
 
 Show Tensorflow and Pytorch GPU support in Python
 
@@ -136,7 +137,7 @@ Conda virtual environment commands
 -----------------------------------
 .. code-block:: none
 
-	conda create -y --name icenet python==3.9.6
+	conda create -y --name icenet python==3.X.Y
 	conda activate icenet
 
 	...[install dependencies with pip, do your work]...

@@ -31,12 +31,12 @@ If you use this work in your research (especially if you find algorithms or idea
 
 ::
 
-    @misc{mieskolainen2022icenet,
+    @misc{mieskolainen2023icenet,
       author = "{Mikael Mieskolainen}",
-      title  = "icenet: a deep learning library",
-      year   = "2022",
+      title  = "ICENET: a deep learning library for HEP",
+      year   = "2023",
       url    = "https://github.com/mieskolainen/icenet",
-      note   = "[Online code; accessed XX-YY-2022]"
+      note   = "[Online code; accessed XX-YY-2023]"
     }
 
 
