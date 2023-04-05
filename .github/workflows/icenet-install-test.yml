@@ -16,11 +16,11 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11.1'
+          python-version: '3.10.10'
       
       ## Install GPU tools
-      # conda install -c nvidia cudatoolkit==11.3.1 cudnn==8.2.1
-      # conda install -c conda-forge cudatoolkit-dev
+	    #conda install -c nvidia cudatoolkit==11.7.0
+	    #conda install -c conda-forge cudnn==8.4.1.50 cudatoolkit-dev==11.7.0
       
       # Install conda packages
       
@@ -33,26 +33,26 @@ jobs:
           pip install -r requirements-github-actions-2.txt
       
       ## Docs building
-      #- name: Build docs
-      #  run: |
-      #    if [ -e yarn.lock ]; then
-      #    yarn install --frozen-lockfile
-      #    elif [ -e package-lock.json ]; then
-      #    npm ci
-      #    else
-      #    npm i
-      #    fi
-      #    npm run build
-      #    make -C docs/ clean
-      #    make -C docs/ html
-      #    touch docs/build/html/.nojekyll
+      - name: Build docs
+        run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npm run build
+          make -C docs/ clean
+          make -C docs/ html
+          touch docs/build/html/.nojekyll
 
       ## Release to gh-pages
-      #- name: Release docs to GitHub Pages
-      #  uses: peaceiris/actions-gh-pages@v3
-      #  with:
-      #    github_token: ${{ secrets.GITHUB_TOKEN }}
-      #    publish_dir: ./docs/build/html/
+      - name: Release docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
       
       ## Unit tests
       - name: Unit tests
@@ -68,4 +68,5 @@ jobs:
           source setenv.sh && maxevents=10000; source tests/runme_eid_deep.sh
           source setenv.sh && maxevents=10000; source tests/runme_eid_visual.sh
           source setenv.sh && maxevents=10000; source tests/runme_trg.sh
-      ## source setenv.sh && maxevents=10000; source tests/r
+      ## source setenv.sh && maxevents=10000; source tests/runme_brk.sh
+      
