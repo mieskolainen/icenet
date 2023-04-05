@@ -28,7 +28,7 @@ awkward==2.1.1
 vector==1.0.0
 
 # SCIPY & friends
-pandas==2.0.0
+pandas==1.5.3
 scipy==1.10.1
 matplotlib==3.7.1
 numpy==1.23.5 # Do not go over >= 1.24.0
