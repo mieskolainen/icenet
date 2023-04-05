@@ -1,5 +1,5 @@
 # Installation without GPU
 
+-r requirements-aux.txt
 -r requirements-github-actions-1.txt
 -r requirements-github-actions-2.txt
--r requirements-aux.txt
