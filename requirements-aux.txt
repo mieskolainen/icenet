@@ -59,7 +59,7 @@ termcolor==2.2.0
 jupyter==1.0.0
 
 # DOCS and TESTING
-sphinx==5.1.1
+sphinx==6.1.3
 sphinx_rtd_theme
 sphinxawesome-theme
 pytest==7.2.2

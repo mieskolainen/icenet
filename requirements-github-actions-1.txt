@@ -1,5 +1,8 @@
 # Github actions CI requirements 1/2 (need to be separate files)
 
+# AUX
+-r requirements-aux.txt
+
 # PYTORCH
 torch==2.0.0
 torchvision==0.15.1
