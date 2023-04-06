@@ -1,6 +1,6 @@
 # ROOT file processing tools
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
 import uproot
@@ -21,8 +21,20 @@ from icenet.tools import iceroot
 from icenet.tools.icemap import icemap
 
 
-#@ray.remote
 def read_MC(process_func, process, root_path, param, class_id):
+    """
+    Loop over different MC processes as defined in the yaml files
+    
+    Args:
+        process_func:  data processing function
+        process:       MC process dictionary (from yaml)
+        root_path:     main path of files
+        param:         parameters of 'process_func'
+        class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+    
+    Returns:
+        X, Y, W, ids, info (awkward array format)
+    """
 
     print(__name__ + f'.read_MC: {process}')
 
@@ -40,7 +52,6 @@ def read_MC(process_func, process, root_path, param, class_id):
     print(root_path)
 
     rootfile     = io.glob_expand_files(datasets=datasets, datapath=root_path)
-
     
     # Custom scale event statistics
     if param['maxevents'] is None:
