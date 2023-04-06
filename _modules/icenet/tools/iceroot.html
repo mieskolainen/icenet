@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.3
+                0.0.8.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional">Pre-installed CUDA paths (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional-deprecated">Pre-installed CUDA paths (optional, deprecated)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
@@ -724,11 +724,13 @@
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
         
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span>
-
+    
     <span class="k">elif</span> <span class="n">library</span> <span class="o">==</span> <span class="s1">&#39;ak&#39;</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: maxevents is None, setting maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        
         <span class="c1"># Non-multiprocessed version for single files</span>
         
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

@@ -11,12 +11,12 @@ Preliminaries: Conda installation
 ----------------------------------
 .. code-block:: none
 
-	wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 
+	wget https://repo.anaconda.com/archive/Anaconda3-2023.03-Linux-x86_64.sh 
 
 Then execute the installer with ``bash filename.sh``.
 
 
-Pre-installed CUDA paths (optional)
+Pre-installed CUDA paths (optional, deprecated)
 ------------------------------------
 .. code-block:: none
 
@@ -42,7 +42,7 @@ Execute
 	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
 	# Create environment
-	conda create -y --name icenet python==3.11.1
+	conda create -y --name icenet python==3.10.10
 	conda activate icenet
 	
 	# Install cudatoolkit and cudnn (make sure no other installations overlap)
