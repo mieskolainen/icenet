@@ -4,11 +4,8 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
-import uproot
 from tqdm import tqdm
-import psutil
 import copy
-import os
 import pickle
 
 from termcolor import colored, cprint

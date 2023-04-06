@@ -14,7 +14,9 @@ sys.path.append(".")
 from icenet.tools import iceroot
 from icenet.tools import io
 
-path     = '/home/user/travis-stash/input/icedqcd'
+#path     = '/home/user/travis-stash/input/icedqcd'
+path     = '/vols/cms/mc3909'
+
 datasets = 'bparkProductionV2/HiddenValley_vector_m_10_ctau_10_xiO_1_xiL_1_privateMC_11X_NANOAODSIM_v2_generationForBParking/output_1.root'
 key      = 'Events;1'
 

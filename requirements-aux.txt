@@ -28,6 +28,7 @@ awkward==2.1.1
 vector==1.0.0
 
 # SCIPY & friends
+# 1.5.3 required by icehnl pandas dataframe pickle file (2.0.0 won't work)
 pandas==1.5.3
 scipy==1.10.1
 matplotlib==3.7.1

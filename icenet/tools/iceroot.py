@@ -286,11 +286,13 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
         print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
         
         return X, ids
-
+    
     elif library == 'ak':
 
-        if maxevents is None: maxevents = int(1e10)
-
+        if maxevents is None:
+            maxevents = int(1e10)
+            cprint(__name__ + f'.load_tree: maxevents is None, setting maxevents = {maxevents}', 'red')
+        
         # Non-multiprocessed version for single files
         
         if len(files) == 1:
