@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.4
+                0.0.8.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -438,7 +438,7 @@
   <h1>Source code for icenet.tools.iceroot</h1><div class="highlight"><pre>
 <span></span><span class="c1"># ROOT file processing tools</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2022</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
@@ -459,8 +459,20 @@
 <span class="kn">from</span> <span class="nn">icenet.tools.icemap</span> <span class="kn">import</span> <span class="n">icemap</span>
 
 
-<span class="c1">#@ray.remote</span>
 <div class="viewcode-block" id="read_MC"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_MC">[docs]</a><span class="k">def</span> <span class="nf">read_MC</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">class_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loop over different MC processes as defined in the yaml files</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        process_func:  data processing function</span>
+<span class="sd">        process:       MC process dictionary (from yaml)</span>
+<span class="sd">        root_path:     main path of files</span>
+<span class="sd">        param:         parameters of &#39;process_func&#39;</span>
+<span class="sd">        class_id:      class identifier (integer), e.g. 0, 1, 2 ...</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        X, Y, W, ids, info (awkward array format)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_MC: </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -478,7 +490,6 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
 
     <span class="n">rootfile</span>     <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
-
     
     <span class="c1"># Custom scale event statistics</span>
     <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

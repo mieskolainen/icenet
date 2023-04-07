@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.4
+                0.0.8.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -665,7 +665,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">u_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)):</span>
-                <span class="n">xx</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">xx</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">ev</span><span class="p">][</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]]])</span> <span class="c1"># outer [] for protection</span>
                 <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">[]:</span> <span class="n">u_mat</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span>
             
             <span class="n">u_mat</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">u_mat</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span> <span class="c1"># Input protection</span>
@@ -673,7 +673,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
+    
     <span class="c1">#print(__name__ + f&#39;.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)&#39;)        </span>
     
     <span class="k">return</span> <span class="n">dataset</span></div>

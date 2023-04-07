@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.0.8.4
+                0.0.8.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -3014,7 +3014,22 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.read_MC">
 <span class="sig-name descname"><span class="pre">read_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_MC" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Loop over different MC processes as defined in the yaml files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>process_func</strong> – data processing function</p></li>
+<li><p><strong>process</strong> – MC process dictionary (from yaml)</p></li>
+<li><p><strong>root_path</strong> – main path of files</p></li>
+<li><p><strong>param</strong> – parameters of ‘process_func’</p></li>
+<li><p><strong>class_id</strong> – class identifier (integer), e.g. 0, 1, 2 …</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>X, Y, W, ids, info (awkward array format)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple_MC">
