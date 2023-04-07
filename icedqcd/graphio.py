@@ -227,7 +227,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
         else:
             u_mat = np.zeros(len(features), dtype=float)
             for j in range(len(features)):
-                xx = ak.to_numpy(X[ev][features[j]])
+                xx = ak.to_numpy([X[ev][features[j]]]) # outer [] for protection
                 if xx is not []: u_mat[j] = xx
             
             u_mat[~np.isfinite(u_mat)] = null_value # Input protection
@@ -235,7 +235,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
 
         data = Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u)
         dataset.append(data)
-
+    
     #print(__name__ + f'.parse_graph_data: Empty events: {num_empty} / {num_events} = {num_empty/num_events:0.5f} (using only global data u)')        
     
     return dataset
