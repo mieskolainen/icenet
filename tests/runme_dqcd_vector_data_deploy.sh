@@ -15,9 +15,4 @@ DATAPATH="/vols/cms/mc3909"
 ulimit -s unlimited # stack
 #ulimit -v unlimited # virtual memory
 
-# Use * or other glob wildcards for filenames
-
-# This needs to be executed only once
-#python configs/dqcd/include/ymlgen.py --process 'data' --filerange '*' --outputfile configs/dqcd/include/data_deploy.yml
-
 python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/data_deploy.yml' --modeltag vector_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH

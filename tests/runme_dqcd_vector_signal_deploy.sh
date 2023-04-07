@@ -15,8 +15,4 @@ DATAPATH="/vols/cms/mc3909"
 #GRID_ID=0
 #GRID_NODES=1
 
-# This needs to be executed only once
-#python configs/dqcd/include/ymlgen.py --process 'vector' --filerange '[6-100000]' --outputfile configs/dqcd/include/vector_deploy.yml
-
-# Use * or other glob wildcards for filenames
 python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/vector_deploy.yml' --modeltag vector_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH
