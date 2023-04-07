@@ -1,6 +1,6 @@
 # Deploy MVA-model to data (or MC) files (work in progress, not all models supported ...)
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import matplotlib.pyplot as plt
 import os
@@ -11,7 +11,7 @@ import awkward as ak
 import pickle
 import uproot
 import logging
-import shap
+import shap2
 import xgboost
 import copy
 import socket
@@ -31,16 +31,16 @@ from tqdm import tqdm
 
 def generate_cartesian_param(ids):
     """
-    Generate cartesian array for the theory model parameters
+    Generate cartesian N-dim array for the theory model parameter conditional sampling
 
     Note. Keep the order m, ctau, xiO, xiL
     """
 
     values    = {'m':    np.round(np.array([2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
-                 'ctau': np.round(np.array([10, 25, 50, 75, 100, 250, 500]), 1),
+                 'ctau': np.round(np.array([1.0, 10, 25, 50, 75, 100, 250, 500]), 1),
                  'xiO':  np.round(np.array([1.0, 2.5]), 1),
                  'xiL':  np.round(np.array([1.0, 2.5]), 1)}
-
+    
     CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
 
     pindex    = np.zeros(4, dtype=int)
@@ -71,6 +71,8 @@ def zscore_normalization(X, args):
     return X
 
 def process_data(args):
+
+    print(args)
 
     ## ** Special YAML loader here **
     from libs.ccorp.ruamel.yaml.include import YAML
@@ -103,7 +105,7 @@ def process_data(args):
 
     basepath = aux.makedir(f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}")
 
-    nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
+    nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--grid_id__{args['grid_id']}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
@@ -127,7 +129,19 @@ def process_data(args):
         # Loop over the files
         total_num_events = 0
 
-        for k in range(len(rootfiles)):
+        # ----------------------------------
+        # GRID (batch) processing
+        all_file_id = aux.split_start_end(range(len(rootfiles)), args['grid_nodes'])
+
+        try:
+            file_id = all_file_id[args['grid_id']]
+            print(__name__ + f".deploy: file_id = {file_id} (grid_id = {args['grid_id']})")
+        except:
+            logging.debug('No processing under this grid PC node -- continue')
+            continue # This subfolder is already saturated on the grid processing, i.e. grid_id > len(all_file_id)
+        # ----------------------------------
+        
+        for k in range(file_id[0], file_id[-1]):
 
             filename = rootfiles[k]
             param = {
@@ -256,10 +270,10 @@ def process_data(args):
                             pred = aux.unmask(x=pred, mask=mask, default_value=-1)
 
                             # ----------------------------
-                            # Import SHAP
+                            # Import SHAP library
                             
                             """
-                            explainer   = shap.Explainer(model, feature_names=ids)
+                            explainer   = shap2.Explainer(model, feature_names=ids)
                             maxEvent    = 3
                             shap_values = explainer(XX[0:maxEvent,:])
                             

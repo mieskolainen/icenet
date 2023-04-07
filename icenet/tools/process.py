@@ -61,6 +61,10 @@ def read_cli():
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_cache",       type=int,  default=1)
+
+    parser.add_argument("--grid_id",         type=int,  default=0)
+    parser.add_argument("--grid_nodes",      type=int,  default=1)
+    
     parser.add_argument("--inputmap",        type=str,  default=None)
     parser.add_argument("--modeltag",        type=str,  default=None)
     
@@ -199,14 +203,16 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args['modeldir']   = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/modeltag__{cli_dict["modeltag"]}')
     args['plotdir']    = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{cli_dict["modeltag"]}')
     
-    args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)
-    
+    args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
     # Technical
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__raytune_running__'] = False
 
-
+    # Distributed computing
+    for key in ['grid_id', 'grid_nodes']:
+        args[key] = cli_dict[key]
+    
     # -------------------------------------------------------------------
     ## Create directories
     aux.makedir('tmp')

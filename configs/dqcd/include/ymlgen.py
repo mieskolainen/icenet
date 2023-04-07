@@ -294,38 +294,52 @@ def QCD(outputfile, filerange='*'):
 
 def data(outputfile, filerange='*'):
 
-  process         = 'ParkingData'
+  processes = [ \
+  {'path':     'bparkProductionAll_V1p0',
+   'process':  'ParkingBPH1_Run2018B',
+   'end_name': 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1p0_generationSync',
+  }
+  ,
   
-  # ------------------------------------------
-  # Basic
-  filename        = f'output_{filerange}.root'
-  path            = 'bparkProductionAll_V1p0'
-  end_name        = 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1p0_generationSync'
-  xs              = 'null'
-  force_xs        = 'false'
-  isMC            = 'false'
-  maxevents_scale = '1.0'
-  # ------------------------------------------
-  
+  {'path':     'bparkProductionAll_V1p0',
+   'process':  'ParkingBPH1_Run2018C',
+   'end_name': 'ParkingBPH1_Run2018C-05May2019-v1_MINIAOD_v1p0_generationSync',
+  } ]
+
   rp = {}
   rp['m']         = ['null']
   rp['ctau']      = ['null'] 
   rp['xi_pair']   = [['null', 'null']]
   rp['xi2str']    = ['null']
+  
+  for i in range(len(processes)):
 
-  param = {
-    'outputfile':      outputfile,
-    'rp':              rp,
-    'process':         process,
-    'path':            path,
-    'end_name':        end_name,
-    'filename':        filename,
-    'xs':              xs,
-    'force_xs':        force_xs,
-    'isMC':            isMC,
-    'maxevents_scale': maxevents_scale
-  }
-  printer(**param)
+    # ------------------------------------------
+    # Basic
+    filename        = f'output_{filerange}.root'
+    force_xs        = 'false'
+    isMC            = 'false'
+    xs              = 'null'
+    maxevents_scale = '1.0'
+    # ------------------------------------------
+
+    param = {
+      'outputfile':      outputfile,
+      'rp':              rp,
+      'process':         processes[i]['process'],
+      'path':            processes[i]['path'],
+      'end_name':        processes[i]['end_name'],
+      'filename':        filename,
+      'xs':              xs,
+      'force_xs':        force_xs,
+      'isMC':            isMC,
+      'maxevents_scale': maxevents_scale
+    }
+
+    if i == 0:
+      printer(**param)
+    else:
+      printer(**param, flush_index=i)
 
 if __name__ == '__main__':
 

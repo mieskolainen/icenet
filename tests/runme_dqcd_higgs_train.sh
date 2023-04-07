@@ -16,10 +16,9 @@ if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Set system memory limits
 ulimit -s unlimited # stack
-ulimit -v unlimited # virtual memory
+#ulimit -v unlimited # virtual memory
 
 # Use * or other glob wildcards for filenames
-# tee redirect output to both a file and to screen
 
 # Generate steering YAML for QCD
 python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'

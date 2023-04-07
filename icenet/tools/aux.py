@@ -459,6 +459,9 @@ def split(a, n):
     Example:
         list(split(10, 3))
     """
+    if len(a) < n: # Overflow protection
+        n = len(a)
+    
     k, m = divmod(len(a), n)
     return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
