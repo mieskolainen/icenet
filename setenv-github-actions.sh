@@ -6,4 +6,3 @@ export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 ulimit -s unlimited  # stack
 #ulimit -u 131072     # num of threads
 #ulimit -v unlimited # virtual memory
-
