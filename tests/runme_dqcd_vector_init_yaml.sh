@@ -7,8 +7,8 @@
 # Run with: source runme.sh
 
 # Training
-python configs/dqcd/include/ymlgen.py --process 'QCD'    --filerange '[0-10]'
-python configs/dqcd/include/ymlgen.py --process 'vector' --filerange '[0-5]'
+python configs/dqcd/include/ymlgen.py --process 'QCD'    --filerange '[0-10]'      --outputfile configs/dqcd/include/QCD.yml
+python configs/dqcd/include/ymlgen.py --process 'vector' --filerange '[0-5]'       --outputfile configs/dqcd/include/vector.yml
 
 # Deployment
 python configs/dqcd/include/ymlgen.py --process 'QCD'    --filerange '[11-100000]' --outputfile configs/dqcd/include/QCD_deploy.yml

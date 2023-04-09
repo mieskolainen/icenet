@@ -1,0 +1,62 @@
+# iceqsub setup
+# 
+# See: https://www.hep.ph.ic.ac.uk/private/computing/sge.shtml
+# 
+# m.mieskolainen@imperial.ac.uk, 2023
+
+jobs:
+
+  hello_world:
+    
+    cwd: 'tests/hello_world.sh'
+    t: '1-3:1'         # array (sub)jobs
+    h_vmem: '12G'      # virtual memory ~ 3 x real RAM required
+    h_rt: '10:00:00'   # maximum running time
+    q: 'hep.q'         # 'hep.q' for CPU only, 'gpu.q@lxcgpu*' for Nvidia-V100 (faster) or 'gpu.q@lxbgpu*' for Nvidia-P100
+    pe: null           # GPU nodes have all cores available, 'hep.pe 8' for 8-core job
+    S: null            # special shell, e.g. '/usr/bin/python'
+    m: 'a'             # email (a for aborted, e for execute, one can combine e.g. ea)
+  
+  dqcd_vector_train:
+
+    cwd: 'tests/runme_dqcd_vector_train.sh'
+    t: null            
+    h_vmem: null       
+    h_rt: '24:00:00'   
+    q: 'gpu.q@lxcgpu*'
+    pe: null           
+    S: null           
+    m: 'a'             
+
+  dqcd_vector_signal:
+    
+    cwd: 'tests/runme_dqcd_vector_signal_deploy.sh'
+    t: '1-20:1'
+    h_vmem: '12G'
+    h_rt: '10:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+  
+  dqcd_vector_qcd:
+
+    cwd: 'tests/runme_dqcd_vector_qcd_deploy.sh'
+    t: '1-80:1'
+    h_vmem: '12G'
+    h_rt: '10:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+  
+  dqcd_vector_data:
+
+    cwd: 'tests/runme_dqcd_vector_data_deploy.sh'
+    t: '1-80:1'
+    h_vmem: '12G'
+    h_rt: '10:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
