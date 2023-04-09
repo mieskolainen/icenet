@@ -6,6 +6,9 @@
 #
 # Run with: source runme.sh
 
+conda activate icenet
+source setenv.sh
+
 # Training
 python configs/dqcd/include/ymlgen.py --process 'QCD'    --filerange '[0-10]'      --outputfile configs/dqcd/include/QCD.yml
 python configs/dqcd/include/ymlgen.py --process 'vector' --filerange '[0-5]'       --outputfile configs/dqcd/include/vector.yml
