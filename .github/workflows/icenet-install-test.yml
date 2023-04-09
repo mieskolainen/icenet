@@ -64,19 +64,19 @@ jobs:
         run: |
           git clone https://github.com/mieskolainen/travis-stash.git
 
-          source setenv.sh && maxevents=10000; source tests/runme_hnl.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_hnl.sh
           
-          source setenv.sh && maxevents=10000; source tests/runme_eid.sh
-          source setenv.sh && maxevents=10000; source tests/runme_eid_deep.sh
-          source setenv.sh && maxevents=10000; source tests/runme_eid_visual.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
           
-          source setenv.sh && maxevents=10000; source tests/runme_trg.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
         
-        ## source setenv.sh && maxevents=10000; source tests/runme_brk.sh
+        ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh
         
-        ## source setenv.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh
+        ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh
         
-        ## source setenv.sh && maxevents=10000; source tests/runme_hgcal_cnd.sh
+        ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_hgcal_cnd.sh
         
-        ## source setenv.sh && maxevents=10000; source tests/runme_hgcal_trk.sh
+        ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_hgcal_trk.sh
 
