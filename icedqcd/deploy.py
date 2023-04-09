@@ -136,8 +136,8 @@ def process_data(args):
         try:
             file_id = all_file_id[args['grid_id']]
             print(__name__ + f".deploy: file_id = {file_id} (grid_id = {args['grid_id']})")
-        except:
-            logging.debug('No processing under this grid PC node -- continue')
+        except Exception as e:
+            logging.debug('Subfolder already saturated -- no processing under this grid PC node -- continue')
             continue # This subfolder is already saturated on the grid processing, i.e. grid_id > len(all_file_id)
         # ----------------------------------
         
@@ -161,7 +161,7 @@ def process_data(args):
                 logging.debug(f'{filename} | Number of events: {len(X_nocut)}')
                 total_num_events += len(X_nocut)
 
-            except, e:
+            except Exception as e:
                 cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
                 
                 # Write to log-file
@@ -202,8 +202,8 @@ def process_data(args):
                 Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
                 W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
                 data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_nocut, args=args, skip_graph=True)
-            except, e:
-
+            except Exception as e:
+		
                 # Something went wrong at OS level (e.g. memory), write to log-file and exit with error
                 logging.debug(f'{filename} | A fatal error in common.splitfactor -- os._exit(os.EX_OSERR): ' + str(e))
                 os._exit(os.EX_OSERR)
