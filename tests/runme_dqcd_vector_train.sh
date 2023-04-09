@@ -14,10 +14,6 @@ CONDITIONAL=1
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-# Set system memory limits
-ulimit -s unlimited # stack
-#ulimit -v unlimited # virtual memory
-
 # Use * or other glob wildcards for filenames
 python analysis/dqcd.py --runmode genesis  $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH
 python analysis/dqcd.py --runmode train    $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

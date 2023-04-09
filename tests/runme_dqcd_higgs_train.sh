@@ -14,10 +14,6 @@ CONDITIONAL=1
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-# Set system memory limits
-ulimit -s unlimited # stack
-#ulimit -v unlimited # virtual memory
-
 # Use * or other glob wildcards for filenames
 
 # Generate steering YAML for QCD

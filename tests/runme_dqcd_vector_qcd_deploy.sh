@@ -11,8 +11,4 @@ DATAPATH="/vols/cms/mc3909"
 #GRID_ID=0
 #GRID_NODES=1
 
-# Set system memory limits
-ulimit -s unlimited # stack
-#ulimit -v unlimited # virtual memory
-
 python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/QCD_deploy.yml' --modeltag vector_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH

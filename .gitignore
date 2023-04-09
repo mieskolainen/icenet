@@ -11,6 +11,8 @@
 #*.json
 #*.txt
 
+core.*
+
 travis-stash/
 dataset/
 tensorboard/

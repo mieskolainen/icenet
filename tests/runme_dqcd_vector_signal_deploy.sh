@@ -3,10 +3,6 @@
 # Execute distributed deployment for the DQCD analysis
 # Run with: source runme.sh
 
-# Set system memory limits
-ulimit -s unlimited # stack
-#ulimit -v unlimited # virtual memory
-
 CONFIG="tune0.yml"
 #DATAPATH="/home/user/travis-stash/input/icedqcd"
 DATAPATH="/vols/cms/mc3909"

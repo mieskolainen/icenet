@@ -15,10 +15,6 @@ CMD="python analysis/dqcd.py"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-# Set system memory limits
-ulimit -s unlimited # stack
-ulimit -v unlimited # virtual memory
-
 # Generate steering YAML for QCD
 python configs/dqcd/include/ymlgen.py --process 'QCD'        --filerange '[0-10]'
 
