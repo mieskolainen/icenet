@@ -37,10 +37,10 @@ def generate_cartesian_param(ids):
     """
 
     values    = {'m':    np.round(np.array([2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
-                 'ctau': np.round(np.array([1.0, 10, 25, 50, 75, 100, 250, 500]), 1),
-                 'xiO':  np.round(np.array([1.0, 2.5]), 1),
-                 'xiL':  np.round(np.array([1.0, 2.5]), 1)}
-    
+                 'ctau': np.round(np.array([1.0, 5.0, 10, 25, 50, 75, 100, 250, 500]), 1),
+                 'xiO':  np.round(np.array([1.0]), 1),
+                 'xiL':  np.round(np.array([1.0]), 1)}
+
     CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
 
     pindex    = np.zeros(4, dtype=int)
@@ -48,7 +48,7 @@ def generate_cartesian_param(ids):
     pindex[1] = ids.index('MODEL_ctau')
     pindex[2] = ids.index('MODEL_xiO')
     pindex[3] = ids.index('MODEL_xiL')
-
+    
     return CAX, pindex
 
 def f2s(value):
@@ -161,13 +161,13 @@ def process_data(args):
                 logging.debug(f'{filename} | Number of events: {len(X_nocut)}')
                 total_num_events += len(X_nocut)
 
-            except:
-                cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}"', 'red')
+            except, e:
+                cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
                 
                 # Write to log-file
-                logging.debug(f'{filename} | A fatal error in iceroot.load_tree !')
+                logging.debug(f'{filename} | A fatal error in iceroot.load_tree: ' + str(e))
                 continue
-
+            
             # -------------------------------------------------
             # Add conditional (theory param) variables
             model_param = {'m': 0.0, 'ctau': 0.0, 'xiO': 0.0, 'xiL': 0.0}
@@ -198,9 +198,15 @@ def process_data(args):
             # ------------------
             # Phase 3: Convert to icenet dataformat
 
-            Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
-            W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
-            data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_nocut, args=args, skip_graph=True)
+            try:
+                Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
+                W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
+                data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_nocut, args=args, skip_graph=True)
+            except, e:
+
+                # Something went wrong at OS level (e.g. memory), write to log-file and exit with error
+                logging.debug(f'{filename} | A fatal error in common.splitfactor -- os._exit(os.EX_OSERR): ' + str(e))
+                os._exit(os.EX_OSERR)
             
             # ------------------
             # Phase 4: Apply MVA-models
