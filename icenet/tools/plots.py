@@ -932,11 +932,14 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             # Plot corresponding threshold points
             if plot_thresholds:
                 
-                for eff in thr_points_signal:
-                    index = np.argmin(np.abs(tpr - eff))
-                    if fpr[index] >= xmin and fpr[index] <= 1.0:
-                        plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
-                        plt.text(x=fpr[index], y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+                try:
+                    for eff in thr_points_signal:
+                        index = np.argmin(np.abs(tpr - eff))
+                        if fpr[index] >= xmin and fpr[index] <= 1.0:
+                            plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
+                            plt.text(x=fpr[index], y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+                except: # If failed
+                    True
         
         ax.set_xlabel('False Positive Rate $\\alpha$ (background efficiency)')
         ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
