@@ -845,14 +845,17 @@ def draw_error_band(ax, x, y, x_err, y_err, **kwargs):
     ax.add_patch(PathPatch(path, **kwargs))
 
 
-def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, xmin=1.0e-4, alpha=0.32):
+def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
+    thr_points_signal = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95], \
+    filename = 'ROC', legend_fontsize=7, xmin=1.0e-4, alpha=0.32):
     """
     Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)
-
     Args:
         metrics:
         labels:
         title:
+        plot_thresholds:
+        thr_points_signal: 
         filename:
         legend_fontsize:
         xmin:
@@ -879,8 +882,9 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
 
-            fpr    = metrics[i].fpr
-            tpr    = metrics[i].tpr
+            fpr        = metrics[i].fpr
+            tpr        = metrics[i].tpr
+            thresholds = metrics[i].thresholds
 
             if metrics[i].tpr_bootstrap is not None:
 
@@ -904,12 +908,9 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
             elif not (isinstance(fpr, int) or isinstance(fpr, float)):
                 fpr    = fpr[1:] # Remove always the first element for log-plot reasons
                 tpr    = tpr[1:]
-
                 if metrics[i].tpr_bootstrap is not None:
-
                     tpr_lo = tpr_lo[1:]
                     tpr_hi = tpr_hi[1:]
-
                     fpr_lo = fpr_lo[1:]
                     fpr_hi = fpr_hi[1:]
             """
@@ -928,6 +929,14 @@ def ROC_plot(metrics, labels, title = '', filename = 'ROC', legend_fontsize=7, x
                 #   y_err=np.std(metrics[i].tpr_bootstrap, axis=0)[1:], \
                 #   facecolor=f'C{i}', edgecolor="none", alpha=0.2)
 
+            # Plot corresponding threshold points
+            if plot_thresholds:
+                
+                for eff in thr_points_signal:
+                    index = np.argmin(np.abs(tpr - eff))
+                    plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
+                    plt.text(x=fpr[index]*1.01, y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+        
         ax.set_xlabel('False Positive Rate $\\alpha$ (background efficiency)')
         ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
         ax.set_title(title, fontsize=10)
