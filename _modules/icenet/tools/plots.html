@@ -1283,14 +1283,17 @@
     <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">PathPatch</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">):</span>
+<div class="viewcode-block" id="ROC_plot"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a><span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">plot_thresholds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
+    <span class="n">thr_points_signal</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> \
+    <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Receiver Operating Characteristics i.e. False positive (x) vs True positive (y)</span>
-
 <span class="sd">    Args:</span>
 <span class="sd">        metrics:</span>
 <span class="sd">        labels:</span>
 <span class="sd">        title:</span>
+<span class="sd">        plot_thresholds:</span>
+<span class="sd">        thr_points_signal: </span>
 <span class="sd">        filename:</span>
 <span class="sd">        legend_fontsize:</span>
 <span class="sd">        xmin:</span>
@@ -1317,8 +1320,9 @@
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.ROC_plot: metrics[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">) is None, continue without&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="n">fpr</span>    <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
-            <span class="n">tpr</span>    <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
+            <span class="n">fpr</span>        <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
+            <span class="n">tpr</span>        <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
+            <span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">thresholds</span>
 
             <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -1342,12 +1346,9 @@
 <span class="sd">            elif not (isinstance(fpr, int) or isinstance(fpr, float)):</span>
 <span class="sd">                fpr    = fpr[1:] # Remove always the first element for log-plot reasons</span>
 <span class="sd">                tpr    = tpr[1:]</span>
-
 <span class="sd">                if metrics[i].tpr_bootstrap is not None:</span>
-
 <span class="sd">                    tpr_lo = tpr_lo[1:]</span>
 <span class="sd">                    tpr_hi = tpr_hi[1:]</span>
-
 <span class="sd">                    fpr_lo = fpr_lo[1:]</span>
 <span class="sd">                    fpr_hi = fpr_hi[1:]</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -1366,6 +1367,14 @@
                 <span class="c1">#   y_err=np.std(metrics[i].tpr_bootstrap, axis=0)[1:], \</span>
                 <span class="c1">#   facecolor=f&#39;C{i}&#39;, edgecolor=&quot;none&quot;, alpha=0.2)</span>
 
+            <span class="c1"># Plot corresponding threshold points</span>
+            <span class="k">if</span> <span class="n">plot_thresholds</span><span class="p">:</span>
+                
+                <span class="k">for</span> <span class="n">eff</span> <span class="ow">in</span> <span class="n">thr_points_signal</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tpr</span> <span class="o">-</span> <span class="n">eff</span><span class="p">))</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">fpr</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">*</span><span class="mf">1.01</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">tpr</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive Rate $</span><span class="se">\\</span><span class="s1">alpha$ (background efficiency)&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True Positive Rate $1-</span><span class="se">\\</span><span class="s1">beta$ (signal efficiency)&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
