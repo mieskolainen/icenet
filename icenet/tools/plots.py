@@ -934,13 +934,14 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
                 
                 for eff in thr_points_signal:
                     index = np.argmin(np.abs(tpr - eff))
-                    plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
-                    plt.text(x=fpr[index]*1.01, y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+                    if fpr[index] >= xmin and fpr[index] <= 1.0:
+                        plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
+                        plt.text(x=fpr[index], y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
         
         ax.set_xlabel('False Positive Rate $\\alpha$ (background efficiency)')
         ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
         ax.set_title(title, fontsize=10)
-
+        
         # Legend
         if len(metrics) > 12: # Put outside the figure
             plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
@@ -969,6 +970,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             plt.savefig(filename + '--log.pdf', bbox_inches='tight')
 
         plt.close()
+
 
 
 def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fontsize=7) :
