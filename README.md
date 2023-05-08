@@ -12,6 +12,7 @@ A deep learning driven library for high energy physics and beyond. See the docum
 
 https://mieskolainen.github.io/icenet
 
+Also an introduction talk [docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf](docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf)
 
 ## First steps
 

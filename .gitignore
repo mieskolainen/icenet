@@ -13,6 +13,8 @@
 
 core.*
 
+!docs/pdf/*.pdf
+
 travis-stash/
 dataset/
 tensorboard/
