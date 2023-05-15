@@ -69,12 +69,14 @@ def pred_cut(args, param):
     index = args['features'].index(param['variable'])
     
     def func_predict(x):
-        # Squeeze the values via tanh() from R -> [-1,1]
-        if   param['transform'] == 'tanh':
-            return np.tanh(param['sign'] * x[...,index])
         # Transform via sigmoid from R -> [0,1]
-        elif param['transform'] == 'sigmoid':
+        if param['transform'] == 'sigmoid':
             return 1 / (1 + np.exp(param['sign'] * x[...,index]))
+        # Numpy function, e.g. np.abs, np.tanh ...
+        elif 'np.' in param['transform']:
+            cmd = param['transform'] + f"(param['sign'] * x[...,index])"
+            return eval(cmd)
+        # Identity
         else:
             return param['sign'] * x[...,index]
     

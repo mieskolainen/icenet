@@ -42,7 +42,6 @@ cutset0:
     x_hlt_trkValidHits >= 5 && 
     x_hlt_trkNrLayerIT >= 2
 
-
 cut0:
   train:    'cut'
   predict:  'cut'
@@ -57,7 +56,7 @@ cut1:
   label:    'hlt_invEInvP x (-1)'
   variable: 'x_hlt_invEInvP'
   sign: -1
-  transform: 'tanh'
+  transform: 'np.tanh'
 
 cut2:
   train:    'cut'
@@ -65,7 +64,7 @@ cut2:
   label:    'hlt_trkDEtaSeed x (-1)'
   variable: 'x_hlt_trkDEtaSeed'
   sign: -1
-  transform: 'tanh'
+  transform: 'np.tanh'
 
 cut3:
   train:    'cut'
@@ -73,7 +72,7 @@ cut3:
   label:    'hlt_trkDPhi x (-1)'
   variable: 'x_hlt_trkDPhi'
   sign: -1
-  transform: 'tanh'
+  transform: 'np.tanh'
 
 cut4:
   train:    'cut'
@@ -81,7 +80,7 @@ cut4:
   label:    'hlt_trkChi2 x (-1)'
   variable: 'x_hlt_trkChi2'
   sign: -1
-  transform: 'tanh'
+  transform: 'np.tanh'
 
 cut5:
   train:    'cut'
