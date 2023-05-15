@@ -69,16 +69,18 @@ def pred_cut(args, param):
     index = args['features'].index(param['variable'])
     
     def func_predict(x):
+        # Identity
+        if param['transform'] is None:             
+            return param['sign'] * x[...,index]
         # Transform via sigmoid from R -> [0,1]
-        if param['transform'] == 'sigmoid':
+        elif param['transform'] == 'sigmoid':
             return 1 / (1 + np.exp(param['sign'] * x[...,index]))
         # Numpy function, e.g. np.abs, np.tanh ...
         elif 'np.' in param['transform']:
             cmd = "param['sign'] * " + param['transform'] + f"(x[...,index])"
             return eval(cmd)
-        # Identity
         else:
-            return param['sign'] * x[...,index]
+            raise Exception(__name__ + '.pred_cuts: Unknown transform chosen (check your syntax)')
     
     return func_predict
 
