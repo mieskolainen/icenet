@@ -74,7 +74,7 @@ def pred_cut(args, param):
             return 1 / (1 + np.exp(param['sign'] * x[...,index]))
         # Numpy function, e.g. np.abs, np.tanh ...
         elif 'np.' in param['transform']:
-            cmd = param['transform'] + f"(param['sign'] * x[...,index])"
+            cmd = "param['sign']" + param['transform'] + f"(x[...,index])"
             return eval(cmd)
         # Identity
         else:
