@@ -32,7 +32,7 @@ from icenet.tools import aux_torch
 
 from icenet.tools import plots
 from icenet.tools import prints
-from icenet.deep  import optimize
+from icenet.deep  import optimize, predict
 
 
 #from icenet.deep  import dev_dndt
@@ -44,6 +44,7 @@ from icenet.deep  import maxo
 from icenet.deep  import dmlp
 from icenet.deep  import dbnf
 from icenet.deep  import vae
+from icenet.deep  import iceboost
 
 from icenet.deep  import cnn
 from icenet.deep  import graph
@@ -109,6 +110,19 @@ def getgraphmodel(conv_type, netparam):
     print(model)
     
     return model
+
+def getcutsetparam(param, config={}):
+    """
+    Construct generic cutset parameters
+    """
+    cutsetparam = {}
+    
+    # Add model hyperparameter keys
+    if param['model_param'] is not None:
+        for key in param['model_param'].keys():
+            cutsetparam[key] = config[key] if key in config.keys() else param['model_param'][key]
+
+    return cutsetparam
 
 
 def getgenericparam(param, D, num_classes, config={}):
@@ -197,18 +211,22 @@ def raytune_main(inputs, train_func=None):
         # Uniform sampling
         elif rtp == 'tune.uniform':
             config[key] = tune.uniform(value[0], value[1])
-
+        
+        # Grid search
+        elif rtp == 'tune.grid_search':
+            config[key] = tune.grid_search(value[0], value[1])
+        
         else:
             raise Exception(__name__ + f'.raytune_main: Unknown raytune parameter type = {rtp}')
     
     # Raytune basic metrics
-    reporter   = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
+    reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
     
     # Raytune search algorithm
-    metric     = args['raytune']['setup'][steer]['search_metric']['metric']
-    mode       = args['raytune']['setup'][steer]['search_metric']['mode']
+    metric   = args['raytune']['setup'][steer]['search_metric']['metric']
+    mode     = args['raytune']['setup'][steer]['search_metric']['mode']
     
-    # Hyperopt Bayesian / 
+    # Hyperopt Bayesian
     search_alg = HyperOptSearch(metric=metric, mode=mode)
     
     # Raytune scheduler
@@ -223,6 +241,8 @@ def raytune_main(inputs, train_func=None):
     inputs['args']['__raytune_running__'] = True
     
     # Raytune main setup
+    print(__name__ + f'.raytune_main: Launching tune ...')
+    
     analysis = tune.run(
         partial(train_func, **inputs),
         search_alg          = search_alg,
@@ -236,33 +256,17 @@ def raytune_main(inputs, train_func=None):
     # Get the best config
     best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="last")
 
-    cprint(f'raytune: Best trial config:                {best_trial.config}',              'green')
-    cprint(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
-    cprint(f'raytune: Best trial final validation AUC:  {best_trial.last_result["AUC"]}',  'green')
-
+    cprint(__name__ + f'.raytune_main: Best trial config:                {best_trial.config}',              'green')
+    cprint(__name__ + f'.raytune_main: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
+    cprint(__name__ + f'.raytune_main: Best trial final validation AUC:  {best_trial.last_result["AUC"]}',  'green')
 
     # Set the best config, training functions will update the parameters
     inputs['config'] = best_trial.config
     inputs['args']['__raytune_running__'] = False
     
-    # Torch graph networks
-    if (train_func == train_torch_graph) or (train_func == train_torch_generic):
-
-        # Train
-        if   train_func == train_torch_graph:
-            best_trained_model = train_torch_graph(**inputs)
-        elif train_func == train_torch_generic:
-            best_trained_model = train_torch_generic(**inputs)
-        else:
-            raise Exception(__name__ + f'.raytune_main: Unknown error with input')
-
-    ## XGboost
-    elif train_func == train_xgb:
-        best_trained_model = train_xgb(**inputs)
-
-    else:
-        raise Exception(__name__ + f'raytune_main: Unsupported train_func = {train_func}')
-
+    # Train finally once more with the best parameters
+    best_trained_model = train_func(**inputs)
+    
     return best_trained_model
 
 
@@ -501,6 +505,51 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     return model, train_loader, test_loader
 
 
+def train_cutset(config={}, data_trn=None, data_val=None, args=None, param=None):
+    """
+    Train cutset model
+
+    Args:
+        See other train_*
+
+    Returns:
+        Trained model
+    """
+    print(__name__ + f'.train_cutset: Training <{param["label"]}> classifier ...')
+
+    model_param = getcutsetparam(param=param, config=config)
+    new_param   = copy.deepcopy(param)
+    new_param['model_param'] = model_param
+    
+    x       = data_trn.x
+    y_true  = data_trn.y
+    weights = data_trn.w
+    args['features'] = data_trn.ids
+    
+    pred_func = predict.pred_cutset(args=args, param=new_param)
+    
+    # Apply cutset
+    y_pred    = pred_func(x)
+    
+    # Benchmark
+    metrics   = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, num_classes=2, hist=False, verbose=True)
+    
+    cprint(__name__ + f'.train_cutset: AUC = {metrics.auc:0.4f}', 'yellow')
+    
+    if args['__raytune_running__']:
+        #with tune.checkpoint_dir(epoch) as checkpoint_dir:
+        #    path = os.path.join(checkpoint_dir, "checkpoint")
+        #    torch.save((model.state_dict(), optimizer.state_dict()), path)
+        tune.report(loss = -1.0, AUC = metrics.auc)
+    else:
+        ## Save
+        True
+        #checkpoint = {'model': model, 'state_dict': model.state_dict()}
+        #torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
+
+    return model_param
+
+
 def train_flr(config={}, data_trn=None, args=None, param=None):
     """
     Train factorized likelihood model
@@ -516,9 +565,6 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
     pickle.dump([b_pdfs, s_pdfs, bin_edges],
         open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '_.dat', 'wb'))
-
-    def func_predict(X):
-        return flr.predict(X, b_pdfs, s_pdfs, bin_edges)
 
     return (b_pdfs, s_pdfs)
 

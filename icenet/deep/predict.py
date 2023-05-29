@@ -89,12 +89,22 @@ def pred_cutset(args, param):
     print(__name__ + f'.pred_cutset: Evaluate <{param["label"]}> fixed cutset model ...')
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
+
+    # Expand model parameters into memory
+    for p in param['model_param'].keys():
+        exec(f"{p} = param['model_param']['{p}']")
+    
+    # Expand cut string
+    variable = param['variable']
+    expr = eval(f'f"{cutstring}"')
+
+    print(f'cutstring expanded: {expr}')
     
     # Get feature name variables
     ids = args['features']
-
+    
     def func_predict(x):
-        y = stx.eval_boolean_syntax(expr=cutstring, X=x, ids=ids)
+        y = stx.eval_boolean_syntax(expr=expr, X=x, ids=ids)
         return y.astype(float)
     
     return func_predict

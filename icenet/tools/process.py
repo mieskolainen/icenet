@@ -542,7 +542,7 @@ def train_models(data_trn, data_val, args=None) :
 
             data_trn['data'].x[data_trn['data'].x[:,j] < minval, j] = minval
             data_trn['data'].x[data_trn['data'].x[:,j] > maxval, j] = maxval
-
+    
     # @@ Variable normalization @@
     if   args['varnorm'] == 'zscore' :
 
@@ -683,10 +683,19 @@ def train_models(data_trn, data_val, args=None) :
 
         elif param['train'] == 'cut':
             None
+        
         elif param['train'] == 'cutset':
-            None
-        elif param['train'] == 'exp':
-            None
+
+            inputs = {'data_trn':    data_trn['data'],
+                      'data_val':    data_val['data'],
+                      'args':        args,
+                      'param':       param}
+            
+            if ID in args['raytune']['param']['active']:
+                model = train.raytune_main(inputs=inputs, train_func=train.train_cutset)
+            else:
+                model = train.train_cutset(**inputs)
+
         else:
             raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
 
@@ -943,10 +952,6 @@ def evaluate_models(data=None, info=None, args=None):
         #elif param['predict'] == 'xtx':
         # ...   
         #
-        
-        elif param['predict'] == 'exp':
-            func_predict = predict.pred_exp(args=args, param=param)
-            plot_XYZ_wrap(func_predict = func_predict, x_input = X, y = y, **inputs)
         
         elif param['predict'] == 'cut':
             func_predict = predict.pred_cut(args=args, param=param)

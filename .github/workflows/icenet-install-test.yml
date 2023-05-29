@@ -73,10 +73,7 @@ jobs:
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
         
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh
-        
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh
-        
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_hgcal_cnd.sh
-        
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_hgcal_trk.sh
 

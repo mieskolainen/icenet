@@ -29,18 +29,46 @@ cutset0:
   predict: 'cutset'
   
   label:   'cutset'
-  raytune:  null
+  raytune:  cutset_trial_0
+  
+  variable: ['x_hlt_pms2',
+             'x_hlt_invEInvP',
+             'x_hlt_trkDEtaSeed',
+             'x_hlt_trkDPhi',
+             'x_hlt_trkChi2',
+             'x_hlt_trkValidHits',
+             'x_hlt_trkNrLayerIT']
+
+  model_param:
+
+    comp_0: '<'
+    comp_1: '<'
+    comp_2: '<'
+    comp_3: '<'
+    comp_4: '<'
+    comp_5: '>='
+    comp_6: '>='
+
+    cut_0: 10000
+    cut_1:   0.2
+    cut_2:  0.01
+    cut_3:   0.2
+    cut_4:    40
+    cut_5:     5
+    cut_6:     2
+
+    logic_0: '&&'
   
   # Using yaml multiline suntax without last linebreak syntax with >-
   # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
   cutstring: >-
-    x_hlt_pms2 < 10000 &&  
-    x_hlt_invEInvP < 0.2 &&  
-    x_hlt_trkDEtaSeed < 0.01 &&  
-    x_hlt_trkDPhi < 0.2 && 
-    x_hlt_trkChi2 < 40 && 
-    x_hlt_trkValidHits >= 5 && 
-    x_hlt_trkNrLayerIT >= 2
+    ({variable[0]} {comp_0} {cut_0}) {logic_0}
+    ({variable[1]} {comp_1} {cut_1}) {logic_0}
+    ({variable[2]} {comp_2} {cut_2}) {logic_0}
+    ({variable[3]} {comp_3} {cut_3}) {logic_0}
+    ({variable[4]} {comp_4} {cut_4}) {logic_0}
+    ({variable[5]} {comp_5} {cut_5}) {logic_0}
+    ({variable[6]} {comp_6} {cut_6})
 
 cut0:
   train:    'cut'
