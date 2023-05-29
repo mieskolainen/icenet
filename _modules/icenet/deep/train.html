@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.5
+                0.0.8.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -470,7 +470,7 @@
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">predict</span>
 
 
 <span class="c1">#from icenet.deep  import dev_dndt</span>
@@ -482,6 +482,7 @@
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dmlp</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dbnf</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">vae</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">iceboost</span>
 
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">cnn</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">graph</span>
@@ -547,6 +548,19 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="getcutsetparam"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getcutsetparam">[docs]</a><span class="k">def</span> <span class="nf">getcutsetparam</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct generic cutset parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cutsetparam</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1"># Add model hyperparameter keys</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">cutsetparam</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">cutsetparam</span></div>
 
 
 <div class="viewcode-block" id="getgenericparam"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgenericparam">[docs]</a><span class="k">def</span> <span class="nf">getgenericparam</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
@@ -635,18 +649,22 @@
         <span class="c1"># Uniform sampling</span>
         <span class="k">elif</span> <span class="n">rtp</span> <span class="o">==</span> <span class="s1">&#39;tune.uniform&#39;</span><span class="p">:</span>
             <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
+        
+        <span class="c1"># Grid search</span>
+        <span class="k">elif</span> <span class="n">rtp</span> <span class="o">==</span> <span class="s1">&#39;tune.grid_search&#39;</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">grid_search</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Unknown raytune parameter type = </span><span class="si">{</span><span class="n">rtp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="c1"># Raytune basic metrics</span>
-    <span class="n">reporter</span>   <span class="o">=</span> <span class="n">CLIReporter</span><span class="p">(</span><span class="n">metric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;AUC&quot;</span><span class="p">,</span> <span class="s2">&quot;training_iteration&quot;</span><span class="p">])</span>
+    <span class="n">reporter</span> <span class="o">=</span> <span class="n">CLIReporter</span><span class="p">(</span><span class="n">metric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;AUC&quot;</span><span class="p">,</span> <span class="s2">&quot;training_iteration&quot;</span><span class="p">])</span>
     
     <span class="c1"># Raytune search algorithm</span>
-    <span class="n">metric</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
-    <span class="n">mode</span>       <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
+    <span class="n">metric</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+    <span class="n">mode</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
     
-    <span class="c1"># Hyperopt Bayesian / </span>
+    <span class="c1"># Hyperopt Bayesian</span>
     <span class="n">search_alg</span> <span class="o">=</span> <span class="n">HyperOptSearch</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
     
     <span class="c1"># Raytune scheduler</span>
@@ -661,6 +679,8 @@
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     
     <span class="c1"># Raytune main setup</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Launching tune ...&#39;</span><span class="p">)</span>
+    
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
         <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
@@ -674,33 +694,17 @@
     <span class="c1"># Get the best config</span>
     <span class="n">best_trial</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get_best_trial</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
 
-    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial config:                </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>              <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation loss: </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;raytune: Best trial final validation AUC:  </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;AUC&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial config:                </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>              <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial final validation loss: </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial final validation AUC:  </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;AUC&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
     <span class="c1"># Set the best config, training functions will update the parameters</span>
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_trial</span><span class="o">.</span><span class="n">config</span>
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     
-    <span class="c1"># Torch graph networks</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_graph</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_generic</span><span class="p">):</span>
-
-        <span class="c1"># Train</span>
-        <span class="k">if</span>   <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_graph</span><span class="p">:</span>
-            <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_torch_graph</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_torch_generic</span><span class="p">:</span>
-            <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_torch_generic</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Unknown error with input&#39;</span><span class="p">)</span>
-
-    <span class="c1">## XGboost</span>
-    <span class="k">elif</span> <span class="n">train_func</span> <span class="o">==</span> <span class="n">train_xgb</span><span class="p">:</span>
-        <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;raytune_main: Unsupported train_func = </span><span class="si">{</span><span class="n">train_func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
+    <span class="c1"># Train finally once more with the best parameters</span>
+    <span class="n">best_trained_model</span> <span class="o">=</span> <span class="n">train_func</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">best_trained_model</span></div>
 
 
@@ -939,6 +943,51 @@
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span></div>
 
 
+<div class="viewcode-block" id="train_cutset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cutset">[docs]</a><span class="k">def</span> <span class="nf">train_cutset</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train cutset model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        See other train_*</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Trained model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_cutset: Training &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; classifier ...&#39;</span><span class="p">)</span>
+
+    <span class="n">model_param</span> <span class="o">=</span> <span class="n">getcutsetparam</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">new_param</span>   <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="n">new_param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_param</span>
+    
+    <span class="n">x</span>       <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">y_true</span>  <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">y</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">w</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span>
+    
+    <span class="n">pred_func</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_cutset</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">new_param</span><span class="p">)</span>
+    
+    <span class="c1"># Apply cutset</span>
+    <span class="n">y_pred</span>    <span class="o">=</span> <span class="n">pred_func</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    
+    <span class="c1"># Benchmark</span>
+    <span class="n">metrics</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_cutset: AUC = </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">auc</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
+        <span class="c1">#with tune.checkpoint_dir(epoch) as checkpoint_dir:</span>
+        <span class="c1">#    path = os.path.join(checkpoint_dir, &quot;checkpoint&quot;)</span>
+        <span class="c1">#    torch.save((model.state_dict(), optimizer.state_dict()), path)</span>
+        <span class="n">tune</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">AUC</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">auc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">## Save</span>
+        <span class="kc">True</span>
+        <span class="c1">#checkpoint = {&#39;model&#39;: model, &#39;state_dict&#39;: model.state_dict()}</span>
+        <span class="c1">#torch.save(checkpoint, args[&#39;modeldir&#39;] + f&#39;/{param[&quot;label&quot;]}_&#39; + str(epoch) + &#39;.pth&#39;)</span>
+
+    <span class="k">return</span> <span class="n">model_param</span></div>
+
+
 <div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train factorized likelihood model</span>
@@ -954,9 +1003,6 @@
     <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">flr</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="p">)</span>
     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">],</span>
         <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">flr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">)</span></div>
 
