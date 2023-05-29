@@ -2,7 +2,6 @@
 # 
 # m.mieskolainen@imperial.ac.uk, 2022
 
-import torch
 import numpy as np
 import awkward as ak
 from tqdm import tqdm
@@ -15,12 +14,7 @@ from scipy.optimize import curve_fit
 from scipy import interpolate
 from scipy.stats import ncx2,norm
 
-from icenet.tools import stx
-from icenet.tools import io
-from icenet.tools import prints
 from icenet.tools import aux
-from icenet.tools import reweight
-from icenet.tools import plots
 from icefit import cortools
 
 #from PyPDF2 import PdfFileMerger

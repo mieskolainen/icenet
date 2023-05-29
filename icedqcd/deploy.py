@@ -2,17 +2,12 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2023
 
-import matplotlib.pyplot as plt
 import os
-import torch
-import torch_geometric
 import numpy as np
 import awkward as ak
 import pickle
 import uproot
 import logging
-import shap2
-import xgboost
 import copy
 import socket
 

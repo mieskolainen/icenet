@@ -12,7 +12,6 @@ import torch.nn as nn
 from icenet.deep import losstools
 from icenet.deep import deeptools
 from icenet.tools import aux
-from icenet.tools import aux_torch
 from icenet.tools import io
 
 from ray import tune

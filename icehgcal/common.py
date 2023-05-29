@@ -3,25 +3,15 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-import copy
-import math
-import argparse
+
 import pprint
 from pprint import pprint
 
-import psutil
 import os
-import datetime
-import json
 import pickle
-import sys
 
 import numpy as np
-import torch
-import uproot
-import awkward as ak
 
-import multiprocessing
 
 
 from termcolor import colored, cprint
@@ -29,9 +19,6 @@ from tqdm import tqdm
 
 from icenet.tools import io
 from icenet.tools import aux
-from icenet.tools import plots
-from icenet.tools import prints
-from icenet.tools import process
 from icenet.tools import iceroot
 
 from icehgcal import preprocess

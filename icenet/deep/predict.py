@@ -2,64 +2,25 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
-import math
 import numpy as np
-import torch
 import torch_geometric
 
-import argparse
-import pprint
-import os
-import datetime
-import json
 import pickle
-import sys
-import yaml
 import copy
 
 # xgboost
 import xgboost
 
-# matplotlib
-from matplotlib import pyplot as plt
-
-# scikit
-from sklearn         import metrics
-from sklearn.metrics import accuracy_score
-
 # icenet
-from icenet.tools import io
 from icenet.tools import stx
 from icenet.tools import aux
 from icenet.tools import aux_torch
-from icenet.tools import plots
 
 from icenet.algo  import flr
 from icenet.deep  import bnaf
 from icenet.deep  import optimize
 from icenet.deep  import dbnf
-from icenet.deep  import mlgr
-from icenet.deep  import maxo
 
-
-"""
-def pred_exp(args, param):
-    #
-    # This function assumes z-score normalization for the input variables
-    #
-    print(__name__ + f'.pred_exp: Evaluate <{param["label"]}> prod(exp) model ...')
-    
-    # Get feature name variables
-    def func_predict(x):
-        summ = 0.0
-        for i in range(len(param['variable'])):
-            index = args['features'].index(param['variable'][i])
-            summ += -(x[...,index])**2
-
-        return 1 / (1 + np.exp(summ))
-    
-    return func_predict
-"""
 
 def pred_cut(args, param):
 

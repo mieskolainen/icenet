@@ -7,18 +7,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import awkward as ak
 import torch
-import xgboost
-import os
 import gc
 from pprint import pprint
-import copy
+
 
 from tqdm import tqdm
 
 from iceplot import iceplot
 from icefit import statstools
 from icenet.tools import aux
-from icenet.tools import process
 from icefit import cortools
 
 

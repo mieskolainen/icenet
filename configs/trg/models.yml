@@ -29,7 +29,7 @@ cutset0:
   predict: 'cutset'
   
   label:   'cutset'
-  raytune:  cutset_trial_0
+  raytune:  cutset_setup_0
   
   variable: ['x_hlt_pms2',
              'x_hlt_invEInvP',
@@ -38,7 +38,7 @@ cutset0:
              'x_hlt_trkChi2',
              'x_hlt_trkValidHits',
              'x_hlt_trkNrLayerIT']
-
+  
   model_param:
 
     comp_0: '<'
@@ -57,7 +57,7 @@ cutset0:
     cut_5:     5
     cut_6:     2
 
-    logic_0: '&&'
+    logic_0: '&&' # &&, ||
   
   # Using yaml multiline suntax without last linebreak syntax with >-
   # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
@@ -133,7 +133,7 @@ xgb0:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB'
-  raytune:  xgb_trial_0
+  raytune:  xgb_setup_0
 
   # booster parameters
   model_param:
@@ -173,7 +173,7 @@ xgb1:
   train:   'xgb'
   predict: 'xgb'
   label:   'XGB_tiny'
-  raytune: 'xgb_trial_1'
+  raytune: 'xgb_setup_1'
   
   # booster parameters
   model_param:

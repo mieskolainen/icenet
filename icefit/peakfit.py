@@ -30,13 +30,11 @@
 import numpy as np
 
 import yaml
-import copy
 import os
 import pickle
 import iminuit
 import matplotlib.pyplot as plt
 import uproot
-import pytest
 from termcolor import cprint
 
 from scipy import interpolate

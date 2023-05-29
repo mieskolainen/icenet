@@ -18,7 +18,6 @@ from termcolor import colored, cprint
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import iceroot
-from icenet.tools.icemap import icemap
 
 
 def read_MC(process_func, process, root_path, param, class_id):

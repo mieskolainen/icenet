@@ -4,7 +4,6 @@
 
 import numpy as np
 import numba
-import copy
 
 @numba.njit
 def gausspdf(x,mu,sigma):

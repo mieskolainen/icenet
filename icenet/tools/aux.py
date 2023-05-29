@@ -20,15 +20,10 @@ from sklearn import metrics
 from scipy import stats
 import scipy.special as special
 
-import multiprocessing
-import ctypes
 
-from functools import partial
-from itertools import repeat
-from multiprocessing import Pool, freeze_support
-
-import icenet.tools.prints as prints
-import icenet.tools.stx as stx
+#from functools import partial
+#from itertools import repeat
+#from multiprocessing import Pool, freeze_support
 
 
 def unmask(x, mask, default_value=-1):

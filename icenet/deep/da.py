@@ -2,7 +2,6 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
-import numpy as np
 import torch
 from torch.autograd import Function
 

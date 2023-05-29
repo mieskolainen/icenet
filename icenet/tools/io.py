@@ -12,7 +12,6 @@ import torch
 import os
 import psutil
 import subprocess
-import sys
 import re
 
 from termcolor import colored, cprint

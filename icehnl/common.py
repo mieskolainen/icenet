@@ -4,7 +4,6 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
-from tqdm import tqdm
 import copy
 import pickle
 
@@ -12,10 +11,6 @@ from termcolor import colored, cprint
 
 from icenet.tools import io
 from icenet.tools import aux
-from icenet.tools import plots
-from icenet.tools import prints
-from icenet.tools import process
-from icenet.tools import iceroot
 
 # GLOBALS
 from configs.hnl.mvavars import *

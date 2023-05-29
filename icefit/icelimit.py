@@ -5,15 +5,13 @@
 # m.mieskolainen@imperial.ac.uk, 2022
 
 import numpy as np
-import numba
 import scipy.optimize
 from scipy import stats
-import uproot
 from tqdm import tqdm
 from scipy.stats import ncx2,norm
 import matplotlib.pyplot as plt
 
-import mystic
+#import mystic
 
 from icefit import lognormal
 

@@ -23,13 +23,7 @@ from torch_scatter import scatter_add, scatter_max, scatter_mean
 from icenet.deep.da import GradientReversal
 
 from icenet.deep.pgraph import *
-from icenet.deep import optimize
 from icenet.deep.dmlp import MLP, MLP_ALL_ACT
-
-from icenet.tools import aux
-from icenet.tools import aux_torch
-from icenet.deep import losstools
-
 
 from typing import Callable, Union, Optional
 from torch_geometric.typing import OptTensor, PairTensor, PairOptTensor, Adj

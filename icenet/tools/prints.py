@@ -3,10 +3,7 @@
 # Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
-import xgboost
 import psutil
 
 from termcolor import colored, cprint

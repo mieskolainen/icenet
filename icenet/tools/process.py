@@ -18,7 +18,6 @@ import copy
 import sys
 import pickle
 import xgboost
-from pprint import pprint
 from yamlinclude import YamlIncludeConstructor
 
 import icenet.deep.iceboost as iceboost
@@ -670,8 +669,8 @@ def train_models(data_trn, data_val, args=None) :
 
             inputs = {'y_soft': None}
             set_distillation_drain(ID=ID, param=param, inputs=inputs)
-
-            iceboost.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
+            
+            train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
                 trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
                 feature_names=data_trn['data'].ids)  
         

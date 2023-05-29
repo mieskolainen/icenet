@@ -4,12 +4,10 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
-import psutil
 import copy
 import os
 
 import ray
-from ray.actor import ActorHandle
 from tqdm import tqdm
 
 import time
@@ -17,12 +15,9 @@ import multiprocessing
 
 from termcolor import colored, cprint
 
-from icenet.tools import raytools
 from icenet.tools import io
 from icenet.tools import aux
-from icenet.tools import plots
 from icenet.tools import prints
-from icenet.tools import process
 from icenet.tools import iceroot
 
 from icedqcd import graphio
