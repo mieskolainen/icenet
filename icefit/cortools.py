@@ -2,7 +2,7 @@
 #
 # Run with: pytest ./icefit/cortools -rP (can take few minutes)
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 #import sys
 #sys.path.append(".")

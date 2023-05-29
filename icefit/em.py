@@ -1,6 +1,6 @@
 # Expectation-Maximization and mixture density algorithms
 #
-# m.mieskolainen@imperial.ac.uk, 2020
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
 import numba

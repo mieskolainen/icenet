@@ -19,12 +19,12 @@ iminuit==2.21.3
 mystic==0.4.0
 
 # RAY
-ray==2.3.1
+ray==2.4.0
 hyperopt==0.2.7
 
 # UPROOT & friends
-uproot==5.0.5
-awkward==2.1.1
+uproot==5.0.7
+awkward==2.2.1
 vector==1.0.0
 
 # SCIPY & friends

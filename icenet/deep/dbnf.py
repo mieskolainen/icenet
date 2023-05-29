@@ -5,7 +5,7 @@
 # https://github.com/nicola-decao/BNAF (MIT license)
 #
 #
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 

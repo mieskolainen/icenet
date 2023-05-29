@@ -3,7 +3,7 @@
 # https://arxiv.org/abs/1609.02907
 # Adapted from original code
 # 
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 

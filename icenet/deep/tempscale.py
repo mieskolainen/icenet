@@ -6,7 +6,7 @@
 #   https://arxiv.org/abs/1706.04599
 #   https://github.com/gpleiss/temperature_scaling
 # 
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import torch
 from torch import nn, optim

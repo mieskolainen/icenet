@@ -1,7 +1,7 @@
 # Case study of implementing "score test" with pytorch
 # for the population mean
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import torch
 import numpy as np

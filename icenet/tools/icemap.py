@@ -1,6 +1,6 @@
 # "Pandas style" frame wrapper for columnar data with advanced indexing
 #
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np

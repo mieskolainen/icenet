@@ -1,6 +1,6 @@
 # Convolutional Neural Nets
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np

@@ -1,6 +1,6 @@
 # Common input & data reading routines for HGCAL (CND, TRK modes)
 # 
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 

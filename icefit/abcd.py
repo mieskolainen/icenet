@@ -2,7 +2,7 @@
 #
 # Run tests with: pytest icefit/abcd.py -rP
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import copy
 import numpy as np

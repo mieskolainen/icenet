@@ -1,6 +1,6 @@
 # Torch autograd Jacobians, Hessians and related
 # 
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
 import torch

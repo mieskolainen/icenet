@@ -9,7 +9,7 @@ ulimit -a
 
 # Set system memory limits
 ulimit -s unlimited  # stack
-#ulimit -u 1048576     # num of processes (for Sun Grid Engine use)
+#ulimit -u 65536     # num of processes (for Sun Grid Engine use)
 #ulimit -v unlimited # virtual memory
 
 echo ""

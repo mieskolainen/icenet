@@ -2,7 +2,7 @@
 # 
 # Run with: pytest icefit/icelimit.py -rP
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
 import scipy.optimize

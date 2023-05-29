@@ -2,7 +2,7 @@
 #
 # Run tests with: pytest lognormal.py -rP
 #
-# m.mieskolainen@imperial.ac.uk, 2021
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
 import matplotlib.pyplot as plt

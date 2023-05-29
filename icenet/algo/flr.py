@@ -1,7 +1,7 @@
 # Dim-by-Dim Factorized Histogram Likelihood Ratio Classifier    
 #
 #
-# Mikael Mieskolainen, 2020
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 

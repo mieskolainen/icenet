@@ -1,6 +1,6 @@
 # Generic model training wrapper functions [TBD; unify and simplify data structures further]
 #
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
@@ -13,6 +13,7 @@ import copy
 from termcolor import cprint
 import multiprocessing
 import xgboost
+from tqdm import tqdm
 
 from matplotlib import pyplot as plt
 
@@ -210,7 +211,7 @@ def raytune_main(inputs, train_func=None):
     analysis = tune.run(
         partial(train_func, **inputs),
         search_alg          = search_alg,
-        local_dir           = f'./tmp/ray/local_dir',
+        resource_path       = f'./tmp/ray/local_dir',
         resources_per_trial = {"cpu": multiprocessing.cpu_count(), "gpu": 1 if torch.cuda.is_available() else 0},
         config              = config,
         num_samples         = num_samples,
@@ -816,11 +817,11 @@ def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_ki
                 param['label'] = f'{label}_bin_{i}_{j}'
 
                 model, train_loader, test_loader = \
-                    train.torch_construct(X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
+                    torch_construct(X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
                         X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], X_trn_2D=None, X_val_2D=None, \
                      trn_weights=weights, val_weights=None, param=param['model_param'], args=args)
 
-                model = train.torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
+                model = torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                             args=args, param=param['model_param'])
 
             except:

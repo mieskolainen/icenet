@@ -1,6 +1,6 @@
 # Simple Lorentz vectors with HEP metric (+,---)
 #
-# (c) 2021 Mikael Mieskolainen
+# (c) 2023 Mikael Mieskolainen
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 import numpy as np

@@ -1,6 +1,6 @@
 # Graph and tensor data readers and parsers for electron ID
 #
-# Mikael Mieskolainen, 2022
+# Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np

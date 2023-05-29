@@ -1,6 +1,6 @@
 # iceboost == xgboost + torch autograd based extensions
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2023
 
 import matplotlib.pyplot as plt
 import numpy as np
