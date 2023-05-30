@@ -4,7 +4,6 @@ param:
   active: ['cutset0']
   #active:  [null]
   num_samples:    20 # Trial count parameter
-  max_num_epochs: 50 # Not active
 
 setup:
 

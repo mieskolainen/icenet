@@ -2,7 +2,6 @@ param:
   #active:         ['xgb0'] # Add model identifiers here
   active:         [null]
   num_samples:    5   # Trial count parameter
-  max_num_epochs: 50  # Not active
 
 setup:
 

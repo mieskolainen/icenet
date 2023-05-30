@@ -175,12 +175,11 @@ def raytune_main(inputs, train_func=None):
     
     ### General raytune parameters
     num_samples    = args['raytune']['param']['num_samples']
-    max_num_epochs = args['raytune']['param']['max_num_epochs']
     
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
     parameters = {}
-
+    
     for key in args['raytune']['setup'][steer]['param']:
         
         rtp   = args['raytune']['setup'][steer]['param'][key]['type']
@@ -264,7 +263,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     """
     Main training loop for all torch based models
     """
-    
+
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
     trn_aucs  = []

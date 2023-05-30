@@ -3,7 +3,6 @@ param:
   #active:         ['xgb1']
   active:  [null]
   num_samples:    10  # Trial count parameter
-  max_num_epochs: 50  # Not active
 
 
 setup:
