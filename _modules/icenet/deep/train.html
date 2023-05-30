@@ -661,7 +661,7 @@
     <span class="n">param_space</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span> <span class="c1"># Set hyperparameters</span>
     
     <span class="n">tuner</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">Tuner</span><span class="p">(</span>
-        <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
+        <span class="n">tune</span><span class="o">.</span><span class="n">with_parameters</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
         <span class="n">tune_config</span><span class="o">=</span><span class="n">tune</span><span class="o">.</span><span class="n">TuneConfig</span><span class="p">(</span>
             <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
             <span class="n">scheduler</span>           <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
