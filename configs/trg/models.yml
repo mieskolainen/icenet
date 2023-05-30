@@ -40,7 +40,7 @@ cutset0:
     # Approximate median significance (AMS)
     lossfunc: 'np.sqrt(2*((eff_s*s + eff_b*b + b_r)*np.log(1 + eff_s*s / (eff_b*b + b_r)) - eff_s*s))'
     
-    lossfunc_var:              # These are expanded into memory via (exec)
+    lossfunc_var:              # Constants corresponding to 'lossfunc', expanded into memory via (exec)
       s: 20                    # Number of signal events expected
       b: 1000                  # Number of background events expected
       b_r: 10                  # Regularization constant
