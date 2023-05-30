@@ -21,13 +21,10 @@ from scipy import stats
 import scipy.special as special
 
 
-#from functools import partial
-#from itertools import repeat
-#from multiprocessing import Pool, freeze_support
-
-
 def replace_param(default, raytune):
-
+    """
+    Parameter replacement
+    """
     new_param = {}
     for key in default.keys():
         new_param[key] = raytune[key] if key in raytune.keys() else default[key]
