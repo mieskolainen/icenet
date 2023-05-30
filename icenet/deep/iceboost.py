@@ -128,7 +128,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     return total_loss * len(preds)
 
 
-def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True,
+def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True,
     data_trn_MI=None, data_val_MI=None):
     """
     Train XGBoost model
@@ -175,10 +175,9 @@ def train_xgb(config={}, data_trn=None, data_val=None, y_soft=None, args=None, p
     print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    if config is not {}:
-        for key in param['model_param'].keys():
-            param['model_param'][key] = config[key] if key in config.keys() else param['model_param'][key]
-
+    for key in param['model_param'].keys():
+        param['model_param'][key] = config['params'][key] if key in config['params'].keys() else param['model_param'][key]
+    
     ### *********************************
     
     # Normalize weights to sum to number of events (xgboost library has no scale normalization)

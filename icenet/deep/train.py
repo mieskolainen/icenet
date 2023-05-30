@@ -45,8 +45,12 @@ from icenet.optim import scheduler
 
 # Raytune
 from ray import tune
+from ray.tune.search.basic_variant import BasicVariantGenerator
 from ray.tune.search.hyperopt import HyperOptSearch
-from ray.tune import CLIReporter
+from ray.tune.search.optuna import OptunaSearch
+from ray.tune.search.bayesopt import BayesOptSearch
+
+from ray.air.config import RunConfig, ScalingConfig
 from ray.tune.schedulers import ASHAScheduler
 from functools import partial
 
@@ -128,7 +132,6 @@ def getgenericparam(param, D, num_classes, config={}):
 
     return netparam, param['conv_type']
 
-
 def getgraphparam(data_trn, num_classes, param, config={}):
     """
     Construct graph network parameters
@@ -185,22 +188,29 @@ def raytune_main(inputs, train_func=None):
         config[key] = eval(rtp)
     
     # Raytune basic metrics
-    reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
+    #reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
     
     # Raytune search algorithm
+    algo     = args['raytune']['setup'][steer]['search_algo']
     metric   = args['raytune']['setup'][steer]['search_metric']['metric']
     mode     = args['raytune']['setup'][steer]['search_metric']['mode']
     
     # Hyperopt Bayesian
-    search_alg = HyperOptSearch(metric=metric, mode=mode)
+    if   algo == 'Basic':
+        search_alg = BasicVariantGenerator()
+    elif algo == 'HyperOpt':
+        search_alg = HyperOptSearch()
+    elif algo == 'Optuna':
+        search_alg = OptunaSearch()
+    elif algo == 'BayesOpt':
+        search_alg = BayesOptSearch()
+    else:
+        raise Exception(__name__ + f".raytune_main: Unknown 'search_algo' (use 'Basic', 'HyperOpt', 'Optuna', 'BayesOpt')")
+    
+    cprint(__name__ + f'.raytune_main: Optimization algorithm: {algo}', 'yellow')
     
     # Raytune scheduler
-    scheduler = ASHAScheduler(
-        metric = metric,
-        mode   = mode,
-        max_t  = max_num_epochs,
-        grace_period     = 1,
-        reduction_factor = 2)
+    scheduler = ASHAScheduler()
     
     ## Flag raytune on for training functions
     inputs['args']['__raytune_running__'] = True
@@ -208,27 +218,38 @@ def raytune_main(inputs, train_func=None):
     # Raytune main setup
     print(__name__ + f'.raytune_main: Launching tune ...')
     
-    analysis = tune.run(
+    param_space = {
+        "scaling_config": ScalingConfig(
+            num_workers          = multiprocessing.cpu_count(),
+            resources_per_worker = {"cpu": 1, "gpu": 1 if torch.cuda.is_available() else 0}
+        ),
+    }
+    param_space['params'] = config # Set hyperparameters
+    
+    tuner = tune.Tuner(
         partial(train_func, **inputs),
-        search_alg          = search_alg,
-        resource_path       = f'./tmp/ray/local_dir',
-        resources_per_trial = {"cpu": multiprocessing.cpu_count(), "gpu": 1 if torch.cuda.is_available() else 0},
-        config              = config,
-        num_samples         = num_samples,
-        scheduler           = scheduler,
-        progress_reporter   = reporter)
+        tune_config=tune.TuneConfig(
+            search_alg          = search_alg,
+            scheduler           = scheduler,
+            metric              = metric,
+            mode                = mode,
+            num_samples         = num_samples
+        ),
+        run_config  = RunConfig(name="icenet_raytune", local_dir="./tmp"),
+        param_space = param_space,
+    )
+    results = tuner.fit()
     
     # Get the best config
-    best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="last")
-
+    best_result = results.get_best_result(metric=metric, mode=mode)
+    
     print('')
-    cprint(__name__ + f'.raytune_main: Best trial config:                {best_trial.config}',              'yellow')
-    cprint(__name__ + f'.raytune_main: Best trial final validation loss: {best_trial.last_result["loss"]}', 'yellow')
-    cprint(__name__ + f'.raytune_main: Best trial final validation AUC:  {best_trial.last_result["AUC"]}',  'yellow')
+    cprint(__name__ + f'.raytune_main: Best result config:  {best_result.config}',  'yellow')
+    cprint(__name__ + f'.raytune_main: Best result metrics: {best_result.metrics}', 'yellow')
     print('')
     
     # Set the best config, training functions will update the parameters
-    inputs['config'] = best_trial.config
+    inputs['config'] = best_result.config['params']
     inputs['args']['__raytune_running__'] = False
     
     # Train finally once more with the best parameters
@@ -237,7 +258,7 @@ def raytune_main(inputs, train_func=None):
     return best_trained_model
 
 
-def torch_loop(model, train_loader, test_loader, args, param, config={}, save_period=1):
+def torch_loop(model, train_loader, test_loader, args, param, config={'params': {}}, save_period=1):
     """
     Main training loop for all torch based models
     """
@@ -253,11 +274,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
     for key in param['opt_param'].keys():
-        opt_param[key]       = config[key] if key in config.keys() else param['opt_param'][key]
+        opt_param[key]       = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
     
     scheduler_param = {}
     for key in param['scheduler_param'].keys():
-        scheduler_param[key] = config[key] if key in config.keys() else param['scheduler_param'][key]
+        scheduler_param[key] = config['params'][key] if key in config['params'].keys() else param['scheduler_param'][key]
     
     # Create optimizer
     if   opt_param['optimizer'] == 'Adam':
@@ -358,7 +379,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={}, save_pe
     return # No return value for raytune
 
 
-def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=None, y_soft=None, save_period=5):
+def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None, y_soft=None, save_period=5):
     """
     Train graph neural networks
     
@@ -373,15 +394,16 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
         trained model
     """
     print(__name__ + f'.train_torch_graph: Training <{param["label"]}> classifier ...')
+    print(config)
     
     # Construct model
-    netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config)
+    netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config['params'])
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
     for key in param['opt_param'].keys():
-        opt_param[key] = config[key] if key in config.keys() else param['opt_param'][key]
+        opt_param[key] = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
 
     # ** Set distillation training targets **
     if y_soft is not None:
@@ -399,7 +421,7 @@ def train_torch_graph(config={}, data_trn=None, data_val=None, args=None, param=
 def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     trn_weights=None, val_weights=None, X_trn_2D=None, X_val_2D=None, args=None, param=None, 
     Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, 
-    data_trn_MI=None, data_val_MI=None, config={}):
+    data_trn_MI=None, data_val_MI=None, config={'params': {}}):
     """
     Train generic neural model [R^d x (2D) -> output]
     
@@ -428,7 +450,7 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
 
 def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights, val_weights, param, args, 
     Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, 
-    data_trn_MI=None, data_val_MI=None, config={}):
+    data_trn_MI=None, data_val_MI=None, config={'params': {}}):
     """
     Torch model and data loader constructor
 
@@ -441,7 +463,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
 
     ## ------------------------
     ### Construct model
-    netparam, conv_type = getgenericparam(config=config, param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
+    netparam, conv_type = getgenericparam(config=config['params'], param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
     model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
 
 
@@ -459,7 +481,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = {}
     for key in param['opt_param'].keys():
-        opt_param[key] = config[key] if key in config.keys() else param['opt_param'][key]
+        opt_param[key] = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
 
     params = {'batch_size'  : opt_param['batch_size'],
               'shuffle'     : True,
@@ -472,7 +494,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     return model, train_loader, test_loader
 
 
-def train_cutset(config={}, data_trn=None, data_val=None, args=None, param=None):
+def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None):
     """
     Train cutset model
 
@@ -483,8 +505,9 @@ def train_cutset(config={}, data_trn=None, data_val=None, args=None, param=None)
         Trained model
     """
     print(__name__ + f'.train_cutset: Training <{param["label"]}> classifier ...')
-
-    model_param = getcutsetparam(param=param, config=config)
+    print(config)
+    
+    model_param = getcutsetparam(param=param, config=config['params'])
     new_param   = copy.deepcopy(param)
     new_param['model_param'] = model_param
     
@@ -521,7 +544,7 @@ def train_cutset(config={}, data_trn=None, data_val=None, args=None, param=None)
     return # No return value for raytune
 
 
-def train_flr(config={}, data_trn=None, args=None, param=None):
+def train_flr(config={'params': {}}, data_trn=None, args=None, param=None):
     """
     Train factorized likelihood model
 
@@ -540,7 +563,7 @@ def train_flr(config={}, data_trn=None, args=None, param=None):
     return (b_pdfs, s_pdfs)
 
 
-def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
+def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None):
     """
     Train normalizing flow (BNAF) neural model
 
@@ -591,7 +614,7 @@ def train_flow(config={}, data_trn=None, data_val=None, args=None, param=None):
     return True
 
 
-def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, val_weights=None,
+def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_weights=None, val_weights=None,
     args=None, y_soft=None, param=None, feature_names=None):
     """
     Train graph model + xgb hybrid model
@@ -762,7 +785,7 @@ def train_graph_xgb(config={}, data_trn=None, data_val=None, trn_weights=None, v
     return model
 
 
-def train_xtx(config={}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):
+def train_xtx(config={'params': {}}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):
     """
     Train binned neural model (untested function; TODO add weights)
     

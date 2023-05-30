@@ -7,7 +7,7 @@ param:
   #active:         ['xgb1']
   active:  [null]
   num_samples:    1000
-  max_num_epochs: 50 # Keep it high enough if tuning 'num_boost_round' with xgboost
+  max_num_epochs: 50  # Not active
 
 setup:
 
