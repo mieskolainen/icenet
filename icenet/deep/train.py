@@ -179,13 +179,13 @@ def raytune_main(inputs, train_func=None):
     
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
-    config = {}
+    parameters = {}
 
     for key in args['raytune']['setup'][steer]['param']:
         
         rtp   = args['raytune']['setup'][steer]['param'][key]['type']
         print(f'{key}: {rtp}')
-        config[key] = eval(rtp)
+        parameters[key] = eval(rtp)
     
     # Raytune basic metrics
     #reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
@@ -224,7 +224,7 @@ def raytune_main(inputs, train_func=None):
             resources_per_worker = {"cpu": 1, "gpu": 1 if torch.cuda.is_available() else 0}
         ),
     }
-    param_space['params'] = config # Set hyperparameters
+    param_space['params'] = parameters # Set hyperparameters
     
     tuner = tune.Tuner(
         partial(train_func, **inputs),
@@ -249,7 +249,7 @@ def raytune_main(inputs, train_func=None):
     print('')
     
     # Set the best config, training functions will update the parameters
-    inputs['config'] = best_result.config['params']
+    inputs['config']['params'] = best_result.config['params']
     inputs['args']['__raytune_running__'] = False
     
     # Train finally once more with the best parameters
