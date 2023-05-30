@@ -179,15 +179,12 @@ def raytune_main(inputs, train_func=None):
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
     parameters = {}
-    
+
     for key in args['raytune']['setup'][steer]['param']:
         
         rtp   = args['raytune']['setup'][steer]['param'][key]['type']
         print(f'{key}: {rtp}')
         parameters[key] = eval(rtp)
-    
-    # Raytune basic metrics
-    #reporter = CLIReporter(metric_columns = ["loss", "AUC", "training_iteration"])
     
     # Raytune search algorithm
     algo     = args['raytune']['setup'][steer]['search_algo']
