@@ -175,8 +175,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    for key in param['model_param'].keys():
-        param['model_param'][key] = config['params'][key] if key in config['params'].keys() else param['model_param'][key]
+    param['model_param'] = aux.replace_param(default=param['model_param'], raytune=config['params'])
     
     ### *********************************
     

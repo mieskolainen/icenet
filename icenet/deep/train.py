@@ -102,19 +102,6 @@ def getgraphmodel(conv_type, netparam):
     
     return model
 
-def getcutsetparam(param, config={}):
-    """
-    Construct generic cutset parameters
-    """
-    cutsetparam = {}
-    
-    # Add model hyperparameter keys
-    if param['model_param'] is not None:
-        for key in param['model_param'].keys():
-            cutsetparam[key] = config[key] if key in config.keys() else param['model_param'][key]
-
-    return cutsetparam
-
 
 def getgenericparam(param, D, num_classes, config={}):
     """
@@ -270,13 +257,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     model, device = optimize.model_to_cuda(model=model, device_type=param['device'])
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    opt_param = {}
-    for key in param['opt_param'].keys():
-        opt_param[key]       = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
-    
-    scheduler_param = {}
-    for key in param['scheduler_param'].keys():
-        scheduler_param[key] = config['params'][key] if key in config['params'].keys() else param['scheduler_param'][key]
+    opt_param       = aux.replace_param(default=param['opt_param'], raytune=config['params'])
+    scheduler_param = aux.replace_param(default=param['scheduler_param'], raytune=config['params'])
     
     # Create optimizer
     if   opt_param['optimizer'] == 'Adam':
@@ -399,10 +381,8 @@ def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=
     model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    opt_param = {}
-    for key in param['opt_param'].keys():
-        opt_param[key] = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
-
+    opt_param = aux.replace_param(default=param['opt_param'], raytune=config['params'])
+    
     # ** Set distillation training targets **
     if y_soft is not None:
         for i in range(len(data_trn)):
@@ -477,10 +457,8 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
         validation_set = optimize.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    opt_param = {}
-    for key in param['opt_param'].keys():
-        opt_param[key] = config['params'][key] if key in config['params'].keys() else param['opt_param'][key]
-
+    opt_param       = aux.replace_param(default=param['opt_param'], raytune=config['params'])
+    
     params = {'batch_size'  : opt_param['batch_size'],
               'shuffle'     : True,
               'num_workers' : param['num_workers'],
@@ -505,7 +483,8 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     print(__name__ + f'.train_cutset: Training <{param["label"]}> classifier ...')
     print(config)
     
-    model_param = getcutsetparam(param=param, config=config['params'])
+    model_param = aux.replace_param(default=param['model_param'], raytune=config['params'])
+    
     new_param   = copy.deepcopy(param)
     new_param['model_param'] = model_param
     

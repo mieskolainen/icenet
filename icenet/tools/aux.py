@@ -26,6 +26,14 @@ import scipy.special as special
 #from multiprocessing import Pool, freeze_support
 
 
+def replace_param(default, raytune):
+
+    new_param = {}
+    for key in default.keys():
+        new_param[key] = raytune[key] if key in raytune.keys() else default[key]
+    
+    return new_param
+
 def unmask(x, mask, default_value=-1):
     """
     Unmasking function
