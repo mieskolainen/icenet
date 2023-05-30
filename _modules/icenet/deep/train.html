@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.6
+                0.0.8.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -483,8 +483,12 @@
 
 <span class="c1"># Raytune</span>
 <span class="kn">from</span> <span class="nn">ray</span> <span class="kn">import</span> <span class="n">tune</span>
+<span class="kn">from</span> <span class="nn">ray.tune.search.basic_variant</span> <span class="kn">import</span> <span class="n">BasicVariantGenerator</span>
 <span class="kn">from</span> <span class="nn">ray.tune.search.hyperopt</span> <span class="kn">import</span> <span class="n">HyperOptSearch</span>
-<span class="kn">from</span> <span class="nn">ray.tune</span> <span class="kn">import</span> <span class="n">CLIReporter</span>
+<span class="kn">from</span> <span class="nn">ray.tune.search.optuna</span> <span class="kn">import</span> <span class="n">OptunaSearch</span>
+<span class="kn">from</span> <span class="nn">ray.tune.search.bayesopt</span> <span class="kn">import</span> <span class="n">BayesOptSearch</span>
+
+<span class="kn">from</span> <span class="nn">ray.air.config</span> <span class="kn">import</span> <span class="n">RunConfig</span><span class="p">,</span> <span class="n">ScalingConfig</span>
 <span class="kn">from</span> <span class="nn">ray.tune.schedulers</span> <span class="kn">import</span> <span class="n">ASHAScheduler</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
@@ -566,7 +570,6 @@
 
     <span class="k">return</span> <span class="n">netparam</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;conv_type&#39;</span><span class="p">]</span></div>
 
-
 <div class="viewcode-block" id="getgraphparam"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgraphparam">[docs]</a><span class="k">def</span> <span class="nf">getgraphparam</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct graph network parameters</span>
@@ -614,31 +617,38 @@
     
     <span class="c1">### Construct hyperparameter config (setup) from yaml</span>
     <span class="n">steer</span>  <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">]</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">]:</span>
         
         <span class="n">rtp</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">rtp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">rtp</span><span class="p">)</span>
+        <span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">rtp</span><span class="p">)</span>
     
     <span class="c1"># Raytune basic metrics</span>
-    <span class="n">reporter</span> <span class="o">=</span> <span class="n">CLIReporter</span><span class="p">(</span><span class="n">metric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;AUC&quot;</span><span class="p">,</span> <span class="s2">&quot;training_iteration&quot;</span><span class="p">])</span>
+    <span class="c1">#reporter = CLIReporter(metric_columns = [&quot;loss&quot;, &quot;AUC&quot;, &quot;training_iteration&quot;])</span>
     
     <span class="c1"># Raytune search algorithm</span>
+    <span class="n">algo</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_algo&#39;</span><span class="p">]</span>
     <span class="n">metric</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
     <span class="n">mode</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;raytune&#39;</span><span class="p">][</span><span class="s1">&#39;setup&#39;</span><span class="p">][</span><span class="n">steer</span><span class="p">][</span><span class="s1">&#39;search_metric&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
     
     <span class="c1"># Hyperopt Bayesian</span>
-    <span class="n">search_alg</span> <span class="o">=</span> <span class="n">HyperOptSearch</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="k">if</span>   <span class="n">algo</span> <span class="o">==</span> <span class="s1">&#39;Basic&#39;</span><span class="p">:</span>
+        <span class="n">search_alg</span> <span class="o">=</span> <span class="n">BasicVariantGenerator</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s1">&#39;HyperOpt&#39;</span><span class="p">:</span>
+        <span class="n">search_alg</span> <span class="o">=</span> <span class="n">HyperOptSearch</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s1">&#39;Optuna&#39;</span><span class="p">:</span>
+        <span class="n">search_alg</span> <span class="o">=</span> <span class="n">OptunaSearch</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">algo</span> <span class="o">==</span> <span class="s1">&#39;BayesOpt&#39;</span><span class="p">:</span>
+        <span class="n">search_alg</span> <span class="o">=</span> <span class="n">BayesOptSearch</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.raytune_main: Unknown &#39;search_algo&#39; (use &#39;Basic&#39;, &#39;HyperOpt&#39;, &#39;Optuna&#39;, &#39;BayesOpt&#39;)&quot;</span><span class="p">)</span>
+    
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Optimization algorithm: </span><span class="si">{</span><span class="n">algo</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># Raytune scheduler</span>
-    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">ASHAScheduler</span><span class="p">(</span>
-        <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">,</span>
-        <span class="n">mode</span>   <span class="o">=</span> <span class="n">mode</span><span class="p">,</span>
-        <span class="n">max_t</span>  <span class="o">=</span> <span class="n">max_num_epochs</span><span class="p">,</span>
-        <span class="n">grace_period</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">reduction_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">ASHAScheduler</span><span class="p">()</span>
     
     <span class="c1">## Flag raytune on for training functions</span>
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -646,27 +656,39 @@
     <span class="c1"># Raytune main setup</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Launching tune ...&#39;</span><span class="p">)</span>
     
-    <span class="n">analysis</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">param_space</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;scaling_config&quot;</span><span class="p">:</span> <span class="n">ScalingConfig</span><span class="p">(</span>
+            <span class="n">num_workers</span>          <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
+            <span class="n">resources_per_worker</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">param_space</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span> <span class="c1"># Set hyperparameters</span>
+    
+    <span class="n">tuner</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">Tuner</span><span class="p">(</span>
         <span class="n">partial</span><span class="p">(</span><span class="n">train_func</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">),</span>
-        <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
-        <span class="n">resource_path</span>       <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;./tmp/ray/local_dir&#39;</span><span class="p">,</span>
-        <span class="n">resources_per_trial</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">},</span>
-        <span class="n">config</span>              <span class="o">=</span> <span class="n">config</span><span class="p">,</span>
-        <span class="n">num_samples</span>         <span class="o">=</span> <span class="n">num_samples</span><span class="p">,</span>
-        <span class="n">scheduler</span>           <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
-        <span class="n">progress_reporter</span>   <span class="o">=</span> <span class="n">reporter</span><span class="p">)</span>
+        <span class="n">tune_config</span><span class="o">=</span><span class="n">tune</span><span class="o">.</span><span class="n">TuneConfig</span><span class="p">(</span>
+            <span class="n">search_alg</span>          <span class="o">=</span> <span class="n">search_alg</span><span class="p">,</span>
+            <span class="n">scheduler</span>           <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
+            <span class="n">metric</span>              <span class="o">=</span> <span class="n">metric</span><span class="p">,</span>
+            <span class="n">mode</span>                <span class="o">=</span> <span class="n">mode</span><span class="p">,</span>
+            <span class="n">num_samples</span>         <span class="o">=</span> <span class="n">num_samples</span>
+        <span class="p">),</span>
+        <span class="n">run_config</span>  <span class="o">=</span> <span class="n">RunConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;icenet_raytune&quot;</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="s2">&quot;./tmp&quot;</span><span class="p">),</span>
+        <span class="n">param_space</span> <span class="o">=</span> <span class="n">param_space</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">tuner</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
     
     <span class="c1"># Get the best config</span>
-    <span class="n">best_trial</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get_best_trial</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
-
+    <span class="n">best_result</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_best_result</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial config:                </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>              <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial final validation loss: </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best trial final validation AUC:  </span><span class="si">{</span><span class="n">best_trial</span><span class="o">.</span><span class="n">last_result</span><span class="p">[</span><span class="s2">&quot;AUC&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best result config:  </span><span class="si">{</span><span class="n">best_result</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.raytune_main: Best result metrics: </span><span class="si">{</span><span class="n">best_result</span><span class="o">.</span><span class="n">metrics</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
     <span class="c1"># Set the best config, training functions will update the parameters</span>
-    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_trial</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># Create empty</span>
+    <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_result</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span>
     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     
     <span class="c1"># Train finally once more with the best parameters</span>
@@ -675,7 +697,7 @@
     <span class="k">return</span> <span class="n">best_trained_model</span></div>
 
 
-<div class="viewcode-block" id="torch_loop"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.torch_loop">[docs]</a><span class="k">def</span> <span class="nf">torch_loop</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="torch_loop"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.torch_loop">[docs]</a><span class="k">def</span> <span class="nf">torch_loop</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main training loop for all torch based models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -691,11 +713,11 @@
     <span class="c1">### ** Optimization hyperparameters [possibly from Raytune] **</span>
     <span class="n">opt_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>       <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>       <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
     
     <span class="n">scheduler_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;scheduler_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">scheduler_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;scheduler_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">scheduler_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;scheduler_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
     
     <span class="c1"># Create optimizer</span>
     <span class="k">if</span>   <span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Adam&#39;</span><span class="p">:</span>
@@ -796,7 +818,7 @@
     <span class="k">return</span> <span class="c1"># No return value for raytune</span></div>
 
 
-<div class="viewcode-block" id="train_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="train_torch_graph"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a><span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_period</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train graph neural networks</span>
 <span class="sd">    </span>
@@ -811,15 +833,16 @@
 <span class="sd">        trained model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_torch_graph: Training &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; classifier ...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     
     <span class="c1"># Construct model</span>
-    <span class="n">netparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgraphparam</span><span class="p">(</span><span class="n">data_trn</span><span class="o">=</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">netparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgraphparam</span><span class="p">(</span><span class="n">data_trn</span><span class="o">=</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">])</span>
     <span class="n">model</span>               <span class="o">=</span> <span class="n">getgraphmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="o">=</span><span class="n">netparam</span><span class="p">)</span>    
 
     <span class="c1">### ** Optimization hyperparameters [possibly from Raytune] **</span>
     <span class="n">opt_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
 
     <span class="c1"># ** Set distillation training targets **</span>
     <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -837,7 +860,7 @@
 <div class="viewcode-block" id="train_torch_generic"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_generic">[docs]</a><span class="k">def</span> <span class="nf">train_torch_generic</span><span class="p">(</span><span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_trn_2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val_2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
     <span class="n">Y_trn_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-    <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train generic neural model [R^d x (2D) -&gt; output]</span>
 <span class="sd">    </span>
@@ -866,7 +889,7 @@
 
 <div class="viewcode-block" id="torch_construct"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.torch_construct">[docs]</a><span class="k">def</span> <span class="nf">torch_construct</span><span class="p">(</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">X_trn_2D</span><span class="p">,</span> <span class="n">X_val_2D</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> 
     <span class="n">Y_trn_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-    <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Torch model and data loader constructor</span>
 
@@ -879,7 +902,7 @@
 
     <span class="c1">## ------------------------</span>
     <span class="c1">### Construct model</span>
-    <span class="n">netparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgenericparam</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">])</span>
+    <span class="n">netparam</span><span class="p">,</span> <span class="n">conv_type</span> <span class="o">=</span> <span class="n">getgenericparam</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">])</span>
     <span class="n">model</span>               <span class="o">=</span> <span class="n">getgenericmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="o">=</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="o">=</span><span class="n">netparam</span><span class="p">)</span>
 
 
@@ -897,7 +920,7 @@
     <span class="c1">### ** Optimization hyperparameters [possibly from Raytune] **</span>
     <span class="n">opt_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">opt_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
 
     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span>  <span class="p">:</span> <span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
               <span class="s1">&#39;shuffle&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
@@ -910,7 +933,7 @@
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span></div>
 
 
-<div class="viewcode-block" id="train_cutset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cutset">[docs]</a><span class="k">def</span> <span class="nf">train_cutset</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="train_cutset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cutset">[docs]</a><span class="k">def</span> <span class="nf">train_cutset</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train cutset model</span>
 
@@ -921,8 +944,9 @@
 <span class="sd">        Trained model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_cutset: Training &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; classifier ...&#39;</span><span class="p">)</span>
-
-    <span class="n">model_param</span> <span class="o">=</span> <span class="n">getcutsetparam</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    
+    <span class="n">model_param</span> <span class="o">=</span> <span class="n">getcutsetparam</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">])</span>
     <span class="n">new_param</span>   <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
     <span class="n">new_param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_param</span>
     
@@ -959,7 +983,7 @@
     <span class="k">return</span> <span class="c1"># No return value for raytune</span></div>
 
 
-<div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="train_flr"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a><span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train factorized likelihood model</span>
 
@@ -978,7 +1002,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="train_flow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flow">[docs]</a><span class="k">def</span> <span class="nf">train_flow</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="train_flow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flow">[docs]</a><span class="k">def</span> <span class="nf">train_flow</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train normalizing flow (BNAF) neural model</span>
 
@@ -1029,7 +1053,7 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="train_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="train_graph_xgb"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a><span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train graph model + xgb hybrid model</span>
@@ -1200,7 +1224,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="train_xtx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xtx">[docs]</a><span class="k">def</span> <span class="nf">train_xtx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="train_xtx"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_xtx">[docs]</a><span class="k">def</span> <span class="nf">train_xtx</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_kin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train binned neural model (untested function; TODO add weights)</span>
 <span class="sd">    </span>
