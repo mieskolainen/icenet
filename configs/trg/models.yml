@@ -41,7 +41,7 @@ cutset0:
   
   model_param:
 
-    comp_0: '<'
+    comp_0: '<'       # hint: for raytune, use "tune.choice(['<', '>'])"
     comp_1: '<'
     comp_2: '<'
     comp_3: '<'
