@@ -244,9 +244,9 @@ def raytune_main(inputs, train_func=None):
     best_result = results.get_best_result(metric=metric, mode=mode)
     
     print('-----------------')
-    cprint(__name__ + f'.raytune_main: Best result config: \n{best_result.config}',  'yellow')
+    cprint(__name__ + f'.raytune_main: Best result config: \n\n{best_result.config}',  'yellow')
     print('')
-    cprint(__name__ + f'.raytune_main: Best result metrics:\n{best_result.metrics}', 'yellow')
+    cprint(__name__ + f'.raytune_main: Best result metrics:\n\n{best_result.metrics}', 'yellow')
     print('-----------------')
     
     # Set the best config, training functions will update the parameters
@@ -264,7 +264,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     """
     Main training loop for all torch based models
     """
-
+    
     DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
     trn_aucs  = []
