@@ -223,7 +223,7 @@ def raytune_main(inputs, train_func=None):
     param_space['params'] = parameters # Set hyperparameters
     
     tuner = tune.Tuner(
-        partial(train_func, **inputs),
+        tune.with_parameters(train_func, **inputs),
         tune_config=tune.TuneConfig(
             search_alg          = search_alg,
             scheduler           = scheduler,
