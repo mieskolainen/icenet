@@ -243,10 +243,11 @@ def raytune_main(inputs, train_func=None):
     # Get the best config
     best_result = results.get_best_result(metric=metric, mode=mode)
     
+    print('-----------------')
+    cprint(__name__ + f'.raytune_main: Best result config: \n{best_result.config}',  'yellow')
     print('')
-    cprint(__name__ + f'.raytune_main: Best result config:  {best_result.config}',  'yellow')
-    cprint(__name__ + f'.raytune_main: Best result metrics: {best_result.metrics}', 'yellow')
-    print('')
+    cprint(__name__ + f'.raytune_main: Best result metrics:\n{best_result.metrics}', 'yellow')
+    print('-----------------')
     
     # Set the best config, training functions will update the parameters
     inputs['config'] = {} # Create empty
