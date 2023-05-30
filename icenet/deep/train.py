@@ -249,6 +249,7 @@ def raytune_main(inputs, train_func=None):
     print('')
     
     # Set the best config, training functions will update the parameters
+    inputs['config'] = {} # Create empty
     inputs['config']['params'] = best_result.config['params']
     inputs['args']['__raytune_running__'] = False
     
