@@ -31,6 +31,20 @@ cutset0:
   label:   'cutset'
   raytune:  cutset_setup_0
   
+  # Optimization
+  opt_param:  
+    
+    #lossfunc: 'eff_s * s / np.sqrt(eff_s*s + eff_b*b)'
+    #lossfunc: 'eff_s * s / (eff_s*s + eff_b*b)'
+
+    # Approximate median significance (AMS)
+    lossfunc: 'np.sqrt(2*((eff_s*s + eff_b*b + b_r)*np.log(1 + eff_s*s / (eff_b*b + b_r)) - eff_s*s))'
+    
+    lossfunc_var:              # These are expanded into memory via (exec)
+      s: 20                    # Number of signal events expected
+      b: 1000                  # Number of background events expected
+      b_r: 10                  # Regularization constant
+  
   variable: ['x_hlt_pms2',
              'x_hlt_invEInvP',
              'x_hlt_trkDEtaSeed',

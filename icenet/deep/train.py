@@ -509,9 +509,9 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     new_param   = copy.deepcopy(param)
     new_param['model_param'] = model_param
     
-    x       = data_trn.x
-    y_true  = data_trn.y
-    weights = data_trn.w
+    x                = data_trn.x
+    y_true           = data_trn.y
+    weights          = data_trn.w
     args['features'] = data_trn.ids
     
     pred_func = predict.pred_cutset(args=args, param=new_param)
@@ -519,16 +519,30 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     # Apply cutset
     y_pred    = pred_func(x)
     
-    # Benchmark
+    # Metrics
     metrics   = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, num_classes=2, hist=False, verbose=True)
     
-    cprint(__name__ + f'.train_cutset: AUC = {metrics.auc:0.4f}', 'yellow')
+    # ------------------------------------------------------
+    # Compute loss
+    for p in param['opt_param']['lossfunc_var'].keys():
+        exec(f"{p} = param['opt_param']['lossfunc_var']['{p}']")
+    
+    y_pred = y_pred.astype(int)
+    
+    # Efficiency
+    eff_s = np.sum(weights[np.logical_and(y_pred == 1, y_true == 1)]) / np.sum(weights[y_true == 1])
+    eff_b = np.sum(weights[np.logical_and(y_pred == 0, y_true == 0)]) / np.sum(weights[y_true == 0])
+    
+    loss  = eval(param['opt_param']['lossfunc'])
+    # -------------------------------------------------------
+    
+    cprint(__name__ + f'.train_cutset: (eff_s: {eff_s:0.3E}, eff_b: {eff_b:0.3E}) | loss: {loss:0.3f} | AUC = {metrics.auc:0.4f}', 'yellow')
     
     if args['__raytune_running__']:
         #with tune.checkpoint_dir(epoch) as checkpoint_dir:
         #    path = os.path.join(checkpoint_dir, "checkpoint")
         #    torch.save((model.state_dict(), optimizer.state_dict()), path)
-        tune.report(loss = -1.0, AUC = metrics.auc)
+        tune.report(loss = loss, AUC = metrics.auc)
     else:
         ## Save
         True

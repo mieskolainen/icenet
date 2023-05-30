@@ -13,9 +13,9 @@ setup:
     search_algo: 'HyperOpt' # 'Basic', 'HyperOpt', 'Optuna', 'BayesOpt'
 
     search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
+      metric: 'loss'   # 'AUC' or 'loss'
+      mode: 'max'      # 'max', 'min'
+    
     param:
       
       cut_0:
@@ -30,9 +30,9 @@ setup:
     search_algo: 'HyperOpt'
 
     search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
+      metric: 'AUC'   # 'AUC' or 'loss'
+      mode: 'max'     # 'max', 'min'
+    
     param:
       
       num_boost_round:
