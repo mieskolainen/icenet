@@ -4,6 +4,14 @@
 #
 # Run with: source runme.sh
 
+source $HOME/setconda.sh
+conda activate icenet
+
+ICEPATH="/vols/cms/mmieskol/icenet"
+cd $ICEPATH
+echo "$(pwd)"
+source $ICEPATH/setenv.sh
+
 # --------------------
 ## Process input
 

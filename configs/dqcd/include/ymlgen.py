@@ -292,21 +292,41 @@ def QCD(outputfile, filerange='*'):
       printer(**param, flush_index=i)
 
 
-def data(outputfile, filerange='*'):
+def data(outputfile, filerange='*', period='B'):
 
-  processes = [ \
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'ParkingBPH1_Run2018B',
-   'end_name': 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1p0_generationSync',
-  }
-  ,
+  processes = None
   
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'ParkingBPH1_Run2018C',
-   'end_name': 'ParkingBPH1_Run2018C-05May2019-v1_MINIAOD_v1p0_generationSync',
-  } ]
+  if   period == 'B':
+    
+    processes = [
+    {'path':     'bparkProductionAll_V1p0',
+     'process':  'ParkingBPH1_Run2018B',
+     'end_name': 'ParkingBPH1_Run2018B-05May2019-v2_MINIAOD_v1p0_generationSync'
+    }
+    ]
 
-  rp = {}
+  elif period == 'C':
+    
+    processes = [
+    {'path':     'bparkProductionAll_V1p0',
+     'process':  'ParkingBPH1_Run2018C',
+     'end_name': 'ParkingBPH1_Run2018C-05May2019-v1_MINIAOD_v1p0_generationSync'
+    }
+    ]
+  
+  elif period == 'D':
+    
+    processes = [
+    {'path':     'bparkProductionAll_V1p0',
+     'process':  'ParkingBPH1_Run2018D',
+     'end_name': 'tmp'
+    }
+    ]
+  
+  else:
+    raise Exception(__name__ + f'.data: Unknown period "{period}" chosen')
+
+  rp              = {}
   rp['m']         = ['null']
   rp['ctau']      = ['null'] 
   rp['xi_pair']   = [['null', 'null']]
@@ -341,6 +361,7 @@ def data(outputfile, filerange='*'):
     else:
       printer(**param, flush_index=i)
 
+
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Generate some YAML-files.')
@@ -367,10 +388,16 @@ if __name__ == '__main__':
 
   elif args.process == 'QCD':
     QCD(outputfile=outputfile, filerange=args.filerange)
-    
-  elif args.process == 'data':
-    data(outputfile=outputfile, filerange=args.filerange)
+  
+  elif args.process == 'data-B':
+    data(outputfile=outputfile, filerange=args.filerange, period='B')
 
+  elif args.process == 'data-C':
+    data(outputfile=outputfile, filerange=args.filerange, period='C')
+  
+  elif args.process == 'data-D':
+    data(outputfile=outputfile, filerange=args.filerange, period='D')
+  
   else:
     print('Error: unknown --process chosen (run --help)')
 

@@ -208,7 +208,7 @@ def parse_vars(items):
     return d
 
 
-def ak2numpy(x, fields, null_value=float(999.0)):
+def ak2numpy(x, fields, null_value=float(999.0), dtype='float32'):
     """
     Unzip awkward array to numpy array per column (awkward Record)
     
@@ -218,13 +218,14 @@ def ak2numpy(x, fields, null_value=float(999.0)):
     Returns:
         numpy array with columns ordered as 'fields' parameter
     """
-    out = null_value * np.ones((len(x), len(fields)), dtype=float)
+    out = null_value * np.ones((len(x), len(fields)), dtype=dtype)
     for i in range(len(fields)):
         out[:,i] = ak.flatten(ak.unzip(x[fields[i]]))
     return out
 
 
-def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_start=None, entry_stop=None, null_value=float(-999.0)):
+def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim,
+                       entry_start=None, entry_stop=None, null_value=float(-999.0), dtype='float32'):
     """
     Transform jagged awkward array to fixed dimensional numpy data
     
@@ -258,23 +259,22 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim, entry_star
         'scalar_vars': scalar_vars,
         'jagged_vars': jagged_vars,
         'jagged_dim':  jagged_dim,
-        'null_value':  null_value
+        'null_value':  null_value,
+        'dtype':       dtype
     }
-    
-    matrix       = jagged2matrix(data.x, **arg)
     
     # Cast to numpy arrays
     new_data     = copy.deepcopy(data)
 
-    new_data.x   = ak.to_numpy(matrix)
-    new_data.y   = ak.to_numpy(data.y)
+    new_data.x   = jagged2matrix(data.x, **arg)
+    new_data.y   = ak.to_numpy(data.y).astype(dtype)
     new_data.ids = scalar_vars + all_jagged_vars # First scalar, then jagged !
 
     return new_data
 
 
 def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
-    entry_start=None, entry_stop=None, null_value=float(-999.0), mode='columnar'):
+    entry_start=None, entry_stop=None, null_value=float(-999.0), mode='columnar', dtype='float32'):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
@@ -295,7 +295,11 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
     entry_start, entry_stop, N = slice_range(start=entry_start, stop=entry_stop, N=len(arr))
     D = len(scalar_vars) + int(np.sum(np.array(jagged_dim)))
     
-    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}] ({N*D*64/8/1024**3:0.3f} GB)')
+    # Print stats
+    mem_size = N*D*32/8/1024**3 # 32 bit
+    if dtype == 'float64': mem_size *= 2
+    
+    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}] ({mem_size:0.3f} GB)')
 
     # Pre-processing of jagged variable names
     jvname = []
@@ -304,7 +308,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
         jvname.append(jagged_vars[j].split('_', 1)) # argument 1 takes the first '_' occurance
 
     # Return matrix
-    shared_array = np.full((N,D), null_value)
+    shared_array = np.full((N,D), null_value, dtype=dtype)
 
     ## Pure scalar vars (very fast)
     for j in range(len(scalar_vars)):
@@ -360,7 +364,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
     return shared_array
 
 
-def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
+def jagged2tensor(X, ids, xyz, x_binedges, y_binedges, dtype='float32'):
     """
     Args:
         X          : input data (samples x dimensions) with jagged structure
@@ -374,7 +378,7 @@ def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
     """
 
     # Samples x Channels x Rows x Columns
-    T = np.zeros((X.shape[0], len(xyz), len(x_binedges)-1, len(y_binedges)-1), dtype=float)
+    T = np.zeros((X.shape[0], len(xyz), len(x_binedges)-1, len(y_binedges)-1), dtype=dtype)
 
     # Choose targets
     for c in range(len(xyz)):
@@ -390,7 +394,7 @@ def jagged2tensor(X, ids, xyz, x_binedges, y_binedges):
     return T
 
 
-def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
+def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges, dtype='float32'):
     """
     Array representation summed to matrix.
     
@@ -409,7 +413,7 @@ def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges):
     y_ind = x2ind(x=y_arr, binedges=y_binedges)
 
     # Loop and sum (accumulate)
-    A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=float)
+    A  = np.zeros((len(x_binedges)-1, len(y_binedges)-1), dtype=dtype)
     try:
         for i in range(len(x_ind)):
             A[x_ind[i], y_ind[i]] += z_arr[i]

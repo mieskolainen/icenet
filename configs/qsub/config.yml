@@ -50,11 +50,33 @@ jobs:
     S: null
     m: 'a'
   
-  dqcd_vector_data:
+  dqcd_vector_data-B:
 
-    cwd: 'tests/runme_dqcd_vector_data_deploy.sh'
+    cwd: 'tests/runme_dqcd_vector_data-B_deploy.sh'
     t: '1-80:1'
     h_vmem: '12G'
+    h_rt: '24:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+
+  dqcd_vector_data-C:
+
+    cwd: 'tests/runme_dqcd_vector_data-C_deploy.sh'
+    t: '1-80:1'
+    h_vmem: '12G'
+    h_rt: '24:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+  
+  dqcd_vector_data-D:
+
+    cwd: 'tests/runme_dqcd_vector_data-D_deploy.sh'
+    t: '1-80:1'
+    h_vmem: '24G'
     h_rt: '24:00:00'
     q: 'hep.q'
     pe: null

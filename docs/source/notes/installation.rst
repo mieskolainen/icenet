@@ -49,7 +49,7 @@ Execute
 	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
 	# Create environment
-	conda create -y --name icenet -c conda-forge python==3.10.11 gxx_linux-64==11.3.0 sysroot_linux-64==2.28
+	conda create -y --name icenet -c conda-forge python==3.10.11 cmake==3.26.4 gxx_linux-64==11.3.0 sysroot_linux-64==2.28
 	conda activate icenet
 	
 	# Install cudatoolkit and cudnn

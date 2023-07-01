@@ -8,9 +8,9 @@ import socket
 import os
 import psutil
 
-__version__    = '0.0.8.7'
+__version__    = '0.0.8.8'
 __release__    = 'alpha'
-__date__       = '30/05/2023'
+__date__       = '01/07/2023'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \

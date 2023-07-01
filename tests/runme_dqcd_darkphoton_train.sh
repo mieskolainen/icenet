@@ -4,6 +4,14 @@
 #
 # Run with: source runme.sh
 
+source $HOME/setconda.sh
+conda activate icenet
+
+ICEPATH="/vols/cms/mmieskol/icenet"
+cd $ICEPATH
+echo "$(pwd)"
+source $ICEPATH/setenv.sh
+
 CONFIG="tune0.yml"
 #DATAPATH="/home/user/travis-stash/input/icedqcd"
 DATAPATH="/vols/cms/mc3909"
