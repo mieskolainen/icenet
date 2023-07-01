@@ -33,7 +33,7 @@
             
           </a>
               <div class="version">
-                0.0.8.7
+                0.0.8.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -47,7 +47,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#pre-installed-cuda-paths-optional-deprecated">Pre-installed CUDA paths (optional, deprecated)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#possible-problems">Possible problems</a></li>
@@ -60,6 +60,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#yaml-configuration-files">YAML-configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#folder-structure">Folder structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ml-algorithms-and-models">ML-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-ml-training-technology">Advanced ML-training technology</a></li>
@@ -445,10 +446,11 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#basic-design-principles" id="id1">Basic design principles</a></p></li>
 <li><p><a class="reference internal" href="#yaml-configuration-files" id="id2">YAML-configuration files</a></p></li>
-<li><p><a class="reference internal" href="#folder-structure" id="id3">Folder structure</a></p></li>
-<li><p><a class="reference internal" href="#ml-algorithms-and-models" id="id4">ML-algorithms and models</a></p></li>
-<li><p><a class="reference internal" href="#advanced-ml-training-technology" id="id5">Advanced ML-training technology</a></p></li>
-<li><p><a class="reference internal" href="#automated-selectors-and-combinatorics-for-distributions" id="id6">Automated selectors and combinatorics for distributions</a></p></li>
+<li><p><a class="reference internal" href="#oracle-grid-execution" id="id3">Oracle Grid execution</a></p></li>
+<li><p><a class="reference internal" href="#folder-structure" id="id4">Folder structure</a></p></li>
+<li><p><a class="reference internal" href="#ml-algorithms-and-models" id="id5">ML-algorithms and models</a></p></li>
+<li><p><a class="reference internal" href="#advanced-ml-training-technology" id="id6">Advanced ML-training technology</a></p></li>
+<li><p><a class="reference internal" href="#automated-selectors-and-combinatorics-for-distributions" id="id7">Automated selectors and combinatorics for distributions</a></p></li>
 </ul>
 </nav>
 <section id="basic-design-principles">
@@ -464,8 +466,18 @@ fit under certain “quasi-templated YAML-python-workflow” as manifested from 
 <p>End-to-end deep learning applications are configured with YAML-files.
 See source files for different applications under <code class="docutils literal notranslate"><span class="pre">/configs</span></code></p>
 </section>
+<section id="oracle-grid-execution">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Oracle Grid execution</a><a class="headerlink" href="#oracle-grid-execution" title="Permalink to this heading">¶</a></h2>
+<p>DQCD analysis deployment example:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>source tests/runme_dqcd_vector_init_yaml.sh
+python iceqsub/iceqsub.py --job dqcd_vector_data-D
+</pre></div>
+</div>
+<p>After inspecting the launch command, launch by adding <cite>–run</cite>. Make sure you have
+execute rights (chmod +x) for the steering script under <cite>/tests</cite>.</p>
+</section>
 <section id="folder-structure">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">Folder structure</a><a class="headerlink" href="#folder-structure" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Folder structure</a><a class="headerlink" href="#folder-structure" title="Permalink to this heading">¶</a></h2>
 <p>Folders starting with a name <code class="docutils literal notranslate"><span class="pre">ice</span></code> denote modules, typically
 either different core modules such as <code class="docutils literal notranslate"><span class="pre">icenet</span></code> or <code class="docutils literal notranslate"><span class="pre">icefit</span></code>
 or physics applications such as <code class="docutils literal notranslate"><span class="pre">icedqcd</span></code>, which contain their problem
@@ -491,7 +503,7 @@ specific I/O functions.</p>
 </div>
 </section>
 <section id="ml-algorithms-and-models">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">ML-algorithms and models</a><a class="headerlink" href="#ml-algorithms-and-models" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">ML-algorithms and models</a><a class="headerlink" href="#ml-algorithms-and-models" title="Permalink to this heading">¶</a></h2>
 <p>Various ML-models are implemented and supported. From a fixed dimensional input models
 such as boosted decision trees (BDT) via XGBoost enhanced with a custom torch autograd computed loss function,
 aka <code class="docutils literal notranslate"><span class="pre">ICEBOOST</span></code>, to more complex “Geometric Deep Learning” with graph neural networks using torch-geometric
@@ -514,7 +526,7 @@ new torch models or loss functions can be easily added and other computational l
 </div>
 </section>
 <section id="advanced-ml-training-technology">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Advanced ML-training technology</a><a class="headerlink" href="#advanced-ml-training-technology" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Advanced ML-training technology</a><a class="headerlink" href="#advanced-ml-training-technology" title="Permalink to this heading">¶</a></h2>
 <p>See source files under <code class="docutils literal notranslate"><span class="pre">/icenet/deep</span></code></p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1. Model distillation
 2. Conditional (parametric) classifiers
@@ -526,7 +538,7 @@ new torch models or loss functions can be easily added and other computational l
 </div>
 </section>
 <section id="automated-selectors-and-combinatorics-for-distributions">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Automated selectors and combinatorics for distributions</a><a class="headerlink" href="#automated-selectors-and-combinatorics-for-distributions" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Automated selectors and combinatorics for distributions</a><a class="headerlink" href="#automated-selectors-and-combinatorics-for-distributions" title="Permalink to this heading">¶</a></h2>
 <p>The plotting machinery allows sophisticated filtering/cuts or “combinatorial” binning of various metrics, such as ROC-curves and other figures. See steering-file examples under <code class="docutils literal notranslate"><span class="pre">/configs/*/plots.yml</span></code></p>
 </section>
 </section>

@@ -25,6 +25,20 @@ End-to-end deep learning applications are configured with YAML-files.
 See source files for different applications under ``/configs``
 
 
+Oracle Grid execution
+-----------------------
+
+DQCD analysis deployment example:
+
+.. code-block:: none
+
+	source tests/runme_dqcd_vector_init_yaml.sh
+	python iceqsub/iceqsub.py --job dqcd_vector_data-D
+
+After inspecting the launch command, launch by adding `--run`. Make sure you have
+execute rights (chmod +x) for the steering script under `/tests`.
+
+
 Folder structure
 -----------------------
 

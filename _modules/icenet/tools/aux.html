@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.7
+                0.0.8.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-optional-deprecated">Pre-installed CUDA paths (optional, deprecated)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
@@ -57,6 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
@@ -459,13 +460,10 @@
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 
 
-<span class="c1">#from functools import partial</span>
-<span class="c1">#from itertools import repeat</span>
-<span class="c1">#from multiprocessing import Pool, freeze_support</span>
-
-
 <div class="viewcode-block" id="replace_param"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.replace_param">[docs]</a><span class="k">def</span> <span class="nf">replace_param</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">raytune</span><span class="p">):</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameter replacement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">default</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">new_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">raytune</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">raytune</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">default</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -649,7 +647,7 @@
     <span class="k">return</span> <span class="n">d</span></div>
 
 
-<div class="viewcode-block" id="ak2numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.ak2numpy">[docs]</a><span class="k">def</span> <span class="nf">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">999.0</span><span class="p">)):</span>
+<div class="viewcode-block" id="ak2numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.ak2numpy">[docs]</a><span class="k">def</span> <span class="nf">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unzip awkward array to numpy array per column (awkward Record)</span>
 <span class="sd">    </span>
@@ -659,13 +657,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        numpy array with columns ordered as &#39;fields&#39; parameter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">null_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">null_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)):</span>
         <span class="n">out</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="jagged_ak_to_numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">)):</span>
+<div class="viewcode-block" id="jagged_ak_to_numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span>
+                       <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform jagged awkward array to fixed dimensional numpy data</span>
 <span class="sd">    </span>
@@ -699,23 +698,22 @@
         <span class="s1">&#39;scalar_vars&#39;</span><span class="p">:</span> <span class="n">scalar_vars</span><span class="p">,</span>
         <span class="s1">&#39;jagged_vars&#39;</span><span class="p">:</span> <span class="n">jagged_vars</span><span class="p">,</span>
         <span class="s1">&#39;jagged_dim&#39;</span><span class="p">:</span>  <span class="n">jagged_dim</span><span class="p">,</span>
-        <span class="s1">&#39;null_value&#39;</span><span class="p">:</span>  <span class="n">null_value</span>
+        <span class="s1">&#39;null_value&#39;</span><span class="p">:</span>  <span class="n">null_value</span><span class="p">,</span>
+        <span class="s1">&#39;dtype&#39;</span><span class="p">:</span>       <span class="n">dtype</span>
     <span class="p">}</span>
-    
-    <span class="n">matrix</span>       <span class="o">=</span> <span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
     
     <span class="c1"># Cast to numpy arrays</span>
     <span class="n">new_data</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="n">new_data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
-    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">new_data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">new_data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span> <span class="c1"># First scalar, then jagged !</span>
 
     <span class="k">return</span> <span class="n">new_data</span></div>
 
 
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span>
-    <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">):</span>
+    <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
 <span class="sd">    </span>
@@ -736,7 +734,11 @@
     <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">slice_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
     <span class="n">D</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jagged_dim</span><span class="p">)))</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="mi">64</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
+    <span class="c1"># Print stats</span>
+    <span class="n">mem_size</span> <span class="o">=</span> <span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="mi">32</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span> <span class="c1"># 32 bit</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float64&#39;</span><span class="p">:</span> <span class="n">mem_size</span> <span class="o">*=</span> <span class="mi">2</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">mem_size</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
 
     <span class="c1"># Pre-processing of jagged variable names</span>
     <span class="n">jvname</span> <span class="o">=</span> <span class="p">[]</span>
@@ -745,7 +747,7 @@
         <span class="n">jvname</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jagged_vars</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="c1"># argument 1 takes the first &#39;_&#39; occurance</span>
 
     <span class="c1"># Return matrix</span>
-    <span class="n">shared_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">)</span>
+    <span class="n">shared_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">D</span><span class="p">),</span> <span class="n">null_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="c1">## Pure scalar vars (very fast)</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scalar_vars</span><span class="p">)):</span>
@@ -801,7 +803,7 @@
     <span class="k">return</span> <span class="n">shared_array</span></div>
 
 
-<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+<div class="viewcode-block" id="jagged2tensor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2tensor">[docs]</a><span class="k">def</span> <span class="nf">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        X          : input data (samples x dimensions) with jagged structure</span>
@@ -815,7 +817,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Samples x Channels x Rows x Columns</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="c1"># Choose targets</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xyz</span><span class="p">)):</span>
@@ -831,7 +833,7 @@
     <span class="k">return</span> <span class="n">T</span></div>
 
 
-<div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">):</span>
+<div class="viewcode-block" id="arrays2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.arrays2matrix">[docs]</a><span class="k">def</span> <span class="nf">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="p">,</span> <span class="n">y_arr</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Array representation summed to matrix.</span>
 <span class="sd">    </span>
@@ -850,7 +852,7 @@
     <span class="n">y_ind</span> <span class="o">=</span> <span class="n">x2ind</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y_arr</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
 
     <span class="c1"># Loop and sum (accumulate)</span>
-    <span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_binedges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_ind</span><span class="p">)):</span>
             <span class="n">A</span><span class="p">[</span><span class="n">x_ind</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
