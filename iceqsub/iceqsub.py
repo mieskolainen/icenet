@@ -42,6 +42,12 @@ def parse_job(p, args):
     # Add binary file support
     cmd += f" -b y"
 
+    # Resubmit if fails
+    cmd += f" -r y"
+    
+    # Hard requirements
+    cmd += f" -hard"
+    
     # Job name
     cmd += f" -N {args.job}"
     

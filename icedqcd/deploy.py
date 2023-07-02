@@ -219,6 +219,8 @@ def process_data(args):
 
             for i in range(len(args['active_models'])):
                 
+                gc.collect()
+            
                 ID    = args['active_models'][i]
                 param = args['models'][ID]
                 
@@ -246,6 +248,8 @@ def process_data(args):
                         ## Run the MVA-model on all the theory model points in CAX array
                         for z in tqdm(range(len(CAX))):
                             
+                            gc.collect()
+
                             # Set the new conditional model parameters to X
                             nval     = CAX[z,:]
                             ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
@@ -304,10 +308,9 @@ def process_data(args):
 
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 rfile[f"Events"] = ALL_scores
-
             
             gc.collect() #! Garbage collection
-            
+        
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
 
