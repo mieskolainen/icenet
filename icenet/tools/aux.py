@@ -224,20 +224,21 @@ def ak2numpy(x, fields, null_value=float(999.0), dtype='float32'):
     return out
 
 
-def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim,
+def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
                        entry_start=None, entry_stop=None, null_value=float(-999.0), dtype='float32'):
     """
     Transform jagged awkward array to fixed dimensional numpy data
     
     Args:
-        data:          awkward arrays in a XYW object
+        arr:           jagged awkward array
         scalar_vars:   Scalar variable names
         jagged_vars:   Jagged variable names
         jagged_maxdim: Maximum dimension per jagged category
         null_value:    Fill null value
     Returns:
-        data object
+        numpy array, ids
     """
+    
     # Create tuplet expanded jagged variable names
     jagged_dim      = []
     all_jagged_vars = []
@@ -263,14 +264,9 @@ def jagged_ak_to_numpy(data, scalar_vars, jagged_vars, jagged_maxdim,
         'dtype':       dtype
     }
     
-    # Cast to numpy arrays
-    new_data     = copy.deepcopy(data)
+    ids = scalar_vars + all_jagged_vars # First scalar, then jagged !
 
-    new_data.x   = jagged2matrix(data.x, **arg)
-    new_data.y   = ak.to_numpy(data.y).astype(dtype)
-    new_data.ids = scalar_vars + all_jagged_vars # First scalar, then jagged !
-
-    return new_data
+    return jagged2matrix(arr=arr, **arg), ids
 
 
 def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,

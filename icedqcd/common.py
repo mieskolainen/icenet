@@ -160,8 +160,11 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
     """
     data   = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
-    data.y = ak.to_numpy(data.y)
-    data.w = ak.to_numpy(data.w)
+    if data.y is not None:
+        data.y = ak.to_numpy(data.y)
+    
+    if data.w is not None:
+        data.w = ak.to_numpy(data.w)
     
     ### Pick active variables out
     scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=globals()[args['inputvar_scalar']])
@@ -260,11 +263,11 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
     # -------------------------------------------------------------------------
     ## Turn jagged data to a "long-vector" zero-padded matrix representation
     
-    data = aux.jagged_ak_to_numpy(data=data, scalar_vars=scalar_vars,
-                       jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
-                       null_value=args['imputation_param']['fill_value'])
+    data.x, data.ids = aux.jagged_ak_to_numpy(arr=data.x, scalar_vars=scalar_vars,
+                        jagged_vars=jagged_vars, jagged_maxdim=args['jagged_maxdim'],
+                        null_value=args['imputation_param']['fill_value'])
     io.showmem()
-
+    
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None

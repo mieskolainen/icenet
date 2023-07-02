@@ -76,7 +76,7 @@ jobs:
 
     cwd: 'tests/runme_dqcd_vector_data-D_deploy.sh'
     t: '1-80:1'
-    h_vmem: '24G'
+    h_vmem: '12G'
     h_rt: '24:00:00'
     q: 'hep.q'
     pe: null

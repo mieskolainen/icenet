@@ -85,9 +85,11 @@ def main():
     else:
         raise Exception(f"Job '{args.job}' not found in config.yml")
     
-    print('Command to execute (use iceqsub --run to execute)')
-    print(f'"{cmd}"')
-
+    print('Command to execute (use iceqsub --run to execute):')
+    print('')
+    print(f'{cmd}')
+    print('')
+    
     if args.run:
         os.system(cmd)
 

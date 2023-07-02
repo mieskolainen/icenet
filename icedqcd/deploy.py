@@ -10,6 +10,7 @@ import uproot
 import logging
 import copy
 import socket
+import gc
 
 from datetime import datetime
 from termcolor import colored, cprint
@@ -131,6 +132,7 @@ def process_data(args):
         try:
             file_id = all_file_id[args['grid_id']]
             print(__name__ + f".deploy: file_id = {file_id} (grid_id = {args['grid_id']})")
+            
         except Exception as e:
             logging.debug('Subfolder already saturated -- no processing under this grid PC node -- continue')
             continue # This subfolder is already saturated on the grid processing, i.e. grid_id > len(all_file_id)
@@ -182,7 +184,7 @@ def process_data(args):
 
             mask = common.process_root(X=X_nocut, args=args, return_mask=True)
             
-            if len(X_nocut[mask]) == 0:
+            if np.sum(mask) == 0:
                 X        = X_nocut
                 logging.debug("No events left after pre-cuts -- scores will be -1 for all events")
                 OK_event = False
@@ -194,14 +196,21 @@ def process_data(args):
             # Phase 3: Convert to icenet dataformat
 
             try:
-                Y        = ak.Array(np.zeros(len(X))) # Dummy [does not exist here]
-                W        = ak.Array(np.ones(len(X)))  # Dummy [does not exist here]
-                data     = common.splitfactor(x=X, y=Y, w=W, ids=ids_nocut, args=args, skip_graph=True)
+                data = common.splitfactor(x=X, y=None, w=None, ids=ids_nocut, args=args, skip_graph=True)
             except Exception as e:
-		
+                
                 # Something went wrong at OS level (e.g. memory), write to log-file and exit with error
-                logging.debug(f'{filename} | A fatal error in common.splitfactor -- os._exit(os.EX_OSERR): ' + str(e))
+                txt = f'{filename} | A fatal error in common.splitfactor -- os._exit(os.EX_OSERR): ' + str(e)
+                logging.debug(txt)
+                print(txt)
                 os._exit(os.EX_OSERR)
+            
+            # ------------------
+            # ** Save memory **
+            del X
+            del X_nocut
+            gc.collect()
+            # ------------------
             
             # ------------------
             # Phase 4: Apply MVA-models
@@ -228,18 +237,17 @@ def process_data(args):
                     ## Get the MVA-model
                     func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
-                    ## Conditional model
+                    ## ** Conditional model **
                     if args['use_conditional']:
 
                         ## Get conditional parameters
                         CAX,pindex = generate_cartesian_param(ids=ids)
 
                         ## Run the MVA-model on all the theory model points in CAX array
-                        scores = {}
                         for z in tqdm(range(len(CAX))):
-
+                            
                             # Set the new conditional model parameters to X
-                            nval          = CAX[z,:]
+                            nval     = CAX[z,:]
                             ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
 
                             if OK_event:
@@ -258,6 +266,7 @@ def process_data(args):
                             # Save
                             ALL_scores[io.rootsafe(ID_label)] = pred
 
+                    # ** Unconditional model **
                     else:
 
                         if OK_event:
@@ -269,21 +278,7 @@ def process_data(args):
                             # Predict
                             pred = func_predict(XX)
                             pred = aux.unmask(x=pred, mask=mask, default_value=-1)
-
-                            # ----------------------------
-                            # Import SHAP library
-                            
-                            """
-                            explainer   = shap2.Explainer(model, feature_names=ids)
-                            maxEvent    = 3
-                            shap_values = explainer(XX[0:maxEvent,:])
-                            
-                            # Visualize the SHAP value explanation
-                            for n in range(len(shap_values)):
-                                shap.plots.waterfall(shap_values[i], max_display=30)
-                                plt.savefig(f'{basepath}/waterfall_test_{key}_{n}.pdf', bbox_inches='tight')
-                                plt.close()
-                            """                            
+                                               
                         else:
                             pred = (-1) * np.ones(len(mask)) # all -1
 
@@ -291,6 +286,7 @@ def process_data(args):
                         ALL_scores[io.rootsafe(ID)] = pred
 
                 else:
+                    
                     # if param['predict'] == 'torch_graph': # Turned off for now
                     #   scores = func_predict(data['graph'])
 
@@ -301,7 +297,7 @@ def process_data(args):
             # ------------------
             # Phase 5: Write MVA-scores out
 
-            outpath    = aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0])
+            aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0]) # Create dir
             outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
             
             print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
@@ -309,6 +305,9 @@ def process_data(args):
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 rfile[f"Events"] = ALL_scores
 
+            
+            gc.collect() #! Garbage collection
+            
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
 
@@ -331,7 +330,7 @@ def get_predictor(args, param, feature_names=None):
     elif param['predict'] == 'torch_flow':
         func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
 
-    elif   param['predict'] == 'torch_graph':
+    elif param['predict'] == 'torch_graph':
         func_predict = predict.pred_torch_graph(args=args, param=param)
 
     elif param['predict'] == 'graph_xgb':
@@ -348,10 +347,6 @@ def get_predictor(args, param, feature_names=None):
 
     elif param['predict'] == 'flr':
         func_predict = predict.pred_flr(args=args, param=param)
-        
-    #elif param['predict'] == 'xtx':
-    # ...   
-    #
     
     elif param['predict'] == 'exp':
         func_predict = predict.pred_exp(args=args, param=param)
