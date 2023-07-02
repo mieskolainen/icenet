@@ -663,20 +663,21 @@
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="jagged_ak_to_numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span>
+<div class="viewcode-block" id="jagged_ak_to_numpy"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span>
                        <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform jagged awkward array to fixed dimensional numpy data</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        data:          awkward arrays in a XYW object</span>
+<span class="sd">        arr:           jagged awkward array</span>
 <span class="sd">        scalar_vars:   Scalar variable names</span>
 <span class="sd">        jagged_vars:   Jagged variable names</span>
 <span class="sd">        jagged_maxdim: Maximum dimension per jagged category</span>
 <span class="sd">        null_value:    Fill null value</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        data object</span>
+<span class="sd">        numpy array, ids</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="c1"># Create tuplet expanded jagged variable names</span>
     <span class="n">jagged_dim</span>      <span class="o">=</span> <span class="p">[]</span>
     <span class="n">all_jagged_vars</span> <span class="o">=</span> <span class="p">[]</span>
@@ -702,14 +703,9 @@
         <span class="s1">&#39;dtype&#39;</span><span class="p">:</span>       <span class="n">dtype</span>
     <span class="p">}</span>
     
-    <span class="c1"># Cast to numpy arrays</span>
-    <span class="n">new_data</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span> <span class="c1"># First scalar, then jagged !</span>
 
-    <span class="n">new_data</span><span class="o">.</span><span class="n">x</span>   <span class="o">=</span> <span class="n">jagged2matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
-    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">new_data</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">scalar_vars</span> <span class="o">+</span> <span class="n">all_jagged_vars</span> <span class="c1"># First scalar, then jagged !</span>
-
-    <span class="k">return</span> <span class="n">new_data</span></div>
+    <span class="k">return</span> <span class="n">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">),</span> <span class="n">ids</span></div>
 
 
 <div class="viewcode-block" id="jagged2matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a><span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span>

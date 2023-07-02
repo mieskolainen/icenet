@@ -2609,12 +2609,12 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.jagged_ak_to_numpy">
-<span class="sig-name descname"><span class="pre">jagged_ak_to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float32'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged_ak_to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged_ak_to_numpy" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jagged_ak_to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jagged_maxdim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float32'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#jagged_ak_to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.jagged_ak_to_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform jagged awkward array to fixed dimensional numpy data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – awkward arrays in a XYW object</p></li>
+<li><p><strong>arr</strong> – jagged awkward array</p></li>
 <li><p><strong>scalar_vars</strong> – Scalar variable names</p></li>
 <li><p><strong>jagged_vars</strong> – Jagged variable names</p></li>
 <li><p><strong>jagged_maxdim</strong> – Maximum dimension per jagged category</p></li>
@@ -2622,7 +2622,7 @@ with 1 &lt;= M &lt;= N number of ones (hot bits) (default N)</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>data object</p>
+<dd class="field-even"><p>numpy array, ids</p>
 </dd>
 </dl>
 </dd></dl>
