@@ -39,6 +39,7 @@ from termcolor import cprint
 
 from scipy import interpolate
 import scipy.special as special
+from scipy.special import voigt_profile
 import scipy.integrate as integrate
 
 from os import listdir
@@ -238,6 +239,19 @@ def CB_pdf(x, par, norm=True, EPS=1E-12):
             y[i] = N * np.exp(-(x[i] - mu)**2 / np.max([2*sigma**2, EPS]))
         else:
             y[i] = N * A * (B - (x[i] - mu)/np.max([sigma, EPS]))**(-n)
+
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+    return y
+
+
+def voigt_pdf(x, par, norm=True):
+    """
+    Voigtian pdf (Breit-Wigner convoluted with Gaussian)
+    """
+    M0, sigma, gamma = par
+    
+    y = voigt_profile(x - M0, sigma=sigma, gamma=gamma)
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
