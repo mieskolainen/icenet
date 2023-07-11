@@ -691,7 +691,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">par</span>
     
-    <span class="n">y</span> <span class="o">=</span> <span class="n">voigt_profile</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">voigt_profile</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
@@ -1313,8 +1313,9 @@
              <span class="s1">&#39;CB_RBW_conv_pdf&#39;</span><span class="p">:</span>      <span class="n">CB_RBW_conv_pdf</span><span class="p">,</span>
              <span class="s1">&#39;CB_asym_RBW_conv_pdf&#39;</span><span class="p">:</span> <span class="n">CB_asym_RBW_conv_pdf</span><span class="p">,</span>
              <span class="s1">&#39;CB_pdf&#39;</span><span class="p">:</span>               <span class="n">CB_pdf</span><span class="p">,</span>
-             <span class="s1">&#39;gauss_pdf&#39;</span><span class="p">:</span>            <span class="n">gauss_pdf</span><span class="p">}</span>
-
+             <span class="s1">&#39;gauss_pdf&#39;</span><span class="p">:</span>            <span class="n">gauss_pdf</span><span class="p">,</span>
+             <span class="s1">&#39;voigt_pdf&#39;</span><span class="p">:</span>            <span class="n">voigt_pdf</span><span class="p">}</span>
+    
     <span class="n">name</span>         <span class="o">=</span> <span class="p">[]</span>
     <span class="n">start_values</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">limits</span>       <span class="o">=</span> <span class="p">[]</span>
