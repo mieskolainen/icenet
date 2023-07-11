@@ -27,10 +27,11 @@ fit:
       Nmin:     256 # minimum number of function samples for convolution integral
       xfactor:  0.2 # extra domain extension factor for convolution integral (0.2 gives 20%)
 
+    # Function weight (fit contribution) parameter
     w_start:  100.0
     w_limit:  [1.0e-4, 1.0e+5]
     w_fixed:  False
-
+    
     # Gamma(J/psi) = 9.32e-05 GeV (very narrow!)
     # CB_param   = par[0],par[1],par[2],par[3] ~ Crystal-Ball detector smearing x radiative
     # aRBW_param = par[0],par[4],par[5]        ~ J/Psi resonance ~ [initial state pdf x form factor x breit-wigner]
@@ -46,6 +47,7 @@ fit:
       norm:     True
       #Nmin:     null # not active
     
+    # Function weight (fit contribution) parameter
     w_start:  1.0e-3
     w_limit:  [1.0e-4, 1.0e+5]
     w_fixed:  False
