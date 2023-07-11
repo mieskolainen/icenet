@@ -251,7 +251,7 @@ def voigt_pdf(x, par, norm=True):
     """
     M0, sigma, gamma = par
     
-    y = voigt_profile(x - M0, sigma=sigma, gamma=gamma)
+    y = voigt_profile(x - M0, sigma, gamma)
 
     if norm:
         y = y / integrate.simpson(y=y, x=x)
@@ -873,8 +873,9 @@ def read_yaml_input(inputfile):
              'CB_RBW_conv_pdf':      CB_RBW_conv_pdf,
              'CB_asym_RBW_conv_pdf': CB_asym_RBW_conv_pdf,
              'CB_pdf':               CB_pdf,
-             'gauss_pdf':            gauss_pdf}
-
+             'gauss_pdf':            gauss_pdf,
+             'voigt_pdf':            voigt_pdf}
+    
     name         = []
     start_values = []
     limits       = []
