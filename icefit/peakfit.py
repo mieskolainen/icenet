@@ -377,9 +377,9 @@ def DSCB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     https://arxiv.org/abs/1606.03833
     
     Args:
-        par: mu > 0, sigma > 0, n_low > 1, alpha_low > 0, n_high > 0, alpha_high > 0
+        par: mu > 0, sigma > 0, n_low > 1, alpha_low > 0, n_high > 1, alpha_high > 0
     """
-
+    
     mu, sigma, n_low, alpha_low, n_high, alpha_high = par
 
     N = 1 # Normalization (could be solved perhaps analytically)
