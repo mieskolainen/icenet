@@ -28,6 +28,8 @@
 # --------------------------------------
 
 import numpy as np
+import numba
+from numba.typed import List
 
 import yaml
 import os
@@ -36,6 +38,7 @@ import iminuit
 import matplotlib.pyplot as plt
 import uproot
 from termcolor import cprint
+
 
 from scipy import interpolate
 import scipy.special as special
@@ -171,7 +174,8 @@ def TH1_to_numpy(hist):
     return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
 
-def voigt_FWHM(gamma, sigma):
+@numba.njit
+def voigt_FWHM(gamma: float, sigma: float):
     """
     Full width at half-maximum (FWHM) of a Voigtian function
     (Voigtian == a convolution integral between Lorentzian and Gaussian)
@@ -196,22 +200,137 @@ def voigt_FWHM(gamma, sigma):
     return 0.5346*L + np.sqrt(0.2166*L**2 + G**2)
 
 
-def gauss_pdf(x, par, norm=True):
+# ------------------------------------------------------------------------
+# Fit functions
+
+@numba.njit
+def exp_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Exponential density
+    
+    Args:
+        par: rate parameter (1/mean)
+    """
+    y = par[0] * np.exp(-par[0] * x)
+    y[x < 0] = 0
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def poly_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Polynomial density y = p0 + p1*x + p2*x**2 + ...
+    
+    Args:
+        par: polynomial function params
+    """
+    y   = np.zeros(len(x))
+    for i in range(len(par)):
+        y = y + par[i]*(x**i)
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def gauss_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     """
     Normal (Gaussian) density
     
     Args:
-        par: parameters
+        par: parameters mu, sigma
     """
     mu, sigma = par
     y = 1.0 / (sigma * np.sqrt(2*np.pi)) * np.exp(- 0.5 * ((x - mu)/sigma)**2)
     
     if norm:
-        y = y / integrate.simpson(y=y, x=x)
+        y = y / np.trapz(y=y, x=x)
     return y
 
+@numba.njit
+def cauchy_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)
+    """
+    M0, W0 = par
 
-def CB_pdf(x, par, norm=True, EPS=1E-12):
+    y = 1 / (np.pi*W0) * (W0**2 / ((x - M0)**2 + W0**2))
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def voigt_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Voigtian pdf (Breit-Wigner convoluted with Gaussian)
+    """
+    M0, sigma, gamma = par
+    
+    y = voigt_profile(x - M0, sigma, gamma)
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Relativistic Breit-Wigner pdf
+    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
+    """
+    M0, W0 = par
+
+    # Normalization
+    gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
+    k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
+    y = k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def asym_RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Asymmetric Relativistic Breit-Wigner pdf
+    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
+    """
+    M0, W0, a = par
+
+    # Normalization
+    gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
+    k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
+
+    # Asymmetric running width
+    W = 2*W0 / (1 + np.exp(a * (x - M0)))
+    y = k / ((x**2 - M0**2)**2 + M0**2 * W**2)
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def asym_BW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+    """
+    Breit-Wigner with asymmetric tail shape
+
+    Param: a < 0 gives right hand tail, a == 0 without, a > 0 left hand tail
+    """
+    M0, W0, a = par
+
+    # Asymmetric running width
+    W = 2*W0 / (1 + np.exp(a * (x - M0)))
+    y = 1 / (np.pi*W0) * (W**2 / ((x - M0)**2 + W**2))
+
+    if norm:
+        y = y / np.trapz(y=y, x=x)
+    return y
+
+@numba.njit
+def CB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     """
     https://en.wikipedia.org/wiki/Crystal_Ball_function
 
@@ -230,13 +349,15 @@ def CB_pdf(x, par, norm=True, EPS=1E-12):
     A = (n / abs_a)**n * np.exp(-0.5 * abs_a**2)
     B =  n / abs_a - abs_a
 
-    C = (n / abs_a) * (1 / np.max([n-1, EPS])) * np.exp(-0.5 * abs_a**2)
-    D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))
-    N = 1 / (sigma * (C + D))
-
+    # Normalization (Wikipedia)
+    #C = (n / abs_a) * (1 / max(n-1, EPS)) * np.exp(-0.5 * abs_a**2)
+    #D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))
+    #N = 1 / (sigma * (C + D))
+    N = 1 # Simply use this and do numerical normalization
+    
     # Piece wise definition
     y = np.zeros(len(x))
-    t = (x - mu) / np.max([sigma,EPS])
+    t = (x - mu) / max(sigma, EPS)
     
     ind_0 = t > -alpha
     ind_1 = ~ind_0
@@ -245,13 +366,13 @@ def CB_pdf(x, par, norm=True, EPS=1E-12):
     y[ind_1] = N * A * (B - t[ind_1])**(-n)
 
     if norm:
-        y = y / integrate.simpson(y=y, x=x)
+        y = y / np.trapz(y=y, x=x)
     return y
 
-
-def DSCB_pdf(x, par, norm=True, EPS=1E-12):
+@numba.njit
+def DSCB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     """
-    Double sided Crystall-Ball
+    Double sided Crystal-Ball
     
     https://arxiv.org/abs/1606.03833
     
@@ -265,7 +386,7 @@ def DSCB_pdf(x, par, norm=True, EPS=1E-12):
     
     # Piece wise definition
     y = np.zeros(len(x))
-    t = (x - mu) / np.max([sigma,EPS])
+    t = (x - mu) / max(sigma, EPS)
     
     ind_0 = (-alpha_low <= t) & (t <= alpha_high)
     ind_1 = t < -alpha_low
@@ -276,122 +397,11 @@ def DSCB_pdf(x, par, norm=True, EPS=1E-12):
     y[ind_2] = N * np.exp(- 0.5 * alpha_high**2) * (alpha_high / n_high * (n_high / alpha_high - alpha_high + t[ind_2]))**(-n_high)
     
     if norm:
-        y = y / integrate.simpson(y=y, x=x)
+        y = y / np.trapz(y=y, x=x)
     return y
 
-
-def voigt_pdf(x, par, norm=True):
-    """
-    Voigtian pdf (Breit-Wigner convoluted with Gaussian)
-    """
-    M0, sigma, gamma = par
-    
-    y = voigt_profile(x - M0, sigma, gamma)
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def cauchy_pdf(x, par, norm=True):
-    """
-    Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)
-    """
-    M0, W0 = par
-
-    y = 1 / (np.pi*W0) * (W0**2 / ((x - M0)**2 + W0**2))
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def RBW_pdf(x, par, norm=True):
-    """
-    Relativistic Breit-Wigner pdf
-    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
-    """
-    M0, W0 = par
-
-    # Normalization
-    gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
-    k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
-    y = k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def asym_RBW_pdf(x, par, norm=True):
-    """
-    Asymmetric Relativistic Breit-Wigner pdf
-    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
-    """
-    M0, W0, a = par
-
-    # Normalization
-    gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
-    k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
-
-    # Asymmetric running width
-    W = 2*W0 / (1 + np.exp(a * (x - M0)))
-    y = k / ((x**2 - M0**2)**2 + M0**2 * W**2)
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def asym_BW_pdf(x, par, norm=True):
-    """
-    Breit-Wigner with asymmetric tail shape
-
-    Param: a < 0 gives right hand tail, a == 0 without, a > 0 left hand tail
-    """
-    M0, W0, a = par
-
-    # Asymmetric running width
-    W = 2*W0 / (1 + np.exp(a * (x - M0)))
-    y = 1 / (np.pi*W0) * (W**2 / ((x - M0)**2 + W**2))
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def exp_pdf(x, par, norm=True):
-    """
-    Exponential density
-    
-    Args:
-        par: rate parameter (1/mean)
-    """
-    y = par[0] * np.exp(-par[0] * x)
-    y[x < 0] = 0
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def poly_pdf(x, par, norm=True):
-    """
-    Polynomial density y = p0 + p1*x + p2*x**2 + ...
-    
-    Args:
-        par: polynomial function params
-    """
-    y   = np.zeros(len(x))
-    for i in range(len(par)):
-        y = y + par[i]*(x**i)
-
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def highres_x(x, xfactor=0.2, Nmin=256):
+@numba.njit
+def highres_x(x: np.ndarray, xfactor: float=0.2, Nmin: int=256):
     """
     Extend range and sampling of x
         
@@ -401,10 +411,11 @@ def highres_x(x, xfactor=0.2, Nmin=256):
         Nmin:    minimum number of samples
     """
     e = xfactor * (x[0] + x[-1])/2
-    return np.linspace(x[0]-e, x[-1]+e, np.maximum(len(x), Nmin))
+    return np.linspace(x[0]-e, x[-1]+e, max(len(x), Nmin))
 
 
-def generic_conv_pdf(x, par, pdf_pair, par_index, norm=True, xfactor=0.2, Nmin=256):
+def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
+                     par_index: List[int], norm: bool=True, xfactor: float=0.2, Nmin: int=256):
     """
     Convolution between two functions.
     
@@ -421,8 +432,8 @@ def generic_conv_pdf(x, par, pdf_pair, par_index, norm=True, xfactor=0.2, Nmin=2
     func0 = eval(f'{pdf_pair[0]}')
     func1 = eval(f'{pdf_pair[1]}')
     
-    f0_param = [par[i] for i in par_index[0]]
-    f1_param = [par[i] for i in par_index[1]]
+    f0_param = np.array([par[i] for i in par_index[0]])
+    f1_param = np.array([par[i] for i in par_index[1]])
 
     # High-resolution extended range convolution
     xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
@@ -432,8 +443,10 @@ def generic_conv_pdf(x, par, pdf_pair, par_index, norm=True, xfactor=0.2, Nmin=2
     y  = interpolate.interp1d(xp, yp)(x)
     
     if norm:
-        y = y / integrate.simpson(y=y, x=x)
+        y = y / np.trapz(y=y, x=x)
     return y
+
+# ------------------------------------------------------------------------
 
 
 def binned_1D_fit(hist, param, fitfunc, techno):
@@ -640,16 +653,15 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         cov     = m1.covariance
         var2pos = m1.var2pos
         chi2    = chi2_loss(par)
-        ndof    = np.sum(fitbins) - len(par) - 1
+        ndof    = np.sum(fitbins) - len(par)
         
         trials += 1
 
         if (chi2 / ndof < techno['max_chi2']):
             break
-        elif trials == techno['max_trials']:
+        elif trials == techno['max_trials']:      # Could improve this logic (save the best trial if all are ~ weak, recover that)
             break
-        
-
+    
     print(f'Parameters: {par}')
     print(f'Covariance: {cov}')
 
@@ -715,7 +727,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof, n
     y   = {}
     for key in cfunc.keys():
         weight = par[param['w_pind'][key]]
-        y[key] = weight * cfunc[key](x=x, par=par[param['p_pind'][key]], **param['args'][key])
+        y[key] = weight * cfunc[key](x=x, par=np.array(par[param['p_pind'][key]]), **param['args'][key])
 
         # Protect for NaN/Inf
         if np.sum(~np.isfinite(y[key])) > 0:
@@ -737,8 +749,7 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof, n
     deltaX     = np.mean(cbins[fitind][1:] - cbins[fitind][:-1])
 
     for key in y.keys():
-        N[key] = integrate.simpson(y[key], x) / deltaX
-
+        N[key] = integrate.simpson(y=y[key], x=x) / deltaX
 
     # Use the scale error as the leading uncertainty
     # [neglect the functional shape uncertanties affecting the integral]
@@ -1185,7 +1196,7 @@ def run_jpsi_tagprobe(inputparam, savepath='./output_14Dec22/peakfit'):
     for y in all_years:
         
         YEAR     = y['YEAR']
-        data_tag = f'Run{YEAR}'
+        data_tag = f'Run{YEAR}_UL'
         mc_tag   = 'JPsi_pythia8'
 
         # Loop over observables -- pick 'data_tag' (both data and mc have the same observables)
@@ -1350,3 +1361,4 @@ if __name__ == "__main__":
     
     if args.group:
         group_systematics(inputfile=args.inputfile)
+
