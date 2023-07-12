@@ -31,7 +31,7 @@ fit:
     w_fixed:  False
     
     p_name:   ['M0', 'sigma', 'n_low', 'alpha_low', 'n_high', 'alpha_high']
-    p_start:  [3.097, 0.02, 1.001, 5.0, 1.001, 5.0]
+    p_start:  [3.097, 0.03, 1.5, 1.1, 1.5, 1.1]
     p_limit:  [[3.085, 3.12], [0.01, 0.05], [1.001, 100.0], [0.001, 30.0], [1.001, 100.0], [0.001, 30.0]]
     p_fixed:  [False, False, False, False, False, False]
   
