@@ -468,6 +468,8 @@
 <span class="c1"># --------------------------------------</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">from</span> <span class="nn">numba.typed</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -476,6 +478,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
+
 
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
@@ -611,7 +614,8 @@
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;counts&#39;</span><span class="p">:</span> <span class="n">counts</span><span class="p">,</span> <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="n">errors</span><span class="p">,</span> <span class="s1">&#39;bin_edges&#39;</span><span class="p">:</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="s1">&#39;bin_center&#39;</span><span class="p">:</span> <span class="n">bin_center</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="voigt_FWHM"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.voigt_FWHM">[docs]</a><span class="k">def</span> <span class="nf">voigt_FWHM</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+<div class="viewcode-block" id="voigt_FWHM"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.voigt_FWHM">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">voigt_FWHM</span><span class="p">(</span><span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Full width at half-maximum (FWHM) of a Voigtian function</span>
 <span class="sd">    (Voigtian == a convolution integral between Lorentzian and Gaussian)</span>
@@ -636,22 +640,137 @@
     <span class="k">return</span> <span class="mf">0.5346</span><span class="o">*</span><span class="n">L</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.2166</span><span class="o">*</span><span class="n">L</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">G</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="gauss_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.gauss_pdf">[docs]</a><span class="k">def</span> <span class="nf">gauss_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="c1"># ------------------------------------------------------------------------</span>
+<span class="c1"># Fit functions</span>
+
+<div class="viewcode-block" id="exp_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.exp_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">exp_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exponential density</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        par: rate parameter (1/mean)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="poly_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.poly_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">poly_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Polynomial density y = p0 + p1*x + p2*x**2 + ...</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        par: polynomial function params</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">par</span><span class="p">)):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="gauss_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.gauss_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">gauss_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normal (Gaussian) density</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        par: parameters</span>
+<span class="sd">        par: parameters mu, sigma</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">par</span>
     <span class="n">y</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span></div>
 
+<div class="viewcode-block" id="cauchy_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.cauchy_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">cauchy_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span> <span class="o">=</span> <span class="n">par</span>
 
-<div class="viewcode-block" id="CB_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.CB_pdf">[docs]</a><span class="k">def</span> <span class="nf">CB_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">W0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="voigt_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.voigt_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">voigt_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Voigtian pdf (Breit-Wigner convoluted with Gaussian)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">par</span>
+    
+    <span class="n">y</span> <span class="o">=</span> <span class="n">voigt_profile</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="RBW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.RBW_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">RBW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Relativistic Breit-Wigner pdf</span>
+<span class="sd">    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span> <span class="o">=</span> <span class="n">par</span>
+
+    <span class="c1"># Normalization</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">k</span>     <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">M0</span><span class="o">*</span><span class="n">W0</span><span class="o">*</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="asym_RBW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.asym_RBW_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">asym_RBW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asymmetric Relativistic Breit-Wigner pdf</span>
+<span class="sd">    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">par</span>
+
+    <span class="c1"># Normalization</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">k</span>     <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">M0</span><span class="o">*</span><span class="n">W0</span><span class="o">*</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span>
+
+    <span class="c1"># Asymmetric running width</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">W0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="asym_BW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.asym_BW_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">asym_BW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Breit-Wigner with asymmetric tail shape</span>
+
+<span class="sd">    Param: a &lt; 0 gives right hand tail, a == 0 without, a &gt; 0 left hand tail</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">par</span>
+
+    <span class="c1"># Asymmetric running width</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">W0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">W</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="CB_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.CB_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">CB_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    https://en.wikipedia.org/wiki/Crystal_Ball_function</span>
 
@@ -670,13 +789,15 @@
     <span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">abs_a</span><span class="p">)</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">abs_a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">B</span> <span class="o">=</span>  <span class="n">n</span> <span class="o">/</span> <span class="n">abs_a</span> <span class="o">-</span> <span class="n">abs_a</span>
 
-    <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">abs_a</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">EPS</span><span class="p">]))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">abs_a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">abs_a</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">C</span> <span class="o">+</span> <span class="n">D</span><span class="p">))</span>
-
+    <span class="c1"># Normalization (Wikipedia)</span>
+    <span class="c1">#C = (n / abs_a) * (1 / max(n-1, EPS)) * np.exp(-0.5 * abs_a**2)</span>
+    <span class="c1">#D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))</span>
+    <span class="c1">#N = 1 / (sigma * (C + D))</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Simply use this and do numerical normalization</span>
+    
     <span class="c1"># Piece wise definition</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">sigma</span><span class="p">,</span><span class="n">EPS</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
     
     <span class="n">ind_0</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">alpha</span>
     <span class="n">ind_1</span> <span class="o">=</span> <span class="o">~</span><span class="n">ind_0</span>
@@ -685,13 +806,13 @@
     <span class="n">y</span><span class="p">[</span><span class="n">ind_1</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="n">A</span> <span class="o">*</span> <span class="p">(</span><span class="n">B</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="n">ind_1</span><span class="p">])</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span></div>
 
-
-<div class="viewcode-block" id="DSCB_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.DSCB_pdf">[docs]</a><span class="k">def</span> <span class="nf">DSCB_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<div class="viewcode-block" id="DSCB_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.DSCB_pdf">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">DSCB_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Double sided Crystall-Ball</span>
+<span class="sd">    Double sided Crystal-Ball</span>
 <span class="sd">    </span>
 <span class="sd">    https://arxiv.org/abs/1606.03833</span>
 <span class="sd">    </span>
@@ -705,7 +826,7 @@
     
     <span class="c1"># Piece wise definition</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">sigma</span><span class="p">,</span><span class="n">EPS</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
     
     <span class="n">ind_0</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">alpha_low</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="n">alpha_high</span><span class="p">)</span>
     <span class="n">ind_1</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">alpha_low</span>
@@ -716,122 +837,11 @@
     <span class="n">y</span><span class="p">[</span><span class="n">ind_2</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">alpha_high</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha_high</span> <span class="o">/</span> <span class="n">n_high</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_high</span> <span class="o">/</span> <span class="n">alpha_high</span> <span class="o">-</span> <span class="n">alpha_high</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="n">ind_2</span><span class="p">]))</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">n_high</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span></div>
 
-
-<div class="viewcode-block" id="voigt_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.voigt_pdf">[docs]</a><span class="k">def</span> <span class="nf">voigt_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Voigtian pdf (Breit-Wigner convoluted with Gaussian)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">par</span>
-    
-    <span class="n">y</span> <span class="o">=</span> <span class="n">voigt_profile</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="cauchy_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.cauchy_pdf">[docs]</a><span class="k">def</span> <span class="nf">cauchy_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span> <span class="o">=</span> <span class="n">par</span>
-
-    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">W0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="RBW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.RBW_pdf">[docs]</a><span class="k">def</span> <span class="nf">RBW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Relativistic Breit-Wigner pdf</span>
-<span class="sd">    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span> <span class="o">=</span> <span class="n">par</span>
-
-    <span class="c1"># Normalization</span>
-    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">k</span>     <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">M0</span><span class="o">*</span><span class="n">W0</span><span class="o">*</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="asym_RBW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.asym_RBW_pdf">[docs]</a><span class="k">def</span> <span class="nf">asym_RBW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Asymmetric Relativistic Breit-Wigner pdf</span>
-<span class="sd">    https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">par</span>
-
-    <span class="c1"># Normalization</span>
-    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">k</span>     <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">M0</span><span class="o">*</span><span class="n">W0</span><span class="o">*</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">))</span>
-
-    <span class="c1"># Asymmetric running width</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">W0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)))</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">M0</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="asym_BW_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.asym_BW_pdf">[docs]</a><span class="k">def</span> <span class="nf">asym_BW_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Breit-Wigner with asymmetric tail shape</span>
-
-<span class="sd">    Param: a &lt; 0 gives right hand tail, a == 0 without, a &gt; 0 left hand tail</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">W0</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">par</span>
-
-    <span class="c1"># Asymmetric running width</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">W0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)))</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">W</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">M0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="exp_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.exp_pdf">[docs]</a><span class="k">def</span> <span class="nf">exp_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Exponential density</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        par: rate parameter (1/mean)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
-    <span class="n">y</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="poly_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.poly_pdf">[docs]</a><span class="k">def</span> <span class="nf">poly_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Polynomial density y = p0 + p1*x + p2*x**2 + ...</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        par: polynomial function params</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">y</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">par</span><span class="p">)):</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">y</span></div>
-
-
-<div class="viewcode-block" id="highres_x"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.highres_x">[docs]</a><span class="k">def</span> <span class="nf">highres_x</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xfactor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">Nmin</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+<div class="viewcode-block" id="highres_x"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.highres_x">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">highres_x</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xfactor</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">Nmin</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extend range and sampling of x</span>
 <span class="sd">        </span>
@@ -841,10 +851,11 @@
 <span class="sd">        Nmin:    minimum number of samples</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">e</span> <span class="o">=</span> <span class="n">xfactor</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">e</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">e</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">Nmin</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">e</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">e</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">Nmin</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="generic_conv_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.generic_conv_pdf">[docs]</a><span class="k">def</span> <span class="nf">generic_conv_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">pdf_pair</span><span class="p">,</span> <span class="n">par_index</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xfactor</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">Nmin</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+<div class="viewcode-block" id="generic_conv_pdf"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.generic_conv_pdf">[docs]</a><span class="k">def</span> <span class="nf">generic_conv_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pdf_pair</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                     <span class="n">par_index</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xfactor</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">Nmin</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution between two functions.</span>
 <span class="sd">    </span>
@@ -861,8 +872,8 @@
     <span class="n">func0</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">pdf_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">func1</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">pdf_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="n">f0_param</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">par_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">f1_param</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">par_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">f0_param</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">par_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">f1_param</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">par_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 
     <span class="c1"># High-resolution extended range convolution</span>
     <span class="n">xp</span> <span class="o">=</span> <span class="n">highres_x</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">xfactor</span><span class="o">=</span><span class="n">xfactor</span><span class="p">,</span> <span class="n">Nmin</span><span class="o">=</span><span class="n">Nmin</span><span class="p">)</span>
@@ -872,8 +883,10 @@
     <span class="n">y</span>  <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span></div>
+
+<span class="c1"># ------------------------------------------------------------------------</span>
 
 
 <div class="viewcode-block" id="binned_1D_fit"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.binned_1D_fit">[docs]</a><span class="k">def</span> <span class="nf">binned_1D_fit</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">fitfunc</span><span class="p">,</span> <span class="n">techno</span><span class="p">):</span>
@@ -1080,16 +1093,15 @@
         <span class="n">cov</span>     <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">covariance</span>
         <span class="n">var2pos</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">var2pos</span>
         <span class="n">chi2</span>    <span class="o">=</span> <span class="n">chi2_loss</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
-        <span class="n">ndof</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">fitbins</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">par</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">ndof</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">fitbins</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
         
         <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">chi2</span> <span class="o">/</span> <span class="n">ndof</span> <span class="o">&lt;</span> <span class="n">techno</span><span class="p">[</span><span class="s1">&#39;max_chi2&#39;</span><span class="p">]):</span>
             <span class="k">break</span>
-        <span class="k">elif</span> <span class="n">trials</span> <span class="o">==</span> <span class="n">techno</span><span class="p">[</span><span class="s1">&#39;max_trials&#39;</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">trials</span> <span class="o">==</span> <span class="n">techno</span><span class="p">[</span><span class="s1">&#39;max_trials&#39;</span><span class="p">]:</span>      <span class="c1"># Could improve this logic (save the best trial if all are ~ weak, recover that)</span>
             <span class="k">break</span>
-        
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameters: </span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Covariance: </span><span class="si">{</span><span class="n">cov</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -1155,7 +1167,7 @@
     <span class="n">y</span>   <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cfunc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;w_pind&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]]</span>
-        <span class="n">y</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">cfunc</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="o">=</span><span class="n">par</span><span class="p">[</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;p_pind&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]],</span> <span class="o">**</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">cfunc</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">par</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;p_pind&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]]),</span> <span class="o">**</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
 
         <span class="c1"># Protect for NaN/Inf</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1177,8 +1189,7 @@
     <span class="n">deltaX</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cbins</span><span class="p">[</span><span class="n">fitind</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">cbins</span><span class="p">[</span><span class="n">fitind</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">N</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">deltaX</span>
-
+        <span class="n">N</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">deltaX</span>
 
     <span class="c1"># Use the scale error as the leading uncertainty</span>
     <span class="c1"># [neglect the functional shape uncertanties affecting the integral]</span>
@@ -1625,7 +1636,7 @@
     <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">all_years</span><span class="p">:</span>
         
         <span class="n">YEAR</span>     <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;YEAR&#39;</span><span class="p">]</span>
-        <span class="n">data_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">data_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">_UL&#39;</span>
         <span class="n">mc_tag</span>   <span class="o">=</span> <span class="s1">&#39;JPsi_pythia8&#39;</span>
 
         <span class="c1"># Loop over observables -- pick &#39;data_tag&#39; (both data and mc have the same observables)</span>
@@ -1790,6 +1801,7 @@
     
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">group</span><span class="p">:</span>
         <span class="n">group_systematics</span><span class="p">(</span><span class="n">inputfile</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">)</span>
+
 </pre></div>
 
            </div>
