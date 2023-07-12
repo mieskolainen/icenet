@@ -201,10 +201,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.peakfit">icefit.peakfit</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.CB_G_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_G_conv_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.CB_RBW_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_RBW_conv_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.CB_asym_RBW_conv_pdf"><code class="docutils literal notranslate"><span class="pre">CB_asym_RBW_conv_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.CB_pdf"><code class="docutils literal notranslate"><span class="pre">CB_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.DSCB_pdf"><code class="docutils literal notranslate"><span class="pre">DSCB_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.RBW_pdf"><code class="docutils literal notranslate"><span class="pre">RBW_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.TH1_to_numpy"><code class="docutils literal notranslate"><span class="pre">TH1_to_numpy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.analyze_1D_fit"><code class="docutils literal notranslate"><span class="pre">analyze_1D_fit()</span></code></a></li>
@@ -215,7 +213,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.exp_pdf"><code class="docutils literal notranslate"><span class="pre">exp_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.gauss_pdf"><code class="docutils literal notranslate"><span class="pre">gauss_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.generic_conv_pdf"><code class="docutils literal notranslate"><span class="pre">generic_conv_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.get_rootfiles_jpsi_old"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi_old()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.group_systematics"><code class="docutils literal notranslate"><span class="pre">group_systematics()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.highres_x"><code class="docutils literal notranslate"><span class="pre">highres_x()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.iminuit2python"><code class="docutils literal notranslate"><span class="pre">iminuit2python()</span></code></a></li>
@@ -1115,42 +1115,6 @@ window _size: iterations (tail) window size for the final estimate</p>
 <section id="module-icefit.peakfit">
 <span id="icefit-peakfit"></span><h2>icefit.peakfit<a class="headerlink" href="#module-icefit.peakfit" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.CB_G_conv_pdf">
-<span class="sig-name descname"><span class="pre">CB_G_conv_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_G_conv_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_G_conv_pdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crystall Ball (*) Gaussian, with the same center value as CB,
-where (*) is a convolution product.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – CB parameters (4), Gaussian width (1)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.CB_RBW_conv_pdf">
-<span class="sig-name descname"><span class="pre">CB_RBW_conv_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_RBW_conv_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_RBW_conv_pdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crystall Ball (*) Relativistic Breit-Wigner, with the same center values,
-where (*) is a convolution product.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – CB and RBW parameters as below</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.CB_asym_RBW_conv_pdf">
-<span class="sig-name descname"><span class="pre">CB_asym_RBW_conv_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_asym_RBW_conv_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_asym_RBW_conv_pdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crystall Ball (*) Asymmetric Relativistic Breit-Wigner, with the same center values,
-where (*) is a convolution product.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – CB and asym RBW parameters as below</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.CB_pdf">
 <span class="sig-name descname"><span class="pre">CB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_pdf" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Crystal_Ball_function">https://en.wikipedia.org/wiki/Crystal_Ball_function</a></p>
@@ -1159,6 +1123,18 @@ below a certain threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>par</strong> – mu &gt; 0, sigma &gt; 0, n &gt; 1, alpha &gt; 0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.DSCB_pdf">
+<span class="sig-name descname"><span class="pre">DSCB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#DSCB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.DSCB_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Double sided Crystall-Ball</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1606.03833">https://arxiv.org/abs/1606.03833</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>par</strong> – mu &gt; 0, sigma &gt; 0, n_low &gt; 1, alpha_low &gt; 0, n_high &gt; 0, alpha_high &gt; 0</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1246,7 +1222,7 @@ minos:          Minos uncertainties if True, Hesse if False</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.cauchy_pdf">
 <span class="sig-name descname"><span class="pre">cauchy_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#cauchy_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.cauchy_pdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cauchy pdf (non-relativistic fixed width Breit-Wigner)</p>
+<dd><p>Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1278,8 +1254,33 @@ minos:          Minos uncertainties if True, Hesse if False</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.generic_conv_pdf">
+<span class="sig-name descname"><span class="pre">generic_conv_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#generic_conv_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.generic_conv_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolution between two functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – function argument</p></li>
+<li><p><strong>par</strong> – function parameters from the (fit) routine</p></li>
+<li><p><strong>pdf_pair</strong> – names of two functions, e.g. [‘CBW_pdf’, ‘G_pdf’]</p></li>
+<li><p><strong>par_index</strong> – indices of the parameter per pair, e.g. [[0,1,2], [3,4]]</p></li>
+<li><p><strong>norm</strong> – normalize the integral</p></li>
+<li><p><strong>xfactor</strong> – domain extension factor</p></li>
+<li><p><strong>Nmin</strong> – minimum number of function sample points</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.get_rootfiles_jpsi">
 <span class="sig-name descname"><span class="pre">get_rootfiles_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2016,</span> <span class="pre">2017,</span> <span class="pre">2018]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#get_rootfiles_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.get_rootfiles_jpsi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return rootfile names for the J/psi study.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.peakfit.get_rootfiles_jpsi_old">
+<span class="sig-name descname"><span class="pre">get_rootfiles_jpsi_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2016,</span> <span class="pre">2017,</span> <span class="pre">2018]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#get_rootfiles_jpsi_old"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.get_rootfiles_jpsi_old" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return rootfile names for the J/psi study.</p>
 </dd></dl>
 
