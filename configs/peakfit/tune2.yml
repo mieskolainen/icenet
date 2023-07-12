@@ -9,7 +9,7 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2023
 
-path:     '/home/user/dqcd_2018_test/flat/muon/generalTracks/JPsi'
+path:     './travis-stash/input/icefit/dqcd_2018_test/flat/muon/generalTracks/JPsi'
 years:    [2018] #[2016, 2017, 2018]
 
 fitrange: [2.85, 3.35] # Nominal fit window (GeV)
