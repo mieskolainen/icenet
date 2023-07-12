@@ -15,7 +15,7 @@ years:    [2018] #[2016, 2017, 2018]
 fitrange: [2.85, 3.35] # Nominal fit window (GeV)
 
 # List of systematic variations active (note that the SYMMETRIC-SIGNAL works only with particular signal PDF)
-systematics: ['DEFAULT', 'SYMMETRIC-SIGNAL', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+systematics: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 
 fit:
