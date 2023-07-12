@@ -21,27 +21,18 @@ systematics: ['DEFAULT', 'SYMMETRIC-SIGNAL', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP
 fit:
 
   S:
-    func:    'generic_conv_pdf'
+    func:    'DSCB_pdf'
     args:
       norm:     True
-      Nmin:     256 # minimum number of function samples for convolution integral
-      xfactor:  0.2 # extra domain extension factor for convolution integral (0.2 gives 20%)
-
-      pdf_pair:   ['CB_pdf', 'asym_RBW_pdf']  # name of pdfs to be convoluted
-      par_index:  [[0,1,2,3], [0,4,5]]        # parameter indices per pdf (use same index for shared parameters)
     
     # Function weight (fit contribution) parameter
     w_start:  100.0
     w_limit:  [1.0e-4, 1.0e+5]
     w_fixed:  False
     
-    # Gamma(J/psi) = 9.32e-05 GeV (very narrow!)
-    # CB_param = par[0],par[1],par[2],par[3] ~ Crystal-Ball detector smearing x radiative
-    # asym_RBW = par[0],par[4],par[5]        ~ J/Psi resonance ~ [initial state pdf x form factor x breit-wigner]
-    
-    p_name:   ['M0', 'sigma', 'n', 'alpha', 'Gamma', 'asym']
-    p_start:  [3.097, 0.02, 1.001, 5.0, 1.0e-4, -0.01]
-    p_limit:  [[3.085, 3.12], [0.01, 0.05], [1.001, 2.0], [0.001, 10.0], [9.32e-5, 0.01], [-3.0, 3.0]]
+    p_name:   ['M0', 'sigma', 'n_low', 'alpha_low', 'n_high', 'alpha_high']
+    p_start:  [3.097, 0.02, 1.001, 5.0, 1.001, 5.0]
+    p_limit:  [[3.085, 3.12], [0.0001, 0.05], [1.001, 100.0], [0.001, 30.0], [1.001, 100.0], [0.001, 30.0]]
     p_fixed:  [False, False, False, False, False, False]
   
   B:
@@ -67,7 +58,7 @@ fit:
 
 # Fit algorithm parameters
 techno:
-  losstype: 'nll'       # 'chi2', 'nll' or 'wasserstein'
+  losstype: 'nll'               # 'chi2', 'nll' or 'wasserstein'
   use_limits: True              # Use parameter bounds
   zerobin: 1.0e-2               # Minimum number of counts in a valid bin
   

@@ -41,6 +41,7 @@ from scipy import interpolate
 import scipy.special as special
 from scipy.special import voigt_profile
 import scipy.integrate as integrate
+from scipy.stats import wasserstein_distance
 
 from os import listdir
 from os.path import isfile, join
@@ -169,6 +170,7 @@ def TH1_to_numpy(hist):
 
     return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
+
 def voigt_FWHM(gamma, sigma):
     """
     Full width at half-maximum (FWHM) of a Voigtian function
@@ -192,6 +194,7 @@ def voigt_FWHM(gamma, sigma):
 
     # Approximate result
     return 0.5346*L + np.sqrt(0.2166*L**2 + G**2)
+
 
 def gauss_pdf(x, par, norm=True):
     """
@@ -229,17 +232,49 @@ def CB_pdf(x, par, norm=True, EPS=1E-12):
 
     C = (n / abs_a) * (1 / np.max([n-1, EPS])) * np.exp(-0.5 * abs_a**2)
     D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))
-    N =  1 / (sigma * (C + D))
+    N = 1 / (sigma * (C + D))
 
     # Piece wise definition
     y = np.zeros(len(x))
+    t = (x - mu) / np.max([sigma,EPS])
+    
+    ind_0 = t > -alpha
+    ind_1 = ~ind_0
+    
+    y[ind_0] = N * np.exp( - 0.5 * t[ind_0]**2)
+    y[ind_1] = N * A * (B - t[ind_1])**(-n)
 
-    for i in range(len(y)):
-        if (x[i] - mu)/np.max([sigma,EPS]) > -alpha:
-            y[i] = N * np.exp(-(x[i] - mu)**2 / np.max([2*sigma**2, EPS]))
-        else:
-            y[i] = N * A * (B - (x[i] - mu)/np.max([sigma, EPS]))**(-n)
+    if norm:
+        y = y / integrate.simpson(y=y, x=x)
+    return y
 
+
+def DSCB_pdf(x, par, norm=True, EPS=1E-12):
+    """
+    Double sided Crystall-Ball
+    
+    https://arxiv.org/abs/1606.03833
+    
+    Args:
+        par: mu > 0, sigma > 0, n_low > 1, alpha_low > 0, n_high > 0, alpha_high > 0
+    """
+
+    mu, sigma, n_low, alpha_low, n_high, alpha_high = par
+
+    N = 1 # Normalization (could be solved perhaps analytically)
+    
+    # Piece wise definition
+    y = np.zeros(len(x))
+    t = (x - mu) / np.max([sigma,EPS])
+    
+    ind_0 = (-alpha_low <= t) & (t <= alpha_high)
+    ind_1 = t < -alpha_low
+    ind_2 = t >  alpha_high
+
+    y[ind_0] = N * np.exp(- 0.5 * t[ind_0]**2)
+    y[ind_1] = N * np.exp(- 0.5 * alpha_low**2)  * (alpha_low / n_low   * (n_low / alpha_low   - alpha_low  - t[ind_1]))**(-n_low)
+    y[ind_2] = N * np.exp(- 0.5 * alpha_high**2) * (alpha_high / n_high * (n_high / alpha_high - alpha_high + t[ind_2]))**(-n_high)
+    
     if norm:
         y = y / integrate.simpson(y=y, x=x)
     return y
@@ -260,7 +295,7 @@ def voigt_pdf(x, par, norm=True):
 
 def cauchy_pdf(x, par, norm=True):
     """
-    Cauchy pdf (non-relativistic fixed width Breit-Wigner)
+    Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)
     """
     M0, W0 = par
 
@@ -369,70 +404,31 @@ def highres_x(x, xfactor=0.2, Nmin=256):
     return np.linspace(x[0]-e, x[-1]+e, np.maximum(len(x), Nmin))
 
 
-def CB_G_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
+def generic_conv_pdf(x, par, pdf_pair, par_index, norm=True, xfactor=0.2, Nmin=256):
     """
-    Crystall Ball (*) Gaussian, with the same center value as CB,
-    where (*) is a convolution product.
+    Convolution between two functions.
     
     Args:
-        par: CB parameters (4), Gaussian width (1)
+        x:         function argument
+        par:       function parameters from the (fit) routine
+        pdf_pair:  names of two functions, e.g. ['CBW_pdf', 'G_pdf']
+        par_index: indices of the parameter per pair, e.g. [[0,1,2], [3,4]]
+        norm:      normalize the integral
+        xfactor:   domain extension factor
+        Nmin:      minimum number of function sample points
     """
-    mu     = par[0]
-    reso   = par[-1]
+
+    func0 = eval(f'{pdf_pair[0]}')
+    func1 = eval(f'{pdf_pair[1]}')
+    
+    f0_param = [par[i] for i in par_index[0]]
+    f1_param = [par[i] for i in par_index[1]]
 
     # High-resolution extended range convolution
     xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
-    f1 = CB_pdf_(x=xp, par=par[:-1], norm=False)
-    f2 = gauss_pdf(x=xp, par=np.array([mu, reso]), norm=False)
-    yp = np.convolve(a=f1, v=f2, mode='same')
-    y  = interpolate.interp1d(xp, yp)(x)
-    
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def CB_asym_RBW_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
-    """
-    Crystall Ball (*) Asymmetric Relativistic Breit-Wigner, with the same center values,
-    where (*) is a convolution product.
-    
-    Args:
-        par: CB and asym RBW parameters as below
-    """
-
-    CB_param   = par[0],par[1],par[2],par[3]
-    aRBW_param = par[0],par[4],par[5]
-
-    # High-resolution extended range convolution
-    xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
-    f1 = CB_pdf(x=xp, par=CB_param, norm=False)
-    f2 = asym_RBW_pdf(x=xp, par=aRBW_param, norm=False)
-    yp = np.convolve(a=f1, v=f2, mode='same')
-    y  = interpolate.interp1d(xp, yp)(x)
-    
-    if norm:
-        y = y / integrate.simpson(y=y, x=x)
-    return y
-
-
-def CB_RBW_conv_pdf(x, par, norm=True, xfactor=0.2, Nmin=256):
-    """
-    Crystall Ball (*) Relativistic Breit-Wigner, with the same center values,
-    where (*) is a convolution product.
-    
-    Args:
-        par: CB and RBW parameters as below
-    """
-
-    CB_param  = par[0],par[1],par[2],par[3]
-    RBW_param = par[0],par[4]
-
-    # High-resolution extended range convolution
-    xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
-    f1 = CB_pdf(x=xp, par=CB_param, norm=False)
-    f2 = RBW_pdf(x=xp, par=RBW_param, norm=False)
-    yp = np.convolve(a=f1, v=f2, mode='same')
+    f0 = func0(x=xp, par=f0_param, norm=False)
+    f1 = func1(x=xp, par=f1_param, norm=False)
+    yp = np.convolve(a=f0, v=f1, mode='same')
     y  = interpolate.interp1d(xp, yp)(x)
     
     if norm:
@@ -507,11 +503,22 @@ def binned_1D_fit(hist, param, fitfunc, techno):
 
         return (-1)*(np.sum(T1[np.isfinite(T1)]) - np.sum(T2[np.isfinite(T2)]))
 
+    ### Wasserstein (1st type) optimal transport distance
+    def wasserstein_loss(par):
+        if np.sum(fitbins) == 0:
+            return 1e9
+        
+        yhat = fitfunc(cbins[fitbins], par)
+        
+        return wasserstein_distance(yhat, counts[fitbins], u_weights=None, v_weights=None)
+
     # --------------------------------------------------------------------
     if   losstype == 'chi2':
         loss = chi2_loss
     elif losstype == 'nll':
         loss = poiss_nll_loss
+    elif losstype == 'wasserstein':
+        loss = wasserstein_loss
     else:
         raise Exception(f'Unknown losstype chosen <{losstype}>')
     # --------------------------------------------------------------------
@@ -861,21 +868,20 @@ def read_yaml_input(inputfile):
     with open(inputfile) as file:
         steer = yaml.full_load(file)
         print(steer)
-
-    # Function handles
-    fmaps = {'exp_pdf':              exp_pdf,
-             'poly_pdf':             poly_pdf,
-             'asym_BW_pdf':          asym_BW_pdf,
-             'asym_RBW_pdf':         asym_RBW_pdf,
-             'RBW_pdf':              RBW_pdf,
-             'cauchy_pdf':           cauchy_pdf,
-             'CB_G_conv_pdf':        CB_G_conv_pdf,
-             'CB_RBW_conv_pdf':      CB_RBW_conv_pdf,
-             'CB_asym_RBW_conv_pdf': CB_asym_RBW_conv_pdf,
-             'CB_pdf':               CB_pdf,
-             'gauss_pdf':            gauss_pdf,
-             'voigt_pdf':            voigt_pdf}
     
+    # Function handles
+    fmaps = {'generic_conv_pdf':  generic_conv_pdf,
+             'exp_pdf':           exp_pdf,
+             'poly_pdf':          poly_pdf,
+             'asym_BW_pdf':       asym_BW_pdf,
+             'asym_RBW_pdf':      asym_RBW_pdf,
+             'RBW_pdf':           RBW_pdf,
+             'cauchy_pdf':        cauchy_pdf,
+             'CB_pdf':            CB_pdf,
+             'DSCB_pdf':          DSCB_pdf,
+             'gauss_pdf':         gauss_pdf,
+             'voigt_pdf':         voigt_pdf}
+
     name         = []
     start_values = []
     limits       = []
@@ -941,7 +947,7 @@ def read_yaml_input(inputfile):
     return param, fitfunc, cfunc, steer['techno']
 
 
-def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
+def get_rootfiles_jpsi_old(path='/', years=[2016, 2017, 2018]):
     """
     Return rootfile names for the J/psi study.
     """
@@ -1000,6 +1006,66 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
                                 rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS1}_{OBS2}.root'
                                 tree     = f'NUM_MyNum_DEN_MyDen_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
 
+                                file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+                                files.append(file)
+
+            info[TYPE] = files
+
+        all_years.append({'YEAR': YEAR, 'info': info})
+
+    return all_years
+
+
+def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
+    """
+    Return rootfile names for the J/psi study.
+    """
+    all_years = []
+
+    # Loop over datasets
+    for YEAR     in years:
+        info = {}
+        
+        for TYPE in ['JPsi_pythia8', f'Run{YEAR}_UL']: # Data or MC
+            files = []
+            
+            # 1D-observables
+            # for OBS in ['absdxy']:
+            #     for BIN in [1,2,3]:
+            #         for PASS in ['Pass', 'Fail']:
+            #             for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
+
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
+            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS}.root'
+            #                 # tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
+
+            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
+            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+
+            #                 rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS}.root'
+            #                 tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
+
+            #                 file = {'OBS': OBS, 'BIN': BIN, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+            #                 files.append(file)                
+            
+            # 2D-observables
+            #for OBS1 in ['absdxy_sig', 'absdxy']:
+            for OBS1 in ['absdxy_hack']:
+                OBS2 = 'pt'
+
+                # Binning
+                #for BIN1 in [1,2,3]:
+                for BIN1 in [1,2,3,4]:
+                    for BIN2 in [1,2,3,4,5]:
+                        for PASS in ['Pass', 'Fail']:
+                            #for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
+                            for SYST in ['Nominal']:
+                                
+                                rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
+                                tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+                                
                                 file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
                                 files.append(file)
 
