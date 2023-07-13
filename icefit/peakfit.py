@@ -1351,7 +1351,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--analyze',   help="Fit and analyze", action="store_true")
     parser.add_argument('--group',     help="Collect and group results", action="store_true")
-    parser.add_argument('--inputfile', type=str, default='configs/peakfit/tune0.yml', help="Steering input YAML file", nargs='?')
+    parser.add_argument('--inputfile', type=str, default='configs/peakfit/tune2.yml', help="Steering input YAML file", nargs='?')
     
     args = parser.parse_args()
     print(args)
