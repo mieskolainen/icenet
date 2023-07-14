@@ -1,5 +1,5 @@
 # Binned histogram chi2/likelihood fits with mystic + iminuit (minuit from python)
-# 
+# for tag & probe efficiency (and scale factor) estimation.
 #
 # Notes:
 #   
@@ -30,6 +30,7 @@
 import numpy as np
 import numba
 from numba.typed import List
+import multiprocessing
 
 import yaml
 import os
@@ -484,7 +485,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
     # Extract out
     losstype = techno['losstype']
 
-    ### Return fitbins
+    ### Return fitbins which are within 'fitrange' and are positive definite
     def get_fitbins():
 
         posdef = (errs > techno['zerobin']) & (counts > techno['zerobin'])
@@ -958,128 +959,118 @@ def read_yaml_input(inputfile):
     return param, fitfunc, cfunc, steer['techno']
 
 
-def get_rootfiles_jpsi_old(path='/', years=[2016, 2017, 2018]):
-    """
-    Return rootfile names for the J/psi study.
-    """
-    all_years = []
-
-    # Loop over datasets
-    for YEAR     in years:
-        info = {}
-        
-        for TYPE in ['JPsi_pythia8', f'Run{YEAR}']: # Data or MC
-            files = []
-            
-            # 1D-observables
-            # for OBS in ['absdxy']:
-            #     for BIN in [1,2,3]:
-            #         for PASS in ['Pass', 'Fail']:
-            #             for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
-
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
-            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
-
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS}.root'
-            #                 # tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
-
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
-            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
-
-            #                 rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS}.root'
-            #                 tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
-
-            #                 file = {'OBS': OBS, 'BIN': BIN, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
-            #                 files.append(file)                
-            
-            # 2D-observables
-            #for OBS1 in ['absdxy_sig', 'absdxy']:
-            for OBS1 in ['absdxy_hack']:
-                OBS2 = 'pt'
-
-                # Binning
-                #for BIN1 in [1,2,3]:
-                for BIN1 in [1,2,3,4]:
-                    for BIN2 in [1,2,3,4,5]:
-                        for PASS in ['Pass', 'Fail']:
-                            #for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
-                            for SYST in ['Nominal']:
-
-                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
-                                # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
-
-                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS1}_{OBS2}.root'
-                                # tree     = f'NUM_MyNum_DEN_MyDen_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
-
-                                # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
-                                # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
-
-                                rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS1}_{OBS2}.root'
-                                tree     = f'NUM_MyNum_DEN_MyDen_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
-
-                                file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
-                                files.append(file)
-
-            info[TYPE] = files
-
-        all_years.append({'YEAR': YEAR, 'info': info})
-
-    return all_years
-
+# ========================================================================
+# Input processing
 
 def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
     """
-    Return rootfile names for the J/psi study.
+    Return rootfile names for the J/psi (muon) study.
     """
     all_years = []
+    setup = [
+    
+    ##
+    {
+        'NUM_DEN': ['LooseID', 'TrackerMuons'],
+        'OBS':     ['absdxy'],
+        'BINS':    [[1,2,3]]
+    },
+    {
+        'NUM_DEN': ['LooseID', 'TrackerMuons'],
+        'OBS':     ['absdxy_hack', 'pt'],
+        'BINS':    [[1,2,3,4], [1,2,3,4,5]]
+    }
+    ]
+    """,
+    {
+        'NUM_DEN': ['LooseID', 'TrackerMuons'],
+        'OBS':     ['absdxy', 'pt'],
+        'BINS':    [[1,2,3], [1,2,3,4,5]]
+    },
+    {
+        'NUM_DEN': ['LooseID', 'TrackerMuons'],
+        'OBS':     ['abseta', 'pt'],
+        'BINS':    [[1,2,3,4,5], [1,2,3,4,5]]
+    },
+    {
+        'NUM_DEN': ['LooseID', 'TrackerMuons'],
+        'OBS':     ['eta'],
+        'BINS':    [[1,2,3,4,5,6,7,8,9,10]]
+    },
+    
+    ## 
+    {
+        'NUM_DEN': ['MyNum', 'MyDen'],
+        'OBS':     ['absdxy'],
+        'BINS':    [[1,2,3]]
+    },
+    {
+        'NUM_DEN': ['MyNum', 'MyDen'],
+        'OBS':     ['absdxy_hack', 'pt'],
+        'BINS':    [[1,2,3,4], [1,2,3,4,5]]
+    },
+    {
+        'NUM_DEN': ['MyNum', 'MyDen'],
+        'OBS':     ['absdxy', 'pt'],
+        'BINS':    [[1,2,3], [1,2,3,4,5]]
+    },
+    {
+        'NUM_DEN': ['MyNum', 'MyDen'],
+        'OBS':     ['abseta', 'pt'],
+        'BINS':    [[1,2,3,4,5], [1,2,3,4,5]]
+    },
+    {
+        'NUM_DEN': ['MyNum', 'MyDen'],
+        'OBS':     ['eta'],
+        'BINS':    [[1,2,3,4,5,6,7,8,9,10]]
+    }
+    ]
+    """
 
     # Loop over datasets
-    for YEAR     in years:
+    for YEAR in years:
         info = {}
         
         for TYPE in ['JPsi_pythia8', f'Run{YEAR}_UL']: # Data or MC
             files = []
-            
-            # 1D-observables
-            # for OBS in ['absdxy']:
-            #     for BIN in [1,2,3]:
-            #         for PASS in ['Pass', 'Fail']:
-            #             for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
+                        
+            for SYST in ['Nominal']: #['Nominal', 'nVertices_Up', 'nVertices_Down']:
 
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
-            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
+                for s in setup:    
+                    
+                    NUM_DEN = s['NUM_DEN']
+                    OBS     = s['OBS']
+                    BINS    = s['BINS']
 
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/Nominal/NUM_MyNum_DEN_MyDen_{OBS}.root'
-            #                 # tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
+                    # 1D histograms
+                    if   len(OBS) == 1:
 
-            #                 # rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS}.root'
-            #                 # tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS}_{BIN}_{PASS}'
-
-            #                 rootfile = f'{path}/Run{YEAR}/{TYPE}/{SYST}/NUM_MyNum_DEN_MyDen_{OBS}.root'
-            #                 tree     = f'NUM_MyNum_DEN_MyDen_{OBS}_{BIN}_{PASS}'
-
-            #                 file = {'OBS': OBS, 'BIN': BIN, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
-            #                 files.append(file)                
-            
-            # 2D-observables
-            #for OBS1 in ['absdxy_sig', 'absdxy']:
-            for OBS1 in ['absdxy_hack']:
-                OBS2 = 'pt'
-
-                # Binning
-                #for BIN1 in [1,2,3]:
-                for BIN1 in [1,2,3,4]:
-                    for BIN2 in [1,2,3,4,5]:
-                        for PASS in ['Pass', 'Fail']:
-                            #for SYST in ['Nominal', 'nVertices_Up', 'nVertices_Down']:
-                            for SYST in ['Nominal']:
+                        rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}.root'
+                        
+                        # Binning
+                        for BIN0 in BINS[0]:
+                            for PASS in ['Pass', 'Fail']:
                                 
-                                rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_LooseID_DEN_TrackerMuons_{OBS1}_{OBS2}.root'
-                                tree     = f'NUM_LooseID_DEN_TrackerMuons_{OBS1}_{BIN1}_{OBS2}_{BIN2}_{PASS}'
+                                tree = f'NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{BIN0}_{PASS}'
                                 
-                                file = {'OBS1': OBS1, 'BIN1': BIN1, 'OBS2': OBS2, 'BIN2': BIN2, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+                                file = {'OBS1': OBS[0], 'BIN1': BIN0, 'OBS2': None, 'BIN2': None, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
                                 files.append(file)
 
+                    # 2D histograms
+                    elif len(OBS) == 2:
+                        
+                        rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{OBS[1]}.root'
+                        
+                        # Binning
+                        for BIN0 in BINS[0]:
+                            for BIN1 in BINS[1]:
+                                for PASS in ['Pass', 'Fail']:
+                                    
+                                    tree = f'NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{BIN0}_{OBS[1]}_{BIN1}_{PASS}'
+                                    
+                                    file = {'OBS1': OBS[0], 'BIN1': BIN0, 'OBS2': OBS[1], 'BIN2': BIN1, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
+                                    files.append(file)
+            
             info[TYPE] = files
 
         all_years.append({'YEAR': YEAR, 'info': info})
@@ -1087,10 +1078,10 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
     return all_years
 
 
-def run_jpsi_fitpeak(inputparam, savepath='output_14Dec22/peakfit'):
-    """
-    J/psi peak fitting
-    """
+def fit_task(f, inputparam, savepath, YEAR, TYPE):
+
+    print(__name__ + '.run_jpsi_fitpeak: Executing task ...')
+    
     rng = default_rng(seed=1)
 
     # ====================================================================
@@ -1105,9 +1096,51 @@ def run_jpsi_fitpeak(inputparam, savepath='output_14Dec22/peakfit'):
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 
+    SYST = f["SYST"]
+    tree = f["tree"]
+    hist = uproot.open(f["rootfile"])[tree]
+
+    # Fit and analyze
+    par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
+    fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
+                                            par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
+
+    # Create savepath
+    total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/{SYST}'
+    if not os.path.exists(total_savepath):
+        os.makedirs(total_savepath)
+
+    # Save the fit plot
+    plt.savefig(f'{total_savepath}/{tree}.pdf')
+    plt.savefig(f'{total_savepath}/{tree}.png')
+    plt.close('all')
+    
+    # Save the fit numerical data
+    par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
+    outdict  = {'par':     par_dict,
+                'cov':     cov_arr,
+                'var2pos': var2pos,
+                'chi2':    chi2,
+                'ndof':    ndof,
+                'N':       N,
+                'N_err':   N_err,
+                'h':       h,
+                'param':   param}
+
+    filename = f"{total_savepath}/{tree}.pkl"
+    pickle.dump(outdict, open(filename, "wb"))
+    cprint(f'Fit results saved to: {filename} (pickle) \n\n', 'green')
+
+
+def run_jpsi_fitpeak(inputparam, savepath):
+    """
+    J/psi peak fitting with multiprocessing (reservation)
+    """
+
     # ====================================================================
     #np.seterr(all='print') # Numpy floating point error treatment
-
+    param     = inputparam['param']
+    
     all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
 
     from pprint import pprint
@@ -1116,47 +1149,15 @@ def run_jpsi_fitpeak(inputparam, savepath='output_14Dec22/peakfit'):
     for y in all_years:
         YEAR = y['YEAR']
 
-        for TYPE in y['info']:
+        for TYPE in y['info']: # Data or MC type
+
             for f in y['info'][TYPE]:
-                SYST = f["SYST"]
-
-                tree = f["tree"]
-                hist = uproot.open(f["rootfile"])[tree]
-
-                # Fit and analyze
-                par,cov,var2pos,chi2,ndof = binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc, techno=techno)
-                fig,ax,h,N,N_err          = analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc, cfunc=cfunc, \
-                                                        par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
-
-                # Create savepath
-                #total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/Nominal'
-                total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/{SYST}'
-                if not os.path.exists(total_savepath):
-                    os.makedirs(total_savepath)
-
-                # Save the fit plot
-                plt.savefig(f'{total_savepath}/{tree}.pdf')
-                plt.savefig(f'{total_savepath}/{tree}.png')
-                plt.close('all')
-                
-                # Save the fit numerical data
-                par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
-                outdict  = {'par':     par_dict,
-                            'cov':     cov_arr,
-                            'var2pos': var2pos,
-                            'chi2':    chi2,
-                            'ndof':    ndof,
-                            'N':       N,
-                            'N_err':   N_err,
-                            'h':       h,
-                            'param':   param}
-
-                filename = f"{total_savepath}/{tree}.pkl"
-                pickle.dump(outdict, open(filename, "wb"))
-                cprint(f'Fit results saved to: {filename} (pickle) \n\n', 'green')
+                fit_task(f, inputparam, savepath, YEAR, TYPE) # multiprocessing here
+    
+    print('HEP')
 
 
-def run_jpsi_tagprobe(inputparam, savepath='./output_14Dec22/peakfit'):
+def run_jpsi_tagprobe(inputparam, savepath):
     """
     Tag & Probe efficiency (& scale factors)
     """
@@ -1203,6 +1204,7 @@ def run_jpsi_tagprobe(inputparam, savepath='./output_14Dec22/peakfit'):
         for f in y['info'][data_tag]:
 
             SYST = f['SYST']
+            
             # Create savepath
             total_savepath = f'{savepath}/Run{YEAR}/Efficiency/{SYST}'
             if not os.path.exists(total_savepath):
@@ -1240,7 +1242,8 @@ def run_jpsi_tagprobe(inputparam, savepath='./output_14Dec22/peakfit'):
                 outdict  = {'eff': eff, 'eff_err': eff_err, 'scale': scale, 'scale_err': scale_err}
                 filename = f"{total_savepath}/{tree}.pkl"
                 pickle.dump(outdict, open(filename, "wb"))
-                print(f'Efficiency and scale factor results saved to: {filename} (pickle)')
+                cprint(f'Efficiency and scale factor results saved to: {filename} (pickle)', 'green')
+
 
 def readwrap(inputfile):
     """
@@ -1272,11 +1275,12 @@ def fit_and_analyze(inputfile):
             p['param']['fitrange'] = [2.87, 3.37]
 
         ## 3 (symmetric signal shape fixed)
-        elif SYST == 'SYMMETRIC-SIGNAL':
+        elif SYST == 'SYMMETRIC-SIGNAL_CB_asym_RBW':
             p = readwrap(inputfile=inputfile)
 
             # ---------------------------
-            # Fixed parameter values for symmetric 'CB_asym_RBW_conv_pdf'
+            
+            # Fixed parameter values for symmetric 'CB (*) asym_RBW', where (*) is a convolution
             pairs = {'asym': 1e-6, 'n': 1.0 + 1e-6, 'alpha': 10.0}
 
             # Fix the parameters
@@ -1344,6 +1348,7 @@ def group_systematics(inputfile):
         filename = f'./output/peakfit/peakfit_systematics_YEAR_{YEAR}.pkl'
         pickle.dump(d, open(filename, "wb"))
         cprint(f'Systematics grouped results saved to: {filename} (pickle)', 'green')
+
 
 if __name__ == "__main__":
 

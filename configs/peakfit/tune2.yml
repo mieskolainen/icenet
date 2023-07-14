@@ -12,7 +12,7 @@
 path:     './travis-stash/input/icefit/dqcd_2018_test/flat/muon/generalTracks/JPsi'
 years:    [2018] #[2016, 2017, 2018]
 
-fitrange: [2.85, 3.35] # Nominal fit window (GeV)
+fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 
 # List of systematic variations active (note that the SYMMETRIC-SIGNAL works only with particular signal PDF)
 systematics: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
@@ -72,7 +72,7 @@ techno:
   ncall_minuit_simplex:  0         # Number of Nelder-Mead simplex search calls
   ncall_minuit_gradient: 10000     # Number of Minuit gradient search calls
   
-  minos: True       # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
+  minos: False       # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
 
   max_chi2: 1200    # Maximum chi2/ndf for a succesful fit
   min_count: 5      # Minimum number of entries in the histogram
