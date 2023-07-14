@@ -1298,7 +1298,7 @@ def fit_and_analyze(inputfile):
             p = readwrap(inputfile=inputfile)
         
         else:
-            raise Exception('Undefined systematic variation chosen: {VARIATION}')
+            raise Exception(f'Undefined systematic variation chosen: {VARIATION}')
         
         # Execute yield fit and compute tag&probe
         run_jpsi_fitpeak(inputparam=p,  savepath=f'./output/peakfit/fitparam_{VARIATION}')
@@ -1335,9 +1335,9 @@ def group_systematics(inputfile):
         
         ## Go through results and print
         print('')
-        print(f'YEAR: {YEAR}')
+        cprint(f'YEAR: {YEAR}', 'red')
         for hyperbin in list(d.keys()):
-            print(hyperbin)
+            cprint(hyperbin, 'magenta')
             for key in d[hyperbin].keys():
                 print(f"{d[hyperbin][key]['scale']:0.4f} +- {d[hyperbin][key]['scale_err']:0.4f} \t ({key})")
         
