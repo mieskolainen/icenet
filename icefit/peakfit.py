@@ -948,7 +948,7 @@ def read_yaml_input(inputfile):
 
     print(param)
     print('')
-    
+
     return param, fitfunc, cfunc, steer['techno']
 
 
@@ -1024,9 +1024,9 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
     for YEAR in years:
         info = {}
         
-        for TYPE in ['JPsi_pythia8', f'Run{YEAR}_UL']: # Data or MC
+        for GENTYPE in ['JPsi_pythia8', f'Run{YEAR}_UL']: # Data or MC
             files = []
-                        
+            
             for SYST in systematics:
                 
                 for s in setup:    
@@ -1038,7 +1038,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
                     # 1D histograms
                     if   len(OBS) == 1:
 
-                        rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}.root'
+                        rootfile = f'{path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}.root'
                         
                         # Binning
                         for BIN0 in BINS[0]:
@@ -1052,7 +1052,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
                     # 2D histograms
                     elif len(OBS) == 2:
                         
-                        rootfile = f'{path}/Run{YEAR}_UL/{TYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{OBS[1]}.root'
+                        rootfile = f'{path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{OBS[1]}.root'
                         
                         # Binning
                         for BIN0 in BINS[0]:
@@ -1064,14 +1064,14 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
                                     file = {'OBS1': OBS[0], 'BIN1': BIN0, 'OBS2': OBS[1], 'BIN2': BIN1, 'SYST': SYST, 'rootfile': rootfile, 'tree': tree}
                                     files.append(file)
             
-            info[TYPE] = files
+            info[GENTYPE] = files
 
         all_years.append({'YEAR': YEAR, 'info': info})
 
     return all_years
 
 @ray.remote
-def fit_task(f, inputparam, savepath, YEAR, TYPE):
+def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
 
     print(__name__ + f'.run_jpsi_fitpeak: Executing task "{f}" ...')
     
@@ -1099,7 +1099,7 @@ def fit_task(f, inputparam, savepath, YEAR, TYPE):
                                             par=par, cov=cov, chi2=chi2, var2pos=var2pos, ndof=ndof)
 
     # Create savepath
-    total_savepath = f'{savepath}/Run{YEAR}/{TYPE}/{SYST}'
+    total_savepath = f'{savepath}/Run{YEAR}/{GENTYPE}/{SYST}'
     if not os.path.exists(total_savepath):
         os.makedirs(total_savepath)
 
@@ -1146,10 +1146,10 @@ def run_jpsi_fitpeak(inputparam, savepath):
     for y in all_years:
         YEAR = y['YEAR']
 
-        for TYPE in y['info']: # Data or MC type
+        for GENTYPE in y['info']: # Data or MC type
 
-            for f in y['info'][TYPE]:
-                result_ids.append(fit_task.remote(f, inputparam, savepath, YEAR, TYPE)) # multiprocessing here
+            for f in y['info'][GENTYPE]:
+                result_ids.append(fit_task.remote(f, inputparam, savepath, YEAR, GENTYPE)) # multiprocessing here
     
     results = ray.get(result_ids)
     ray.shutdown()
@@ -1195,8 +1195,9 @@ def run_jpsi_tagprobe(inputparam, savepath):
     for y in all_years:
         
         YEAR     = y['YEAR']
+        
+        mc_tag   = f'JPsi_pythia8'
         data_tag = f'Run{YEAR}_UL'
-        mc_tag   = 'JPsi_pythia8'
 
         # Loop over observables -- pick 'data_tag' (both data and mc have the same observables)
         for f in y['info'][data_tag]:
@@ -1216,18 +1217,18 @@ def run_jpsi_tagprobe(inputparam, savepath):
                 eff_err = {}
 
                 # Loop over data and MC
-                for TYPE in [data_tag, mc_tag]:
+                for GENTYPE in [data_tag, mc_tag]:
 
                     ### Compute Tag & Probe efficiency
-                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{TYPE}/{SYST}')
-                    eff[TYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
-                    eff_err[TYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
+                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{GENTYPE}/{SYST}')
+                    eff[GENTYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
+                    eff_err[GENTYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
                     ### Print out
-                    print(f'[{TYPE}]')
+                    print(f'[{GENTYPE}]')
                     print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
                     print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
-                    print(f'Efficiency: {eff[TYPE]:0.3f} +- {eff_err[TYPE]:0.3f} \n')
+                    print(f'Efficiency: {eff[GENTYPE]:0.3f} +- {eff_err[GENTYPE]:0.3f} \n')
 
                 ### Compute scale factor Data / MC
                 scale     = eff[data_tag] / eff[mc_tag]
@@ -1337,8 +1338,8 @@ def group_systematics(inputfile):
         print(f'YEAR: {YEAR}')
         for hyperbin in list(d.keys()):
             print(hyperbin)
-            for VARIATION in p['param']['systematics']:
-                print(f"{d[hyperbin][VARIATION]['scale']:0.4f} +- {d[hyperbin][VARIATION]['scale_err']:0.4f} \t ({VARIATION})")
+            for key in d[hyperbin].keys():
+                print(f"{d[hyperbin][key]['scale']:0.4f} +- {d[hyperbin][key]['scale_err']:0.4f} \t ({key})")
         
         ## Save collected results
         path = './output/peakfit'

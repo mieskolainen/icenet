@@ -16,7 +16,7 @@ fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 
 systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 
-# List of systematic variations active (note that the SYMMETRIC-SIGNAL works only with particular signal PDF)
+# List of systematic variations active
 variations: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 
