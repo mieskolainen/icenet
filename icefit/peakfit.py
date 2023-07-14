@@ -1108,7 +1108,6 @@ def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
     # Save the fit plot
     plt.savefig(f'{total_savepath}/{tree}.pdf')
     plt.savefig(f'{total_savepath}/{tree}.png')
-    plt.close('all')
     
     # Save the fit numerical data
     par_dict, cov_arr = iminuit2python(par=par, cov=cov, var2pos=var2pos)
@@ -1120,13 +1119,17 @@ def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
                 'N':       N,
                 'N_err':   N_err,
                 'h':       h,
-                'param':   param}
+                'param':   param,
+                'fig':     fig}
 
     filename = f"{total_savepath}/{tree}.pkl"
     pickle.dump(outdict, open(filename, "wb"))
     cprint(f'Fit results saved to: {filename} (pickle) \n\n', 'green')
 
+    plt.close('all') # as last
+    
     return True
+
 
 def run_jpsi_fitpeak(inputparam, savepath):
     """
