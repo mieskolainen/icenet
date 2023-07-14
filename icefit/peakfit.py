@@ -934,12 +934,13 @@ def read_yaml_input(inputfile):
         return y
 
     # Finally collect all
-    param  = {'path':         steer['path'],
+    param  = {'input_path':   steer['input_path'],
               'years':        steer['years'],
               'systematics':  steer['systematics'],
               'variations':   steer['variations'],
               'fitrange':     steer['fitrange'],
               'num_cpus':     steer['num_cpus'],
+              'output_name':  steer['output_name'],
               'start_values': start_values,
               'limits':       limits, 
               'fixed':        fixed,
@@ -957,7 +958,7 @@ def read_yaml_input(inputfile):
 # ========================================================================
 # Input processing
 
-def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal']):
+def get_rootfiles_jpsi(input_path='/', years=[2016, 2017, 2018], systematics=['Nominal']):
     """
     Return rootfile names for the J/psi (muon) study.
     """
@@ -969,7 +970,8 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy'],
         'BINS':    [[1,2,3]]
-    },
+    }]
+    """,
     {
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy_hack', 'pt'],
@@ -1018,6 +1020,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
         'BINS':    [[1,2,3,4,5,6,7,8,9,10]]
     }
     ]
+    """
 
     # Loop over datasets
     for YEAR in years:
@@ -1037,7 +1040,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
                     # 1D histograms
                     if   len(OBS) == 1:
 
-                        rootfile = f'{path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}.root'
+                        rootfile = f'{input_path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}.root'
                         
                         # Binning
                         for BIN0 in BINS[0]:
@@ -1051,7 +1054,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
                     # 2D histograms
                     elif len(OBS) == 2:
                         
-                        rootfile = f'{path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{OBS[1]}.root'
+                        rootfile = f'{input_path}/Run{YEAR}_UL/{GENTYPE}/{SYST}/NUM_{NUM_DEN[0]}_DEN_{NUM_DEN[1]}_{OBS[0]}_{OBS[1]}.root'
                         
                         # Binning
                         for BIN0 in BINS[0]:
@@ -1212,7 +1215,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
             N_err[PASS] = outdict['N_err']['S']
 
         return N, N_err
-
+    
     # ====================================================================
     ## Read filenames
     all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
@@ -1268,6 +1271,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
                 filename = f"{total_savepath}/{tree}.pkl"
                 pickle.dump(outdict, open(filename, "wb"))
                 cprint(f'Efficiency and scale factor results saved to: {filename} (pickle)', 'green')
+    return True
 
 
 def readwrap(inputfile):
@@ -1327,13 +1331,14 @@ def fit_and_analyze(inputfile):
             raise Exception(f'Undefined systematic variation chosen: {VARIATION}')
         
         # Execute yield fit and compute tag&probe
-        outputdir = os.getcwd() + f'/output/peakfit/fitparam_{VARIATION}'
+        outputdir = os.getcwd() + f'/output/peakfit/{p["param"]["output_name"]}/fitparam_{VARIATION}'
         if not os.path.exists(outputdir):
             os.makedirs(outputdir)
         
         run_jpsi_fitpeak(inputparam=p,  savepath=outputdir)
         run_jpsi_tagprobe(inputparam=p, savepath=outputdir)
 
+    return True
 
 def group_systematics(inputfile):
     """
@@ -1351,7 +1356,7 @@ def group_systematics(inputfile):
             
             for VARIATION in p['param']['variations']:
                 
-                path = os.getcwd() + f'/output/peakfit/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
+                path = os.getcwd() + f'/output/peakfit/{p["param"]["output_name"]}/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
 
                 files = [f for f in listdir(path) if isfile(join(path, f))]
 
@@ -1373,14 +1378,15 @@ def group_systematics(inputfile):
                 print(f"{d[hyperbin][key]['scale']:0.4f} +- {d[hyperbin][key]['scale_err']:0.4f} \t ({key})")
         
         ## Save collected results
-        path = os.getcwd() + '/output/peakfit'
-        if not os.path.exists(path):
-            os.makedirs(path)
+        savepath = os.getcwd() + f'/output/peakfit/{p["param"]["output_name"]}'
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
 
-        filename = os.getcwd() + f'/output/peakfit/peakfit_systematics_YEAR_{YEAR}.pkl'
+        filename = f'{savepath}/peakfit_systematics_YEAR_{YEAR}.pkl'
         pickle.dump(d, open(filename, "wb"))
         cprint(f'Systematics grouped results saved to: {filename} (pickle)', 'green')
 
+    return True
 
 if __name__ == "__main__":
 
