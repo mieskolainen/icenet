@@ -19,6 +19,8 @@ systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 # List of systematic variations active
 variations: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
+num_cpus: 0 # put 0 for automatic, set manually if problems
+
 
 fit:
 

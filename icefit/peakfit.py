@@ -18,6 +18,7 @@
 import numpy as np
 import numba
 from numba.typed import List
+import multiprocessing
 
 import yaml
 import os
@@ -938,6 +939,7 @@ def read_yaml_input(inputfile):
               'systematics':  steer['systematics'],
               'variations':   steer['variations'],
               'fitrange':     steer['fitrange'],
+              'num_cpus':     steer['num_cpus'],
               'start_values': start_values,
               'limits':       limits, 
               'fixed':        fixed,
@@ -1068,6 +1070,9 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
     return all_years
 
 @ray.remote
+def fit_task_ray(f, inputparam, savepath, YEAR, GENTYPE):
+    return fit_task(f, inputparam, savepath, YEAR, GENTYPE)
+
 def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
 
     print(__name__ + f'.run_jpsi_fitpeak: Executing task "{f}" ...')
@@ -1137,20 +1142,35 @@ def run_jpsi_fitpeak(inputparam, savepath):
     from pprint import pprint
     pprint(all_years)
 
-    ray.init() # Start Ray
-
-    result_ids = []
+    num_cpus = param['num_cpus']
+    
+    if num_cpus == 0:
+        num_cpus = multiprocessing.cpu_count()
+    
+    if num_cpus > 1:
+        cprint(__name__ + f'.run_jpsi_fitpeak: Fitting with {num_cpus} CPU cores using Ray', 'green')
+        ray.init(num_cpus=num_cpus) # Start Ray
+        result_ids = []
+    else:
+        cprint(__name__ + f'.run_jpsi_fitpeak: Fitting with {num_cpus} CPU cores', 'green')
+    
     for y in all_years:
         YEAR = y['YEAR']
 
         for GENTYPE in y['info']: # Data or MC type
 
             for f in y['info'][GENTYPE]:
-                result_ids.append(fit_task.remote(f, inputparam, savepath, YEAR, GENTYPE)) # multiprocessing here
+                
+                if num_cpus > 1:
+                    result_ids.append(fit_task_ray.remote(f, inputparam, savepath, YEAR, GENTYPE))
+                else:
+                    fit_task(f, inputparam, savepath, YEAR, GENTYPE)
     
-    results = ray.get(result_ids)
-    ray.shutdown()
+    if num_cpus > 1:
+        results = ray.get(result_ids)
+        ray.shutdown()
 
+    return True
 
 def run_jpsi_tagprobe(inputparam, savepath):
     """
