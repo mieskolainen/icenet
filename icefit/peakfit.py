@@ -936,25 +936,26 @@ def read_yaml_input(inputfile):
     param  = {'path':         steer['path'],
               'years':        steer['years'],
               'systematics':  steer['systematics'],
+              'variations':   steer['variations'],
+              'fitrange':     steer['fitrange'],
               'start_values': start_values,
               'limits':       limits, 
               'fixed':        fixed,
               'name':         name,
-              'fitrange':     steer['fitrange'],
               'args':         args,
               'w_pind':       w_pind,
               'p_pind':       p_pind}
 
     print(param)
     print('')
-
+    
     return param, fitfunc, cfunc, steer['techno']
 
 
 # ========================================================================
 # Input processing
 
-def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
+def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal']):
     """
     Return rootfile names for the J/psi (muon) study.
     """
@@ -1026,8 +1027,8 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
         for TYPE in ['JPsi_pythia8', f'Run{YEAR}_UL']: # Data or MC
             files = []
                         
-            for SYST in ['Nominal']: #['Nominal', 'nVertices_Up', 'nVertices_Down']:
-
+            for SYST in systematics:
+                
                 for s in setup:    
                     
                     NUM_DEN = s['NUM_DEN']
@@ -1134,7 +1135,7 @@ def run_jpsi_fitpeak(inputparam, savepath):
     #np.seterr(all='print') # Numpy floating point error treatment
     param     = inputparam['param']
     
-    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
+    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'], systematics=param['systematics'])
 
     from pprint import pprint
     pprint(all_years)
@@ -1259,7 +1260,7 @@ def fit_and_analyze(inputfile):
     # Get YAML parameters
     p = readwrap(inputfile=inputfile)
 
-    for VARIATION in p['param']['systematics']:
+    for VARIATION in p['param']['variations']:
         
         ## 1 (mass window shifted down)
         if   VARIATION == 'MASS-WINDOW-DOWN':
@@ -1314,10 +1315,10 @@ def group_systematics(inputfile):
     for YEAR in p['param']['years']:
 
         d = {}
-        
-        for SYST in ['Nominal']: #['Nominal', 'nVertices_Up', 'nVertices_Down']:
 
-            for VARIATION in p['param']['systematics']:
+        for SYST in p['param']['systematics']:
+            
+            for VARIATION in p['param']['variations']:
                 path = f'./output/peakfit/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
             
                 files = [f for f in listdir(path) if isfile(join(path, f))]

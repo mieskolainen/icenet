@@ -14,8 +14,10 @@ years:    [2018] #[2016, 2017, 2018]
 
 fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 
+systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
+
 # List of systematic variations active
-systematics: ['DEFAULT', 'SYMMETRIC-SIGNAL_CB_asym_RBW', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+variations: ['DEFAULT', 'SYMMETRIC-SIGNAL_CB_asym_RBW', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 
 fit:
