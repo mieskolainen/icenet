@@ -1,5 +1,5 @@
-# Binned histogram chi2/likelihood fits with mystic + iminuit (minuit from python)
-# for tag & probe efficiency (and scale factor) estimation. Multiprocessing via Ray.
+# Binned histogram chi2/likelihood/Wasserstein fits with mystic + iminuit (minuit from python)
+# with Tag & Probe efficiency (and scale factor) estimation. Multiprocessing via Ray.
 #
 # Notes:
 #   
