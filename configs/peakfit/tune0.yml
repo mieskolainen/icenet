@@ -57,10 +57,10 @@ fit:
       #Nmin:     null # not active
     
     # Function weight (fit contribution) parameter
-    w_start:  1.0e-3
+    w_start:  0.1
     w_limit:  [1.0e-4, 1.0e+5]
     w_fixed:  False
-
+    
     p_name:   ['lambda']
     p_start:  [1.0e-4]
     p_limit:  [[1.0e-5, 4.0]]
