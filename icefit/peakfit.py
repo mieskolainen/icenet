@@ -1152,7 +1152,12 @@ def run_jpsi_fitpeak(inputparam, savepath):
     
     if num_cpus > 1:
         cprint(__name__ + f'.run_jpsi_fitpeak: Fitting with {num_cpus} CPU cores using Ray', 'green')
-        ray.init(num_cpus=num_cpus, _temp_dir='./tmp') # Start Ray
+        
+        tmpdir = os.getcwd() + '/tmp'
+        if not os.path.exists(tmpdir):
+            os.makedirs(tmpdir)
+        
+        ray.init(num_cpus=num_cpus, _temp_dir=tmpdir) # Start Ray
         result_ids = []
     else:
         cprint(__name__ + f'.run_jpsi_fitpeak: Fitting with {num_cpus} CPU cores', 'green')
