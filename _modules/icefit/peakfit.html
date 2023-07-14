@@ -1374,12 +1374,13 @@
         <span class="k">return</span> <span class="n">y</span>
 
     <span class="c1"># Finally collect all</span>
-    <span class="n">param</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;path&#39;</span><span class="p">:</span>         <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span>
+    <span class="n">param</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;input_path&#39;</span><span class="p">:</span>   <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;input_path&#39;</span><span class="p">],</span>
               <span class="s1">&#39;years&#39;</span><span class="p">:</span>        <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;years&#39;</span><span class="p">],</span>
               <span class="s1">&#39;systematics&#39;</span><span class="p">:</span>  <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;systematics&#39;</span><span class="p">],</span>
               <span class="s1">&#39;variations&#39;</span><span class="p">:</span>   <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;variations&#39;</span><span class="p">],</span>
               <span class="s1">&#39;fitrange&#39;</span><span class="p">:</span>     <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;fitrange&#39;</span><span class="p">],</span>
               <span class="s1">&#39;num_cpus&#39;</span><span class="p">:</span>     <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">],</span>
+              <span class="s1">&#39;output_name&#39;</span><span class="p">:</span>  <span class="n">steer</span><span class="p">[</span><span class="s1">&#39;output_name&#39;</span><span class="p">],</span>
               <span class="s1">&#39;start_values&#39;</span><span class="p">:</span> <span class="n">start_values</span><span class="p">,</span>
               <span class="s1">&#39;limits&#39;</span><span class="p">:</span>       <span class="n">limits</span><span class="p">,</span> 
               <span class="s1">&#39;fixed&#39;</span><span class="p">:</span>        <span class="n">fixed</span><span class="p">,</span>
@@ -1397,7 +1398,7 @@
 <span class="c1"># ========================================================================</span>
 <span class="c1"># Input processing</span>
 
-<div class="viewcode-block" id="get_rootfiles_jpsi"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.get_rootfiles_jpsi">[docs]</a><span class="k">def</span> <span class="nf">get_rootfiles_jpsi</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">years</span><span class="o">=</span><span class="p">[</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">2017</span><span class="p">,</span> <span class="mi">2018</span><span class="p">],</span> <span class="n">systematics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Nominal&#39;</span><span class="p">]):</span>
+<div class="viewcode-block" id="get_rootfiles_jpsi"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.get_rootfiles_jpsi">[docs]</a><span class="k">def</span> <span class="nf">get_rootfiles_jpsi</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">years</span><span class="o">=</span><span class="p">[</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">2017</span><span class="p">,</span> <span class="mi">2018</span><span class="p">],</span> <span class="n">systematics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Nominal&#39;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return rootfile names for the J/psi (muon) study.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1409,55 +1410,57 @@
         <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
         <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">],</span>
         <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy_hack&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;abseta&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]]</span>
-    <span class="p">},</span>
-    
-    <span class="c1">## Num/Den type B</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy_hack&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;abseta&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]]</span>
-    <span class="p">}</span>
-    <span class="p">]</span>
+    <span class="p">}]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;,</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy_hack&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;abseta&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;eta&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5,6,7,8,9,10]]</span>
+<span class="sd">    },</span>
+<span class="sd">    </span>
+<span class="sd">    ## Num/Den type B</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy_hack&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;abseta&#39;, &#39;pt&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5], [1,2,3,4,5]]</span>
+<span class="sd">    },</span>
+<span class="sd">    {</span>
+<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
+<span class="sd">        &#39;OBS&#39;:     [&#39;eta&#39;],</span>
+<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5,6,7,8,9,10]]</span>
+<span class="sd">    }</span>
+<span class="sd">    ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Loop over datasets</span>
     <span class="k">for</span> <span class="n">YEAR</span> <span class="ow">in</span> <span class="n">years</span><span class="p">:</span>
@@ -1477,7 +1480,7 @@
                     <span class="c1"># 1D histograms</span>
                     <span class="k">if</span>   <span class="nb">len</span><span class="p">(</span><span class="n">OBS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
 
-                        <span class="n">rootfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">_UL/</span><span class="si">{</span><span class="n">GENTYPE</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/NUM_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_DEN_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.root&#39;</span>
+                        <span class="n">rootfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">input_path</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">_UL/</span><span class="si">{</span><span class="n">GENTYPE</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/NUM_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_DEN_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.root&#39;</span>
                         
                         <span class="c1"># Binning</span>
                         <span class="k">for</span> <span class="n">BIN0</span> <span class="ow">in</span> <span class="n">BINS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -1491,7 +1494,7 @@
                     <span class="c1"># 2D histograms</span>
                     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">OBS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                         
-                        <span class="n">rootfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">_UL/</span><span class="si">{</span><span class="n">GENTYPE</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/NUM_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_DEN_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">.root&#39;</span>
+                        <span class="n">rootfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">input_path</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">_UL/</span><span class="si">{</span><span class="n">GENTYPE</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/NUM_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_DEN_</span><span class="si">{</span><span class="n">NUM_DEN</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">OBS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">.root&#39;</span>
                         
                         <span class="c1"># Binning</span>
                         <span class="k">for</span> <span class="n">BIN0</span> <span class="ow">in</span> <span class="n">BINS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -1652,7 +1655,7 @@
             <span class="n">N_err</span><span class="p">[</span><span class="n">PASS</span><span class="p">]</span> <span class="o">=</span> <span class="n">outdict</span><span class="p">[</span><span class="s1">&#39;N_err&#39;</span><span class="p">][</span><span class="s1">&#39;S&#39;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">N</span><span class="p">,</span> <span class="n">N_err</span>
-
+    
     <span class="c1"># ====================================================================</span>
     <span class="c1">## Read filenames</span>
     <span class="n">all_years</span> <span class="o">=</span> <span class="n">get_rootfiles_jpsi</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">years</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;years&#39;</span><span class="p">])</span>
@@ -1707,7 +1710,8 @@
                 <span class="n">outdict</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;eff&#39;</span><span class="p">:</span> <span class="n">eff</span><span class="p">,</span> <span class="s1">&#39;eff_err&#39;</span><span class="p">:</span> <span class="n">eff_err</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="n">scale</span><span class="p">,</span> <span class="s1">&#39;scale_err&#39;</span><span class="p">:</span> <span class="n">scale_err</span><span class="p">}</span>
                 <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">total_savepath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s2">.pkl&quot;</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">outdict</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">))</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Efficiency and scale factor results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+                <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Efficiency and scale factor results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="readwrap"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.readwrap">[docs]</a><span class="k">def</span> <span class="nf">readwrap</span><span class="p">(</span><span class="n">inputfile</span><span class="p">):</span>
@@ -1767,13 +1771,14 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Undefined systematic variation chosen: </span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="c1"># Execute yield fit and compute tag&amp;probe</span>
-        <span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/fitparam_</span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">outputdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;param&quot;</span><span class="p">][</span><span class="s2">&quot;output_name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/fitparam_</span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputdir</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outputdir</span><span class="p">)</span>
         
         <span class="n">run_jpsi_fitpeak</span><span class="p">(</span><span class="n">inputparam</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>  <span class="n">savepath</span><span class="o">=</span><span class="n">outputdir</span><span class="p">)</span>
-        <span class="n">run_jpsi_tagprobe</span><span class="p">(</span><span class="n">inputparam</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="n">outputdir</span><span class="p">)</span></div>
+        <span class="n">run_jpsi_tagprobe</span><span class="p">(</span><span class="n">inputparam</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="n">outputdir</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="group_systematics"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.group_systematics">[docs]</a><span class="k">def</span> <span class="nf">group_systematics</span><span class="p">(</span><span class="n">inputfile</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1791,7 +1796,7 @@
             
             <span class="k">for</span> <span class="n">VARIATION</span> <span class="ow">in</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">][</span><span class="s1">&#39;variations&#39;</span><span class="p">]:</span>
                 
-                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/fitparam_</span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">/Efficiency/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/&#39;</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;param&quot;</span><span class="p">][</span><span class="s2">&quot;output_name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/fitparam_</span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">/Run</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">/Efficiency/</span><span class="si">{</span><span class="n">SYST</span><span class="si">}</span><span class="s1">/&#39;</span>
 
                 <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
 
@@ -1813,14 +1818,15 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="n">hyperbin</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> +- </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="n">hyperbin</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;scale_err&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> </span><span class="se">\t</span><span class="s2"> (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         
         <span class="c1">## Save collected results</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;/output/peakfit&#39;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">savepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;param&quot;</span><span class="p">][</span><span class="s2">&quot;output_name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">savepath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">savepath</span><span class="p">)</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/output/peakfit/peakfit_systematics_YEAR_</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">savepath</span><span class="si">}</span><span class="s1">/peakfit_systematics_YEAR_</span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">))</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Systematics grouped results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Systematics grouped results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
