@@ -546,7 +546,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
         if trials == 0:
             start_values = param['start_values']
         else:
-            # Randomly perturb
+            # Randomly perturb around the default starting point and clip
             start_values = param['start_values'] + 0.2 * param['start_values'] * np.random.randn(len(param['start_values']))
             for i in range(len(start_values)):
                 start_values[i] = np.clip(start_values[i], param['limits'][i][0], param['limits'][i][1])
