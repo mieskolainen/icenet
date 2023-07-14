@@ -61,6 +61,7 @@ import icefit.statstools as statstools
 import numpy as onp # original numpy
 from numpy.random import default_rng
 
+import ray
 
 """
 # Raytune
@@ -547,9 +548,9 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             start_values = param['start_values']
         else:
             # Randomly perturb around the default starting point and clip
-            start_values = param['start_values'] + 0.2 * param['start_values'] * np.random.randn(len(param['start_values']))
+            start_values = param['start_values']
             for i in range(len(start_values)):
-                start_values[i] = np.clip(start_values[i], param['limits'][i][0], param['limits'][i][1])
+                start_values[i] = np.clip(start_values[i] + 0.2 * start_values[i] * np.random.randn(), param['limits'][i][0], param['limits'][i][1])
         
         # ------------------------------------------------------------
         # Nelder-Mead search from scipy
@@ -1080,10 +1081,10 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018]):
 
     return all_years
 
-
+@ray.remote
 def fit_task(f, inputparam, savepath, YEAR, TYPE):
 
-    print(__name__ + '.run_jpsi_fitpeak: Executing task ...')
+    print(__name__ + f'.run_jpsi_fitpeak: Executing task "{f}" ...')
     
     rng = default_rng(seed=1)
 
@@ -1134,6 +1135,7 @@ def fit_task(f, inputparam, savepath, YEAR, TYPE):
     pickle.dump(outdict, open(filename, "wb"))
     cprint(f'Fit results saved to: {filename} (pickle) \n\n', 'green')
 
+    return True
 
 def run_jpsi_fitpeak(inputparam, savepath):
     """
@@ -1149,15 +1151,19 @@ def run_jpsi_fitpeak(inputparam, savepath):
     from pprint import pprint
     pprint(all_years)
 
+    ray.init() # Start Ray
+
+    result_ids = []
     for y in all_years:
         YEAR = y['YEAR']
 
         for TYPE in y['info']: # Data or MC type
 
             for f in y['info'][TYPE]:
-                fit_task(f, inputparam, savepath, YEAR, TYPE) # multiprocessing here
+                result_ids.append(fit_task.remote(f, inputparam, savepath, YEAR, TYPE)) # multiprocessing here
     
-    print('HEP')
+    results = ray.get(result_ids)
+    ray.shutdown()
 
 
 def run_jpsi_tagprobe(inputparam, savepath):
