@@ -1401,7 +1401,7 @@
     <span class="n">all_years</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">setup</span> <span class="o">=</span> <span class="p">[</span>
     
-    <span class="c1">##</span>
+    <span class="c1">## Num/Den type A</span>
     <span class="p">{</span>
         <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
         <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">],</span>
@@ -1412,52 +1412,50 @@
         <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy_hack&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
         <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
     <span class="p">}</span>
+    <span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;abseta&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LooseID&#39;</span><span class="p">,</span> <span class="s1">&#39;TrackerMuons&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]]</span>
+    <span class="p">},</span>
+    
+    <span class="c1">## Num/Den type B</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy_hack&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;absdxy&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;abseta&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NUM_DEN&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MyNum&#39;</span><span class="p">,</span> <span class="s1">&#39;MyDen&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;OBS&#39;</span><span class="p">:</span>     <span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;BINS&#39;</span><span class="p">:</span>    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]]</span>
+    <span class="p">}</span>
     <span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;,</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;, &#39;pt&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3], [1,2,3,4,5]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;abseta&#39;, &#39;pt&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5], [1,2,3,4,5]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;LooseID&#39;, &#39;TrackerMuons&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;eta&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5,6,7,8,9,10]]</span>
-<span class="sd">    },</span>
-<span class="sd">    </span>
-<span class="sd">    ## </span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy_hack&#39;, &#39;pt&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4], [1,2,3,4,5]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;absdxy&#39;, &#39;pt&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3], [1,2,3,4,5]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;abseta&#39;, &#39;pt&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5], [1,2,3,4,5]]</span>
-<span class="sd">    },</span>
-<span class="sd">    {</span>
-<span class="sd">        &#39;NUM_DEN&#39;: [&#39;MyNum&#39;, &#39;MyDen&#39;],</span>
-<span class="sd">        &#39;OBS&#39;:     [&#39;eta&#39;],</span>
-<span class="sd">        &#39;BINS&#39;:    [[1,2,3,4,5,6,7,8,9,10]]</span>
-<span class="sd">    }</span>
-<span class="sd">    ]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Loop over datasets</span>
     <span class="k">for</span> <span class="n">YEAR</span> <span class="ow">in</span> <span class="n">years</span><span class="p">:</span>
@@ -1737,7 +1735,7 @@
             <span class="n">p</span> <span class="o">=</span> <span class="n">readwrap</span><span class="p">(</span><span class="n">inputfile</span><span class="o">=</span><span class="n">inputfile</span><span class="p">)</span>
         
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Undefined systematic variation chosen: </span><span class="si">{VARIATION}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Undefined systematic variation chosen: </span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="c1"># Execute yield fit and compute tag&amp;probe</span>
         <span class="n">run_jpsi_fitpeak</span><span class="p">(</span><span class="n">inputparam</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>  <span class="n">savepath</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;./output/peakfit/fitparam_</span><span class="si">{</span><span class="n">VARIATION</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -1774,9 +1772,9 @@
         
         <span class="c1">## Go through results and print</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;YEAR: </span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;YEAR: </span><span class="si">{</span><span class="n">YEAR</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">hyperbin</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">hyperbin</span><span class="p">)</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="n">hyperbin</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="n">hyperbin</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="n">hyperbin</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> +- </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="n">hyperbin</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;scale_err&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> </span><span class="se">\t</span><span class="s2"> (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         
