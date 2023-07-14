@@ -1259,20 +1259,20 @@ def fit_and_analyze(inputfile):
     # Get YAML parameters
     p = readwrap(inputfile=inputfile)
 
-    for SYST in p['param']['systematics']:
+    for VARIATION in p['param']['systematics']:
         
         ## 1 (mass window shifted down)
-        if   SYST == 'MASS-WINDOW-DOWN':
+        if   VARIATION == 'MASS-WINDOW-DOWN':
             p = readwrap(inputfile=inputfile)
             p['param']['fitrange'] = [2.83, 3.33]
 
         ## 2 (mass window shifted up)
-        elif SYST == 'MASS-WINDOW-UP':
+        elif VARIATION == 'MASS-WINDOW-UP':
             p = readwrap(inputfile=inputfile)
             p['param']['fitrange'] = [2.87, 3.37]
 
         ## 3 (symmetric signal shape fixed)
-        elif SYST == 'SYMMETRIC-SIGNAL_CB_asym_RBW':
+        elif VARIATION == 'SYMMETRIC-SIGNAL_CB_asym_RBW':
             p = readwrap(inputfile=inputfile)
 
             # ---------------------------
@@ -1292,15 +1292,15 @@ def fit_and_analyze(inputfile):
             # ------------------------
 
         ## 4 (Default setup)
-        elif SYST == 'DEFAULT':
+        elif VARIATION == 'DEFAULT':
             p = readwrap(inputfile=inputfile)
         
         else:
-            raise Exception('Undefined systematic variation chosen: {SYST}')
+            raise Exception('Undefined systematic variation chosen: {VARIATION}')
         
         # Execute yield fit and compute tag&probe
-        run_jpsi_fitpeak(inputparam=p,  savepath=f'./output/peakfit/fitparam_{SYST}')
-        run_jpsi_tagprobe(inputparam=p, savepath=f'./output/peakfit/fitparam_{SYST}')
+        run_jpsi_fitpeak(inputparam=p,  savepath=f'./output/peakfit/fitparam_{VARIATION}')
+        run_jpsi_tagprobe(inputparam=p, savepath=f'./output/peakfit/fitparam_{VARIATION}')
 
 
 def group_systematics(inputfile):
@@ -1314,28 +1314,30 @@ def group_systematics(inputfile):
     for YEAR in p['param']['years']:
 
         d = {}
+        
+        for SYST in ['Nominal']: #['Nominal', 'nVertices_Up', 'nVertices_Down']:
 
-        for SYST in p['param']['systematics']:
-            path = f'./output/peakfit/fitparam_{SYST}/Run{YEAR}/Efficiency/Nominal/'
+            for VARIATION in p['param']['systematics']:
+                path = f'./output/peakfit/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
+            
+                files = [f for f in listdir(path) if isfile(join(path, f))]
 
-            files = [f for f in listdir(path) if isfile(join(path, f))]
+                for filename in files:
+                    with open(path + filename, 'rb') as f:
+                        x = pickle.load(f)
+                    
+                    if filename not in d:
+                        d[filename] = {}
 
-            for filename in files:
-                with open(path + filename, 'rb') as f:
-                    x = pickle.load(f)
-                
-                if filename not in d:
-                    d[filename] = {}
-
-                d[filename][SYST] = x
-
+                    d[filename][SYST + '_' + VARIATION] = x
+        
         ## Go through results and print
         print('')
         print(f'YEAR: {YEAR}')
         for hyperbin in list(d.keys()):
             print(hyperbin)
-            for SYST in p['param']['systematics']:
-                print(f"{d[hyperbin][SYST]['scale']:0.4f} +- {d[hyperbin][SYST]['scale_err']:0.4f} \t ({SYST})")
+            for VARIATION in p['param']['systematics']:
+                print(f"{d[hyperbin][VARIATION]['scale']:0.4f} +- {d[hyperbin][VARIATION]['scale_err']:0.4f} \t ({VARIATION})")
         
         ## Save collected results
         path = './output/peakfit'
