@@ -209,7 +209,6 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.cauchy_pdf"><code class="docutils literal notranslate"><span class="pre">cauchy_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.exp_pdf"><code class="docutils literal notranslate"><span class="pre">exp_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.fit_task"><code class="docutils literal notranslate"><span class="pre">fit_task()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.gauss_pdf"><code class="docutils literal notranslate"><span class="pre">gauss_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.generic_conv_pdf"><code class="docutils literal notranslate"><span class="pre">generic_conv_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
@@ -501,6 +500,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">onp</span> <span class="c1"># original numpy</span>
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
 
+<span class="kn">import</span> <span class="nn">ray</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd"># Raytune</span>
@@ -986,8 +986,11 @@
         <span class="k">if</span> <span class="n">trials</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">start_values</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;start_values&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">start_values</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;start_values&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;start_values&#39;</span><span class="p">]))</span>
-
+            <span class="c1"># Randomly perturb around the default starting point and clip</span>
+            <span class="n">start_values</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;start_values&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start_values</span><span class="p">)):</span>
+                <span class="n">start_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">start_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">start_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;limits&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;limits&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Nelder-Mead search from scipy</span>
         <span class="k">if</span> <span class="n">techno</span><span class="p">[</span><span class="s1">&#39;ncall_scipy_simplex&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1517,10 +1520,10 @@
 
     <span class="k">return</span> <span class="n">all_years</span></div>
 
+<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">fit_task</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">,</span> <span class="n">YEAR</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">):</span>
 
-<div class="viewcode-block" id="fit_task"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.fit_task">[docs]</a><span class="k">def</span> <span class="nf">fit_task</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">,</span> <span class="n">YEAR</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">):</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.run_jpsi_fitpeak: Executing task ...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.run_jpsi_fitpeak: Executing task &quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">)</span>
     
     <span class="n">rng</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
@@ -1569,8 +1572,9 @@
 
     <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">total_savepath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s2">.pkl&quot;</span>
     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">outdict</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">))</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Fit results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle) </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Fit results saved to: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (pickle) </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="run_jpsi_fitpeak"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.run_jpsi_fitpeak">[docs]</a><span class="k">def</span> <span class="nf">run_jpsi_fitpeak</span><span class="p">(</span><span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1586,15 +1590,19 @@
     <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
     <span class="n">pprint</span><span class="p">(</span><span class="n">all_years</span><span class="p">)</span>
 
+    <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">()</span> <span class="c1"># Start Ray</span>
+
+    <span class="n">result_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">all_years</span><span class="p">:</span>
         <span class="n">YEAR</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;YEAR&#39;</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">TYPE</span> <span class="ow">in</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]:</span> <span class="c1"># Data or MC type</span>
 
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="n">TYPE</span><span class="p">]:</span>
-                <span class="n">fit_task</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">,</span> <span class="n">YEAR</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">)</span> <span class="c1"># multiprocessing here</span>
+                <span class="n">result_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fit_task</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">,</span> <span class="n">YEAR</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">))</span> <span class="c1"># multiprocessing here</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;HEP&#39;</span><span class="p">)</span></div>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result_ids</span><span class="p">)</span>
+    <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="run_jpsi_tagprobe"><a class="viewcode-back" href="../../modules/icefit.html#icefit.peakfit.run_jpsi_tagprobe">[docs]</a><span class="k">def</span> <span class="nf">run_jpsi_tagprobe</span><span class="p">(</span><span class="n">inputparam</span><span class="p">,</span> <span class="n">savepath</span><span class="p">):</span>
