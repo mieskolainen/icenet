@@ -970,8 +970,7 @@ def get_rootfiles_jpsi(input_path='/', years=[2016, 2017, 2018], systematics=['N
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy'],
         'BINS':    [[1,2,3]]
-    }]
-    """,
+    },
     {
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy_hack', 'pt'],
@@ -1020,7 +1019,7 @@ def get_rootfiles_jpsi(input_path='/', years=[2016, 2017, 2018], systematics=['N
         'BINS':    [[1,2,3,4,5,6,7,8,9,10]]
     }
     ]
-    """
+    
 
     # Loop over datasets
     for YEAR in years:
@@ -1202,7 +1201,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
 
         N      = {}
         N_err  = {}
-        
+
         for PASS in ['Pass', 'Fail']:
 
             filename = f"{total_savepath}/{f'{tree}_{PASS}'}.pkl"
