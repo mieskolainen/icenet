@@ -1327,8 +1327,12 @@ def fit_and_analyze(inputfile):
             raise Exception(f'Undefined systematic variation chosen: {VARIATION}')
         
         # Execute yield fit and compute tag&probe
-        run_jpsi_fitpeak(inputparam=p,  savepath=f'./output/peakfit/fitparam_{VARIATION}')
-        run_jpsi_tagprobe(inputparam=p, savepath=f'./output/peakfit/fitparam_{VARIATION}')
+        outputdir = os.getcwd() + f'/output/peakfit/fitparam_{VARIATION}'
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+        
+        run_jpsi_fitpeak(inputparam=p,  savepath=outputdir)
+        run_jpsi_tagprobe(inputparam=p, savepath=outputdir)
 
 
 def group_systematics(inputfile):
@@ -1346,8 +1350,9 @@ def group_systematics(inputfile):
         for SYST in p['param']['systematics']:
             
             for VARIATION in p['param']['variations']:
-                path = f'./output/peakfit/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
-            
+                
+                path = os.getcwd() + f'/output/peakfit/fitparam_{VARIATION}/Run{YEAR}/Efficiency/{SYST}/'
+
                 files = [f for f in listdir(path) if isfile(join(path, f))]
 
                 for filename in files:
@@ -1368,11 +1373,11 @@ def group_systematics(inputfile):
                 print(f"{d[hyperbin][key]['scale']:0.4f} +- {d[hyperbin][key]['scale_err']:0.4f} \t ({key})")
         
         ## Save collected results
-        path = './output/peakfit'
+        path = os.getcwd() + '/output/peakfit'
         if not os.path.exists(path):
             os.makedirs(path)
 
-        filename = f'./output/peakfit/peakfit_systematics_YEAR_{YEAR}.pkl'
+        filename = os.getcwd() + f'/output/peakfit/peakfit_systematics_YEAR_{YEAR}.pkl'
         pickle.dump(d, open(filename, "wb"))
         cprint(f'Systematics grouped results saved to: {filename} (pickle)', 'green')
 
