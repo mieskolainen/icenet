@@ -68,8 +68,8 @@ fit:
 # Fit algorithm parameters
 techno:
   losstype: 'nll'       # 'chi2', 'nll' or 'wasserstein'
-  use_limits: True              # Use parameter bounds
-  zerobin: 1.0e-2               # Minimum number of counts in a valid bin
+  use_limits: True      # Use parameter bounds
+  zerobin: 0.1          # Minimum number of counts in a valid bin
   
   # Use enough calls / iterations (otherwise can get stuck in bad local minima)
   
