@@ -972,8 +972,7 @@ def get_rootfiles_jpsi(path='/', years=[2016, 2017, 2018], systematics=['Nominal
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy_hack', 'pt'],
         'BINS':    [[1,2,3,4], [1,2,3,4,5]]
-    }
-    ,
+    },
     {
         'NUM_DEN': ['LooseID', 'TrackerMuons'],
         'OBS':     ['absdxy', 'pt'],
