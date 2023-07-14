@@ -15,22 +15,9 @@
 # m.mieskolainen@imperial.ac.uk
 
 
-# --------------------------------------
-# JAX for autograd
-# !pip install jax jaxlib
-
-#import jax
-#from jax.config import config
-#config.update("jax_enable_x64", True) # enable float64 precision
-#from jax import numpy as np           # jax replacement for normal numpy
-#from jax.scipy.special import erf,erfc
-#from jax import jit, grad
-# --------------------------------------
-
 import numpy as np
 import numba
 from numba.typed import List
-import multiprocessing
 
 import yaml
 import os
@@ -61,7 +48,9 @@ import icefit.statstools as statstools
 import numpy as onp # original numpy
 from numpy.random import default_rng
 
+# Ray
 import ray
+
 
 """
 # Raytune
@@ -73,7 +62,6 @@ from functools import partial
 import multiprocessing
 import torch
 """
-
 
 """
 def raytune_main(param, loss_func=None, inputs={}, num_samples=20, max_num_epochs=20):
@@ -176,6 +164,30 @@ def TH1_to_numpy(hist):
     return {'counts': counts, 'errors': errors, 'bin_edges': bin_edges, 'bin_center': bin_center}
 
 
+def iminuit2python(par, cov, var2pos):
+    """
+    Convert iminuit objects into standard python
+
+    Args:
+        par     : Parameter values object
+        cov     : Covariance object
+        var2pos : Variable string to index
+
+    Returns:
+        par_dict : Parameter values dictionary
+        cov_arr  : Covariance matrix
+    """
+    par_dict = {}
+    cov_arr  = np.zeros((len(var2pos), len(var2pos)))
+    
+    for key in var2pos.keys():
+        i = var2pos[key]
+        par_dict[key] = par[i]
+        cov_arr[i][i] = cov[i][i]
+
+    return par_dict, cov_arr
+
+
 @numba.njit
 def voigt_FWHM(gamma: float, sigma: float):
     """
@@ -202,7 +214,7 @@ def voigt_FWHM(gamma: float, sigma: float):
     return 0.5346*L + np.sqrt(0.2166*L**2 + G**2)
 
 
-# ------------------------------------------------------------------------
+# ========================================================================
 # Fit functions
 
 @numba.njit
@@ -448,8 +460,8 @@ def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
         y = y / np.trapz(y=y, x=x)
     return y
 
-# ------------------------------------------------------------------------
-
+# ========================================================================
+# Fit routines
 
 def binned_1D_fit(hist, param, fitfunc, techno):
     """
@@ -471,7 +483,7 @@ def binned_1D_fit(hist, param, fitfunc, techno):
             minos:          Minos uncertainties if True, Hesse if False
     """
 
-    # -------------------------------------------------------------------------------
+    # --------------------------------------------------------------------
     # Histogram data
 
     h = TH1_to_numpy(hist)
@@ -844,30 +856,6 @@ def analyze_1D_fit(hist, param, fitfunc, cfunc, par, cov, var2pos, chi2, ndof, n
     iceplot.set_axis_ticks(ax=ax[1], ticks=ticks, dim='y')
     
     return fig,ax,h,N,N_err
-
-
-def iminuit2python(par, cov, var2pos):
-    """
-    Convert iminuit objects into standard python
-
-    Args:
-        par     : Parameter values object
-        cov     : Covariance object
-        var2pos : Variable string to index
-
-    Returns:
-        par_dict : Parameter values dictionary
-        cov_arr  : Covariance matrix
-    """
-    par_dict = {}
-    cov_arr  = np.zeros((len(var2pos), len(var2pos)))
-    
-    for key in var2pos.keys():
-        i = var2pos[key]
-        par_dict[key] = par[i]
-        cov_arr[i][i] = cov[i][i]
-
-    return par_dict, cov_arr
 
 
 def read_yaml_input(inputfile):
