@@ -1143,7 +1143,7 @@ def run_jpsi_fitpeak(inputparam, savepath):
     #np.seterr(all='print') # Numpy floating point error treatment
     param     = inputparam['param']
     
-    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'], systematics=param['systematics'])
+    all_years = get_rootfiles_jpsi(input_path=param['input_path'], years=param['years'], systematics=param['systematics'])
 
     from pprint import pprint
     pprint(all_years)
@@ -1202,13 +1202,12 @@ def run_jpsi_tagprobe(inputparam, savepath):
 
         N      = {}
         N_err  = {}
-
+        
         for PASS in ['Pass', 'Fail']:
 
             filename = f"{total_savepath}/{f'{tree}_{PASS}'}.pkl"
             cprint(f'Reading fit results from: {filename} (pickle)', 'green')         
             outdict  = pickle.load(open(filename, "rb"))
-            #pprint(outdict)
 
             # Read out signal peak fit event count yield and its uncertainty
             N[PASS]     = outdict['N']['S']
@@ -1218,7 +1217,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
     
     # ====================================================================
     ## Read filenames
-    all_years = get_rootfiles_jpsi(path=param['path'], years=param['years'])
+    all_years = get_rootfiles_jpsi(input_path=param['input_path'], years=param['years'])
 
     ### Loop over datasets
     for y in all_years:
