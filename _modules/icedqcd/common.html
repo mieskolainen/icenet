@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.8
+                0.0.8.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -124,6 +124,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -587,7 +588,19 @@
         <span class="k">return</span> <span class="n">fmask_np</span></div>
 
 
-<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="deltaR"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.deltaR">[docs]</a><span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    dR distance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">deltaEta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">eta1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">eta2</span><span class="p">]</span>
+    
+    <span class="n">deltaPhi</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">phi1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">phi2</span><span class="p">]</span>
+    <span class="n">deltaPhi</span> <span class="o">=</span> <span class="p">(</span><span class="n">deltaPhi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deltaEta</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaPhi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform data into different datatypes.</span>
 <span class="sd">    </span>
@@ -598,13 +611,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary with different data representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span>   <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
     
     <span class="c1">### Pick active variables out</span>
     <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">unroll_ak_fields</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">),</span>  <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]])</span>
@@ -620,6 +635,8 @@
     <span class="n">npf_vars</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">unroll_ak_fields</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;second&#39;</span><span class="p">),</span> <span class="n">ids</span><span class="o">=</span><span class="n">MVA_NPF_VARS</span><span class="p">)</span>
     <span class="n">pf_vars</span>     <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">unroll_ak_fields</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;second&#39;</span><span class="p">),</span> <span class="n">ids</span><span class="o">=</span><span class="n">MVA_PF_VARS</span><span class="p">)</span>
 
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### ** Remove conditional variables **</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MODEL_VARS&#39;</span><span class="p">]:</span>
@@ -628,7 +645,30 @@
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Removing model conditional var &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot;&quot; from scalar_vars&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">continue</span>
-
+    
+        
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## ** Re-ordering sort **</span>
+    
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_order&#39;</span><span class="p">]:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Re-ordering </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">sort_ind</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]][</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">]],</span> <span class="n">ascending</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;ascending&#39;</span><span class="p">])</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]][</span><span class="n">sort_ind</span><span class="p">]</span>
+    
+    
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## ** Add additional custom variables **</span>
+    
+    <span class="c1">## DeltaR</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;deltaR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deltaR</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
+    <span class="n">jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
+    <span class="n">muonsv_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+    
+    
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Pick kinematic variables out</span>
     <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
@@ -640,7 +680,8 @@
         <span class="n">data_kin</span>       <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_kin</span><span class="o">.</span><span class="n">x</span>     <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">kinematic_vars</span><span class="p">)</span>
         <span class="n">data_kin</span><span class="o">.</span><span class="n">ids</span>   <span class="o">=</span> <span class="n">kinematic_vars</span>
-
+    
+    
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## Graph representation</span>
     <span class="n">data_graph</span> <span class="o">=</span> <span class="kc">None</span>
