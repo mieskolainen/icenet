@@ -31,7 +31,8 @@ then
     export GRID_NODES=${SGE_TASK_LAST}
 fi
 
-TUNE_RESULT_DIR="./tmp/ray/GRID_ID_${GRID_ID}"
+CWD=`pwd`
+TUNE_RESULT_DIR="$CWD/tmp/ray/GRID_ID_${GRID_ID}"
 
 echo "GRID_ID=${GRID_ID}"
 echo "GRID_NODES=${GRID_NODES}"

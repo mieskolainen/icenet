@@ -1,5 +1,7 @@
 # DQCD tune0.yml
 #
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD
+
 rootname: 'dqcd'
 rngseed: 123456                      # Fixed seed for training data mixing
 
@@ -20,8 +22,32 @@ mva_param: &MVA_INPUT_PARAM
     Muon: 6
     muonSV: 6
     SV:   6
-    cpf:  0 #20
-    npf:  0 #10
+    cpf:  0     # 20
+    npf:  0     # 10
+  
+  jagged_order:
+
+    - order_0: 
+      name: 'muonSV'
+      var:   'dlen'    
+      ascending: False  # True ~ smallest first
+    
+    - order_1: 
+      name: 'SV'
+      var:  'dlen'   
+      ascending: False
+
+    - order_2: 
+      name: 'Jet'
+      var:  'pt'   
+      ascending: False
+    
+    - order_3: 
+      name: 'Muon'
+      var:  'pt'   
+      ascending: False
+    
+    # add more here ..
   
   frac: 0.6                          # Train vs validate/test split fraction
   

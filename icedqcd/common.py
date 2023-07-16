@@ -147,7 +147,19 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
         return fmask_np
 
 
-def splitfactor(x, y, w, ids, args, skip_graph=False):
+def deltaR(x, eta1, eta2, phi1, phi2):
+    """
+    dR distance
+    """
+    deltaEta = x[eta1] - x[eta2]
+    
+    deltaPhi = x[phi1] - x[phi2]
+    deltaPhi = (deltaPhi + np.pi) % (2 * np.pi) - np.pi
+
+    return np.sqrt(deltaEta**2 + deltaPhi**2)
+
+
+def splitfactor(x, y, w, ids, args, skip_graph=True):
     """
     Transform data into different datatypes.
     
@@ -158,13 +170,15 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
     Returns:
         dictionary with different data representations
     """
-    data   = io.IceXYW(x=x, y=y, w=w, ids=ids)
+    data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
     if data.y is not None:
         data.y = ak.to_numpy(data.y)
     
     if data.w is not None:
         data.w = ak.to_numpy(data.w)
+
+    # -------------------------------------------------------------------------
     
     ### Pick active variables out
     scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=globals()[args['inputvar_scalar']])
@@ -180,6 +194,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
     npf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_NPF_VARS)
     pf_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_PF_VARS)
 
+
+    # -------------------------------------------------------------------------
     ### ** Remove conditional variables **
     if args['use_conditional'] == False:
         for var in globals()['MODEL_VARS']:
@@ -188,7 +204,30 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
                 print(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars')
             except:
                 continue
-
+    
+        
+    # -------------------------------------------------------------------------
+    ## ** Re-ordering sort **
+    
+    for d in args['jagged_order']:
+        
+        print(__name__ + f'.splitfactor: Re-ordering {d}')
+        
+        sort_ind = ak.argsort(data.x[d['name']][d['var']], ascending=d['ascending'])
+        data.x[d['name']] = data.x[d['name']][sort_ind]
+    
+    
+    # -------------------------------------------------------------------------
+    ## ** Add additional custom variables **
+    
+    ## DeltaR
+    data.x['muonSV', 'deltaR'] = deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
+    jagged_vars.append('muonSV_deltaR')
+    muonsv_vars.append('muonSV_deltaR')
+    
+    print(data.x['muonSV'].fields)
+    
+    
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
@@ -200,7 +239,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=False):
         data_kin       = copy.deepcopy(data)
         data_kin.x     = aux.ak2numpy(x=data.x, fields=kinematic_vars)
         data_kin.ids   = kinematic_vars
-
+    
+    
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None

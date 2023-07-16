@@ -119,9 +119,11 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
     
     # Variable set is reduced
     if np.sum(mask) != len(ids):
-        cprint(__name__ + f'.red: Using the reduced set of variables: {np.array(ids)[mask].tolist()}', 'red')
+        
+        reduced = set(np.array(ids).tolist()) - set(np.array(ids)[mask].tolist())
+        cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
     else:
-        cprint(__name__ + f'.red: Using the full set of input variables', 'red')
+        cprint(__name__ + f'.red: Using a full set of input variables', 'red')
     
     if   mode == 'X':
         return X[:, mask]

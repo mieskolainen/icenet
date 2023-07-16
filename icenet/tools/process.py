@@ -323,15 +323,9 @@ def read_data(args, func_loader, runmode):
                 X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
                         
                 if i > 0:
-                    if   isinstance(X_, np.ndarray):
-                        X = np.concatenate((X, X_), axis=0)
-                        Y = np.concatenate((Y, Y_), axis=0)
-                        W = np.concatenate((W, W_), axis=0)
-                        
-                    elif isinstance(X_, ak.Array):
-                        X = np.concatenate((X, X_), axis=0)
-                        Y = np.concatenate((Y, Y_), axis=0)
-                        W = np.concatenate((W, W_), axis=0)
+                    X = np.concatenate((X, X_), axis=0) # akward will cast numpy automatically
+                    Y = np.concatenate((Y, Y_), axis=0)
+                    W = np.concatenate((W, W_), axis=0)
                 else:
                     X,Y,W = copy.deepcopy(X_),copy.deepcopy(Y_),copy.deepcopy(W_)
                     
@@ -344,33 +338,61 @@ def read_data(args, func_loader, runmode):
 
 def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     """
-    Read/write (MVA)-processed data
+    Read/write (MVA) data
     """
 
-    cache_filename = f'{args["datadir"]}/data_processed_{runmode}_{args["__hash__"]}.pkl'
+    # --------------------------------------------------------------------
+    # 'PREDATA': Raw input reading and processing
+    
+    cache_filename = f'{args["datadir"]}/data_{runmode}_{args["__hash__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         # Read it
         predata = read_data(args=args, func_loader=func_loader, runmode=runmode) 
         
+        with open(cache_filename, 'wb') as handle:
+            cprint(__name__ + f'.read_data_processed: Saving <DATA> to a file: "{cache_filename}"', 'yellow')
+            
+            # Disable garbage collector for speed
+            gc.disable()
+            pickle.dump(predata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            gc.enable()
+    else:
+        with open(cache_filename, 'rb') as handle:
+            cprint(__name__ + f'.read_data_processed: Loading <DATA> from a file: "{cache_filename}"', 'yellow')
+            
+            # Disable garbage collector for speed
+            gc.disable()
+            predata = pickle.load(handle)
+            gc.enable()
+    
+    # --------------------------------------------------------------------
+    # 'DATA': Further processing step
+    
+    cache_filename = f'{args["datadir"]}/processed_data_{runmode}_{args["__hash__"]}.pkl'
+    
+    if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
+
         # Process it
         data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data_processed: Saving to a file: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Saving <PROCESSED DATA> to a file: "{cache_filename}"', 'yellow')
+            
             # Disable garbage collector for speed
             gc.disable()
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             gc.enable()
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data_processed: Loading from a file: "{cache_filename}"', 'yellow')
+            cprint(__name__ + f'.read_data_processed: Loading <PROCESSED DATA> from a file: "{cache_filename}"', 'yellow')
+            
             # Disable garbage collector for speed
             gc.disable()
             data = pickle.load(handle)
             gc.enable()
-
+    
     return data
 
 
