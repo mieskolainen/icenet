@@ -124,7 +124,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -446,6 +445,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
@@ -510,42 +510,43 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1"> | </span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s1">20s</span><span class="si">}</span><span class="s1"> | </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s1">6.0f</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">frac</span><span class="si">:</span><span class="s1">6.4f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="print_variables"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.prints.print_variables">[docs]</a><span class="k">def</span> <span class="nf">print_variables</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="print_variables"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.prints.print_variables">[docs]</a><span class="k">def</span> <span class="nf">print_variables</span><span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Print in a format (# samples x # dimensions)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">weighted_avg_and_std</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the weighted average and standard deviation</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">average</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-        <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">((</span><span class="n">values</span> <span class="o">-</span> <span class="n">average</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">average</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.print_variables:&#39;</span><span class="p">)</span>
 
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Excluding values: </span><span class="si">{</span><span class="n">exclude_vals</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[i] variable_name : [min, med, max] [#unique]   mean +- std   [[isinf, isnan]]&#39;</span><span class="p">)</span>
     
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="n">x</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">exclude_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Exclude special values    </span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exclude_vals</span><span class="p">)):</span>
+                    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">exclude_vals</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
             <span class="n">minval</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">med</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">maxval</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="n">mean</span><span class="p">,</span><span class="n">std</span>   <span class="o">=</span> <span class="n">weighted_avg_and_std</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+            <span class="n">mean</span><span class="p">,</span><span class="n">std</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">weighted_avg_and_std</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
             <span class="n">num_unique</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
             <span class="n">isinf</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
             <span class="n">isnan</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{: &gt;3}</span><span class="s1">]</span><span class="si">{: &gt;35}</span><span class="s1"> : [</span><span class="si">{: &gt;10.2E}</span><span class="s1">, </span><span class="si">{: &gt;10.2E}</span><span class="s1">, </span><span class="si">{: &gt;10.2E}</span><span class="s1">] </span><span class="si">{: &gt;10}</span><span class="s1"> </span><span class="se">\t</span><span class="s1"> </span><span class="si">{: &gt;10.2E}</span><span class="s1"> +- </span><span class="si">{: &gt;10.2E}</span><span class="s1">   [[</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">]]&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{: &gt;3}</span><span class="s1">]</span><span class="si">{: &gt;35}</span><span class="s1"> : [</span><span class="si">{: &gt;10.2E}</span><span class="s1">, </span><span class="si">{: &gt;10.2E}</span><span class="s1">, </span><span class="si">{: &gt;10.2E}</span><span class="s1">] </span><span class="si">{: &gt;10}</span><span class="s1"> </span><span class="se">\t</span><span class="s1"> (</span><span class="si">{: &gt;10.2E}</span><span class="s1"> +- </span><span class="si">{: &gt;10.2E}</span><span class="s1">)   [[</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">]]&#39;</span>
                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">minval</span><span class="p">,</span> <span class="n">med</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">num_unique</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">isinf</span><span class="p">,</span> <span class="n">isnan</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s1"> &gt;3</span><span class="si">}</span><span class="s1">] Cannot print variable &quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; (probably non-scalar type)&#39;</span><span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 </pre></div>

@@ -124,7 +124,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -447,6 +446,23 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">special</span>
+
+
+<div class="viewcode-block" id="phi_phasewrap"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.phi_phasewrap">[docs]</a><span class="k">def</span> <span class="nf">phi_phasewrap</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used for example when phi is deltaphi = phi1 - phi2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">phi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
+
+
+<div class="viewcode-block" id="deltaR"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.deltaR">[docs]</a><span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    dR distance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">deltaEta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">eta1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">eta2</span><span class="p">]</span>
+    <span class="n">deltaPhi</span> <span class="o">=</span> <span class="n">phi_phasewrap</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">phi1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">phi2</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deltaEta</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaPhi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="fox_wolfram_boost_inv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.fox_wolfram_boost_inv">[docs]</a><span class="k">def</span> <span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>

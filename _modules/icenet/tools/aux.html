@@ -124,7 +124,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -461,6 +460,15 @@
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 
+
+<div class="viewcode-block" id="weighted_avg_and_std"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.weighted_avg_and_std">[docs]</a><span class="k">def</span> <span class="nf">weighted_avg_and_std</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the weighted average and standard deviation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">average</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">((</span><span class="n">values</span> <span class="o">-</span> <span class="n">average</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">average</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="replace_param"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.replace_param">[docs]</a><span class="k">def</span> <span class="nf">replace_param</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">raytune</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

@@ -124,7 +124,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -460,6 +459,7 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
+<span class="kn">from</span> <span class="nn">icenet.algo</span> <span class="kn">import</span> <span class="n">analytic</span>
 
 <span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">graphio</span>
 
@@ -587,19 +587,6 @@
         
         <span class="k">return</span> <span class="n">fmask_np</span></div>
 
-
-<div class="viewcode-block" id="deltaR"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.deltaR">[docs]</a><span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    dR distance</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">deltaEta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">eta1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">eta2</span><span class="p">]</span>
-    
-    <span class="n">deltaPhi</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">phi1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">phi2</span><span class="p">]</span>
-    <span class="n">deltaPhi</span> <span class="o">=</span> <span class="p">(</span><span class="n">deltaPhi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deltaEta</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaPhi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform data into different datatypes.</span>
@@ -646,7 +633,7 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">continue</span>
     
-        
+    
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## ** Re-ordering sort **</span>
     
@@ -662,7 +649,7 @@
     <span class="c1">## ** Add additional custom variables **</span>
     
     <span class="c1">## DeltaR</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;deltaR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deltaR</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;deltaR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
     <span class="n">jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
     <span class="n">muonsv_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
     

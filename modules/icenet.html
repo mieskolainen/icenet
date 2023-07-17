@@ -128,7 +128,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="icedqcd.html">icedqcd</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.deltaR"><code class="docutils literal notranslate"><span class="pre">deltaR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
@@ -457,6 +456,12 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.algo.analytic.deltaR">
+<span class="sig-name descname"><span class="pre">deltaR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#deltaR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.deltaR" title="Permalink to this definition">¶</a></dt>
+<dd><p>dR distance</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.algo.analytic.fox_wolfram_boost_inv">
 <span class="sig-name descname"><span class="pre">fox_wolfram_boost_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#fox_wolfram_boost_inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.fox_wolfram_boost_inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>arxiv.org/pdf/1508.03144, (Formula 5.6)</p>
@@ -525,6 +530,12 @@
 <dd class="field-even"><p>distance measure</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.algo.analytic.phi_phasewrap">
+<span class="sig-name descname"><span class="pre">phi_phasewrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/algo/analytic.html#phi_phasewrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.algo.analytic.phi_phasewrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for example when phi is deltaphi = phi1 - phi2</p>
 </dd></dl>
 
 </section>
@@ -2855,6 +2866,12 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.weighted_avg_and_std">
+<span class="sig-name descname"><span class="pre">weighted_avg_and_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#weighted_avg_and_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.weighted_avg_and_std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the weighted average and standard deviation</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.x2ind">
 <span class="sig-name descname"><span class="pre">x2ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#x2ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.x2ind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return histogram bin indices for data in x, which needs to be an array [].
@@ -3925,7 +3942,7 @@ other dimensions evaluated at zero=(0,0,…0) (thus z-normalized with 0-mean is 
 <dt class="sig sig-object py" id="icenet.tools.plots.plot_reweight_result">
 <span class="sig-name descname"><span class="pre">plot_reweight_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrange</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/plots.html#plot_reweight_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.plots.plot_reweight_result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Here plot pure event counts
-so we see that also integrated class fractions are equalized (or not)!</p>
+so we see that also integrated class fractions are equalized (or not) after weighting!</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4031,7 +4048,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.prints.print_variables">
-<span class="sig-name descname"><span class="pre">print_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.prints.print_variables" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">print_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_vals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/prints.html#print_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.prints.print_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print in a format (# samples x # dimensions)</p>
 </dd></dl>
 
@@ -4141,7 +4158,7 @@ ax:  figure axis</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.read_data">
 <span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load input data</p>
+<dd><p>Load input data and return full dataset arrays</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4155,7 +4172,7 @@ ax:  figure axis</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.read_data_processed">
 <span class="sig-name descname"><span class="pre">read_data_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data_processed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read/write (MVA) data</p>
+<dd><p>Read/write (MVA) data and return full processed dataset</p>
 </dd></dl>
 
 <dl class="py function">
