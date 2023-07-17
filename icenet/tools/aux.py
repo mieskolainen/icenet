@@ -21,6 +21,15 @@ from scipy import stats
 import scipy.special as special
 
 
+def weighted_avg_and_std(values, weights):
+    """
+    Return the weighted average and standard deviation
+    """
+    average  = np.average(values, weights=weights)
+    variance = np.average((values - average)**2, weights=weights)
+    
+    return average, np.sqrt(variance)
+
 def replace_param(default, raytune):
     """
     Parameter replacement

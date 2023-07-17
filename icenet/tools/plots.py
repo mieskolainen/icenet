@@ -715,9 +715,9 @@ def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
 
 def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5):
     """ Here plot pure event counts
-        so we see that also integrated class fractions are equalized (or not)!
+        so we see that also integrated class fractions are equalized (or not) after weighting!
     """
-
+    
     fig,ax      = plt.subplots(1, 2, figsize = (10, 4.25))
     num_classes = len(np.unique(y))
     legends     = []
@@ -729,6 +729,8 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
         counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
 
+        mu, std = aux.weighted_avg_and_std(values=X[y == c], weights=weights[y == c])
+        
         # Linear and log scale scale (left and right plots)
         for i in range(2):
 
@@ -737,15 +739,15 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
             plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='--')
             
             if i == 0:
-                legends.append(f'$\\mathcal{{C}} = {c}$')
-                legends.append(f'$\\mathcal{{C}} = {c}$ (weighted)')
-    
+                legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
+                legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
+
     ax[0].set_ylabel('weighted counts')
     ax[0].set_xlabel(xlabel)
     ax[1].set_xlabel(xlabel)
     
     ax[1].set_title(title, fontsize=10)
-    ax[1].legend(legends)
+    ax[1].legend(legends, fontsize=8)
     ax[1].set_yscale('log')
     plt.tight_layout()
     

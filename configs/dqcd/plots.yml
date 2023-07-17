@@ -33,7 +33,7 @@ FILTER: &FILTER
 
 
 basic:
-  active: false
+  active: True
   nbins:  70
   exclude_vals: [null, -999.0]
 

@@ -8,6 +8,23 @@ import numba
 from scipy import special as special
 
 
+def phi_phasewrap(phi):
+    """
+    Used for example when phi is deltaphi = phi1 - phi2
+    """
+    return (phi + np.pi) % (2 * np.pi) - np.pi
+
+
+def deltaR(x, eta1, eta2, phi1, phi2):
+    """
+    dR distance
+    """
+    deltaEta = x[eta1] - x[eta2]
+    deltaPhi = phi_phasewrap(x[phi1] - x[phi2])
+    
+    return np.sqrt(deltaEta**2 + deltaPhi**2)
+
+
 def fox_wolfram_boost_inv(p, L=10):
     """
     arxiv.org/pdf/1508.03144, (Formula 5.6)

@@ -261,13 +261,15 @@ def generic_flow(rootname, func_loader, func_factor):
         
     if runmode == 'train':
         
-        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
+        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids,
+                               exclude_vals=[args['imputation_param']['fill_value']])
         make_plots(data=data['trn'], args=args)
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
     if runmode == 'eval':
 
-        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
+        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids,
+                               exclude_vals=[args['imputation_param']['fill_value']])
         evaluate_models(data=data['tst'], info=data['info'], args=args)
 
     return args, runmode
@@ -275,7 +277,7 @@ def generic_flow(rootname, func_loader, func_factor):
 
 def read_data(args, func_loader, runmode):
     """
-    Load input data
+    Load input data and return full dataset arrays
     
     Args:
         args:         main argument dictionary
@@ -311,11 +313,15 @@ def read_data(args, func_loader, runmode):
                 pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-
+        
+        if runmode == "genesis": # Genesis mode does not need this
+            return
+        
         num_files = io.count_files_in_dir(cache_directory)
         cprint(__name__ + f'.read_data: Loading from path: "{cache_directory}"', 'yellow')
         
         for i in tqdm(range(num_files)):
+            
             with open(f'{cache_directory}/output_{i}.pkl', 'rb') as handle:
                 X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
                         
@@ -324,19 +330,17 @@ def read_data(args, func_loader, runmode):
                     Y = np.concatenate((Y, Y_), axis=0)
                     W = np.concatenate((W, W_), axis=0)
                 else:
-                    X,Y,W = copy.deepcopy(X_),copy.deepcopy(Y_),copy.deepcopy(W_)
+                    X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
                 
                 gc.collect() # important!
                 
-                #cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
-                #pprint(genesis_args)
     
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
 def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     """
-    Read/write (MVA) data
+    Read/write (MVA) data and return full processed dataset
     """
 
     # --------------------------------------------------------------------
@@ -373,14 +377,14 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
         # Process it
-        data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
+        processed_data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
             cprint(__name__ + f'.read_data_processed: Saving <PROCESSED DATA> to a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(processed_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             gc.enable()
     else:
         with open(cache_filename, 'rb') as handle:
@@ -388,10 +392,10 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             
             # Disable garbage collector for speed
             gc.disable()
-            data = pickle.load(handle)
+            processed_data = pickle.load(handle)
             gc.enable()
     
-    return data
+    return processed_data
 
 
 def process_data(args, predata, func_factor, mvavars, runmode):

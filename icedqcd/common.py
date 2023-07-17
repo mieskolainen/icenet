@@ -19,6 +19,7 @@ from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import prints
 from icenet.tools import iceroot
+from icenet.algo import analytic
 
 from icedqcd import graphio
 
@@ -146,19 +147,6 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
         
         return fmask_np
 
-
-def deltaR(x, eta1, eta2, phi1, phi2):
-    """
-    dR distance
-    """
-    deltaEta = x[eta1] - x[eta2]
-    
-    deltaPhi = x[phi1] - x[phi2]
-    deltaPhi = (deltaPhi + np.pi) % (2 * np.pi) - np.pi
-
-    return np.sqrt(deltaEta**2 + deltaPhi**2)
-
-
 def splitfactor(x, y, w, ids, args, skip_graph=True):
     """
     Transform data into different datatypes.
@@ -205,7 +193,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
             except:
                 continue
     
-        
+    
     # -------------------------------------------------------------------------
     ## ** Re-ordering sort **
     
@@ -221,7 +209,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     ## ** Add additional custom variables **
     
     ## DeltaR
-    data.x['muonSV', 'deltaR'] = deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
+    data.x['muonSV', 'deltaR'] = analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
     jagged_vars.append('muonSV_deltaR')
     muonsv_vars.append('muonSV_deltaR')
     

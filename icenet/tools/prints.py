@@ -5,6 +5,7 @@
 
 import numpy as np
 import psutil
+from typing import List
 
 from termcolor import colored, cprint
 from icenet.tools import aux
@@ -69,41 +70,42 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, ids, W=None):
+def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
     """ Print in a format (# samples x # dimensions)
     """
-
-    def weighted_avg_and_std(values, weights):
-        """
-        Return the weighted average and standard deviation
-        """
-        average  = np.average(values, weights=weights)
-        variance = np.average((values - average)**2, weights=weights)
-        
-        return average, np.sqrt(variance)
 
     print('\n')
     print(__name__ + f'.print_variables:')
 
+    print(f'Excluding values: {exclude_vals}')
     print('[i] variable_name : [min, med, max] [#unique]   mean +- std   [[isinf, isnan]]')
     
     for j in range(len(ids)):
         try:
-            x = np.array(X[:,j], dtype=np.float)
+            x   = np.array(X[:,j], dtype=np.float).squeeze()
+            ind = np.ones(len(x), dtype=bool)
+            
+            if exclude_vals is not None:
+                # Exclude special values    
+                for k in range(len(exclude_vals)):
+                    ind = np.logical_and(ind, (x != exclude_vals[k]))
+
+            x = x[ind]
 
             minval     = np.min(x)
             med        = np.median(x)
             maxval     = np.max(x)
-            mean,std   = weighted_avg_and_std(values=x, weights=W)
+            mean,std   = aux.weighted_avg_and_std(values=x, weights=W[ind])
             num_unique = len(np.unique(x))
 
             isinf  = np.any(np.isinf(x))
             isnan  = np.any(np.isnan(x))
 
-            print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t {: >10.2E} +- {: >10.2E}   [[{}, {}]]'
+            print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t ({: >10.2E} +- {: >10.2E})   [[{}, {}]]'
                 .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
-        except:
+        except Exception as e:
+            print(e)
             print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')
-    
+
     print('\n')
 
