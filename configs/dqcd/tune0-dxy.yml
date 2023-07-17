@@ -29,12 +29,12 @@ mva_param: &MVA_INPUT_PARAM
 
     - order_0: 
       name: 'muonSV'
-      var:  'dlen'
+      var:  'dxy'
       ascending: False  # True ~ smallest first, False ~ largest first
     
     - order_1: 
       name: 'SV'
-      var:  'dlen'
+      var:  'dxy'
       ascending: False
     
     - order_2: 
