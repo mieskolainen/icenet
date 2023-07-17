@@ -287,9 +287,6 @@ def read_data(args, func_loader, runmode):
         return aux.split_start_end(range(N), chunks)
 
     cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash__"]}')
-    
-    # Disable garbage collector for speed
-    gc.disable()
 
     if args['__use_cache__'] == False or (not os.path.exists(f'{cache_directory}/output_0.pkl')):
 
@@ -323,16 +320,17 @@ def read_data(args, func_loader, runmode):
                 X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
                         
                 if i > 0:
-                    X = np.concatenate((X, X_), axis=0) # akward will cast numpy automatically
+                    X = np.concatenate((X, X_), axis=0) # awkward will cast numpy automatically
                     Y = np.concatenate((Y, Y_), axis=0)
                     W = np.concatenate((W, W_), axis=0)
                 else:
                     X,Y,W = copy.deepcopy(X_),copy.deepcopy(Y_),copy.deepcopy(W_)
-                    
+                
+                gc.collect() # important!
+                
                 #cprint(__name__ + f'.read_data: Saved data was generated with arguments:', 'yellow')
                 #pprint(genesis_args)
-    gc.enable()
-        
+    
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
@@ -366,7 +364,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.disable()
             predata = pickle.load(handle)
             gc.enable()
-    
+
     # --------------------------------------------------------------------
     # 'DATA': Further processing step
     

@@ -18,10 +18,10 @@ mva_param: &MVA_INPUT_PARAM
   # The variable names below need to match the nanoAOD variable names, e.g. 'Jet_*'
   jagged_maxdim:
     
-    Jet:  6
-    Muon: 6
-    muonSV: 6
-    SV:   6
+    Jet:  8
+    Muon: 8
+    muonSV: 8
+    SV:   8
     cpf:  0     # 20
     npf:  0     # 10
   
@@ -29,12 +29,12 @@ mva_param: &MVA_INPUT_PARAM
 
     - order_0: 
       name: 'muonSV'
-      var:   'dlen'    
-      ascending: False  # True ~ smallest first
+      var:   'dxy'    
+      ascending: False  # True ~ smallest first, False ~ largest first
     
     - order_1: 
       name: 'SV'
-      var:  'dlen'   
+      var:  'dxy'   
       ascending: False
 
     - order_2: 
