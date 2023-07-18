@@ -20,7 +20,6 @@ from sklearn import metrics
 from scipy import stats
 import scipy.special as special
 
-
 def weighted_avg_and_std(values, weights):
     """
     Return the weighted average and standard deviation
@@ -1004,7 +1003,7 @@ class Metric:
                     print(__name__ + f'.Metric: bootstrap fail with num_classes < 2 (check the input per class statistics)')
                     continue
                 # ------------------
-
+                
                 ww  = weights[ind] if weights is not None else None
                 out = compute_metrics(num_classes=num_classes, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
                 

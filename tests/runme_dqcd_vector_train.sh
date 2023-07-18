@@ -20,9 +20,8 @@ MAX=1000000 # Tune according to maximum CPU RAM available
 
 for CONFIG in "tune0-dxy.yml" "tune0-dlen.yml" "tune0-chi2.yml"
 do
-
     rm $ICEPATH/output/dqcd/processed_data_*
-    
+
     python analysis/dqcd.py --runmode genesis  --maxevents $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH
     python analysis/dqcd.py --runmode train    --maxevents $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
     python analysis/dqcd.py --runmode eval     --maxevents $MAX --inputmap mc_map__vector_all.yml --modeltag vector_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

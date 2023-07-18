@@ -161,10 +161,10 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
     if data.y is not None:
-        data.y = ak.to_numpy(data.y)
+        data.y = ak.to_numpy(data.y).astype(np.float32)
     
     if data.w is not None:
-        data.w = ak.to_numpy(data.w)
+        data.w = ak.to_numpy(data.w).astype(np.float32)
 
     # -------------------------------------------------------------------------
     
