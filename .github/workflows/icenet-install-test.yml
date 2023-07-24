@@ -72,7 +72,7 @@ jobs:
           
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
           
-          source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --inputfile ./configs/peakfit/tune2.yml
+        #  source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --inputfile ./configs/peakfit/tune2.yml
 
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh

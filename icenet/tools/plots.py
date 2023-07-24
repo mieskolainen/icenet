@@ -936,7 +936,8 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
                         index = np.argmin(np.abs(tpr - eff))
                         if fpr[index] >= xmin and fpr[index] <= 1.0:
                             plt.plot(fpr[index], tpr[index], '.', color=f'C{i}')
-                            plt.text(x=fpr[index], y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+                            t = plt.text(x=fpr[index], y=tpr[index], s=f'{thresholds[index]:0.4g}', fontsize=5, color=f'C{i}')
+                            t.set_bbox(dict(facecolor='white', alpha=0.5, linewidth=0))
                 except: # If failed
                     True
         
@@ -959,7 +960,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
 
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-
+        
         if k == 1: # Log-Linear
 
             plt.ylim(0.0, 1.0)
@@ -1101,7 +1102,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
                 raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {matrix}')
 
             Z = Z.reshape(PX.shape)
-
+            
             # --------------------------------------
             ## Plot
 

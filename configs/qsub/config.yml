@@ -15,7 +15,7 @@ jobs:
     q: 'hep.q'       # 'hep.q' for CPU only, 'gpu.q@lxcgpu*' for Nvidia-V100 (faster) or 'gpu.q@lxbgpu*' for Nvidia-P100
     pe: null         # GPU nodes have all cores available, 'hep.pe 8' for 8-core job
     S: null          # special shell, e.g. '/usr/bin/python'
-    m: 'a'           # email (a for aborted, e for execute, one can combine e.g. ea)
+    m: 'a'           # email (b for begins, a for aborted, e for ends, one can combine e.g. bea)
   
   dqcd_vector_train:
 
