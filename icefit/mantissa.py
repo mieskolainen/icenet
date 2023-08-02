@@ -22,7 +22,7 @@ def round_sig(x: float, sig: int=2):
     """
     return round(x, sig-int(math.floor(math.log10(abs(x))))-1)
 
-@numba.njit
+@numba.njit(parallel=True)
 def reduce_mantissa_digits(x: np.ndarray, mandigits: int=3):
     """
     Args:
@@ -31,18 +31,18 @@ def reduce_mantissa_digits(x: np.ndarray, mandigits: int=3):
     """
     y = np.zeros(len(x))
     
-    for i in range(len(x)):
+    for i in numba.prange(len(x)):
         
         # Get mantissa and exponent
         m,e  = math.frexp(x[i])
-        # Round mantissa
+        # Round mantissa, frexp returns 0.5 <= |m| < 1.0
         m    = np.round(m, mandigits)
         # Map back
         y[i] = math.ldexp(m,e)
 
     return y
 
-@numba.njit
+@numba.njit(parallel=True)
 def reduce_mantissa_bits(x: np.ndarray, manbits: int=10):
     """
     Args:
@@ -51,7 +51,7 @@ def reduce_mantissa_bits(x: np.ndarray, manbits: int=10):
     """
     y = np.zeros(len(x))
     
-    for i in range(len(x)):
+    for i in numba.prange(len(x)):
         
         # Get mantissa and exponent
         m,e  = math.frexp(x[i])
@@ -71,21 +71,29 @@ def bits2digits(bits: int) -> float:
 def plots(x, xhat, b, error_bins=300, dquant_label='none', mantissa_title='None', label='default', savepath='output'):
 
     # Error distribution plots
-    fig,ax = plt.subplots(1,2, figsize=(8,12))
+    fig,ax = plt.subplots(1,2, figsize=(10,14))
+    fig.tight_layout(pad=1.0) # Give space
 
+    error     = x - xhat
+    rel_error = (x - xhat) / x
+    
     plt.sca(ax[0])
-    plt.hist( x - xhat, error_bins)
-    plt.xlabel('$x - \\tilde{x}$')
-    plt.title(f'Error (dequantize: {dquant_label})')
+    plt.hist(error, error_bins, histtype='step', label=f'$\\mu = {np.mean(error):0.1e}, \\sigma = {np.std(error):0.1e}$')
+    plt.xlabel('Error: $x - \\tilde{x}$')
+    plt.legend(fontsize=9)
+    plt.title(f'{label}')
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0)) # scientific notation
     
     plt.sca(ax[1])
-    plt.hist( (x - xhat) / x, error_bins)
-    plt.xlabel('$(x - \\tilde{x}) / x$')
-    plt.title(f'Relative error (dequantize: {dquant_label})')
+    plt.hist(rel_error, error_bins, histtype='step', label=f'$\\mu = {np.mean(rel_error):0.1e}, \\sigma = {np.std(rel_error):0.1e}$')
+    plt.xlabel('Relative error: $(x - \\tilde{x}) / x$')
+    plt.legend(fontsize=9)
+    plt.title(f'')
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
     
     for i in range(len(ax)):
         ax[i].set_aspect(1.0/ax[i].get_data_ratio(), adjustable='box')
-        
+    
     filename = f'{savepath}/hist_error_{label}.pdf'
     print(f'Saving figure to: {filename}')
     fig.savefig(filename, bbox_inches='tight')
@@ -98,25 +106,47 @@ def plots(x, xhat, b, error_bins=300, dquant_label='none', mantissa_title='None'
     for i in range(len(b)):
         
         bins  = b[i]
+        cbins = (bins[1:] + bins[:-1])/2
         
+        ## Original
         plt.sca(ax[0][i])
-        n_x, _, _ = plt.hist(x, bins=bins)
+        n_x, _, _ = plt.hist(x, bins=bins, histtype='step')
+        
+        plt.errorbar(cbins, y=n_x, yerr=np.sqrt(n_x), color='black', linestyle='')
         plt.title('IEEE 64b floats')
-        plt.ylabel(f'counts / {bins[1]-bins[0]:0.2g} bin')
+        plt.ylabel(f'$N$  (counts / {bins[1]-bins[0]:0.2g})')
         plt.xlabel('$x$')
         
+        ## Approximate
         plt.sca(ax[1][i])
-        n_xhat, _, _ = plt.hist(xhat, bins=bins)
+        n_xhat, _, _ = plt.hist(xhat, bins=bins, histtype='step')
+        
+        plt.errorbar(cbins, y=n_xhat, yerr=np.sqrt(n_xhat), color='black', linestyle='')
         plt.title(mantissa_title)
-        plt.ylabel(f'counts / {bins[1]-bins[0]:0.2g} bin')
+        plt.ylabel(f'$\\tilde{{N}}$  (counts / {bins[1]-bins[0]:0.2g})')
         plt.xlabel('$\\tilde{x}$')
         
+        
+        ## Ratios
         plt.sca(ax[2][i])
-        plt.plot(bins, np.ones(len(bins)), color=(0.75,0.75,0.75)) # Horizontal line
-        plt.step((bins[1:] + bins[:-1])/2, n_xhat / np.clip(n_x, a_min=1E-15, a_max=None))
-        plt.title('Ratio')
-        plt.ylabel('$\\tilde{N} \, / \, N$')
-    
+        
+        non_zero     = (n_x != 0)
+        poisson_err  = np.zeros(len(n_x))
+        relative_err = np.zeros(len(n_x))
+        
+        poisson_err[non_zero]  = 100 * 1 / np.sqrt(n_x[non_zero])
+        relative_err[non_zero] = 100 * (n_xhat[non_zero] - n_x[non_zero]) / n_x[non_zero]
+        
+        plt.hist(x=cbins, bins=bins, weights= poisson_err, color='red', alpha=0.25, label='$1 \, / \, \sqrt{N}$')
+        plt.hist(x=cbins, bins=bins, weights=-poisson_err, color='red', alpha=0.25)
+        
+        plt.hist(x=cbins, bins=bins, weights=relative_err, label='$(\\tilde{N}\, - \, N) \, / \, N$', alpha=0.6)
+        
+        plt.plot(bins, np.zeros(len(bins)), color=(0.5,0.5,0.5)) # Horizontal line
+        plt.title('Ratios $\\times \, 100$')
+        plt.ylabel('[%]')
+        plt.legend(fontsize=8, loc='upper left')
+        
     for i in range(len(ax)):
         for j in range(len(ax[i])):
             ax[i][j].set_aspect(1.0/ax[i][j].get_data_ratio(), adjustable='box')
@@ -135,14 +165,14 @@ def main():
         os.makedirs(savepath)
     
     # Number of samples
-    N = int(1e6)
+    N = int(1e5)
 
     ## Histogram binning
     min_edge = 1.8
     max_edge = 2.2
 
     b = [np.linspace(min_edge, max_edge, 501),
-         np.linspace(min_edge, max_edge, 51),
+         np.linspace(min_edge, max_edge, 101),
          np.linspace(min_edge, max_edge, 26),
          np.linspace(min_edge, max_edge, 11)]
 
@@ -154,8 +184,8 @@ def main():
         
         if input == 'flat':
             # Generate flat distribution
-            xmin = 0
-            xmax = 5
+            xmin = 1
+            xmax = 3
             x = xmin + (xmax - xmin) * np.random.rand(N)
 
         elif input == 'resonance':    
@@ -168,22 +198,22 @@ def main():
         for manbits in [10, 15, 20]:
             
             mandigits = bits2digits(manbits)
-            mantissa_title = f'{manbits} bits ~ mantissa {mandigits:0.1f} digits'
+            mantissa_title = f'mantissa {manbits} bits ~ {mandigits:0.1f} digits'
 
             print(mantissa_title)
             
             # Reduce floating point precision
             print(f'Reducing precision to {manbits} mantissa bits')
             xhat_raw = reduce_mantissa_bits(x, manbits)
-
-            # Post-Dequantization diagnostics
-            for dquant in ['none']:
+            
+            # Post-Dequantization
+            for dquant in ['none', 'relG']:
                 
                 if dquant == 'none':
                     xhat = copy.deepcopy(xhat_raw)
                 
                 # Add relative Gaussian dithering noise to dequantize
-                if dquant == 'gaussian':
+                if dquant == 'relG':
                     xhat = xhat_raw * (1 + d_sigma * np.random.randn(N))
                 
                 # Make plots
@@ -191,8 +221,5 @@ def main():
                     mantissa_title=mantissa_title, label=f'MC-input_{input}_manbits_{manbits}_dquant_{dquant}', \
                     savepath=savepath)
 
-
 if __name__ == "__main__":
     main()
-
-    
