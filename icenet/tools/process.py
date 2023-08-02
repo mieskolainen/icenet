@@ -338,7 +338,7 @@ def read_data(args, func_loader, runmode):
                 gc.collect() # important!
                 
     
-    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
+        return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
 def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
