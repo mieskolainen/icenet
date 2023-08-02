@@ -177,8 +177,10 @@ def main():
          np.linspace(min_edge, max_edge, 11)]
 
     # Dequantize strength parameter
+    # (fixed for comparison, but should be scaled down when the number of bits
+    # increases ~ i.e. according to the digit precision)
     d_sigma = 1e-3
-
+    
     # MC simulation input
     for input in ['flat', 'resonance']:
         
