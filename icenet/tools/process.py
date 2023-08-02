@@ -312,6 +312,9 @@ def read_data(args, func_loader, runmode):
             with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
                 pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        return predata
+        
     else:
         
         if runmode == "genesis": # Genesis mode does not need this

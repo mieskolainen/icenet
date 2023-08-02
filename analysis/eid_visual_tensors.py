@@ -52,11 +52,10 @@ def main() :
     
     runmode        = 'genesis'
     args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    predata        = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
     
     runmode        = 'train'
-    predata        = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
     args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
-    
     data           = process.process_data(args=args, predata=predata, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
     
     # Pick them out
