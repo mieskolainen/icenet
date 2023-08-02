@@ -80,14 +80,14 @@ def plots(x, xhat, b, error_bins=300, dquant_label='none', mantissa_title='None'
     plt.sca(ax[0])
     plt.hist(error, error_bins, histtype='step', label=f'$\\mu = {np.mean(error):0.1e}, \\sigma = {np.std(error):0.1e}$')
     plt.xlabel('Error: $x - \\tilde{x}$')
-    plt.legend(fontsize=9)
+    plt.legend(fontsize=9, loc='upper right')
     plt.title(f'{label}')
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0)) # scientific notation
     
     plt.sca(ax[1])
     plt.hist(rel_error, error_bins, histtype='step', label=f'$\\mu = {np.mean(rel_error):0.1e}, \\sigma = {np.std(rel_error):0.1e}$')
     plt.xlabel('Relative error: $(x - \\tilde{x}) / x$')
-    plt.legend(fontsize=9)
+    plt.legend(fontsize=9, loc='upper right')
     plt.title(f'')
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
     
@@ -205,7 +205,7 @@ def main():
             # Reduce floating point precision
             print(f'Reducing precision to {manbits} mantissa bits')
             xhat_raw = reduce_mantissa_bits(x, manbits)
-            
+
             # Post-Dequantization
             for dquant in ['none', 'relG']:
                 
