@@ -184,6 +184,8 @@ def main():
         
         if input == 'flat':
             # Generate flat distribution
+            # Larger range --> more "steps" in the error distribution
+            # (dynamic precision of floats)
             xmin = 1
             xmax = 3
             x = xmin + (xmax - xmin) * np.random.rand(N)
