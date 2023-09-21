@@ -245,8 +245,8 @@ def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=No
         w = 1.0
 
     y = F.one_hot(y, num_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
-
+    loss = -y * torch.pow(1 - torch.exp(log_phat), gamma) * log_phat * w
+    
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
