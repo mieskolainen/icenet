@@ -369,7 +369,6 @@ def main(basepath):
     # -------------------------
     ## Scenario O. (contact topology)
     
-    """
     # Parameter combinations list (add more here)
     param = [{'m': '2', 'ctau': '1',  'xiO': '1', 'xiL': '1', 'file_id': [1]},
              {'m': '2', 'ctau': '50', 'xiO': '1', 'xiL': '1', 'file_id': [1]}]
@@ -413,7 +412,6 @@ def main(basepath):
         
         scenario = f"scenarioB2_mpi_{p['mpi']}_mA_{p['mA']}_ctau_{p['ctau']}"
         wrapper_sequential_topology(p=p, scenario=scenario, basepath=basepath, dark_meson_name="eta3", dark_meson_PDG=PDG_ETA3)
-    """
     
     # -------------------------
     ## Scenario C. (contact topology)
