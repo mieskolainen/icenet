@@ -19,8 +19,7 @@ iminuit==2.24.0
 mystic==0.4.1
 
 # RAY
-ray==2.7.1
-pyarrow==13.0.0
+ray[data,train,tune,serve,rllib]==2.7.1
 hyperopt==0.2.7
 optuna==3.3.0
 bayesian-optimization==1.4.3
