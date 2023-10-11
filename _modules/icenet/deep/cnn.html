@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -448,7 +448,9 @@
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 
-<div class="viewcode-block" id="CNN_MAXO"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO">[docs]</a><span class="k">class</span> <span class="nc">CNN_MAXO</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_MAXO">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO">[docs]</a>
+<span class="k">class</span> <span class="nc">CNN_MAXO</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dual (simultaneous) input network [image tensors x global vectors]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -519,7 +521,9 @@
 
         <span class="c1"># -------------------------------------------</span>
 
-<div class="viewcode-block" id="CNN_MAXO.maxout"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.maxout">[docs]</a>    <span class="k">def</span> <span class="nf">maxout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">layer_list</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN_MAXO.maxout">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.maxout">[docs]</a>
+    <span class="k">def</span> <span class="nf">maxout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">layer_list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; MAXOUT layer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">max_output</span> <span class="o">=</span> <span class="n">layer_list</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">x</span><span class="p">)</span>
@@ -528,7 +532,10 @@
         <span class="k">return</span> <span class="n">max_output</span></div>
 
 
-<div class="viewcode-block" id="CNN_MAXO.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CNN_MAXO.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Input data dictionary with members</span>
 <span class="sd">            &#39;x&#39; : as image tensor</span>
@@ -562,15 +569,22 @@
 
         <span class="k">return</span> <span class="n">x</span></div>
 
+
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN_MAXO.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="CNN_MAXO.softpredict">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN_MAXO.softpredict">[docs]</a>
+    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
         <span class="c1">#if self.training:</span>
         <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
         <span class="c1">#else:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CNN"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN">[docs]</a><span class="k">class</span> <span class="nc">CNN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CNN">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN">[docs]</a>
+<span class="k">class</span> <span class="nc">CNN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="c1"># Note: MaxPool(Relu(x)) = Relu(MaxPool(x))</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">nchannels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">dropout_cnn</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dropout_mlp</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">mlp_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
@@ -621,7 +635,9 @@
             <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">),</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="CNN.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="CNN.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="c1">#print(f&#39;\nINPUT: {x.shape}&#39;)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -634,12 +650,17 @@
         <span class="c1">#print(f&#39;\nAFTER BLOCK 2: {x.shape}&#39;)</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
+
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="CNN.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="CNN.softpredict">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.cnn.CNN.softpredict">[docs]</a>
+    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
         <span class="c1">#if self.training:</span>
         <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
         <span class="c1">#else:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

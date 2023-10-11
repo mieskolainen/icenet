@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -454,7 +454,9 @@
 <span class="kn">from</span> <span class="nn">torch.nn.modules.module</span> <span class="kn">import</span> <span class="n">Module</span>
 
 
-<div class="viewcode-block" id="GCN_layer"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer">[docs]</a><span class="k">class</span> <span class="nc">GCN_layer</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="GCN_layer">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer">[docs]</a>
+<span class="k">class</span> <span class="nc">GCN_layer</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Graph Convolution Network Layer</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -472,7 +474,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">register_param</span><span class="p">(</span><span class="s1">&#39;bias&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_param</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GCN_layer.reset_param"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer.reset_param">[docs]</a>    <span class="k">def</span> <span class="nf">reset_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GCN_layer.reset_param">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer.reset_param">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; 1 / sqrt(N) normalization &quot;&quot;&quot;</span>
 
         <span class="n">std</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -480,7 +484,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="n">std</span><span class="p">,</span> <span class="n">std</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GCN_layer.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adj_matrix</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GCN_layer.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN_layer.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adj_matrix</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Forward operator &quot;&quot;&quot;</span>
 
         <span class="n">support</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>        <span class="c1"># matrix multiplication</span>
@@ -489,12 +496,16 @@
             <span class="k">return</span> <span class="n">output</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">output</span></div>
+
         
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D_in</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D_out</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span></div>
 
 
-<div class="viewcode-block" id="GCN"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN">[docs]</a><span class="k">class</span> <span class="nc">GCN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GCN">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN">[docs]</a>
+<span class="k">class</span> <span class="nc">GCN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Graph Convolution Network</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -516,7 +527,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">gc2</span> <span class="o">=</span> <span class="n">GCN_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
 
-<div class="viewcode-block" id="GCN.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adj_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="GCN.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.gcnn.GCN.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">adj_matrix</span><span class="p">):</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gc1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">adj_matrix</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">)</span>
@@ -525,7 +538,9 @@
         <span class="c1">#if self.training:</span>
         <span class="c1">#    return F.log_softmax(y, dim=-1) # Numerically more stable</span>
         <span class="c1">#else:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -470,7 +470,9 @@
 <span class="kn">from</span> <span class="nn">configs.dqcd.filter</span> <span class="kn">import</span> <span class="o">*</span>
 
 
-<div class="viewcode-block" id="load_root_file"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.load_root_file">[docs]</a><span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_root_file">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.load_root_file">[docs]</a>
+<span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Loads the root files</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -548,7 +550,10 @@
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">:</span><span class="n">W</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span> <span class="n">INFO</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="process_root"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a><span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="process_root">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a>
+<span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply selections</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -587,7 +592,10 @@
         
         <span class="k">return</span> <span class="n">fmask_np</span></div>
 
-<div class="viewcode-block" id="splitfactor"><a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a><span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="splitfactor">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a>
+<span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform data into different datatypes.</span>
 <span class="sd">    </span>
@@ -754,6 +762,7 @@
     <span class="c1"># --------------------------------------------------------------------------</span>
     
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
+
 </pre></div>
 
            </div>

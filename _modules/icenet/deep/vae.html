@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -463,7 +463,9 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Encoder">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Encoder">[docs]</a>
+<span class="k">class</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -472,10 +474,16 @@
         <span class="c1"># modules  = [self.linear2, torch.sigmoid()]</span>
         <span class="c1">#self.linear2 = nn.Sequential(*modules)</span>
 
-<div class="viewcode-block" id="Encoder.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Encoder.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="Encoder.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Encoder.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+</div>
 
-<div class="viewcode-block" id="VariationalEncoder"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder">[docs]</a><span class="k">class</span> <span class="nc">VariationalEncoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VariationalEncoder">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder">[docs]</a>
+<span class="k">class</span> <span class="nc">VariationalEncoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">VariationalEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
@@ -485,7 +493,9 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span>          <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VariationalEncoder.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="VariationalEncoder.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">q</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="c1"># &quot;Re-parametrization&quot; trick to allow gradients backpropagate</span>
@@ -498,25 +508,38 @@
 
         <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span></div>
 
-<div class="viewcode-block" id="VariationalEncoder.to_device"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VariationalEncoder.to_device">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VariationalEncoder.to_device">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Needed for cuda</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">loc</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">loc</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="c1"># Get sampling on GPU &quot;hack&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">.</span><span class="n">scale</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Decoder"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Decoder">[docs]</a><span class="k">class</span> <span class="nc">Decoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Decoder">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Decoder">[docs]</a>
+<span class="k">class</span> <span class="nc">Decoder</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Decoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="n">latent_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Decoder.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Decoder.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="Decoder.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.Decoder.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="VAE"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE">[docs]</a><span class="k">class</span> <span class="nc">VAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE">[docs]</a>
+<span class="k">class</span> <span class="nc">VAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span>
             <span class="n">encoder_bn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoder_act</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">encoder_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">decoder_bn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">decoder_act</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">decoder_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">reco_prob</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span> <span class="n">kl_prob</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="o">=</span><span class="s1">&#39;KL_RECO&#39;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -534,18 +557,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">Decoder</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">decoder_act</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="n">decoder_bn</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">encoder_dropout</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">D</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VAE.to_device"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<div class="viewcode-block" id="VAE.to_device">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.to_device">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="VAE.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">z</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">xhat</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">xhat</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">std</span></div>
 
-<div class="viewcode-block" id="VAE.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE.softpredict">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.softpredict">[docs]</a>
+    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">xhat</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         
         <span class="c1"># &quot;Test statistic&quot;</span>
@@ -562,13 +593,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.softpredict: Unknown &lt;anomaly_score&gt; = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">anomaly_score</span><span class="si">}</span><span class="s1"> selected.&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VAE.loss_kl_reco"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.loss_kl_reco">[docs]</a>    <span class="k">def</span> <span class="nf">loss_kl_reco</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xhat</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE.loss_kl_reco">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.loss_kl_reco">[docs]</a>
+    <span class="k">def</span> <span class="nf">loss_kl_reco</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xhat</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        min ( E_q[log q(z|x) - log p(z)] - E_q log p(x|z) )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">beta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">kl_div</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_pxz</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">xhat</span><span class="o">=</span><span class="n">xhat</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VAE.log_pxz"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.log_pxz">[docs]</a>    <span class="k">def</span> <span class="nf">log_pxz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xhat</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE.log_pxz">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.log_pxz">[docs]</a>
+    <span class="k">def</span> <span class="nf">log_pxz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xhat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reconstruction loss</span>
 <span class="sd">        </span>
@@ -596,7 +633,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.log_pxz: Unknown reco_prob = &lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reco_prob</span><span class="si">}</span><span class="s1">&gt; chosen.&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VAE.kl_div"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.kl_div">[docs]</a>    <span class="k">def</span> <span class="nf">kl_div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VAE.kl_div">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.vae.VAE.kl_div">[docs]</a>
+    <span class="k">def</span> <span class="nf">kl_div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        KL divergence (always positive), taken against a diagonal multivariate normal here</span>
 <span class="sd">        </span>
@@ -621,7 +661,9 @@
         <span class="c1"># Take torch.sum(self.kl_i, dim=-1) to obtain the MC estimate</span>
         <span class="c1">#kl = (0.5 * (std.pow(2) + mu.pow(2) - 1 - logvar).sum(dim=-1)</span>
 
-        <span class="k">return</span> <span class="n">kl</span></div></div>
+        <span class="k">return</span> <span class="n">kl</span></div>
+</div>
+
 </pre></div>
 
            </div>

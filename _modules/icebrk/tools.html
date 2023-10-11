@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -465,7 +465,9 @@
 <span class="kn">import</span> <span class="nn">icebrk.features</span> <span class="k">as</span> <span class="nn">features</span>
 
 
-<div class="viewcode-block" id="construct_kinematics"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_kinematics">[docs]</a><span class="k">def</span> <span class="nf">construct_kinematics</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
+<div class="viewcode-block" id="construct_kinematics">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_kinematics">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_kinematics</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct kinematics of the triplet @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -496,7 +498,10 @@
                                <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;BToKEE_fit_k_pt&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;BToKEE_fit_k_pt&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">K_MASS</span><span class="p">})</span></div>
 
 
-<div class="viewcode-block" id="construct_MC_tree"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_tree">[docs]</a><span class="k">def</span> <span class="nf">construct_MC_tree</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_MC_tree">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_tree">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_MC_tree</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct decay tree branches @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -520,7 +525,10 @@
     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;_BToKEE_k_genMotherPdgId&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;GenPart_pdgId&#39;</span><span class="p">][</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;_BToKEE_k_genMotherIdx&#39;</span><span class="p">]</span> <span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="construct_MC_truth"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_truth">[docs]</a><span class="k">def</span> <span class="nf">construct_MC_truth</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_MC_truth">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_truth">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_MC_truth</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Set MC signal truth into a new branch @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -545,7 +553,10 @@
     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;_BToKEE_is_signal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">VALUE1</span> <span class="o">&amp;</span> <span class="n">VALUE2</span> <span class="o">&amp;</span> <span class="n">VALUE3</span> <span class="o">&amp;</span> <span class="n">VALUE4</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="deltar_3"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.deltar_3">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+
+<div class="viewcode-block" id="deltar_3">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.deltar_3">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">deltar_3</span><span class="p">(</span><span class="n">eta1</span><span class="p">,</span><span class="n">eta2</span><span class="p">,</span><span class="n">eta3</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">,</span><span class="n">phi3</span><span class="p">,</span> <span class="n">dR_MATCH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Match vector triplets by their DeltaR.</span>
 
@@ -572,7 +583,10 @@
     <span class="k">return</span> <span class="n">qsets</span></div>
 
 
-<div class="viewcode-block" id="find_connected_triplets"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.find_connected_triplets">[docs]</a><span class="k">def</span> <span class="nf">find_connected_triplets</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">dR_MATCH</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">):</span>
+
+<div class="viewcode-block" id="find_connected_triplets">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.find_connected_triplets">[docs]</a>
+<span class="k">def</span> <span class="nf">find_connected_triplets</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">dR_MATCH</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Find all qsets of triplets connected together via DeltaR matching of their vectors.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -593,7 +607,10 @@
     <span class="k">return</span> <span class="n">aux</span><span class="o">.</span><span class="n">merge_connected</span><span class="p">(</span><span class="n">qsets</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_first_indices"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.get_first_indices">[docs]</a><span class="k">def</span> <span class="nf">get_first_indices</span><span class="p">(</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_first_indices">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.get_first_indices">[docs]</a>
+<span class="k">def</span> <span class="nf">get_first_indices</span><span class="p">(</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;  Get the first evt_index from a list of list, where sublists</span>
 <span class="sd">    encode e.g. different reconstruction chains of triplets.</span>
 
@@ -610,7 +627,10 @@
     <span class="k">return</span> <span class="n">ind</span></div>
 
 
-<div class="viewcode-block" id="construct_input_vec"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_input_vec">[docs]</a><span class="k">def</span> <span class="nf">construct_input_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_input_vec">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_input_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_input_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct MVA input vector x.</span>
 
 <span class="sd">    feature 1 for all triplets 0 &lt;possible zeros&gt; .. 0 0,</span>
@@ -651,7 +671,10 @@
     <span class="k">return</span> <span class="n">x</span></div>
 
 
-<div class="viewcode-block" id="index_of_first_signal"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_first_signal">[docs]</a><span class="k">def</span> <span class="nf">index_of_first_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="index_of_first_signal">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_first_signal">[docs]</a>
+<span class="k">def</span> <span class="nf">index_of_first_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Check the evt_index of the last signal triplet (MC truth).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -671,7 +694,10 @@
     <span class="k">return</span> <span class="n">first_index</span></div>
 
 
-<div class="viewcode-block" id="index_of_last_signal"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_last_signal">[docs]</a><span class="k">def</span> <span class="nf">index_of_last_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="index_of_last_signal">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_last_signal">[docs]</a>
+<span class="k">def</span> <span class="nf">index_of_last_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Check the evt_index of the last signal triplet (MC truth).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -690,7 +716,10 @@
     <span class="k">return</span> <span class="n">last_index</span></div>
 
 
-<div class="viewcode-block" id="construct_output_vec"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_output_vec">[docs]</a><span class="k">def</span> <span class="nf">construct_output_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_output_vec">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_output_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_output_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct MVA output vector y (binary with multilabel).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -709,7 +738,10 @@
     <span class="k">return</span> <span class="n">y</span></div>
 
 
-<div class="viewcode-block" id="print_MC_event"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.print_MC_event">[docs]</a><span class="k">def</span> <span class="nf">print_MC_event</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">PRINTMAX</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">):</span>
+
+<div class="viewcode-block" id="print_MC_event">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.print_MC_event">[docs]</a>
+<span class="k">def</span> <span class="nf">print_MC_event</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">PRINTMAX</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Print MC event info.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -749,6 +781,7 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">PRINTMAX</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
                 <span class="k">return</span></div>
+
 </pre></div>
 
            </div>

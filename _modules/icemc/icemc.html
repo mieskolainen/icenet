@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -460,14 +460,19 @@
 <span class="c1"># ----------------------------------------------</span>
 
 
-<div class="viewcode-block" id="U"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.U">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+<div class="viewcode-block" id="U">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.U">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">U</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Uniform random numbers from [a,b]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span></div>
 
+
 <span class="c1">#@numba.njit</span>
-<div class="viewcode-block" id="randpow"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randpow">[docs]</a><span class="k">def</span> <span class="nf">randpow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
+<div class="viewcode-block" id="randpow">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randpow">[docs]</a>
+<span class="k">def</span> <span class="nf">randpow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Power-law random numbers for pdf(x) ~ x^{g-1} for a &lt;= x &lt;= b</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
@@ -476,14 +481,20 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">ag</span> <span class="o">+</span> <span class="p">(</span><span class="n">bg</span> <span class="o">-</span> <span class="n">ag</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">g</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="randexp"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randexp">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+
+<div class="viewcode-block" id="randexp">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.randexp">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">randexp</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Exponential random variables pdf(x) ~ 1/u exp(-x/u) with mean u</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">u</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="twobody"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.twobody">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+
+<div class="viewcode-block" id="twobody">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.twobody">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">twobody</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2-body isotropic decay routine according to dLIPS_2 flat phase space</span>
@@ -529,19 +540,28 @@
     <span class="k">return</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span></div>
 
 
-<div class="viewcode-block" id="Gamma2tau"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.Gamma2tau">[docs]</a><span class="k">def</span> <span class="nf">Gamma2tau</span><span class="p">(</span><span class="n">Gamma</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Gamma2tau">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.Gamma2tau">[docs]</a>
+<span class="k">def</span> <span class="nf">Gamma2tau</span><span class="p">(</span><span class="n">Gamma</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Width to mean lifetime</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">hbar_const</span> <span class="o">/</span> <span class="n">Gamma</span></div>
 
 
-<div class="viewcode-block" id="tau2Gamma"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.tau2Gamma">[docs]</a><span class="k">def</span> <span class="nf">tau2Gamma</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+
+<div class="viewcode-block" id="tau2Gamma">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.tau2Gamma">[docs]</a>
+<span class="k">def</span> <span class="nf">tau2Gamma</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Mean lifetime to width</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">hbar_const</span> <span class="o">/</span> <span class="n">tau</span></div>
 
 
-<div class="viewcode-block" id="resonance_generator"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.resonance_generator">[docs]</a><span class="k">def</span> <span class="nf">resonance_generator</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+
+<div class="viewcode-block" id="resonance_generator">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.resonance_generator">[docs]</a>
+<span class="k">def</span> <span class="nf">resonance_generator</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulation massive resonance with (M, ctau) parameters,</span>
 <span class="sd">    having production kinematics (pt2, rapidity, phi ~ flat)</span>
@@ -588,7 +608,10 @@
     <span class="k">return</span> <span class="n">p4_arr</span><span class="p">,</span> <span class="n">x4_arr</span></div>
 
 
-<div class="viewcode-block" id="outer_sim_loop"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop">[docs]</a><span class="k">def</span> <span class="nf">outer_sim_loop</span><span class="p">(</span><span class="n">M_values</span><span class="p">,</span> <span class="n">ctau_values</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+
+<div class="viewcode-block" id="outer_sim_loop">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop">[docs]</a>
+<span class="k">def</span> <span class="nf">outer_sim_loop</span><span class="p">(</span><span class="n">M_values</span><span class="p">,</span> <span class="n">ctau_values</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">rap</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulation helper (wrapper) loop</span>
 
@@ -610,7 +633,10 @@
     <span class="k">return</span> <span class="n">Z</span></div>
 
 
-<div class="viewcode-block" id="outer_sim_loop_2"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop_2">[docs]</a><span class="k">def</span> <span class="nf">outer_sim_loop_2</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2_values</span><span class="p">,</span> <span class="n">rap_values</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+
+<div class="viewcode-block" id="outer_sim_loop_2">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.outer_sim_loop_2">[docs]</a>
+<span class="k">def</span> <span class="nf">outer_sim_loop_2</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">ctau</span><span class="p">,</span> <span class="n">pt2_values</span><span class="p">,</span> <span class="n">rap_values</span><span class="p">,</span> <span class="n">acc_func</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulation helper (wrapper) loop</span>
 
@@ -632,7 +658,10 @@
     <span class="k">return</span> <span class="n">Z</span></div>
 
 
-<div class="viewcode-block" id="spherical_acceptance"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.spherical_acceptance">[docs]</a><span class="k">def</span> <span class="nf">spherical_acceptance</span><span class="p">(</span><span class="n">p4</span><span class="p">,</span> <span class="n">x4</span><span class="p">):</span>
+
+<div class="viewcode-block" id="spherical_acceptance">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.spherical_acceptance">[docs]</a>
+<span class="k">def</span> <span class="nf">spherical_acceptance</span><span class="p">(</span><span class="n">p4</span><span class="p">,</span> <span class="n">x4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Spherical (geometric) acceptance function.</span>
 <span class="sd">    </span>
@@ -651,14 +680,20 @@
 
     <span class="k">return</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">R</span></div>
 
-<div class="viewcode-block" id="set_aspect_true_equal"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.set_aspect_true_equal">[docs]</a><span class="k">def</span> <span class="nf">set_aspect_true_equal</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_aspect_true_equal">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.set_aspect_true_equal">[docs]</a>
+<span class="k">def</span> <span class="nf">set_aspect_true_equal</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set plot square sized.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()))</span>
     <span class="k">return</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="annotate_heatmap"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.annotate_heatmap">[docs]</a><span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+
+<div class="viewcode-block" id="annotate_heatmap">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.annotate_heatmap">[docs]</a>
+<span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Annotate heatmap with text (broken function, fix TBD).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -676,7 +711,10 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="produce_acceptance_sim"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.produce_acceptance_sim">[docs]</a><span class="k">def</span> <span class="nf">produce_acceptance_sim</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+
+<div class="viewcode-block" id="produce_acceptance_sim">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.produce_acceptance_sim">[docs]</a>
+<span class="k">def</span> <span class="nf">produce_acceptance_sim</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulate fiducial (geometric) acceptance</span>
 <span class="sd">    by looping over (M,ctau) or (Pt,Rap) pairs, others being fixed.</span>
@@ -795,9 +833,12 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;./figs/LLP_geometric_acc_Rap_Pt_R=</span><span class="si">{</span><span class="n">R</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
+
 <span class="c1">#produce_acceptance_sim()</span>
 
-<div class="viewcode-block" id="test_toy_pt_spectrum"><a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.test_toy_pt_spectrum">[docs]</a><span class="k">def</span> <span class="nf">test_toy_pt_spectrum</span><span class="p">():</span>
+<div class="viewcode-block" id="test_toy_pt_spectrum">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.test_toy_pt_spectrum">[docs]</a>
+<span class="k">def</span> <span class="nf">test_toy_pt_spectrum</span><span class="p">():</span>
 
     <span class="n">pt2</span> <span class="o">=</span> <span class="n">randpow</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">13000</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">g</span><span class="o">=-</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
     <span class="n">pt</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pt2</span><span class="p">)</span>
@@ -818,6 +859,7 @@
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$p_T$ (GeV)&#39;</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
 
 </pre></div>
 

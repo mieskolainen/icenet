@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -468,7 +468,9 @@
 <span class="kn">import</span> <span class="nn">icebrk.fasthistos</span> <span class="k">as</span> <span class="nn">fasthistos</span>
 
 
-<div class="viewcode-block" id="hdf5_write_handles"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_write_handles">[docs]</a><span class="k">def</span> <span class="nf">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">N_weights</span><span class="p">,</span> <span class="n">rwmode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="hdf5_write_handles">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_write_handles">[docs]</a>
+<span class="k">def</span> <span class="nf">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">N_weights</span><span class="p">,</span> <span class="n">rwmode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create HDF5 file handles.</span>
 
 <span class="sd">    Args:</span>
@@ -499,7 +501,10 @@
     <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">datasets</span></div>
 
 
-<div class="viewcode-block" id="hdf5_append"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_append">[docs]</a><span class="k">def</span> <span class="nf">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+
+<div class="viewcode-block" id="hdf5_append">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_append">[docs]</a>
+<span class="k">def</span> <span class="nf">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Append chunk of data to HDF5 file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -525,6 +530,7 @@
     <span class="n">row_count</span> <span class="o">+=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">row_count</span></div>
+
 
 
 
@@ -555,7 +561,9 @@
 <span class="sd">...</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
-<div class="viewcode-block" id="poweranalysis"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.poweranalysis">[docs]</a><span class="k">def</span> <span class="nf">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">reco</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="p">):</span>
+<div class="viewcode-block" id="poweranalysis">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.poweranalysis">[docs]</a>
+<span class="k">def</span> <span class="nf">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">reco</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Powerset analysis of the event</span>
 <span class="sd">    N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</span>
 <span class="sd">    </span>
@@ -649,7 +657,10 @@
     <span class="k">return</span> <span class="n">w</span></div>
 
 
-<div class="viewcode-block" id="hist_flush"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hist_flush">[docs]</a><span class="k">def</span> <span class="nf">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span><span class="p">,</span> <span class="n">h5datasets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="hist_flush">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hist_flush">[docs]</a>
+<span class="k">def</span> <span class="nf">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span><span class="p">,</span> <span class="n">h5datasets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Histogram observables with accumulation of previous histograms, and flush buffer arrays</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -693,11 +704,14 @@
     <span class="c1"># Weight</span>
     <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">reco</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
     
     <span class="c1"># ====================================================================</span>
 
 
-<div class="viewcode-block" id="initarrays"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.initarrays">[docs]</a><span class="k">def</span> <span class="nf">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="p">):</span>
+<div class="viewcode-block" id="initarrays">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.initarrays">[docs]</a>
+<span class="k">def</span> <span class="nf">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Init histogramming arrays and objects</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -746,7 +760,10 @@
     <span class="k">return</span> <span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span></div>
 
 
-<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
+
+<div class="viewcode-block" id="process">
+<a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a>
+<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
     <span class="n">EVTGROUPSIZE</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">CHUNKBUFFER</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BMAT</span><span class="o">=</span><span class="p">[],</span> <span class="n">WNORM</span><span class="o">=</span><span class="p">[],</span> <span class="n">SUPERSETS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">hd5dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputXY</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">outputP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Main event processing loop</span>
@@ -1058,6 +1075,7 @@
     <span class="p">}</span>
     
     <span class="k">return</span> <span class="n">output</span></div>
+
 </pre></div>
 
            </div>

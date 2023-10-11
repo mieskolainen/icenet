@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -461,7 +461,9 @@
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
 
-<div class="viewcode-block" id="percentile_per_dim"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.percentile_per_dim">[docs]</a><span class="k">def</span> <span class="nf">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="percentile_per_dim">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.percentile_per_dim">[docs]</a>
+<span class="k">def</span> <span class="nf">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute percentile per column dimension</span>
 
@@ -477,10 +479,16 @@
         <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span> <span class="n">q</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="prc_CI"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.prc_CI">[docs]</a><span class="k">def</span> <span class="nf">prc_CI</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+
+<div class="viewcode-block" id="prc_CI">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.prc_CI">[docs]</a>
+<span class="k">def</span> <span class="nf">prc_CI</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))])</span></div>
 
-<div class="viewcode-block" id="hacine_entropy_bin"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_entropy_bin">[docs]</a><span class="k">def</span> <span class="nf">hacine_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+
+<div class="viewcode-block" id="hacine_entropy_bin">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_entropy_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">hacine_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hacine-Gharbi et al. </span>
 <span class="sd">    “Low Bias Histogram-Based Estimation of Mutual Information for Feature Selection.”</span>
@@ -499,7 +507,10 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="hacine_joint_entropy_bin"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_joint_entropy_bin">[docs]</a><span class="k">def</span> <span class="nf">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+
+<div class="viewcode-block" id="hacine_joint_entropy_bin">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_joint_entropy_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hacine-Gharbi, Ravier. &quot;A Binning Formula of Bi-histogram</span>
 <span class="sd">    for Joint Entropy Estimation Using Mean Square Error Minimization.”</span>
@@ -520,7 +531,10 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="freedman_diaconis_bin"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.freedman_diaconis_bin">[docs]</a><span class="k">def</span> <span class="nf">freedman_diaconis_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+
+<div class="viewcode-block" id="freedman_diaconis_bin">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.freedman_diaconis_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">freedman_diaconis_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Freedman-Diaconis rule for a 1D-histogram bin width</span>
 <span class="sd">    </span>
@@ -545,7 +559,10 @@
         <span class="k">return</span> <span class="n">bw2bins</span><span class="p">(</span><span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="scott_bin"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.scott_bin">[docs]</a><span class="k">def</span> <span class="nf">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+
+<div class="viewcode-block" id="scott_bin">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.scott_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Scott rule for a 2D-histogram bin widths</span>
@@ -569,7 +586,10 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">bw2bins</span><span class="p">(</span><span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="bw2bins"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.bw2bins">[docs]</a><span class="k">def</span> <span class="nf">bw2bins</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+
+<div class="viewcode-block" id="bw2bins">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.bw2bins">[docs]</a>
+<span class="k">def</span> <span class="nf">bw2bins</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a histogram binwidth to number of bins</span>
 <span class="sd">    </span>
@@ -588,7 +608,10 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="H_score"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.H_score">[docs]</a><span class="k">def</span> <span class="nf">H_score</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
+
+<div class="viewcode-block" id="H_score">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.H_score">[docs]</a>
+<span class="k">def</span> <span class="nf">H_score</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shannon Entropy (log_e ~ nats units)</span>
 
@@ -603,7 +626,10 @@
 
     <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p_</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="I_score"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.I_score">[docs]</a><span class="k">def</span> <span class="nf">I_score</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
+
+<div class="viewcode-block" id="I_score">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.I_score">[docs]</a>
+<span class="k">def</span> <span class="nf">I_score</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mutual information score (log_e ~ nats units)</span>
 
@@ -646,7 +672,10 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;I_score: Error with unknown normalization parameter &quot;</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="mutual_information"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.mutual_information">[docs]</a><span class="k">def</span> <span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bins_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="mutual_information">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.mutual_information">[docs]</a>
+<span class="k">def</span> <span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bins_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
     <span class="n">automethod</span><span class="o">=</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="n">minbins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">maxbins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">outlier</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -731,7 +760,10 @@
 
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span></div>
 
-<div class="viewcode-block" id="distance_corr"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.distance_corr">[docs]</a><span class="k">def</span> <span class="nf">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+
+<div class="viewcode-block" id="distance_corr">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.distance_corr">[docs]</a>
+<span class="k">def</span> <span class="nf">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance correlation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -776,7 +808,10 @@
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span></div>
 
 
-<div class="viewcode-block" id="pearson_corr"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.pearson_corr">[docs]</a><span class="k">def</span> <span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+
+<div class="viewcode-block" id="pearson_corr">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.pearson_corr">[docs]</a>
+<span class="k">def</span> <span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pearson Correlation Coefficient</span>
 <span class="sd">    https://en.wikipedia.org/wiki/Pearson_correlation_coefficient</span>
@@ -850,7 +885,10 @@
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">r_CI</span><span class="p">,</span> <span class="n">prob</span></div>
 
 
-<div class="viewcode-block" id="gaussian_mutual_information"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.gaussian_mutual_information">[docs]</a><span class="k">def</span> <span class="nf">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">):</span>
+
+<div class="viewcode-block" id="gaussian_mutual_information">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.gaussian_mutual_information">[docs]</a>
+<span class="k">def</span> <span class="nf">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analytical 2D-Gaussian mutual information</span>
 <span class="sd">    using a correlation coefficient rho.</span>
@@ -863,7 +901,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="optbins"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins">[docs]</a><span class="k">def</span> <span class="nf">optbins</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
+
+<div class="viewcode-block" id="optbins">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins">[docs]</a>
+<span class="k">def</span> <span class="nf">optbins</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    NOTE: Weak performance, study the method !!</span>
@@ -905,7 +946,10 @@
         <span class="k">return</span> <span class="n">optM</span></div>
 
 
-<div class="viewcode-block" id="optbins2d"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins2d">[docs]</a><span class="k">def</span> <span class="nf">optbins2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
+
+<div class="viewcode-block" id="optbins2d">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins2d">[docs]</a>
+<span class="k">def</span> <span class="nf">optbins2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    </span>
 <span class="sd">    NOTE: Weak performance, study the method !!</span>
@@ -956,7 +1000,10 @@
         <span class="k">return</span> <span class="n">optM</span></div>
 
 
-<div class="viewcode-block" id="test_gaussian"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_gaussian">[docs]</a><span class="k">def</span> <span class="nf">test_gaussian</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_gaussian">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_gaussian">[docs]</a>
+<span class="k">def</span> <span class="nf">test_gaussian</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    #Gaussian unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1012,7 +1059,10 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test_constant"><a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_constant">[docs]</a><span class="k">def</span> <span class="nf">test_constant</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_constant">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_constant">[docs]</a>
+<span class="k">def</span> <span class="nf">test_constant</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constant input unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1046,6 +1096,7 @@
 
     <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
+
 
 
 <span class="c1">#if __name__ == &quot;__main__&quot;:</span>

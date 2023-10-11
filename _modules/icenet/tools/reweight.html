@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -453,7 +453,9 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
 
-<div class="viewcode-block" id="compute_ND_reweights"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.compute_ND_reweights">[docs]</a><span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_ND_reweights">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.compute_ND_reweights">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute N-dim reweighting coefficients (currently 2D or 1D supported)</span>
 <span class="sd">    </span>
@@ -659,7 +661,10 @@
         <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">pdf</span></div>
 
 
-<div class="viewcode-block" id="reweightcoeff1D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff1D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">equal_frac</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">)</span> <span class="p">:</span>
+
+<div class="viewcode-block" id="reweightcoeff1D">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff1D">[docs]</a>
+<span class="k">def</span> <span class="nf">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">equal_frac</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -690,7 +695,10 @@
     <span class="k">return</span> <span class="n">weights_doublet</span></div>
 
 
-<div class="viewcode-block" id="reweightcoeff2D"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff2D">[docs]</a><span class="k">def</span> <span class="nf">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+
+<div class="viewcode-block" id="reweightcoeff2D">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.reweightcoeff2D">[docs]</a>
+<span class="k">def</span> <span class="nf">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">max_reg</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Compute N-class density reweighting coefficients.</span>
 <span class="sd">    </span>
 <span class="sd">    Operates in full 2D without any factorization.</span>
@@ -726,7 +734,10 @@
     <span class="k">return</span> <span class="n">weights_doublet</span></div>
 
 
-<div class="viewcode-block" id="pdf_1D_hist"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.pdf_1D_hist">[docs]</a><span class="k">def</span> <span class="nf">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">binedges</span><span class="p">):</span>
+
+<div class="viewcode-block" id="pdf_1D_hist">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.pdf_1D_hist">[docs]</a>
+<span class="k">def</span> <span class="nf">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">binedges</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Compute re-weighting 1D pdfs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -739,7 +750,10 @@
     <span class="k">return</span> <span class="n">pdf</span></div>
 
 
-<div class="viewcode-block" id="pdf_2D_hist"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.pdf_2D_hist">[docs]</a><span class="k">def</span> <span class="nf">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">binedges_A</span><span class="p">,</span> <span class="n">binedges_B</span><span class="p">):</span>
+
+<div class="viewcode-block" id="pdf_2D_hist">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.pdf_2D_hist">[docs]</a>
+<span class="k">def</span> <span class="nf">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="p">,</span> <span class="n">X_B</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">binedges_A</span><span class="p">,</span> <span class="n">binedges_B</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute re-weighting 2D pdfs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -752,7 +766,10 @@
     <span class="k">return</span> <span class="n">pdf</span></div>
 
 
-<div class="viewcode-block" id="balanceweights"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.balanceweights">[docs]</a><span class="k">def</span> <span class="nf">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+
+<div class="viewcode-block" id="balanceweights">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.balanceweights">[docs]</a>
+<span class="k">def</span> <span class="nf">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Balance N-class weights to sum to equal counts.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -771,6 +788,7 @@
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">EQ</span>
 
     <span class="k">return</span> <span class="n">weights_doublet</span></div>
+
 
 </pre></div>
 

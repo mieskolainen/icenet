@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -449,7 +449,9 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 
 
-<div class="viewcode-block" id="filter_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.filter_constructor">[docs]</a><span class="k">def</span> <span class="nf">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+<div class="viewcode-block" id="filter_constructor">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.filter_constructor">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter product main constructor</span>
 <span class="sd">    </span>
@@ -547,7 +549,10 @@
     <span class="k">return</span> <span class="n">all_mask_matrix</span><span class="p">,</span> <span class="n">all_text</span><span class="p">,</span> <span class="n">all_path</span></div>
 
 
-<div class="viewcode-block" id="set_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.set_constructor">[docs]</a><span class="k">def</span> <span class="nf">set_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">veto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_constructor">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.set_constructor">[docs]</a>
+<span class="k">def</span> <span class="nf">set_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">veto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Direct set filter constructor</span>
 <span class="sd">    </span>
@@ -584,7 +589,10 @@
     <span class="k">return</span> <span class="n">mask_matrix</span><span class="p">,</span> <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span></div>
 
 
-<div class="viewcode-block" id="powerset_constructor"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_constructor">[docs]</a><span class="k">def</span> <span class="nf">powerset_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+
+<div class="viewcode-block" id="powerset_constructor">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_constructor">[docs]</a>
+<span class="k">def</span> <span class="nf">powerset_constructor</span><span class="p">(</span><span class="n">cutset</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Powerset (all subsets of boolean combinations) filter constructor</span>
 <span class="sd">    </span>
@@ -621,7 +629,10 @@
     <span class="k">return</span> <span class="n">mask_powerset</span><span class="p">,</span> <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span></div>
 
 
-<div class="viewcode-block" id="construct_columnar_cuts"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_columnar_cuts">[docs]</a><span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_columnar_cuts">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_columnar_cuts">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_columnar_cuts</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">cutlist</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct cuts and corresponding names.</span>
 
@@ -648,7 +659,10 @@
     <span class="k">return</span> <span class="n">masks</span><span class="p">,</span> <span class="n">names</span></div>
 
 
-<div class="viewcode-block" id="powerset_cutmask"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_cutmask">[docs]</a><span class="k">def</span> <span class="nf">powerset_cutmask</span><span class="p">(</span><span class="n">cut</span><span class="p">):</span>
+
+<div class="viewcode-block" id="powerset_cutmask">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.powerset_cutmask">[docs]</a>
+<span class="k">def</span> <span class="nf">powerset_cutmask</span><span class="p">(</span><span class="n">cut</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Generate powerset 2**|cuts| masks</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -679,7 +693,10 @@
     <span class="k">return</span> <span class="n">powerset</span></div>
 
 
-<div class="viewcode-block" id="apply_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.apply_cutflow">[docs]</a><span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+
+<div class="viewcode-block" id="apply_cutflow">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.apply_cutflow">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_cutflow</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Apply cutflow</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -710,7 +727,10 @@
     <span class="k">return</span> <span class="n">mask</span></div>
 
 
-<div class="viewcode-block" id="print_parallel_cutflow"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_parallel_cutflow">[docs]</a><span class="k">def</span> <span class="nf">print_parallel_cutflow</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+
+<div class="viewcode-block" id="print_parallel_cutflow">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_parallel_cutflow">[docs]</a>
+<span class="k">def</span> <span class="nf">print_parallel_cutflow</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print boolean combination cutflow statistics</span>
 <span class="sd">    </span>
@@ -732,7 +752,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parse_boolean_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.parse_boolean_exptree">[docs]</a><span class="k">def</span> <span class="nf">parse_boolean_exptree</span><span class="p">(</span><span class="n">instring</span><span class="p">):</span>
+
+<div class="viewcode-block" id="parse_boolean_exptree">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.parse_boolean_exptree">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_boolean_exptree</span><span class="p">(</span><span class="n">instring</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A boolean expression tree parser.</span>
 <span class="sd">    </span>
@@ -802,7 +825,10 @@
     <span class="c1"># Remove excess []</span>
     <span class="k">return</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">output</span></div>
 
-<div class="viewcode-block" id="tree_node"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.tree_node">[docs]</a><span class="k">class</span> <span class="nc">tree_node</span><span class="p">:</span>
+
+<div class="viewcode-block" id="tree_node">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.tree_node">[docs]</a>
+<span class="k">class</span> <span class="nc">tree_node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to represent the nodes of an expression tree.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -814,7 +840,10 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s1">, data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="se">}}</span><span class="s1">&#39;</span></div>
 
-<div class="viewcode-block" id="construct_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_exptree">[docs]</a><span class="k">def</span> <span class="nf">construct_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+
+<div class="viewcode-block" id="construct_exptree">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.construct_exptree">[docs]</a>
+<span class="k">def</span> <span class="nf">construct_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct an expression (syntax) tree via recursion.</span>
 <span class="sd">    </span>
@@ -841,7 +870,10 @@
 
     <span class="k">return</span> <span class="n">prev_root</span></div>
 
-<div class="viewcode-block" id="print_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_exptree">[docs]</a><span class="k">def</span> <span class="nf">print_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+
+<div class="viewcode-block" id="print_exptree">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_exptree">[docs]</a>
+<span class="k">def</span> <span class="nf">print_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print out an expression tree object via recursion.</span>
 <span class="sd">    </span>
@@ -863,7 +895,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;inter | L: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s1">, D: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, R: </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="eval_boolean_exptree"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_exptree">[docs]</a><span class="k">def</span> <span class="nf">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+
+<div class="viewcode-block" id="eval_boolean_exptree">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_exptree">[docs]</a>
+<span class="k">def</span> <span class="nf">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluation of a (boolean) expression tree via recursion.</span>
 <span class="sd">    </span>
@@ -982,7 +1017,10 @@
     <span class="c1"># Evaluate</span>
     <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]),</span> <span class="n">rhs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="eval_boolean_syntax"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_syntax">[docs]</a><span class="k">def</span> <span class="nf">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+
+<div class="viewcode-block" id="eval_boolean_syntax">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.eval_boolean_syntax">[docs]</a>
+<span class="k">def</span> <span class="nf">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A complete wrapper to evaluate boolean syntax.</span>
 
@@ -1003,7 +1041,10 @@
 
     <span class="k">return</span> <span class="n">output</span></div>
 
-<div class="viewcode-block" id="test_syntax_tree_parsing"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_parsing">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_parsing</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_syntax_tree_parsing">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_parsing">[docs]</a>
+<span class="k">def</span> <span class="nf">test_syntax_tree_parsing</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1020,7 +1061,10 @@
     <span class="k">assert</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">treelist_C</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">==</span> <span class="s2">&quot;[[&#39;x&#39;, &#39;&lt;&#39;, &#39;0.2&#39;], &#39;AND&#39;, [[&#39;y&#39;, &#39;&lt;&#39;, &#39;2&#39;], &#39;OR&#39;, [&#39;z&#39;, &#39;&gt;=&#39;, &#39;4&#39;]]]&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test_syntax_tree_simple"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_simple">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_simple</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_syntax_tree_simple">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_simple">[docs]</a>
+<span class="k">def</span> <span class="nf">test_syntax_tree_simple</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Units tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1044,8 +1088,11 @@
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output2</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="n">output2</span><span class="p">)</span></div>
+
         
-<div class="viewcode-block" id="test_syntax_tree_flip"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_flip">[docs]</a><span class="k">def</span> <span class="nf">test_syntax_tree_flip</span><span class="p">():</span>
+<div class="viewcode-block" id="test_syntax_tree_flip">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_syntax_tree_flip">[docs]</a>
+<span class="k">def</span> <span class="nf">test_syntax_tree_flip</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1072,7 +1119,10 @@
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="test_powerset"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_powerset">[docs]</a><span class="k">def</span> <span class="nf">test_powerset</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_powerset">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.test_powerset">[docs]</a>
+<span class="k">def</span> <span class="nf">test_powerset</span><span class="p">():</span>
 
     <span class="n">cut</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]),</span>
            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]),</span>
@@ -1100,6 +1150,7 @@
          <span class="p">[</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]])</span>
 
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">maskmatrix</span> <span class="o">==</span> <span class="n">reference</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

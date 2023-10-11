@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -448,14 +448,19 @@
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">special</span>
 
 
-<div class="viewcode-block" id="phi_phasewrap"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.phi_phasewrap">[docs]</a><span class="k">def</span> <span class="nf">phi_phasewrap</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+<div class="viewcode-block" id="phi_phasewrap">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.phi_phasewrap">[docs]</a>
+<span class="k">def</span> <span class="nf">phi_phasewrap</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used for example when phi is deltaphi = phi1 - phi2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">phi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
 
 
-<div class="viewcode-block" id="deltaR"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.deltaR">[docs]</a><span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="deltaR">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.deltaR">[docs]</a>
+<span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">,</span> <span class="n">eta2</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    dR distance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -465,7 +470,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deltaEta</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">deltaPhi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fox_wolfram_boost_inv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.fox_wolfram_boost_inv">[docs]</a><span class="k">def</span> <span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fox_wolfram_boost_inv">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.fox_wolfram_boost_inv">[docs]</a>
+<span class="k">def</span> <span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    arxiv.org/pdf/1508.03144, (Formula 5.6)</span>
 
@@ -498,7 +506,10 @@
     <span class="k">return</span> <span class="n">S</span></div>
 
 
-<div class="viewcode-block" id="gram_matrix"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.gram_matrix">[docs]</a><span class="k">def</span> <span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="gram_matrix">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.gram_matrix">[docs]</a>
+<span class="k">def</span> <span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gram matrix for 4-vectors.</span>
 
@@ -525,7 +536,10 @@
     <span class="k">return</span> <span class="n">G</span></div>
 
 
-<div class="viewcode-block" id="ktmetric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+
+<div class="viewcode-block" id="ktmetric">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    kt-algorithm type distance measure.</span>
@@ -547,7 +561,10 @@
     
     <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="get_Lorentz_edge_features"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">[docs]</a><span class="k">def</span> <span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_Lorentz_edge_features">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">[docs]</a>
+<span class="k">def</span> <span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
     
     <span class="c1"># Edge features: [num_edges, num_edge_features]</span>
     <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -597,7 +614,10 @@
     <span class="k">return</span> <span class="n">edge_attr</span></div>
 
 
-<div class="viewcode-block" id="count_simple_edges"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.count_simple_edges">[docs]</a><span class="k">def</span> <span class="nf">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
+
+<div class="viewcode-block" id="count_simple_edges">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.count_simple_edges">[docs]</a>
+<span class="k">def</span> <span class="nf">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count number of edges in a (semi)-fully connected adjacency matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -610,7 +630,10 @@
     <span class="k">elif</span> <span class="n">directed</span> <span class="o">==</span> <span class="kc">True</span>  <span class="ow">and</span> <span class="n">self_loops</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">num_nodes</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">num_nodes</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">num_nodes</span></div>
 
-<div class="viewcode-block" id="get_simple_edge_index"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_simple_edge_index">[docs]</a><span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
+
+<div class="viewcode-block" id="get_simple_edge_index">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_simple_edge_index">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
 <span class="k">def</span> <span class="nf">get_simple_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
 
     <span class="c1"># Graph connectivity: (~ sparse adjacency matrix)</span>
@@ -631,6 +654,7 @@
             <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
     
     <span class="k">return</span> <span class="n">edge_index</span></div>
+
 </pre></div>
 
            </div>

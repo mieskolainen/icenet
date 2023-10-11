@@ -10,9 +10,9 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -449,7 +449,9 @@
 <span class="kn">from</span> <span class="nn">torch.autograd.functional</span> <span class="kn">import</span> <span class="n">jacobian</span>
 
 
-<div class="viewcode-block" id="get_gradient"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_gradient">[docs]</a><span class="k">def</span> <span class="nf">get_gradient</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="get_gradient">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_gradient">[docs]</a>
+<span class="k">def</span> <span class="nf">get_gradient</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return derivative df(x)/dx or gradient vectors</span>
 <span class="sd">    for f: R^n -&gt; R</span>
@@ -464,7 +466,10 @@
     <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span></div>
 
 
-<div class="viewcode-block" id="get_jacobian"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_jacobian">[docs]</a><span class="k">def</span> <span class="nf">get_jacobian</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_jacobian">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_jacobian">[docs]</a>
+<span class="k">def</span> <span class="nf">get_jacobian</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return Jacobian matrix of size m x n</span>
 <span class="sd">    of a function f: R^n -&gt; R^m</span>
@@ -506,7 +511,10 @@
     <span class="k">return</span> <span class="n">J</span></div>
 
 
-<div class="viewcode-block" id="get_full_hessian"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_full_hessian">[docs]</a><span class="k">def</span> <span class="nf">get_full_hessian</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_full_hessian">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.get_full_hessian">[docs]</a>
+<span class="k">def</span> <span class="nf">get_full_hessian</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the full Hessian matrix of a neural net (can be very slow)</span>
 <span class="sd">    </span>
@@ -527,6 +535,7 @@
     <span class="k">return</span> <span class="n">H</span></div>
 
 
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">def get_hessian(inputs, func, **kwargs):</span>
 <span class="sd">    </span>
@@ -540,7 +549,9 @@
 <span class="sd">&quot;&quot;&quot;</span> 
 
 
-<div class="viewcode-block" id="observed_fisher_info"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.observed_fisher_info">[docs]</a><span class="k">def</span> <span class="nf">observed_fisher_info</span><span class="p">(</span><span class="n">logL</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="observed_fisher_info">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.observed_fisher_info">[docs]</a>
+<span class="k">def</span> <span class="nf">observed_fisher_info</span><span class="p">(</span><span class="n">logL</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Observed Fisher information -- the negative of the second derivative</span>
 <span class="sd">    (Hessian matrix) of the log-likelihood function.</span>
@@ -566,7 +577,10 @@
     <span class="k">return</span> <span class="n">I</span></div>
 
 
-<div class="viewcode-block" id="test_hessians"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_hessians">[docs]</a><span class="k">def</span> <span class="nf">test_hessians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+<div class="viewcode-block" id="test_hessians">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_hessians">[docs]</a>
+<span class="k">def</span> <span class="nf">test_hessians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test Hessian matrix computations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -621,7 +635,10 @@
         <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">H_auto</span> <span class="o">-</span> <span class="n">H_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span></div>
 
 
-<div class="viewcode-block" id="test_dimension_interfaces"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_dimension_interfaces">[docs]</a><span class="k">def</span> <span class="nf">test_dimension_interfaces</span><span class="p">():</span>
+
+<div class="viewcode-block" id="test_dimension_interfaces">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_dimension_interfaces">[docs]</a>
+<span class="k">def</span> <span class="nf">test_dimension_interfaces</span><span class="p">():</span>
     <span class="c1"># Test different dimensional input-output.</span>
     
     <span class="kn">import</span> <span class="nn">pytest</span>
@@ -699,7 +716,10 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test_jacobians"><a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_jacobians">[docs]</a><span class="k">def</span> <span class="nf">test_jacobians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+<div class="viewcode-block" id="test_jacobians">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.jacobian.test_jacobians">[docs]</a>
+<span class="k">def</span> <span class="nf">test_jacobians</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
     
     <span class="c1">#Test Jacobians from:</span>
     <span class="c1">#https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant</span>
@@ -809,6 +829,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">J_analytic</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">J_auto</span> <span class="o">-</span> <span class="n">J_analytic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span></div>
+
         
 </pre></div>
 

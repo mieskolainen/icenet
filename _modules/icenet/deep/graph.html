@@ -10,9 +10,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -330,21 +330,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-predict">icenet.deep.predict</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
 </ul>
 </li>
@@ -363,7 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -473,7 +473,9 @@
 <span class="kn">from</span> <span class="nn">torch_geometric.nn.conv</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
 
 
-<div class="viewcode-block" id="SuperEdgeConv"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv">[docs]</a><span class="k">class</span> <span class="nc">SuperEdgeConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
+<div class="viewcode-block" id="SuperEdgeConv">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv">[docs]</a>
+<span class="k">class</span> <span class="nc">SuperEdgeConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom GNN</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -498,12 +500,17 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SuperEdgeConv.reset_parameters"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.reset_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SuperEdgeConv.reset_parameters">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.reset_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">torch_geometric</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">inits</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span>
         <span class="n">torch_geometric</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">inits</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nn_final</span><span class="p">)</span></div>
+
         <span class="c1">#self.eps.data.fill_(self.initial_eps)</span>
 
-<div class="viewcode-block" id="SuperEdgeConv.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">],</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span>
+<div class="viewcode-block" id="SuperEdgeConv.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">PairTensor</span><span class="p">],</span> <span class="n">edge_index</span><span class="p">:</span> <span class="n">Adj</span><span class="p">,</span>
             <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">:</span> <span class="n">OptTensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="n">Size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="c1">#print(f&#39;forward: x: {x.shape}&#39;)</span>
@@ -516,7 +523,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn_final</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">out</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SuperEdgeConv.message"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_i</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">x_j</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SuperEdgeConv.message">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.SuperEdgeConv.message">[docs]</a>
+    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_i</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">x_j</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">:</span> <span class="n">OptTensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 
         <span class="c1">#print(f&#39;message: x_i: {x_i.shape}&#39;)</span>
         <span class="c1">#print(f&#39;message: x_j: {x_j.shape}&#39;)</span>
@@ -531,6 +541,7 @@
 
         <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">edge_weight</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">out</span> <span class="o">*</span> <span class="n">edge_weight</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
+
     <span class="c1"># Memory efficient fusion of message and aggregate via sparse matrix</span>
     <span class="c1">#def message_and_aggregate(self, adj_t: SparseTensor,</span>
     <span class="c1">#                          x: OptPairTensor) -&gt; Tensor:</span>
@@ -539,6 +550,7 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(nn=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="p">)</span></div>
+
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">class SuperEdgeConv(MessagePassing):</span>
@@ -568,7 +580,9 @@
 <span class="sd">        return &#39;{}(nn={})&#39;.format(self.__class__.__name__, self.nn)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GNNGeneric"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a><span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric">[docs]</a>
+<span class="k">class</span> <span class="nc">GNNGeneric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Technical Remarks:</span>
 <span class="sd">        </span>
@@ -578,7 +592,9 @@
 <span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="GNNGeneric.SuperEdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SuperEdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SuperEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric.SuperEdgeConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SuperEdgeConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">SuperEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
@@ -587,7 +603,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.EdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.EdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">EdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.EdgeConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.EdgeConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">EdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
@@ -596,7 +615,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.DynamicEdgeConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.DynamicEdgeConv_">[docs]</a>    <span class="k">def</span> <span class="nf">DynamicEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.DynamicEdgeConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.DynamicEdgeConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">DynamicEdgeConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
@@ -605,7 +627,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.NNConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.NNConv_">[docs]</a>    <span class="k">def</span> <span class="nf">NNConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.NNConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.NNConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">NNConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
@@ -614,7 +639,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.GATConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GATConv_">[docs]</a>    <span class="k">def</span> <span class="nf">GATConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.GATConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GATConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">GATConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
@@ -623,7 +651,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.SplineConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SplineConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SplineConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.SplineConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SplineConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">SplineConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span><span class="p">)</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">elu</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
@@ -637,7 +668,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.SAGEConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SAGEConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SAGEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.SAGEConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SAGEConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">SAGEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
@@ -646,7 +680,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.SGConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SGConv_">[docs]</a>    <span class="k">def</span> <span class="nf">SGConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.SGConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.SGConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">SGConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span>     <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>
@@ -655,7 +692,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.GINEConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINEConv_">[docs]</a>    <span class="k">def</span> <span class="nf">GINEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.GINEConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINEConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">GINEConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>  <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="p">)</span>
@@ -665,7 +705,10 @@
         <span class="c1"># Apply &quot;residual-fusion&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin1</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.PANConv_"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.PANConv_">[docs]</a>    <span class="k">def</span> <span class="nf">PANConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.PANConv_">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.PANConv_">[docs]</a>
+    <span class="k">def</span> <span class="nf">PANConv_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Message passing</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span>
         <span class="n">perm_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -689,6 +732,7 @@
         <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">x</span></div>
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_dim</span><span class="p">,</span> <span class="n">c_dim</span><span class="p">,</span> <span class="n">u_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">e_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_dim</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
         <span class="n">conv_type</span>        <span class="o">=</span> <span class="s1">&#39;EdgeConv&#39;</span><span class="p">,</span>
@@ -925,7 +969,9 @@
         <span class="c1"># ----------------------------------------------------</span>
 
 
-<div class="viewcode-block" id="GNNGeneric.forward_2pt"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_2pt">[docs]</a>    <span class="k">def</span> <span class="nf">forward_2pt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric.forward_2pt">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_2pt">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward_2pt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        MLP decoder of two-point correlations (edges)</span>
 
@@ -944,7 +990,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_final</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="GNNGeneric.GINE_helper"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINE_helper">[docs]</a>    <span class="k">def</span> <span class="nf">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.GINE_helper">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.GINE_helper">[docs]</a>
+    <span class="k">def</span> <span class="nf">GINE_helper</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        GINEConv requires node features and edge features with the same dimension.</span>
 <span class="sd">        Increase dimensionality here.</span>
@@ -961,8 +1010,11 @@
             <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_attr</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_attr</span></div>
+
         
-<div class="viewcode-block" id="GNNGeneric.forward_with_DA"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_with_DA">[docs]</a>    <span class="k">def</span> <span class="nf">forward_with_DA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric.forward_with_DA">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward_with_DA">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward_with_DA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward call with Domain Adaptation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -974,7 +1026,10 @@
 
         <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">x_DA</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.forward"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">conv_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;batch&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Create virtual null batch if singlet graph input</span>
@@ -1007,7 +1062,10 @@
 
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="GNNGeneric.inference"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GNNGeneric.inference">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.inference">[docs]</a>
+    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Final inference network forward call</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1029,12 +1087,17 @@
 
         <span class="k">return</span> <span class="n">x</span></div>
 
+
     <span class="c1"># Returns softmax probability</span>
-<div class="viewcode-block" id="GNNGeneric.softpredict"><a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.softpredict">[docs]</a>    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="GNNGeneric.softpredict">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.graph.GNNGeneric.softpredict">[docs]</a>
+    <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
         <span class="c1">#if self.training:</span>
         <span class="c1">#    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable</span>
         <span class="c1">#else:</span>
-        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
