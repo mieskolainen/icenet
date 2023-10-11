@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>icenet.algo.flr &mdash; icenet alpha documentation</title>
+  <title>icenet.deep.dbnf &mdash; icenet alpha documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -428,7 +428,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">icenet.algo.flr</li>
+      <li class="breadcrumb-item active">icenet.deep.dbnf</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -437,115 +437,315 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for icenet.algo.flr</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Dim-by-Dim Factorized Histogram Likelihood Ratio Classifier    </span>
+  <h1>Source code for icenet.deep.dbnf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Block Neural Autoregressive Flow (BNAF)</span>
+<span class="c1"># Generative (Neural Likelihood) Functions</span>
+<span class="c1">#</span>
+<span class="c1"># https://arxiv.org/abs/1904.04676</span>
+<span class="c1"># https://github.com/nicola-decao/BNAF (MIT license)</span>
 <span class="c1">#</span>
 <span class="c1">#</span>
 <span class="c1"># Mikael Mieskolainen, 2023</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">torch.utils</span> <span class="kn">import</span> <span class="n">data</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="n">tools</span> <span class="kn">import</span> <span class="nn">aux</span>
+
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="n">bnaf</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
 
 
-<div class="viewcode-block" id="train">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.flr.train">[docs]</a>
-<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Factorized likelihood classifier training.</span>
+<div class="viewcode-block" id="compute_log_p_x">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.compute_log_p_x">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Model log-density value log[pdf(x), where x is the data vector]</span>
+<span class="sd">    </span>
+<span class="sd">    log p(x) = log p(z) + sum_{k=1}^K log|det J_{f_k}|</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        X:         input data [# vectors x # dimensions]</span>
-<span class="sd">        y:         target data</span>
-<span class="sd">        weights:   weighted events</span>
-<span class="sd">        param:     dictionary for the parameters</span>
-
+<span class="sd">        model : model object</span>
+<span class="sd">        x     : N minibatch vectors</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        b_pdfs:    background pdfs</span>
-<span class="sd">        s_pdfs:    signal pdfs</span>
-<span class="sd">        bin_edges: histogram bin edges</span>
+<span class="sd">        log-likelihood value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">bin_edges</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">b_pdfs</span>    <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">s_pdfs</span>    <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Evaluate the non-diagonal and the diagonal part</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">log_diag</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="c1"># Over dimensions</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="c1"># Sum of log-likelihoods (log product) pushed through the flow, evaluated for the unit Gaussian</span>
+    <span class="n">log_p_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">log_p_y</span> <span class="o">+</span> <span class="n">log_diag</span></div>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span>
-        <span class="n">minval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;qmin&#39;</span><span class="p">])</span>
-        <span class="n">maxval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;qmax&#39;</span><span class="p">])</span>
 
-        <span class="n">bin_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;nbins&#39;</span><span class="p">])</span> <span class="p">)</span>
 
-        <span class="n">b_pdf</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">patches</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">density</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">)</span>
-        <span class="n">s_pdf</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">patches</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span>
-            <span class="n">density</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="get_pdf">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.get_pdf">[docs]</a>
+<span class="k">def</span> <span class="nf">get_pdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Evaluate learned density (pdf) at point x</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        model :  model object</span>
+<span class="sd">        x     :  input vector(s)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pdf value</span>
 
-        <span class="n">b_pdfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b_pdf</span><span class="p">)</span>
-        <span class="n">s_pdfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s_pdf</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span></div>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt; x = torch.tensor([[1.0, 2.0]])</span>
+<span class="sd">        &gt; l = get_pdf(model,x)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)))</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="predict">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.flr.predict">[docs]</a>
-<span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">b_pdfs</span><span class="p">,</span> <span class="n">s_pdfs</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="n">return_prob</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Evaluate the likelihood ratio.</span>
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.predict">[docs]</a>
+<span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">return_prob</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        X:           input data [# vectors x # dimensions]</span>
-<span class="sd">        b_pdfs:      background pdfs</span>
-<span class="sd">        s_pdfs:      signal pdfs</span>
-<span class="sd">        bin_edges:   bin edges</span>
-<span class="sd">        return_prob: return probability if True, or likelihood ratio</span>
+<span class="sd">        param      : input parameters</span>
+<span class="sd">        X          : pytorch tensor of vectors</span>
+<span class="sd">        models     : list of model objects</span>
+<span class="sd">        return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        LR:        likelihood ratio, or probability</span>
+<span class="sd">        likelihood ratio (or alternatively probability)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="c1"># Loop over events</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-
-        <span class="c1"># Log-likelihoods</span>
-        <span class="n">b_ll</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">s_ll</span> <span class="o">=</span> <span class="mi">0</span>
-        
-        <span class="c1"># Loop over dimensions</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            
-            <span class="n">x</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
-
-            <span class="c1"># Evaluate likelihoods for this dimension</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-
-            <span class="n">b</span> <span class="o">=</span> <span class="n">b_pdfs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="n">s_pdfs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span>
-
-            <span class="c1"># Sum log-likelihoods (a factorized total product likelihood)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">):</span>
-                <span class="n">b_ll</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">s</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">):</span>
-                <span class="n">s_ll</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-
-        <span class="c1"># Probability</span>
-        <span class="k">if</span> <span class="n">return_prob</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s_ll</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s_ll</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">b_ll</span><span class="p">))</span>
-
-        <span class="c1"># Likelihood ratio</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s_ll</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">b_ll</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.predict: Computing density (likelihood) ratio for N = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> events ...&#39;</span><span class="p">)</span>
+    
+    <span class="n">bgk_pdf</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    <span class="n">sgn_pdf</span> <span class="o">=</span> <span class="n">get_pdf</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">return_prob</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_pdf</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">sgn_pdf</span> <span class="o">+</span> <span class="n">bgk_pdf</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">sgn_pdf</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">bgk_pdf</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     
     <span class="n">out</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">out</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
     
     <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="Dataset">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.Dataset">[docs]</a>
+<span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialization &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">W</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Generates one sample of data &quot;&quot;&quot;</span>
+        <span class="c1"># Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="train">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.train">[docs]</a>
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">trn_x</span><span class="p">,</span> <span class="n">val_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Train the model density.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        model       : initialized model object</span>
+<span class="sd">        optimizer   : optimizer object</span>
+<span class="sd">        scheduler   : optimization scheduler</span>
+<span class="sd">        trn_x       : training vectors</span>
+<span class="sd">        val_x       : validation vectors</span>
+<span class="sd">        trn_weights : training weights</span>
+<span class="sd">        param       : parameters</span>
+<span class="sd">        modeldir    : directory to save the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+    <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
+
+    <span class="c1"># TensorboardX</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;modelname&#39;</span><span class="p">]))</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
+              <span class="s1">&#39;shuffle&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;num_workers&#39;</span> <span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">],</span>
+              <span class="s1">&#39;pin_memory&#39;</span>  <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    
+    <span class="c1"># Training generator</span>
+    <span class="n">training_set</span>         <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">trn_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">)</span>
+    <span class="n">training_generator</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    
+    <span class="c1"># Validation generator</span>
+    <span class="n">validation_set</span>       <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">val_x</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">)</span>
+    <span class="n">validation_generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Loss function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Note:</span>
+<span class="sd">        log-likelihood functions can be weighted linearly, due to</span>
+<span class="sd">        \\prod_i p_i(\\theta; x_i)**w_i ==\\log==&gt; \\sum_i w_i \\log p_i(\\theta; x_i)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">lossvec</span> <span class="o">=</span> <span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># log-likelihood</span>
+    
+    <span class="c1"># Training loop</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">88</span><span class="p">):</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="c1"># !</span>
+
+        <span class="n">train_loss</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">permutation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">((</span><span class="n">trn_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">training_generator</span><span class="p">:</span>
+
+            <span class="c1"># Transfer to GPU</span>
+            <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
+            
+            <span class="c1"># Zero gradients, calculate loss, calculate gradients and update parameters</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">max_norm</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;clip_norm&#39;</span><span class="p">])</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="n">train_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+        <span class="n">train_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+
+        <span class="c1"># ----------------------------------------------------------------</span>
+        <span class="c1"># Compute validation loss</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
+
+        <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_generator</span><span class="p">:</span>
+
+            <span class="c1"># Transfer to GPU</span>
+            <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
+            <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+        <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+        <span class="c1"># ----------------------------------------------------------------</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">{:3d}</span><span class="s1">/</span><span class="si">{:3d}</span><span class="s1"> | Train: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | Validation: loss: </span><span class="si">{:4.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()))</span>
+
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">,</span>
+            <span class="n">callback_best</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">),</span>
+            <span class="n">callback_reduce</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">modeldir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_&#39;</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pth&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lr&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="k">break</span></div>
+
+
+
+<div class="viewcode-block" id="create_model">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.create_model">[docs]</a>
+<span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rngseed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct the network object.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        param : parameters</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        model : model object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># For random permutations</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rngseed</span><span class="p">)</span>
+    
+    <span class="n">flows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]):</span>
+
+        <span class="c1"># Layers of the flow block</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]):</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span>
+                                       <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]))</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tanh</span><span class="p">())</span>
+        
+        <span class="c1"># Add this flow block</span>
+        <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">BNAF</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]),</span> <span class="n">Tanh</span><span class="p">()]</span> <span class="o">+</span> \
+                   <span class="n">layers</span> <span class="o">+</span> \
+                   <span class="p">[</span><span class="n">MaskedWeight</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;hidden_dim&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">])]),</span>\
+                 <span class="n">res</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;residual&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Flow permutations</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Permutation</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;perm&#39;</span><span class="p">]))</span>
+
+    <span class="c1"># Create the model</span>
+    <span class="n">model</span>  <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">flows</span><span class="p">)</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="c1"># Print model information    </span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameters=</span><span class="si">{}</span><span class="s1">, n_dims=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+
+<div class="viewcode-block" id="load_models">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.load_models">[docs]</a>
+<span class="k">def</span> <span class="nf">load_models</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">modelnames</span><span class="p">,</span> <span class="n">modeldir</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load models from files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">modelnames</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_models: Loading model[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] from </span><span class="si">{</span><span class="n">modelnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">model</span>      <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">filename</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">modeldir</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">modelnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> \
+            <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">],</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.pth&#39;</span><span class="p">)</span>
+        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        
+        <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval mode!</span>
+
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">models</span></div>
 
 </pre></div>
 
