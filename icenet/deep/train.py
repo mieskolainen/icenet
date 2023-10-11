@@ -218,7 +218,7 @@ def raytune_main(inputs, train_func=None):
             mode                = mode,
             num_samples         = num_samples
         ),
-        run_config  = RunConfig(name="icenet_raytune", local_dir="./tmp"),
+        run_config  = RunConfig(name="icenet_raytune", local_dir=os.getcwd() + "/tmp"),
         param_space = param_space,
     )
     results = tuner.fit()
