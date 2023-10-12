@@ -45,6 +45,7 @@ from icenet.optim import scheduler
 
 # Raytune
 import ray
+from ray import tune
 from ray.tune.search.basic_variant import BasicVariantGenerator
 from ray.tune.search.hyperopt      import HyperOptSearch
 from ray.tune.search.optuna        import OptunaSearch
