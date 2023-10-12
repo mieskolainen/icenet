@@ -14,7 +14,6 @@ from icenet.deep import deeptools
 from icenet.tools import aux
 from icenet.tools import io
 
-from ray import tune
 
 class Dataset(torch.utils.data.Dataset):
 

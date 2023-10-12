@@ -44,11 +44,11 @@ from icenet.optim import scheduler
 
 
 # Raytune
-from ray import tune
+import ray
 from ray.tune.search.basic_variant import BasicVariantGenerator
-from ray.tune.search.hyperopt import HyperOptSearch
-from ray.tune.search.optuna import OptunaSearch
-from ray.tune.search.bayesopt import BayesOptSearch
+from ray.tune.search.hyperopt      import HyperOptSearch
+from ray.tune.search.optuna        import OptunaSearch
+from ray.tune.search.bayesopt      import BayesOptSearch
 
 from ray.air.config import RunConfig, ScalingConfig
 from ray.tune.schedulers import ASHAScheduler
@@ -209,9 +209,9 @@ def raytune_main(inputs, train_func=None):
     }
     param_space['params'] = parameters # Set hyperparameters
     
-    tuner = tune.Tuner(
-        tune.with_parameters(train_func, **inputs),
-        tune_config=tune.TuneConfig(
+    tuner = ray.tune.Tuner(
+        ray.tune.with_parameters(train_func, **inputs),
+        tune_config=ray.tune.TuneConfig(
             search_alg          = search_alg,
             scheduler           = scheduler,
             metric              = metric,
@@ -337,11 +337,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         scheduler.step()
         
         if args['__raytune_running__']:
-            with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
                 path = os.path.join(checkpoint_dir, "checkpoint")
                 torch.save((model.state_dict(), optimizer.state_dict()), path)
 
-            tune.report(loss = loss, AUC = validate_auc)
+            ray.train.report({'loss': loss, 'AUC': validate_auc})
         else:
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
@@ -518,10 +518,10 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     cprint(__name__ + f'.train_cutset: (eff_s: {eff_s:0.3E}, eff_b: {eff_b:0.3E}) | loss: {loss:0.3f} | AUC = {metrics.auc:0.4f}', 'yellow')
     
     if args['__raytune_running__']:
-        #with tune.checkpoint_dir(epoch) as checkpoint_dir:
+        #with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
         #    path = os.path.join(checkpoint_dir, "checkpoint")
         #    torch.save((model.state_dict(), optimizer.state_dict()), path)
-        tune.report(loss = loss, AUC = metrics.auc)
+        ray.train.report({'loss': loss, 'AUC': metrics.auc})
     else:
         ## Save
         True
