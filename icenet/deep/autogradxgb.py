@@ -11,13 +11,15 @@ from tqdm import tqdm
 from typing import Callable, Sequence, List, Tuple
 
 class XgboostObjective():
-    def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', loss_sign=1, skip_hessian=False, device='cpu'):
+    def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', loss_sign=1, 
+                 flatten_grad=False, skip_hessian=False, device='cpu'):
 
-        self.mode      = mode
-        self.loss_func = loss_func
-        self.loss_sign = loss_sign
-        self.device    = device
+        self.mode         = mode
+        self.loss_func    = loss_func
+        self.loss_sign    = loss_sign
+        self.device       = device
         self.skip_hessian = skip_hessian
+        self.flatten_grad = flatten_grad
     
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
@@ -58,4 +60,10 @@ class XgboostObjective():
                 grad2_i  = torch.autograd.grad(grad1[i], preds, retain_graph=True)[0]
                 grad2[i] = grad2_i[i]
 
-        return grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
+        grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
+
+        if self.flatten_grad:
+            grad1, grad2 = grad1.flatten("F"), grad2.flatten()
+        
+        return grad1, grad2
+        
