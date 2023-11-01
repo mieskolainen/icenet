@@ -453,13 +453,15 @@
 <div class="viewcode-block" id="XgboostObjective">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.autogradxgb.XgboostObjective">[docs]</a>
 <span class="k">class</span> <span class="nc">XgboostObjective</span><span class="p">():</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">loss_sign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">loss_sign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                 <span class="n">flatten_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>      <span class="o">=</span> <span class="n">mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span> <span class="o">=</span> <span class="n">loss_func</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_sign</span> <span class="o">=</span> <span class="n">loss_sign</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">device</span>    <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>         <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span>    <span class="o">=</span> <span class="n">loss_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_sign</span>    <span class="o">=</span> <span class="n">loss_sign</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span>       <span class="o">=</span> <span class="n">device</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">skip_hessian</span> <span class="o">=</span> <span class="n">skip_hessian</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flatten_grad</span> <span class="o">=</span> <span class="n">flatten_grad</span>
     
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">):</span>
 
@@ -505,9 +507,15 @@
                 <span class="n">grad2_i</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">grad1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">preds</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">grad2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">grad2_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">grad1</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">grad2</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+        <span class="n">grad1</span><span class="p">,</span> <span class="n">grad2</span> <span class="o">=</span> <span class="n">grad1</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">grad2</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten_grad</span><span class="p">:</span>
+            <span class="n">grad1</span><span class="p">,</span> <span class="n">grad2</span> <span class="o">=</span> <span class="n">grad1</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">),</span> <span class="n">grad2</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">grad1</span><span class="p">,</span> <span class="n">grad2</span></div>
 </div>
 
+        
 </pre></div>
 
            </div>
