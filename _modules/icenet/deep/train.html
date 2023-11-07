@@ -775,7 +775,7 @@
 
         <span class="n">loss</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="o">=</span><span class="n">opt_param</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="n">MI</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">save_period</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">save_period</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
             <span class="n">train_acc</span><span class="p">,</span> <span class="n">train_auc</span>       <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
             <span class="n">validate_acc</span><span class="p">,</span> <span class="n">validate_auc</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">,</span>  <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         
@@ -795,11 +795,19 @@
         <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
         
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
-            <span class="k">with</span> <span class="n">ray</span><span class="o">.</span><span class="n">tune</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">as</span> <span class="n">checkpoint_dir</span><span class="p">:</span>
-                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;checkpoint&quot;</span><span class="p">)</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
-
-            <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">report</span><span class="p">({</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s1">&#39;AUC&#39;</span><span class="p">:</span> <span class="n">validate_auc</span><span class="p">})</span>
+            
+            <span class="c1"># OLD</span>
+            <span class="c1"># with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:</span>
+            <span class="c1">#    path = os.path.join(checkpoint_dir, &quot;checkpoint&quot;)</span>
+            <span class="c1">#    torch.save((model.state_dict(), optimizer.state_dict()), path)</span>
+            <span class="c1">#</span>
+            <span class="c1"># NEW</span>
+            <span class="c1"># from ray.train import Checkpoint</span>
+            <span class="c1"># with tempfile.TemporaryDirectory as temp_checkpoint_dir:</span>
+            <span class="c1">#   torch.save(state_dict, os.path.join(temp_checkpoint_dir, &#39;model.pt&#39;))</span>
+            <span class="c1">#   ray.train.report({&#39;metric&#39;: 1}, checkpoint=Checkpoint.from_directory(temp_checkpoint_dir))</span>
+            
+            <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">report</span><span class="p">({</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="s1">&#39;AUC&#39;</span><span class="p">:</span> <span class="n">validate_auc</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">## Save</span>
             <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;state_dict&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()}</span>
