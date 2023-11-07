@@ -12,9 +12,10 @@ xgb:
   # general parameters
   model_param:
 
-    booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
     num_boost_round: 300   # Number of epochs
-    tree_method: 'auto'    # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    booster: 'gbtree'      # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'    # 'auto', 'cpu', 'cuda'
     
     # booster parameters
     learning_rate: 0.1

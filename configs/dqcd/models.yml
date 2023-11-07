@@ -64,8 +64,9 @@ xgb0:
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'      # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -107,8 +108,9 @@ xgb0-no-mass:
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'      # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -150,8 +152,9 @@ xgb0-only-mu:
   # general parameters
   model_param:
     num_boost_round: 200     # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'      # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -552,7 +555,7 @@ gnet1:
 
   # Read/Write of epochs
   savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+  readmode: -1                 # 'name', epoch number, or -1 uses the last saved epoch
 
 
 # Graph net
@@ -562,7 +565,7 @@ gnet2:
   label:    'SuperEdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'SuperEdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'SuperEdgeConv'   # See models under icenet/deep/graph.py
   
   # Model
   model_param:

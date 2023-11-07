@@ -7,7 +7,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
   # ... more filters here
 
   # -------------------------------------------------
-
+  
   set[0]:
     expand: 'powerset' # 'set', 'vetoset', or 'powerset' which goes through all boolean vector combinations
     cutset:
@@ -109,7 +109,8 @@ xgb0:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -153,7 +154,8 @@ xgb0-red:
     num_boost_round: 10       # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.1
     gamma: 1.67
@@ -196,7 +198,8 @@ xgb-MI-min:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     # booster parameters
     learning_rate: 0.05
@@ -245,7 +248,8 @@ xgb-MI-max:
     num_boost_round: 50       # number of epochs (equal to the number of trees!)
   
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     # booster parameters
     learning_rate: 0.05

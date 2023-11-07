@@ -18,9 +18,9 @@ gxgb0:
 
     # Model
     model_param:
-      task: 'graph'             # 'graph', 'node', 'edge_symmetric', 'edge_asymmetric' (level of inference)
+      task: 'graph'              # 'graph', 'node', 'edge_symmetric', 'edge_asymmetric' (level of inference)
       global_pool: 'mean'
-      z_dim: 196                # Convolution output dimension
+      z_dim: 196                 # Convolution output dimension
       
       # Message passing parameters
       conv_MLP_act: 'relu'
@@ -79,7 +79,8 @@ gxgb0:
       num_boost_round: 100    # number of epochs (equal to the number of trees!)
       
       booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-      tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+      tree_method: 'hist'
+      device:      'auto'     # 'auto', 'cpu', 'cuda'
       
       # booster parameters
       learning_rate: 0.1
@@ -114,7 +115,7 @@ gnet0:
   label:    'NNConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'NNConv'       # See models under icenet/deep/graph.py
+  conv_type: 'NNConv'         # See models under icenet/deep/graph.py
   
   # Model
   model_param:
@@ -376,7 +377,8 @@ xgb0:
     num_boost_round: 100    # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     # booster parameters
     learning_rate: 0.1

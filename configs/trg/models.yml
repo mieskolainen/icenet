@@ -154,7 +154,8 @@ xgb0:
     num_boost_round: 56       # number of epochs (equal to the number of trees!)
   
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'       # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -194,7 +195,8 @@ xgb1:
     num_boost_round: 2      # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'auto'     # 'auto', 'hist' (CPU), 'gpu_hist' (GPU)
+    tree_method: 'hist'
+    device:      'auto'     # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 0.63

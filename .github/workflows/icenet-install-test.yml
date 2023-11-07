@@ -65,7 +65,7 @@ jobs:
           git clone https://github.com/mieskolainen/travis-stash.git
 
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
-
+          
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_hnl.sh
           
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh

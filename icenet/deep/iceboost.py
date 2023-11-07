@@ -170,9 +170,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
 
     # ---------------------------------------------------
 
-    if param['model_param']['tree_method'] == 'auto':
-        param['model_param'].update({'tree_method': 'gpu_hist' if torch.cuda.is_available() else 'hist'})
-
+    if param['model_param']['device'] == 'auto':
+        param['model_param'].update({'device': 'cuda' if torch.cuda.is_available() else 'cpu'})
+    
     print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **

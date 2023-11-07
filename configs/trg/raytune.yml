@@ -3,7 +3,7 @@ param:
   #active:  [null]
   #active: ['xgb1']
   active: ['xgb1', 'cutset0']
-  num_samples:    300 # Trial count parameter
+  num_samples:    30 # Trial count parameter
 
 setup:
 
