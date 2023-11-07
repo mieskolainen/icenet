@@ -111,7 +111,7 @@ xgb0:
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'     # 'auto', 'cpu', 'cuda'
-
+    
     learning_rate: 0.1
     gamma: 1.67
     max_depth: 8
