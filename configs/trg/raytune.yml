@@ -1,8 +1,8 @@
 param:
 
-  #active: ['xgb1']
-  active: ['cutset0']
   #active:  [null]
+  #active: ['xgb1']
+  active: ['xgb1', 'cutset0']
   num_samples:    300 # Trial count parameter
 
 setup:
@@ -10,7 +10,7 @@ setup:
   # -----------------------------------
 
   cutset_setup_0:
-    search_algo: 'HyperOpt' # 'Basic', 'HyperOpt', 'Optuna', 'BayesOpt'
+    search_algo: 'HyperOpt' # 'Basic' (use with grid_search), 'HyperOpt', 'Optuna', 'BayesOpt'
 
     search_metric:
       metric: 'loss'   # 'AUC' or 'loss'
@@ -20,6 +20,7 @@ setup:
       
       cut_0:
         type: "tune.uniform(0.0, 20000)"
+        #type: "tune.grid_search([0, 10, 100, 1000])"
 
       cut_1:
         type: "tune.uniform(0.0, 1.0)"

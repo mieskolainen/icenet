@@ -22,6 +22,7 @@ from icenet.deep import optimize
 
 from icefit import mine
 
+import ray
 from ray import tune
 
 
@@ -284,11 +285,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if args['__raytune_running__']:
-            with tune.checkpoint_dir(epoch) as checkpoint_dir:
-                path = os.path.join(checkpoint_dir, "checkpoint")
-                pickle.dump(model, open(path, 'wb'))
-
-            tune.report(loss = trn_losses[-1], AUC = val_aucs[-1])
+            #with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            #    path = os.path.join(checkpoint_dir, "checkpoint")
+            #    pickle.dump(model, open(path, 'wb'))
+            ray.train.report({'loss': trn_losses[-1], 'AUC': val_aucs[-1]})
         else:
             ## Save
             filename = args['modeldir'] + f'/{param["label"]}_{epoch}'

@@ -318,7 +318,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
 
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
 
-        if (epoch % save_period) == 0:
+        if (epoch % save_period) == 0 or args['__raytune_running__']:
             train_acc, train_auc       = optimize.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
             validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
@@ -338,11 +338,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         scheduler.step()
         
         if args['__raytune_running__']:
-            with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
-                path = os.path.join(checkpoint_dir, "checkpoint")
-                torch.save((model.state_dict(), optimizer.state_dict()), path)
-
-            ray.train.report({'loss': loss, 'AUC': validate_auc})
+            
+            # OLD
+            # with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
+            #    path = os.path.join(checkpoint_dir, "checkpoint")
+            #    torch.save((model.state_dict(), optimizer.state_dict()), path)
+            #
+            # NEW
+            # from ray.train import Checkpoint
+            # with tempfile.TemporaryDirectory as temp_checkpoint_dir:
+            #   torch.save(state_dict, os.path.join(temp_checkpoint_dir, 'model.pt'))
+            #   ray.train.report({'metric': 1}, checkpoint=Checkpoint.from_directory(temp_checkpoint_dir))
+            
+            ray.train.report({'loss': loss.item(), 'AUC': validate_auc})
         else:
             ## Save
             checkpoint = {'model': model, 'state_dict': model.state_dict()}
