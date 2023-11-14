@@ -30,7 +30,7 @@
             
           </a>
               <div class="version">
-                0.0.8.9
+                0.0.9.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -905,7 +905,7 @@
 
 <div class="viewcode-block" id="split_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.split_data">[docs]</a>
-<span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">permute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">permute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Split machine learning data into train, validation, test sets</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -913,7 +913,7 @@
 <span class="sd">        Y:         target matrix</span>
 <span class="sd">        W:         weight matrix</span>
 <span class="sd">        ids:       variable names of columns</span>
-<span class="sd">        frac:      fraction</span>
+<span class="sd">        frac:      fraction [train, validate, evaluate] (sum to 1)</span>
 <span class="sd">        rngseed:   random seed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -927,14 +927,15 @@
     
     <span class="c1"># --------------------------------------------------------------------</span>
 
-    <span class="n">N</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="n">N_A</span>   <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">frac</span><span class="p">)</span>
-    <span class="n">N_B</span>   <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">N_A</span>
+    <span class="n">frac</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frac</span><span class="p">)</span>
+    <span class="n">frac</span>  <span class="o">=</span> <span class="n">frac</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">frac</span><span class="p">)</span>
     
-    <span class="n">N_trn</span> <span class="o">=</span> <span class="n">N_A</span>
-    <span class="n">N_val</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">N_B</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">N_tst</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">N_trn</span> <span class="o">-</span> <span class="n">N_val</span>
-
+    <span class="c1"># Get event counts</span>
+    <span class="n">N</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">N_trn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">frac</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">N_tst</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">frac</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">N_val</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">N_trn</span> <span class="o">-</span> <span class="n">N_tst</span>
+    
     <span class="c1"># 1. Train</span>
     <span class="n">X_trn</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
     <span class="n">Y_trn</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N_trn</span><span class="p">]</span>
