@@ -31,7 +31,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     use_ak = True if isinstance(x, ak.Array) else False
 
     num_classes = len(np.unique(y))
-
+    
     if use_ak:
         y = copy.deepcopy(ak.to_numpy(y).astype(int))
         w = copy.deepcopy(ak.to_numpy(w).astype(float))
@@ -121,7 +121,6 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             else:
                 raise Exception(__name__ + ': Unknown re-weight binning mode')
         
-
         rwparam = {
             'y':               y,
             'reference_class': args['reference_class'],
