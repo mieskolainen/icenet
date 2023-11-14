@@ -445,7 +445,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 
-<span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -480,17 +479,17 @@
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="c1"># Make sure we make a copy, because we modify args here</span>
 
-    <span class="c1">### Construct parameter names</span>
-    <span class="n">paramdict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">])):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">varname</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">paramdict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">varname</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">break</span>
-    
     <span class="c1"># Compute event-by-event weights</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;differential&#39;</span><span class="p">]:</span>
+        
+        <span class="c1">### Construct parameter names</span>
+        <span class="n">paramdict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">])):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">varname</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">paramdict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">varname</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">break</span>    
         
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; (Found </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2"> classes: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> from y)&quot;</span><span class="p">)</span>
         
@@ -563,7 +562,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;: Unknown re-weight binning mode&#39;</span><span class="p">)</span>
         
-
         <span class="n">rwparam</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;y&#39;</span><span class="p">:</span>               <span class="n">y</span><span class="p">,</span>
             <span class="s1">&#39;reference_class&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span>
