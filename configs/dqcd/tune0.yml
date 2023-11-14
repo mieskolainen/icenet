@@ -49,7 +49,7 @@ mva_param: &MVA_INPUT_PARAM
     
     # add more here ..
   
-  frac: 0.6                          # Train vs validate/test split fraction
+  frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
   
   # Variable imputation
   imputation_param:
@@ -109,6 +109,9 @@ train_runmode:
 
   ## Reweighting setup
   reweight: true
+  reweight_mode: 'write'          # 'write', 'load'
+  reweight_file: 'reweight_train.pkl' # differential reweighting model file
+
   reweight_param: &REWEIGHT_PARAM
     
     maxevents: 1000000             # Maximum number of events for the PDF construction
@@ -116,31 +119,7 @@ train_runmode:
     differential: False
     reference_class: 0             # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
     
-    # Note about asymmetry: Keep the reference class as 0 == background, because signal
-    # MC has much longer tail over pt. Thus, it is not possible to re-weight background
-    # to signal very easily, but it is possible to re-weight signal to background.
-    # This is seen by inspecting the re-weighted distributions with small and large statistics.
-    
-    # ---------------------
-    # Differential parameters
-    
-    # dimension: 'pseudo-2D'         # '2D', 'pseudo-2D', '1D'
-    # pseudo_type: 'product'         # 'product', 'geometric_mean'
-    
-    # var_A: 'x_hlt_pt'
-    # var_B: 'x_hlt_eta'
-
-    # bins_A:  [0.0001, 100.0, 150]  # Make sure the bounds cover the phase space
-    # binmode_A:  'linear'           # 'log10' or 'linear' binning
-    
-    # bins_B: [-3.1, 3.1, 150]
-    # binmode_B: 'linear'
-    
-    # # ! Variable, and binning min/max boundaries are both transformed !
-    # transform_A: 'log10'           # 'log10', 'sqrt', 'square', null
-    # transform_B: null
-    
-    # max_reg: 10000.0               # Maximum weight cut-off regularization
+    # see /trg/tune0.yml
 
 
   ## Outlier protection in the training
@@ -213,6 +192,9 @@ eval_runmode:
   model_tag: null
 
   reweight: true
+  reweight_mode: 'load'               # 'write', 'load'
+  reweight_file: 'reweight_train.pkl'
+
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/dqcd/models.yml
@@ -230,6 +212,9 @@ optimize_runmode:
   model_tag: null
 
   reweight: true
+  reweight_mode: 'load'               # 'write', 'load'
+  reweight_file: 'reweight_train.pkl'
+
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/dqcd/models.yml

@@ -43,7 +43,7 @@ mva_param: &MVA_INPUT_PARAM
   cutfunc:     null
   targetfunc:  null
 
-  frac: 0.9                 # Train vs validate/test split fraction
+  frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
   
   varnorm: 'zscore'         # variable normalization: 'zscore', 'minmax', 'none'
 

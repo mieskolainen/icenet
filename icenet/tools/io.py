@@ -394,7 +394,7 @@ def split_data_simple(X, frac, permute=True):
     return X_trn, X_val, X_tst
 
 
-def split_data(X, Y, W, ids, frac, permute=True):
+def split_data(X, Y, W, ids, frac=[0.5, 0.1, 0.4], permute=True):
     """ Split machine learning data into train, validation, test sets
     
     Args:
@@ -402,7 +402,7 @@ def split_data(X, Y, W, ids, frac, permute=True):
         Y:         target matrix
         W:         weight matrix
         ids:       variable names of columns
-        frac:      fraction
+        frac:      fraction [train, validate, evaluate] (sum to 1)
         rngseed:   random seed
     """
 
@@ -416,14 +416,15 @@ def split_data(X, Y, W, ids, frac, permute=True):
     
     # --------------------------------------------------------------------
 
-    N     = len(X)
-    N_A   = round(N * frac)
-    N_B   = N - N_A
+    frac  = np.array(frac)
+    frac  = frac / np.sum(frac)
     
-    N_trn = N_A
-    N_val = round(N_B / 2)
-    N_tst = N - N_trn - N_val
-
+    # Get event counts
+    N     = len(X)
+    N_trn = int(round(N * frac[0]))
+    N_tst = int(round(N * frac[2]))
+    N_val = N - N_trn - N_tst
+    
     # 1. Train
     X_trn = X[0:N_trn]
     Y_trn = Y[0:N_trn]

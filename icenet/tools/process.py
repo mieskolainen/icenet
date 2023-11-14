@@ -454,9 +454,21 @@ def process_data(args, predata, func_factor, mvavars, runmode):
 
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
-            trn.w, pdf = reweight.compute_ND_reweights(pdf=None, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
-            val.w,_    = reweight.compute_ND_reweights(pdf=pdf,  x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
-            pickle.dump(pdf, open(args["modeldir"] + '/reweight_pdf.pkl', 'wb'))
+            
+            fmodel = args["modeldir"] + '/' + args['reweight_file']
+            
+            if args['reweight_mode'] == 'load':
+                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} (runmode == {runmode})', 'green')
+                pdf = pickle.load(open(fmodel, 'rb'))
+            else:
+                pdf = None # Compute it now
+            
+            trn.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
+            val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
+            
+            if args['reweight_mode'] == 'write':
+                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode == {runmode})', 'green')
+                pickle.dump(pdf, open(fmodel, 'wb'))
         
         # Compute different data representations
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
@@ -473,8 +485,20 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         
         ### Compute reweighting weights (before func_factor because we need all the variables !)
         if args['reweight']:
-            pdf      = pickle.load(open(args["modeldir"] + '/reweight_pdf.pkl', 'rb'))
-            tst.w, _ = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+            
+            fmodel = args["modeldir"] + '/' + args['reweight_file']
+            
+            if args['reweight_mode'] == 'load':
+                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} (runmode = {runmode})', 'green')
+                pdf = pickle.load(open(fmodel, 'rb'))
+            else:
+                pdf = None # Compute it now
+            
+            tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+            
+            if args['reweight_mode'] == 'write':
+                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode = {runmode})', 'green')
+                pickle.dump(pdf, open(fmodel, 'wb'))
         
         # Compute different data representations
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)

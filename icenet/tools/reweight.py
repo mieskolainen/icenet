@@ -40,17 +40,17 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
     ### Construct parameter names
     paramdict = {}
-    for var in ['A', 'B']: # Currently only 2 variables, A, B, supported
+    for i in range(len(args['var'])):
         try:
-            varname  = args['var_' + var]
-            paramdict[var] = varname
+            varname  = args['var'][i]
+            paramdict[str(i)] = varname
         except:
             break
     
     # Compute event-by-event weights
     if args['differential']:
         
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y) | Differential re-weighting using variables: {paramdict}")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y)")
         
         ### Collect re-weighting variables
         RV = {}
@@ -62,8 +62,13 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
         ### Pre-transform
         for var in paramdict.keys():
-            mode = args[f'transform_{var}']
-
+            mode = args[f'transform'][int(var)]
+            
+            if args[f'binmode'][int(var)] == 'edges':
+                raise Exception(__name__ + '.compute_ND_reweights: Cannot transform "edges" type')
+            
+            d = args[f'bins'][int(var)]
+            
             if   mode == 'log10':
                 if np.any(RV[var] <= 0):
                     ind = (RV[var] <= 0)
@@ -73,8 +78,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 RV[var] = np.log10(np.maximum(RV[var], EPS))
 
                 # Transform bins
-                args[f'bins_{var}'][0] = np.log10(args[f'bins_{var}'][0] + EPS)
-                args[f'bins_{var}'][1] = np.log10(args[f'bins_{var}'][1])
+                args[f'bins'][int(var)][0] = np.log10(d[0] + EPS)
+                args[f'bins'][int(var)][1] = np.log10(d[1])
 
             elif mode == 'sqrt':
 
@@ -82,39 +87,39 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 RV[var] = np.sqrt(np.maximum(RV[var], EPS))
 
                 # Bins
-                args[f'bins_{var}'][0] = np.sqrt(args[f'bins_{var}'][0] + EPS)
-                args[f'bins_{var}'][1] = np.sqrt(args[f'bins_{var}'][1])
-
+                args[f'bins'][int(var)][0] = np.sqrt(d[0] + EPS)
+                args[f'bins'][int(var)][1] = np.sqrt(d[1])
+                
             elif mode == 'square':
 
                 # Values
                 RV[var] = RV[var]**2
 
                 # Bins
-                args[f'bins_{var}'][0] = (args[f'bins_{var}'][0])**2
-                args[f'bins_{var}'][1] = (args[f'bins_{var}'][1])**2
+                args[f'bins'][int(var)][0] = d[0]**2
+                args[f'bins'][int(var)][1] = d[1]**2
 
             elif mode == None:
                 True
             else:
-                raise Except(__name__ + '.compute_ND_reweights: Unknown pre-transform')
+                raise Exception(__name__ + '.compute_ND_reweights: Unknown pre-transform')
 
         # Binning setup
         binedges = {}
         for var in paramdict.keys():
-            if   args[f'binmode_{var}'] == 'linear':
-                binedges[var] = np.linspace(
-                                     args[f'bins_{var}'][0],
-                                     args[f'bins_{var}'][1],
-                                     args[f'bins_{var}'][2])
+            
+            d = args[f'bins'][int(var)]
+            
+            if   args[f'binmode'][int(var)] == 'linear':
+                binedges[var] = np.linspace(d[0], d[1], d[2])
 
-            elif args[f'binmode_{var}'] == 'log10':
-                binedges[var] = np.logspace(
-                                     np.log10(np.max([args[f'bins_{var}'][0], EPS])),
-                                     np.log10(args[f'bins_{var}'][1]),
-                                     args[f'bins_{var}'][2], base=10)
+            elif args[f'binmode'][int(var)] == 'log10':
+                binedges[var] = np.logspace(np.log10(np.maximum(d[0], EPS)), np.log10(d[1]), d[2], base=10)
+                
+            elif args[f'binmode'][int(var)] == 'edges':
+                binedges[var] = np.array(d)
             else:
-                raise Except(__name__ + ': Unknown re-weight binning mode')
+                raise Exception(__name__ + ': Unknown re-weight binning mode')
         
 
         rwparam = {
@@ -125,27 +130,31 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
         ### Compute 2D-PDFs for each class
         if args['dimension'] == '2D':
-
+            
+            print(__name__ + f'.compute_ND_reweights: 2D re-weighting using variables: {paramdict} ...')
+            
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
 
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
-                    pdf[c] = pdf_2D_hist(X_A=RV['A'][y==c], X_B=RV['B'][y==c], w=sample_weights, \
-                        binedges_A=binedges['A'], binedges_B=binedges['B'])
+                    pdf[c] = pdf_2D_hist(X_A=RV['0'][y==c], X_B=RV['1'][y==c], w=sample_weights, \
+                        binedges_A=binedges['0'], binedges_B=binedges['1'])
 
-                pdf['binedges_A']  = binedges['A']
-                pdf['binedges_B']  = binedges['B']
+                pdf['binedges_0']  = binedges['0']
+                pdf['binedges_1']  = binedges['1']
                 pdf['num_classes'] = num_classes
-
-            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            
+            weights_doublet = reweightcoeff2D(X_A = RV['0'], X_B = RV['1'], pdf=pdf, **rwparam)
             
         ### Compute geometric mean factorized 1D x 1D product
         elif args['dimension'] == 'pseudo-2D':
-
-            if len(binedges['A']) != len(binedges['B']):
-                raise Exception(__name__ + f'.compute_ND_reweights: Error: <pseudo-2D> requires same number of bins for A and B')
+            
+            print(__name__ + f'.compute_ND_reweights: pseudo-2D re-weighting using variables: {paramdict} ...')
+            
+            #if len(binedges['0']) != len(binedges['1']):
+            #    raise Exception(__name__ + f'.compute_ND_reweights: Error: <pseudo-2D> requires same number of bins for both variables')
 
             if pdf is None: # Not given by user
                 pdf = {}
@@ -153,38 +162,40 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
-                    pdf_A  = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
-                    pdf_B  = pdf_1D_hist(X=RV['B'][y==c], w=sample_weights, binedges=binedges['B'])
+                    pdf_0  = pdf_1D_hist(X=RV['0'][y==c], w=sample_weights, binedges=binedges['0'])
+                    pdf_1  = pdf_1D_hist(X=RV['1'][y==c], w=sample_weights, binedges=binedges['1'])
                     
                     if   args['pseudo_type'] == 'geometric_mean':
-                        pdf[c] = np.sqrt(np.outer(pdf_A, pdf_B)) # (A,B) order gives normal matrix indexing
+                        pdf[c] = np.sqrt(np.outer(pdf_0, pdf_1)) # (A,B) order gives normal matrix indexing
                     elif args['pseudo_type'] == 'product':
-                        pdf[c] = np.outer(pdf_A, pdf_B)
+                        pdf[c] = np.outer(pdf_0, pdf_1)
                     else:
                         raise Exception(__name__ + f'.compute_ND_reweights: Unknown <pseudo_type>')
 
                     # Normalize to discrete density
                     pdf[c] /= np.sum(pdf[c].flatten())
 
-                pdf['binedges_A']  = binedges['A']
-                pdf['binedges_B']  = binedges['B']
+                pdf['binedges_0']  = binedges['0']
+                pdf['binedges_1']  = binedges['1']
                 pdf['num_classes'] = num_classes
 
-            weights_doublet = reweightcoeff2D(X_A = RV['A'], X_B = RV['B'], pdf=pdf, **rwparam)
+            weights_doublet = reweightcoeff2D(X_A = RV['0'], X_B = RV['1'], pdf=pdf, **rwparam)
 
         ### Compute 1D-PDFs for each class
         elif args['dimension'] == '1D':
+            
+            print(__name__ + f'.compute_ND_reweights: 1D re-weighting using variable {paramdict[list(paramdict.keys())[0]]} ...')
             
             if pdf is None: # Not given by user
                 pdf = {}
                 for c in range(num_classes):
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
-                    pdf[c] = pdf_1D_hist(X=RV['A'][y==c], w=sample_weights, binedges=binedges['A'])
+                    pdf[c] = pdf_1D_hist(X=RV['0'][y==c], w=sample_weights, binedges=binedges['0'])
 
-                pdf['binedges']    = binedges['A']
+                pdf['binedges']    = binedges['0']
                 pdf['num_classes'] = num_classes
 
-            weights_doublet = reweightcoeff1D(X = RV['A'], pdf=pdf, **rwparam)
+            weights_doublet = reweightcoeff1D(X = RV['0'], pdf=pdf, **rwparam)
         else:
             raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality mode <{args["dimension"]}>')
     
@@ -219,14 +230,14 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
         return weights, pdf
 
 
-def reweightcoeff1D(X, y, pdf, reference_class, equal_frac, max_reg = 1e3, EPS=1e-12) :
+def reweightcoeff1D(X, y, pdf, reference_class, max_reg = 1e3, EPS=1e-12):
     """ Compute N-class density reweighting coefficients.
     
     Args:
-        X  :              Observable of interest (N x 1)
-        y  :              Class labels (0,1,...) (N x 1)
-        pdf:              PDF for each class
-        reference_class : e.g. 0 (background) or 1 (signal)
+        X:               Observable of interest (N x 1)
+        y:               Class labels (0,1,...) (N x 1)
+        pdf:             PDF for each class
+        reference_class: e.g. 0 (background) or 1 (signal)
     
     Returns:
         weights for each event
@@ -256,8 +267,8 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12)
     Operates in full 2D without any factorization.
     
     Args:
-        X_A :             Observable A of interest (N x 1)
-        X_B :             Observable B of interest (N x 1)
+        X_A :             First observable of interest  (N x 1)
+        X_B :             Second observable of interest (N x 1)
         y   :             Signal (1) and background (0) labels (N x 1)
         pdf :             Density histograms for each class
         reference_class : e.g. Background (0) or signal (1)
@@ -273,10 +284,10 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12)
 
     # Weight each class against the reference class
     for c in range(num_classes):
-        inds_A = aux.x2ind(X_A[y == c], pdf['binedges_A'])
-        inds_B = aux.x2ind(X_B[y == c], pdf['binedges_B'])
+        inds_0 = aux.x2ind(X_A[y == c], pdf['binedges_0']) # variable 0
+        inds_1 = aux.x2ind(X_B[y == c], pdf['binedges_1']) # variable 1
         if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds_A, inds_B] / (pdf[c][inds_A, inds_B] + EPS)
+            weights_doublet[y == c, c] = pdf[reference_class][inds_0, inds_1] / (pdf[c][inds_0, inds_1] + EPS)
         else:
             weights_doublet[y == c, c] = 1.0 # Reference class stays intact
 
