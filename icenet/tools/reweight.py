@@ -38,17 +38,17 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
     args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
-    ### Construct parameter names
-    paramdict = {}
-    for i in range(len(args['var'])):
-        try:
-            varname  = args['var'][i]
-            paramdict[str(i)] = varname
-        except:
-            break
-    
     # Compute event-by-event weights
     if args['differential']:
+        
+        ### Construct parameter names
+        paramdict = {}
+        for i in range(len(args['var'])):
+            try:
+                varname  = args['var'][i]
+                paramdict[str(i)] = varname
+            except:
+                break    
         
         print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y)")
         
