@@ -272,19 +272,19 @@ def QCD(outputfile, filerange='*'):
   ,
 
   {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'process':  'QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 1362000.0}
   ,
 
   {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'process':  'QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 376600.0}
   ,
 
   {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'process':  'QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 88930.0} 
   ,
@@ -300,9 +300,9 @@ def QCD(outputfile, filerange='*'):
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 7055.0}
   ,
-
+  
   {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 619.3} 
   ,
