@@ -4,10 +4,9 @@
 # Conditional (parametric) signal model variables
 
 MODEL_VARS = [
-  'MODEL_m',
+  'MODEL_mpi',
+  'MODEL_mA',
   'MODEL_ctau',
-  'MODEL_xiO',
-  'MODEL_xiL'
 ]
 
 # ---------------------------------------------------------
@@ -124,7 +123,7 @@ MVA_JET_VARS = [
   #'Jet_btagCMVA',
   #'Jet_btagCSVV2',
   'Jet_btagDeepB',
-  'Jet_btagDeepC',
+  #'Jet_btagDeepC',
   #'Jet_btagDeepFlavB',
   #'Jet_btagDeepFlavC',
   'Jet_qgl',

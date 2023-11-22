@@ -82,3 +82,37 @@ jobs:
     pe: null
     S: null
     m: 'a'
+
+  dqcd_scenarioA_train:
+
+    cwd: 'tests/runme_dqcd_newmodels_train.sh'
+    t: null
+    h_vmem: null
+    h_rt: '24:00:00'
+    q: 'gpu.q@lxcgpu*'
+    pe: null
+    S: null
+    m: 'a'      
+
+  dqcd_scenarioA_signal:
+
+    cwd: 'tests/runme_dqcd_newmodels_signal_deploy.sh'
+    t: '1-20:1'
+    h_vmem: '12G'
+    h_rt: '24:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+
+  dqcd_scenarioA_qcd:
+
+    cwd: 'tests/runme_dqcd_newmodels_qcd_deploy.sh'
+    t: '1-80:1'
+    h_vmem: '12G'
+    h_rt: '24:00:00'
+    q: 'hep.q'
+    pe: null
+    S: null
+    m: 'a'
+

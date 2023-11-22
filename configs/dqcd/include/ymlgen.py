@@ -54,6 +54,49 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
         i += 1
 
+def printer_newmodels(outputfile, process, path, end_name, filename, xs, force_xs, isMC, maxevents_scale, rp, flush_index=0):
+  
+  if flush_index == 0:
+    dprint('', 'w') # Empty it
+
+  i = flush_index
+  for mpi in rp['mpi']:
+    for mA in rp['mA']:
+      for ctau in rp['ctau']:
+
+        # MC signal
+        if isMC == 'true' and mpi != 'null':
+          param_name   = f'mpi_{mpi}_mA_{mA}_ctau_{ctau}'
+          process_name = f'{process}_{param_name}'  
+          folder_name  = f'{process_name}'
+
+        # MC background
+        elif isMC == 'true' and mpi == 'null':
+          process_name = f'{process}'  
+          folder_name  = f'{process_name}_{end_name}'
+        
+        # Data
+        else:
+          process_name = f'{process}'
+          folder_name  = f'{end_name}'
+
+        # Print
+        dprint(f'# [{i}]')
+        dprint(f'{path}--{process_name}: &{path}--{process_name}')
+        dprint(f"  path:  \'{path}/{folder_name}\'")
+        dprint(f"  files: \'{filename}\'")
+        dprint(f'  xs:   {xs}')
+        dprint(f'  model_param:')
+        dprint(f'    mpi:    {mpi}')
+        dprint(f'    mA:    {mA}')
+        dprint(f'    ctau: {ctau}')
+        dprint(f'  force_xs: {force_xs}')
+        dprint(f'  isMC:     {isMC}')
+        dprint(f'  maxevents_scale: {maxevents_scale}')
+        dprint(f'')
+
+        i += 1
+
 
 def darkphoton(outputfile, filerange='*'):
   
@@ -162,106 +205,128 @@ def higgs(outputfile, filerange='*'):
   }
   printer(**param)
 
+def scenarioA(outputfile, filerange='*'):
+
+  process         = 'scenarioA'
+
+  # ------------------------------------------
+  # Basic
+  filename        = f'nano_{filerange}.root'
+  path            = 'bparkProductionAll_V1p3'
+  end_name        = ''
+  xs              = '1.0 # [pb]'
+  force_xs        = 'true'
+  isMC            = 'true'
+  maxevents_scale = '1.0'
+  # ------------------------------------------
+  
+  rp = {}
+  rp['mpi']       = ['4']
+  rp['mA']        = ['1p33']
+  rp['ctau']      = ['10']
+  
+  param = {
+    'outputfile':      outputfile,
+    'rp':              rp,
+    'process':         process,
+    'path':            path,
+    'end_name':        end_name,
+    'filename':        filename,
+    'xs':              xs,
+    'force_xs':        force_xs,
+    'isMC':            isMC,
+    'maxevents_scale': maxevents_scale
+  }
+  printer_newmodels(**param)
+
 
 def QCD(outputfile, filerange='*'):
 
   processes = [ \
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 2799000.0} # pb
   ,
   
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v4',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 2526000.0 }
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 1362000.0}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-50to80_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 376600.0}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 44465.0} # 44465.0 = 88930.0 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionAll_V1p0', # Extension sample !
-   'process':  'QCD_Pt-80to120_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 44465.0} # 44465.0 = 88930.0 / 2 [two paths treated as "separate" processes]
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 88930.0} 
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 10615.0} # 10615.0 = 21230.0 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionAll_V1p0', # Extension sample !
-   'process':  'QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 10615.0} # 10615.0 = 21230.0 / 2 [two paths treated as "separate" processes]
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 21230.0}  
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 7055.0}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 309.65} # 309.65 = 619.3 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionAll_V1p0', # Extension sample !
-   'process':  'QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 309.65} # 309.65 = 619.3 / 2 [two paths treated as "separate" processes]
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_MINIAODSIM_v1p1_generationSync',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 619.3} 
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 29.62}  # 29.62 = 59.24 / 2 [two paths treated as "separate" processes]
-  ,
-  {'path':     'bparkProductionAll_V1p0', # Extension sample !
-   'process':  'QCD_Pt-470to600_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
-   'xs': 29.62}  # 29.62 = 59.24 / 2 [two paths treated as "separate" processes]
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 59.24}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-600to800_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 18.21}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-800to1000_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext3-v2',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 3.275}
   ,
 
-  {'path':     'bparkProductionAll_V1p0',
-   'process':  'QCD_Pt-1000toInf_MuEnrichedPt5_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1',
-   'end_name': 'MINIAODSIM_v1p0_generationSync',
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 1.078} ]
   
   rp = {}
+
+  #old models
+  '''
   rp['m']       = ['null']
   rp['ctau']    = ['null'] 
   rp['xi_pair'] = [['null', 'null']]
   rp['xi2str']  = ['null']
+  '''
+  #new models
+  rp['mpi']     = ['null']
+  rp['mA']      = ['null']
+  rp['ctau']    = ['null']
 
   for i in range(len(processes)):
 
@@ -287,9 +352,9 @@ def QCD(outputfile, filerange='*'):
     }
 
     if i == 0:
-      printer(**param)
+      printer_newmodels(**param)
     else:
-      printer(**param, flush_index=i)
+      printer_newmodels(**param, flush_index=i)
 
 
 def data(outputfile, filerange='*', period='B'):
@@ -385,6 +450,9 @@ if __name__ == '__main__':
 
   elif args.process == 'darkphoton':
     darkphoton(outputfile=outputfile, filerange=args.filerange)
+  
+  elif args.process == 'scenarioA':
+    scenarioA(outputfile=outputfile, filerange=args.filerange)
 
   elif args.process == 'QCD':
     QCD(outputfile=outputfile, filerange=args.filerange)
