@@ -1,0 +1,3 @@
+input:
+  class_0: !include include/QCD_newmodels.yml
+  class_1: !include include/scenarioA.yml
