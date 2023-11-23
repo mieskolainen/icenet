@@ -411,26 +411,32 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     W    = predata['W']
     ids  = predata['ids']
     info = predata['info']
-
+    
     # ----------------------------------------------------------
-    # Pop out conditional variables if they exist
+    # Pop out conditional variables if they exist and no conditional training is used
     if args['use_conditional'] == False:
+        
+        if ids is None: # Awkward type, ids within X
+            ids_ = X.fields
+        else:
+            ids_ = ids  # Separate fields
         
         index  = []
         idxvar = []
-        for i in range(len(ids)):
-            if 'MODEL_' not in ids[i]:
+        for i in range(len(ids_)):
+            if 'MODEL_' not in ids_[i]:
                 index.append(i)
-                idxvar.append(ids[i])
+                idxvar.append(ids_[i])
             else:
-                print(__name__ + f'.process_data: Removing conditional variable "{ids[i]}"')
-
+                print(__name__ + f'.process_data: Removing conditional variable "{ids_[i]}" (use_conditional == False)')
+        
         if   isinstance(X, np.ndarray):
             X = X[:,np.array(index, dtype=int)]
+            ids = [ids[j] for j in index]
+        
         elif isinstance(X, ak.Array):
             X = X[idxvar]
-
-        ids = [ids[j] for j in index]
+        
     # ----------------------------------------------------------
     
     # Split into training, validation, test
