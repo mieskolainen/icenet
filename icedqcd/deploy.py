@@ -1,5 +1,7 @@
 # Deploy MVA-model to data (or MC) files (work in progress, not all models supported ...)
 #
+# This code is compatible with Oracle Grid Engine submission
+#
 # m.mieskolainen@imperial.ac.uk, 2023
 
 import os
@@ -25,33 +27,39 @@ from icenet.deep import predict
 from tqdm import tqdm
 
 
-def generate_cartesian_param(ids):
+def f2s(value, decimals=2):
+    """
+    Convert e.g. floating point "1.5" to "1p5"
+    """
+    return str(np.round(value, decimals)).replace('.', 'p')
+
+def generate_cartesian_param(ids, mc_param, decimals=2):
     """
     Generate cartesian N-dim array for the theory model parameter conditional sampling
-
-    Note. Keep the order m, ctau, xiO, xiL
     """
 
-    values    = {'m':    np.round(np.array([2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]), 1),
-                 'ctau': np.round(np.array([1.0, 5.0, 10, 25, 50, 75, 100, 250, 500]), 1),
-                 'xiO':  np.round(np.array([1.0]), 1),
-                 'xiL':  np.round(np.array([1.0]), 1)}
+    arr = []
+    for key in mc_param.keys():
+        arr.append(np.round(np.array(mc_param[key]), decimals))
 
-    CAX       = aux.cartesian_product(*[values['m'], values['ctau'], values['xiO'], values['xiL']])
-
-    pindex    = np.zeros(4, dtype=int)
-    pindex[0] = ids.index('MODEL_m')
-    pindex[1] = ids.index('MODEL_ctau')
-    pindex[2] = ids.index('MODEL_xiO')
-    pindex[3] = ids.index('MODEL_xiL')
+    CAX    = aux.cartesian_product(*arr)
+    pindex = np.zeros(len(mc_param.keys()), dtype=int)
+    
+    for i, key in enumerate(mc_param.keys()):
+        pindex[i] = ids.index(f'MODEL_{key}')
     
     return CAX, pindex
 
-def f2s(value):
+def create_ID_label(ID, mc_param, lattice_values, decimals=2):
     """
-    Convert floating point "1.5" to "1p5"
+    Create parameter label for the conditional model parameters
     """
-    return str(np.round(value,1)).replace('.', 'p')
+    ID_label = f'{ID}_'
+    
+    for i, key in enumerate(mc_param.keys()):
+        ID_label += f'_{key}_{f2s(lattice_values[i], decimals=decimals)}'
+    
+    return ID_label
 
 def zscore_normalization(X, args):
     """
@@ -68,6 +76,7 @@ def zscore_normalization(X, args):
 
 def process_data(args):
 
+    cprint(__name__ + f'.process_data:', 'green')
     print(args)
 
     ## ** Special YAML loader here **
@@ -92,13 +101,6 @@ def process_data(args):
 
     # ------------------
     # Phase 1: Read ROOT-file to awkward-format
-
-    VARS  = []
-    VARS += TRIGGER_VARS
-    VARS += MVA_SCALAR_VARS
-    VARS += MVA_JAGGED_VARS
-    VARS += MVA_PF_VARS
-
     basepath = aux.makedir(f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}")
 
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--grid_id__{args['grid_id']}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
@@ -109,6 +111,10 @@ def process_data(args):
     logging.debug(__name__ + f'.process_data: {nodestr}')
     logging.debug('')
     logging.debug(f'{inputmap}')
+    
+    # Pick the model lattice definition
+    if args['use_conditional']:    
+        mc_param = args['mc_param']
     
     for key in inputmap.keys():
 
@@ -166,16 +172,15 @@ def process_data(args):
                 continue
             
             # -------------------------------------------------
-            # Add conditional (theory param) variables
-            model_param = {'m': 0.0, 'ctau': 0.0, 'xiO': 0.0, 'xiL': 0.0}
+            # Phase 1.5: Add conditional (theory MC param) variables
 
             if args['use_conditional']:
 
                 print(__name__ + f'.process_data: Initializing conditional theory (model) parameters')
-                for var in model_param.keys():
-                    # Create new 'record' (column) to ak-array
-                    col_name    = f'MODEL_{var}'
-                    X_nocut[col_name] = model_param[var]
+                for var in mc_param.keys():
+                    # Create new 'record' (column) to ak-array and init to zero
+                    col_name          = f'MODEL_{var}'
+                    X_nocut[col_name] = 0.0
 
                 ids_nocut = ak.fields(X_nocut)
 
@@ -243,7 +248,7 @@ def process_data(args):
                     if args['use_conditional']:
 
                         ## Get conditional parameters
-                        CAX,pindex = generate_cartesian_param(ids=ids)
+                        CAX, pindex = generate_cartesian_param(ids=ids, mc_param=mc_param)
 
                         ## Run the MVA-model on all the theory model points in CAX array
                         for z in tqdm(range(len(CAX))):
@@ -251,16 +256,16 @@ def process_data(args):
                             gc.collect()
 
                             # Set the new conditional model parameters to X
-                            nval     = CAX[z,:]
-                            ID_label = f'{ID}__m_{f2s(nval[0])}_ctau_{f2s(nval[1])}_xiO_{f2s(nval[2])}_xiL_{f2s(nval[3])}'
+                            lattice_values = CAX[z,:]
+                            ID_label       = create_ID_label(ID=ID, mc_param=mc_param, lattice_values=lattice_values)
 
                             if OK_event:
                                 XX            = copy.deepcopy(X)
-                                XX[:, pindex] = nval  # Set new values
+                                XX[:, pindex] = lattice_values  # Set new values
 
                                 # Variable normalization
                                 XX = zscore_normalization(X=XX, args=args)
-
+                                
                                 # Predict
                                 pred = func_predict(XX)
                                 pred = aux.unmask(x=pred, mask=mask, default_value=-1)

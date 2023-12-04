@@ -15,5 +15,6 @@ source $ICEPATH/setenv.sh
 
 CONFIG="tune0.yml"
 DATAPATH="/vols/cms/mc3909"
+CONDITIONAL=1
 
-python analysis/dqcd_deploy.py --use_conditional 1 --inputmap 'include/data-C_deploy.yml' --modeltag vector_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd_deploy.py --runmode deploy --use_conditional $CONDITIONAL --inputmap 'include/data-C_deploy.yml' --modeltag vector_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH

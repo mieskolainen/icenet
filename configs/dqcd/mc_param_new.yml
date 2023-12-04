@@ -1,0 +1,6 @@
+# Conditional theory parameters to be sampled
+#
+
+mpi  : [1.33]
+mA   : [4.0]
+ctau : [10.0]

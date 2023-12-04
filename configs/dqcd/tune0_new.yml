@@ -29,13 +29,13 @@ mva_param: &MVA_INPUT_PARAM
 
     - order_0: 
       name: 'muonSV'
-      var:  'chi2'
-      ascending: True  # True ~ smallest first, False ~ largest first
+      var:  'dlen'
+      ascending: False  # True ~ smallest first, False ~ largest first
     
     - order_1: 
       name: 'SV'
-      var:  'chi2'
-      ascending: True
+      var:  'dlen'
+      ascending: False
     
     - order_2: 
       name: 'Jet'
@@ -214,7 +214,7 @@ optimize_runmode:
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
   reweight_file: 'reweight_train.pkl'
-  
+
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/dqcd/models.yml
@@ -222,4 +222,20 @@ optimize_runmode:
 
 
 # ----------------------------------------------------
-plot_param: !include configs/dqcd/plots.yml
+deploy_runmode:
+  
+  <<: *MVA_INPUT_PARAM
+
+  maxevents: null
+
+  input_tag: null
+  model_tag: null
+
+  mc_param: !include configs/dqcd/mc_param_new.yml
+  
+  models:  !include configs/dqcd/models.yml
+  active_models: *ACTIVE_MODELS
+
+
+# ----------------------------------------------------
+plot_param: !include configs/dqcd/plots_new.yml

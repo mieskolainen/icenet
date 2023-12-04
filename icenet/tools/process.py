@@ -154,7 +154,12 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     elif runmode == 'optimize':
         new_args.update(args['optimize_runmode'])
         new_args['plot_param'] = args['plot_param']
-
+    
+    elif runmode == 'deploy':
+        new_args.update(args['genesis_runmode'])
+        new_args.update(args['deploy_runmode'])
+        new_args['plot_param'] = args['plot_param']
+    
     elif runmode == 'all':
         for key in args.keys():
             if "_runmode" in key:
@@ -482,11 +487,14 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         
         ## Imputate
         if args['imputation_param']['active']:
+            
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            pickle.dump(imputer, open(args["modeldir"] + f'/imputer.pkl', 'wb'))
-
+            outputfile = args["modeldir"] + f'/imputer.pkl'
+            cprint(__name__ + f'.process_data: Saving imputer to: {outputfile}', 'green')
+            pickle.dump(imputer, open(outputfile, 'wb'))
+        
     elif runmode == 'eval':
         
         ### Compute reweighting weights (before func_factor because we need all the variables !)
@@ -512,7 +520,9 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         ## Imputate
         if args['imputation_param']['active']:
             
-            imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
+            inputfile = args["modeldir"] + f'/imputer.pkl'
+            cprint(__name__ + f'.process_data: Loading imputer from: {inputfile}', 'green')
+            imputer = pickle.load(open(inputfile, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
     
     return output

@@ -1,0 +1,7 @@
+# Conditional theory parameters to be evaluated
+#
+
+m    : [2.0, 3.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0]
+ctau : [1.0, 5.0, 10, 25, 50, 75, 100, 250, 500]
+xiO  : [1.0]
+xiL  : [1.0]

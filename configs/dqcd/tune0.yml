@@ -222,4 +222,20 @@ optimize_runmode:
 
 
 # ----------------------------------------------------
+deploy_runmode:
+  
+  <<: *MVA_INPUT_PARAM
+
+  maxevents: null
+
+  input_tag: null
+  model_tag: null
+
+  mc_param: !include configs/dqcd/mc_param.yml
+  
+  models:  !include configs/dqcd/models.yml
+  active_models: *ACTIVE_MODELS
+
+
+# ----------------------------------------------------
 plot_param: !include configs/dqcd/plots.yml
