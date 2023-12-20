@@ -76,18 +76,17 @@ def printer_newmodels(outputfile, process, path, end_name, filename, xs, force_x
     dprint(outputfile, '', 'w') # Empty it
 
   i = flush_index
-  for mpi in rp['mpi']:
-    for mA in rp['mA']:
+  for mpi_mA_pair in rp['mpi_mA_pair']:
       for ctau in rp['ctau']:
 
         # MC signal
-        if isMC == 'true' and mpi != 'null':
-          param_name   = f'mpi_{mpi}_mA_{mA}_ctau_{ctau}'
+        if isMC == 'true' and mpi_mA_pair[0] != 'null':
+          param_name   = f'mpi_{mpi_mA_pair[0]}_mA_{mpi_mA_pair[1]}_ctau_{ctau}'
           process_name = f'{process}_{param_name}'  
           folder_name  = f'{process_name}'
 
         # MC background
-        elif isMC == 'true' and mpi == 'null':
+        elif isMC == 'true' and mpi_mA_pair[0] == 'null':
           process_name = f'{process}'  
           folder_name  = f'{process_name}_{end_name}'
         
@@ -103,8 +102,8 @@ def printer_newmodels(outputfile, process, path, end_name, filename, xs, force_x
         dprint(outputfile, f"  files: \'{filename}\'")
         dprint(outputfile, f'  xs:   {xs}')
         dprint(outputfile, f'  model_param:')
-        dprint(outputfile, f'    mpi:    {str2float(mpi)}')
-        dprint(outputfile, f'    mA:     {str2float(mA)}')
+        dprint(outputfile, f'    mpi:    {str2float(mpi_mA_pair[0])}')
+        dprint(outputfile, f'    mA:     {str2float(mpi_mA_pair[1])}')
         dprint(outputfile, f'    ctau:   {str2float(ctau)}')
         dprint(outputfile, f'  force_xs: {force_xs}')
         dprint(outputfile, f'  isMC:     {isMC}')
@@ -227,7 +226,7 @@ def scenarioA(outputfile, filerange='*'):
 
   # ------------------------------------------
   # Basic
-  filename        = f'nano_{filerange}.root'
+  filename        = f'data_{filerange}.root'
   path            = 'bparkProductionAll_V1p3'
   end_name        = ''
   xs              = '1.0 # [pb]'
@@ -237,9 +236,8 @@ def scenarioA(outputfile, filerange='*'):
   # ------------------------------------------
   
   rp = {}
-  rp['mpi']       = ['4']
-  rp['mA']        = ['1p33']
-  rp['ctau']      = ['10']
+  rp['mpi_mA_pair']  = [['1', '0p33'],['2', '0p67'],['4','0p40'],['4','1p33'],['10','1p00'],['10','3p33']]
+  rp['ctau']         = ['0p1','1p0','10','100']
   
   param = {
     'outputfile':      outputfile,
@@ -300,7 +298,6 @@ def QCD(outputfile, filerange='*'):
    'end_name': 'MINIAODSIM_v1p1_generationSync',
    'xs': 7055.0}
   ,
-  
   {'path':     'bparkProductionAll_V1p3',
    'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
    'end_name': 'MINIAODSIM_v1p1_generationSync',
@@ -340,9 +337,8 @@ def QCD(outputfile, filerange='*'):
   rp['xi2str']  = ['null']
   '''
   #new models
-  rp['mpi']     = ['null']
-  rp['mA']      = ['null']
-  rp['ctau']    = ['null']
+  rp['mpi_mA_pair']     = [['null', 'null']]
+  rp['ctau']            = ['null']
 
   for i in range(len(processes)):
 
@@ -373,6 +369,7 @@ def QCD(outputfile, filerange='*'):
       printer_newmodels(**param, flush_index=i)
 
 
+
 def data(outputfile, filerange='*', period='B'):
 
   processes = None
@@ -398,21 +395,26 @@ def data(outputfile, filerange='*', period='B'):
   elif period == 'D':
     
     processes = [
-    {'path':     'bparkProductionAll_V1p0',
-     'process':  'ParkingBPH1_Run2018D',
-     'end_name': 'tmp'
+    {'path':     'bparkProductionAll_V1p3',
+     'process':  'ParkingBPH1_Run2018D-UL2018_MiniAODv2-v1',
+     'end_name': 'ParkingBPH1_Run2018D-UL2018_MiniAODv2-v1_MINIAOD_v1p3_generationSync'
     }
     ]
   
   else:
     raise Exception(__name__ + f'.data: Unknown period "{period}" chosen')
-
+  
   rp              = {}
+  '''
   rp['m']         = ['null']
   rp['ctau']      = ['null'] 
   rp['xi_pair']   = [['null', 'null']]
   rp['xi2str']    = ['null']
+  '''
   
+  rp['mpi']     = ['null']
+  rp['mA']      = ['null']
+  rp['ctau']    = ['null']
   for i in range(len(processes)):
 
     # ------------------------------------------
@@ -420,7 +422,7 @@ def data(outputfile, filerange='*', period='B'):
     filename        = f'output_{filerange}.root'
     force_xs        = 'false'
     isMC            = 'false'
-    xs              = 'null'
+    xs              =  2799000.0
     maxevents_scale = '1.0'
     # ------------------------------------------
 
@@ -438,9 +440,9 @@ def data(outputfile, filerange='*', period='B'):
     }
 
     if i == 0:
-      printer(**param)
+      printer_newmodels(**param)
     else:
-      printer(**param, flush_index=i)
+      printer_newmodels(**param, flush_index=i)
 
 
 if __name__ == '__main__':
