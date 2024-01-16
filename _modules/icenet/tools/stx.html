@@ -994,6 +994,10 @@
             <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">x</span>
         <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;BOOL&#39;</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;FLOAT&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s1">&#39;INT&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Unknown function </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
@@ -1002,20 +1006,23 @@
 
     <span class="c1"># Middle binary operators g(x,y)</span>
     <span class="k">if</span>   <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&lt;</span> <span class="n">y</span>
     <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span>  <span class="o">&gt;</span> <span class="n">y</span>
     <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y</span>
     <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">y</span>
     <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="c1"># use default tolerance</span>
     <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_exptree: Unknown binary operator &quot;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+    
     <span class="c1"># Evaluate</span>
     <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]),</span> <span class="n">rhs</span><span class="p">)</span></div>
 
