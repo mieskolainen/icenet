@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.1
+                0.0.9.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -513,10 +513,10 @@
     
     <span class="c1"># Apply selections</span>
     <span class="n">X</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">stats</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_uncut</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
-    <span class="n">N_after</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">N_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
-    <span class="n">eff_acc</span>  <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
-
+    <span class="n">eff_acc</span> <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
@@ -546,19 +546,29 @@
             
         <span class="n">value</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
         
-        <span class="c1"># Pick random between [a,b]</span>
+        <span class="c1"># Pick uniform random between [a,b] ~ &quot;dequantized&quot; sampling</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
-            <span class="n">col</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="c1"># Pick specific fixed value</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_MC: Input </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> &#39;</span><span class="p">)</span>
+            
+            <span class="n">mva_value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">gen_value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Pick only the fixed value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">col</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>         
+            <span class="n">mva_value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+            <span class="n">gen_value</span> <span class="o">=</span> <span class="n">value</span>
         
-        <span class="c1"># Create new &#39;record&#39; (column) to ak-array</span>
+        <span class="c1"># Create a new &#39;record&#39; (column) to ak-array [actual input for MVA]</span>
         <span class="n">col_name</span>    <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="n">X</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span>
-
+        <span class="n">X</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">mva_value</span>
+        
+        <span class="c1"># Store the actual model parameter value</span>
+        <span class="n">col_name</span>    <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;GEN_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">gen_value</span>
+    
     <span class="c1"># This as a last</span>
     <span class="n">ids</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
