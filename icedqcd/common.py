@@ -87,8 +87,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         p   = ak.to_numpy(W_S / ak.sum(W_S)).squeeze() # probability per event entry
         new = np.random.choice(ak.to_numpy(X_S[var]).squeeze(), size=len(X_B), replace=True, p=p)
         
+        # Conditional variable 'MODEL_'
         X_B[var] = ak.Array(new)
 
+        # "Mirror" copy variable 'GEN_' (for ROC plots etc. in the evaluation stage)
+        X_B[var.replace('MODEL', 'GEN')] = ak.Array(new)
+    
+    
     # =================================================================
     # *** Finally combine ***
 

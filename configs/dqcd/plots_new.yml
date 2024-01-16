@@ -5,27 +5,27 @@ FILTER: &FILTER
     sets: [0,1]                # input set ids (one or two)
   
   # ... more filters here
-
+  
   # --------------------
   
   set[0]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{latex: ['$m \neq 2$',  '$m = 2$'],  cut: 'MODEL_m == 2'},
-       {latex: ['$m \neq 5$',  '$m = 5$'],  cut: 'MODEL_m == 5'},
-       {latex: ['$m \neq 10$', '$m = 10$'], cut: 'MODEL_m == 10'},
-       {latex: ['$m \neq 15$', '$m = 15$'], cut: 'MODEL_m == 15'},
-       {latex: ['$m \neq 20$', '$m = 20$'], cut: 'MODEL_m == 20'}]
-
+      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['$\neq(m_\pi = 1  & m_A = 0.33)$', '$m_\pi = 1  & m_A = 0.33$']},
+       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['$\neq(m_\pi = 2  & m_A = 0.67)$', '$m_\pi = 2  & m_A = 0.67$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['$\neq(m_\pi = 4  & m_A = 0.40)$', '$m_\pi = 4  & m_A = 0.40$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['$\neq(m_\pi = 4  & m_A = 1.33)$', '$m_\pi = 4  & m_A = 1.33$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['$\neq(m_\pi = 10 & m_A = 1.00)$', '$m_\pi = 10 & m_A = 1.00$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['$\neq(m_\pi = 10 & m_A = 3.33)$', '$m_\pi = 10 & m_A = 3.33$']}]
+  
   set[1]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{latex: ['$c\tau \neq 1$',    '$c\tau = 1$'],  cut: 'MODEL_ctau == 1'},
-       {latex: ['$c\tau \neq 10$',  '$c\tau = 10$'],  cut: 'MODEL_ctau == 10'},
-       {latex: ['$c\tau \neq 50$',  '$c\tau = 50$'],  cut: 'MODEL_ctau == 50'},
-       {latex: ['$c\tau \neq 100$', '$c\tau = 100$'], cut: 'MODEL_ctau == 100'},
-       {latex: ['$c\tau \neq 500$', '$c\tau = 500$'], cut: 'MODEL_ctau == 500'}]
+      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']},
+       {cut: 'GEN_ctau == 1',   latex: ['$c\tau \neq 1$',   '$c\tau = 1$']  },
+       {cut: 'GEN_ctau == 10',  latex: ['$c\tau \neq 10$',  '$c\tau = 10$'] },
+       {cut: 'GEN_ctau == 100', latex: ['$c\tau \neq 100$', '$c\tau = 100$']}]
   
   # ... more sets here
 
@@ -47,7 +47,7 @@ ROC:
   active: true
   num_bootstrap: 200
   xmin: 1.0E-5
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
@@ -60,7 +60,7 @@ ROC_binned:
   #  edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
 
   #plot[0]:
-  #  var:   ['MODEL_m', 'MODEL_ctau']
+  #  var:   ['GEN_mpi', 'GEN_ctau']
   #  edges: [[1.9, 2.1, 4.9, 5.1, 9.9, 10.1, 14.1, 15.1],
   #          [9, 11, 49, 51, 99, 101]]
 
@@ -68,7 +68,7 @@ ROC_binned:
 MVA_output:
   active: true
   edges: 80
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## (MVA output x External variable) density (2D)
 MVA_2D:

@@ -27,23 +27,19 @@ mva_param: &MVA_INPUT_PARAM
   
   jagged_order:
 
-    - order_0: 
-      name: 'muonSV'
+    - name: 'muonSV'
       var:  'dlen'
       ascending: False  # True ~ smallest first, False ~ largest first
     
-    - order_1: 
-      name: 'SV'
+    - name: 'SV'
       var:  'dlen'
       ascending: False
     
-    - order_2: 
-      name: 'Jet'
+    - name: 'Jet'
       var:  'pt'   
       ascending: False
     
-    - order_3: 
-      name: 'Muon'
+    - name: 'Muon'
       var:  'pt'   
       ascending: False
     

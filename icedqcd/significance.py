@@ -133,7 +133,7 @@ def optimize_selection(args):
     B_cut_eA_xs  += cut_eA  * xs
     B_acc_eff_xs += eff_acc * xs
     B_xs_tot     += xs
-  
+    
     dprint(f'{name.replace("_", "-")} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {eff_acc:0.3f} & {N:0.1E} \\\\')
 
   B_trg_eA  = B_trg_eA_xs  / B_xs_tot

@@ -69,10 +69,10 @@ def read_MC(process_func, process, root_path, param, class_id):
     
     # Apply selections
     X,ids,stats = process_func(X=X_uncut, ids=ids, **param)
-    N_after  = len(X)
+    N_after = len(X)
 
-    eff_acc  = N_after / N_before
-
+    eff_acc = N_after / N_before
+    
     print(__name__ + f'.read_multiple_MC: efficiency x acceptance = {eff_acc:0.6f}')
 
     Y = class_id * ak.Array(np.ones(N_after, dtype=int))
@@ -102,19 +102,29 @@ def read_MC(process_func, process, root_path, param, class_id):
             
         value = model_param[var]
         
-        # Pick random between [a,b]
+        # Pick uniform random between [a,b] ~ "dequantized" sampling
         if type(value) == list:
-            col = value[0]  + (value[1] - value[0]) * ak.Array(np.random.rand(len(X), 1))
-        # Pick specific fixed value
+            if len(value) != 3:
+                raise Exception(__name__ + f'.read_MC: Input {value} ')
+            
+            mva_value = value[1] + (value[2] - value[1]) * ak.Array(np.random.rand(len(X), 1))
+            gen_value = value[0]
+        
+        # Pick only the fixed value
         else:
             if value is None:
                 value = np.nan
-            col = value * ak.Array(np.ones((len(X), 1)).astype(float))         
+            mva_value = value * ak.Array(np.ones((len(X), 1)).astype(float))
+            gen_value = value
         
-        # Create new 'record' (column) to ak-array
+        # Create a new 'record' (column) to ak-array [actual input for MVA]
         col_name    = f'MODEL_{var}'
-        X[col_name] = col
-
+        X[col_name] = mva_value
+        
+        # Store the actual model parameter value
+        col_name    = f'GEN_{var}'
+        X[col_name] = gen_value
+    
     # This as a last
     ids = ak.fields(X)
 

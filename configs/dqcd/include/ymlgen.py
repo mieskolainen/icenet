@@ -37,7 +37,7 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
         # MC signal
         if isMC == 'true' and m != 'null':
-          param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
+          param_name   = f'm_{m}_ctau_{ctau}_xiO_{xi_pair[0]}_xiL_{xi_pair[1]}'
           process_name = f'{process}_{param_name}'  
           folder_name  = f'{process_name}_{end_name}'
 
@@ -131,8 +131,7 @@ def darkphoton(outputfile, filerange='*'):
   rp = {}
   rp['m']         = ['2', '5', '10', '15']
   rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
+  rp['xi_pair']   = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
 
   param = {
     'outputfile':      outputfile,
@@ -168,7 +167,6 @@ def vector(outputfile, filerange='*'):
   rp['m']         = ['2', '5', '10', '15', '20']
   rp['ctau']      = ['1', '10', '50', '100', '500'] 
   rp['xi_pair']   = [['1', '1']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
   
   param = {
     'outputfile':      outputfile,
@@ -203,9 +201,8 @@ def higgs(outputfile, filerange='*'):
   rp = {}
   rp['m']         = ['10', '15', '20']
   rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
-
+  rp['xi_pair']   = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
+  
   param = {
     'outputfile':      outputfile,
     'rp':              rp,
@@ -334,11 +331,11 @@ def QCD(outputfile, filerange='*'):
   rp['m']       = ['null']
   rp['ctau']    = ['null'] 
   rp['xi_pair'] = [['null', 'null']]
-  rp['xi2str']  = ['null']
   '''
+  
   #new models
-  rp['mpi_mA_pair']     = [['null', 'null']]
-  rp['ctau']            = ['null']
+  rp['mpi_mA_pair'] = [['null', 'null']]
+  rp['ctau']        = ['null']
 
   for i in range(len(processes)):
 
@@ -405,16 +402,18 @@ def data(outputfile, filerange='*', period='B'):
     raise Exception(__name__ + f'.data: Unknown period "{period}" chosen')
   
   rp              = {}
+  
+  #old models
   '''
-  rp['m']         = ['null']
-  rp['ctau']      = ['null'] 
-  rp['xi_pair']   = [['null', 'null']]
-  rp['xi2str']    = ['null']
+  rp['m']       = ['null']
+  rp['ctau']    = ['null'] 
+  rp['xi_pair'] = [['null', 'null']]
   '''
   
-  rp['mpi']     = ['null']
-  rp['mA']      = ['null']
-  rp['ctau']    = ['null']
+  #new models
+  rp['mpi_mA_pair'] = [['null', 'null']]
+  rp['ctau']        = ['null']
+  
   for i in range(len(processes)):
 
     # ------------------------------------------
@@ -422,7 +421,7 @@ def data(outputfile, filerange='*', period='B'):
     filename        = f'output_{filerange}.root'
     force_xs        = 'false'
     isMC            = 'false'
-    xs              =  2799000.0
+    xs              =  2799000.0 # dummy value
     maxevents_scale = '1.0'
     # ------------------------------------------
 

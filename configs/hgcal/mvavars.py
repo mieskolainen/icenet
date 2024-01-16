@@ -4,9 +4,8 @@
 KINEMATIC_GEN_VARS = [
 ]
 
-# For plots etc.
+# For plots, diagnostics etc.
 KINEMATIC_VARS = [
-
 ]
 
 MVA_SCALAR_VARS = [
