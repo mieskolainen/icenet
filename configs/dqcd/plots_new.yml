@@ -12,12 +12,12 @@ FILTER: &FILTER
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['$\neq(m_\pi = 1  & m_A = 0.33)$', '$m_\pi = 1  & m_A = 0.33$']},
-       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['$\neq(m_\pi = 2  & m_A = 0.67)$', '$m_\pi = 2  & m_A = 0.67$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['$\neq(m_\pi = 4  & m_A = 0.40)$', '$m_\pi = 4  & m_A = 0.40$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['$\neq(m_\pi = 4  & m_A = 1.33)$', '$m_\pi = 4  & m_A = 1.33$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['$\neq(m_\pi = 10 & m_A = 1.00)$', '$m_\pi = 10 & m_A = 1.00$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['$\neq(m_\pi = 10 & m_A = 3.33)$', '$m_\pi = 10 & m_A = 3.33$']}]
+      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['$\neq(m_\pi = 1$  & $m_A = 0.33)$', '$m_\pi = 1$  & $m_A = 0.33$']},
+       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['$\neq(m_\pi = 2$  & $m_A = 0.67)$', '$m_\pi = 2$  & $m_A = 0.67$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['$\neq(m_\pi = 4$  & $m_A = 0.40)$', '$m_\pi = 4$  & $m_A = 0.40$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['$\neq(m_\pi = 4$  & $m_A = 1.33)$', '$m_\pi = 4$  & $m_A = 1.33$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['$\neq(m_\pi = 10$ & $m_A = 1.00)$', '$m_\pi = 10$ & $m_A = 1.00$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['$\neq(m_\pi = 10$ & $m_A = 3.33)$', '$m_\pi = 10$ & $m_A = 3.33$']}]
   
   set[1]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
@@ -46,7 +46,7 @@ contours:
 ROC:
   active: true
   num_bootstrap: 200
-  xmin: 1.0E-5
+  xmin: 1.0E-6
   set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D

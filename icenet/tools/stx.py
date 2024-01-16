@@ -517,6 +517,10 @@ def eval_boolean_exptree(root, X, ids):
             f = lambda x : 1.0/x
         elif func_name == 'BOOL':
             f = lambda x : x.astype(bool)
+        elif func_name == 'FLOAT':
+            f = lambda x : x.astype(float)
+        elif func_name == 'INT':
+            f = lambda x : x.astype(int)
         else:
             raise Exception(__name__ + f'.eval_boolean_exptree: Unknown function {func_name}')
         
@@ -525,20 +529,23 @@ def eval_boolean_exptree(root, X, ids):
 
     # Middle binary operators g(x,y)
     if   operator == '<':
-        g = lambda x,y : x  < float(y)
+        g = lambda x,y : x  < y
     elif operator == '>':
-        g = lambda x,y : x  > float(y)
+        g = lambda x,y : x  > y
     elif operator == '<=':
-        g = lambda x,y : x <= float(y)
+        g = lambda x,y : x <= y
     elif operator == '>=':
-        g = lambda x,y : x >= float(y)
+        g = lambda x,y : x >= y
     elif operator == '!=':
-        g = lambda x,y : x != int(y)
+        g = lambda x,y : ~np.isclose(x,y) # use default tolerance
     elif operator == '==':
-        g = lambda x,y : x == int(y)
+        g = lambda x,y :  np.isclose(x,y)
     else:
         raise Exception(__name__ + f'.eval_boolean_exptree: Unknown binary operator "{operator}"')
-
+    
+    if isinstance(rhs, str):
+        rhs = float(rhs)
+    
     # Evaluate
     return g(f(X[:, ind]), rhs)
 
