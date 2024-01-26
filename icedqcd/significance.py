@@ -92,10 +92,8 @@ def optimize_selection(args):
   print('resdict:')
   pprint(resdict)
 
-
   # MVA-model labels
   MVA_model_names = resdict['roc_labels']['inclusive']
-
 
   # --------------------------------------------------------
   # Total background estimate
@@ -115,17 +113,17 @@ def optimize_selection(args):
   dprint('\\hline')
 
   for name in info[f"class_{c}"].keys():
-
+    
     # ----------
     proc          = info[f"class_{c}"][name]
     # ----------
 
-    xs            = proc['yaml']["xs"]    # Cross section
+    xs            = proc['yaml']["xs"]     # Cross-section
     
     trg_eA        = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
     cut_eA        = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
-    eff_acc       = trg_eA * cut_eA       # combined eff x Acc
-    N             = eff_acc * xs * L_int  # 
+    eff_acc       = trg_eA  * cut_eA       # Combined Eff x Acc
+    N             = eff_acc * xs * L_int   # Number of events expected
     
     B_tot        += N
 
@@ -135,7 +133,7 @@ def optimize_selection(args):
     B_xs_tot     += xs
     
     dprint(f'{name.replace("_", "-")} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {eff_acc:0.3f} & {N:0.1E} \\\\')
-
+  
   B_trg_eA  = B_trg_eA_xs  / B_xs_tot
   B_cut_eA  = B_cut_eA_xs  / B_xs_tot
   B_acc_eff = B_acc_eff_xs / B_xs_tot
@@ -234,18 +232,18 @@ def optimize_selection(args):
       
       # ----------------
       # Compute background event count
-      B[i]         = B_tot * MVA_eff[i,0]
+      B[i]        = B_tot * MVA_eff[i,0]
 
       # ----------------
-      xs[i]        = proc['yaml']["xs"]
-      eff_acc      = proc['eff_acc']
+      xs[i]       = proc['yaml']["xs"]
+      eff_acc     = proc['eff_acc']
 
-      S_trg_eA[i]  = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
-      S_cut_eA[i]  = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
+      S_trg_eA[i] = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
+      S_cut_eA[i] = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
       # ----------------
 
       # Compute signal event count 
-      S[i]         = S_trg_eA[i] * S_cut_eA[i] * xs[i] * L_int * MVA_eff[i,1]
+      S[i]        = S_trg_eA[i] * S_cut_eA[i] * xs[i] * L_int * MVA_eff[i,1]
 
       # ------------------------------------
       fig,ax = plt.subplots(1,2)
@@ -285,7 +283,7 @@ def optimize_selection(args):
           plt.xlabel('False positive rate $\\alpha$ (background efficiency)', fontsize=9)
 
         plt.ylim([0,1])
-      
+
       pdf_filename = f'{path}/{roc_path}.pdf'
       plt.savefig(pdf_filename, bbox_inches='tight')
       plt.close()

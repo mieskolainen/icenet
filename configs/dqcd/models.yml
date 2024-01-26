@@ -147,8 +147,8 @@ xgb0-only-mu:
   
   # ** Custom set of variables **
   exclude_MVA_vars: ['.*']
-  include_MVA_vars: ['nMuon', 'Muon_.*', 'MODEL_.*']
-
+  include_MVA_vars: ['SV_.*', 'muonSV_.*', 'Muon_.*', 'MODEL_.*', 'nMuon', 'nsv', 'MET_pt', 'MET_phi']
+  
   # general parameters
   model_param:
     num_boost_round: 60      # number of epochs (equal to the number of trees!)

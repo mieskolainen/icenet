@@ -136,7 +136,7 @@ train_runmode:
     
     - xgb0
     - xgb0-no-mass
-    #- xgb0-only-mu
+    - xgb0-only-mu
     
     #- dmlp
     #- lgr0
