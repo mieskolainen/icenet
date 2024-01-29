@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.2
+                0.0.9.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -488,7 +488,8 @@
     <span class="n">model_param</span>     <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span>
     <span class="n">force_xs</span>        <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;force_xs&#39;</span><span class="p">]</span>
     <span class="n">maxevents_scale</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;maxevents_scale&#39;</span><span class="p">]</span>
-
+    <span class="n">isMC</span>            <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s1">&#39;isMC&#39;</span><span class="p">]</span>
+    
     <span class="c1"># --------------------</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
@@ -512,9 +513,9 @@
     <span class="c1">## ** Here one could save X before any cuts **</span>
     
     <span class="c1"># Apply selections</span>
-    <span class="n">X</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">stats</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_uncut</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">stats</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_uncut</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="o">**</span><span class="n">param</span><span class="p">)</span>
     <span class="n">N_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
+    
     <span class="n">eff_acc</span> <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_multiple_MC: efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>

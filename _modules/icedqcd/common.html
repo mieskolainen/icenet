@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.2
+                0.0.9.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -497,25 +497,24 @@
         <span class="s2">&quot;tree&quot;</span><span class="p">:</span>        <span class="s2">&quot;Events&quot;</span><span class="p">,</span>
         <span class="s2">&quot;entry_start&quot;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span>
         <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entry_stop</span><span class="p">,</span>
-        <span class="s2">&quot;maxevents&quot;</span><span class="p">:</span>    <span class="n">maxevents</span><span class="p">,</span>
+        <span class="s2">&quot;maxevents&quot;</span><span class="p">:</span>   <span class="n">maxevents</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span>        <span class="n">args</span><span class="p">,</span>
-        <span class="s2">&quot;load_ids&quot;</span><span class="p">:</span>    <span class="n">LOAD_VARS</span><span class="p">,</span>
-        <span class="s2">&quot;isMC&quot;</span><span class="p">:</span>        <span class="kc">True</span>
+        <span class="s2">&quot;load_ids&quot;</span><span class="p">:</span>    <span class="n">LOAD_VARS</span>
     <span class="p">}</span>
 
     <span class="n">INFO</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class_0&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;class_1&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
-
+    
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** SIGNAL MC ***</span>
     
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span> <span class="c1"># input from yamlgen generated yml</span>
     <span class="n">X_S</span><span class="p">,</span> <span class="n">Y_S</span><span class="p">,</span> <span class="n">W_S</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** BACKGROUND MC ***</span>
     
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span> <span class="c1"># input from yamlgen generated yml</span>
     <span class="n">X_B</span><span class="p">,</span> <span class="n">Y_B</span><span class="p">,</span> <span class="n">W_B</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="s1">&#39;class_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
     
@@ -560,7 +559,7 @@
 
 <div class="viewcode-block" id="process_root">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a>
-<span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply selections</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -571,7 +570,7 @@
     <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;cutfunc&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
     
     <span class="c1"># @@ Filtering done here @@</span>
-    <span class="n">fmask</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
+    <span class="n">fmask</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;before&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)}</span>
     
     <span class="c1">#plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args[&#39;plotdir&#39;], label=f&#39;&lt;filterfunc&gt;_{isMC}&#39;, varlist=CUT_VARS, library=&#39;ak&#39;)</span>
@@ -648,20 +647,29 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">continue</span>
     
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">## ** Collection filter **</span>
+    
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_filter&#39;</span><span class="p">]:</span>
+        
+        <span class="n">expr</span> <span class="o">=</span> <span class="s1">&#39;data.x.&#39;</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;condition&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="c1"># strip to remove leading/trailing spaces</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Filtering collection </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1"> with </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">filter_ind</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]][</span><span class="n">filter_ind</span><span class="p">]</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1">## ** Re-ordering sort **</span>
+    <span class="c1">## ** Collection entry re-ordering sort **</span>
     
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;jagged_order&#39;</span><span class="p">]:</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Re-ordering </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Collection re-ordering </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="n">sort_ind</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]][</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">]],</span> <span class="n">ascending</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;ascending&#39;</span><span class="p">])</span>
         <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]][</span><span class="n">sort_ind</span><span class="p">]</span>
-    
-    
+        
     <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1">## ** Add additional custom variables **</span>
+    <span class="c1">## ** Custom variables added to collections **</span>
     
     <span class="c1">## DeltaR</span>
     <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;deltaR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
