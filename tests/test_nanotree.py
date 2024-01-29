@@ -41,10 +41,13 @@ for library in ['ak']:
 
 	#print(count)
 	#exit()
-
-
+ 
 	print(f'Opening with <{library}> took: {elapsed} sec')
 	
+	idx = out.sv.chi2 > 0.0
+	print(idx)
+	out['sv'] = out['sv'][idx]
+ 	
 	print(len(out))
 	print(out)
 

@@ -53,25 +53,24 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         "tree":        "Events",
         "entry_start": entry_start,
         "entry_stop":  entry_stop,
-        "maxevents":    maxevents,
+        "maxevents":   maxevents,
         "args":        args,
-        "load_ids":    LOAD_VARS,
-        "isMC":        True
+        "load_ids":    LOAD_VARS
     }
 
     INFO = {'class_0': None, 'class_1': None}
-
+    
     # =================================================================
     # *** SIGNAL MC ***
     
-    proc = args["input"]['class_1']
+    proc = args["input"]['class_1'] # input from yamlgen generated yml
     X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
     # =================================================================
     # *** BACKGROUND MC ***
     
-    proc = args["input"]['class_0']
+    proc = args["input"]['class_0'] # input from yamlgen generated yml
     X_B, Y_B, W_B, ind, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
         process_func=process_root, processes=proc, root_path=root_path, param=param)
     
@@ -113,7 +112,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
 
 
-def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
+def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None, **kwargs):
     """
     Apply selections
     """
@@ -124,7 +123,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, **kwargs):
     stats = {'filterfunc': None, 'cutfunc': None}
     
     # @@ Filtering done here @@
-    fmask = FILTERFUNC(X=X, isMC=isMC, xcorr_flow=args['xcorr_flow'])
+    fmask = FILTERFUNC(X=X, isMC=isMC, class_id=class_id, xcorr_flow=args['xcorr_flow'])
     stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
     
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=CUT_VARS, library='ak')
@@ -198,20 +197,29 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
             except:
                 continue
     
+    # -------------------------------------------------------------------------
+    ## ** Collection filter **
+    
+    for d in args['jagged_filter']:
+        
+        expr = 'data.x.' + d['condition'].strip() # strip to remove leading/trailing spaces
+        print(__name__ + f'.splitfactor: Filtering collection {d} with {expr}')
+        
+        filter_ind = eval(expr)
+        data.x[d['name']] = data.x[d['name']][filter_ind]
     
     # -------------------------------------------------------------------------
-    ## ** Re-ordering sort **
+    ## ** Collection entry re-ordering sort **
     
     for d in args['jagged_order']:
-        
-        print(__name__ + f'.splitfactor: Re-ordering {d}')
+
+        print(__name__ + f'.splitfactor: Collection re-ordering {d}')
         
         sort_ind = ak.argsort(data.x[d['name']][d['var']], ascending=d['ascending'])
         data.x[d['name']] = data.x[d['name']][sort_ind]
-    
-    
+        
     # -------------------------------------------------------------------------
-    ## ** Add additional custom variables **
+    ## ** Custom variables added to collections **
     
     ## DeltaR
     data.x['muonSV', 'deltaR'] = analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')

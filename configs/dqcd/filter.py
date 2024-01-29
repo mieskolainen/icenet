@@ -11,17 +11,17 @@ import numba
 from icenet.tools import stx
 
 
-def filter_nofilter(X, isMC=None, xcorr_flow=False):
+def filter_nofilter(X, isMC=None, class_id=None, xcorr_flow=False):
     """ All pass
     """
     return ak.Array(np.ones(len(X), dtype=np.bool_)) # Note datatype np.bool_
 
 
-def filter_standard(X, isMC=None, xcorr_flow=False):
+def filter_standard(X, isMC=None, class_id=None, xcorr_flow=False):
     """ Basic filters.
     
     Args:
-    	X    : Awkward jagged array
+    	X : Awkward jagged array
     
     Returns:
         Passing indices mask (N)
@@ -34,6 +34,10 @@ def filter_standard(X, isMC=None, xcorr_flow=False):
              "O['HLT_Mu9_IP6_part3'] | "
              "O['HLT_Mu9_IP6_part4']"]
 
+    #if isMC and class_id == 0:
+    #    names += ["additional cut here"]
+    #    names += ["additional cut here"]
+    
     # Evaluate columnar cuts; Compute cutflow
     cuts  = [eval(names[i], globals()) for i in range(len(names))]
     mask  = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)

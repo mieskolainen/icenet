@@ -24,9 +24,19 @@ mva_param: &MVA_INPUT_PARAM
     SV:   8
     cpf:  0     # 20
     npf:  0     # 10
-  
-  jagged_order:
+
+
+  # Filtering of collection entries (for BDT)
+  jagged_filter:
     
+    - name: 'muonSV'
+      condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0'
+    
+    # add more here ..
+
+  # Re-ordering of collection entries (for BDT)
+  jagged_order:
+
     - name: 'muonSV'
       var:  'dlen'
       ascending: False  # True ~ smallest first, False ~ largest first

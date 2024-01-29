@@ -44,7 +44,8 @@ def read_MC(process_func, process, root_path, param, class_id):
     model_param     = process['model_param']
     force_xs        = process['force_xs']
     maxevents_scale = process['maxevents_scale']
-
+    isMC            = process['isMC']
+    
     # --------------------
 
     print(datasets)
@@ -68,9 +69,9 @@ def read_MC(process_func, process, root_path, param, class_id):
     ## ** Here one could save X before any cuts **
     
     # Apply selections
-    X,ids,stats = process_func(X=X_uncut, ids=ids, **param)
+    X,ids,stats = process_func(X=X_uncut, ids=ids, isMC=isMC, class_id=class_id, **param)
     N_after = len(X)
-
+    
     eff_acc = N_after / N_before
     
     print(__name__ + f'.read_multiple_MC: efficiency x acceptance = {eff_acc:0.6f}')

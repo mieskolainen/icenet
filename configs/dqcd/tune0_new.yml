@@ -25,6 +25,14 @@ mva_param: &MVA_INPUT_PARAM
     cpf:  0     # 20
     npf:  0     # 10
   
+
+  # Filtering of collection entries (for BDT)
+  jagged_filter:
+    
+    - name: 'muonSV'
+      condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0'
+
+  # Re-ordering of collection entries (for BDT)
   jagged_order:
 
     - name: 'muonSV'
