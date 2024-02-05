@@ -222,13 +222,16 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     ## ** Custom variables added to collections **
     
     ## \DeltaR
-    data.x['muonSV', 'deltaR'] = analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
+    data.x['muonSV', 'deltaR'] = \
+        analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
     jagged_vars.append('muonSV_deltaR')
     muonsv_vars.append('muonSV_deltaR')
     
     ## Invariant Mass
-    data.x['muonSV', 'mass'] = analytic.invmass(x=data.x['muonSV'], \
-                                                 pt1='mu1pt', pt2='mu2pt', eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
+    data.x['muonSV', 'mass'] = \
+        analytic.invmass(x=data.x['muonSV'], pt1='mu1pt', pt2='mu2pt', eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi',
+                         m1_const=0.1057, m2_const=0.1057)
+    
     jagged_vars.append('muonSV_mass')
     muonsv_vars.append('muonSV_mass')
     

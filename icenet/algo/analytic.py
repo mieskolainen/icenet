@@ -15,9 +15,28 @@ def phi_phasewrap(phi):
     return (phi + np.pi) % (2 * np.pi) - np.pi
 
 
-def invmass(x, pt1, pt2, eta1, eta2, phi1, phi2):
+def invmass(x, pt1: str, pt2: str, eta1: str, eta2: str, phi1: str, phi2: str, m1_const=0.1396, m2_const=0.1396):
     """
-    invariant mass
+    invariant mass (exact)
+    
+    With awkward arrays
+    """
+    
+    px1,py1,pz1 = x[pt1]*np.cos(x[phi1]), x[pt1]*np.sin(x[phi1]), x[pt1]/np.tan(2.0*np.arctan(np.exp(-x[eta1])))
+    px2,py2,pz2 = x[pt2]*np.cos(x[phi2]), x[pt2]*np.sin(x[phi2]), x[pt2]/np.tan(2.0*np.arctan(np.exp(-x[eta2])))
+    
+    E1 = np.sqrt(m1_const**2 + px1**2 + py1**2 + pz1**2)
+    E2 = np.sqrt(m2_const**2 + px2**2 + py2**2 + pz2**2)
+    M2 = m1_const**2 + m2_const**2 + 2*(E1*E2 - (px1*px2 + py1*py2 + pz1*pz2))
+    
+    return np.sqrt(M2)
+
+
+def invmass_massless(x, pt1: str, pt2: str, eta1: str, eta2: str, phi1: str, phi2: str):
+    """
+    invariant mass (massless limit)
+    
+    With awkward arrays
     """
     prodPt   = x[pt1] * x[pt2]
     deltaEta = x[eta1] - x[eta2]
@@ -26,9 +45,11 @@ def invmass(x, pt1, pt2, eta1, eta2, phi1, phi2):
     return np.sqrt(2*prodPt*(np.cosh(deltaEta) - np.cos(deltaPhi)))
 
 
-def deltaR(x, eta1, eta2, phi1, phi2):
+def deltaR(x, eta1: str, eta2: str, phi1: str, phi2: str):
     """
     dR distance
+    
+    With awkward arrays
     """
     deltaEta = x[eta1] - x[eta2]
     deltaPhi = phi_phasewrap(x[phi1] - x[phi2])
