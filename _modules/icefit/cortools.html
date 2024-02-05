@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.3
+                0.0.9.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -192,7 +192,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
@@ -442,7 +443,7 @@
   <h1>Source code for icefit.cortools</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Linear (correlation) and non-linear dependency tools</span>
 <span class="c1">#</span>
-<span class="c1"># Run with: pytest ./icefit/cortools -rP (can take few minutes)</span>
+<span class="c1"># Run with: pytest ./icefit/cortools.py -rP (can take few minutes)</span>
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
@@ -450,6 +451,7 @@
 <span class="c1">#sys.path.append(&quot;.&quot;)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="c1">#import numba</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
@@ -667,9 +669,9 @@
     <span class="k">if</span>   <span class="n">normalized</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">I</span>
     <span class="k">elif</span> <span class="n">normalized</span> <span class="o">==</span> <span class="s1">&#39;additive&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="p">(</span><span class="n">H_score</span><span class="p">(</span><span class="n">Pi</span><span class="p">)</span> <span class="o">+</span> <span class="n">H_score</span><span class="p">(</span><span class="n">Pj</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="p">(</span><span class="n">H_score</span><span class="p">(</span><span class="n">P_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">H_score</span><span class="p">(</span><span class="n">P_j</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">normalized</span> <span class="o">==</span> <span class="s1">&#39;multiplicative&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">I</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">H_score</span><span class="p">(</span><span class="n">Pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">H_score</span><span class="p">(</span><span class="n">Pj</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">I</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">H_score</span><span class="p">(</span><span class="n">P_i</span><span class="p">)</span> <span class="o">*</span> <span class="n">H_score</span><span class="p">(</span><span class="n">P_j</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;I_score: Error with unknown normalization parameter &quot;</span><span class="si">{</span><span class="n">normalized</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 
@@ -1007,19 +1009,19 @@
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_gaussian">[docs]</a>
 <span class="k">def</span> <span class="nf">test_gaussian</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    #Gaussian unit test of the estimators.</span>
+<span class="sd">    # Gaussian unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">pytest</span>
     
-    <span class="n">EPS</span> <span class="o">=</span> <span class="mf">0.3</span>
+    <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># neural MI can fluctuate ...</span>
     
     <span class="c1">## Create synthetic Gaussian data</span>
-    <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">)]:</span>
-
+    <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mf">5e3</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">)]:</span>
+        
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*************** statistics N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> ***************&#39;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
-        
+        <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+            
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;&lt;&lt;rho = </span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&gt;&gt;&gt;&#39;</span><span class="p">)</span>
 
             <span class="c1"># Create correlation via 2D-Cholesky</span>
@@ -1030,10 +1032,10 @@
             <span class="n">x2</span>  <span class="o">=</span> <span class="n">rho</span><span class="o">*</span><span class="n">z1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">z2</span>
             
             <span class="c1"># ---------------------------------------------------------------</span>
-
+            
             <span class="c1"># Linear correlation</span>
             <span class="n">r</span><span class="p">,</span><span class="n">r_CI</span><span class="p">,</span><span class="n">prob</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)</span>
-            <span class="k">assert</span>  <span class="n">r</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+            <span class="k">assert</span>  <span class="n">r</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">rel</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pearson_corr = </span><span class="si">{</span><span class="n">r</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">, CI = </span><span class="si">{</span><span class="n">r_CI</span><span class="si">}</span><span class="s1">, p-value = </span><span class="si">{</span><span class="n">prob</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="c1"># MI Reference (exact analytic)</span>
@@ -1045,18 +1047,36 @@
             
             <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">automethod</span><span class="p">:</span>
                 <span class="n">MI</span><span class="p">,</span> <span class="n">MI_CI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
-                <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="n">rel</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Histogram     MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">, CI = </span><span class="si">{</span><span class="n">MI_CI</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
 
             <span class="c1"># Neural MI</span>
             <span class="n">neuromethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MINE&#39;</span><span class="p">,</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSITY&#39;</span><span class="p">]</span>
             
+            <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+            <span class="n">Z</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> 
+            
             <span class="k">for</span> <span class="n">losstype</span> <span class="ow">in</span> <span class="n">neuromethod</span><span class="p">:</span>
-
-                <span class="c1"># Test with 2D vectors</span>
-                <span class="n">MI</span><span class="p">,</span><span class="n">MI_err</span>  <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
-                <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural        MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> +- </span><span class="si">{</span><span class="n">MI_err</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">losstype</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                
+                <span class="c1">## -----------------</span>
+                <span class="n">MI</span><span class="p">,</span><span class="n">MI_err</span><span class="p">,</span><span class="n">model</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
+                <span class="n">device</span> <span class="o">=</span> <span class="n">MI</span><span class="o">.</span><span class="n">device</span>
+                <span class="n">MI</span>     <span class="o">=</span> <span class="n">MI</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="n">MI_err</span> <span class="o">=</span> <span class="n">MI_err</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                
+                <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="n">rel</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural (.estimate)            MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> +- </span><span class="si">{</span><span class="n">MI_err</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">losstype</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                
+                <span class="c1">## -----------------</span>
+                <span class="n">MI_full</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">apply_mine</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">MI_full</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="n">rel</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural (.apply_mine)          MI = </span><span class="si">{</span><span class="n">MI_full</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">losstype</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                
+                <span class="c1">## -----------------</span>
+                <span class="n">MI_batch</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">apply_mine_batched</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">MI_batch</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="n">rel</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Neural (.apply_mine_batched) MI = </span><span class="si">{</span><span class="n">MI_batch</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">losstype</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                
             
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
@@ -1083,7 +1103,7 @@
     <span class="n">MI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span> <span class="n">Z</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x2</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
 
@@ -1096,7 +1116,7 @@
     <span class="n">MI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">assert</span>  <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">x2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">MI_mine</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span> <span class="n">Z</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x2</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
 
 

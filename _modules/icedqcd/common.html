@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.3
+                0.0.9.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -192,7 +192,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
@@ -671,10 +672,16 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## ** Custom variables added to collections **</span>
     
-    <span class="c1">## DeltaR</span>
+    <span class="c1">## \DeltaR</span>
     <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;deltaR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
     <span class="n">jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
     <span class="n">muonsv_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_deltaR&#39;</span><span class="p">)</span>
+    
+    <span class="c1">## Invariant Mass</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analytic</span><span class="o">.</span><span class="n">invmass</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">],</span> \
+                                                 <span class="n">pt1</span><span class="o">=</span><span class="s1">&#39;mu1pt&#39;</span><span class="p">,</span> <span class="n">pt2</span><span class="o">=</span><span class="s1">&#39;mu2pt&#39;</span><span class="p">,</span> <span class="n">eta1</span><span class="o">=</span><span class="s1">&#39;mu1eta&#39;</span><span class="p">,</span> <span class="n">eta2</span><span class="o">=</span><span class="s1">&#39;mu2eta&#39;</span><span class="p">,</span> <span class="n">phi1</span><span class="o">=</span><span class="s1">&#39;mu1phi&#39;</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="s1">&#39;mu2phi&#39;</span><span class="p">)</span>
+    <span class="n">jagged_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_mass&#39;</span><span class="p">)</span>
+    <span class="n">muonsv_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;muonSV_mass&#39;</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;muonSV&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
     
@@ -759,6 +766,14 @@
                         <span class="n">null_value</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;fill_value&#39;</span><span class="p">])</span>
     <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     
+    
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Mutual information regularization targets</span>
+    
+    <span class="n">MI_ind</span><span class="p">,</span> <span class="n">MI_vars</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">set_of_vars</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MI_VARS&#39;</span><span class="p">]))</span>
+    <span class="n">data_MI</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">MI_ind</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    
+    
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># Create DeepSet style representation from the &quot;long-vector&quot; content</span>
     <span class="n">data_deps</span> <span class="o">=</span> <span class="kc">None</span>
@@ -776,7 +791,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
     
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_MI&#39;</span><span class="p">:</span> <span class="n">data_MI</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
 
 </pre></div>
 

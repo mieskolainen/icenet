@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.3
+                0.0.9.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -192,7 +192,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
@@ -740,17 +741,19 @@
         <span class="n">MI</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;MI_reg_param&#39;</span><span class="p">])</span> <span class="c1"># ! important</span>
         <span class="n">input_size</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;MI_reg_param&#39;</span><span class="p">][</span><span class="s1">&#39;x_dim&#39;</span><span class="p">]</span>
 
-        <span class="n">index</span>      <span class="o">=</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;y_index&#39;</span><span class="p">]</span>
-        <span class="k">if</span>   <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_dim</span>      <span class="o">=</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;y_dim&#39;</span><span class="p">]</span>
+        <span class="k">if</span>   <span class="n">y_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">input_size</span> <span class="o">+=</span> <span class="n">model</span><span class="o">.</span><span class="n">C</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="n">input_size</span> <span class="o">+=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-            <span class="n">input_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">y_dim</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">input_size</span> <span class="o">+=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">y_dim</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">y_dim</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">input_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_dim</span><span class="p">)</span>
 
         <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="p">[]</span>
         <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;MI_lb&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="p">[]</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.torch_loop: MINE estimator input_size: </span><span class="si">{</span><span class="n">input_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">])):</span>
             <span class="n">MI_model</span>         <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">MINENet</span><span class="p">(</span><span class="n">input_size</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span> <span class="o">**</span><span class="n">MI</span><span class="p">)</span>
             <span class="n">MI_model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">MI_model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
@@ -761,7 +764,7 @@
         <span class="n">all_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">])):</span>
             <span class="n">all_parameters</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-
+        
         <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">all_parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">],</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">MI</span> <span class="o">=</span> <span class="kc">None</span>

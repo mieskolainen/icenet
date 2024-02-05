@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.3
+                0.0.9.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -192,7 +192,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
@@ -476,10 +477,17 @@
     <span class="k">global</span> <span class="n">MI_reg_param</span>
     <span class="k">global</span> <span class="n">loss_history</span>
     
+    <span class="c1"># Detect device</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="n">device</span>
+    
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    
+    <span class="c1"># Set computing device</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">w</span>       <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
     
     <span class="c1">## Squared hinge-loss type</span>
     <span class="c1">#targets = 2 * targets - 1</span>
@@ -503,7 +511,7 @@
 
     <span class="c1"># Loop over chosen classes</span>
     <span class="n">k</span>       <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">MI_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">MI_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
     <span class="n">MI_lb_values</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">MI_reg_param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">]:</span>
@@ -516,37 +524,41 @@
         <span class="c1"># Pick class indices</span>
         <span class="n">cind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
 
-        <span class="n">X</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">MI_x</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span><span class="n">cind</span><span class="p">]</span>
+        <span class="n">X</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">MI_x</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)[</span><span class="n">cind</span><span class="p">]</span>
         <span class="n">Z</span>     <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
         <span class="n">W</span>     <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
-
-        <span class="c1">### Now loop over all powerset categories</span>
+        
+        <span class="c1">### Now loop over all (powerset) categories</span>
         <span class="n">mask</span>  <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;evt_mask&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
         <span class="n">N_cat</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">MI_loss_this</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">MI_lb</span>        <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">MI_loss_this</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">MI_lb</span>        <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="n">total_ww</span>     <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_cat</span><span class="p">):</span>
-
+            
             <span class="n">mm_</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="n">m</span><span class="p">,:]</span> <span class="c1"># Pick index mask</span>
 
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span> <span class="c1"># Minimum number of events per category cutoff</span>
-
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span> <span class="c1"># Minimum number of events per category cutoff</span>
+                
                 <span class="c1"># We need .detach() here for Z!</span>
                 <span class="n">model</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span>
-                    <span class="n">return_model_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="n">reg_param</span><span class="p">)</span>
+                    <span class="n">return_model_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="n">reg_param</span><span class="p">)</span>
                 
                 <span class="c1"># ------------------------------------------------------------</span>
                 <span class="c1"># Now apply the MI estimator to the sample</span>
                 
                 <span class="c1"># No .detach() here, we need the gradients for Z!</span>
-                <span class="n">MI_lb</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">apply_in_batches</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">])</span>
+                <span class="n">MI_lb</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">apply_mine_batched</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                                              <span class="n">losstype</span><span class="o">=</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;eval_batch_size&#39;</span><span class="p">])</span>
                 <span class="c1"># ------------------------------------------------------------</span>
                 
                 <span class="c1"># Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats</span>
-                <span class="n">cat_ww</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">MI_reg_param</span><span class="p">[</span><span class="s1">&#39;poisson_weight&#39;</span><span class="p">]:</span>
+                    <span class="n">cat_ww</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cat_ww</span>   <span class="o">=</span> <span class="mf">1.0</span>
                 
                 <span class="c1"># Save</span>
                 <span class="n">MI_loss_this</span> <span class="o">=</span> <span class="n">MI_loss_this</span> <span class="o">+</span> <span class="n">MI_reg_param</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">MI_lb</span> <span class="o">*</span> <span class="n">cat_ww</span>
@@ -668,9 +680,9 @@
 
         <span class="c1"># == Custom loss ==</span>
         <span class="k">if</span> <span class="s1">&#39;custom&#39;</span> <span class="ow">in</span> <span class="n">model_param</span><span class="p">[</span><span class="s1">&#39;objective&#39;</span><span class="p">]:</span>
-
+            
             <span class="n">strs</span>   <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="s1">&#39;objective&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu:0&#39;</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu:0&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">strs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_cross_entropy_with_MI&#39;</span><span class="p">:</span>
 

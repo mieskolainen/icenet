@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.3
+                0.0.9.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -192,7 +192,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.apply_in_batches"><code class="docutils literal notranslate"><span class="pre">apply_in_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
@@ -494,10 +495,10 @@
 </li>
       <li><a href="modules/icefit.html#icefit.statstools.analytical_extreme_npdf">analytical_extreme_npdf() (in module icefit.statstools)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icefit.html#icefit.peakfit.analyze_1D_fit">analyze_1D_fit() (in module icefit.peakfit)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/icemc.html#icemc.icemc.annotate_heatmap">annotate_heatmap() (in module icemc.icemc)</a>
 
       <ul>
@@ -508,9 +509,11 @@
 </li>
       <li><a href="modules/icebrk.html#icebrk.cutstats.apply_cuts">apply_cuts() (in module icebrk.cutstats)</a>
 </li>
-      <li><a href="modules/icefit.html#icefit.mine.apply_in_batches">apply_in_batches() (in module icefit.mine)</a>
-</li>
       <li><a href="modules/icenet.html#icenet.tools.io.apply_madscore">apply_madscore() (in module icenet.tools.io)</a>
+</li>
+      <li><a href="modules/icefit.html#icefit.mine.apply_mine">apply_mine() (in module icefit.mine)</a>
+</li>
+      <li><a href="modules/icefit.html#icefit.mine.apply_mine_batched">apply_mine_batched() (in module icefit.mine)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.io.apply_zscore">apply_zscore() (in module icenet.tools.io)</a>
 </li>
@@ -918,6 +921,8 @@
 </li>
       <li><a href="modules/icefit.html#icefit.statstools.geom_mean_2D">geom_mean_2D() (in module icefit.statstools)</a>
 </li>
+      <li><a href="modules/icenet.html#icenet.deep.dmlp.get_act">get_act() (in module icenet.deep.dmlp)</a>
+</li>
       <li><a href="modules/icebrk.html#icebrk.tools.get_first_indices">get_first_indices() (in module icebrk.tools)</a>
 </li>
       <li><a href="modules/icefit.html#icefit.jacobian.get_full_hessian">get_full_hessian() (in module icefit.jacobian)</a>
@@ -928,10 +933,10 @@
 </li>
       <li><a href="modules/icefit.html#icefit.jacobian.get_jacobian">get_jacobian() (in module icefit.jacobian)</a>
 </li>
-      <li><a href="modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">get_Lorentz_edge_features() (in module icenet.algo.analytic)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">get_Lorentz_edge_features() (in module icenet.algo.analytic)</a>
+</li>
       <li><a href="modules/icehgcal.html#icehgcal.graphio.get_node_features">get_node_features() (in module icehgcal.graphio)</a>
 
       <ul>
@@ -1264,8 +1269,6 @@
         <li><a href="modules/icenet.html#module-icenet.deep.deeptools">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.deps
 
@@ -1273,6 +1276,8 @@
         <li><a href="modules/icenet.html#module-icenet.deep.deps">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     icenet.deep.dmlp
 
@@ -1497,6 +1502,8 @@
       <li><a href="modules/icebrk.html#icebrk.fasthistos.initialize">initialize() (in module icebrk.fasthistos)</a>
 </li>
       <li><a href="modules/icenet.html#icenet.tools.aux.int2onehot">int2onehot() (in module icenet.tools.aux)</a>
+</li>
+      <li><a href="modules/icenet.html#icenet.algo.analytic.invmass">invmass() (in module icenet.algo.analytic)</a>
 </li>
   </ul></td>
 </tr></table>
