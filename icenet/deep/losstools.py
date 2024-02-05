@@ -42,11 +42,11 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
     def MI_helper(log_phat):
         if MI is not None:
             X = MI['x'].float()
-            Z = torch.exp(log_phat[:, MI['y_index']])  # Classifier output
+            Z = torch.exp(log_phat[:, MI['y_dim']])  # Classifier output
             return {f'MI x $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
         else:
             return {}
-
+    
     if  param['lossfunc'] == 'cross_entropy':
         log_phat = torch.log(model.softpredict(x) + EPS)
         
