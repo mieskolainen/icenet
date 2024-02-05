@@ -21,9 +21,8 @@ def invmass(x, pt1: str, pt2: str, eta1: str, eta2: str, phi1: str, phi2: str, m
     
     With awkward arrays
     """
-    
-    px1,py1,pz1 = x[pt1]*np.cos(x[phi1]), x[pt1]*np.sin(x[phi1]), x[pt1]/np.tan(2.0*np.arctan(np.exp(-x[eta1])))
-    px2,py2,pz2 = x[pt2]*np.cos(x[phi2]), x[pt2]*np.sin(x[phi2]), x[pt2]/np.tan(2.0*np.arctan(np.exp(-x[eta2])))
+    px1,py1,pz1 = x[pt1]*np.cos(x[phi1]), x[pt1]*np.sin(x[phi1]), x[pt1]*np.sinh(x[eta1])
+    px2,py2,pz2 = x[pt2]*np.cos(x[phi2]), x[pt2]*np.sin(x[phi2]), x[pt2]*np.sinh(x[eta2])
     
     E1 = np.sqrt(m1_const**2 + px1**2 + py1**2 + pz1**2)
     E2 = np.sqrt(m2_const**2 + px2**2 + py2**2 + pz2**2)

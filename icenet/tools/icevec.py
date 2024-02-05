@@ -106,9 +106,9 @@ class vec4:
 
 
     def setPtEtaPhi(self, pt, eta, phi):
-        self.setXYZ(pt*np.cos(phi), pt*np.sin(phi), pt/np.tan(2.0*np.arctan(np.exp(-eta))))
+        self.setXYZ(pt*np.cos(phi), pt*np.sin(phi), pt*np.sinh(eta))
 
-
+    
     def setMagThetaPhi(self, mag, theta, phi):
         self._x = mag * np.sin(theta) * np.cos(phi)
         self._y = mag * np.sin(theta) * np.sin(phi)
