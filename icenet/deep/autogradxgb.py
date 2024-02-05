@@ -21,6 +21,8 @@ class XgboostObjective():
         self.skip_hessian = skip_hessian
         self.flatten_grad = flatten_grad
     
+        print(__name__ + f'.__init__: Using device: {device}')
+    
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
         preds_, targets_, weights_ = self.torch_conversion(preds=preds, targets=targets)

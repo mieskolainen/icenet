@@ -32,12 +32,15 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
-
+  
+  min_count: 32            #  Minimum number of events (per category)
+  poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
   losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY'
+  eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
   
-  y_index: [1]
+  y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
   epochs: 30
   batch_size: 512

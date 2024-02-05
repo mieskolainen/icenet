@@ -281,17 +281,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         MI         = copy.deepcopy(param['MI_reg_param']) # ! important
         input_size = param['MI_reg_param']['x_dim']
 
-        index      = MI['y_index']
-        if   index is None:
+        y_dim      = MI['y_dim']
+        if   y_dim is None:
             input_size += model.C
-        elif type(index) is str:
-            input_size += eval(index)
-        elif type(index) is list:
-            input_size += len(index)
+        elif type(y_dim) is str:
+            input_size += eval(y_dim)
+        elif type(y_dim) is list:
+            input_size += len(y_dim)
 
         MI['model']     = []
         MI['MI_lb']     = []
 
+        print(__name__ + f'.torch_loop: MINE estimator input_size: {input_size}')
+        
         for k in range(len(MI['classes'])):
             MI_model         = mine.MINENet(input_size=input_size, **MI)
             MI_model, device = optimize.model_to_cuda(model=MI_model, device_type=param['device'])
@@ -302,7 +304,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         all_parameters = list()
         for k in range(len(MI['classes'])):
             all_parameters += list(MI['model'][k].parameters())
-
+        
         MI['optimizer'] = torch.optim.Adam(all_parameters, lr=MI['lr'], weight_decay=MI['weight_decay'])
     else:
         MI = None

@@ -15,6 +15,17 @@ def phi_phasewrap(phi):
     return (phi + np.pi) % (2 * np.pi) - np.pi
 
 
+def invmass(x, pt1, pt2, eta1, eta2, phi1, phi2):
+    """
+    invariant mass
+    """
+    prodPt   = x[pt1] * x[pt2]
+    deltaEta = x[eta1] - x[eta2]
+    deltaPhi = phi_phasewrap(x[phi1] - x[phi2])
+    
+    return np.sqrt(2*prodPt*(np.cosh(deltaEta) - np.cos(deltaPhi)))
+
+
 def deltaR(x, eta1, eta2, phi1, phi2):
     """
     dR distance

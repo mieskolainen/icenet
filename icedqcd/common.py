@@ -221,10 +221,16 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     # -------------------------------------------------------------------------
     ## ** Custom variables added to collections **
     
-    ## DeltaR
+    ## \DeltaR
     data.x['muonSV', 'deltaR'] = analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
     jagged_vars.append('muonSV_deltaR')
     muonsv_vars.append('muonSV_deltaR')
+    
+    ## Invariant Mass
+    data.x['muonSV', 'mass'] = analytic.invmass(x=data.x['muonSV'], \
+                                                 pt1='mu1pt', pt2='mu2pt', eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
+    jagged_vars.append('muonSV_mass')
+    muonsv_vars.append('muonSV_mass')
     
     print(data.x['muonSV'].fields)
     
@@ -309,6 +315,14 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
                         null_value=args['imputation_param']['fill_value'])
     io.showmem()
     
+    
+    # -------------------------------------------------------------------------
+    # Mutual information regularization targets
+    
+    MI_ind, MI_vars = io.pick_vars(data=data, set_of_vars=aux.process_regexp_ids(all_ids=data.ids, ids=globals()['MI_VARS']))
+    data_MI = data.x[:, MI_ind].astype(np.float)
+    
+    
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content
     data_deps = None
@@ -326,4 +340,5 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     """
     # --------------------------------------------------------------------------
     
-    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+    
+    return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

@@ -30,7 +30,7 @@ mva_param: &MVA_INPUT_PARAM
   jagged_filter:
     
     - name: 'muonSV'
-      condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0'
+      condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0' condition
     
     # add more here ..
 
@@ -38,8 +38,8 @@ mva_param: &MVA_INPUT_PARAM
   jagged_order:
 
     - name: 'muonSV'
-      var:  'dlen'
-      ascending: False  # True ~ smallest first, False ~ largest first
+      var:  'chi2'
+      ascending: True  # True ~ smallest first, False ~ largest first
     
     - name: 'SV'
       var:  'dlen'
@@ -54,7 +54,7 @@ mva_param: &MVA_INPUT_PARAM
       ascending: False
     
     # add more here ..
-  
+
   frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
   
   # Variable imputation
@@ -95,10 +95,10 @@ genesis_runmode:
   inputmap:  "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
 
-  targetfunc:  null                  # Training target,    implemented under mctargets.py
-  filterfunc: 'filter_standard'      # Training filtering, implemented under mcfilter.py
-  cutfunc:    'cut_fiducial'         # Basic cuts,         implemented under cuts.py
-
+  filterfunc: 'filter_standard'      # Filter cuts, implemented under filter.py
+  cutfunc:    'cut_fiducial'         # Basic cuts,  implemented under cuts.py
+  targetfunc:  null                  # -- not active --
+  
   xcorr_flow: True                   # Full N-point correlations computed between cuts
   pickle_size: 1000                  # Number of entries (events) per pickle file
 
@@ -144,10 +144,14 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    - xgb0
-    - xgb0-no-mass
-    - xgb0-only-mu
+    - xgb01
+    - xgb01-no-mass
+    - xgb01-only-mu
     
+    - iceboost
+    - iceboost-no-mass
+    - iceboost-only-mu
+
     #- dmlp
     #- lgr0
     

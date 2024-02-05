@@ -34,10 +34,17 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     global MI_reg_param
     global loss_history
     
+    # Detect device
+    device = preds.device
+    
     if weights is None:
-        w = torch.ones(len(preds)).to(preds.device)
+        w = torch.ones(len(preds))
     else:
         w = weights / torch.sum(weights)
+    
+    # Set computing device
+    targets = targets.to(device)
+    w       = w.to(device)
     
     ## Squared hinge-loss type
     #targets = 2 * targets - 1
@@ -61,7 +68,7 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
 
     # Loop over chosen classes
     k       = 0
-    MI_loss = torch.tensor(0.0).to(preds.device)
+    MI_loss = torch.tensor(0.0).to(device)
     MI_lb_values = []
 
     for c in MI_reg_param['classes']:
@@ -74,37 +81,41 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
         # Pick class indices
         cind  = (targets != None) if c == None else (targets == c)
 
-        X     = torch.Tensor(MI_x).to(preds.device)[cind]
+        X     = torch.Tensor(MI_x).to(device)[cind]
         Z     = preds[cind]
         W     = weights[cind]
-
-        ### Now loop over all powerset categories
+        
+        ### Now loop over all (powerset) categories
         mask  = reg_param['evt_mask'][c]
         N_cat = mask.shape[0]
 
-        MI_loss_this = torch.tensor(0.0).to(preds.device)
-        MI_lb        = torch.tensor(0.0).to(preds.device)
+        MI_loss_this = torch.tensor(0.0).to(device)
+        MI_lb        = torch.tensor(0.0).to(device)
         total_ww     = 0.0
 
         for m in range(N_cat):
-
+            
             mm_ = mask[m,:] # Pick index mask
 
-            if np.sum(mm_) > 32: # Minimum number of events per category cutoff
-
+            if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
+                
                 # We need .detach() here for Z!
                 model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
-                    return_model_only=True, device=X.device, **reg_param)
+                    return_model_only=True, device=device, **reg_param)
                 
                 # ------------------------------------------------------------
                 # Now apply the MI estimator to the sample
                 
                 # No .detach() here, we need the gradients for Z!
-                MI_lb = mine.apply_in_batches(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model, losstype=reg_param['losstype'])
+                MI_lb = mine.apply_mine_batched(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model,
+                                              losstype=reg_param['losstype'], batch_size=reg_param['eval_batch_size'])
                 # ------------------------------------------------------------
                 
                 # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
-                cat_ww       = np.sqrt(np.sum(mm_))
+                if MI_reg_param['poisson_weight']:
+                    cat_ww   = np.sqrt(np.sum(mm_))
+                else:
+                    cat_ww   = 1.0
                 
                 # Save
                 MI_loss_this = MI_loss_this + MI_reg_param['beta'][k] * MI_lb * cat_ww
@@ -224,9 +235,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
 
         # == Custom loss ==
         if 'custom' in model_param['objective']:
-
+            
             strs   = model_param['objective'].split(':')
-            device = 'cuda:0' if torch.cuda.is_available() else 'cpu:0'
+            device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
             if strs[1] == 'binary_cross_entropy_with_MI':
 
