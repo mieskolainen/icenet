@@ -18,14 +18,14 @@ mva_param: &MVA_INPUT_PARAM
   # The variable names below need to match the nanoAOD variable names, e.g. 'Jet_*'
   jagged_maxdim:
     
-    Jet:  8
-    Muon: 8
-    muonSV: 8
-    SV:   8
+    Jet:  6
+    Muon: 10
+    muonSV: 12
+    SV:   6
     cpf:  0     # 20
     npf:  0     # 10
 
-
+  
   # Filtering of collection entries (for BDT)
   jagged_filter:
     

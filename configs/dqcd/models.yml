@@ -95,7 +95,7 @@ xgb01:
   
   # general parameters
   model_param:
-    num_boost_round: 90       # number of epochs (equal to the number of trees!)
+    num_boost_round: 180       # number of epochs (equal to the number of trees!)
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'       # 'auto', 'cpu', 'cuda'
@@ -139,7 +139,7 @@ xgb01-no-mass:
   
   # general parameters
   model_param:
-    num_boost_round: 90      # number of epochs (equal to the number of trees!)
+    num_boost_round: 180      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -183,7 +183,7 @@ xgb01-no-jets:
   
   # general parameters
   model_param:
-    num_boost_round: 90      # number of epochs (equal to the number of trees!)
+    num_boost_round: 180      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -226,7 +226,7 @@ iceboost:
   
   # general parameters
   model_param:
-    num_boost_round: 90      # number of epochs (equal to the number of trees!)
+    num_boost_round: 180      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -275,7 +275,7 @@ iceboost-no-mass:
   
   # general parameters
   model_param:
-    num_boost_round: 90      # number of epochs (equal to the number of trees!)
+    num_boost_round: 180      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -324,7 +324,7 @@ iceboost-no-jets:
 
   # general parameters
   model_param:
-    num_boost_round: 90      # number of epochs (equal to the number of trees!)
+    num_boost_round: 180      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'

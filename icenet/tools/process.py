@@ -146,7 +146,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     elif runmode == 'train':
         new_args.update(args['train_runmode'])
         new_args['plot_param'] = args['plot_param']
-    
+
     elif runmode == 'eval':
         new_args.update(args['eval_runmode'])
         new_args['plot_param'] = args['plot_param']
@@ -179,9 +179,10 @@ def read_config(config_path='configs/xyz/', runmode='all'):
             cprint(__name__ + f'.read_config: {config_yaml_file} <{key}> default value cli-override with <{cli_dict[key]}>', 'red')
             args[key] = cli_dict[key]
     print()
-
+    
     # -------------------------------------------------------------------
-    ## Create a hash based on "rngseed", "maxevents", "genesis" and "inputmap" fields of yaml
+    ## Create a hash based on:
+    # "rngseed", "maxevents", "genesis", "inputmap" fields of yaml
     
     hash_args = {}
 
@@ -194,9 +195,19 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     hash_args['maxevents'] = args['maxevents']
     hash_args.update(inputmap)
 
-    args['__hash__'] = io.make_hash_sha256_object(hash_args)
-
-
+    args['__hash_genesis__'] = io.make_hash_sha256_object(hash_args)
+    
+    cprint(__name__ + f'.read_config: Generated config hashes', 'magenta')
+    cprint(f'[__hash_genesis__]      : {args["__hash_genesis__"]}     ', 'magenta')
+    
+    ## Second level hash (depends on all previous) + other parameters
+    
+    if runmode == 'train' or runmode == 'eval':
+        hash_args['use_conditional']  = args['use_conditional']
+        args['__hash_post_genesis__'] = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
+        
+        cprint(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
+    
     # -------------------------------------------------------------------
     ## Create new variables to args dictionary
 
@@ -293,7 +304,7 @@ def read_data(args, func_loader, runmode):
         chunks = int(np.ceil(N / args['pickle_size']))
         return aux.split_start_end(range(N), chunks)
 
-    cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash__"]}')
+    cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash_genesis__"]}')
 
     if args['__use_cache__'] == False or (not os.path.exists(f'{cache_directory}/output_0.pkl')):
 
@@ -354,7 +365,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 'PREDATA': Raw input reading and processing
     
-    cache_filename = f'{args["datadir"]}/data_{runmode}_{args["__hash__"]}.pkl'
+    cache_filename = f'{args["datadir"]}/data_{runmode}_{args["__hash_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
@@ -380,7 +391,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 'DATA': Further processing step
     
-    cache_filename = f'{args["datadir"]}/processed_data_{runmode}_{args["__hash__"]}.pkl'
+    cache_filename = f'{args["datadir"]}/processed_data_{runmode}_{args["__hash_post_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 

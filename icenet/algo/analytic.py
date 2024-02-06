@@ -46,7 +46,7 @@ def invmass_massless(x, pt1: str, pt2: str, eta1: str, eta2: str, phi1: str, phi
 
 def deltaR(x, eta1: str, eta2: str, phi1: str, phi2: str):
     """
-    dR distance
+    dR distance (invariant [massless limit y --> eta] under longitudinal boosts)
     
     With awkward arrays
     """
