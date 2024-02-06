@@ -146,12 +146,12 @@ train_runmode:
     
     - xgb01
     - xgb01-no-mass
-    - xgb01-only-mu
+    - xgb01-no-jets
     
     - iceboost
     - iceboost-no-mass
-    - iceboost-only-mu
-
+    - iceboost-no-jets
+    
     #- dmlp
     #- lgr0
     

@@ -95,11 +95,11 @@ xgb01:
   
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 90       # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
-
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
+    
     learning_rate: 0.1
     gamma: 1.67
     max_depth: 10
@@ -139,7 +139,7 @@ xgb01-no-mass:
   
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    num_boost_round: 90      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -171,10 +171,10 @@ xgb01-no-mass:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-only-mu:
+xgb01-no-jets:
   train:   'xgb'
   predict: 'xgb'
-  label:   'XGB-only-mu'
+  label:   'XGB-no-jets'
   raytune:  xgb_trial_0
   
   # ** Custom set of variables **
@@ -183,7 +183,7 @@ xgb01-only-mu:
   
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    num_boost_round: 90      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -217,16 +217,16 @@ xgb01-only-mu:
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 iceboost:
   train:   'xgb'
-  predict: 'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
   label:   'ICEBOOST'
   raytune:  xgb_trial_0
-
+  
   #exclude_MVA_vars: ['.*']
   #include_MVA_vars: ['.*']
   
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    num_boost_round: 90      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -265,7 +265,7 @@ iceboost:
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 iceboost-no-mass:
   train:   'xgb'
-  predict: 'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
   label:   'ICEBOOST-no-mass'
   raytune:  xgb_trial_0
 
@@ -275,7 +275,7 @@ iceboost-no-mass:
   
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    num_boost_round: 90      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -312,10 +312,10 @@ iceboost-no-mass:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost-only-mu:
+iceboost-no-jets:
   train:   'xgb'
-  predict: 'xgb'
-  label:   'ICEBOOST-only-mu'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+  label:   'ICEBOOST-no-jets'
   raytune:  xgb_trial_0
   
   # ** Custom set of variables **
@@ -324,7 +324,7 @@ iceboost-only-mu:
 
   # general parameters
   model_param:
-    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    num_boost_round: 90      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'

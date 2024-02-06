@@ -8,6 +8,7 @@ import numpy as np
 import awkward as ak
 import re
 import time
+import datetime
 
 import numba
 import copy
@@ -827,21 +828,34 @@ def deltar(eta1,eta2, phi1,phi2):
     return np.sqrt((eta1 - eta2)**2 + deltaphi(phi1,phi2)**2)
 
 
-def create_model_filename(path, label, epoch, filetype, max_epochs=int(1e5)):
+def getmtime(filename):
+    """ Return the last modification time of a file, reported by os.stat()
+    """
+    return os.stat(filename).st_mtime
 
+
+def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None, max_epochs:int=int(1e5)):
+    """ Create model filename 
+    """
     def createfilename(i):
-        return path + '/' + label + '_' + str(i) + filetype
+        return f'{path}/{label}_{i}{filetype}'
 
-    # Loop over epochs
-    last_found  = -1
-    for i in range(max_epochs):
-        filename = createfilename(i)
-        if os.path.exists(filename):
-            last_found = i
-
+    if epoch is None or epoch == -1:
+        
+        last_found  = -1
+        for i in range(max_epochs):
+            filename = createfilename(i)
+            if os.path.exists(filename):
+                last_found = i
+            else:
+                break
+    else:
+        last_found = epoch
+       
     filename = createfilename(last_found)
-    print(__name__ + f'.create_model_filename: Found model file: {filename}')
-
+    dt = datetime.datetime.fromtimestamp(getmtime(filename))
+    print(__name__ + f'.create_model_filename: Found a model file: {filename} (modified {dt})')
+    
     return filename
 
 

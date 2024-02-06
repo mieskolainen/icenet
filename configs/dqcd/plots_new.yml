@@ -33,7 +33,7 @@ FILTER: &FILTER
 
 
 basic:
-  active: False
+  active: True
   nbins:  70
   exclude_vals: [null, -999.0]
 
@@ -45,14 +45,14 @@ contours:
 
 ROC:
   active: true
-  num_bootstrap: 200
+  num_bootstrap: 50
   xmin: 1.0E-6
   set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
   active: false
-  num_bootstrap: 200
+  num_bootstrap: 50
   xmin: 1.0E-4
   
   #plot[0]:

@@ -266,7 +266,8 @@ LOAD_VARS += MVA_JAGGED_VARS
 
 # Mutual information regularization targets
 MI_VARS = [
-  'muonSV_mass.*'
+  #'muonSV_mass.*'  # All
+  'muonSV_mass(0)'  # The leading one
 ]
 
 print(LOAD_VARS)
@@ -274,4 +275,3 @@ print(LOAD_VARS)
 # (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']
 #LOAD_VARS = ['.*'] # all
-
