@@ -594,7 +594,7 @@
     <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
         <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;train_runmode&#39;</span><span class="p">])</span>
         <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span>
-    
+
     <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
         <span class="n">new_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;eval_runmode&#39;</span><span class="p">])</span>
         <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span>
@@ -627,9 +627,10 @@
             <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: </span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1"> &lt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&gt; default value cli-override with &lt;</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="n">args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">()</span>
-
+    
     <span class="c1"># -------------------------------------------------------------------</span>
-    <span class="c1">## Create a hash based on &quot;rngseed&quot;, &quot;maxevents&quot;, &quot;genesis&quot; and &quot;inputmap&quot; fields of yaml</span>
+    <span class="c1">## Create a hash based on:</span>
+    <span class="c1"># &quot;rngseed&quot;, &quot;maxevents&quot;, &quot;genesis&quot;, &quot;inputmap&quot; fields of yaml</span>
     
     <span class="n">hash_args</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -642,9 +643,19 @@
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span>
     <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inputmap</span><span class="p">)</span>
 
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
-
-
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
+    
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Generated config hashes&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[__hash_genesis__]      : </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">     &#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    
+    <span class="c1">## Second level hash (depends on all previous) + other parameters</span>
+    
+    <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
+        <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_post_genesis__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
+        
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[__hash_post_genesis__] : </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_post_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">## Create new variables to args dictionary</span>
 
@@ -747,7 +758,7 @@
         <span class="n">chunks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pickle_size&#39;</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_start_end</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">chunks</span><span class="p">)</span>
 
-    <span class="n">cache_directory</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">cache_directory</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_0.pkl&#39;</span><span class="p">)):</span>
 
@@ -811,7 +822,7 @@
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># &#39;PREDATA&#39;: Raw input reading and processing</span>
     
-    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
     
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
 
@@ -837,7 +848,7 @@
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># &#39;DATA&#39;: Further processing step</span>
     
-    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/processed_data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/processed_data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_post_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
     
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
 
