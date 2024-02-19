@@ -700,7 +700,7 @@
     <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
     
     <span class="k">if</span> <span class="n">KINEMATIC_VARS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
+        
         <span class="n">kinematic_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">unroll_ak_fields</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">),</span> <span class="n">ids</span><span class="o">=</span><span class="n">KINEMATIC_VARS</span><span class="p">)</span>
 
         <span class="n">data_kin</span>       <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>

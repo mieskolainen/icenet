@@ -637,7 +637,7 @@
             <span class="k">if</span> <span class="n">MI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_</span><span class="o">.</span><span class="n">x_MI</span>
         <span class="c1"># -----------------------------------------</span>
-
+        
         <span class="c1">#if DA_active:</span>
         <span class="c1">#    loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)</span>
         <span class="c1">#    loss       = l + l_DA</span>
@@ -790,7 +790,7 @@
         
         <span class="c1"># Classification metrics</span>
         <span class="n">N</span>       <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
-        <span class="n">metrics</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">class_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">auc</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># Bad batch protection</span>
             <span class="n">aucsum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">auc</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>

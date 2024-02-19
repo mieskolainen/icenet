@@ -1246,7 +1246,7 @@
         <span class="c1"># If distillation</span>
         <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;source&#39;</span><span class="p">]:</span>
             
-            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;primary_classes&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Distillation supported now only for 2-class classification&#39;</span><span class="p">)</span>
             
             <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train.models: Computing distillation soft targets from the source &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
@@ -1615,7 +1615,7 @@
 
             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask_powerset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                 <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">pathlabel</span><span class="o">=</span><span class="n">path_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
-
+    
     <span class="c1"># --------------------------------------</span>
     <span class="c1">### ROC binned plots (no powerset selection supported here)</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC_binned&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>

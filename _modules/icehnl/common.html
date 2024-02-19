@@ -575,7 +575,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1"># Mutual information regularization targets</span>
     
-    <span class="nb">vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MI_VARS&#39;</span><span class="p">])</span>
+    <span class="nb">vars</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MI_VARS&#39;</span><span class="p">])</span>
     <span class="n">data_MI</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">vars</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
