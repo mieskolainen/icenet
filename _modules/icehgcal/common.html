@@ -452,10 +452,8 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-
 
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -467,10 +465,9 @@
 <span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">preprocess</span>
 <span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">graphio</span>
 
+<span class="c1"># Globals</span>
 <span class="kn">from</span> <span class="nn">configs.hgcal.mctargets</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.hgcal.mcfilter</span>  <span class="kn">import</span> <span class="o">*</span>
-
-<span class="kn">from</span> <span class="nn">configs.hgcal.mvavars</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.hgcal.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 
 
@@ -567,21 +564,21 @@
 <span class="sd">        ids:   columnar variable string (list)</span>
 <span class="sd">        info:  trigger and pre-selection acceptance x efficiency information (dict)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
+    
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list, we expect only the path here</span>
     
     <span class="c1"># -----------------------------------------------</span>
 
     <span class="c1"># ** Pick the variables **</span>
-    <span class="n">ids</span> <span class="o">=</span> <span class="n">MVA_SCALAR_VARS</span>
     
     <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;entry_start&quot;</span><span class="p">:</span> <span class="n">entry_start</span><span class="p">,</span>
         <span class="s2">&quot;entry_stop&quot;</span><span class="p">:</span>  <span class="n">entry_stop</span><span class="p">,</span>
         <span class="s2">&quot;maxevents&quot;</span><span class="p">:</span>   <span class="n">maxevents</span><span class="p">,</span>
         <span class="s2">&quot;args&quot;</span><span class="p">:</span>        <span class="n">args</span><span class="p">,</span>
-        <span class="s2">&quot;load_ids&quot;</span><span class="p">:</span>    <span class="n">ids</span>     
+        <span class="s2">&quot;load_ids&quot;</span><span class="p">:</span>    <span class="n">inputvars</span><span class="o">.</span><span class="n">MVA_SCALAR_VARS</span>
     <span class="p">}</span>
     
     <span class="n">tree</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;tree_name&#39;</span><span class="p">]</span>
@@ -681,22 +678,21 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary with different data representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
+    
     <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
     <span class="c1">### Pick active variables out</span>
-    <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]])</span>
+    <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;inputvars.&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]))</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Pick kinematic variables out</span>
     <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
     
-    <span class="c1">#if KINEMATIC_VARS is not None:</span>
-    <span class="c1">#    k_ind, k_vars = io.pick_vars(data, aux.process_regexp_ids(all_ids=ids, ids=KINEMATIC_VARS))</span>
-    <span class="c1">#    </span>
-    <span class="c1">#    data_kin      = copy.deepcopy(data)</span>
-    <span class="c1">#    data_kin.x    = data.x[:, k_ind].astype(np.float)</span>
-    <span class="c1">#    data_kin.ids  = k_vars</span>
+    <span class="c1">#if inputvars.KINEMATIC_VARS is not None:</span>
+    <span class="c1">#    vars = aux.process_regexp_ids(all_ids=ids, ids=inputvars.KINEMATIC_VARS)</span>
+    <span class="c1">#    data_kin      = data[vars]</span>
+    <span class="c1">#    data_kin.x    = data_kin.x.astype(np.float32)</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### DeepSets representation</span>
@@ -705,10 +701,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Tensor representation</span>
     <span class="n">data_tensor</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    if args[&#39;image_on&#39;]:</span>
-<span class="sd">        data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=globals()[&#39;CMSSW_MVA_IMAGE_VARS&#39;], args=args)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## Graph representation</span>
     <span class="n">data_graph</span> <span class="o">=</span> <span class="kc">None</span>

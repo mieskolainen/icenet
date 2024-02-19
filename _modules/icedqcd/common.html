@@ -650,7 +650,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### ** Remove conditional variables **</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MODEL_VARS&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">MODEL_VARS</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">scalar_vars</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Removing model conditional var &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot;&quot; from scalar_vars&#39;</span><span class="p">)</span>
