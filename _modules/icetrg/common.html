@@ -448,7 +448,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
@@ -457,7 +457,6 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
 
 <span class="c1"># GLOBALS</span>
-<span class="kn">from</span> <span class="nn">configs.trg.mvavars</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.trg.cuts</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">configs.trg.filter</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -477,7 +476,8 @@
 <span class="sd">        ids:   columnar variable string (list)</span>
 <span class="sd">        info:  trigger and pre-selection acceptance x efficiency information (dict)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
+    
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list, we expect only the path here (no files)</span>
     
@@ -593,6 +593,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary with different data representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
     
     <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
     
@@ -600,8 +601,8 @@
     <span class="c1">### Pick kinematic variables out</span>
     <span class="n">data_kin</span> <span class="o">=</span> <span class="kc">None</span>
     
-    <span class="k">if</span> <span class="n">KINEMATIC_VARS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">vars</span>       <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">KINEMATIC_VARS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">KINEMATIC_VARS</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">vars</span>       <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">inputvars</span><span class="o">.</span><span class="n">KINEMATIC_VARS</span><span class="p">)</span>
         <span class="n">data_kin</span>   <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">vars</span><span class="p">]</span>
         <span class="n">data_kin</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data_kin</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     
@@ -617,13 +618,13 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1"># Mutual information regularization targets</span>
     
-    <span class="nb">vars</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;MI_VARS&#39;</span><span class="p">])</span>
+    <span class="nb">vars</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">inputvars</span><span class="o">.</span><span class="n">MI_VARS</span><span class="p">)</span>
     <span class="n">data_MI</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">vars</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### Finally pick active scalar variables out</span>
     
-    <span class="nb">vars</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]])</span>
+    <span class="nb">vars</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;inputvars.&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]))</span>
     <span class="n">data</span>   <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="nb">vars</span><span class="p">]</span>
     <span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     
