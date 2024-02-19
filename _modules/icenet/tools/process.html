@@ -1044,7 +1044,7 @@
 
         <span class="c1"># No other imputation, but fix spurious NaN / Inf</span>
         <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]))]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fill_value&#39;</span><span class="p">]</span>
-
+    
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">imputer</span></div>
 
 
