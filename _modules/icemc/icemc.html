@@ -315,6 +315,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.set_aspect_true_equal"><code class="docutils literal notranslate"><span class="pre">set_aspect_true_equal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.spherical_acceptance"><code class="docutils literal notranslate"><span class="pre">spherical_acceptance()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.tau2Gamma"><code class="docutils literal notranslate"><span class="pre">tau2Gamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.test_toy_pt_spectrum"><code class="docutils literal notranslate"><span class="pre">test_toy_pt_spectrum()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.icemc.twobody"><code class="docutils literal notranslate"><span class="pre">twobody()</span></code></a></li>
 </ul>
@@ -560,6 +561,26 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">hbar_const</span> <span class="o">/</span> <span class="n">tau</span></div>
 
+
+
+<div class="viewcode-block" id="test">
+<a class="viewcode-back" href="../../modules/icemc.html#icemc.icemc.test">[docs]</a>
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">1000</span>
+    
+    <span class="n">M_pi</span> <span class="o">=</span> <span class="mf">1.5</span>
+    <span class="n">M_A</span>  <span class="o">=</span> <span class="mf">0.5</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+
+        <span class="n">p_pi</span> <span class="o">=</span> <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">M_pi</span><span class="p">)</span>
+        
+        
+        <span class="n">p_A</span>  <span class="o">=</span> <span class="n">icevec</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">M_A</span><span class="p">)</span></div>
+
+
+    
 
 
 <div class="viewcode-block" id="resonance_generator">
