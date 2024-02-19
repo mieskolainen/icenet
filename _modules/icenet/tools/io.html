@@ -479,12 +479,13 @@
 
 <div class="viewcode-block" id="global_imports">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.global_imports">[docs]</a>
-<span class="k">def</span> <span class="nf">global_imports</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">shortname</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">asfunction</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">global_imports</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">shortname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asfunction</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">shortname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
         <span class="n">shortname</span> <span class="o">=</span> <span class="n">modulename</span>
     <span class="k">if</span> <span class="n">asfunction</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="nb">globals</span><span class="p">()[</span><span class="n">shortname</span><span class="p">]</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">modulename</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.global_imports: Importing &#39;</span><span class="si">{</span><span class="n">modulename</span><span class="si">}</span><span class="s2">&#39; as &#39;</span><span class="si">{</span><span class="n">shortname</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="nb">globals</span><span class="p">()[</span><span class="n">shortname</span><span class="p">]</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
         <span class="nb">globals</span><span class="p">()[</span><span class="n">shortname</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">modulename</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">shortname</span><span class="p">)</span></div>
 
 
