@@ -6,6 +6,7 @@
 import numpy as np
 import copy
 import pickle
+from importlib import import_module
 
 from termcolor import colored, cprint
 
@@ -13,7 +14,6 @@ from icenet.tools import io
 from icenet.tools import aux
 
 # GLOBALS
-from configs.hnl.mvavars import *
 #from configs.hnl.cuts import *
 #from configs.hnl.filter import *
 
@@ -31,6 +31,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         ids:   columnar variable string (list)
         info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list, we expect only the path here
@@ -103,23 +104,19 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-    
-    ### Pick active variables out
-    scalar_vars = aux.process_regexp_ids(all_ids=ids, ids=globals()[args['inputvar_scalar']])
 
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
 
-    if KINEMATIC_VARS is not None:
-        k_ind, k_vars = io.pick_vars(data, aux.process_regexp_ids(all_ids=ids, ids=KINEMATIC_VARS))
-        
-        data_kin      = copy.deepcopy(data)
-        data_kin.x    = data.x[:, k_ind].astype(np.float)
-        data_kin.ids  = k_vars
-
+    if inputvars.KINEMATIC_VARS is not None:
+        vars       = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.KINEMATIC_VARS)
+        data_kin   = data[vars]
+        data_kin.x = data_kin.x.astype(np.float32)
+    
     # -------------------------------------------------------------------------
     data_deps   = None
 
@@ -131,14 +128,15 @@ def splitfactor(x, y, w, ids, args):
     
     # -------------------------------------------------------------------------
     # Mutual information regularization targets
-    MI_ind, MI_vars = io.pick_vars(data, globals()['MI_VARS'])
-    data_MI = data.x[:, MI_ind].astype(np.float)
+    
+    vars    = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.MI_VARS)
+    data_MI = data[vars].x.astype(np.float32)
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, scalar_vars)
     
-    data.x   = data.x[:, s_ind].astype(np.float)
-    data.ids = s_vars
+    vars   = aux.process_regexp_ids(all_ids=data.ids, ids=eval('inputvars.' + args['inputvar_scalar']))
+    data   = data[vars]
+    data.x = data.x.astype(np.float32)
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

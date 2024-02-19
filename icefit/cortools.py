@@ -239,7 +239,7 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
     if len(x) < 10:
         print(__name__ + f'.mutual_information: Error: len(x) < 10')
         return np.nan, np.array([np.nan, np.nan])
-
+    
     x = np.asarray(x, dtype=float) # Require float for precision
     y = np.asarray(y, dtype=float)
 
@@ -354,6 +354,10 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
 
     if len(x) != len(y):
         raise Exception('pearson_corr: x and y with different size.')
+
+    if len(x) < 10:
+        print(__name__ + '.pearson_corr: Error: len(x) < 10')
+        return np.nan, np.array([np.nan, np.nan]), np.nan
 
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)

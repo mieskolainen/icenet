@@ -6,7 +6,7 @@
 import copy
 import numpy as np
 import uproot
-
+from importlib import import_module
 from termcolor import colored, cprint
 
 from icenet.tools import io
@@ -16,11 +16,9 @@ from icenet.tools import iceroot
 
 from iceid import graphio
 
-
+# Globals
 from configs.eid.mctargets import *
 from configs.eid.mcfilter  import *
-
-from configs.eid.mvavars import *
 from configs.eid.cuts import *
 
 
@@ -37,6 +35,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         ids:   columnar variable string (list)
         info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
     if type(root_path) is not list:
         root_path = [root_path] # Make sure it is a list, even if one file only
@@ -125,25 +124,24 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
-
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
+    
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-
+    
     ### Pick active variables out
-    scalar_vars = aux.process_regexp_ids(all_ids=ids, ids=globals()[args['inputvar_scalar']])
-    image_vars  = aux.process_regexp_ids(all_ids=ids, ids=globals()['CMSSW_MVA_IMAGE_VARS'])
+    scalar_vars = aux.process_regexp_ids(all_ids=ids, ids=eval('inputvars.' + args['inputvar_scalar']))
+    image_vars  = aux.process_regexp_ids(all_ids=ids, ids=inputvars.CMSSW_MVA_IMAGE_VARS)
 
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
     
-    if KINEMATIC_VARS is not None:
+    if inputvars.KINEMATIC_VARS is not None:
 
-        k_ind, k_vars = io.pick_vars(data, aux.process_regexp_ids(all_ids=ids, ids=KINEMATIC_VARS))
-        
-        data_kin      = copy.deepcopy(data)
-        data_kin.x    = data.x[:, k_ind].astype(np.float)
-        data_kin.ids  = k_vars
-
+        vars       = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.KINEMATIC_VARS)
+        data_kin   = data[vars]
+        data_kin.x = data_kin.x.astype(np.float32)
+    
     # -------------------------------------------------------------------------
     ### DeepSets representation
     data_deps = None
@@ -153,7 +151,7 @@ def splitfactor(x, y, w, ids, args):
     data_tensor = None
     
     data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=image_vars, args=args)
-        
+    
     # -------------------------------------------------------------------------
     ## Graph representation
     data_graph = None
@@ -163,10 +161,10 @@ def splitfactor(x, y, w, ids, args):
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
-    s_ind, s_vars = io.pick_vars(data, scalar_vars)
     
-    data.x   = data.x[:, s_ind].astype(np.float)
-    data.ids = s_vars
+    vars   = aux.process_regexp_ids(all_ids=data.ids, ids=scalar_vars)
+    data   = data[vars]
+    data.x = data.x.astype(np.float32)
     
     return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
 

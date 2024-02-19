@@ -17,24 +17,24 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     Compute N-dim reweighting coefficients (currently 2D or 1D supported)
     
     Args:
-        x      : training sample input
-        y      : training sample (class) labels
-        w      : training sample weights
-        ids    : variable names of columns of x
-        pdf    : pre-computed pdfs
-        args   : reweighting parameters in a dictionary
+        x    : training sample input
+        y    : training sample (class) labels
+        w    : training sample weights
+        ids  : variable names of columns of x
+        pdf  : pre-computed pdfs
+        args : reweighting parameters in a dictionary
     
     Returns:
-        weights: 1D-array of re-weights
+        weights : 1D-array of re-weights
     """
     use_ak = True if isinstance(x, ak.Array) else False
-
-    num_classes = len(np.unique(y))
-
+    
     if use_ak:
         y = copy.deepcopy(ak.to_numpy(y).astype(int))
         w = copy.deepcopy(ak.to_numpy(w).astype(float))
-
+    
+    class_ids = np.unique(y.astype(int))
+    
     args = copy.deepcopy(args) # Make sure we make a copy, because we modify args here
 
     # Compute event-by-event weights
@@ -49,7 +49,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             except:
                 break    
         
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes: {np.unique(y)} from y)")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found classes: {np.unique(y)} from y)")
         
         ### Collect re-weighting variables
         RV = {}
@@ -77,7 +77,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 RV[var] = np.log10(np.maximum(RV[var], EPS))
 
                 # Transform bins
-                args[f'bins'][int(var)][0] = np.log10(d[0] + EPS)
+                args[f'bins'][int(var)][0] = np.log10(max(d[0], EPS))
                 args[f'bins'][int(var)][1] = np.log10(d[1])
 
             elif mode == 'sqrt':
@@ -86,7 +86,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 RV[var] = np.sqrt(np.maximum(RV[var], EPS))
 
                 # Bins
-                args[f'bins'][int(var)][0] = np.sqrt(d[0] + EPS)
+                args[f'bins'][int(var)][0] = np.sqrt(max(d[0], EPS))
                 args[f'bins'][int(var)][1] = np.sqrt(d[1])
                 
             elif mode == 'square':
@@ -113,7 +113,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
                 binedges[var] = np.linspace(d[0], d[1], d[2])
 
             elif args[f'binmode'][int(var)] == 'log10':
-                binedges[var] = np.logspace(np.log10(np.maximum(d[0], EPS)), np.log10(d[1]), d[2], base=10)
+                binedges[var] = np.logspace(np.log10(max(d[0], EPS)), np.log10(d[1]), d[2], base=10)
                 
             elif args[f'binmode'][int(var)] == 'edges':
                 binedges[var] = np.array(d)
@@ -133,16 +133,16 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             
             if pdf is None: # Not given by user
                 pdf = {}
-                for c in range(num_classes):
-
+                for c in class_ids:
+                    
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
                     pdf[c] = pdf_2D_hist(X_A=RV['0'][y==c], X_B=RV['1'][y==c], w=sample_weights, \
                         binedges_A=binedges['0'], binedges_B=binedges['1'])
 
-                pdf['binedges_0']  = binedges['0']
-                pdf['binedges_1']  = binedges['1']
-                pdf['num_classes'] = num_classes
+                pdf['binedges_0'] = binedges['0']
+                pdf['binedges_1'] = binedges['1']
+                pdf['class_ids']  = class_ids
             
             weights_doublet = reweightcoeff2D(X_A = RV['0'], X_B = RV['1'], pdf=pdf, **rwparam)
             
@@ -156,8 +156,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
             if pdf is None: # Not given by user
                 pdf = {}
-                for c in range(num_classes):
-
+                for c in class_ids:
+                    
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
 
                     pdf_0  = pdf_1D_hist(X=RV['0'][y==c], w=sample_weights, binedges=binedges['0'])
@@ -175,7 +175,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
 
                 pdf['binedges_0']  = binedges['0']
                 pdf['binedges_1']  = binedges['1']
-                pdf['num_classes'] = num_classes
+                pdf['class_ids']   = class_ids
 
             weights_doublet = reweightcoeff2D(X_A = RV['0'], X_B = RV['1'], pdf=pdf, **rwparam)
 
@@ -186,25 +186,26 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             
             if pdf is None: # Not given by user
                 pdf = {}
-                for c in range(num_classes):
+                for c in class_ids:
                     sample_weights = w[y==c] if w is not None else None # Feed in the input weights
                     pdf[c] = pdf_1D_hist(X=RV['0'][y==c], w=sample_weights, binedges=binedges['0'])
 
-                pdf['binedges']    = binedges['0']
-                pdf['num_classes'] = num_classes
-
+                pdf['binedges']  = binedges['0']
+                pdf['class_ids'] = class_ids
+            
             weights_doublet = reweightcoeff1D(X = RV['0'], pdf=pdf, **rwparam)
         else:
             raise Exception(__name__ + f'.compute_ND_reweights: Unsupported dimensionality mode <{args["dimension"]}>')
     
     # No differential re-weighting    
     else:
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found {num_classes} classes {np.unique(y)} from y)")
-        weights_doublet = np.zeros((len(x), num_classes))
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found classes {class_ids} from y)")
+        weights_doublet = {}
 
-        for c in range(num_classes):
+        for c in class_ids:
+            weights_doublet[c] = np.zeros(len(x))
             sample_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights
-            weights_doublet[y == c, c] = sample_weights
+            weights_doublet[c][y == c] = sample_weights
 
     ### Apply class balance equalizing weight
     if (args['equal_frac'] == True):
@@ -212,15 +213,17 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
         weights_doublet = balanceweights(weights_doublet=weights_doublet, reference_class=args['reference_class'], y=y)
 
     ### Finally map back to 1D-array
-    weights = np.sum(weights_doublet, axis=1)
+    weights = np.zeros(len(w))
+    for c in class_ids:
+        weights = weights + weights_doublet[c]
 
     ### Compute the sum of weights per class for the output print
-    frac = np.zeros(num_classes)
-    sums = np.zeros(num_classes)
-    for c in range(num_classes):
-        frac[c], sums[c] = np.sum(y == c), np.sum(weights[y == c])
+    frac = {}
+    sums = {}
+    for c in class_ids:
+        frac[c], sums[c] = np.sum(y == c), np.round(np.sum(weights[y == c]), 2)
     
-    print(__name__ + f'.compute_ND_reweights: Output sum[y == c] = {frac} || sum[weights[y == c]] = {sums}')
+    print(__name__ + f'.compute_ND_reweights: Output sum[y == c] = {frac} || sum[weights[y == c]] = {sums} ({class_ids})')
     
     if use_ak:
         return ak.Array(weights), pdf
@@ -233,28 +236,30 @@ def reweightcoeff1D(X, y, pdf, reference_class, max_reg = 1e3, EPS=1e-12):
     
     Args:
         X:               Observable of interest (N x 1)
-        y:               Class labels (0,1,...) (N x 1)
+        y:               Class labels (N x 1)
         pdf:             PDF for each class
         reference_class: e.g. 0 (background) or 1 (signal)
     
     Returns:
         weights for each event
     """
-    num_classes = pdf['num_classes']
+    class_ids = pdf['class_ids']
 
     # Re-weighting weights
-    weights_doublet = np.zeros((X.shape[0], num_classes)) # Init with zeros!!
-
+    weights_doublet = {} # Init with zeros!!
+    for c in class_ids:
+        weights_doublet[c] = np.zeros(X.shape[0])
+    
     # Weight each class against the reference class
-    for c in range(num_classes):
+    for c in class_ids:
         inds = aux.x2ind(X[y == c], pdf['binedges'])
         if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds] / (pdf[c][inds] + EPS)
+            weights_doublet[c][y == c] = pdf[reference_class][inds] / np.clip(pdf[c][inds], a_min=EPS, a_max=None)
         else:
-            weights_doublet[y == c, c] = 1.0 # Reference class stays intact
+            weights_doublet[c][y == c] = 1.0 # Reference class stays intact
 
-    # Maximum weight cut-off regularization
-    weights_doublet[weights_doublet > max_reg] = max_reg
+        # Maximum weight cut-off regularization
+        weights_doublet[c][weights_doublet[c] > max_reg] = max_reg
 
     return weights_doublet
 
@@ -267,7 +272,7 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12)
     Args:
         X_A :             First observable of interest  (N x 1)
         X_B :             Second observable of interest (N x 1)
-        y   :             Signal (1) and background (0) labels (N x 1)
+        y   :             Class labels (N x 1)
         pdf :             Density histograms for each class
         reference_class : e.g. Background (0) or signal (1)
         max_reg :         Regularize the maximum reweight coefficient
@@ -275,22 +280,24 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12)
     Returns:
         weights for each event
     """
-    num_classes = pdf['num_classes']
+    class_ids = pdf['class_ids']
 
     # Re-weighting weights
-    weights_doublet = np.zeros((X_A.shape[0], num_classes)) # Init with zeros!!
-
+    weights_doublet = {} # Init with zeros!!
+    for c in class_ids:
+        weights_doublet[c] = np.zeros(X_A.shape[0])
+    
     # Weight each class against the reference class
-    for c in range(num_classes):
+    for c in class_ids:
         inds_0 = aux.x2ind(X_A[y == c], pdf['binedges_0']) # variable 0
         inds_1 = aux.x2ind(X_B[y == c], pdf['binedges_1']) # variable 1
         if c is not reference_class:
-            weights_doublet[y == c, c] = pdf[reference_class][inds_0, inds_1] / (pdf[c][inds_0, inds_1] + EPS)
+            weights_doublet[c][y == c] = pdf[reference_class][inds_0, inds_1] / np.clip(pdf[c][inds_0, inds_1], a_min=EPS, a_max=None)
         else:
-            weights_doublet[y == c, c] = 1.0 # Reference class stays intact
+            weights_doublet[c][y == c] = 1.0 # Reference class stays intact
 
-    # Maximum weight cut-off regularization
-    weights_doublet[weights_doublet > max_reg] = max_reg
+        # Maximum weight cut-off regularization
+        weights_doublet[c][weights_doublet[c] > max_reg] = max_reg
 
     return weights_doublet
 
@@ -325,19 +332,19 @@ def balanceweights(weights_doublet, reference_class, y, EPS=1e-12):
     """ Balance N-class weights to sum to equal counts.
     
     Args:
-        weights_doublet: N-class event weights (events x classes)
-        reference_class: which class gives the reference (integer)
-        y : class targets
+        weights_doublet:  N-class event weights (events x classes)
+        reference_class:  which class gives the reference (integer)
+        y:                class targets
     Returns:
         weights doublet with new weights per event
     """
-    num_classes = weights_doublet.shape[1]
-    ref_sum = np.sum(weights_doublet[(y == reference_class), reference_class])
-
-    for i in range(num_classes):
-        if i is not reference_class:
-            EQ = ref_sum / (np.sum(weights_doublet[y == i, i]) + EPS)
-            weights_doublet[y == i, i] *= EQ
-
+    class_ids = np.unique(y).astype(int)
+    ref_sum   = np.sum(weights_doublet[reference_class][y == reference_class])
+    
+    for c in class_ids:
+        if c is not reference_class:
+            EQ = ref_sum / np.clip(np.sum(weights_doublet[c][y == c]), a_min=EPS, a_max=None)
+            weights_doublet[c][y == c] *= EQ
+    
     return weights_doublet
 

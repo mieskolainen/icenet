@@ -7,13 +7,15 @@
 
 rootname: 'eid'
 rngseed: 123456                      # Fixed seed for training data mixing
+inputvars: 'mvavars'                 # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false             # Conditional (theory parametric) input
-  num_classes: 2                     # Number of classes in MVA
-  signalclass: 1                     # Signal class ID
-       
+  primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                    # Signal class ID
+  #DA_class:    -2                   # Domain Adaptation class
+  
   inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_ORIG' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   #inputvar_jagged: null              # 'MVA_JAGGED_VARS'
   #jagged_maxdim:
@@ -89,7 +91,7 @@ genesis_runmode:
   maxevents:  null
   inputmap: null #"mc_input.yml"
   tree_name:  'ntuplizer/tree'
-
+  
   targetfunc: 'target_e'              # Training target,    implemented under mctargets.py
   filterfunc: 'filter_no_egamma'      # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py

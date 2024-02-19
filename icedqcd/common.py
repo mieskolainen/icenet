@@ -1,7 +1,6 @@
 # Common input & data reading routines for the DQCD analysis
 #
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import copy
@@ -12,6 +11,7 @@ from tqdm import tqdm
 
 import time
 import multiprocessing
+from importlib import import_module
 
 from termcolor import colored, cprint
 
@@ -23,10 +23,8 @@ from icenet.algo import analytic
 
 from icedqcd import graphio
 
-
 # GLOBALS
-from configs.dqcd.mvavars import *
-from configs.dqcd.cuts import *
+from configs.dqcd.cuts   import *
 from configs.dqcd.filter import *
 
 
@@ -43,7 +41,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         ids:   columnar variables string (list)
         info:  trigger, MC xs, pre-selection acceptance x efficiency information (dict)
     """
-
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
+    
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list
     
@@ -55,50 +54,55 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         "entry_stop":  entry_stop,
         "maxevents":   maxevents,
         "args":        args,
-        "load_ids":    LOAD_VARS
+        "load_ids":    inputvars.LOAD_VARS
     }
 
-    INFO = {'class_0': None, 'class_1': None}
+    INFO = {}
+    X    = {}
+    Y    = {}
+    W    = {}
     
     # =================================================================
-    # *** SIGNAL MC ***
+    # *** BACKGROUND MC, SIGNAL MC, DOMAIN ADAPTATION ... ***
     
-    proc = args["input"]['class_1'] # input from yamlgen generated yml
-    X_S, Y_S, W_S, ind, INFO['class_1'] = iceroot.read_multiple_MC(class_id=1,
-        process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
-    # =================================================================
-    # *** BACKGROUND MC ***
-    
-    proc = args["input"]['class_0'] # input from yamlgen generated yml
-    X_B, Y_B, W_B, ind, INFO['class_0'] = iceroot.read_multiple_MC(class_id=0,
-        process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
-    
-    # =================================================================
-    # Sample conditional theory parameters for the background as they are distributed in signal sample
-    
-    for var in MODEL_VARS:
-            
-        print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for the background')
-
-        # Random-sample values for the background as in the signal MC
-        p   = ak.to_numpy(W_S / ak.sum(W_S)).squeeze() # probability per event entry
-        new = np.random.choice(ak.to_numpy(X_S[var]).squeeze(), size=len(X_B), replace=True, p=p)
+    for key in args["input"].keys(): # input from yamlgen generated yml
         
-        # Conditional variable 'MODEL_'
-        X_B[var] = ak.Array(new)
+        class_id = int(key.split("_")[1])
+        proc     = args["input"][key] 
+        
+        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple_MC(class_id=class_id,
+            process_func=process_root, processes=proc, root_path=root_path, param=param)
+    
+    
+    # =================================================================
+    # Sample conditional theory parameters they are distributed in signal sample
+    
+    sig_class = "class_1" # fixed here
+    
+    for var in inputvars.MODEL_VARS:
+        
+        for key in X.keys():
+            if key != sig_class:
+                
+                # Random-sample values as in the signal MC
+                p   = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
+                new = np.random.choice(ak.to_numpy(X[sig_class][var]).squeeze(), size=len(X[key]), replace=True, p=p)
 
-        # "Mirror" copy variable 'GEN_' (for ROC plots etc. in the evaluation stage)
-        X_B[var.replace('MODEL', 'GEN')] = ak.Array(new)
+                print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for "{key}"')
+
+                # Conditional variable 'MODEL_'
+                X[key][var] = ak.Array(new)
+
+                # "Mirror" copy variable 'GEN_' (for ROC plots etc. in the evaluation stage)
+                X[key][var.replace('MODEL', 'GEN')] = ak.Array(new)
     
     
     # =================================================================
     # *** Finally combine ***
-
-    X = ak.concatenate((X_B, X_S), axis=0)
-    Y = ak.concatenate((Y_B, Y_S), axis=0)
-    W = ak.concatenate((W_B, W_S), axis=0)
+    
+    X = ak.concatenate(X.values(), axis=0)
+    Y = ak.concatenate(Y.values(), axis=0)
+    W = ak.concatenate(W.values(), axis=0)
     
     # ** Crucial -- randomize order to avoid problems with other functions **
     rand = np.random.permutation(len(X))
@@ -107,7 +111,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     Y    = Y[rand]
     W    = W[rand]
 
-    print(__name__ + f'.common.load_root_file: len(X) = [{len(X[Y==0])}, {len(X[Y==1])}]')
+    print(__name__ + f'.common.load_root_file: Event counts per class')
+    unique, counts = np.unique(Y, return_counts=True)
+    print(np.asarray((unique, counts)).T)
     
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
 
@@ -162,6 +168,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     Returns:
         dictionary with different data representations
     """
+    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
+    
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
     if data.y is not None:
@@ -169,28 +177,28 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     
     if data.w is not None:
         data.w = ak.to_numpy(data.w).astype(np.float32)
-
+    
     # -------------------------------------------------------------------------
     
     ### Pick active variables out
-    scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=globals()[args['inputvar_scalar']])
-    jagged_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=globals()[args['inputvar_jagged']])
+    scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=eval('inputvars.' + args['inputvar_scalar']))
+    jagged_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=eval('inputvars.' + args['inputvar_jagged']))
     
     # Individually for GNNs
-    muon_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUON_VARS)
-    jet_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_JET_VARS)
-    sv_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_SV_VARS)
+    muon_vars   = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_MUON_VARS)
+    jet_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_JET_VARS)
+    sv_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_SV_VARS)
 
-    muonsv_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_MUONSV_VARS)
-    cpf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_CPF_VARS)
-    npf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_NPF_VARS)
-    pf_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=MVA_PF_VARS)
+    muonsv_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_MUONSV_VARS)
+    cpf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_CPF_VARS)
+    npf_vars    = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_NPF_VARS)
+    pf_vars     = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='second'), ids=inputvars.MVA_PF_VARS)
 
 
     # -------------------------------------------------------------------------
     ### ** Remove conditional variables **
     if args['use_conditional'] == False:
-        for var in globals()['MODEL_VARS']:
+        for var in inputvars.MODEL_VARS:
             try:
                 scalar_vars.remove(var)
                 print(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars')
@@ -229,7 +237,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     
     ## Invariant Mass
     data.x['muonSV', 'mass'] = \
-        analytic.invmass(x=data.x['muonSV'], pt1='mu1pt', pt2='mu2pt', eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi',
+        analytic.invmass(x=data.x['muonSV'], pt1='mu1pt', pt2='mu2pt',
+                         eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi',
                          m1_const=0.1057, m2_const=0.1057)
     
     jagged_vars.append('muonSV_mass')
@@ -237,19 +246,18 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
     
     print(data.x['muonSV'].fields)
     
-    
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
     data_kin = None
     
-    if KINEMATIC_VARS is not None:
-
-        kinematic_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'), ids=KINEMATIC_VARS)
+    if inputvars.KINEMATIC_VARS is not None:
+        
+        kinematic_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),
+                                                ids=inputvars.KINEMATIC_VARS)
 
         data_kin       = copy.deepcopy(data)
         data_kin.x     = aux.ak2numpy(x=data.x, fields=kinematic_vars)
         data_kin.ids   = kinematic_vars
-    
     
     # -------------------------------------------------------------------------
     ## Graph representation
@@ -295,7 +303,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
                 
                 graph_futures.append( \
                     graphio.parse_graph_data_ray.remote( \
-                        obj_ref, data.ids, scalar_vars, node_features, args['graph_param'], data.y, data.w, entry_start, entry_stop)
+                        obj_ref, data.ids, scalar_vars, node_features, args['graph_param'],
+                        data.y, data.w, entry_start, entry_stop)
                 )
 
                 job_index += 1
@@ -318,13 +327,11 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
                         null_value=args['imputation_param']['fill_value'])
     io.showmem()
     
-    
     # -------------------------------------------------------------------------
     # Mutual information regularization targets
     
-    MI_ind, MI_vars = io.pick_vars(data=data, set_of_vars=aux.process_regexp_ids(all_ids=data.ids, ids=globals()['MI_VARS']))
-    data_MI = data.x[:, MI_ind].astype(np.float)
-    
+    vars = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.MI_VARS)
+    data_MI = data[vars].x.astype(np.float32)
     
     # --------------------------------------------------------------------------
     # Create DeepSet style representation from the "long-vector" content

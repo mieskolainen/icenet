@@ -1,23 +1,87 @@
 
 # -----------------------------------------------
+# ** Main Domain Filter **
+MAIN_DOMAIN_FILTER: &MAIN_DOMAIN_FILTER
+  
+  filter[0]:
+    operator: null   # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0]        # input set ids (one or two)
+  
+  # ... more filters here
+  
+  # --------------------
+  
+  set[0]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{cut: 'nMuon > 0', latex: ['$!(nMuon > 0)$', '$nMuon > 0$']}]
+
+# -----------------------------------------------
+
+
+# -----------------------------------------------
+# ** Domain Adaptation Control Domain Filter **
+DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
+  
+  filter[0]:
+    operator: null  # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0]       # input set ids (one or two)
+  
+  # ... more filters here
+  
+  # --------------------
+  
+  set[0]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{cut: 'nMuon > 0', latex: ['$!(nMuon > 0)$', '$nMuon > 0$']}]
+      #[{cut: '(2.9 < muonSV_mass_0) AND (muonSV_mass_0 < 3.3)', latex: ['$!(2.9 < muonSV_{mass_0} < 3.3)$', '$2.9 < muonSV_{mass_0} < 3.3$']}]
+
+# -----------------------------------------------
+
+
+# -----------------------------------------------
+# ** Mutual Information Control Domain Filter **
+MI_DOMAIN_FILTER: &MI_DOMAIN_FILTER
+  
+  filter[0]:
+    operator: null  # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0]       # input set ids (one or two)
+  
+  # ... more filters here
+  
+  # --------------------
+  
+  set[0]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{cut: '0 < muonSV_mass_0 AND muonSV_mass_0 < 20', latex: ['!(0 < $muonSV_{mass_0}$ AND $muonSV_{mass_0} < 20$)', '$0 < $muonSV_{mass_0}$ AND $muonSV_{mass_0} < 20$']}]
+
+# -----------------------------------------------
+
+
+# -----------------------------------------------
 # ** Mutual Information regularization **
 MI_REG_PARAM: &MI_REG_PARAM
   
-  classes: [0]             #  Which classes to use in the regularization
+  classes: [-2]            #  Which classes to use in the regularization
 
   min_count: 32            #  Minimum number of events (per category)
   poisson_weight: False    #  per category Poisson sqrt(N) weighted loss
-  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY'
+  losstype: 'PEARSON'      # 'MINE', 'MINE_EMA', 'DENSITY', 'PEARSON'
   eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
-  epochs: 3
-  batch_size: 4096
-  lr: 1.0e-3
-  weight_decay: 1.0e-5
+  epochs: 5
+  batch_size: 256          # if the estimate (network) turns into NaN, try tuning batch size, lr, weight decay ...
+  lr: 1.0e-4
+  weight_decay: 1.0e-2
   clip_norm: 1.0
   
   mlp_dim: [128, 128]
@@ -27,7 +91,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   activation: 'relu'
   
   # Comment out for no categories
-  #set_filter: *FINAL_STATE_FILTER
+  set_filter: *MI_DOMAIN_FILTER
 # -----------------------------------------------
 
 
@@ -86,16 +150,16 @@ exp:
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb01:
   train:   'xgb'
-  predict: 'xgb'
+  predict: 'xgb_logistic'
   label:   'XGB'
   raytune:  xgb_trial_0
-
-  #exclude_MVA_vars: ['.*']
+  
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
   # general parameters
   model_param:
-    num_boost_round: 180       # number of epochs (equal to the number of trees!)
+    num_boost_round: 150       # number of epochs (equal to the number of trees!)
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'       # 'auto', 'cpu', 'cuda'
@@ -115,8 +179,17 @@ xgb01:
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']                        # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    #objective: 'binary:logistic'             # Note that 'multi:softprob' does not work with distillation
+    #eval_metric: ['logloss']                 # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'custom:binary_cross_entropy'  # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   plot_trees: False
 
@@ -127,110 +200,22 @@ xgb01:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-no-mass:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB-no-mass'
-  raytune:  xgb_trial_0
-
-  # ** Custom set of variables **
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
-  #include_MVA_vars: []
-  
-  # general parameters
-  model_param:
-    num_boost_round: 180      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']                        # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-no-jets:
-  train:   'xgb'
-  predict: 'xgb'
-  label:   'XGB-no-jets'
-  raytune:  xgb_trial_0
-  
-  # ** Custom set of variables **
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*']
-  #include_MVA_vars: []
-  
-  # general parameters
-  model_param:
-    num_boost_round: 180      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']                        # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost:
+iceboost01-DA:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST'
+  label:   'ICEBOOST-DA'
   raytune:  xgb_trial_0
   
-  #exclude_MVA_vars: ['.*']
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
   # general parameters
   model_param:
-    num_boost_round: 180      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 150       # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
-
+    device:      'auto'        # 'auto', 'cpu', 'cuda'
+    
     learning_rate: 0.1
     gamma: 1.67
     max_depth: 10
@@ -246,13 +231,20 @@ iceboost:
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  MI_reg_param:
-    beta: [2.0]                # Positive for minimizing
-    <<: *MI_REG_PARAM
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    DA:
+      classes: [0,-2]
+      beta: -0.1
+      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
 
@@ -263,19 +255,18 @@ iceboost:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost-no-mass:
+iceboost01-MI:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-no-mass'
+  label:   'ICEBOOST-MI'
   raytune:  xgb_trial_0
-
-  # ** Custom set of variables **
+  
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
-  #include_MVA_vars: []
+  #include_MVA_vars: ['.*']
   
   # general parameters
   model_param:
-    num_boost_round: 180      # number of epochs (equal to the number of trees!)
+    num_boost_round: 150      # number of epochs (equal to the number of trees!)
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
@@ -295,12 +286,19 @@ iceboost-no-mass:
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
-  MI_reg_param:
-    beta: [2.0]                # Positive for minimizing
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  MI_param:
+    beta: [0.1]               # Positive for minimizing, regularization strength [per class]
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -308,26 +306,24 @@ iceboost-no-mass:
   # Read/Write of epochs
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
-
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost-no-jets:
+iceboost01-DA-MI:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-no-jets'
+  label:   'ICEBOOST-DA-MI'
   raytune:  xgb_trial_0
   
-  # ** Custom set of variables **
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*']
-  #include_MVA_vars: []
-
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
+  
   # general parameters
   model_param:
-    num_boost_round: 180      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    num_boost_round: 150      # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
 
     learning_rate: 0.1
     gamma: 1.67
@@ -344,12 +340,23 @@ iceboost-no-jets:
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    DA:
+      classes: [0,-2]
+      beta: -0.1
+      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
-  MI_reg_param:
-    beta: [2.0]                # Positive for minimizing
+  MI_param:
+    beta: [0.1]                # Positive for minimizing
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -358,6 +365,7 @@ iceboost-no-jets:
   savemode: 'all'              # 'all', 'latest'
   readmode: -1                 # -1 is the last saved epoch
 
+# -----------------------------------------------------------------------------
 
 
 # Logistic Regression (convex model = global optimum guarantee)

@@ -52,7 +52,7 @@ class icemap:
 
         self.x = np.concatenate((self.x, other.x), axis=0)
         return self
-
+    
     def __getitem__(self, key):
         """ Advanced indexing """
 

@@ -2,7 +2,7 @@
 #
 # This code is compatible with Oracle Grid Engine submission
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import os
 import numpy as np
@@ -319,6 +319,7 @@ def process_data(args):
         # Write to log-file
         logging.debug(f'Total number of events: {total_num_events}')
 
+
 def get_predictor(args, param, feature_names=None):    
 
     model = None
@@ -332,41 +333,11 @@ def get_predictor(args, param, feature_names=None):
     elif param['predict'] == 'torch_vector':
         func_predict = predict.pred_torch_generic(args=args, param=param)
 
-    elif param['predict'] == 'torch_scalar':
-        func_predict = predict.pred_torch_scalar(args=args, param=param)
-
-    elif param['predict'] == 'torch_flow':
-        func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-
     elif param['predict'] == 'torch_graph':
         func_predict = predict.pred_torch_graph(args=args, param=param)
-
-    elif param['predict'] == 'graph_xgb':
-        func_predict = predict.pred_graph_xgb(args=args, param=param)
-    
-    elif param['predict'] == 'torch_deps':
-        func_predict = predict.pred_torch_generic(args=args, param=param)
-    
-    elif param['predict'] == 'torch_image':
-        func_predict = predict.pred_torch_generic(args=args, param=param)
-        
-    elif param['predict'] == 'torch_image_vector':
-        func_predict = predict.pred_torch_generic(args=args, param=param)
-
-    elif param['predict'] == 'flr':
-        func_predict = predict.pred_flr(args=args, param=param)
-    
-    elif param['predict'] == 'exp':
-        func_predict = predict.pred_exp(args=args, param=param)
-    
-    elif param['predict'] == 'cut':
-        func_predict = predict.pred_cut(args=args, param=param)
-    
-    elif param['predict'] == 'cutset':
-        func_predict = predict.pred_cutset(args=args, param=param)
     
     else:
-        raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
+        raise Exception(__name__ + f'.get_predictor: Unknown param["predict"] = {param["predict"]}')
 
     return func_predict, model
 

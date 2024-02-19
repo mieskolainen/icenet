@@ -4,12 +4,14 @@
 
 rootname: 'dqcd'
 rngseed: 123456                      # Fixed seed for training data mixing
+inputvars: 'mvavars'                 # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false             # Conditional (theory parametric) input
-  num_classes: 2                     # Number of classes in MVA
-  signalclass: 1                     # Signal class ID
+  primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                    # Signal class ID
+  DA_class:    -2                    # Domain Adaptation class
   
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
@@ -94,7 +96,7 @@ genesis_runmode:
   maxevents:  null
   inputmap:  "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
-
+  
   filterfunc: 'filter_standard'      # Filter cuts, implemented under filter.py
   cutfunc:    'cut_fiducial'         # Basic cuts,  implemented under cuts.py
   targetfunc:  null                  # -- not active --
@@ -144,13 +146,10 @@ train_runmode:
     #- gnet1
     #- gnet3
     
+    - iceboost01-MI
+    - iceboost01-DA-MI
+    - iceboost01-DA
     - xgb01
-    - xgb01-no-mass
-    - xgb01-no-jets
-    
-    - iceboost
-    - iceboost-no-mass
-    - iceboost-no-jets
     
     #- dmlp
     #- lgr0

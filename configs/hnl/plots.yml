@@ -67,7 +67,7 @@ MVA_output:
   #set_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
-# Powerset can be applied only per one plot[i] identifier!
+# Set filter can be applied only per one plot[i] identifier!
 MVA_2D:
   active: true
 

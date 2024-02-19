@@ -113,8 +113,8 @@ def printloss(loss, precision=5):
 
 def trackloss(loss, loss_history):
     for key in loss.keys():
-        if key not in loss_history:
-            loss_history[key] = []
+        if key not in loss_history: # First iteration
+            loss_history[key] = [loss[key]]
         else:
             loss_history[key].append(loss[key])
 
@@ -174,7 +174,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
             if MI is not None:
                 MI['x'] = batch_.x_MI
         # -----------------------------------------
-
+        
         #if DA_active:
         #    loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, num_classes=model.C, weights=w, param=opt_param, y_DA=y_DA, w_DA=w_DA, MI=MI)
         #    loss       = l + l_DA
@@ -324,7 +324,7 @@ def test(model, loader, optimizer, device):
         
         # Classification metrics
         N       = len(y_true)
-        metrics = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, num_classes=model.C, hist=False, verbose=True)
+        metrics = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, class_ids=None, hist=False, verbose=True)
         
         if metrics.auc > -1: # Bad batch protection
             aucsum += (metrics.auc * N)

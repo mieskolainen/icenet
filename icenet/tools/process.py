@@ -134,8 +134,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # Mode setup
 
     new_args = {}
-    new_args['rootname'] = args['rootname']
-    new_args['rngseed']  = args['rngseed']
+    new_args['rootname']  = args['rootname']
+    new_args['rngseed']   = args['rngseed']
+    new_args['inputvars'] = args['inputvars']
     
     # -----------------------------------------------------
     # Runmode setup
@@ -182,17 +183,21 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # -------------------------------------------------------------------
     ## Create a hash based on:
-    # "rngseed", "maxevents", "genesis", "inputmap" fields of yaml
+    # "rngseed", "maxevents", "inputvars", "genesis" and "inputmap" fields of yaml
     
     hash_args = {}
 
-    mvavars_path = f'{cwd}/{config_path}/mvavars.py'
-    if os.path.exists(mvavars_path):
-        hash_args['__hash__mvavars.py'] = io.make_hash_sha256_file(mvavars_path)
-    
+    inputvars_path = f'{cwd}/{config_path}/{args["inputvars"]}.py'
+    if os.path.exists(inputvars_path):
+        hash_args['__hash__inputvars'] = io.make_hash_sha256_file(inputvars_path)
+    else:
+        raise Exception(__name__ + f".read_config: Did not find: {inputvars_path}")
+
     hash_args.update(old_args['genesis_runmode']) # This first !
     hash_args['rngseed']   = args['rngseed']
     hash_args['maxevents'] = args['maxevents']
+    hash_args['inputvars'] = args['inputvars']
+    
     hash_args.update(inputmap)
 
     args['__hash_genesis__'] = io.make_hash_sha256_object(hash_args)
@@ -209,14 +214,16 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         cprint(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
     
     # -------------------------------------------------------------------
-    ## Create new variables to args dictionary
+    ## Create new variables to args dictionary (and create directories)
 
     args["config"]     = cli_dict['config']
     args["modeltag"]   = cli_dict['modeltag']
     
     args['datadir']    = aux.makedir(f'{cwd}/output/{args["rootname"]}')
-    args['modeldir']   = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/modeltag__{cli_dict["modeltag"]}')
-    args['plotdir']    = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{cli_dict["modeltag"]}')
+    
+    if runmode != 'genesis':
+        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/modeltag__{cli_dict["modeltag"]}')
+        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{cli_dict["modeltag"]}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
@@ -229,12 +236,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args[key] = cli_dict[key]
     
     # -------------------------------------------------------------------
-    ## Create directories
+    ## Create aux
     aux.makedir('tmp')
-    aux.makedir(args['datadir'])
-    aux.makedir(args['modeldir'])
-    aux.makedir(args['plotdir'])
-
+    
     # -------------------------------------------------------------------
     # Set random seeds for reproducability and train-validate-test splits
 
@@ -581,7 +585,7 @@ def impute_datasets(data, args, features=None, imputer=None):
 
         # No other imputation, but fix spurious NaN / Inf
         data.x[np.logical_not(np.isfinite(data.x[:, dim]))] = args['fill_value']
-
+    
     return data, imputer
 
 
@@ -780,7 +784,7 @@ def train_models(data_trn, data_val, args=None) :
         # If distillation
         if ID == args['distillation']['source']:
             
-            if args['num_classes'] != 2:
+            if len(args['primary_classes']) != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
             
             cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
@@ -796,6 +800,8 @@ def train_models(data_trn, data_val, args=None) :
                 raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
         # --------------------------------------------------------
 
+    cprint(__name__ + f'.train_models: [done]', 'yellow')
+    
     return
 
 
@@ -833,8 +839,8 @@ def evaluate_models(data=None, info=None, args=None):
     #MVA_binned_mstats = []
     #MVA_binned_mlabel = []
 
-    ROC_binned_mstats = [list()] * len(args['active_models'])
-    ROC_binned_mlabel = [list()] * len(args['active_models'])
+    ROC_binned_mstats = {}
+    ROC_binned_mlabel = {}
 
     # -----------------------------
     # Prepare output folders
@@ -1086,7 +1092,7 @@ def make_plots(data, args):
     if args['plot_param']['corrmat']['active']:
 
         targetdir = aux.makedir(f'{args["plotdir"]}/train/')
-        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, classes=data['data'].y, targetdir=targetdir)
+        fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, y=data['data'].y, targetdir=targetdir)
 
 
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
@@ -1152,17 +1158,21 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 edges = args['plot_param']['ROC_binned'][pid]['edges']
             else:
                 break # No more this type of plots 
-
+            
             ## 1D
-            if   len(var) == 1:
+            if len(var) == 1:
 
                 met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var[0], \
+                    ids_kin=VARS_kin, X=X_RAW, ids=ids_RAW, edges=edges, VAR=var[0], \
                     num_bootstrap=args['plot_param']['ROC_binned']['num_bootstrap'])
 
+                if label not in ROC_binned_mstats: # not yet created
+                    ROC_binned_mstats[label] = {}
+                    ROC_binned_mlabel[label] = {}
+                
                 # Save for multiple comparison
-                ROC_binned_mstats[i].append(met_1D)
-                ROC_binned_mlabel[i].append(label_1D)
+                ROC_binned_mstats[label][i] = met_1D
+                ROC_binned_mlabel[label][i] = label_1D
 
                 # Plot this one
                 plots.ROC_plot(met_1D, label_1D, xmin=args['plot_param']['ROC_binned']['xmin'], title = f'{label}', filename=aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}]')
@@ -1171,9 +1181,9 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             ## 2D
             elif len(var) == 2:
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    VARS_kin=VARS_kin, edges=edges, label=label, ids=var)
+                    ids_kin=VARS_kin, X=X_RAW, ids=ids_RAW, edges=edges, label=label, VAR=var)
                 plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}].pdf', bbox_inches='tight')
-                
+
             else:
                 print(var)
                 raise Exception(__name__ + f'.plot_AUC_wrap: Unknown dimensionality {len(var)}')
@@ -1185,7 +1195,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         def plot_helper(mask, sublabel, pathlabel):
             hist_edges = args['plot_param'][f'MVA_output']['edges']
             inputs = {'y_pred': y_pred[mask], 'y': y[mask],
-                'weights': weights[mask] if weights is not None else None, 'num_classes': args['num_classes'],
+                'weights': weights[mask] if weights is not None else None, 'class_ids': None,
                 'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': f'{targetdir}/MVA/{label}/{pathlabel}'}
 
             plots.density_MVA_wclass(**inputs)
@@ -1194,7 +1204,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         mask  = np.ones(len(y_pred), dtype=bool)
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
-        # ** Powerset filtered **
+        # ** Set filtered **
         if 'set_filter' in args['plot_param']['MVA_output']:
 
             filters = args['plot_param']['MVA_output']['set_filter']
@@ -1227,7 +1237,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                     'weights':     weights[mask] if weights is not None else None,
                     'X':           XX,
                     'ids':         np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
-                    'num_classes': args['num_classes'],
+                    'class_ids':   None,
                     'label':       f'{label}/{sublabel}', 'hist_edges': edges,
                     'path':        f'{targetdir}/COR/{label}/{pathlabel}'}
                 
@@ -1235,10 +1245,12 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 #plots.density_COR(**inputs)
 
                 # Save output
-                if savestats:
-                    if label not in corr_mstats.keys():
-                        corr_mstats[label] = {}
-                    corr_mstats[label][sublabel] = output
+                if i not in corr_mstats.keys():
+                    corr_mstats[i] = {}
+                if label not in corr_mstats[i].keys():    
+                    corr_mstats[i][label] = {}
+                
+                corr_mstats[i][label][sublabel] = output
 
             # Pick chosen variables based on regular expressions
             var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=var)
@@ -1247,20 +1259,17 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             # ** All inclusive **
             mask      = np.ones(len(y_pred), dtype=bool)
 
-            # ** Powerset filtered **
+            plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive')
+            
+            # ** Set filtered **
             if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
-
-                plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=True)
-
+                
                 filters = args['plot_param']['MVA_2D'][pid]['set_filter']
                 mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
 
                 for m in range(mask_powerset.shape[0]):
-                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m],
-                        pathlabel=path_powerset[m], savestats=True)
-            else:
-                plot_helper(mask=mask, pick_ind=pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False)                
-
+                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], pathlabel=path_powerset[m])
+            
     return True
 
 
@@ -1283,11 +1292,14 @@ def plot_XYZ_multiple_models(targetdir, args):
         for i in range(100): # Loop over plot indexes
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:
-                if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
-
+                
+                try: # if user provided xlim
                     xlim = args['plot_param']['MVA_2D'][pid]['xlim']
-                    plots.plot_correlation_comparison(corr_mstats=corr_mstats, 
-                        num_classes=args['num_classes'], targetdir=targetdir, xlim=xlim)
+                except:
+                    xlim = None
+                
+                plots.plot_correlation_comparison(corr_mstats=corr_mstats[i], targetdir=targetdir, xlim=xlim)
+
             else:
                 break
 
@@ -1324,7 +1336,7 @@ def plot_XYZ_multiple_models(targetdir, args):
     ### Plot all MVA outputs (not implemented)
     #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
 
-    ### Plot all binned ROC curves
+    ### Plot all 1D-binned ROC curves
     if args['plot_param']['ROC_binned']['active']:
 
         for i in range(100):
@@ -1335,21 +1347,22 @@ def plot_XYZ_multiple_models(targetdir, args):
                 edges = args['plot_param']['ROC_binned'][pid]['edges']
             else:
                 break # No more plots 
-
-            if len(var) == 1:
-
+            
+            if len(var) == 1: # 1D
+                
                 # Over different bins
                 for b in range(len(edges)-1):
-
+                    
                     # Over different models
                     xy,legs = [],[]
-                    for k in range(len(ROC_binned_mstats[i])):
-                        xy.append(ROC_binned_mstats[i][k][b])
-
+                    for k in range(len(ROC_binned_mstats)):
+                        
                         # Take label for the legend
                         ID    = args['active_models'][k]
                         label = args['models'][ID]['label']
+                        
                         legs.append(label)
+                        xy.append(ROC_binned_mstats[label][i][b])
                     
                     ### ROC
                     title = f'BINNED ROC: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'

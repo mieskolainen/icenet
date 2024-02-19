@@ -13,7 +13,7 @@ from icenet.tools import aux_torch
 from icefit import mine
 
 
-def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None, EPS=1e-20):
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None, EPS=1e-12):
     """
     A wrapper function to loss functions
     
@@ -48,7 +48,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
             return {}
     
     if  param['lossfunc'] == 'cross_entropy':
-        log_phat = torch.log(model.softpredict(x) + EPS)
+        log_phat = torch.log(torch.clip(model.softpredict(x), min=EPS))
         
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
@@ -79,7 +79,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         loss  = {'LNCE': loss, **MI_helper(log_phat)}
 
     elif param['lossfunc'] == 'focal_entropy':
-        log_phat = torch.log(model.softpredict(x) + EPS)
+        log_phat = torch.log(torch.clip(model.softpredict(x), min=EPS))
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
         loss  = {'FE': loss, **MI_helper(log_phat)}
@@ -188,10 +188,10 @@ def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1
     """
     https://arxiv.org/abs/2205.09310
     """
-    norms = torch.norm(logit, p=2, dim=-1, keepdim=True)+EPS
+    norms = torch.clip(torch.norm(logit, p=2, dim=-1, keepdim=True), min=EPS)
     logit_norm = torch.div(logit, norms) / t
     log_phat = F.log_softmax(logit_norm, dim=-1) # Numerically more stable than pure softmax
-
+    
     return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
 
 def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
@@ -214,7 +214,7 @@ def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
     else:
         return loss.sum() / y.shape[0]
 
-def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
+def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-12):
     """
     Per instance weighted cross entropy loss
     (negative log-likelihood)
@@ -227,14 +227,14 @@ def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-30):
     y = F.one_hot(y, num_classes)
 
     # Protection
-    loss = - y*torch.log(phat +  EPS) * w
+    loss = - y*torch.log(torch.clip(phat, min=EPS)) * w
     
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
 
-def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
+def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
@@ -252,7 +252,7 @@ def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=No
     else:
         return loss.sum() / y.shape[0]
 
-def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-30) :
+def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-12) :
     """
     Per instance weighted 'focal entropy loss'
     https://arxiv.org/pdf/1708.02002.pdf
@@ -262,8 +262,8 @@ def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-3
     else:
         w = 1.0
 
-    y = F.one_hot(y, num_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(phat + EPS) * w
+    y    = F.one_hot(y, num_classes)
+    loss = -y * torch.pow(1 - phat, gamma) * torch.log(torch.clip(phat, min=EPS)) * w
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)

@@ -5,6 +5,7 @@
 
 rootname: 'brk'
 rngseed: 123456                 # Fixed seed for training data mixing
+inputvars: 'mvavars'            # Main file input description python file
 
 
 input_param: &INPUT_PARAM
@@ -36,9 +37,10 @@ input_param: &INPUT_PARAM
 
 mva_param: &MVA_INPUT_PARAM
   
-  num_classes: null         # Num of classes in MVA
-  signalclass: null
-
+  primary_classes: null              # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: null                 # Signal class ID
+  DA_class:    null                  # Domain Adaptation class
+  
   inputvar:    null
   cutfunc:     null
   targetfunc:  null

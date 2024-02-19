@@ -34,13 +34,13 @@ If you use this work in your research (especially if you find algorithms or idea
 @misc{mieskolainen2023icenet,
   author = "{Mikael Mieskolainen}",
   title  = "ICENET: a deep learning library for HEP",
-  year   = "2023",
+  year   = "2024",
   url    = "https://github.com/mieskolainen/icenet",
-  note   = "[Online code; accessed XX-YY-2023]"
+  note   = "[Online code; accessed XX-YY-2024]"
 }
 ```
 
 
-Mikael Mieskolainen, 2023 \
+Mikael Mieskolainen, 2024 \
 m.mieskolainen@imperial.ac.uk
 

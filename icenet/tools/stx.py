@@ -9,6 +9,23 @@ import copy
 from icenet.tools import aux
 
 
+def print_stats(mask, text):
+    """
+    Print filter mask category statistics
+    
+    Args:
+        mask:   computed event filter mask
+        text:   filter descriptions
+    """    
+    N = mask.shape[1]
+    print(__name__ + f'.print_stats: mask.shape = {mask.shape}')
+    
+    for i in range(mask.shape[0]):
+        count = np.sum(mask[i,:])
+        print(f'cat[{text[i]}]: {count} ({count / N:0.5E})')
+    print('')
+
+
 def filter_constructor(filters, X, ids):
     """
     Filter product main constructor
@@ -101,8 +118,9 @@ def filter_constructor(filters, X, ids):
             all_mask_matrix = copy.deepcopy(mask_matrix)
         all_text += text_set
         all_path += path_set
-    else:
-        raise Exception(__name__ + f'.filter_constructor: Number of "sets" for filter[{i}] should be 1 or 2')
+    
+    #else:
+    #    raise Exception(__name__ + f'.filter_constructor: Number of "sets" for filter[{i}] should be 1 or 2')
 
     return all_mask_matrix, all_text, all_path
 
@@ -122,7 +140,7 @@ def set_constructor(cutset, X, ids, veto=False):
 
     # Turn into matrix
     mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
-    print(textlist)
+    #print(textlist)
 
     # Create description strings
     text_set, path_set = [],[]
@@ -161,7 +179,7 @@ def powerset_constructor(cutset, X, ids):
     mask_powerset = powerset_cutmask(cut=masks)
     BMAT          = aux.generatebinary(len(masks))
 
-    print(textlist)
+    #print(textlist)
 
     # Loop over all powerset 2**|cuts| masked selections
     # Create a description latex strings and savepath strings
@@ -216,7 +234,7 @@ def powerset_cutmask(cut):
     Returns:
         mask: (2**|cuts| x num_events) sized boolean mask matrix
     """
-    print(cut)
+    #print(cut)
 
     num_events = len(cut[0])
     num_cuts   = len(cut)
@@ -549,7 +567,7 @@ def eval_boolean_exptree(root, X, ids):
     # Evaluate
     return g(f(X[:, ind]), rhs)
 
-def eval_boolean_syntax(expr, X, ids):
+def eval_boolean_syntax(expr, X, ids, verbose=False):
     """
     A complete wrapper to evaluate boolean syntax.
 
@@ -568,6 +586,11 @@ def eval_boolean_syntax(expr, X, ids):
     treeobj  = construct_exptree(treelist)
     output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
+    if verbose:
+        print(__name__ + f'.eval_boolean_syntax:')
+        print(treeobj)
+        print(f'Selection fraction: {np.sum(output) / len(output):0.4e}')
+    
     return output
 
 def test_syntax_tree_parsing():

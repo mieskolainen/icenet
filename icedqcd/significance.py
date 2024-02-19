@@ -1,4 +1,4 @@
-# Compute S/sqrt[B]
+# Compute S/sqrt[B] (TBD. Update to work with the latest model scenarios)
 # 
 # m.mieskolainen@imperial.ac.uk, 2023
 

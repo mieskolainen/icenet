@@ -4,6 +4,10 @@ FILTER: &FILTER
     operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
     sets: [0,1]                # input set ids (one or two)
   
+  filter[1]:
+    operator: null             # null (unary), cartesian_and', 'cartesian_or'
+    sets: [2]                  # input set ids (one or two)
+  
   # ... more filters here
   
   # --------------------
@@ -27,10 +31,14 @@ FILTER: &FILTER
        {cut: 'GEN_ctau == 10',  latex: ['$c\tau \neq 10$',  '$c\tau = 10$'] },
        {cut: 'GEN_ctau == 100', latex: ['$c\tau \neq 100$', '$c\tau = 100$']}]
   
+  set[2]:
+    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    cutset:
+      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']}]
+  
   # ... more sets here
 
 # -----------------------------------------------------------------------
-
 
 basic:
   active: False
@@ -38,49 +46,54 @@ basic:
   exclude_vals: [null, -999.0]
 
 corrmat:
-  active: false
+  active: False
 
 contours:
-  active: false
+  active: False
 
 ROC:
-  active: true
+  active: True
   num_bootstrap: 50
   xmin: 1.0E-6
-  set_filter: *FILTER
+  #set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
-  active: false
+  active: False
   num_bootstrap: 50
   xmin: 1.0E-4
-  
-  #plot[0]:
-  #  var:   ['ChsMET_pt']
-  #  edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
 
-  #plot[0]:
+  plot[0]:
+    var:   ['ChsMET_pt']
+    edges: [4.0, 6, 8.0, 10.0, 12.0, 15.0, 10000]
+
+  plot[1]:
+    var:   ['muonSV_mass_0']
+    edges: [0.5, 1.5, 2.5, 3.5, 5.5, 7.0, 10.0, 20.0, 40.0, 80.0]
+  
+  #plot[2]:
   #  var:   ['GEN_mpi', 'GEN_ctau']
   #  edges: [[1.9, 2.1, 4.9, 5.1, 9.9, 10.1, 14.1, 15.1],
   #          [9, 11, 49, 51, 99, 101]]
 
 ## MVA output density (1D)
 MVA_output:
-  active: true
+  active: True
   edges: 80
-  set_filter: *FILTER
+  #set_filter: *FILTER
 
 ## (MVA output x External variable) density (2D)
 MVA_2D:
-  active: false
+  active: True
   
   plot[0]:
-    var:   ['.*'] # RegExp supported
-    edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
-            {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
+    #var:  ['.*'] # RegExp supported
+    #var:  ['muonSV_mass.*'] # RegExp supported
+    var:   ['muonSV_mass_0', 'muonSV_mass_1']
+    edges: [{'nbin': 50,  'minmax': [0.0, 1.0],  'space': 'linear'},
+            {'nbin': 100, 'minmax': [0.0, 20.0], 'space': 'linear'}]
 
   #plot[1]:
-  #  var:   ['.?hlt_pms2.?']
+  #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
-

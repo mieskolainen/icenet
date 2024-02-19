@@ -22,7 +22,7 @@ from icenet.tools import iceroot
 
 def read_MC(process_func, process, root_path, param, class_id):
     """
-    Loop over different MC processes as defined in the yaml files
+    Loop over different MC (or data) processes as defined in the yaml files
     
     Args:
         process_func:  data processing function

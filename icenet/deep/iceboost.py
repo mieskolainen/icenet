@@ -1,6 +1,6 @@
 # iceboost == xgboost + torch autograd based extensions
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,19 +26,13 @@ import ray
 from ray import tune
 
 
-def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-30):
-    """
-    Custom binary cross entropy loss with mutual information regularization
-    """
-    global MI_x
-    global MI_reg_param
-    global loss_history
-    
-    # Detect device
+def _hinge_loss(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None):
+
     device = preds.device
     
     if weights is None:
         w = torch.ones(len(preds))
+        w = w / torch.sum(w)
     else:
         w = weights / torch.sum(weights)
     
@@ -46,102 +40,255 @@ def _binary_CE_with_MI(preds: torch.Tensor, targets: torch.Tensor, weights: torc
     targets = targets.to(device)
     w       = w.to(device)
     
-    ## Squared hinge-loss type
-    #targets = 2 * targets - 1
-    #classifier_loss = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
-    #classifier_loss = classifier_loss.sum()
+    targets = 2 * targets - 1
+    loss = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
     
-    ## Sigmoid link function
-    phat = 1 / (1 + torch.exp(-preds))
+    return loss.sum() * len(preds)
+
+def corrcoeff_weighted(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None):
+    """
+    Per event weighted Pearson 2x2 correlation matrix cf. torch.corrcoef()
+    Args:
+        x  :  data (Nx1)
+        y  :  data (Nx1)
+        weights : event weights
+    """
+    data   = torch.vstack((x.squeeze(), y.squeeze()))
+    C      = torch.cov(data, aweights=weights.squeeze())
+    N      = len(C)
+    D      = torch.eye(N).to(C.device)
     
-    ## Classifier binary Cross Entropy
-    CE_loss  = - w * (targets*torch.log(phat + EPS) + (1-targets)*(torch.log(1 - phat + EPS)))
-    CE_loss  = CE_loss.sum()
+    D[range(N), range(N)] = 1.0 / torch.sqrt(torch.diagonal(C))
+    rho = D @ C @ D
     
-    #lossfunc = torch.nn.BCELoss(weight=w, reduction='sum')
-    #classifier_loss = lossfunc(phat, targets)
+    return rho
+
+def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
+    """
+    Custom binary cross entropy loss with
+    domain adaptation (DA) and mutual information (MI) regularization
+    """
+    global loss_mode
+    global MI_x
+    global BCE_param
+    global MI_param
+    global loss_history
     
-    ## Domain Adaptation
-    # [reservation] ...
-
-    ## Regularization
-
-    # Loop over chosen classes
-    k       = 0
-    MI_loss = torch.tensor(0.0).to(device)
-    MI_lb_values = []
-
-    for c in MI_reg_param['classes']:
-
-        # -----------
-        reg_param = copy.deepcopy(MI_reg_param)
-        reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
-        # -----------
-
-        # Pick class indices
-        cind  = (targets != None) if c == None else (targets == c)
-
-        X     = torch.Tensor(MI_x).to(device)[cind]
-        Z     = preds[cind]
-        W     = weights[cind]
+    device = preds.device
+    
+    if weights is None:
+        w = torch.ones(len(preds))
+        w = w / torch.sum(w)
+    else:
+        w = weights / torch.sum(weights)
+    
+    # Set computing device
+    targets = targets.type(torch.int32).to(device)
+    w       = w.to(device)
+    
+    track_loss = {}
+    loss_str   = ''
+    
+    # --------------------------------------------------------------------
+    ## Sigmoid
+    phat = torch.clip(1 / (1 + torch.exp(-preds)), min=EPS, max=1-EPS)
+    
+    ## Binary Cross Entropy terms
+    BCE_loss = torch.tensor(0.0).to(device)
+    
+    for key in BCE_param.keys():
+        param = BCE_param[key]
+            
+        # Set labels
+        t0 = (targets == param['classes'][0])
+        t1 = (targets == param['classes'][1])
         
-        ### Now loop over all (powerset) categories
-        mask  = reg_param['evt_mask'][c]
-        N_cat = mask.shape[0]
-
-        MI_loss_this = torch.tensor(0.0).to(device)
-        MI_lb        = torch.tensor(0.0).to(device)
-        total_ww     = 0.0
-
+        targets_CE = targets.clone()
+        targets_CE[t0] = 0
+        targets_CE[t1] = 1
+        
+        ### Now loop over all filter categories
+        mask0 = param[f'evt_mask_{loss_mode}'][param['classes'][0]]
+        mask1 = param[f'evt_mask_{loss_mode}'][param['classes'][1]]
+        N_cat = mask0.shape[0]
+        
+        loss = torch.tensor(0.0).to(device)
+        
         for m in range(N_cat):
             
-            mm_ = mask[m,:] # Pick index mask
+            m0   = torch.tensor(mask0[m,:], dtype=torch.bool).to(device) # Pick index mask
+            m1   = torch.tensor(mask1[m,:], dtype=torch.bool).to(device)
+            
+            wnew = torch.zeros_like(w).to(device) # ! important
+            
+            wnew[t0] = m0 * w[t0]; wnew[t0] = wnew[t0] / torch.sum(wnew[t0])
+            wnew[t1] = m1 * w[t1]; wnew[t1] = wnew[t1] / torch.sum(wnew[t1])
+            wnew     = wnew / torch.sum(wnew)
+            
+            # BCE
+            CE   = - wnew * ((1-targets_CE)*torch.log(1-phat) + targets_CE*torch.log(phat))
+            loss = loss + CE
 
-            if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
-                
-                # We need .detach() here for Z!
-                model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
-                    return_model_only=True, device=device, **reg_param)
-                
-                # ------------------------------------------------------------
-                # Now apply the MI estimator to the sample
-                
-                # No .detach() here, we need the gradients for Z!
-                MI_lb = mine.apply_mine_batched(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model,
-                                              losstype=reg_param['losstype'], batch_size=reg_param['eval_batch_size'])
-                # ------------------------------------------------------------
-                
-                # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
-                if MI_reg_param['poisson_weight']:
-                    cat_ww   = np.sqrt(np.sum(mm_))
-                else:
-                    cat_ww   = 1.0
-                
-                # Save
-                MI_loss_this = MI_loss_this + MI_reg_param['beta'][k] * MI_lb * cat_ww
-                total_ww    += cat_ww
-
-            MI_lb_values.append(np.round(MI_lb.item(), 4))
-
-        # Finally add this to the total loss
-        MI_loss = MI_loss + MI_loss_this / total_ww
-
-        k += 1
-
-    ## Total loss
-    total_loss = CE_loss + MI_loss
-    cprint(f'Loss: Total = {total_loss:0.4f} | CE = {CE_loss:0.4f} | MI x beta {reg_param["beta"]} = {MI_loss:0.4f}', 'yellow')
-    cprint(f'MI_lb = {MI_lb_values}', 'yellow')
+        loss     = param["beta"] * loss.sum()        
+        BCE_loss = BCE_loss + loss
+        
+        track_loss[key] = loss.item()
+        loss_str       += f'{key} [beta = {param["beta"]}] = {loss.item():0.5f} | '
     
-    loss = {'sum': total_loss.item(), 'CE': CE_loss.item(), f'MI x $\\beta = {MI_reg_param["beta"]}$': MI_loss.item()}
-    optimize.trackloss(loss=loss, loss_history=loss_history)
+    # --------------------------------------------------------------------
+    ## MI Regularization
+
+    MI_loss = torch.tensor(0.0).to(device)
+    
+    if MI_param is not None:
+
+        # Loop over chosen classes
+        k       = 0
+        values  = []
+        
+        for c in MI_param['classes']:
+
+            # -----------
+            reg_param = copy.deepcopy(MI_param)
+            reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
+            # -----------
+
+            # Pick class indices
+            cind  = (targets != None) if c == None else (targets == c)
+
+            X     = torch.Tensor(MI_x).to(device)[cind].squeeze()
+            Z     = preds[cind].squeeze()
+            W     = weights[cind]
+            
+            ### Now loop over all filter categories
+            mask  = reg_param[f'evt_mask_{loss_mode}'][c]
+            N_cat = mask.shape[0]
+
+            loss_this = torch.tensor(0.0).to(device)
+            value     = torch.tensor(0.0).to(device)
+            total_ww  = 0.0
+
+            for m in range(N_cat):
+
+                mm_ = mask[m,:] # Pick index mask
+
+                if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
+                    
+                    # Pearson Correlation
+                    if reg_param['losstype'] == 'PEARSON':
+                        
+                        if len(X.shape) > 1: # if multidim X
+                            
+                            for j in range(X.shape[-1]): # dim-by-dim against Z (BDT output)
+                                
+                                rho   = corrcoeff_weighted(x=X[mm_, j], y=Z[mm_], weights=W[mm_])
+                                triag = torch.triu(rho, diagonal=1) # upper triangle without diagonal
+                                L     = torch.sum(torch.abs(triag))
+                                value = value + L
+                        else:
+                            rho   = corrcoeff_weighted(x=X[mm_], y=Z[mm_], weights=W[mm_])
+                            triag = torch.triu(rho, diagonal=1)
+                            L     = torch.sum(torch.abs(triag))
+                            value = value + L
+                    
+                    # Neural MI
+                    else:
+                    
+                        # We need .detach() here for Z!
+                        model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
+                            return_model_only=True, device=device, **reg_param)
+
+                        # ------------------------------------------------------------
+                        # Now apply the MI estimator to the sample
+                        
+                        # No .detach() here, we need the gradients wrt Z!
+                        value = mine.apply_mine_batched(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model,
+                                                    losstype=reg_param['losstype'], batch_size=reg_param['eval_batch_size'])
+                    
+                    # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
+                    if MI_param['poisson_weight']:
+                        cat_ww = np.sqrt(np.sum(mm_))
+                    else:
+                        cat_ww = 1.0
+                    
+                    if not torch.isfinite(value): # First boost iteration might yield bad values
+                        value = torch.tensor(0.0).to(device)
+                    
+                    # Save
+                    loss_this = loss_this + MI_param['beta'][k] * value * cat_ww
+                    total_ww    += cat_ww
+
+                values.append(np.round(value.item(), 6))
+                
+            # Finally add this to the total loss
+            MI_loss = MI_loss + loss_this / total_ww
+            
+            k += 1
+
+        cprint(f'{reg_param["losstype"]} = {values}', 'yellow')
+
+        track_loss['MI'] = MI_loss.item()
+        loss_str        += f'MI [beta = {MI_param["beta"]}] = {MI_loss.item():0.5f}'
+    
+    # --------------------------------------------------------------------
+    # Total loss
+    
+    total_loss        = BCE_loss + MI_loss
+    track_loss['sum'] = total_loss.item()
+    
+    # --------------------------------------------------------------------
+    # Track losses
+    
+    loss_str = f'Loss[{loss_mode}]: sum: {total_loss:0.5f} | ' + loss_str
+    cprint(loss_str, 'yellow')
+    optimize.trackloss(loss=track_loss, loss_history=loss_history)
+    
+    # --------------------------------------------------------------------
     
     # Scale finally to the total number of events (to conform with xgboost internal convention)
     return total_loss * len(preds)
 
 
-def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, args=None, param=None, plot_importance=True,
-    data_trn_MI=None, data_val_MI=None):
+def create_filters(param, data_trn, data_val):
+    
+    # Create filter masks
+    param['evt_mask_train'] = {}
+    param['evt_mask_eval']  = {}
+
+    for c in param['classes']: # per chosen class
+        
+        for mode in ['train', 'eval']:
+        
+            print(f'class[{c}] ({mode}):')
+            
+            if mode == 'train':
+                data = data_trn
+            else:
+                data = data_val
+            
+            # Pick class indices
+            cind = (data.y != None) if c == None else (data.y == c)
+            
+            # Per filter category
+            if 'set_filter' in param:
+                mask, text, path = stx.filter_constructor(
+                    filters=param['set_filter'], X=data.x[cind,...], ids=data_trn.ids)
+            
+            # All inclusive
+            else:
+                mask = np.ones((1, len(data.x[cind,...])), dtype=int)
+                text = ['inclusive']
+            
+            stx.print_stats(mask=mask, text=text)
+                
+            # Save the mask
+            param[f'evt_mask_{mode}'][c] = copy.deepcopy(mask)    
+    
+    return param
+
+
+def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, args=None, param=None,
+              plot_importance=True, data_trn_MI=None, data_val_MI=None):
     """
     Train XGBoost model
     
@@ -151,34 +298,39 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     Returns:
         trained model
     """
+    
+    global MI_x
+    global BCE_param
+    global MI_param    
+    global loss_mode
+    global loss_history
+    
+    MI_x         = None
+    BCE_param    = None
+    MI_param     = None
+    loss_mode    = None
+    loss_history = {}
+    
+    loss_history_train = {}
+    loss_history_eval  = {}
 
-    if 'MI_reg_param' in param:
-
-        global MI_x
-        global MI_reg_param
-        global loss_history
-
-        loss_history  = {}
-        MI_reg_param  = copy.deepcopy(param['MI_reg_param']) #! important
-
-        # ---------------------------------------------------
-        # Create powerset masks
-        MI_reg_param['evt_mask'] = [None]*len(MI_reg_param['classes'])
-
-        for c in MI_reg_param['classes']:
-            cind = (data_trn.y != None) if c == None else (data_trn.y == c)
-
-            # Per powerset category
-            if 'set_filter' in MI_reg_param:
-                mask, text, path = stx.filter_constructor(
-                    filters=MI_reg_param['set_filter'], X=data_trn.x[cind,...], ids=data_trn.ids)
-            # All inclusive
-            else:
-                mask = np.ones((1, len(data_trn.x[cind,...])), dtype=int)
+    if 'BCE_param' in param:
+        
+        BCE_param = {}
+        
+        for key in param['BCE_param'].keys():
             
-            # Save the mask
-            MI_reg_param['evt_mask'][c] = copy.deepcopy(mask)
+            cprint(__name__ + f'.train_xgb: Setting BCE event filters [{key}]', 'green')
 
+            BCE_param[key] = create_filters(param=param['BCE_param'][key], data_trn=data_trn, data_val=data_val)
+
+    if 'MI_param' in param:
+        
+        cprint(__name__ + f'.train_xgb: Setting MI event filters', 'green')
+        
+        MI_param = copy.deepcopy(param['MI_param']) #! important
+        MI_param = create_filters(param=MI_param, data_trn=data_trn, data_val=data_val)
+    
     # ---------------------------------------------------
 
     if param['model_param']['device'] == 'auto':
@@ -195,10 +347,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    X_trn, ids_trn = aux.red(data_trn.x, data_trn.ids, param)
+    X_trn, ids_trn = aux.red(data_trn.x, data_trn.ids, param) # variable reduction
     dtrain    = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=ids_trn)
     
-    X_val, ids_val = aux.red(data_val.x, data_val.ids, param)
+    X_val, ids_val = aux.red(data_val.x, data_val.ids, param) # variable reduction
     deval     = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val, feature_names=ids_val)
     
     evallist  = [(dtrain, 'train'), (deval, 'eval')]
@@ -215,8 +367,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     model_param = copy.deepcopy(param['model_param'])
     
     if 'multi' in model_param['objective']:
-        model_param.update({'num_class': args['num_classes']})
-
+        model_param.update({'num_class': len(args['primary_classes'])})
+    
     del model_param['num_boost_round']
     # ---------------------------------------
 
@@ -239,25 +391,15 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             strs   = model_param['objective'].split(':')
             device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
-            if strs[1] == 'binary_cross_entropy_with_MI':
-
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, skip_hessian=True, device=device)
+            # !
+            MI_x         = copy.deepcopy(data_trn_MI)
+            loss_history = copy.deepcopy(loss_history_train)
+            
+            if strs[1] == 'binary_cross_entropy':
+                
+                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=True, device=device)
                 a['params']['disable_default_eval_metric'] = 1
-
-                # ! Important to have here because we modify it in the eval below
-                MI_x = copy.deepcopy(data_trn_MI)
-
-                def eval_obj(mode='train'):
-                    global MI_x #!
-                    obj = autogradxgb.XgboostObjective(loss_func=_binary_CE_with_MI, mode='eval', device=device)
-                    
-                    if mode == 'train':
-                        MI_x = copy.deepcopy(data_trn_MI)
-                        loss = obj(preds=model.predict(dtrain), targets=dtrain)[1] / len(MI_x)
-                    elif mode == 'eval':
-                        MI_x = copy.deepcopy(data_val_MI)
-                        loss = obj(preds=model.predict(deval), targets=deval)[1] / len(MI_x)
-                    return loss
+            
             else:
                 raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]}')
 
@@ -269,30 +411,43 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
 
-        # Train it
+        # Train
+        loss_mode = 'train'
         model = xgboost.train(**a)
-
-        # ------- AUC values ------
-        pred    = model.predict(dtrain)
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
-        trn_aucs.append(metrics.auc)
+        loss_history_train = copy.deepcopy(loss_history)
         
-        pred    = model.predict(deval)
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
-        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
-        val_aucs.append(metrics.auc)
-        # -------------------------
-
+        # Validate
+        if 'custom' in model_param['objective']:
+            loss_mode    = 'eval'
+            MI_x         = copy.deepcopy(data_val_MI)
+            loss_history = copy.deepcopy(loss_history_eval)
+            
+            # Loss history is updated inside the loss
+            loss              = a['obj'](preds=model.predict(deval), targets=deval)[1] / len(data_val.x)
+            loss_history_eval = copy.deepcopy(loss_history)
+        
         # ------ Loss values ------
         if 'custom' in model_param['objective']:
-            trn_losses.append(0)#eval_obj('train'))
-            val_losses.append(0)#eval_obj('eval'))
+            trn_losses.append(loss_history_train['sum'][-1])
+            val_losses.append(loss_history_eval['sum'][-1])
         else:
             trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
             val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
         # -------------------------
-
+        
+        # ------- AUC values ------
+        
+        pred = model.predict(dtrain)
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
+        trn_aucs.append(metrics.auc)
+        
+        pred = model.predict(deval)
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
+        val_aucs.append(metrics.auc)
+        # -------------------------
+        
         print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if args['__raytune_running__']:
@@ -316,8 +471,11 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                 trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         else:
-            fig,ax   = plots.plot_train_evolution_multi(losses=loss_history,
-                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])    
+            
+            ltr = {f'train:    {k}': v for k, v in loss_history_train.items()}
+            lev = {f'validate: {k}': v for k, v in loss_history_eval.items()}
+            
+            fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         plt.savefig(f'{plotdir}/{param["label"]}--evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot feature importance
@@ -343,7 +501,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
             except:
                 print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
-            
+        
         model.feature_names = None # Set original default ones
 
         return model
