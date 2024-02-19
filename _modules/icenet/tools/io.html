@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.4
+                0.0.9.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -475,6 +475,8 @@
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
 
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">stx</span>
+
 
 <div class="viewcode-block" id="rootsafe">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.rootsafe">[docs]</a>
@@ -763,7 +765,6 @@
 </div>
 
 
-
 <div class="viewcode-block" id="pick_vars">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.pick_vars">[docs]</a>
 <span class="k">def</span> <span class="nf">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">set_of_vars</span><span class="p">):</span>
@@ -784,7 +785,6 @@
         <span class="n">newvars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">newind</span><span class="p">,</span> <span class="n">newvars</span></div>
-
 
 
 <div class="viewcode-block" id="IceXYW">
@@ -810,8 +810,32 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">concat</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.IceXYW.__init__: Unknown input array type&#39;</span><span class="p">)</span>
-
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.IceXYW.__init__: Unknown input array type&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Advanced indexing with a variable or a list of variables &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>       <span class="c1"># access with a single variable name</span>
+            
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>         <span class="c1"># direct access</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span> <span class="c1"># might be a cut string, try that</span>
+                <span class="n">select</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">select</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+            
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[operator]: Cannot execute&#39;</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>                           <span class="c1"># list of variables</span>
+            <span class="n">col</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_of_vars</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">col</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        
     <span class="c1"># + operator</span>
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 

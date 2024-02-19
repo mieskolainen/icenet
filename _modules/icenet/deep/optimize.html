@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.4
+                0.0.9.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -573,8 +573,8 @@
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.trackloss">[docs]</a>
 <span class="k">def</span> <span class="nf">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">loss</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loss_history</span><span class="p">:</span>
-            <span class="n">loss_history</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loss_history</span><span class="p">:</span> <span class="c1"># First iteration</span>
+            <span class="n">loss_history</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">loss</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss_history</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">[</span><span class="n">key</span><span class="p">])</span></div>
 
