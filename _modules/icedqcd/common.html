@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.6
+                0.0.9.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -464,7 +464,7 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
 <span class="kn">from</span> <span class="nn">icenet.algo</span> <span class="kn">import</span> <span class="n">analytic</span>
-
+<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">dequantize</span>
 <span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">graphio</span>
 
 <span class="c1"># GLOBALS</span>
@@ -609,7 +609,7 @@
 
 <div class="viewcode-block" id="splitfactor">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a>
-<span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dequantize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform data into different datatypes.</span>
 <span class="sd">    </span>
@@ -648,14 +648,27 @@
 
 
     <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1">### ** Remove conditional variables **</span>
+    <span class="c1">### ** Conditional variables **</span>
+    
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">MODEL_VARS</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">scalar_vars</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Removing model conditional var &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot;&quot; from scalar_vars&#39;</span><span class="p">)</span>
+                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Removing model conditional var &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot;&quot; from scalar_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">continue</span>
+    <span class="k">else</span><span class="p">:</span>
+        
+        <span class="c1"># Dequantization for training (turn off for deployment)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;conditional_param&#39;</span><span class="p">][</span><span class="s1">&#39;dequantize_common&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">use_dequantize</span><span class="p">:</span>
+            
+            <span class="n">n_interp</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;conditional_param&#39;</span><span class="p">][</span><span class="s1">&#39;n_interp&#39;</span><span class="p">]</span>
+            <span class="n">kind</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;conditional_param&#39;</span><span class="p">][</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">MODEL_VARS</span><span class="p">:</span>
+                
+                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.split_factor: Dequantizing conditional &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot; with iDQF&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">dequantize</span><span class="o">.</span><span class="n">iDQF</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">])),</span> <span class="n">n_interp</span><span class="o">=</span><span class="n">n_interp</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## ** Collection filter **</span>
