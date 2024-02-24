@@ -9,10 +9,10 @@ sys.path.append(".")
 import icenet
 from iceplot import iceplot
 
-#filename = '/vols/cms/mmieskol/icenet/output/dqcd/processed_data_train_PWnLfFxUkLRKk9yB_KPngOZsRu7Yrvc57KI3xuNrLro=__1hr+5DwGJahoYhL6U_XtxVIT2j4auShkPbIfLPh4eis=.pkl'
-filename = '/vols/cms/mmieskol/icenet/output/dqcd/processed_data_train_93HokcsaJAhaxMZ_KWJxWfcLAUUy8qUzTUSFF3iZEGw=__AQcF6JMry4u3K81MHgrNKkObnK6aNEVc3u4pbB0V4so=.pkl'
+hash  = 'RpK0tm4jMTIvAThS_HRL+yeV2kGHMY+yjD9AqDiM0H0=__aJw1b950j1f+MA6MsrDTY6_E9xq7u+Knq27coZ9TfOg='
+fname = f'/vols/cms/mmieskol/icenet/output/dqcd/processed_data_train_{hash}.pkl'
 
-with open(filename, 'rb') as file:
+with open(fname, 'rb') as file:
     obj = pickle.load(file)
 
 data = obj['trn']['data']

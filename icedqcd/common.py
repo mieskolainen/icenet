@@ -20,7 +20,7 @@ from icenet.tools import aux
 from icenet.tools import prints
 from icenet.tools import iceroot
 from icenet.algo import analytic
-
+from icefit import dequantize
 from icedqcd import graphio
 
 # GLOBALS
@@ -157,7 +157,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
         
         return fmask_np
 
-def splitfactor(x, y, w, ids, args, skip_graph=True):
+def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     """
     Transform data into different datatypes.
     
@@ -196,14 +196,27 @@ def splitfactor(x, y, w, ids, args, skip_graph=True):
 
 
     # -------------------------------------------------------------------------
-    ### ** Remove conditional variables **
+    ### ** Conditional variables **
+    
     if args['use_conditional'] == False:
         for var in inputvars.MODEL_VARS:
             try:
                 scalar_vars.remove(var)
-                print(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars')
+                cprint(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars', 'red')
             except:
                 continue
+    else:
+        
+        # Dequantization for training (turn off for deployment)
+        if args['conditional_param']['dequantize_common'] and use_dequantize:
+            
+            n_interp = args['conditional_param']['n_interp']
+            kind     = args['conditional_param']['kind']
+            
+            for var in inputvars.MODEL_VARS:
+                
+                cprint(__name__ + f'.split_factor: Dequantizing conditional "{var}" with iDQF', 'yellow')
+                data.x[var] = dequantize.iDQF(x=ak.to_numpy(ak.ravel(data.x[var])), n_interp=n_interp, kind=kind)
     
     # -------------------------------------------------------------------------
     ## ** Collection filter **

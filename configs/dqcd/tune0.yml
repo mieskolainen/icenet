@@ -9,6 +9,7 @@ inputvars: 'mvavars'                 # Main file input description python file
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false             # Conditional (theory parametric) input
+  
   primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
   signal_class: 1                    # Signal class ID
   DA_class:    -2                    # Domain Adaptation class
@@ -115,6 +116,14 @@ train_runmode:
   input_tag: null
   model_tag: null
 
+  # Conditional (theory parametric) dequantization
+  conditional_param:
+    dequantize_common: True          # Under common.py
+    dequantize_batch:  False         # (mini)batch based (reservation)
+    n_interp:   1000                 # Number of interpolation points per dimension
+    kind:       'linear'             # Interpolator ('linear', 'quadratic', 'cubic' ...),
+                                     # see scipy.interpolate.interp1d
+  
   ## Reweighting setup
   reweight: true
   reweight_mode: 'write'          # 'write', 'load'
@@ -199,7 +208,14 @@ eval_runmode:
 
   input_tag: null
   model_tag: null
-
+  
+  # Conditional (theory parametric) dequantization
+  conditional_param:
+    dequantize_common: True          # Under common.py
+    n_interp:   1000                 # Number of interpolation points per dimension
+    kind:       'linear'             # Interpolator ('linear', 'quadratic', 'cubic' ...),
+                                     # see scipy.interpolate.interp1d
+  
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
   reweight_file: 'reweight_train.pkl'

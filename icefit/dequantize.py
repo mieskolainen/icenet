@@ -44,7 +44,24 @@ def construct_icdf(theta, pvals, n_interp=int(1e4), kind='cubic'):
     
     return icdf
 
-def iDQF(x, theta=None, pvals=None, N_buffer=int(1e5), n_interp=int(1e4), kind='cubic'):
+@numba.njit
+def fast_loop(i:int, k:int, N_buffer:int, x:np.ndarray,
+              deq:np.ndarray, theta=np.ndarray, theta_ind=np.ndarray):
+    """
+    Fast loop function used by iDQF
+    """
+    while True:
+        if k >= N_buffer:
+            return -1
+        else:
+            if np.argmin(np.abs(x[k] - theta)) == theta_ind[i]:
+                deq[i] = x[k]
+                k += 1
+                break           
+            k += 1
+    return k
+
+def iDQF(x, theta=None, pvals=None, N_buffer=int(1e4), n_interp=int(1e4), kind='cubic'):
     """
     Dequantization via inverse CDF
     
@@ -68,28 +85,22 @@ def iDQF(x, theta=None, pvals=None, N_buffer=int(1e5), n_interp=int(1e4), kind='
     
     def generate():
         u    = np.random.rand(N_buffer) # Inverse CDF sampling
-        return icdf(u)
+        return icdf(u), 0
     
     # Index association
     theta_ind = compute_ind(x=x, theta=theta)
-    deq  = np.zeros(len(theta_ind))
-    xset = generate()
+    deq       = np.zeros(len(theta_ind))
+    x,k       = generate()
     
     # Dequantization loop
-    k = 0
     for i in tqdm(range(len(deq))):
-        
         while True:
-            if k < N_buffer: # Buffered generation for efficiency
-                x = xset[k]
-                k += 1
+            # Arrays are updated via reference
+            k = fast_loop(i=i, k=k, N_buffer=N_buffer,
+                            x=x, deq=deq, theta=theta, theta_ind=theta_ind)
+            if k == -1:
+                x,k = generate()
             else:
-                xset = generate()
-                x = xset[0]
-                k = 1
-            
-            if np.argmin(np.abs(x - theta)) == theta_ind[i]:
-                deq[i] = x
                 break
     
     return deq
@@ -134,6 +145,9 @@ def main():
     plt.xlabel('$x - \\tilde{{x}}$')
     plt.ylabel('count')
     plt.show()
-
+    
+    plt.savefig('dequantize.pdf', bbox_inches='tight')
+    plt.close()
+    
 if __name__ == "__main__":
     main()

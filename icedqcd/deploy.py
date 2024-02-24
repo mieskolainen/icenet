@@ -14,12 +14,9 @@ import copy
 import socket
 import gc
 
+from importlib import import_module
 from datetime import datetime
 from termcolor import colored, cprint
-
-
-# GLOBALS
-from configs.dqcd.mvavars import *
 
 from icedqcd import common
 from icenet.tools import iceroot, io, aux, process
@@ -37,7 +34,6 @@ def generate_cartesian_param(ids, mc_param, decimals=2):
     """
     Generate cartesian N-dim array for the theory model parameter conditional sampling
     """
-
     arr = []
     for key in mc_param.keys():
         arr.append(np.round(np.array(mc_param[key]), decimals))
@@ -75,7 +71,12 @@ def zscore_normalization(X, args):
     return X
 
 def process_data(args):
-
+    """
+    Main processing loop
+    """
+    rootname  = args["rootname"]
+    inputvars = import_module("configs." + rootname + "." + args["inputvars"])
+    
     cprint(__name__ + f'.process_data:', 'green')
     print(args)
 
@@ -85,7 +86,7 @@ def process_data(args):
     yaml.allow_duplicate_keys = True
     cwd = os.getcwd()
 
-    with open(f'{cwd}/configs/dqcd/{args["inputmap"]}', 'r') as f:
+    with open(f'{cwd}/configs/{rootname}/{args["inputmap"]}', 'r') as f:
         try:
             inputmap = yaml.load(f)
             if 'includes' in inputmap:
@@ -101,7 +102,7 @@ def process_data(args):
 
     # ------------------
     # Phase 1: Read ROOT-file to awkward-format
-    basepath = aux.makedir(f"{cwd}/output/dqcd/deploy/modeltag__{args['modeltag']}")
+    basepath = aux.makedir(f"{cwd}/output/{rootname}/deploy/modeltag__{args['modeltag']}")
 
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--grid_id__{args['grid_id']}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
@@ -130,7 +131,7 @@ def process_data(args):
 
         # Loop over the files
         total_num_events = 0
-
+        
         # ----------------------------------
         # GRID (batch) processing
         all_file_id = aux.split_start_end(range(len(rootfiles)), args['grid_nodes'])
@@ -153,7 +154,7 @@ def process_data(args):
                 'entry_start' : None,
                 'entry_stop'  : None,
                 'maxevents'   : None,
-                'ids'         : LOAD_VARS,
+                'ids'         : inputvars.LOAD_VARS,
                 'library'     : 'ak'
             }
             
@@ -201,7 +202,9 @@ def process_data(args):
             # Phase 3: Convert to icenet dataformat
 
             try:
-                data = common.splitfactor(x=X, y=None, w=None, ids=ids_nocut, args=args, skip_graph=True)
+                # Dequantization always off in deployment
+                data = common.splitfactor(x=X, y=None, w=None, ids=ids_nocut, args=args,
+                                          skip_graph=True, use_dequantize=False)
             except Exception as e:
                 
                 # Something went wrong at OS level (e.g. memory), write to log-file and exit with error
@@ -211,7 +214,7 @@ def process_data(args):
                 os._exit(os.EX_OSERR)
             
             # ------------------
-            # ** Save memory **
+            # ** Free memory **
             del X
             del X_nocut
             gc.collect()
@@ -229,30 +232,31 @@ def process_data(args):
                 ID    = args['active_models'][i]
                 param = args['models'][ID]
                 
-                if param['predict'] == 'xgb':
-
+                # xgb / iceboost
+                if param['predict'] in ['xgb', 'xgb_logistic']:
+                    
                     print(f'Evaluating MVA-model "{ID}" \n')
 
-                    # Impute data
+                    ## 1. Impute data
                     if args['imputation_param']['active']:
                         imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
                         data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
 
-                    ## Apply the input variable set reductor
+                    ## 2. Apply the input variable set reductor
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
 
-                    ## Get the MVA-model
+                    ## 3. Get the MVA-model
                     func_predict, model = get_predictor(args=args, param=param, feature_names=ids)
 
-                    ## ** Conditional model **
+                    ## 4. ** Conditional model **
                     if args['use_conditional']:
-
+                        
                         ## Get conditional parameters
                         CAX, pindex = generate_cartesian_param(ids=ids, mc_param=mc_param)
 
                         ## Run the MVA-model on all the theory model points in CAX array
                         for z in tqdm(range(len(CAX))):
-                            
+
                             gc.collect()
 
                             # Set the new conditional model parameters to X
@@ -275,7 +279,7 @@ def process_data(args):
                             # Save
                             ALL_scores[io.rootsafe(ID_label)] = pred
 
-                    # ** Unconditional model **
+                    # 4. ** Unconditional model **
                     else:
 
                         if OK_event:
@@ -321,7 +325,9 @@ def process_data(args):
 
 
 def get_predictor(args, param, feature_names=None):    
-
+    """
+    Load model predictor function handle
+    """
     model = None
 
     if   param['predict'] == 'xgb':
