@@ -6,17 +6,36 @@
 MODEL_VARS = [
   'MODEL_mpi',
   'MODEL_mA',
-  'MODEL_ctau',
+  'MODEL_ctau'
 ]
 
 # ---------------------------------------------------------
-# Generator level variables
+# For plots, diagnostics ...
 
 KINEMATIC_GEN_VARS = [
+  # Conditional theory MC point parameters
+  # Read from .yaml (input) steering cards and constructed under .iceroot
+  'GEN_mpi',
+  'GEN_mA',
+  'GEN_ctau',
+  
+  # MC only NanoAOD
   'GenJet_pt',
   'GenJet_eta',
   'GenJet_phi',
   'GenJet_mass'
+]
+
+KINEMATIC_VARS = [
+  
+  # Data & MC NanoAOD
+  'nJet',
+  'nMuon',
+  'nsv',
+
+  'ChsMET_phi',
+  'ChsMET_pt' ,
+  'ChsMET_sumEt'
 ]
 
 # ---------------------------------------------------------
@@ -28,19 +47,6 @@ TRIGGER_VARS = [
   'HLT_Mu9_IP6_part2',
   'HLT_Mu9_IP6_part3',
   'HLT_Mu9_IP6_part4'
-]
-
-# ---------------------------------------------------------
-# For plots etc.
-
-KINEMATIC_VARS = [
-  'nJet',
-  'nMuon',
-  'nsv',
-
-  'ChsMET_phi',
-  'ChsMET_pt',
-  'ChsMET_sumEt'
 ]
 
 # ---------------------------------------------------------
@@ -79,7 +85,7 @@ MVA_CPF_VARS = [
 
 # ---------------------------------------------------------
 # Neutral particle flow
-#
+# 
 # 'npf_' is the custom (nanotron) jet-matched collection
 #
 MVA_NPF_VARS = [
@@ -171,7 +177,7 @@ MVA_MUON_VARS = [
 #  'SV_'        is the standard nanoAOD collection
 #  'sv_'        is the jet-matched custom collection
 #  'svAdapted_' is the jet-matched custom collection with adapted SV-reco
-#  'MuonSV_'    is the custom muon SV collection
+#  'muonSV_'    is the custom muon SV collection
 
 #  'SV_'        is the standard nanoAOD collection
 #  'sv_'        is the jet-matched custom collection
@@ -242,28 +248,30 @@ MVA_SV_VARS = [
 # ---------------------------------------------------------
 # Combine logical sets
 
-MVA_SCALAR_VARS += MODEL_VARS # Treated on the same basis as scalar vars
+KINEMATIC_VARS  += KINEMATIC_GEN_VARS
+MVA_SCALAR_VARS += MODEL_VARS           # Treated on the same basis as scalar vars
 
-MVA_PF_VARS     = MVA_CPF_VARS + MVA_NPF_VARS
-MVA_JAGGED_VARS = MVA_JET_VARS + MVA_MUON_VARS + MVA_MUONSV_VARS + MVA_SV_VARS #+ MVA_PF_VARS
-
+MVA_PF_VARS      = MVA_CPF_VARS + MVA_NPF_VARS
+MVA_JAGGED_VARS  = MVA_JET_VARS + MVA_MUON_VARS + MVA_MUONSV_VARS + MVA_SV_VARS # + MVA_PF_VARS
 
 # ---------------------------------------------------------
 # Variables we read out from the root files
 
 LOAD_VARS = []
 
-LOAD_VARS += TRIGGER_VARS
 LOAD_VARS += KINEMATIC_VARS
-LOAD_VARS += KINEMATIC_GEN_VARS
-
+LOAD_VARS += TRIGGER_VARS
 LOAD_VARS += MVA_SCALAR_VARS
 LOAD_VARS += MVA_JAGGED_VARS
 
+# Mutual information regularization targets
+MI_VARS = [
+  #'muonSV_mass.*' # All
+  'muonSV_mass_0'  # The leading one
+]
 
 print(LOAD_VARS)
 
 # (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']
 #LOAD_VARS = ['.*'] # all
-

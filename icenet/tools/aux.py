@@ -8,17 +8,21 @@ import numpy as np
 import awkward as ak
 import re
 import time
+import datetime
 
 import numba
 import copy
 from tqdm import tqdm
 import os
+import glob
 from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
 from scipy import stats
 import scipy.special as special
+from scipy import interpolate
+
 
 def weighted_avg_and_std(values, weights):
     """
@@ -259,9 +263,10 @@ def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
         dim = int(jagged_maxdim[jagged_vars[i].split('_', 1)[0]])
         jagged_dim.append(dim)
         
-        # Create names of type 'varname(j)' (xgboost does not accept [,], or <)
+        # Create names of type 'varname_j'
+        # (xgboost does not accept [,], or <,> and (,) can be problematic otherwise)
         for j in range(dim):
-            all_jagged_vars.append(f'{jagged_vars[i]}({j})')
+            all_jagged_vars.append(f'{jagged_vars[i]}_{j}')
     
     # Parameters
     arg = {
@@ -827,21 +832,32 @@ def deltar(eta1,eta2, phi1,phi2):
     return np.sqrt((eta1 - eta2)**2 + deltaphi(phi1,phi2)**2)
 
 
-def create_model_filename(path, label, epoch, filetype, max_epochs=int(1e5)):
+def getmtime(filename):
+    """ Return the last modification time of a file, reported by os.stat()
+    """
+    return os.stat(filename).st_mtime
 
+
+def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None):
+    """
+    Create model filename
+    """
     def createfilename(i):
-        return path + '/' + label + '_' + str(i) + filetype
-
-    # Loop over epochs
-    last_found  = -1
-    for i in range(max_epochs):
-        filename = createfilename(i)
-        if os.path.exists(filename):
-            last_found = i
-
-    filename = createfilename(last_found)
-    print(__name__ + f'.create_model_filename: Found model file: {filename}')
-
+        return f'{path}/{label}_{i}{filetype}'
+    
+    if epoch is None or epoch == -1:
+        cprint(__name__ + f'.create_model_filename: Loading the latest model by timestamp', 'yellow')
+        
+        list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
+        filename      = max(list_of_files, key=os.path.getctime)
+    else:
+        cprint(__name__ + f'.create_model_filename: Loading the model with the provided epoch = {epoch}', 'yellow')
+        
+        filename = createfilename(epoch)
+    
+    dt = datetime.datetime.fromtimestamp(getmtime(filename))
+    cprint(__name__ + f'.create_model_filename: Found a model file: {filename} (modified {dt})', 'green')
+    
     return filename
 
 
@@ -882,19 +898,21 @@ class Metric:
     """
     Classifier performance evaluation metrics.
     """
-    def __init__(self, y_true, y_pred, weights=None, num_classes=2, hist=True, valrange='prob',
-        N_mva_bins=30, verbose=True, num_bootstrap=0):
+    def __init__(self, y_true, y_pred, weights=None, class_ids=[0,1], hist=True, valrange='prob',
+        N_mva_bins=30, verbose=True, num_bootstrap=0, exclude_neg_class=True):
         """
         Args:
             y_true     : true classifications
             y_pred     : predicted probabilities per class (N x 1), (N x 2) or (N x K) dimensional array
             weights    : event weights
-            num_classes: number of classses
+            class_ids  : class indices
             
             hist       : histogram soft decision values
             valrange   : histogram range selection type
             N_mva_bins : number of bins
-    
+            num_bootstrap     : number of bootstrap trials
+            exclude_neg_class : exclude (special) negative class from y_true
+        
         Returns:
             metrics, see the source code for details
         """
@@ -911,14 +929,36 @@ class Metric:
 
         self.mva_bins = []
         self.mva_hist = []
-
-        # Make sure they are binary (scikit ROC functions cannot handle continuous values)
+        
+        # Make sure they are integer (scikit ROC functions cannot handle continuous values)
         y_true = np.round(y_true)
+        
+        # ----------------------------------------------
+        # Special classes excluded
+        if exclude_neg_class:
+            include = (y_true >= 0)
+            y_true  = y_true[include]
+            y_pred  = y_pred[include]
+            if weights is not None:
+                weights = weights[include]
+        # ----------------------------------------------
+        
+        if class_ids is None:
+            self.class_ids = np.unique(y_true.astype(int))
+        else:
+            self.class_ids = class_ids
+        
+        self.num_classes = len(self.class_ids)
 
-        self.num_classes = num_classes
+        # Invalid input
+        if self.num_classes <= 1:
+            if verbose:
+                print(__name__ + f'.Metric: only one class present cannot evaluate metrics (return -1)')
 
+            return # Return None
+        
         # Transform N x 2 to N x 1 (pick class[1] probabilities as the signal)
-        if (num_classes == 2) and (np.squeeze(y_pred).ndim == 2):
+        if (self.num_classes == 2) and (np.squeeze(y_pred).ndim == 2):
             y_pred = y_pred[:,-1]
 
         # Make sure the weights array is 1-dimensional, not sparse array of (events N) x (num class K)
@@ -937,13 +977,6 @@ class Metric:
         if weights is not None:
             weights = weights[ok]
         """
-        
-        # Invalid input
-        if len(np.unique(y_true)) <= 1:
-            if verbose:
-                print(__name__ + f'.Metric: only one class present cannot evaluate metrics (return -1)')
-
-            return # Return None
             
         if hist is True:
             
@@ -958,13 +991,13 @@ class Metric:
             self.mva_bins = np.linspace(valrange[0], valrange[1], N_mva_bins)
             self.mva_hist = []
             
-            for c in range(num_classes):
+            for c in self.class_ids:
                 ind    = (y_true == c)
                 counts = []
                 
                 if np.sum(ind) != 0:
                     w = weights[ind] if weights is not None else None
-                    x = y_pred[ind] if num_classes == 2 else y_pred[ind,c]
+                    x = y_pred[ind] if self.num_classes == 2 else y_pred[ind,c]
                     counts, edges = np.histogram(x, weights=w, bins=self.mva_bins)
                 self.mva_hist.append(counts)
         else:
@@ -973,7 +1006,7 @@ class Metric:
 
         # ------------------------------------
         ## Compute Metrics
-        out = compute_metrics(num_classes=num_classes, y_true=y_true, y_pred=y_pred, weights=weights)
+        out = compute_metrics(class_ids=self.class_ids, y_true=y_true, y_pred=y_pred, weights=weights)
 
         self.acc        = out['acc']
         self.auc        = out['auc']
@@ -981,8 +1014,8 @@ class Metric:
         self.tpr        = out['tpr']
         self.thresholds = out['thresholds']
 
-        if num_bootstrap > 0:
-
+        if num_bootstrap > 0 and type(self.tpr) is not int:
+            
             self.tpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.tpr)))
             self.fpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.fpr)))
             self.auc_bootstrap = (-1)*np.ones(num_bootstrap)
@@ -1000,12 +1033,12 @@ class Metric:
                     else:
                         trials += 1
                 if trials > max_trials:
-                    print(__name__ + f'.Metric: bootstrap fail with num_classes < 2 (check the input per class statistics)')
+                    print(__name__ + f'.Metric: bootstrap failed (check the input per class statistics)')
                     continue
                 # ------------------
                 
                 ww  = weights[ind] if weights is not None else None
-                out = compute_metrics(num_classes=num_classes, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
+                out = compute_metrics(class_ids=self.class_ids, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
                 
                 if out['auc'] > 0:
 
@@ -1013,8 +1046,6 @@ class Metric:
                     self.acc_bootstrap[i] = out['acc']
 
                     # Interpolate ROC-curve (re-sample to match the non-bootstrapped x-axis)
-                    from scipy import interpolate
-
                     func = interpolate.interp1d(out['fpr'], out['tpr'], 'linear')
                     self.tpr_bootstrap[i,:] = func(self.fpr)
 
@@ -1022,7 +1053,7 @@ class Metric:
                     self.fpr_bootstrap[i,:] = func(self.tpr)
 
 
-def compute_metrics(num_classes, y_true, y_pred, weights):
+def compute_metrics(class_ids, y_true, y_pred, weights):
 
     acc = -1
     auc = -1
@@ -1037,18 +1068,19 @@ def compute_metrics(num_classes, y_true, y_pred, weights):
         y_pred[~np.isfinite(y_pred)] = 0 # Set to zero
     
     try:
-        if  num_classes == 2:
+        if  len(class_ids) == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
             auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
             acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
         else:
             fpr, tpr, thresholds = None, None, None
             auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=None, \
-                        average="weighted", multi_class='ovo', labels=np.arange(num_classes))
+                        average="weighted", multi_class='ovo', labels=class_ids)
             acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
+    
     except Exception as e:
         print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics: {e}')
-        for i in range(num_classes):
-            print(f'num_class[{i}] = {np.sum(y_true == i)}')
+        for c in class_ids:
+            print(f'num of class[{c}] = {np.sum(y_true == c)}')
 
     return {'fpr': fpr, 'tpr': tpr, 'thresholds': thresholds, 'auc': auc, 'acc': acc}

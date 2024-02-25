@@ -16,7 +16,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
        {latex: ['\mu',  'e'],    cut: 'BOOL@subleadingLeptons_isElectron == True'},
        {latex: ['OS',   'SS'],   cut: 'dilepton_charge > 0'},
        {latex: ['mer$', 'iso$'], cut: 'nominal_dR_l2j > 0.4'}]
-
+  
   # note: dataframe has SS for dilepton_charge == 1, OS for == -1
   # -- = -2 -> SS
   # -+ =  0 -> OS
@@ -67,7 +67,7 @@ MVA_output:
   #set_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
-# Powerset can be applied only per one plot[i] identifier!
+# Set filter can be applied only per one plot[i] identifier!
 MVA_2D:
   active: true
 

@@ -1,7 +1,6 @@
 # Plotting functions
-# 
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+#
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -101,7 +100,7 @@ def plot_selection(X, mask, ids, plotdir, label, varlist, density=True, library=
             before = ak.to_numpy(X[:][var])
             after  = ak.to_numpy(X[mask][var])
         else:
-            raise Error(__name__ + f'.Unknown library: {library}')
+            raise Exception(__name__ + f'.Unknown library: {library}')
 
         counts1, errs1, bins, cbins = iceplot.hist(before, bins=100,  density=density)
         counts2, errs2, bins, cbins = iceplot.hist(after,  bins=bins, density=density)
@@ -183,8 +182,11 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('loss')
-    ax[0].legend(fontsize=8)
-    ax[0].set_title(f'[{label}]', fontsize=10)
+    ax[0].legend(fontsize=6)
+    ax[0].set_title(f'{label}', fontsize=10)
+    
+    plt.sca(ax[0])
+    plt.autoscale(enable=True, axis='x', tight=True)
     
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
@@ -193,28 +195,33 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     ax[1].set_ylabel('AUC')
     ax[1].grid(True)
     
+    plt.sca(ax[1])
+    plt.autoscale(enable=True, axis='x', tight=True)
+    
     ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
 
     for i in [1]:
-        ax[1].set_ylim([0.5, 1.0])
+        ax[1].set_ylim([np.min([np.min(trn_aucs), np.min(val_aucs)]), 1.0])
         ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)
 
     return fig,ax
 
 
-def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['trk_pt', 'trk_eta']):
+def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None, VAR:list=['trk_pt', 'trk_eta']):
     """
     Evaluate AUC per 2D-bin.
     
     Args:
         y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
-        X_kin       :  Kinematic (A,B) data
-        VARS_kin    :  Kinematic variables (strings)
+        X_kin       :  Data
+        ids_kin     :  Variables
+        X           :  Data
+        ids         :  Variables  
         edges       :  Edges of the A,B-space cells (2D array)
         label       :  Label of the classifier (string)
         weights     :  Sample weights
-        ids         :  Variable identifiers
+        VAR         :  Variable identifiers (two)
     
     Returns:
         fig,ax      :  Figure handle and axis
@@ -237,10 +244,17 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
             range_B = [edges_B[j], edges_B[j+1]]
 
             # Indices
-            ind = np.logical_and(aux.pick_ind(X_kin[:, VARS_kin.index(ids[0])], range_A),
-                                 aux.pick_ind(X_kin[:, VARS_kin.index(ids[1])], range_B))
-
-            string = f'{ids[0]} = [{range_A[0]:10.3f},{range_A[1]:10.3f}), {ids[1]} = [{range_B[0]:10.3f},{range_B[1]:10.3f})'
+            try:
+                ind = np.logical_and(aux.pick_ind(X_kin[:, ids_kin.index(VAR[0])], range_A),
+                                 aux.pick_ind(X_kin[:, ids_kin.index(VAR[1])], range_B))
+            except:
+                try:
+                    ind = np.logical_and(aux.pick_ind(X[:, ids.index(VAR[0])], range_A),
+                                    aux.pick_ind(X[:, ids.index(VAR[1])], range_B))
+                except:
+                    raise Exception(__name__ + f'.binned_2D_AUC: Cannot find the variables {VAR}')
+            
+            string = f'{VAR[0]} = [{range_A[0]:10.3f},{range_A[1]:10.3f}), {VAR[1]} = [{range_B[0]:10.3f},{range_B[1]:10.3f})'
             
             if np.sum(ind) > 0: # Do we have any events in this cell
                 
@@ -262,25 +276,26 @@ def binned_2D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids=['
     # Finally plot it
     fig,ax = plot_AUC_matrix(AUC=AUC, edges_A=edges_A, edges_B=edges_B)
     ax.set_title(f'{label} | AUC = {met.auc:.3f} (integrated)', fontsize=9)
-    ax.set_xlabel(f"{ids[0]}")
-    ax.set_ylabel(f"{ids[1]}")
+    ax.set_xlabel(f"{VAR[0]}")
+    ax.set_ylabel(f"{VAR[1]}")
     
     return fig, ax, met
 
 
-def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='trk_pt', num_bootstrap=0):
+def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None, VAR:str='trk_pt', num_bootstrap=0):
     """
     Evaluate AUC & ROC per 1D-bin.
     
     Args:
         y_pred      :  MVA algorithm output
         y           :  Output (truth level target) data
-        X_kin       :  Kinematic (A,B) data
-        VARS_kin    :  Kinematic variables (strings)
+        X_kin       :  Data
+        ids_X_kin   :  Variables (strings)
+        X           :  Data
+        ids         :  Variables (strings)
         edges       :  Edges of the space cells
-        label       :  Label of the classifier (string)
         weights     :  Sample weights
-        ids         :  Variable identifier
+        VAR         :  Variable identifier to pick (one)
     
     Returns:
         fig,ax      :  Figure handle and axis
@@ -300,10 +315,16 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
 
             range_ = [edges[i], edges[i+1]]
 
-            # Indices
-            ind = aux.pick_ind(X_kin[:, VARS_kin.index(ids)], range_)
+            # Indices (either from X_kin or X)
+            try:
+                ind = aux.pick_ind(X_kin[:, ids_kin.index(VAR)], range_)
+            except:
+                try:
+                    ind = aux.pick_ind(X[:, ids.index(VAR)], range_)
+                except:
+                    raise Exception(__name__ + f'.binned_1D_AUC: Cannot find the variable {VAR}')
             
-            string = f'{ids} = [{range_[0]:10.3f},{range_[1]:10.3f})'
+            string = f'{VAR} = [{range_[0]:10.3f},{range_[1]:10.3f})'
 
             if np.sum(ind) > 0: # Do we have any events in this cell
                     
@@ -320,12 +341,12 @@ def binned_1D_AUC(y_pred, y, X_kin, VARS_kin, edges, label, weights=None, ids='t
                 METS.append(None)
                 print(__name__ + f'.binned_1D_AUC: {string} | No events found in this cell!')
 
-            LABELS.append(f'{ids}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
+            LABELS.append(f'{VAR}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
 
     return METS, LABELS
 
 
-def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_edges=80, path=''):
+def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, hist_edges=80, path=''):
     """
     Evaluate MVA output (1D) density per class.
     
@@ -334,25 +355,29 @@ def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_ed
         y          :  Output (truth level target) data
         label      :  Label of the MVA model (string)
         weights    :  Sample weights
+        class_ids  :  Class IDs to plot
         hist_edges :  Histogram edges list (or number of bins, as an alternative)
     
     Returns:
         Plot pdf saved directly
     """
     
+    if class_ids is None:
+        class_ids = np.unique(y.astype(int))
+    
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(num_classes)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in class_ids]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(num_classes)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in class_ids]
 
     # Over classes
     fig,ax = plt.subplots()
     
-    for k in range(num_classes):
+    for k in class_ids:
         ind = (y == k)
 
         w = weights[ind] if weights is not None else None
@@ -379,35 +404,37 @@ def density_MVA_wclass(y_pred, y, label, weights=None, num_classes=None, hist_ed
     gc.collect()
 
 
-def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
+def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
     """
     Plot collected correlation metrics from density_COR_wclass()
     
     Args:
         corr_mstats: statistics dictionary
-        num_classes: number of classes
         targetdir:   output directory
         xlim:        plot limits dictionary per class
     Returns:
         plots saved to a directory
     """
+    print(__name__ + f'.plot_correlation_comparison ...')
 
+    class_ids = {}
+    
     ## Find all variables
-    all_var = []
+    all_var   = []
     for model in corr_mstats.keys():
         for category in corr_mstats[model].keys():
-            for class_ind in range(num_classes):
-                for var in corr_mstats[model][category][class_ind].keys():
+            for c in corr_mstats[model][category].keys():
+                class_ids = corr_mstats[model][category].keys() # This is overwritten (all same)
+                for var in corr_mstats[model][category][c].keys():
                     all_var.append(var)
 
     all_var = set(all_var) # Reduce to a set (values appear only once)
-
 
     ## Over all variables
     for var in all_var:
 
         # Over classes
-        for class_ind in range(num_classes):
+        for c in class_ids:
 
             # Over different statistical metrics
             for stats in ['pearson', 'abs_pearson', 'disco', 'MI']:
@@ -425,7 +452,7 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
 
                     ## Over each powerset category
                     for i in range(len(categories)):
-                        x = corr_mstats[model][categories[i]][class_ind]
+                        x = corr_mstats[model][categories[i]][c]
 
                         if x is not {}: # We have some stats
                             values[i] = x[var][f'{stats}']
@@ -445,24 +472,25 @@ def plot_correlation_comparison(corr_mstats, num_classes, targetdir, xlim):
                     plt.errorbar(values, np.arange(len(values)), xerr=error,
                         fmt='s', capsize=5.0, label=legend_label)
 
-                    title = f'$\\mathcal{{C}} = {class_ind}$'
+                    title = f'$\\mathcal{{C}} = {c}$'
                     plt.title(title)
                     plt.xlabel(f'{stats}$_{{XY}}$ (MVA score, {var}) (68CL)')
-
-                    ax.set_xlim(xlim[stats][class_ind])
+                    
+                    if xlim is not None:
+                        ax.set_xlim(xlim[stats][c])
                     ax.set_yticks(np.arange(len(values)))
                     ax.set_yticklabels(categories)
                 
                 ax.invert_yaxis()    
                 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                 filename = aux.makedir(targetdir + f'/COR/')
-                plt.savefig(filename + f'var-{var}--stats-{stats}--class-{class_ind}.pdf',
+                plt.savefig(filename + f'var-{var}--stats-{stats}--class-{c}.pdf',
                     bbox_inches='tight')
                 plt.close()
 
 
 def density_COR_wclass(y_pred, y, X, ids, label, \
-    weights=None, num_classes=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+    weights=None, class_ids=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
     
     """
     Evaluate the 2D-density of the MVA algorithm output vs other variables per class.
@@ -474,6 +502,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         ids         :  Identifiers of the variables in X
         label       :  Label of the MVA model (string)
         weights     :  Sample weights
+        class__ids  :  Class ids to plot
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
         path        :  Save path
         cmap        :  Color map
@@ -483,24 +512,27 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         plots are saved directly
     """
 
+    if class_ids is None:
+        class_ids = np.unique(y.astype(int))
+    
     # Make sure it is 1-dim array of length N (not N x num classes)
     if (weights is not None) and len(weights.shape) > 1:
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in range(num_classes)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in class_ids]
     else:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in range(num_classes)]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in class_ids]
     
-    output = np.array([None]*num_classes, dtype=np.object_)
+    output = {}
 
     # Over classes
-    for k in np.arange(num_classes):
+    for k in class_ids:
         
         output[k] = {}
         ind = (y == k)
         w = weights[ind] if weights is not None else None
-
+        
         if np.sum(ind) == 0:
             print(__name__ + f'.density_COR_wclass: No samples for class {k} -- continue')
             continue
@@ -508,25 +540,34 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         # Loop over variables
         for var in ids:
 
-            xx = y_pred[ind]
-            yy = X[ind, ids.index(var)]
-
-            # Compute Pearson correlation coefficient
-            cc,cc_CI,_         = cortools.pearson_corr(x=xx, y=yy, weights=w)
+            xx   = y_pred[ind]
+            yy   = X[ind, ids.index(var)]
             
-            # Compute Absolute Pearson correlation coefficient
-            cc_abs,cc_abs_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=w, return_abs=True)
+            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
 
+            # Apply histogram bounds
+            box = np.logical_and(np.logical_and(xx > bins[0][0], xx < bins[0][-1]),
+                                 np.logical_and(yy > bins[1][0], yy < bins[1][-1]))
+            xx  = xx[box]
+            yy  = yy[box]
+            ww  = w[box]
+            
+            # Pearson correlation coefficient
+            cc,cc_CI,_         = cortools.pearson_corr(x=xx, y=yy, weights=ww)
+            
+            # Absolute Pearson correlation coefficient
+            cc_abs,cc_abs_CI,_ = cortools.pearson_corr(x=xx, y=yy, weights=ww, return_abs=True)
+            
             # Distance correlation
-            disco,disco_CI     = cortools.distance_corr(x=xx, y=yy, weights=w)
+            disco,disco_CI     = cortools.distance_corr(x=xx, y=yy, weights=ww)
+            
+            # Histogram based MI
+            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, weights=ww, automethod='Scott2D')
             
             # Neural Mutual Information [cannot use, unreliable to compute for small samples]
             #from icefit import mine
-            #MI,MI_err  = mine.estimate(X=xx, Z=yy, weights=w)
+            #MI,MI_err = mine.estimate(X=xx, Z=yy, weights=ww)
             #MI_CI = np.array([MI-MI_err, MI+MI_err])
-
-            # Histogram MI
-            MI,MI_CI = cortools.mutual_information(x=xx, y=yy, automethod='Scott2D')
             
             # Save output
             output[k][var] = {}
@@ -543,8 +584,6 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             output[k][var]['MI']       = MI
             output[k][var]['MI_CI']    = MI_CI
 
-            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
-
             for scale in ['linear', 'log']: 
 
                 fig,ax    = plt.subplots()
@@ -554,9 +593,9 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 try:
                     if scale == 'log':
                         import matplotlib as mpl
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
                     else:
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=w, cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, cmap=plt.get_cmap(cmap))
                     
                     fig.colorbar(im)
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
@@ -718,12 +757,12 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         so we see that also integrated class fractions are equalized (or not) after weighting!
     """
     
-    fig,ax      = plt.subplots(1, 2, figsize = (10, 4.25))
-    num_classes = len(np.unique(y))
-    legends     = []
+    fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
+    class_ids = np.unique(y.astype(int))
+    legends   = []
     
     # Loop over classes
-    for c in range(num_classes):
+    for c in class_ids:
 
         # Compute histograms with numpy (we use nbins and range() for speed)
         counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
@@ -754,14 +793,15 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
     return fig,ax
 
 
-def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, targetdir=None, colorbar = False):
+def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetdir=None, colorbar = False):
     """
     Plot a cross-correlation matrix of vector data
     
     Args:
         X:                Data matrix (N x D)
         ids:              Variable names (list of length D)
-        classes:          Class label ids (list of length N)
+        weights:          Event weights
+        y:                Class labels per event (list of length N)
         round_threshold:  Correlation matrix |C| < threshold to set matrix elements to zero
         targetdir:        Output plot directory
         colorbar:         Colorbar on the plot
@@ -770,23 +810,23 @@ def plot_correlations(X, ids, weights=None, classes=None, round_threshold=0.0, t
         figs, axs:        Figures, axes (per class)
     """
     N = X.shape[0]
-
-    if classes is None:
-        classes = np.zeros(N)
-        num_classes = int(1)
+    
+    if y is None:
+        y = np.zeros(N)
+        class_ids = [0]
     else:
-        num_classes = len(np.unique(classes))
+        class_ids = np.unique(y.astype(int))
 
     figs = {}
     axs  = {}
     
-    for i in range(num_classes):
+    for k in class_ids:
 
-        label = f'all' if (num_classes == 1) else f'class_{i}'
+        label = f'all' if (len(class_ids) == 1) else f'class_{k}'
 
         # Compute correlation matrix
-        w = weights[classes==i] if weights is not None else None
-        C = statstools.correlation_matrix(X=X[classes==i,:], weights=w)
+        w = weights[y==k] if weights is not None else None
+        C = statstools.correlation_matrix(X=X[y==k,:], weights=w)
         C[np.abs(C) < round_threshold] = np.nan
         C *= 100
         
@@ -975,7 +1015,6 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
         plt.close()
 
 
-
 def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fontsize=7) :
     """
     MVA output plots
@@ -988,19 +1027,19 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             print(__name__ + f'.MVA_plot: Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
             return -1
         else:
-            num_classes = metrics[i].num_classes
+            class_ids = metrics[i].class_ids
         
-        if len(metrics[i].mva_hist) != num_classes:
+        if len(metrics[i].mva_hist) != len(class_ids):
             print(__name__ + f'.MVA_plot: Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
             return -1
-
+    
     for k in [0,1]: # linear & log
         
-        fig,ax = plt.subplots(1, num_classes, figsize=(7*num_classes, 5))
+        fig,ax = plt.subplots(1, len(class_ids), figsize=(7*len(class_ids), 5))
 
         # Loop over classes
-        for c in range(num_classes):
-
+        for c in class_ids:
+            
             # Loop over cells
             N      = len(metrics[0].mva_hist[c]) # Number of bins
             counts = np.zeros((N, len(metrics)))
@@ -1042,8 +1081,8 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
         if k == 1:
             #plt.ylim(0.0, 1.0)
             #plt.xlim(1e-4, 1.0)
-            for c in range(num_classes):
-                plt.sca(ax[c])
+            for i in range(len(class_ids)):
+                plt.sca(ax[i])
                 plt.gca().set_yscale('log')
                 #ax.set_aspect(1.0/ax.get_data_ratio() * 0.75)
             plt.savefig(filename + '--log.pdf', bbox_inches='tight')

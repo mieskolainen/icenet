@@ -32,12 +32,15 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
-
-  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY'
+  
+  min_count: 32            #  Minimum number of events (per category)
+  poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
+  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'PEARSON'
+  eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
   
-  y_index: [1]
+  y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
   epochs: 30
   batch_size: 512
@@ -110,7 +113,7 @@ xgb0:
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'     # 'auto', 'cpu', 'cuda'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.1
     gamma: 1.67
@@ -127,8 +130,8 @@ xgb0:
     reg_alpha: 0.05            # L1 regularization
     
     # learning task parameters
-    objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']                        # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'binary:logistic'    # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']        # for custom losses, otherwise 'logloss', 'mlogloss' ...
 
   plot_trees: False
   
@@ -217,11 +220,18 @@ xgb-MI-min:
     reg_alpha: 0.05          # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
-  MI_reg_param:
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  MI_param:
     beta: [2.0]                # Positive for minimizing
     <<: *MI_REG_PARAM
   
@@ -267,11 +277,18 @@ xgb-MI-max:
     reg_alpha: 0.05          # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'                    # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy_with_MI' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                          # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
-  MI_reg_param:
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  MI_param:
     beta: [-2.0]       # Negative for maximizing MI
     <<: *MI_REG_PARAM
 
@@ -411,7 +428,7 @@ dmlp-MI-min:
   
   # Mutual Information regularization (comment out if not used)
   # Remember to use small enough learning rate in the total loss optimizer!
-  MI_reg_param:
+  MI_param:
     beta: [0.99]               # Positive for minimizing MI between (x,y), Negative for Maximizing
     <<: *MI_REG_PARAM
   
@@ -462,7 +479,7 @@ dmlp-MI-max:
   
   # Mutual Information regularization (comment out if not used)
   # Remember to use small enough learning rate in the total loss optimizer!
-  MI_reg_param:
+  MI_param:
     beta:  [-0.99]      #  Positive for minimizing MI between (x,y), Negative for Maximizing (too |high| can make it unstable)
     <<: *MI_REG_PARAM
 

@@ -182,7 +182,7 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
                     from matplotlib.ticker import FuncFormatter
                     fmt  = lambda x, pos: '{:0.2f}'.format(x) # Tick precision formatter
                     cbar = plt.colorbar(cp, format=FuncFormatter(fmt))
-                    cbar.set_label(f'Median expected CL95 upper limit on {process_label} (CLs)', rotation=270, labelpad=15, fontsize=8)
+                    cbar.set_label(f'Median expected CL95 upper limit on {process_label} (CLs)', rotation=270, labelpad=15, fontsize=7)
                     cbar.ax.tick_params(labelsize=8)
             except:
                 print(__name__ + f'.create_limit_plots: Problem with the contour plot -- skipping (check the input)')
@@ -375,8 +375,8 @@ def run_limits(path='/home/user/Desktop/output/', methods=['asymptotic', 'toys']
     ctau_values  = [10,50,100,500]
 
     experiment_label = '$41.6$ fb$^{-1}$, $\\sqrt{{s}} = 13$ TeV'
-    process_label    = '$r = \\sigma / \\sigma_{gg \\rightarrow H \\times BR(0.01)}$'
-
+    process_label    = '$r = \\sigma / \\sigma_{gg \\rightarrow H \\times 0.01}$'
+    
 
     # 1. Create all model point filenames
     files = []
@@ -402,4 +402,4 @@ def run_limits(path='/home/user/Desktop/output/', methods=['asymptotic', 'toys']
         os.system(f'gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile={figpath}/limits_docs_{method}.pdf {figpath}/*.pdf')
 
 if __name__ == "__main__":
-    run_limits()
+    run_limits(path='/vols/cms/mmieskol/dqcd_limits/', methods=['asymptotic'], num_toys_obs=int(1e4), portal='vector')

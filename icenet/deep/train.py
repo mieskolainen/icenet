@@ -281,17 +281,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         MI         = copy.deepcopy(param['MI_reg_param']) # ! important
         input_size = param['MI_reg_param']['x_dim']
 
-        index      = MI['y_index']
-        if   index is None:
+        y_dim      = MI['y_dim']
+        if   y_dim is None:
             input_size += model.C
-        elif type(index) is str:
-            input_size += eval(index)
-        elif type(index) is list:
-            input_size += len(index)
+        elif type(y_dim) is str:
+            input_size += eval(y_dim)
+        elif type(y_dim) is list:
+            input_size += len(y_dim)
 
         MI['model']     = []
         MI['MI_lb']     = []
 
+        print(__name__ + f'.torch_loop: MINE estimator input_size: {input_size}')
+        
         for k in range(len(MI['classes'])):
             MI_model         = mine.MINENet(input_size=input_size, **MI)
             MI_model, device = optimize.model_to_cuda(model=MI_model, device_type=param['device'])
@@ -302,7 +304,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         all_parameters = list()
         for k in range(len(MI['classes'])):
             all_parameters += list(MI['model'][k].parameters())
-
+        
         MI['optimizer'] = torch.optim.Adam(all_parameters, lr=MI['lr'], weight_decay=MI['weight_decay'])
     else:
         MI = None
@@ -386,8 +388,8 @@ def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=
     print(config)
     
     # Construct model
-    netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=args['num_classes'], param=param, config=config['params'])
-    model               = getgraphmodel(conv_type=conv_type, netparam=netparam)    
+    netparam, conv_type = getgraphparam(data_trn=data_trn, num_classes=len(args['primary_classes']), param=param, config=config['params'])
+    model               = getgraphmodel(conv_type=conv_type, netparam=netparam)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param = aux.replace_param(default=param['opt_param'], raytune=config['params'])
@@ -450,7 +452,7 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
 
     ## ------------------------
     ### Construct model
-    netparam, conv_type = getgenericparam(config=config['params'], param=param, D=X_trn.shape[-1], num_classes=args['num_classes'])
+    netparam, conv_type = getgenericparam(config=config['params'], param=param, D=X_trn.shape[-1], num_classes=len(args['primary_classes']))
     model               = getgenericmodel(conv_type=conv_type, netparam=netparam)
 
 
@@ -466,13 +468,13 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
         validation_set = optimize.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    opt_param       = aux.replace_param(default=param['opt_param'], raytune=config['params'])
+    opt_param    = aux.replace_param(default=param['opt_param'], raytune=config['params'])
     
     params = {'batch_size'  : opt_param['batch_size'],
               'shuffle'     : True,
               'num_workers' : param['num_workers'],
               'pin_memory'  : True}
-
+    
     train_loader = torch.utils.data.DataLoader(training_set,   **params)
     test_loader  = torch.utils.data.DataLoader(validation_set, **params)
 
@@ -508,7 +510,7 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     y_pred    = pred_func(x)
     
     # Metrics
-    metrics   = aux.Metric(y_true=y_true, y_pred=y_pred, weights=weights, num_classes=2, hist=False, verbose=True)
+    metrics   = aux.Metric(y_true=y_true, y_pred=y_pred, class_ids=args['primary_classes'], weights=weights, hist=False, verbose=True)
     
     # ------------------------------------------------------
     # Compute loss
@@ -579,7 +581,8 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
 
     print(__name__ + f'.train_flow: Training <{param["label"]}> classifier ...')
     
-    for classid in range(args['num_classes']):
+    for classid in range(len(args['primary_classes'])):
+        
         param['model'] = 'class_' + str(classid)
 
         # Load datasets
@@ -701,7 +704,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     model_param = copy.deepcopy(param['xgb']['model_param'])
     
     if 'multi' in model_param['objective']:
-        model_param.update({'num_class': args['num_classes']})
+        model_param.update({'num_class': len(args['primary_classes'])})
 
     del model_param['num_boost_round']
     # ---------------------------------------
@@ -727,13 +730,13 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         
         # AUC
         pred    = model.predict(dtrain)
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, num_classes=args['num_classes'], hist=False, verbose=True)
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
         trn_aucs.append(metrics.auc)
 
         pred    = model.predict(deval)
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
-        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, num_classes=args['num_classes'], hist=False, verbose=True)
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
         val_aucs.append(metrics.auc)
 
         # Loss
@@ -823,16 +826,16 @@ def train_xtx(config={'params': {}}, X_trn=None, Y_trn=None, X_val=None, Y_val=N
 
                 # Compute weights for this hyperbin (balance class ratios)
                 y = Y_trn[trn_ind]
-                frac = [np.sum(y == k) / y.shape[0] for k in range(args['num_classes'])]
+                frac = [np.sum(y == k) / y.shape[0] for k in range(len(args['primary_classes']))]
 
                 print(__name__ + f'.train_xtx: --- frac = [{frac[0]:.3f}, {frac[1]:.3f}] ---')
 
                 # Inverse weights
                 weights = np.zeros(y.shape[0])
                 for k in range(weights.shape[0]):
-                    weights[k] = 1.0 / frac[int(y[k])] / y.shape[0] / args['num_classes']
+                    weights[k] = 1.0 / frac[int(y[k])] / y.shape[0] / len(args['primary_classes'])
                 
-                for c in range(args[num_classes]):
+                for c in range(len(args['primary_classes'])):
                     print(__name__ + f'.train_xtx: class = {c} | sum(weights) = {np.sum(weights[y == c])}')
 
 

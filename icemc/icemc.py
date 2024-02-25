@@ -101,6 +101,23 @@ def tau2Gamma(tau):
     return hbar_const / tau
 
 
+def test():
+    
+    N = 1000
+    
+    M_pi = 1.5
+    M_A  = 0.5
+    
+    for i in range(N):
+
+        p_pi = icevec.vec4(0,0,0,M_pi)
+        
+        
+        p_A  = icevec.vec4(0,0,0,M_A)
+
+    
+
+
 def resonance_generator(M, ctau, pt2, rap, N=1000):
     """
     Simulation massive resonance with (M, ctau) parameters,

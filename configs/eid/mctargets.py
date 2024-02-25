@@ -11,7 +11,7 @@ def target_e(X, ids, xcorr_flow=False):
     """ Classification signal target """
     
     # Define cuts
-    cutlist = [f'BOOL@is_e== True']
+    cutlist = [f'BOOL@is_e == True']
     
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)

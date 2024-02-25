@@ -57,9 +57,9 @@ def get_model(gdata, args, param):
     # INITIALIZE GRAPH MODEL
 
     # Get model
-    netparam, conv_type = train.getgraphparam(data_trn=gdata['trn'], num_classes=args['num_classes'], param=param)
+    netparam, conv_type = train.getgraphparam(data_trn=gdata['trn'], num_classes=len(args['primary_classes']), param=param)
     model               = train.getgraphmodel(conv_type=conv_type, netparam=netparam)
-
+    
     # CPU or GPU
     model, device       = deep.optimize.model_to_cuda(model=model, device_type=param['device'])
 

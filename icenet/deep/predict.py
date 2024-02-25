@@ -104,7 +104,7 @@ def pred_graph_xgb(args, param, device='cpu'):
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
         pred = xgb_model.predict(xgboost.DMatrix(data = x_tot))
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
         return pred
     
     return func_predict
@@ -129,7 +129,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
         # Predict in smaller batches not to overflow GPU memory
         for i, batch in enumerate(loader):
-            y = model.softpredict(batch.to(device))[:, args['signalclass']].detach().cpu().numpy()
+            y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
         
         return y_tot
@@ -156,7 +156,7 @@ def pred_torch_generic(args, param, return_model=False):
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
         
-        return model.softpredict(x_in)[:, args['signalclass']].detach().cpu().numpy()
+        return model.softpredict(x_in)[:, args['signal_class']].detach().cpu().numpy()
     
     if return_model == False:
         return func_predict
@@ -201,7 +201,7 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
-        if len(pred.shape) > 1: pred = pred[:, args['signalclass']]
+        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
         return pred
 
     if return_model == False:

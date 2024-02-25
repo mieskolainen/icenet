@@ -4,12 +4,15 @@
 
 rootname: 'dqcd'
 rngseed: 123456                      # Fixed seed for training data mixing
+inputvars: 'mvavars'                 # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false             # Conditional (theory parametric) input
-  num_classes: 2                     # Number of classes in MVA
-  signalclass: 1                     # Signal class ID
+  
+  primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                    # Signal class ID
+  DA_class:    -2                    # Domain Adaptation class
   
   inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
@@ -18,37 +21,43 @@ mva_param: &MVA_INPUT_PARAM
   # The variable names below need to match the nanoAOD variable names, e.g. 'Jet_*'
   jagged_maxdim:
     
-    Jet:  8
-    Muon: 8
-    muonSV: 8
-    SV:   8
+    Jet:  6
+    Muon: 10
+    muonSV: 12
+    SV:   6
     cpf:  0     # 20
     npf:  0     # 10
+
   
+  # Filtering of collection entries (for BDT)
+  jagged_filter:
+    
+    - name: 'muonSV'
+      condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0' condition
+    
+    # add more here ..
+
+  # Re-ordering of collection entries (for BDT)
   jagged_order:
 
-    - order_0: 
-      name: 'muonSV'
-      var:  'dlen'
-      ascending: False  # True ~ smallest first, False ~ largest first
+    - name: 'muonSV'
+      var:  'chi2'
+      ascending: True  # True ~ smallest first, False ~ largest first
     
-    - order_1: 
-      name: 'SV'
+    - name: 'SV'
       var:  'dlen'
       ascending: False
     
-    - order_2: 
-      name: 'Jet'
+    - name: 'Jet'
       var:  'pt'   
       ascending: False
     
-    - order_3: 
-      name: 'Muon'
+    - name: 'Muon'
       var:  'pt'   
       ascending: False
     
     # add more here ..
-  
+
   frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
   
   # Variable imputation
@@ -88,11 +97,11 @@ genesis_runmode:
   maxevents:  null
   inputmap:  "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
-
-  targetfunc:  null                  # Training target,    implemented under mctargets.py
-  filterfunc: 'filter_standard'      # Training filtering, implemented under mcfilter.py
-  cutfunc:    'cut_fiducial'         # Basic cuts,         implemented under cuts.py
-
+  
+  filterfunc: 'filter_standard'      # Filter cuts, implemented under filter.py
+  cutfunc:    'cut_fiducial'         # Basic cuts,  implemented under cuts.py
+  targetfunc:  null                  # -- not active --
+  
   xcorr_flow: True                   # Full N-point correlations computed between cuts
   pickle_size: 1000                  # Number of entries (events) per pickle file
 
@@ -107,6 +116,14 @@ train_runmode:
   input_tag: null
   model_tag: null
 
+  # Conditional (theory parametric) dequantization
+  conditional_param:
+    dequantize_common: True          # Under common.py
+    dequantize_batch:  False         # (mini)batch based (reservation)
+    n_interp:   1000                 # Number of interpolation points per dimension
+    kind:       'linear'             # Interpolator ('linear', 'quadratic', 'cubic' ...),
+                                     # see scipy.interpolate.interp1d
+  
   ## Reweighting setup
   reweight: true
   reweight_mode: 'write'          # 'write', 'load'
@@ -138,9 +155,10 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    - xgb0
-    - xgb0-no-mass
-    #- xgb0-only-mu
+    - iceboost01-MI
+    - iceboost01-DA-MI
+    - iceboost01-DA
+    - xgb01
     
     #- dmlp
     #- lgr0
@@ -190,7 +208,14 @@ eval_runmode:
 
   input_tag: null
   model_tag: null
-
+  
+  # Conditional (theory parametric) dequantization
+  conditional_param:
+    dequantize_common: True          # Under common.py
+    n_interp:   1000                 # Number of interpolation points per dimension
+    kind:       'linear'             # Interpolator ('linear', 'quadratic', 'cubic' ...),
+                                     # see scipy.interpolate.interp1d
+  
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
   reweight_file: 'reweight_train.pkl'

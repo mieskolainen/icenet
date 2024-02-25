@@ -32,6 +32,7 @@ import hashlib
 import base64
 import yaml
 
+from icenet.tools import stx
 
 def rootsafe(txt):
     """
@@ -266,7 +267,6 @@ class fastarray1:
     def reset(self):
         self.size = 0
 
-
 def pick_vars(data, set_of_vars):
     """ Choose the active set of input variables.
 
@@ -285,7 +285,6 @@ def pick_vars(data, set_of_vars):
         newvars.append(data.ids[i])
 
     return newind, newvars
-
 
 class IceXYW:
     """
@@ -308,8 +307,32 @@ class IceXYW:
         elif isinstance(x, ak.Array):
             self.concat = ak.concatenate
         else:
-            raise Error(__name__ + f'.IceXYW.__init__: Unknown input array type')
-
+            raise Exception(__name__ + f'.IceXYW.__init__: Unknown input array type')
+    
+    def __getitem__(self, key):
+        """ Advanced indexing with a variable or a list of variables """
+        
+        if type(key) is not list:       # access with a single variable name
+            
+            if key in self.ids:         # direct access
+                col = self.ids.index(key)
+                ids = [key]
+            
+            elif isinstance(self.x, np.ndarray): # might be a cut string, try that
+                select = stx.eval_boolean_syntax(expr=key, X=self.x, ids=self.ids, verbose=True)
+                return IceXYW(x=self.x[select, ...], y=self.y[select], w=self.w[select], ids=self.ids)
+            
+            else:
+                raise Exception(__name__ + f'[operator]: Cannot execute')
+            
+        else:                           # list of variables
+            col,ids = pick_vars(data=self, set_of_vars=key)
+        
+        if isinstance(self.x, np.ndarray):
+            return IceXYW(x=self.x[..., col], y=self.y, w=self.w, ids=ids)
+        else:
+            return IceXYW(x=self.x[col], y=self.y, w=self.w, ids=ids)
+        
     # + operator
     def __add__(self, other):
 

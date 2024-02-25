@@ -1,91 +1,106 @@
 # Deep MLP
 #
-#
 # Mikael Mieskolainen, 2023
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import List
 
-def MLP(layers, activation='relu', batch_norm=False, dropout=0.0):
+def get_act(act: str):
+    """
+    Returns torch activation function
+    
+    Args:
+        act:  activation function 'relu', 'tanh', 'silu', 'elu
+    """
+    if   act == 'relu':
+        return nn.ReLU()
+    elif act == 'tanh':
+        return nn.Tanh()
+    elif act == 'silu':
+        return nn.SiLU()
+    elif act == 'elu':
+        return nn.ELU()
+    else:
+        raise Exception(f'Uknown act "{act}" chosen')
+
+
+def MLP(layers: List[int], activation: str='relu', batch_norm: bool=False, dropout: float=0.0, last_act: bool=False):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     
-    WITHOUT THE LAST ACTIVATION FUNCTION
-    
     Args:
         layers     : input structure, such as [128, 64, 64] for a 3-layer network.
+        activation : activation function
         batch_norm : batch normalization
         dropout    : dropout regularization
+        last_act   : apply activation function after the last layer
+    
     Returns:
         nn.sequential object
-
     """
-    print(__name__ + f'.MLP: Using {activation} activation')
-
-    if batch_norm:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(layers[i - 1], layers[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.BatchNorm1d(layers[i]),
-                nn.Dropout(dropout, inplace=False)
+    print(__name__ + f'.MLP: {layers} | activation {activation} | batch_norm {batch_norm} | dropout {dropout} | last_act {last_act}')
+    
+    if not last_act: # Without activation after the last layer
+        
+        if batch_norm:
+            return nn.Sequential(*[
+                nn.Sequential(
+                    nn.Linear(layers[i - 1], layers[i]),
+                    get_act(activation),
+                    nn.BatchNorm1d(layers[i]),
+                    nn.Dropout(dropout, inplace=False)
+                )
+                for i in range(1,len(layers) - 1)
+            ],
+                nn.Linear(layers[-2], layers[-1]) # N.B. Last without act!
             )
-            for i in range(1,len(layers) - 1)
-        ],
-            nn.Linear(layers[-2], layers[-1]) # N.B. Last without activation!
-        )
+        else:
+            return nn.Sequential(*[
+                nn.Sequential(
+                    nn.Linear(layers[i - 1], layers[i]),
+                    get_act(activation),
+                    nn.Dropout(dropout, inplace=False)
+                )
+                for i in range(1,len(layers) - 1)
+            ], 
+                nn.Linear(layers[-2], layers[-1]) # N.B. Last without act!
+            )
     else:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(layers[i - 1], layers[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.Dropout(dropout, inplace=False)
+      
+        if batch_norm:
+            return nn.Sequential(*[
+                nn.Sequential(
+                    nn.Linear(layers[i - 1], layers[i]),
+                    get_act(activation),
+                    nn.BatchNorm1d(layers[i]),
+                    nn.Dropout(dropout, inplace=False),
+                )
+                for i in range(1,len(layers))
+            ]
             )
-            for i in range(1,len(layers) - 1)
-        ], 
-            nn.Linear(layers[-2], layers[-1]) # N.B. Last without activation!
-        )
+        
+        else:
+            return nn.Sequential(*[
+                nn.Sequential(
+                    nn.Linear(layers[i - 1], layers[i]),
+                    get_act(activation),
+                    nn.Dropout(dropout, inplace=False)
+                )
+                for i in range(1,len(layers))
+            ]
+            )  
 
-
-def MLP_ALL_ACT(layers, activation='relu', batch_norm=False, dropout=0.0):
+def MLP_ALL_ACT(layers: List[int], activation: str='relu', batch_norm: bool=False, dropout: float=0.0):
     """
     Return a Multi Layer Perceptron with an arbitrary number of layers.
     
     ALL LAYERS WITH THE ACTIVATION FUNCTION
-    
-    Args:
-        layers     : input structure, such as [128, 64, 64] for a 3-layer network.
-        batch_norm : batch normalization
-        dropout    : dropout regularization
-    Returns:
-        nn.sequential object
     """
-    print(__name__ + f'.MLP_all_act: Using {activation} activation')
-
-    if batch_norm:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(layers[i - 1], layers[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.BatchNorm1d(layers[i]),
-                nn.Dropout(dropout, inplace=False),
-            )
-            for i in range(1,len(layers))
-        ]
-        )
     
-    else:
-        return nn.Sequential(*[
-            nn.Sequential(
-                nn.Linear(layers[i - 1], layers[i]),
-                nn.ReLU() if activation == 'relu' else nn.Tanh(),
-                nn.Dropout(dropout, inplace=False)
-            )
-            for i in range(1,len(layers))
-        ]
-        )
+    return MLP(layers=layers, activation=activation, batch_norm=batch_norm, dropout=dropout, last_act=True)
 
 
 class DMLP(nn.Module):
