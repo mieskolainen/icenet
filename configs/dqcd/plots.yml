@@ -33,9 +33,11 @@ FILTER: &FILTER
 
 
 basic:
-  active: False
+  active: True
   nbins:  70
+  percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999.0]
+  plot_unweighted: False
 
 corrmat:
   active: false

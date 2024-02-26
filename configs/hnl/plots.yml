@@ -28,9 +28,11 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 # -----------------------------------------------------------------------
 
 basic:
-  active: false
+  active: True
   nbins:  70
-  exclude_vals: [null, -999.0]
+  percentile_range: [0.5, 99.5]
+  exclude_vals: [null, -999]
+  plot_unweighted: True
 
 corrmat:
   active: false

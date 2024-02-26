@@ -723,27 +723,32 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
-def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', targetdir = '.'):
+def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
+             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.'):
     """ Plot all variables.
     """
     print(__name__ + f'.plotvars: Creating plots ...')
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
-
+        
         # Exclude special values
         ind = np.ones(len(x), dtype=bool)
         for k in range(len(exclude_vals)):
             ind = np.logical_and(ind, (x != exclude_vals[k]))
 
-        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins, title=title, targetdir=targetdir)
+        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins,
+                percentile_range=percentile_range, title=title, targetdir=targetdir,
+                plot_unweighted=plot_unweighted)
 
 
-def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
+def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
+            plot_unweighted=True, title='', targetdir='.'):
     """ Plot a single variable.
     """
-    binrange = (np.percentile(x, 0.5), np.percentile(x, 99.5))
+    binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
     
-    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights, title=title, xlabel=var)
+    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
+                                    title=title, xlabel=var, plot_unweighted=plot_unweighted)
     plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
 
     # -----
@@ -752,11 +757,12 @@ def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
     gc.collect()
 
 
-def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5):
+def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
+                         plot_unweighted=True):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not) after weighting!
     """
-    
+
     fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
     class_ids = np.unique(y.astype(int))
     legends   = []
@@ -765,7 +771,9 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
     for c in class_ids:
 
         # Compute histograms with numpy (we use nbins and range() for speed)
-        counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+        if plot_unweighted:
+            counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+        
         counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
 
         mu, std = aux.weighted_avg_and_std(values=X[y == c], weights=weights[y == c])
@@ -774,14 +782,16 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         for i in range(2):
 
             plt.sca(ax[i])
-            plt.stairs(counts,   edges, fill=False, linewidth = linewidth)
-            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='--')
+            if plot_unweighted:
+                plt.stairs(counts,   edges, fill=False, linewidth = linewidth,     linestyle='--')
+            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='-')
             
             if i == 0:
-                legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
+                if plot_unweighted:
+                    legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
                 legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
 
-    ax[0].set_ylabel('weighted counts')
+    ax[0].set_ylabel('[weighted] counts')
     ax[0].set_xlabel(xlabel)
     ax[1].set_xlabel(xlabel)
     

@@ -1077,16 +1077,21 @@ def make_plots(data, args):
     ### Plot variables
     if args['plot_param']['basic']['active']:
         
+        param = copy.deepcopy(args['plot_param']['basic'])
+        param.pop('active')
+        
         ### Specific variables
         if data['data_kin'] is not None:
             targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')
-            plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids, nbins = args['plot_param']['basic']['nbins'],
-                exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+            plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids,           
+                targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
+                **param)
         
         ### Plot MVA input variable plots
         targetdir = aux.makedir(f'{args["plotdir"]}/train/1D-distributions/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids, nbins = args['plot_param']['basic']['nbins'],
-            exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids,
+            targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
+            **param)
     
     ### Correlations
     if args['plot_param']['corrmat']['active']:
