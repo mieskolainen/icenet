@@ -250,6 +250,107 @@ def scenarioA(outputfile, filerange='*'):
   }
   printer_newmodels(**param)
 
+def scenarioB1(outputfile, filerange='*'):
+
+  process         = 'scenarioB1'
+
+  # ------------------------------------------
+  # Basic
+  filename        = f'data_{filerange}.root'
+  path            = 'bparkProductionAll_V1p3'
+  end_name        = ''
+  xs              = '1.0 # [pb]'
+  force_xs        = 'true'
+  isMC            = 'true'
+  maxevents_scale = '1.0'
+  # ------------------------------------------
+  
+  rp = {}
+  rp['mpi_mA_pair']  = [['1', '0p33'],['2', '0p67'],['2','0p40'],['4','0p80'],['4','1p33']]
+  rp['ctau']         = ['0p1','1p0','10','100']
+  
+  param = {
+    'outputfile':      outputfile,
+    'rp':              rp,
+    'process':         process,
+    'path':            path,
+    'end_name':        end_name,
+    'filename':        filename,
+    'xs':              xs,
+    'force_xs':        force_xs,
+    'isMC':            isMC,
+    'maxevents_scale': maxevents_scale
+  }
+  printer_newmodels(**param)
+
+
+def scenarioB2(outputfile, filerange='*'):
+
+  process         = 'scenarioB2'
+
+  # ------------------------------------------
+  # Basic
+  filename        = f'data_{filerange}.root'
+  path            = 'bparkProductionAll_V1p3'
+  end_name        = ''
+  xs              = '1.0 # [pb]'
+  force_xs        = 'true'
+  isMC            = 'true'
+  maxevents_scale = '1.0'
+  # ------------------------------------------
+  
+  rp = {}
+  rp['mpi_mA_pair']  = [['1', '0p60'],['2', '1p10'],['4','2p10']]
+  rp['ctau']         = ['0p1','1p0','10','100']
+  
+  param = {
+    'outputfile':      outputfile,
+    'rp':              rp,
+    'process':         process,
+    'path':            path,
+    'end_name':        end_name,
+    'filename':        filename,
+    'xs':              xs,
+    'force_xs':        force_xs,
+    'isMC':            isMC,
+    'maxevents_scale': maxevents_scale
+  }
+  printer_newmodels(**param)
+
+
+def scenarioC(outputfile, filerange='*'):
+
+  process         = 'scenarioC'
+
+  # ------------------------------------------
+  # Basic
+  filename        = f'data_{filerange}.root'
+  path            = 'bparkProductionAll_V1p3'
+  end_name        = ''
+  xs              = '1.0 # [pb]'
+  force_xs        = 'true'
+  isMC            = 'true'
+  maxevents_scale = '1.0'
+  # ------------------------------------------
+  
+  rp = {}
+  rp['mpi_mA_pair']  = [['2', '1p60'],['4', '3p20'],['10','8p00']]
+  rp['ctau']         = ['0p1','1p0','10','100']
+  
+  param = {
+    'outputfile':      outputfile,
+    'rp':              rp,
+    'process':         process,
+    'path':            path,
+    'end_name':        end_name,
+    'filename':        filename,
+    'xs':              xs,
+    'force_xs':        force_xs,
+    'isMC':            isMC,
+    'maxevents_scale': maxevents_scale
+  }
+  printer_newmodels(**param)
+
 
 def QCD(outputfile, filerange='*'):
 
@@ -470,6 +571,15 @@ if __name__ == '__main__':
   
   elif args.process == 'scenarioA':
     scenarioA(outputfile=outputfile, filerange=args.filerange)
+
+  elif args.process == 'scenarioB1':
+    scenarioB1(outputfile=outputfile, filerange=args.filerange)
+
+  elif args.process == 'scenarioB2':
+    scenarioB2(outputfile=outputfile, filerange=args.filerange)
+
+  elif args.process == 'scenarioC':
+    scenarioC(outputfile=outputfile, filerange=args.filerange)
 
   elif args.process == 'QCD':
     QCD(outputfile=outputfile, filerange=args.filerange)
