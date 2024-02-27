@@ -77,7 +77,8 @@ MVA_2D:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
-
+    density: True
+  
     set_filter: *FINAL_STATE_FILTER
     
     # -----------------------------
@@ -94,4 +95,5 @@ MVA_2D:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
-
+  #  density: True
+  

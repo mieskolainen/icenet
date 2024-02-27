@@ -41,7 +41,7 @@ FILTER: &FILTER
 # -----------------------------------------------------------------------
 
 basic:
-  active: True
+  active: False
   nbins:  70
   percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999.0]
@@ -94,8 +94,11 @@ MVA_2D:
     var:   ['muonSV_mass_0', 'muonSV_mass_1']
     edges: [{'nbin': 50,  'minmax': [0.0, 1.0],  'space': 'linear'},
             {'nbin': 100, 'minmax': [0.0, 20.0], 'space': 'linear'}]
-
+    density: True
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
+  #  density: True
+  

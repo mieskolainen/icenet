@@ -1198,13 +1198,16 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     if args['plot_param']['MVA_output']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
-            hist_edges = args['plot_param'][f'MVA_output']['edges']
-            inputs = {'y_pred': y_pred[mask], 'y': y[mask],
-                'weights': weights[mask] if weights is not None else None, 'class_ids': None,
-                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': f'{targetdir}/MVA/{label}/{pathlabel}'}
+            
+            inputs = {'y_pred':     y_pred[mask],
+                      'y':          y[mask],
+                      'weights':    weights[mask] if weights is not None else None,
+                      'class_ids':  None,
+                      'label':      f'{label}/{sublabel}',
+                      'path':       f'{targetdir}/MVA/{label}/{pathlabel}'}
 
-            plots.density_MVA_wclass(**inputs)
-
+            plots.density_MVA_wclass(**inputs, **args['plot_param'][f'MVA_output'])
+        
         # ** All inclusive **
         mask  = np.ones(len(y_pred), dtype=bool)
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
@@ -1226,13 +1229,12 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:        
-                var   = args['plot_param']['MVA_2D'][pid]['var']
-                edges = args['plot_param']['MVA_2D'][pid]['edges']
+                var     = args['plot_param']['MVA_2D'][pid]['var']
             else:
                 break # No more this type of plots
             
             def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
-
+                
                 # Two step
                 XX = X_RAW[mask, ...]
                 XX = XX[:, pick_ind]
@@ -1243,11 +1245,12 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                     'X':           XX,
                     'ids':         np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
                     'class_ids':   None,
-                    'label':       f'{label}/{sublabel}', 'hist_edges': edges,
-                    'path':        f'{targetdir}/COR/{label}/{pathlabel}'}
+                    'label':       f'{label}/{sublabel}',
+                    'path':        f'{targetdir}/COR/{label}/{pathlabel}/plot-{i}'}
                 
-                output = plots.density_COR_wclass(y=y[mask], **inputs)
-                #plots.density_COR(**inputs)
+                output = plots.density_COR_wclass(y=y[mask], **inputs,
+                                                  **args['plot_param']['MVA_2D'][pid])
+                #plots.density_COR(**inputs, **args['plot_param']['MVA_2D'][pid])
 
                 # Save output
                 if i not in corr_mstats.keys():

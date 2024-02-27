@@ -44,8 +44,11 @@ MVA_2D:
     var:   ['.*'] # RegExp supported
     edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},
             {'nbin': 50, 'q': [0.0,  0.95], 'space': 'linear'}]
-
+    density: True
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?']
   #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 30, 'q': [0.0, 0.95],     'space': 'log10'}]
+  #  density: True
+  

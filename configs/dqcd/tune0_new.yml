@@ -119,7 +119,7 @@ train_runmode:
     dequantize_common: True           # Under common.py
     dequantize_batch:  False          # (mini)batch based training (reservation)
     n_interp:   1000                  # Number of interpolation points per dimension
-    kind:       'linear'              # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'cubic'               # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                       # see scipy.interpolate.interp1d
   
   ## Reweighting setup
@@ -214,7 +214,7 @@ eval_runmode:
   conditional_param:
     dequantize_common: True           # Under common.py
     n_interp:   1000                  # Number of interpolation points per dimension
-    kind:       'linear'              # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'cubic'               # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                       # see scipy.interpolate.interp1d
   
   reweight: true

@@ -282,7 +282,8 @@ def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None,
     return fig, ax, met
 
 
-def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None, VAR:str='trk_pt', num_bootstrap=0):
+def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None,
+                  VAR:str='trk_pt', num_bootstrap=0):
     """
     Evaluate AUC & ROC per 1D-bin.
     
@@ -346,7 +347,7 @@ def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None, VAR:st
     return METS, LABELS
 
 
-def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, hist_edges=80, path=''):
+def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80, path='', **kwargs):
     """
     Evaluate MVA output (1D) density per class.
     
@@ -383,9 +384,9 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, hist_edge
         w = weights[ind] if weights is not None else None
         x = y_pred[ind]
 
-        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=hist_edges, x=x), weights=w,
+        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-        
+    
     plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
@@ -490,7 +491,8 @@ def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
 
 
 def density_COR_wclass(y_pred, y, X, ids, label, \
-    weights=None, class_ids=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+    weights=None, class_ids=None, edges=[[50], [50]], density=True,
+    path='', cmap='Oranges', **kwargs):
     
     """
     Evaluate the 2D-density of the MVA algorithm output vs other variables per class.
@@ -504,6 +506,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         weights     :  Sample weights
         class__ids  :  Class ids to plot
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
+        density     :  Normalize to density
         path        :  Save path
         cmap        :  Color map
         
@@ -543,7 +546,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             xx   = y_pred[ind]
             yy   = X[ind, ids.index(var)]
             
-            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
+            bins = [binengine(bindef=edges[0], x=xx), binengine(bindef=edges[1], x=yy)]
 
             # Apply histogram bounds
             box = np.logical_and(np.logical_and(xx > bins[0][0], xx < bins[0][-1]),
@@ -589,13 +592,13 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}')
                 savepath  = f'{outputdir}/var-{var}--class-{k}--{scale}.pdf'
-
+                
                 try:
                     if scale == 'log':
                         import matplotlib as mpl
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, density=density, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
                     else:
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, density=density, cmap=plt.get_cmap(cmap))
                     
                     fig.colorbar(im)
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
@@ -730,7 +733,7 @@ def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
     print(__name__ + f'.plotvars: Creating plots ...')
     for i in tqdm(range(X.shape[1])):
         x = X[:,i]
-        
+
         # Exclude special values
         ind = np.ones(len(x), dtype=bool)
         for k in range(len(exclude_vals)):
