@@ -225,10 +225,15 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             total_ww  = 0.0
 
             for m in range(N_cat):
+                
+                mm_ = torch.from_numpy(mask[m,:]).to(device) # Pick index mask
 
-                mm_ = mask[m,:] # Pick index mask
-
-                if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
+                # Apply target threshold (e.g. we are interested only in high score region)
+                if reg_param['min_score'] is not None:
+                    mm_ = mm_ & (Z > reg_param['min_score']) 
+                
+                # Minimum number of events per category cutoff
+                if torch.sum(mm_) > reg_param['min_count']:
                     
                     # Distance Correlation
                     if   reg_param['losstype'] == 'DCORR':
@@ -252,7 +257,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                             triag = torch.triu(rho, diagonal=1)
                             L     = torch.sum(torch.abs(triag))
                             value = value + L
-                    
+
                     # Neural MI
                     else:
                         
@@ -269,7 +274,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                     
                     # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
                     if MI_param['poisson_weight']:
-                        cat_ww = np.sqrt(np.sum(mm_))
+                        cat_ww = torch.sqrt(torch.sum(mm_))
                     else:
                         cat_ww = 1.0
                     

@@ -37,7 +37,8 @@ MI_REG_PARAM: &MI_REG_PARAM
   poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
   losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for DEBUG)
   max_N: 20000             #  Maximum number of events per function call ('DCORR' requires at least)
-    
+  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
+  
   eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
