@@ -1532,16 +1532,39 @@ if train_eps:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.iceboost.corrcoeff_weighted">
 <span class="sig-name descname"><span class="pre">corrcoeff_weighted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/iceboost.html#corrcoeff_weighted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.iceboost.corrcoeff_weighted" title="Link to this definition">¶</a></dt>
-<dd><p>Per event weighted Pearson 2x2 correlation matrix cf. torch.corrcoef()
-:param x: data (Nx1)
-:param y: data (Nx1)
-:param weights: event weights</p>
+<dd><p>Per event weighted linear Pearson 2x2 correlation matrix cf. torch.corrcoef()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data (Nx1)</p></li>
+<li><p><strong>y</strong> – data (Nx1)</p></li>
+<li><p><strong>weights</strong> – event weights</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.iceboost.create_filters">
 <span class="sig-name descname"><span class="pre">create_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/iceboost.html#create_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.iceboost.create_filters" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.iceboost.distance_correlation">
+<span class="sig-name descname"><span class="pre">distance_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/iceboost.html#distance_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.iceboost.distance_correlation" title="Link to this definition">¶</a></dt>
+<dd><p>Distance Correlation</p>
+<p>See: <a class="reference external" href="https://www.statsmodels.org/devel/_modules/statsmodels/stats/dist_dependence_measures.html#distance_correlation">https://www.statsmodels.org/devel/_modules/statsmodels/stats/dist_dependence_measures.html#distance_correlation</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data (N x dim)</p></li>
+<li><p><strong>y</strong> – data (N x dim), where dim can be the same or different than for x</p></li>
+<li><p><strong>weights</strong> – event weights (not implemented)</p></li>
+<li><p><strong>max_N</strong> – maximum number of samples to consider</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.iceboost.train_xgb">
@@ -3052,7 +3075,7 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.iceroot.load_tree">
-<span class="sig-name descname"><span class="pre">load_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxevents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#load_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.load_tree" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxevents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#load_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.load_tree" title="Link to this definition">¶</a></dt>
 <dd><p>Load ROOT files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3092,14 +3115,14 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.iceroot.read_MC">
-<span class="sig-name descname"><span class="pre">read_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_MC" title="Link to this definition">¶</a></dt>
-<dd><p>Loop over different MC (or data) processes as defined in the yaml files</p>
+<dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple">
+<span class="sig-name descname"><span class="pre">read_multiple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple" title="Link to this definition">¶</a></dt>
+<dd><p>Loop over different MC / data processes as defined in the yaml files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>process_func</strong> – data processing function</p></li>
-<li><p><strong>process</strong> – MC process dictionary (from yaml)</p></li>
+<li><p><strong>processes</strong> – MC processes dictionary (from yaml)</p></li>
 <li><p><strong>root_path</strong> – main path of files</p></li>
 <li><p><strong>param</strong> – parameters of ‘process_func’</p></li>
 <li><p><strong>class_id</strong> – class identifier (integer), e.g. 0, 1, 2 …</p></li>
@@ -3112,14 +3135,14 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple_MC">
-<span class="sig-name descname"><span class="pre">read_multiple_MC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple_MC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple_MC" title="Link to this definition">¶</a></dt>
-<dd><p>Loop over different MC processes as defined in the yaml files</p>
+<dt class="sig sig-object py" id="icenet.tools.iceroot.read_single">
+<span class="sig-name descname"><span class="pre">read_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_single" title="Link to this definition">¶</a></dt>
+<dd><p>Loop over different MC / data processes as defined in the yaml files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>process_func</strong> – data processing function</p></li>
-<li><p><strong>processes</strong> – MC processes dictionary (from yaml)</p></li>
+<li><p><strong>process</strong> – MC / data process dictionary (from yaml)</p></li>
 <li><p><strong>root_path</strong> – main path of files</p></li>
 <li><p><strong>param</strong> – parameters of ‘process_func’</p></li>
 <li><p><strong>class_id</strong> – class identifier (integer), e.g. 0, 1, 2 …</p></li>

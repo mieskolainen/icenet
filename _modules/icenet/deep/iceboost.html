@@ -485,29 +485,87 @@
     <span class="n">w</span>       <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">targets</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">targets</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">preds</span><span class="p">),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">preds</span> <span class="o">*</span> <span class="n">targets</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">loss</span>    <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">preds</span><span class="p">),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">preds</span> <span class="o">*</span> <span class="n">targets</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     
     <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="distance_correlation">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.iceboost.distance_correlation">[docs]</a>
+<span class="k">def</span> <span class="nf">distance_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                         <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Distance Correlation</span>
+<span class="sd">    </span>
+<span class="sd">    See: https://www.statsmodels.org/devel/_modules/statsmodels/stats/dist_dependence_measures.html#distance_correlation</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x       : data (N x dim)</span>
+<span class="sd">        y       : data (N x dim), where dim can be the same or different than for x</span>
+<span class="sd">        weights : event weights (not implemented)</span>
+<span class="sd">        max_N   : maximum number of samples to consider</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Memory constrained, pick random subsample</span>
+    <span class="k">if</span> <span class="n">max_N</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_N</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">max_N</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">max_N</span><span class="p">]</span>
+    
+    <span class="n">N</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Add feature dimension if 1D</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># Unsqueeze(0) needed for cdist() (expects batched input)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Pairwise distance matrices</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    
+    <span class="n">a_row_means</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># [1 x N]</span>
+    <span class="n">b_row_means</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">a_col_means</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># [N x 1]</span>
+    <span class="n">b_col_means</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">a_mean</span>      <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>          <span class="c1"># [scalar]</span>
+    <span class="n">b_mean</span>      <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    
+    <span class="c1"># Broadcasted to a matrix</span>
+    <span class="n">A</span>      <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">a_row_means</span> <span class="o">-</span> <span class="n">a_col_means</span> <span class="o">+</span> <span class="n">a_mean</span>
+    <span class="n">B</span>      <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">b_row_means</span> <span class="o">-</span> <span class="n">b_col_means</span> <span class="o">+</span> <span class="n">b_mean</span>
+
+    <span class="n">dcov</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">A</span> <span class="o">*</span> <span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span>
+    <span class="n">dvar_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">A</span> <span class="o">*</span> <span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span>
+    <span class="n">dvar_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">B</span> <span class="o">*</span> <span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span>
+    <span class="n">dcor</span>   <span class="o">=</span> <span class="n">dcov</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dvar_x</span> <span class="o">*</span> <span class="n">dvar_y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dcor</span></div>
+
 
 <div class="viewcode-block" id="corrcoeff_weighted">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.iceboost.corrcoeff_weighted">[docs]</a>
 <span class="k">def</span> <span class="nf">corrcoeff_weighted</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Per event weighted Pearson 2x2 correlation matrix cf. torch.corrcoef()</span>
+<span class="sd">    Per event weighted linear Pearson 2x2 correlation matrix cf. torch.corrcoef()</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        x  :  data (Nx1)</span>
 <span class="sd">        y  :  data (Nx1)</span>
 <span class="sd">        weights : event weights</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">data</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()))</span>
     <span class="n">C</span>      <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">aweights</span><span class="o">=</span><span class="n">weights</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
     <span class="n">N</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
     <span class="n">D</span>      <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">D</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">C</span><span class="p">))</span>
-    <span class="n">rho</span> <span class="o">=</span> <span class="n">D</span> <span class="o">@</span> <span class="n">C</span> <span class="o">@</span> <span class="n">D</span>
     
-    <span class="k">return</span> <span class="n">rho</span></div>
+    <span class="k">return</span> <span class="n">D</span> <span class="o">@</span> <span class="n">C</span> <span class="o">@</span> <span class="n">D</span></div>
 
 
 <span class="k">def</span> <span class="nf">_binary_cross_entropy</span><span class="p">(</span><span class="n">preds</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
@@ -579,8 +637,9 @@
         <span class="n">loss</span>     <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>        
         <span class="n">BCE_loss</span> <span class="o">=</span> <span class="n">BCE_loss</span> <span class="o">+</span> <span class="n">loss</span>
         
-        <span class="n">track_loss</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-        <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> [beta = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] = </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">## MI Regularization</span>
@@ -621,8 +680,14 @@
 
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span> <span class="c1"># Minimum number of events per category cutoff</span>
                     
-                    <span class="c1"># Pearson Correlation</span>
-                    <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;PEARSON&#39;</span><span class="p">:</span>
+                    <span class="c1"># Distance Correlation</span>
+                    <span class="k">if</span>   <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DCORR&#39;</span><span class="p">:</span>
+                                                        
+                        <span class="n">rho</span>   <span class="o">=</span> <span class="n">distance_correlation</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">max_N</span><span class="o">=</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">])</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">+</span> <span class="n">rho</span>
+                    
+                    <span class="c1"># Pearson Correlation (only for DEBUG!)</span>
+                    <span class="k">elif</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;PEARSON&#39;</span><span class="p">:</span>
                         
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># if multidim X</span>
                             
@@ -640,7 +705,7 @@
                     
                     <span class="c1"># Neural MI</span>
                     <span class="k">else</span><span class="p">:</span>
-                    
+                        
                         <span class="c1"># We need .detach() here for Z!</span>
                         <span class="n">model</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span>
                             <span class="n">return_model_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="n">reg_param</span><span class="p">)</span>
@@ -672,10 +737,11 @@
             
             <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">values</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-
-        <span class="n">track_loss</span><span class="p">[</span><span class="s1">&#39;MI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MI_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-        <span class="n">loss_str</span>        <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;MI [beta = </span><span class="si">{</span><span class="n">MI_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] = </span><span class="si">{</span><span class="n">MI_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RAW </span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">values</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        
+        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">MI_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">MI_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">MI_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1">&#39;</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Total loss</span>

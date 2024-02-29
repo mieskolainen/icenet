@@ -502,7 +502,7 @@
         <span class="s2">&quot;args&quot;</span><span class="p">:</span>        <span class="n">args</span><span class="p">,</span>
         <span class="s2">&quot;load_ids&quot;</span><span class="p">:</span>    <span class="n">inputvars</span><span class="o">.</span><span class="n">LOAD_VARS</span>
     <span class="p">}</span>
-
+    
     <span class="n">INFO</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">X</span>    <span class="o">=</span> <span class="p">{}</span>
     <span class="n">Y</span>    <span class="o">=</span> <span class="p">{}</span>
@@ -516,9 +516,8 @@
         <span class="n">class_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">proc</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> 
         
-        <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple_MC</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">ind</span><span class="p">,</span> <span class="n">INFO</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">read_multiple</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span>
             <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-    
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># Sample conditional theory parameters they are distributed in signal sample</span>
