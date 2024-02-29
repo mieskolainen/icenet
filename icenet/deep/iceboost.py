@@ -231,7 +231,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 # Apply target threshold (e.g. we are interested only in high score region)
                 if reg_param['min_score'] is not None:
                     mm_ = mm_ & (Z > reg_param['min_score']) 
-                
+
                 # Minimum number of events per category cutoff
                 if torch.sum(mm_) > reg_param['min_count']:
                     
@@ -286,9 +286,10 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                     total_ww    += cat_ww
 
                 values.append(np.round(value.item(), 6))
-                
+            
             # Finally add this to the total loss
-            MI_loss = MI_loss + loss_this / total_ww
+            if total_ww > 0:
+                MI_loss = MI_loss + loss_this / total_ww
             
             k += 1
 
