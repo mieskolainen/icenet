@@ -681,7 +681,7 @@
                 <span class="c1"># Apply target threshold (e.g. we are interested only in high score region)</span>
                 <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_score&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">mm_</span> <span class="o">=</span> <span class="n">mm_</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_score&#39;</span><span class="p">])</span> 
-                
+
                 <span class="c1"># Minimum number of events per category cutoff</span>
                 <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span>
                     
@@ -736,9 +736,10 @@
                     <span class="n">total_ww</span>    <span class="o">+=</span> <span class="n">cat_ww</span>
 
                 <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="mi">6</span><span class="p">))</span>
-                
+            
             <span class="c1"># Finally add this to the total loss</span>
-            <span class="n">MI_loss</span> <span class="o">=</span> <span class="n">MI_loss</span> <span class="o">+</span> <span class="n">loss_this</span> <span class="o">/</span> <span class="n">total_ww</span>
+            <span class="k">if</span> <span class="n">total_ww</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">MI_loss</span> <span class="o">=</span> <span class="n">MI_loss</span> <span class="o">+</span> <span class="n">loss_this</span> <span class="o">/</span> <span class="n">total_ww</span>
             
             <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
 
